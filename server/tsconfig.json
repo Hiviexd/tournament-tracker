@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "baseUrl": "./",
+        "outDir": "../dist",
+        "strict": true,
+        "noImplicitAny": false,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "paths": {
+            "@controllers/*": ["controllers/*"],
+            "@routers/*": ["routers/*"],
+            "@models/*": ["models/*"]
+        }
+    },
+    "include": ["."],
+    "exclude": ["../src"],
+}
