@@ -1,0 +1,10 @@
+{
+    "connection": "",
+    "session": "",
+    "osuApp": {
+        "id": 0,
+        "secret": "",
+        "redirect": "http://localhost:8088/api/auth/callback"
+    },
+    "devs" : []
+}
