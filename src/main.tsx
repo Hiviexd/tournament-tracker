@@ -6,6 +6,7 @@ import { RecoilRoot } from "recoil";
 
 // Mantine
 import { MantineProvider } from "@mantine/core";
+import { theme } from "./themes/main";
 import "@mantine/core/styles.css";
 
 // Global functions
@@ -36,7 +37,7 @@ import AdminPage from "./pages/AdminPage";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <RecoilRoot>
         <AuthProvider>
-            <MantineProvider>
+            <MantineProvider theme={theme}>
                 <Suspense fallback={<div>Loading...</div>}>
                     <Router>
                         <Routes>
