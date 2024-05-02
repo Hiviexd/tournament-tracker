@@ -1,4 +1,4 @@
-import { unauthorize } from "middlewares";
+import { unauthorize } from ".";
 import User from "../models/user";
 import helpers from "../helpers";
 import OsuApi from "../helpers/OsuApi";
