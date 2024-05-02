@@ -27,18 +27,10 @@
     /* Paths */
     "baseUrl": "./",
     "paths": {
-        "@components/*": [
-            "src/components/*"
-        ],
-        "@pages/*": [
-            "src/pages/*"
-        ],
-        "@interfaces/*": [
-            "interfaces/*"
-        ],
-        "@controllers/*": ["server/controllers/*"],
-        "@routes/*": ["server/routes/*"],
-        "@models/*": ["server/models/*"]
+        "@components/*": ["src/components/*"],
+        "@pages/*": ["src/pages/*"],
+        "@atoms/*": ["src/atoms/*"],
+        "@interfaces/*": ["interfaces/*"],
     }
   },
   "include": ["src"],
