@@ -2,9 +2,8 @@ import User from "../models/user";
 import { UserGroup } from "../../interfaces/user";
 
 class UsersController {
-    public async getSelf(req, res): Promise<void> {
-        const user = await User.findById(req.session.mongoId).orFail();
-
+    public getSelf(_, res): void {
+        const user = res.locals.user;
         res.json(user);
     }
 
