@@ -2,21 +2,21 @@ import User from "../models/user";
 import { UserGroup } from "../../interfaces/user";
 
 class UsersController {
-    public async getSelf(req, res): Promise<Response> {
+    public async getSelf(req, res): Promise<void> {
         const user = await User.findById(req.session.mongoId).orFail();
 
-        return res.json(user);
+        res.json(user);
     }
 
-    public async getUser(req, res): Promise<Response> {
+    public async getUser(req, res): Promise<void> {
         const userInput = req.params.userInput;
 
         const user = await User.findByUsernameOrOsuId(userInput).orFail();
 
-        return res.json(user);
+        res.json(user);
     }
 
-    public async getCommittee(req, res): Promise<Response> {
+    public async getCommittee(req, res): Promise<void> {
         const type = req.query.type;
         let query;
 
@@ -33,7 +33,7 @@ class UsersController {
 
         const committee = await User.find(query).orFail();
 
-        return res.json(committee);
+        res.json(committee);
     }
 }
 
