@@ -1,17 +1,24 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
-import { IUser, IUserStatics, UserGroup } from "../../interfaces/user";
+import { IUser, IUserStatics, UserGroup, GameMode } from "../../interfaces/user";
 import helpers from "../helpers";
 import config from "../../config.json";
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
-        osuId: { type: Number, required: true },
+        osuId: { type: Number, required: true, unique: true },
         username: { type: String, required: true },
-        groups: { type: [String], default: [] },
+        groups: { type: [String], enum: Object.values(UserGroup), default: [UserGroup.User] },
         osuGroups: { type: Array, default: [] },
-        modes: { type: [String], default: [] },
-        history: { type: Array, default: [] },
+        modes: { type: [String], enum: Object.values(GameMode), default: [] },
+        history: [
+            {
+                date: { type: Date, required: true },
+                mode: { type: String, enum: Object.values(GameMode), required: true },
+                group: { type: String, enum: Object.values(UserGroup), required: true },
+                kind: { type: String, enum: ["join", "leave"], required: true },
+            },
+        ],
         discordId: { type: String },
         active: { type: Boolean, default: true },
         coverUrl: { type: String },
@@ -57,7 +64,7 @@ UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, user: s
     } else {
         return this.findOne({ osuId });
     }
-}
+};
 
 function getDuration(user: IUser, group: string): number {
     if (!user.history) return 0;
@@ -83,9 +90,7 @@ function getDuration(user: IUser, group: string): number {
     let unendingDate;
 
     for (const history of joinedHistory) {
-        const i = leftHistory.findIndex(
-            (d) => d.date > history.date && d.mode === history.mode
-        );
+        const i = leftHistory.findIndex((d) => d.date > history.date && d.mode === history.mode);
         const leftDate = leftHistory[i];
         leftHistory.splice(i, 1);
 
