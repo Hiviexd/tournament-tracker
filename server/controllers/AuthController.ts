@@ -107,12 +107,10 @@ class AuthController {
         req.session.osuId = osuId;
         req.session.username = username;
 
-        //const lastPage = req.session.lastPage || "/";
+        const lastPage = req.session.lastPage || "/";
         req.session.lastPage = undefined;
 
-        //res.redirect(lastPage);
-
-        res.json({ message: "Logged in", user });
+        res.redirect(lastPage);
     }
 }
 
