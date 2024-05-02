@@ -6,7 +6,7 @@ import { UserGroup } from "../../interfaces/user";
 import User from "../models/user";
 
 class AuthController {
-    /* osu! OAuth login */
+    /** osu! OAuth login */
     public login(req, res): void {
         const state = crypto.randomBytes(48).toString("hex");
         res.cookie("_state", state, { httpOnly: true });
@@ -25,14 +25,14 @@ class AuthController {
         );
     }
 
-    /* Log out through destroying session */
+    /** Log out through destroying session */
     public logout(req, res): void {
         req.session.destroy(() => {
             res.redirect("/");
         });
     }
 
-    /* osu! OAuth callback */
+    /** osu! OAuth callback */
     public async callback(req, res) {
         if (!req.query.code || req.query.error || !req.query.state) {
             return res.status(500).redirect("/error");
