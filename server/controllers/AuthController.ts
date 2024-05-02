@@ -105,6 +105,7 @@ class AuthController {
 
         req.session.mongoId = user._id;
         req.session.osuId = osuId;
+        req.session.username = username;
 
         //const lastPage = req.session.lastPage || "/";
         req.session.lastPage = undefined;
