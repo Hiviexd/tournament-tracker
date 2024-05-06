@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
-import { IUser, IUserStatics, UserGroup, GameMode } from "../../interfaces/user";
+import { IUser, IUserStatics, UserGroup, GameMode } from "../../interfaces/User";
 import helpers from "../helpers";
 import config from "../../config.json";
 
@@ -22,6 +22,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         discordId: { type: String },
         active: { type: Boolean, default: true },
         coverUrl: { type: String },
+        notes: [{ type: Schema.Types.ObjectId, ref: "Note" }],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
