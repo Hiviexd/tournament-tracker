@@ -1,12 +1,14 @@
-import User from "../models/user";
-import { UserGroup } from "../../interfaces/user";
+import User from "../models/userModel";
+import { UserGroup } from "../../interfaces/User";
 
 class UsersController {
+    /** GET logged in user */
     public getSelf(_, res): void {
         const user = res.locals.user;
         res.json(user);
     }
 
+    /** GET a user */
     public async getUser(req, res): Promise<void> {
         const userInput = req.params.userInput;
 
@@ -15,6 +17,7 @@ class UsersController {
         res.json(user);
     }
 
+    /** GET users in a committee */
     public async getCommittee(req, res): Promise<void> {
         const type = req.query.type;
         let query;

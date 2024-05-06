@@ -1,5 +1,5 @@
 import { unauthorize } from ".";
-import User from "../models/user";
+import User from "../models/userModel";
 import helpers from "../helpers";
 import OsuApi from "../helpers/OsuApi";
 import config from "../../config.json";
@@ -12,7 +12,7 @@ async function isLoggedIn(req, res, next) {
     }
 
     // Refresh if less than 2 hours left for some possible edge cases
-    if (new Date() > new Date(req.session.expireDate - (2 * 3600 * 1000))) {
+    if (new Date() > new Date(req.session.expireDate - 2 * 3600 * 1000)) {
         const response = await OsuApi.refreshToken(req.session.refreshToken);
 
         if (!response || OsuApi.isOsuResponseError(response)) {
@@ -72,4 +72,4 @@ export default {
     isContestCommittee,
     isAdmin,
     isDev,
-}
+};

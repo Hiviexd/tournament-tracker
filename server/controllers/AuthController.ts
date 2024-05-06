@@ -2,8 +2,8 @@ import crypto from "crypto";
 import config from "../../config.json";
 import OsuApi from "../helpers/OsuApi";
 import helpers from "../helpers";
-import { UserGroup } from "../../interfaces/user";
-import User from "../models/user";
+import { UserGroup } from "../../interfaces/User";
+import User from "../models/userModel";
 
 class AuthController {
     /** osu! OAuth login */
