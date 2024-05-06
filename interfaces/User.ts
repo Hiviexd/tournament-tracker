@@ -1,3 +1,4 @@
+import { INote } from './Note';
 import { IOsuGroup } from "./OsuApi";
 import { Document, Model, DocumentQuery } from 'mongoose';
 
@@ -32,6 +33,7 @@ export interface IUser extends Document {
     discordId?: string;
     active: boolean;
     coverUrl?: string;
+    notes: INote[];
 
     // virtuals
     isTournamentCommittee: boolean;
@@ -41,8 +43,6 @@ export interface IUser extends Document {
     tcDuration: number;
     ccDuration: number;
     isDev: boolean;
-
-    //findByUsernameOrOsuId?: (user: string | number) => DocumentQuery<IUser, IUser>;
 }
 
 export interface IUserStatics extends Model<IUser> {
