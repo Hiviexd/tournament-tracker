@@ -1,14 +1,6 @@
-import { atom } from "recoil";
+import { atom } from "jotai";
 import { IUser } from "../../interfaces/User";
 
+export const loggedInUserAtom = atom<IUser | null>(null);
 
-export const loggedInUser = atom<IUser | null>({
-    key: "loggedInUser",
-    default: null,
-});
-
-// bool state for loggedInUser being loaded
-export const loggedInUserLoaded = atom<boolean>({
-    key: "loggedInUserLoaded",
-    default: false,
-});
+export const initializedAtom = atom<boolean>(false);

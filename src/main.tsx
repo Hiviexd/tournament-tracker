@@ -1,8 +1,7 @@
-// React
-import { Suspense } from "react";
+// Base
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { RecoilRoot } from "recoil";
+import { Provider as StateProvider } from "jotai";
 
 // Mantine
 import { MantineProvider } from "@mantine/core";
@@ -33,27 +32,32 @@ import Layout from "./layout/Layout";
 import HomePage from "./pages/HomePage";
 import CommitteePage from "./pages/CommitteePage";
 import AdminPage from "./pages/AdminPage";
+import UserPage from "./pages/UserPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <RecoilRoot>
+    <StateProvider>
         <AuthProvider>
             <MantineProvider theme={theme}>
-                <Suspense fallback={<div>Loading...</div>}>
-                    <Router>
-                        <Routes>
-                            <Route path="/" element={<HomePage />} />
-                            <Route
-                                path="/committee"
-                                element={<Layout permissions={["committee"]} page={<CommitteePage />} />}
-                            />
-                            <Route
-                                path="/admin"
-                                element={<Layout permissions={["admin"]} page={<AdminPage />} />}
-                            />
-                        </Routes>
-                    </Router>
-                </Suspense>
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route
+                            path="/committee"
+                            element={
+                                <Layout permissions={["committee"]} page={<CommitteePage />} />
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={<Layout permissions={["admin"]} page={<AdminPage />} />}
+                        />
+                        <Route
+                            path="/user"
+                            element={<Layout permissions={["user"]} page={<UserPage />} />}
+                        />
+                    </Routes>
+                </Router>
             </MantineProvider>
         </AuthProvider>
-    </RecoilRoot>
+    </StateProvider>
 );

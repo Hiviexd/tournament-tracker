@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import { loggedInUser, loggedInUserLoaded } from "../atoms/userAtoms";
+import { useAtom } from "jotai";
+import { loggedInUserAtom, initializedAtom } from "../atoms/userAtoms";
 import { IUser } from "@interfaces/User";
 
 interface IPropTypes {
@@ -10,9 +10,13 @@ interface IPropTypes {
 
 // Check if the user has the required permissions
 function hasRequiredPermissions(user: IUser | null, permissions: string[]): boolean {
-    if (!user) return false;
+    if (!permissions.length) return true;
+
+    if (!user) return !permissions.length;
+
     if (user.isAdmin) return true;
     // if (user.isDev) return true;
+
     if (
         (permissions.includes("admin") && !user.isAdmin) ||
         (permissions.includes("committee") && !user.isCommittee) ||
@@ -23,18 +27,17 @@ function hasRequiredPermissions(user: IUser | null, permissions: string[]): bool
 }
 
 export default function Layout({ permissions = [], page }: IPropTypes) {
-    const user: IUser | null = useRecoilValue(loggedInUser);
-    const userLoaded: boolean = useRecoilValue(loggedInUserLoaded);
+    const [user] = useAtom(loggedInUserAtom);
+    const [initialized] = useAtom(initializedAtom);
 
-    // Continue if no user and no perms required
-    if (user === null && !permissions.length) return page;
+    if (!initialized) return <p>Loading...</p>;
 
     // Redirect if no user or if user doesn't have the required perms
-    if (userLoaded && (user === null || !hasRequiredPermissions(user, permissions))) {
+    if (initialized && !hasRequiredPermissions(user, permissions)) {
         // TODO: emit a toast message
         console.log("missing permissions. redirecting...");
         return <Navigate replace to="/" />;
     }
 
-    return <>{userLoaded && page}</>;
+    return page;
 }

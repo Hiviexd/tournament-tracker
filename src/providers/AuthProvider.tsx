@@ -1,27 +1,27 @@
 import { useEffect } from "react";
-import { loggedInUser, loggedInUserLoaded } from "../atoms/userAtoms";
-import { useSetRecoilState } from "recoil";
+import { loggedInUserAtom, initializedAtom } from "../atoms/userAtoms";
+import { useAtom } from "jotai";
 
 export default function AuthProvider({ children }) {
-    const setUser = useSetRecoilState(loggedInUser);
-    const setUserLoaded = useSetRecoilState(loggedInUserLoaded);
+    const [, setUser] = useAtom(loggedInUserAtom);
+    const [, setInitialized] = useAtom(initializedAtom);
 
     useEffect(() => {
         async function fetchUser () {
             try {
-                setUserLoaded(false);
+                setInitialized(false);
                 const response = await window.$http.executeGet("/users/me");
 
                 if (window.$http.isValid(response)) setUser(response);
             } catch (error) {
                 console.error(error);
             } finally {
-                setUserLoaded(true);
+                setInitialized(true);
             }
         }
 
         fetchUser();
-    }, [setUser, setUserLoaded]);
+    }, [setUser, setInitialized]);
 
     return <>{children}</>;
 }

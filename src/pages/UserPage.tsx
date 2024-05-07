@@ -2,18 +2,14 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../atoms/userAtoms";
 import { Link } from "react-router-dom";
 
-export default function HomePage() {
+export default function UserPage() {
     const [user] = useAtom(loggedInUserAtom);
 
     return (
         <div>
-            <h1>Home</h1>
-            <p>{user ? <>Welcome back, {user.username}!</> : "Hello, newcomer!"}</p>
+            <h1>ser</h1>
+            <p>if you ({user?.username}) can see this, it means you're logged in!</p>
 
-            {user && <a href="/api/auth/logout">Logout</a>}
-            <br />
-            {!user && <a href="/api/auth/login">Login</a>}
-            <br />
             <Link to="/">Home Page</Link>
             <br />
             <Link to="/user">User Page</Link>

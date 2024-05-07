@@ -1,9 +1,9 @@
-import { useRecoilValue } from "recoil";
-import { loggedInUser } from "../atoms/userAtoms";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../atoms/userAtoms";
 import { Link } from "react-router-dom";
 
 export default function CommitteePage() {
-    const user = useRecoilValue(loggedInUser);
+    const [user] = useAtom(loggedInUserAtom);
 
     return (
         <div>
@@ -11,6 +11,8 @@ export default function CommitteePage() {
             <p>{user?.username} is a member of the {user?.isTournamentCommittee ? "tournament" : "contest"} committee!</p>
 
             <Link to="/">Home Page</Link>
+            <br />
+            <Link to="/user">User Page</Link>
             <br />
             <Link to="/committee">Committee Page</Link>
             <br />
