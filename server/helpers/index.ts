@@ -12,7 +12,7 @@ function setSession(session, response: IOsuAuthResponse) {
 }
 
 /** Just replaces () and [] */
-export function escapeUsername(username: string) {
+function escapeUsername(username: string) {
     username = username.trim();
 
     return username.replace(/[()[\]]/g, "\\$&");
@@ -20,8 +20,18 @@ export function escapeUsername(username: string) {
 
 const defaultErrorMessage = { error: "Something went wrong!" };
 
+/**
+ * * Shortens a string
+ * @param string String to shorten
+ * @param length Length of output string (defaults to `50`)
+ */
+function shorten(string: string = "", length: number = 50): string {
+    return string.length > length ? string.substring(0, length - 3) + "..." : string;
+}
+
 export default {
     setSession,
     escapeUsername,
     defaultErrorMessage,
+    shorten,
 };
