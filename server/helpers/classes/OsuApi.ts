@@ -1,12 +1,14 @@
 import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
-import helpers from ".";
-import { IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
-import { ErrorResponse } from "../../interfaces/Responses";
-import config from "../../config.json";
+import helpers from "..";
+import { IOsuAuthResponse, IOsuUser } from "../../../interfaces/OsuApi";
+import { ErrorResponse } from "../../../interfaces/Responses";
+import config from "../../../config.json";
 
 export default class OsuApi {
-    static isOsuResponseError(errorResponse: IOsuAuthResponse | IOsuUser | ErrorResponse): errorResponse is ErrorResponse {
+    static isOsuResponseError(
+        errorResponse: IOsuAuthResponse | IOsuUser | ErrorResponse
+    ): errorResponse is ErrorResponse {
         return (errorResponse as ErrorResponse).error !== undefined;
     }
 

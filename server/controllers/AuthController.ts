@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import config from "../../config.json";
-import OsuApi from "../helpers/OsuApi";
+import OsuApi from "../helpers/classes/OsuApi";
 import helpers from "../helpers";
 import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";

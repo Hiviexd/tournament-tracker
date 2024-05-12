@@ -1,7 +1,7 @@
 import { unauthorize } from ".";
 import User from "../models/userModel";
 import helpers from "../helpers";
-import OsuApi from "../helpers/OsuApi";
+import OsuApi from "../helpers/classes/OsuApi";
 import config from "../../config.json";
 
 async function isLoggedIn(req, res, next) {
