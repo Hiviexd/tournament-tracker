@@ -1,10 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAtom } from "jotai";
-import { loggedInUserAtom, initializedAtom } from "../atoms/userAtoms";
+import { loggedInUserAtom } from "../store/atoms";
+import useLoggedInUser from "../hooks/users/useLoggedInUser";
+import helpers from "../helpers";
 import { IUser } from "@interfaces/User";
 
 interface IPropTypes {
-    permissions: string[];
+    permissions?: string[];
     page: JSX.Element;
 }
 
@@ -27,17 +29,20 @@ function hasRequiredPermissions(user: IUser | null, permissions: string[]): bool
 }
 
 export default function Layout({ permissions = [], page }: IPropTypes) {
-    const [user] = useAtom(loggedInUserAtom);
-    const [initialized] = useAtom(initializedAtom);
+    const { data: user, isLoading } = useLoggedInUser();
+    const [, setLoggedInUser] = useAtom(loggedInUserAtom);
 
-    if (!initialized) return <p>Loading...</p>;
+    if (isLoading) return <p>Loading...</p>;
+    else {
+        if (helpers.httpIsValid(user)) {
+            setLoggedInUser(user);
+        }
 
-    // Redirect if no user or if user doesn't have the required perms
-    if (initialized && !hasRequiredPermissions(user, permissions)) {
-        // TODO: emit a toast message
-        console.log("missing permissions. redirecting...");
-        return <Navigate replace to="/" />;
+        // Redirect if user doesn't have the required perms
+        if (permissions.length && !hasRequiredPermissions(user, permissions)) {
+            // TODO: emit a toast message
+            console.log("missing permissions. redirecting...");
+            return <Navigate replace to="/" />;
+        } else return page;
     }
-
-    return page;
 }

@@ -29,7 +29,7 @@
     "paths": {
         "@components/*": ["src/components/*"],
         "@pages/*": ["src/pages/*"],
-        "@atoms/*": ["src/atoms/*"],
+        "@store/*": ["src/store/*"],
         "@interfaces/*": ["interfaces/*"],
     }
   },

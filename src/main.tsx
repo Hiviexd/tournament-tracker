@@ -2,6 +2,9 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 // Mantine
 import { MantineProvider } from "@mantine/core";
@@ -9,7 +12,6 @@ import { theme } from "./themes/main";
 import "@mantine/core/styles.css";
 
 // Global functions
-import http from "./modules/http";
 import moment from "moment";
 
 declare global {
@@ -19,13 +21,9 @@ declare global {
     }
 }
 
-window.$http = http;
 window.$moment = moment;
 
-// Providers
-import AuthProvider from "./providers/AuthProvider";
-
-// Layouts
+// Layout
 import Layout from "./layout/Layout";
 
 // Pages
@@ -36,11 +34,11 @@ import UserPage from "./pages/UserPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
-        <AuthProvider>
+        <QueryClientProvider client={queryClient}>
             <MantineProvider theme={theme}>
                 <Router>
                     <Routes>
-                        <Route path="/" element={<HomePage />} />
+                        <Route path="/" element={<Layout page={<HomePage />} />} />
                         <Route
                             path="/committee"
                             element={
@@ -58,6 +56,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                     </Routes>
                 </Router>
             </MantineProvider>
-        </AuthProvider>
+        </QueryClientProvider>
     </StateProvider>
 );

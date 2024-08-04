@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../atoms/userAtoms";
+import { loggedInUserAtom } from "../store/atoms";
 import { Link } from "react-router-dom";
 
 export default function UserPage() {
@@ -7,7 +7,7 @@ export default function UserPage() {
 
     return (
         <div>
-            <h1>ser</h1>
+            <h1>User</h1>
             <p>if you ({user?.username}) can see this, it means you're logged in!</p>
 
             <Link to="/">Home Page</Link>

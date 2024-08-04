@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../atoms/userAtoms";
+import { loggedInUserAtom } from "../store/atoms";
 import { Link } from "react-router-dom";
 
 export default function AdminPage() {

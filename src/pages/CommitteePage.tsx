@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../atoms/userAtoms";
+import { loggedInUserAtom } from "../store/atoms";
 import { Link } from "react-router-dom";
 
 export default function CommitteePage() {
@@ -8,7 +8,10 @@ export default function CommitteePage() {
     return (
         <div>
             <h1>Committee</h1>
-            <p>{user?.username} is a member of the {user?.isTournamentCommittee ? "tournament" : "contest"} committee!</p>
+            <p>
+                {user?.username} is a member of the{" "}
+                {user?.isTournamentCommittee ? "tournament" : "contest"} committee!
+            </p>
 
             <Link to="/">Home Page</Link>
             <br />
