@@ -54,4 +54,56 @@
 :root[data-mantine-color-scheme="dark"] {
     --mantine-color-body: var(--mantine-color-primary-11) !important;
     --mantine-color-text: var(--mantine-color-white) !important;
+
+    .mantine-Menu-dropdown {
+        background-color: var(--mantine-color-primary-11) !important;
+    }
+
+    /* Notifications */
+    .mantine-Notification-description {
+        color: var(--mantine-color-gray-4) !important;
+    }
+
+    .mantine-Notification-root {
+        background-color: var(--notification-color) !important;
+
+        &:before {
+            background-color: var(--mantine-color-white) !important;
+        }
+    }
+
+    .mantine-Notification-closeButton {
+        color: var(--mantine-color-white) !important;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+/* Links */
+a {
+    color: var(--mantine-color-primary-3);
+    text-decoration: none;
+}
+
+
+
+/* Triangles background */
+
+body {
+    background-color: var(--mantine-color-primary-11);
+
+    &:before {
+        background-image: url('/src/assets/triangles.png');
+        opacity: .2;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        content: "";
+        z-index: -1;
+    }
+
 }

@@ -7,7 +7,6 @@ export default function AdminPage() {
 
     return (
         <div>
-            <h1>Admin</h1>
             <p>{user?.username} is an admin, spooky...</p>
 
             <Link to="/">Home Page</Link>

@@ -1,9 +1,45 @@
-
 .main-layout {
     width: 100%;
     background-color: var(--mantine-color-primary-10);
     margin: 0 auto;
     overflow-wrap: break-word;
+    border-radius: 4px;
+
+    @media (min-width: 768px) {
+        max-width: 768px;
+    }
+
+    @media (min-width: 1024px) {
+        max-width: 1024px;
+    }
+
+    @media (min-width: 1280px) {
+        max-width: 1280px;
+    }
+}
+
+.page-header {
+    margin: 0;
+    font-size: 1.5rem;
+    padding: 1rem;
+    font-weight: 600;
+    background-color: var(--mantine-color-secondary-9);
+    border-bottom: 1px solid var(--mantine-color-gray-2);
+    border-radius: 4px 4px 0 0;
+}
+
+.nav-group {
+    display: flex;
+    width: 100%;
+    height: auto;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+
+    @media (max-width: 767px) {
+        justify-content: flex-start;
+        align-items: center;
+    }
 
     @media (min-width: 768px) {
         max-width: 768px;

@@ -7,7 +7,6 @@ export default function UserPage() {
 
     return (
         <div>
-            <h1>User</h1>
             <p>if you ({user?.username}) can see this, it means you're logged in!</p>
 
             <Link to="/">Home Page</Link>

@@ -13,7 +13,6 @@ const primary: MantineColorsTuple = [
     "#6b218d",
     "#24222a",
     "#18171c",
-
 ];
 
 const secondary: MantineColorsTuple = [
@@ -30,16 +29,16 @@ const secondary: MantineColorsTuple = [
 ];
 
 const danger: MantineColorsTuple = [
-    "#ffe9e9",
-    "#ffd1d1",
-    "#fba0a1",
-    "#f76d6d",
-    "#f34141",
-    "#f22625",
-    "#f21616",
-    "#d8070b",
-    "#c10008",
-    "#a90003",
+    "#ffeaec",
+    "#fdd4d6",
+    "#f4a7ac",
+    "#ec777e",
+    "#e64f57",
+    "#e3353f",
+    "#e22732",
+    "#c91a25",
+    "#b31220",
+    "#9e0419",
 ];
 
 const info: MantineColorsTuple = [

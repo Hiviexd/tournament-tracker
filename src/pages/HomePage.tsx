@@ -7,7 +7,6 @@ export default function HomePage() {
 
     return (
         <div>
-            <h1>Home</h1>
             <p>{user ? <>Welcome back, {user.username}!</> : "Hello, newcomer!"}</p>
 
             {user && <a href="/api/auth/logout">Logout</a>}

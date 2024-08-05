@@ -7,7 +7,6 @@ export default function CommitteePage() {
 
     return (
         <div>
-            <h1>Committee</h1>
             <p>
                 {user?.username} is a member of the{" "}
                 {user?.isTournamentCommittee ? "tournament" : "contest"} committee!

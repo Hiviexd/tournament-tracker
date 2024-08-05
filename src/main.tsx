@@ -14,9 +14,6 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./sass/app.scss";
 
-// Snackbar
-import { SnackbarProvider } from "notistack";
-
 // Global functions
 import moment from "moment";
 
@@ -30,7 +27,52 @@ declare global {
 window.$moment = moment;
 
 // Layout
-import Layout from "./layout/Layout";
+import Layout from "./base/Layout";
+import ProtectedRoute from "./base/ProtectedRoute";
+
+// fontawesome icons
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+import {
+    faSignOutAlt,
+    faUserCircle,
+    faTrophy,
+    faShieldAlt,
+    faUserShield,
+    faClipboard,
+    faPaperPlane,
+    faMailBulk,
+    faInbox,
+    faPlusCircle,
+    faUsers,
+    faNewspaper,
+    faClipboardList,
+    faUserFriends,
+    faPollH,
+    faVoteYea,
+    faHome,
+} from "@fortawesome/free-solid-svg-icons";
+
+library.add(
+    fab,
+    faSignOutAlt,
+    faUserCircle,
+    faTrophy,
+    faShieldAlt,
+    faUserShield,
+    faClipboard,
+    faPaperPlane,
+    faMailBulk,
+    faInbox,
+    faPlusCircle,
+    faUsers,
+    faNewspaper,
+    faClipboardList,
+    faUserFriends,
+    faPollH,
+    faVoteYea,
+    faHome
+);
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -41,30 +83,45 @@ import UserPage from "./pages/UserPage";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
         <QueryClientProvider client={queryClient}>
-            <SnackbarProvider autoHideDuration={3000}>
-                <MantineProvider defaultColorScheme="dark" theme={theme}>
-                    <Notifications />
-                    <Router>
-                        <Routes>
-                            <Route path="/" element={<Layout page={<HomePage />} />} />
-                            <Route
-                                path="/committee"
-                                element={
-                                    <Layout permissions={["committee"]} page={<CommitteePage />} />
-                                }
-                            />
-                            <Route
-                                path="/admin"
-                                element={<Layout permissions={["admin"]} page={<AdminPage />} />}
-                            />
-                            <Route
-                                path="/user"
-                                element={<Layout permissions={["user"]} page={<UserPage />} />}
-                            />
-                        </Routes>
-                    </Router>
-                </MantineProvider>
-            </SnackbarProvider>
+            <MantineProvider defaultColorScheme="dark" theme={theme}>
+                <Notifications />
+                <Router>
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={
+                                <ProtectedRoute>
+                                    <Layout title="Home" page={<HomePage />} />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/committee"
+                            element={
+                                <ProtectedRoute permissions={["committee"]}>
+                                    <Layout title="Committee" page={<CommitteePage />} />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={
+                                <ProtectedRoute permissions={["admin"]}>
+                                    <Layout title="Admin" page={<AdminPage />} />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/user"
+                            element={
+                                <ProtectedRoute permissions={["user"]}>
+                                    <Layout title="User" page={<UserPage />} />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </Router>
+            </MantineProvider>
         </QueryClientProvider>
     </StateProvider>
 );
