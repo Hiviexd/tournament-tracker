@@ -9,7 +9,13 @@ const queryClient = new QueryClient();
 // Mantine
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./themes/main";
+import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+import "./sass/app.scss";
+
+// Snackbar
+import { SnackbarProvider } from "notistack";
 
 // Global functions
 import moment from "moment";
@@ -35,27 +41,30 @@ import UserPage from "./pages/UserPage";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
         <QueryClientProvider client={queryClient}>
-            <MantineProvider theme={theme}>
-                <Router>
-                    <Routes>
-                        <Route path="/" element={<Layout page={<HomePage />} />} />
-                        <Route
-                            path="/committee"
-                            element={
-                                <Layout permissions={["committee"]} page={<CommitteePage />} />
-                            }
-                        />
-                        <Route
-                            path="/admin"
-                            element={<Layout permissions={["admin"]} page={<AdminPage />} />}
-                        />
-                        <Route
-                            path="/user"
-                            element={<Layout permissions={["user"]} page={<UserPage />} />}
-                        />
-                    </Routes>
-                </Router>
-            </MantineProvider>
+            <SnackbarProvider autoHideDuration={3000}>
+                <MantineProvider defaultColorScheme="dark" theme={theme}>
+                    <Notifications />
+                    <Router>
+                        <Routes>
+                            <Route path="/" element={<Layout page={<HomePage />} />} />
+                            <Route
+                                path="/committee"
+                                element={
+                                    <Layout permissions={["committee"]} page={<CommitteePage />} />
+                                }
+                            />
+                            <Route
+                                path="/admin"
+                                element={<Layout permissions={["admin"]} page={<AdminPage />} />}
+                            />
+                            <Route
+                                path="/user"
+                                element={<Layout permissions={["user"]} page={<UserPage />} />}
+                            />
+                        </Routes>
+                    </Router>
+                </MantineProvider>
+            </SnackbarProvider>
         </QueryClientProvider>
     </StateProvider>
 );

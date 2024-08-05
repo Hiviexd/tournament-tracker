@@ -1,0 +1,19 @@
+
+.main-layout {
+    width: 100%;
+    background-color: var(--mantine-color-primary-10);
+    margin: 0 auto;
+    overflow-wrap: break-word;
+
+    @media (min-width: 768px) {
+        max-width: 768px;
+    }
+
+    @media (min-width: 1024px) {
+        max-width: 1024px;
+    }
+
+    @media (min-width: 1280px) {
+        max-width: 1280px;
+    }
+}
