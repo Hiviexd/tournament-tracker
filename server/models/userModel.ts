@@ -27,6 +27,10 @@ const UserSchema = new Schema<IUser, IUserStatics>(
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+UserSchema.virtual("avatarUrl").get(function (this: IUser) {
+    return `https://a.ppy.sh/${this.osuId}`;
+});
+
 UserSchema.virtual("isTournamentCommittee").get(function (this: IUser) {
     return this.groups && this.groups.includes(UserGroup.Tournaments);
 });

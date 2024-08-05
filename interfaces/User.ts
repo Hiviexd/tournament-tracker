@@ -36,6 +36,7 @@ export interface IUser extends Document {
     notes: INote[];
 
     // virtuals
+    avatarUrl: string;
     isTournamentCommittee: boolean;
     isContestCommittee: boolean;
     isAdmin: boolean;
