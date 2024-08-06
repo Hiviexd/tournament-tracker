@@ -91,7 +91,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path="/"
                             element={
                                 <ProtectedRoute>
-                                    <Layout title="Home" page={<HomePage />} />
+                                    <Layout title="Home" icon="home" page={<HomePage />} />
                                 </ProtectedRoute>
                             }
                         />
@@ -99,7 +99,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path="/committee"
                             element={
                                 <ProtectedRoute permissions={["committee"]}>
-                                    <Layout title="Committee" page={<CommitteePage />} />
+                                    <Layout title="Committee" icon="users" page={<CommitteePage  />} />
                                 </ProtectedRoute>
                             }
                         />
@@ -107,7 +107,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path="/admin"
                             element={
                                 <ProtectedRoute permissions={["admin"]}>
-                                    <Layout title="Admin" page={<AdminPage />} />
+                                    <Layout title="Admin" icon="user-shield" page={<AdminPage />} />
                                 </ProtectedRoute>
                             }
                         />
@@ -115,7 +115,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path="/user"
                             element={
                                 <ProtectedRoute permissions={["user"]}>
-                                    <Layout title="User" page={<UserPage />} />
+                                    <Layout title="User" icon="user-friends" page={<UserPage />} />
                                 </ProtectedRoute>
                             }
                         />
