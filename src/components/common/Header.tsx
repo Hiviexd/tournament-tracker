@@ -13,8 +13,6 @@ import { AppShell, Burger, Button, Group, Image, Menu, Avatar } from "@mantine/c
 // icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import logo from "../../assets/logo-main.svg";
-import osuLogo from "../../assets/logo-osu.svg";
 
 interface IPropTypes {
     mobileHeaderOpened: boolean;
@@ -36,7 +34,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                             hiddenFrom="sm"
                             size="sm"
                         />
-                        <Image src={logo} alt="Logo" h={55} />
+                        <Image src="/assets/logo-main.svg" alt="Logo" h={55} />
                         <Group ml="xl" gap={6} visibleFrom="sm">
                             {user ? (
                                 routes.map(
@@ -90,7 +88,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                     <Button
                                         variant="gradient"
                                         gradient={{ from: "primary.4", to: "primary.9", deg: 90 }}
-                                        rightSection={<Image src={osuLogo} alt="osu!" h={20} />}>
+                                        rightSection={<Image src="/assets/logo-osu.svg" h={20} />}>
                                         Login
                                     </Button>
                                 </a>
@@ -130,11 +128,12 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                 </Group>
             </AppShell.Header>
 
+            {/* TODO mobile navbar */}
             <AppShell.Navbar py="md" px={4}>
-                <Button>aaaaaa</Button>
-                <Button>Blog</Button>
-                <Button>Contacts</Button>
-                <Button>Support</Button>
+                <Button>mobile</Button>
+                <Button>navbar</Button>
+                <Button>don't forget</Button>
+                <Button>about this</Button>
             </AppShell.Navbar>
         </header>
     );
