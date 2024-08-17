@@ -1,7 +1,6 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
 import { IVote } from "./Vote";
-import { INote } from "./Note";
 
 export enum TournamentType {
     Tournament = "tournament",
@@ -13,10 +12,9 @@ export enum TournamentStatus {
     ScreeningOngoing = "screeningOngoing",
     ScreeningConcluded = "screeningConcluded",
     ReviewOngoing = "reviewOngoing",
+    ChangesRequested = "changesRequested",
     BadgeApproved = "badgeApproved",
     BadgeRejected = "badgeRejected",
-    BadgeNeedsChanges = "badgeNeedsChanges",
-    Concluded = "concluded",
 }
 
 export interface ITournament extends Document {
@@ -26,21 +24,15 @@ export interface ITournament extends Document {
     endDate: Date;
     forumUrl: string;
     host: IUser;
-    staff: IUser[];
     type: TournamentType;
     bannerUrl?: string;
     badges: string[];
-    language: string;
-    // screeningList: figure it out
     assignedReviewers: IUser[];
     reviews: IVote[];
     status: TournamentStatus;
-    notes: INote[];
+    isActive: boolean;
 
     // virtuals
     isTournament: boolean;
     isContest: boolean;
-    isOngoing: boolean;
-    isUpcoming: boolean;
-    isConcluded: boolean;
 }
