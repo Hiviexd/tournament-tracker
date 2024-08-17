@@ -40,11 +40,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                 routes.map(
                                     (route) =>
                                         helpers.hasRequiredPermissions(user, route.permissions) && (
-                                            <Menu
-                                                key={route.title}
-                                                withArrow
-                                                trigger="hover"
-                                                shadow="md">
+                                            <Menu key={route.title} trigger="hover" shadow="md">
                                                 <Menu.Target>
                                                     <Button
                                                         variant="subtle"
@@ -94,9 +90,9 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                 </a>
                             )}
                             {user && (
-                                <Menu withArrow trigger="hover" shadow="md">
+                                <Menu withArrow shadow="md">
                                     <Menu.Target>
-                                        <Avatar size="lg" src={user.avatarUrl} />
+                                        <Avatar size="md" src={user.avatarUrl} />
                                     </Menu.Target>
                                     <Menu.Dropdown>
                                         <Menu.Label>Welcome back, {user.username}!</Menu.Label>
