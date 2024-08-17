@@ -1,5 +1,4 @@
-import { INote } from './Note';
-import { IOsuGroup } from "./OsuApi";
+import { IOsuCountry } from './OsuApi';
 import { Document, Model, DocumentQuery } from 'mongoose';
 
 export enum UserGroup {
@@ -27,13 +26,11 @@ export interface IUser extends Document {
     osuId: number;
     username: string;
     groups: UserGroup[];
-    osuGroups: IOsuGroup[];
-    modes: GameMode[];
     history: IUserHistory[];
     discordId?: string;
     active: boolean;
     coverUrl?: string;
-    notes: INote[];
+    country?: IOsuCountry;
 
     // virtuals
     avatarUrl: string;

@@ -6,7 +6,7 @@ export enum LogCategory {
     User = "user",
     Tournament = "tournament",
     Report = "report",
-    Vote = "vote",
+    Voting = "voting",
 }
 
 export interface ILog extends Document {

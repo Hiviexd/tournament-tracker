@@ -1,7 +1,7 @@
-import { Document } from 'mongoose';
-import { IUser } from './User';
-import { IComment } from './Comment';
-import { INote } from './Note';
+import { Document } from "mongoose";
+import { IUser } from "./User";
+import { IVote } from "./Vote";
+import { INote } from "./Note";
 
 export enum TournamentType {
     Tournament = "tournament",
@@ -33,7 +33,7 @@ export interface ITournament extends Document {
     language: string;
     // screeningList: figure it out
     assignedReviewers: IUser[];
-    reviews: IComment[];
+    reviews: IVote[];
     status: TournamentStatus;
     notes: INote[];
 

@@ -55,8 +55,6 @@ export interface IOsuUser {
     id: number;
     username: string;
     country: IOsuCountry;
-    groups: IOsuGroup[];
-    badges: IOsuBadges[];
     cover: IOsuCover;
 }
 

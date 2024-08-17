@@ -79,9 +79,9 @@ export default class OsuApi {
         return await this.executeRequest(options);
     }
 
-    static async getUserInfo(token: string, userId: number): Promise<IOsuUser | ErrorResponse> {
+    static async getUserInfo(token: string, userInput: string | number): Promise<IOsuUser | ErrorResponse> {
         const options: AxiosRequestConfig = {
-            url: `https://osu.ppy.sh/api/v2/users/${userId}`,
+            url: `https://osu.ppy.sh/api/v2/users/${userInput}`,
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,

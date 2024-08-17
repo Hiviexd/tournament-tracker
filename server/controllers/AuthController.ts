@@ -2,8 +2,7 @@ import crypto from "crypto";
 import config from "../../config.json";
 import OsuApi from "../helpers/classes/OsuApi";
 import helpers from "../helpers";
-import { UserGroup } from "../../interfaces/User";
-import User from "../models/userModel";
+import UsersController from "./UsersController";
 
 class AuthController {
     /** osu! OAuth login */
@@ -62,50 +61,11 @@ class AuthController {
         }
 
         // Process user
-        const osuId = userResponse.id;
-        const username = userResponse.username;
-        const groups = UserGroup.User;
-        const osuGroups = userResponse.groups;
-        const coverUrl = userResponse.cover.url;
-
-        let user = await User.findOne({ osuId });
-
-        if (!user) {
-            user = new User({
-                osuId,
-                username,
-                groups,
-                osuGroups,
-                coverUrl,
-            });
-
-            await user.save();
-        } else {
-            let saveTrigger = false;
-
-            if (user.username !== username) {
-                user.username = username;
-                saveTrigger = true;
-            }
-
-            if (user.coverUrl !== coverUrl) {
-                user.coverUrl = coverUrl;
-                saveTrigger = true;
-            }
-
-            if (user.osuGroups !== osuGroups) {
-                user.osuGroups = osuGroups;
-                saveTrigger = true;
-            }
-
-            if (saveTrigger) {
-                await user.save();
-            }
-        }
+        const user = await UsersController.createOrUpdateUser(userResponse);
 
         req.session.mongoId = user._id;
-        req.session.osuId = osuId;
-        req.session.username = username;
+        req.session.osuId = user.osuId;
+        req.session.username = user.username;
 
         const lastPage = req.session.lastPage || "/";
         req.session.lastPage = undefined;

@@ -7,7 +7,7 @@ import webhookColors from "../../helpers/constants/webhookColors";
 
 class Discord {
     private username = "Tournament Tracker";
-    private avatar_url = "https://bn.mappersguild.com/images/qatlogo.png";
+    private avatar_url = "/images/tcommlogo.jpg";
 
     /** * Constructs a webhook link */
     private getWebhookLink(webhookType?: string, threadId?: string): string {

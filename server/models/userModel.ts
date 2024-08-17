@@ -9,8 +9,6 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         osuId: { type: Number, required: true, unique: true },
         username: { type: String, required: true },
         groups: { type: [String], enum: Object.values(UserGroup), default: [UserGroup.User] },
-        osuGroups: { type: Array, default: [] },
-        modes: { type: [String], enum: Object.values(GameMode), default: [] },
         history: [
             {
                 date: { type: Date, required: true },
@@ -22,7 +20,10 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         discordId: { type: String },
         active: { type: Boolean, default: true },
         coverUrl: { type: String },
-        notes: [{ type: Schema.Types.ObjectId, ref: "Note" }],
+        country: {
+            code: { type: String },
+            name: { type: String },
+        },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
