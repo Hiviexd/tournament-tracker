@@ -1,9 +1,4 @@
-export enum OsuGameMode {
-    Osu = "osu",
-    Taiko = "taiko",
-    Catch = "fruits",
-    Mania = "mania",
-}
+export type OsuGameMode = "osu" | "taiko" | "fruits" | "mania";
 
 /** Badges of an osu! user */
 export interface IOsuBadges {

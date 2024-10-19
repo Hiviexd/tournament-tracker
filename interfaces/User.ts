@@ -1,23 +1,10 @@
 import { IOsuCountry } from './OsuApi';
 import { Document, Model, DocumentQuery } from 'mongoose';
 
-export enum UserGroup {
-    User = "user",
-    Tournaments = "tc",
-    Contests = "cc",
-    Admin = "admin",
-}
-
-export enum GameMode {
-    Osu = "osu",
-    Taiko = "taiko",
-    Catch = "catch",
-    Mania = "mania",
-}
+export type UserGroup = "user" | "tc" | "cc" | "admin";
 
 export interface IUserHistory {
     date: Date;
-    mode: GameMode;
     group: UserGroup;
     kind: "join" | "leave";
 }
@@ -28,7 +15,8 @@ export interface IUser extends Document {
     groups: UserGroup[];
     history: IUserHistory[];
     discordId?: string;
-    active: boolean;
+    isActive: boolean;
+    inBag: boolean;
     coverUrl?: string;
     country?: IOsuCountry;
 

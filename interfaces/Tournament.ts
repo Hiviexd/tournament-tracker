@@ -2,24 +2,22 @@ import { Document } from "mongoose";
 import { IUser } from "./User";
 import { IVote } from "./Vote";
 
-export enum TournamentType {
-    Tournament = "tournament",
-    Contest = "contest",
-}
+export type TournamentType = "tournament" | "contest";
 
-export enum TournamentStatus {
-    SpportRequestReceived = "supportRequestReceived",
-    ScreeningOngoing = "screeningOngoing",
-    ScreeningConcluded = "screeningConcluded",
-    ReviewOngoing = "reviewOngoing",
-    ChangesRequested = "changesRequested",
-    BadgeApproved = "badgeApproved",
-    BadgeRejected = "badgeRejected",
-}
+export type GameMode = "osu" | "taiko" | "catch" | "mania";
+
+export type TournamentStatus =
+    | "supportRequestReceived"
+    | "screeningConcluded"
+    | "reviewOngoing"
+    | "changesRequested"
+    | "badgeApproved"
+    | "badgeRejected";
 
 export interface ITournament extends Document {
     name: string;
     description: string;
+    modes: GameMode[];
     startDate: Date;
     endDate: Date;
     forumUrl: string;

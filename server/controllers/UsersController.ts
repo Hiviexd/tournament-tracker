@@ -6,15 +6,19 @@ import OsuApi from "helpers/classes/OsuApi";
 
 class UsersController {
     // ? Util methods
-    /** Create or update a user based on an osu! API response */
-    public async createOrUpdateUser(userResponse: IOsuUser): Promise<IUser> {
+    /**
+     *  Create or update a user based on an osu! API response
+     * @param userResponse - osu! API response
+     * @param existingUser - optional existing user to update
+     */
+    public async createOrUpdateUser(userResponse: IOsuUser, existingUser: IUser | null = null): Promise<IUser> {
         const osuId = userResponse.id;
         const username = userResponse.username;
-        const groups = [UserGroup.User];
+        const groups = ["user"];
         const coverUrl = userResponse.cover.url;
         const country = userResponse.country;
 
-        let user = await User.findOne({ osuId });
+        let user = existingUser;
 
         if (!user) {
             user = new User({
@@ -53,7 +57,7 @@ class UsersController {
     }
 
     /** Find or create a user */
-    public async findOrCreateUser(accessToken, userInput): Promise<IUser | null> {
+    public async findOrCreateUser(accessToken: string, userInput: string | number): Promise<IUser | null> {
         const user = await User.findByUsernameOrOsuId(userInput);
 
         if (user) return user;
@@ -67,7 +71,43 @@ class UsersController {
         return this.createOrUpdateUser(userResponse);
     }
 
-    // ? Route methods
+    /**
+     * Assign reviewers via bag randomization
+     * * Main concept is to fetch all users who have isBag set to true, randomly pick 2, and set their isBag to false.
+     * * If there's less than 2 users with isBag set to true, set all users' isBag to true.
+     */
+    public async assignReviewers(type: UserGroup): Promise<IUser[]> {
+        const users = await User.find({
+            groups: { $in: [type] },
+            isActive: true,
+            inBag: true,
+        }).orFail();
+
+        // get count of total users in groups
+        const totalUsersCount = await User.countDocuments({
+            groups: { $in: [type] },
+            isActive: true,
+        });
+
+        // safer check if there's less than 2 active users in the group
+        if (users.length < _.min([2, totalUsersCount])) {
+            await User.updateMany({}, { $set: { inBag: true } });
+
+            // refetch users
+            return this.assignReviewers(type);
+        }
+
+        const selectedUsers: IUser[] = _.sampleSize(users, 2);
+
+        await User.updateMany(
+            { _id: { $in: selectedUsers.map(user => user._id) } },
+            { $set: { inBag: false } }
+        );
+
+        return selectedUsers;
+    }
+
+    // ? API methods
     /** GET logged in user */
     public getSelf(_, res): void {
         const user = res.locals.user;
@@ -89,14 +129,14 @@ class UsersController {
         let query;
 
         switch (type) {
-            case UserGroup.Tournaments:
-                query = { groups: UserGroup.Tournaments };
+            case "tc":
+                query = { groups: "tc" };
                 break;
-            case UserGroup.Contests:
-                query = { groups: UserGroup.Contests };
+            case "cc":
+                query = { groups: "cc" };
                 break;
             default:
-                query = { groups: { $in: [UserGroup.Tournaments, UserGroup.Contests] } };
+                query = { groups: { $in: ["tc", "cc"] } };
         }
 
         const committee = await User.find(query).orFail();

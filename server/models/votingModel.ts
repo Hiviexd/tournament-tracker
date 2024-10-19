@@ -1,16 +1,17 @@
 import mongoose, { Schema } from "mongoose";
-import { IVoting, VotingCategory } from "../../interfaces/Voting";
+import { IVoting } from "../../interfaces/Voting";
 
 const VotingSchema = new Schema<IVoting>(
     {
-        category: { type: String, enum: Object.values(VotingCategory), required: true },
+        category: { type: String, required: true },
         title: { type: String, required: true },
         description: { type: String, required: true },
         isActive: { type: Boolean, default: true },
         duration: { type: Number, required: true },
         options: [{ type: String, default: ["Agree", "Neutral", "Disagree"] }],
         votes: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
-        target: { type: Schema.Types.ObjectId, refPath: "category" },
+        targetUser: { type: Schema.Types.ObjectId, ref: "User" },
+        targetTournament: { type: Schema.Types.ObjectId, ref: "Tournament" },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -24,15 +25,15 @@ VotingSchema.virtual("isOverdue").get(function (this: IVoting) {
 });
 
 VotingSchema.virtual("isTournamentVote").get(function (this: IVoting) {
-    return this.category === VotingCategory.Tournament;
+    return this.category === "tournament";
 });
 
 VotingSchema.virtual("isUserVote").get(function (this: IVoting) {
-    return this.category === VotingCategory.User;
+    return this.category === "user";
 });
 
 VotingSchema.virtual("isDiscussionVote").get(function (this: IVoting) {
-    return this.category === VotingCategory.Discussion;
+    return this.category === "discussion";
 });
 
 const Voting = mongoose.model<IVoting>("Voting", VotingSchema);

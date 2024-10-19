@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
-import { IUser, IUserStatics, UserGroup, GameMode } from "../../interfaces/User";
+import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
 import helpers from "../helpers";
 import config from "../../config.json";
 
@@ -8,17 +8,17 @@ const UserSchema = new Schema<IUser, IUserStatics>(
     {
         osuId: { type: Number, required: true, unique: true },
         username: { type: String, required: true },
-        groups: { type: [String], enum: Object.values(UserGroup), default: [UserGroup.User] },
+        groups: { type: [String], default: ["user"] },
         history: [
             {
                 date: { type: Date, required: true },
-                mode: { type: String, enum: Object.values(GameMode), required: true },
-                group: { type: String, enum: Object.values(UserGroup), required: true },
+                group: { type: String, required: true },
                 kind: { type: String, enum: ["join", "leave"], required: true },
             },
         ],
         discordId: { type: String },
-        active: { type: Boolean, default: true },
+        isActive: { type: Boolean, default: true },
+        inBag: { type: Boolean, default: true },
         coverUrl: { type: String },
         country: {
             code: { type: String },
@@ -33,15 +33,15 @@ UserSchema.virtual("avatarUrl").get(function (this: IUser) {
 });
 
 UserSchema.virtual("isTournamentCommittee").get(function (this: IUser) {
-    return this.groups && this.groups.includes(UserGroup.Tournaments);
+    return this.groups && this.groups.includes("tc");
 });
 
 UserSchema.virtual("isContestCommittee").get(function (this: IUser) {
-    return this.groups && this.groups.includes(UserGroup.Contests);
+    return this.groups && this.groups.includes("cc");
 });
 
 UserSchema.virtual("isAdmin").get(function (this: IUser) {
-    return this.groups && this.groups.includes(UserGroup.Admin);
+    return this.groups && this.groups.includes("admin");
 });
 
 UserSchema.virtual("isDev").get(function (this: IUser) {
@@ -53,11 +53,11 @@ UserSchema.virtual("isCommittee").get(function (this: IUser) {
 });
 
 UserSchema.virtual("tcDuration").get(function (this: IUser) {
-    return getDuration(this, UserGroup.Tournaments);
+    return getDuration(this, "tc");
 });
 
 UserSchema.virtual("ccDuration").get(function (this: IUser) {
-    return getDuration(this, UserGroup.Contests);
+    return getDuration(this, "cc");
 });
 
 UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, user: string | number) {
@@ -72,7 +72,7 @@ UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, user: s
     }
 };
 
-function getDuration(user: IUser, group: string): number {
+function getDuration(user: IUser, group: UserGroup): number {
     if (!user.history) return 0;
 
     const targetHistory = user.history.filter((h) => h.group === group);
@@ -96,7 +96,7 @@ function getDuration(user: IUser, group: string): number {
     let unendingDate;
 
     for (const history of joinedHistory) {
-        const i = leftHistory.findIndex((d) => d.date > history.date && d.mode === history.mode);
+        const i = leftHistory.findIndex((d) => d.date > history.date);
         const leftDate = leftHistory[i];
         leftHistory.splice(i, 1);
 

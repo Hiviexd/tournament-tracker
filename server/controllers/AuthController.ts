@@ -3,6 +3,7 @@ import config from "../../config.json";
 import OsuApi from "../helpers/classes/OsuApi";
 import helpers from "../helpers";
 import UsersController from "./UsersController";
+import User from "../models/userModel";
 
 class AuthController {
     /** osu! OAuth login */
@@ -61,7 +62,8 @@ class AuthController {
         }
 
         // Process user
-        const user = await UsersController.createOrUpdateUser(userResponse);
+        const userLookup = await User.findOne({ osuId: userResponse.id });
+        const user = await UsersController.createOrUpdateUser(userResponse, userLookup);
 
         req.session.mongoId = user._id;
         req.session.osuId = user.osuId;

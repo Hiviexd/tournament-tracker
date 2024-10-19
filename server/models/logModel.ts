@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
-import { ILog, LogCategory } from "../../interfaces/Log";
+import { ILog } from "../../interfaces/Log";
 
 const LogSchema = new Schema<ILog>(
     {
         user: { type: Schema.Types.ObjectId, ref: "User", required: true },
         action: { type: String, required: true },
-        category: { type: String, enum: Object.values(LogCategory), required: true },
+        category: { type: String, required: true },
     }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 

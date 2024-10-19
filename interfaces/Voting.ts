@@ -1,11 +1,6 @@
 import { Document } from "mongoose";
 
-export enum VotingCategory {
-    // Tournament and User need to be uppercase to match the collection names. scuffed, I know.
-    Tournament = "Tournament",
-    User = "User",
-    Discussion = "discussion",
-}
+export type VotingCategory = "tournament" | "user" | "discussion";
 
 export interface IVoting extends Document {
     category: VotingCategory;

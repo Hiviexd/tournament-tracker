@@ -1,13 +1,7 @@
 import { IUser } from "./User";
 import { Document } from "mongoose";
 
-export enum LogCategory {
-    Account = "account",
-    User = "user",
-    Tournament = "tournament",
-    Report = "report",
-    Voting = "voting",
-}
+export type LogCategory = "account" | "user" | "tournament" | "report" | "voting";
 
 export interface ILog extends Document {
     user: IUser;
