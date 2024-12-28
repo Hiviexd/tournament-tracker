@@ -14,6 +14,16 @@ export type TournamentStatus =
     | "badgeApproved"
     | "badgeRejected";
 
+export interface TournamentQueryParams {
+    name?: string | RegExp;
+    modes?: GameMode[];
+    host?: IUser;
+    type?: TournamentType;
+    status?: TournamentStatus;
+    isActive?: boolean;
+    limit?: number;
+    page?: number;
+}
 export interface ITournament extends Document {
     name: string;
     description: string;
