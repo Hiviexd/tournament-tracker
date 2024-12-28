@@ -2,7 +2,7 @@ import crypto from "crypto";
 import config from "../../config.json";
 import OsuApi from "../helpers/classes/OsuApi";
 import helpers from "../helpers";
-import UsersController from "./UsersController";
+import UserService from "../services/UserService";
 import User from "../models/userModel";
 
 class AuthController {
@@ -63,7 +63,7 @@ class AuthController {
 
         // Process user
         const userLookup = await User.findOne({ osuId: userResponse.id });
-        const user = await UsersController.createOrUpdateUser(userResponse, userLookup);
+        const user = await UserService.createOrUpdateUser(userResponse, userLookup);
 
         req.session.mongoId = user._id;
         req.session.osuId = user.osuId;

@@ -1,10 +1,9 @@
 import Tournament from "../models/tournamentModel";
-import UsersController from "./UsersController";
+import UserService from "../services/UserService";
 import { TournamentType } from "../../interfaces/Tournament";
 import { UserGroup } from "../../interfaces/User";
 
 class TournamentsController {
-    // ? Util methods
     private defaultPopulate = [
         {
             path: "host",
@@ -26,7 +25,6 @@ class TournamentsController {
 
     private selectFields = (isCommittee: boolean) => isCommittee ? "" : "-reviews -assignedReviewers";
 
-    // ? API methods
     /** GET tournament listing */
     public async index(req, res) {
         const { name, host, type, status, isActive, limit } = req.query;
@@ -70,7 +68,7 @@ class TournamentsController {
 
         const assignedReviewersType = reviewerTypeMap[tournament.type];
 
-        const reviewers = await UsersController.assignReviewers(assignedReviewersType);
+        const reviewers = await UserService.assignReviewers(assignedReviewersType);
 
         tournament.assignedReviewers = reviewers;
 
