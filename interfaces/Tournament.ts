@@ -21,7 +21,6 @@ export interface TournamentQueryParams {
     type?: TournamentType;
     status?: TournamentStatus;
     isActive?: boolean;
-    limit?: number;
     page?: number;
 }
 export interface ITournament extends Document {
