@@ -6,5 +6,20 @@
         "secret": "",
         "redirect": "http://localhost:8088/api/auth/callback"
     },
-    "devs" : []
+    "discord": {
+        "roles": {
+            "tournament": "",
+            "contest": ""
+        },
+        "webhooks": {
+            "main": {
+                "id": "",
+                "token": ""
+            },
+            "dev": {
+                "id": "",
+                "token": ""
+            }
+        }
+    }
 }

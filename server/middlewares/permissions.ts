@@ -1,14 +1,26 @@
-import { unauthorize } from ".";
 import User from "../models/userModel";
 import helpers from "../helpers";
 import OsuApi from "../helpers/classes/OsuApi";
-import config from "../../config.json";
+
+function unauthorize(req, res, next) {
+    // Admin bypass
+    const user = res.locals.user || null;
+    if (user && user.isAdmin) {
+        return next();
+    }
+
+    if (req.accepts(["html", "json"]) === "json") {
+        res.json({ error: "Unauthorized, login first" });
+    } else {
+        res.redirect("/");
+    }
+}
 
 async function isLoggedIn(req, res, next) {
     const user = await User.findById(req.session.mongoId);
 
     if (!user) {
-        return unauthorize(req, res);
+        return unauthorize(req, res, next);
     }
 
     // Refresh if less than 2 hours left for some possible edge cases
@@ -32,35 +44,14 @@ async function isLoggedIn(req, res, next) {
 
 function isCommittee(req, res, next) {
     const user = res.locals.user;
-    if (!user.isCommittee) return unauthorize(req, res);
-
-    next();
-}
-
-function isTournamentCommittee(req, res, next) {
-    const user = res.locals.user;
-    if (!user.isTournamentCommittee) return unauthorize(req, res);
-
-    next();
-}
-
-function isContestCommittee(req, res, next) {
-    const user = res.locals.user;
-    if (!user.isContestCommittee) return unauthorize(req, res);
+    if (!user.isCommittee) return unauthorize(req, res, next);
 
     next();
 }
 
 function isAdmin(req, res, next) {
     const user = res.locals.user;
-    if (!user.isAdmin) return unauthorize(req, res);
-
-    next();
-}
-
-function isDev(req, res, next) {
-    const user = res.locals.user;
-    if (!config.devs.includes(user.osuId)) return unauthorize(req, res);
+    if (!user.isAdmin) return unauthorize(req, res, next);
 
     next();
 }
@@ -68,8 +59,5 @@ function isDev(req, res, next) {
 export default {
     isLoggedIn,
     isCommittee,
-    isTournamentCommittee,
-    isContestCommittee,
     isAdmin,
-    isDev,
 };

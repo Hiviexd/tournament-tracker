@@ -28,7 +28,6 @@ export interface IUser extends Document {
     isCommittee: boolean;
     tcDuration: number;
     ccDuration: number;
-    isDev: boolean;
 }
 
 export interface IUserStatics extends Model<IUser> {

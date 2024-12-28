@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 import moment from "moment";
 import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
 import helpers from "../helpers";
-import config from "../../config.json";
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
@@ -42,10 +41,6 @@ UserSchema.virtual("isContestCommittee").get(function (this: IUser) {
 
 UserSchema.virtual("isAdmin").get(function (this: IUser) {
     return this.groups && this.groups.includes("admin");
-});
-
-UserSchema.virtual("isDev").get(function (this: IUser) {
-    return config.devs.includes(this.osuId);
 });
 
 UserSchema.virtual("isCommittee").get(function (this: IUser) {

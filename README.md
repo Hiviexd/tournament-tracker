@@ -25,5 +25,4 @@ The one-stop shop for all official osu! tournament correspondence and informatio
   - `osuApp.id`: osu! API v2 client ID
   - `osuApp.secret`: osu! API v2 client secret
   - `osuApp.redirect`: osu! API v2 redirect URI, should be kept as `http://localhost:8088/api/auth/callback`
-  - `devs`: array of osu! user IDs who should have extra developer permissions (currently unused)
 - Run `yarn dev`, the project will be served in `http://localhost:8088`
