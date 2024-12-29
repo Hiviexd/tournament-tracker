@@ -40,6 +40,8 @@ import {
     faVoteYea,
     faHome,
     faExclamationTriangle,
+    faSearch,
+    faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -62,6 +64,8 @@ library.add(
     faVoteYea,
     faHome,
     faExclamationTriangle,
+    faSearch,
+    faPlus,
 );
 
 // Pages
@@ -70,6 +74,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CommitteePage from "./pages/CommitteePage";
 import AdminPage from "./pages/AdminPage";
 import UserPage from "./pages/UserPage";
+import VotingListPage from "./pages/VotingListPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
@@ -90,7 +95,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path="/committee"
                             element={
                                 <ProtectedRoute permissions={["committee"]}>
-                                    <Layout title="Committee" icon="users" page={<CommitteePage  />} />
+                                    <Layout
+                                        title="Committee"
+                                        icon="users"
+                                        page={<CommitteePage />}
+                                    />
                                 </ProtectedRoute>
                             }
                         />
@@ -111,10 +120,26 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             }
                         />
                         <Route
+                            path="/voting"
+                            element={
+                                <ProtectedRoute permissions={["committee"]}>
+                                    <Layout
+                                        title="Voting"
+                                        icon="poll-h"
+                                        page={<VotingListPage />}
+                                    />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
                             path="*"
                             element={
                                 <ProtectedRoute>
-                                    <Layout title="404" icon="exclamation-triangle" page={<NotFoundPage />} />
+                                    <Layout
+                                        title="404"
+                                        icon="exclamation-triangle"
+                                        page={<NotFoundPage />}
+                                    />
                                 </ProtectedRoute>
                             }
                         />
