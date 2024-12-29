@@ -8,8 +8,13 @@ export type VotingCategory = "tournament" | "user" | "discussion";
 export interface VotingQueryParams {
     title?: string | RegExp;
     category?: VotingCategory;
-    isActive?: boolean;
+    assignedGroup?: UserGroup;
+    status?: string;
     page?: number;
+
+    // backend only
+    assignedGroups?: { $in: UserGroup[] };
+    isActive?: boolean;
 }
 
 export interface IVoting extends Document {
@@ -24,6 +29,7 @@ export interface IVoting extends Document {
     votes: IVote[];
     targetUser?: IUser;
     targetTournament?: ITournament;
+    requiredVotes: number;
     createdAt: Date;
 
     // virtuals
@@ -32,4 +38,6 @@ export interface IVoting extends Document {
     isTournamentVote: boolean;
     isUserVote: boolean;
     isDiscussionVote: boolean;
+    isTournamentCommitteeVote: boolean;
+    isContestCommitteeVote: boolean;
 }

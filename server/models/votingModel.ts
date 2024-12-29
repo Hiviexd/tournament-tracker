@@ -14,6 +14,7 @@ const VotingSchema = new Schema<IVoting>(
         votes: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
         targetUser: { type: Schema.Types.ObjectId, ref: "User" },
         targetTournament: { type: Schema.Types.ObjectId, ref: "Tournament" },
+        requiredVotes: { type: Number, default: 1 },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

@@ -1,26 +1,20 @@
+// Base
 import { useEffect, useState } from "react";
-import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { useSearchParams } from "react-router-dom";
-import {
-    Card,
-    Stack,
-    Group,
-    TextInput,
-    Select,
-    Switch,
-    Pagination,
-    Text,
-    Title,
-    Button,
-    Skeleton,
-    Tooltip,
-} from "@mantine/core";
 import { useVotings } from "../hooks/useVotings";
+import { IVoting, VotingCategory } from "../../interfaces/Voting";
+import { UserGroup } from "../../interfaces/User";
+
+// Mantine
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
+import { Card, Stack, Group, Pagination, Text, Button, Skeleton, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { VotingCategory } from "../../interfaces/Voting";
 import { notifications } from "@mantine/notifications";
+
+// Components
 import VotingCreateModal from "../components/votings/VotingCreateModal";
-import moment from "moment";
+import VotingCard from "../components/votings/VotingCard";
+import VotingFilters from "../components/votings/VotingFilters";
 
 export default function VotingListPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +22,8 @@ export default function VotingListPage() {
     const [searchInput, setSearchInput] = useState({
         title: searchParams.get("title") || "",
         category: (searchParams.get("category") as VotingCategory) || "",
-        isActive: searchParams.get("active") !== "false",
+        assignedGroup: (searchParams.get("group") as UserGroup) || "",
+        status: searchParams.get("status") || "",
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 300);
@@ -38,19 +33,21 @@ export default function VotingListPage() {
         const params = new URLSearchParams();
         if (debouncedTitle) params.set("title", debouncedTitle);
         if (searchInput.category) params.set("category", searchInput.category);
-        if (!searchInput.isActive) params.set("active", "false");
+        if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
+        if (searchInput.status) params.set("status", searchInput.status);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
-    }, [debouncedTitle, searchInput.category, searchInput.isActive, page, setSearchParams]);
+    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status, page, setSearchParams]);
 
     useEffect(() => {
         setPage(1);
-    }, [debouncedTitle, searchInput.category, searchInput.isActive]);
+    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status]);
 
     const { data, isLoading, error } = useVotings({
         title: debouncedTitle,
         category: searchInput.category,
-        isActive: searchInput.isActive,
+        assignedGroup: searchInput.assignedGroup,
+        status: searchInput.status,
         page,
     });
 
@@ -76,116 +73,52 @@ export default function VotingListPage() {
         </Stack>
     );
 
-    const categoryOptions = [
-        { value: "", label: "All Categories" },
-        { value: "tournament", label: "Tournaments" },
-        { value: "user", label: "Users" },
-        { value: "discussion", label: "Discussions" },
-    ];
+    const EmptyState = ({ hasError }: { hasError: boolean }) => {
+        return (
+            <Stack align="center" justify="center" h={200}>
+                <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
+                <Text size="lg" c="dimmed">
+                    {hasError ? "Error loading votings" : "No votings found"}
+                </Text>
+                <Text size="sm" c="dimmed">
+                    {hasError
+                        ? "Try refreshing the page"
+                        : "Try adjusting your filters or create a new voting"}
+                </Text>
+            </Stack>
+        );
+    }
 
     return (
         <Stack gap="md">
-            {/* Filters - Always visible */}
-            <Card shadow="sm" p="md" bg="primary.11">
-                <Stack gap="md">
-                    <Group align="flex-end">
-                        <TextInput
-                            placeholder="Search by title..."
-                            value={searchInput.title}
-                            onChange={(e) =>
-                                setSearchInput((prev) => ({
-                                    ...prev,
-                                    title: e.currentTarget.value,
-                                }))
-                            }
-                            style={{ flex: 1 }}
-                        />
-                        <Select
-                            value={searchInput.category}
-                            onChange={(value) =>
-                                setSearchInput((prev) => ({
-                                    ...prev,
-                                    category: value as VotingCategory,
-                                }))
-                            }
-                            data={categoryOptions}
-                            style={{ width: 200 }}
-                        />
-                        <Switch
-                            label="Active votes"
-                            checked={searchInput.isActive}
-                            onChange={(e) =>
-                                setSearchInput((prev) => ({
-                                    ...prev,
-                                    isActive: e.currentTarget.checked,
-                                }))
-                            }
-                            size="md"
-                            my={6}
-                        />
-                    </Group>
-                    <Button
-                        onClick={open}
-                        leftSection={<FontAwesomeIcon icon="plus" />}
-                        variant="filled"
-                        color="primary"
-                        fullWidth>
-                        Create New Voting
-                    </Button>
-                </Stack>
-            </Card>
+            {/* Filters */}
+            <Stack gap="md">
+                <VotingFilters values={searchInput} onChange={setSearchInput} />
+                {/* Create voting button */}
+                <Button
+                    onClick={open}
+                    leftSection={<FontAwesomeIcon icon="plus" />}
+                    variant="filled"
+                    color="primary"
+                    fullWidth>
+                    Create New Voting
+                </Button>
+            </Stack>
 
-            {/* Create Voting Modal */}
+            {/* Create voting modal */}
             <VotingCreateModal opened={opened} onClose={close} />
 
-            {/* Content Area */}
+            <Divider />
+
+            {/* Content area */}
             {isLoading ? (
                 <LoadingState />
             ) : !data || data.votings.length === 0 ? (
-                <Stack align="center" justify="center" h={200}>
-                    <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
-                    <Text size="lg" c="dimmed">
-                        {!data ? "Error loading votings" : "No votings found"}
-                    </Text>
-                    <Text size="sm" c="dimmed">
-                        {!data
-                            ? "Try refreshing the page"
-                            : "Try adjusting your filters or create a new voting"}
-                    </Text>
-                </Stack>
+                <EmptyState hasError={!data} />
             ) : (
                 <Stack gap="md">
-                    {data.votings.map((voting) => (
-                        <Card key={voting._id} shadow="sm" p="lg">
-                            <Group justify="space-between" mb="xs">
-                                <div>
-                                    <Title order={4}>{voting.title}</Title>
-                                    <Text size="sm" c="dimmed">
-                                        Created by {voting.author.username} •{" "}
-                                        <Tooltip label={moment(voting.deadline).format("LLL")}>
-                                            <span>{moment(voting.createdAt).fromNow()}</span>
-                                        </Tooltip>
-                                    </Text>
-                                </div>
-                                <Group>
-                                    {voting.isActive ? (
-                                        <Text c="green">Active</Text>
-                                    ) : (
-                                        <Text c="red">Inactive</Text>
-                                    )}
-                                </Group>
-                            </Group>
-                            <Group mt="md" justify="space-between">
-                                <Text size="sm">
-                                    {voting.votes.length} vote{voting.votes.length !== 1 && "s"}
-                                </Text>
-                                <Tooltip label={moment(voting.deadline).format("LLL")}>
-                                    <Text size="sm">
-                                        Deadline: {moment(voting.deadline).fromNow()}
-                                    </Text>
-                                </Tooltip>
-                            </Group>
-                        </Card>
+                    {data.votings.map((voting: IVoting) => (
+                        <VotingCard key={voting._id} voting={voting} />
                     ))}
                 </Stack>
             )}
@@ -199,5 +132,3 @@ export default function VotingListPage() {
         </Stack>
     );
 }
-
-// TODO: make an actual voting card component

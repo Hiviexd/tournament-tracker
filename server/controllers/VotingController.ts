@@ -24,12 +24,13 @@ const DEFAULT_LIMIT = 20;
 class VotingController {
     /** GET voting listing */
     public async index(req, res) {
-        const { title, category, isActive, page = 1 } = req.query;
+        const { title, category, assignedGroup, status, page = 1 } = req.query;
         const query: VotingQueryParams = {};
 
         if (title) query.title = new RegExp(title, "i");
         if (category) query.category = category;
-        if (isActive !== undefined) query.isActive = isActive === "true";
+        if (assignedGroup) query.assignedGroups = { $in: [assignedGroup] };
+        if (status) query.isActive = status === "active";
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
@@ -75,6 +76,9 @@ class VotingController {
         const author = res.locals.user;
         let targetUser: IUser, targetTournament: ITournament;
 
+        const assignedUsersCount = await User.countDocuments({ groups: { $in: assignedGroups } });
+        const requiredVotes = Math.ceil(0.8 * assignedUsersCount);
+
         const voting = new Voting({
             author,
             category,
@@ -83,6 +87,7 @@ class VotingController {
             description,
             duration,
             options,
+            requiredVotes,
         });
 
         if (targetUserId) {
