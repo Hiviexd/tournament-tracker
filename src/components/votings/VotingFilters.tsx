@@ -17,9 +17,9 @@ interface IProps {
 export default function VotingFilters({ values, onChange }: IProps) {
     const categoryOptions = [
         { value: "", label: "All Categories" },
+        { value: "discussion", label: "Discussions" },
         { value: "tournament", label: "Tournaments" },
         { value: "user", label: "Users" },
-        { value: "discussion", label: "Discussions" },
     ];
 
     const assignedGroupOptions = [
