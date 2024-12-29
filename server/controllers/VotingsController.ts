@@ -23,7 +23,7 @@ const DEFAULT_LIMIT = 10;
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
-class VotingController {
+class VotingsController {
     /** GET voting listing */
     public async index(req, res) {
         const { title, category, assignedGroup, status, page = 1 } = req.query;
@@ -235,4 +235,4 @@ class VotingController {
     }
 }
 
-export default new VotingController();
+export default new VotingsController();
