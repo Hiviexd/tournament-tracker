@@ -14,18 +14,6 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./sass/app.scss";
 
-// Global functions
-import moment from "moment";
-
-declare global {
-    interface Window {
-        $http: any;
-        $moment: any;
-    }
-}
-
-window.$moment = moment;
-
 // Layout
 import Layout from "./base/Layout";
 import ProtectedRoute from "./base/ProtectedRoute";
@@ -51,6 +39,7 @@ import {
     faPollH,
     faVoteYea,
     faHome,
+    faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -71,11 +60,13 @@ library.add(
     faUserFriends,
     faPollH,
     faVoteYea,
-    faHome
+    faHome,
+    faExclamationTriangle,
 );
 
 // Pages
 import HomePage from "./pages/HomePage";
+import NotFoundPage from "./pages/NotFoundPage";
 import CommitteePage from "./pages/CommitteePage";
 import AdminPage from "./pages/AdminPage";
 import UserPage from "./pages/UserPage";
@@ -116,6 +107,14 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             element={
                                 <ProtectedRoute permissions={["user"]}>
                                     <Layout title="User" icon="user-friends" page={<UserPage />} />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="*"
+                            element={
+                                <ProtectedRoute>
+                                    <Layout title="404" icon="exclamation-triangle" page={<NotFoundPage />} />
                                 </ProtectedRoute>
                             }
                         />
