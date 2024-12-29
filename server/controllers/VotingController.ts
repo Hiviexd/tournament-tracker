@@ -21,7 +21,7 @@ const DEFAULT_POPULATE = [
 
 const DEFAULT_LIMIT = 10;
 
-const STRICT_PARTICIPATION_PERCENTAGE = 0.8;
+const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
 class VotingController {
     /** GET voting listing */
