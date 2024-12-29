@@ -2,7 +2,7 @@ import User from "../models/userModel";
 import _ from "lodash";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
-import OsuApi from "helpers/classes/OsuApi";
+import OsuApi from "../helpers/classes/OsuApi";
 
 class UserService {
     /**
