@@ -1,3 +1,10 @@
+// Base
+import { useState } from "react";
+import { useCreateVoting } from "../../hooks/useVotings";
+import { VotingCategory } from "../../../interfaces/Voting";
+import { UserGroup } from "../../../interfaces/User";
+
+//Mantine
 import {
     Modal,
     TextInput,
@@ -9,11 +16,13 @@ import {
     Button,
     Group,
     LoadingOverlay,
+    Pill,
+    ActionIcon,
+    Text,
+    Divider,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { VotingCategory } from "../../../interfaces/Voting";
-import { UserGroup } from "../../../interfaces/User";
-import { useCreateVoting } from "../../hooks/useVotings";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     opened: boolean;
@@ -22,6 +31,7 @@ interface IProps {
 
 export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
+    const [newOption, setNewOption] = useState("");
 
     const form = useForm({
         initialValues: {
@@ -30,7 +40,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             category: "" as VotingCategory,
             assignedGroups: [] as UserGroup[],
             duration: 7,
-            options: ["Yes", "No"], // Default options
+            options: ["Yes", "No"],
+            targetUserInput: "",
+            targetTournamentId: "",
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
@@ -40,6 +52,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 value.length === 0 ? "At least one group is required" : null,
             duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
             options: (value) => (value.length < 2 ? "At least two options are required" : null),
+            targetUserInput: (value, values) =>
+                values.category === "user" && !value ? "Target user is required" : null,
+            targetTournamentId: (value, values) =>
+                values.category === "tournament" && !value ? "Target tournament is required" : null,
         },
     });
 
@@ -49,10 +65,32 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         onClose();
     };
 
+    const handleAddOption = () => {
+        const trimmedOption = newOption.trim();
+        if (trimmedOption && !form.values.options.includes(trimmedOption)) {
+            form.setFieldValue("options", [...form.values.options, trimmedOption]);
+            setNewOption("");
+        }
+    };
+
+    const handleRemoveOption = (optionToRemove: string) => {
+        form.setFieldValue(
+            "options",
+            form.values.options.filter((option) => option !== optionToRemove)
+        );
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddOption();
+        }
+    };
+
     const categoryOptions = [
+        { value: "discussion", label: "Discussion" },
         { value: "tournament", label: "Tournament" },
         { value: "user", label: "User" },
-        { value: "discussion", label: "Discussion" },
     ];
 
     const groupOptions = [
@@ -69,6 +107,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             />
             <form onSubmit={form.onSubmit(handleSubmit)} style={{ position: "relative" }}>
                 <Stack gap="md">
+                    <Divider />
                     <TextInput
                         label="Title"
                         placeholder="Enter voting title"
@@ -81,6 +120,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         placeholder="Enter voting description"
                         withAsterisk
                         minRows={3}
+                        maxRows={8}
+                        autosize
                         {...form.getInputProps("description")}
                     />
 
@@ -91,6 +132,24 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         withAsterisk
                         {...form.getInputProps("category")}
                     />
+
+                    {form.values.category === "user" && (
+                        <TextInput
+                            label="Target User"
+                            placeholder="Enter target user's username or osu! ID"
+                            withAsterisk
+                            {...form.getInputProps("targetUserInput")}
+                        />
+                    )}
+
+                    {form.values.category === "tournament" && (
+                        <TextInput
+                            label="Target Tournament ID"
+                            placeholder="Enter target tournament ID"
+                            withAsterisk
+                            {...form.getInputProps("targetTournamentId")}
+                        />
+                    )}
 
                     <MultiSelect
                         label="Assigned Groups"
@@ -108,6 +167,44 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("duration")}
                     />
 
+                    <Stack gap="xs">
+                        <Text size="sm" fw={500}>
+                            Options
+                        </Text>
+                        <Group gap="xs">
+                            {form.values.options.length === 0 && (
+                                <Text size="xs" c="danger">
+                                    No options!
+                                </Text>
+                            )}
+                            {form.values.options.map((option, index) => (
+                                <Pill
+                                    key={index}
+                                    withRemoveButton
+                                    onRemove={() => handleRemoveOption(option)}>
+                                    {option}
+                                </Pill>
+                            ))}
+                        </Group>
+                        <Group gap="xs" flex={1} align="flex-start">
+                            <TextInput
+                                placeholder="Add new option"
+                                size="xs"
+                                value={newOption}
+                                onChange={(e) => setNewOption(e.currentTarget.value)}
+                                onKeyDown={handleKeyPress}
+                                error={form.errors.options}
+                            />
+                            <ActionIcon
+                                variant="filled"
+                                color="primary"
+                                onClick={handleAddOption}
+                                disabled={!newOption.trim()}>
+                                <FontAwesomeIcon icon="plus" />
+                            </ActionIcon>
+                        </Group>
+                    </Stack>
+
                     <Group justify="flex-end" mt="md">
                         <Button variant="subtle" onClick={onClose}>
                             Cancel
@@ -121,5 +218,3 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         </Modal>
     );
 }
-
-// TODO: implement missing fields (options, targetUser, targetTournament)
