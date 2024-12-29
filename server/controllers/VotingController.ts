@@ -19,7 +19,7 @@ const DEFAULT_POPULATE = [
     { path: "targetTournament", select: "name" },
 ];
 
-const DEFAULT_LIMIT = 20;
+const DEFAULT_LIMIT = 10;
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.8;
 
