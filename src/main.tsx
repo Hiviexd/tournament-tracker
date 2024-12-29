@@ -9,6 +9,7 @@ const queryClient = new QueryClient();
 // Mantine
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./themes/main";
+import loadIcons from "./themes/icons";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -18,55 +19,8 @@ import "./sass/app.scss";
 import Layout from "./base/Layout";
 import ProtectedRoute from "./base/ProtectedRoute";
 
-// fontawesome icons
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { fab } from "@fortawesome/free-brands-svg-icons";
-import {
-    faSignOutAlt,
-    faUserCircle,
-    faTrophy,
-    faShieldAlt,
-    faUserShield,
-    faClipboard,
-    faPaperPlane,
-    faMailBulk,
-    faInbox,
-    faPlusCircle,
-    faUsers,
-    faNewspaper,
-    faClipboardList,
-    faUserFriends,
-    faPollH,
-    faVoteYea,
-    faHome,
-    faExclamationTriangle,
-    faSearch,
-    faPlus,
-} from "@fortawesome/free-solid-svg-icons";
-
-library.add(
-    fab,
-    faSignOutAlt,
-    faUserCircle,
-    faTrophy,
-    faShieldAlt,
-    faUserShield,
-    faClipboard,
-    faPaperPlane,
-    faMailBulk,
-    faInbox,
-    faPlusCircle,
-    faUsers,
-    faNewspaper,
-    faClipboardList,
-    faUserFriends,
-    faPollH,
-    faVoteYea,
-    faHome,
-    faExclamationTriangle,
-    faSearch,
-    faPlus,
-);
+// Fontawesome icons
+loadIcons();
 
 // Pages
 import HomePage from "./pages/HomePage";

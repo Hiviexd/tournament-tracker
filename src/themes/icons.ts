@@ -1,0 +1,55 @@
+// fontawesome icons
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+import {
+    faSignOutAlt,
+    faUserCircle,
+    faTrophy,
+    faShieldAlt,
+    faUserShield,
+    faClipboard,
+    faPaperPlane,
+    faMailBulk,
+    faInbox,
+    faPlusCircle,
+    faUsers,
+    faNewspaper,
+    faClipboardList,
+    faUserFriends,
+    faPollH,
+    faVoteYea,
+    faHome,
+    faExclamationTriangle,
+    faSearch,
+    faPlus,
+    faComments,
+    faUser,
+} from "@fortawesome/free-solid-svg-icons";
+
+export default function loadIcons() {
+    library.add(
+        fab,
+        faSignOutAlt,
+        faUserCircle,
+        faTrophy,
+        faShieldAlt,
+        faUserShield,
+        faClipboard,
+        faPaperPlane,
+        faMailBulk,
+        faInbox,
+        faPlusCircle,
+        faUsers,
+        faNewspaper,
+        faClipboardList,
+        faUserFriends,
+        faPollH,
+        faVoteYea,
+        faHome,
+        faExclamationTriangle,
+        faSearch,
+        faPlus,
+        faComments,
+        faUser
+    );
+}
