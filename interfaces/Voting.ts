@@ -7,7 +7,6 @@ export type VotingCategory = "tournament" | "user" | "discussion";
 
 export interface VotingQueryParams {
     title?: string | RegExp;
-    author?: IUser;
     category?: VotingCategory;
     isActive?: boolean;
     page?: number;
