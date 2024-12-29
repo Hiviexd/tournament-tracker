@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useLoggedInUser from "../hooks/users/useLoggedInUser";
+import useLoggedInUser from "../hooks/useLoggedInUser";
 import { useAtom } from "jotai";
 import { loggedInUserAtom, redirectAtom } from "../store/atoms";
 import helpers from "../helpers";
