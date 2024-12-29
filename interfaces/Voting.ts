@@ -31,6 +31,7 @@ export interface IVoting extends Document {
     targetTournament?: ITournament;
     requiredVotes: number;
     createdAt: Date;
+    updatedAt: Date;
 
     // virtuals
     deadline: Date;

@@ -76,9 +76,16 @@ export default function VotingCard({ voting }: IPropTypes) {
                     <Title order={4}>{voting.title}</Title>
                     <Text size="sm" c="dimmed">
                         Created by {voting.author.username} •{" "}
-                        <Tooltip label={moment(voting.createdAt).format("LLL")}>
-                            <span>{moment(voting.createdAt).fromNow()}</span>
-                        </Tooltip>
+                        {voting.isActive && (
+                            <Tooltip label={moment(voting.createdAt).format("LLL")}>
+                                <span>{moment(voting.createdAt).fromNow()}</span>
+                            </Tooltip>
+                        )}
+                        {!voting.isActive && (
+                            <Tooltip label={moment(voting.updatedAt).format("LLL")}>
+                                <span>concluded {moment(voting.updatedAt).fromNow()}</span>
+                            </Tooltip>
+                        )}
                     </Text>
                 </div>
             </Group>
@@ -86,7 +93,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                 <Group>
                     <Tooltip label={getVotingTypeInfo().text}>
                         <Badge color="primary" variant="filled">
-                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} /> {" "}
+                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} />{" "}
                             {getVotingAssignedGroups()}
                         </Badge>
                     </Tooltip>
