@@ -14,30 +14,36 @@ interface IPropTypes {
 
 export default function ProtectedRoute({ permissions = [], children }: IPropTypes) {
     const { data: user, isLoading } = useLoggedInUser();
-    const [, setLoggedInUser] = useAtom(loggedInUserAtom);
+    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
     const [redirect, setRedirect] = useAtom(redirectAtom);
     const navigate = useNavigate();
     const [authChecked, setAuthChecked] = useState(false);
 
+    // Set user data
     useEffect(() => {
         if (helpers.httpIsValid(user)) {
             setLoggedInUser(user);
+            setAuthChecked(true);
         }
-        setAuthChecked(true);
     }, [user, setLoggedInUser]);
 
+    // Check permissions after user data is set
     useEffect(() => {
-        if (authChecked && permissions.length && !helpers.hasRequiredPermissions(user, permissions)) {
-            notifications.show({
-                title: "Missing Permissions",
-                message: "You don't have the required permissions to view this page.",
-                color: "red",
-                autoClose: 300000,
-            });
-            setRedirect(true);
+        if (authChecked && permissions.length > 0) {
+            const hasPermissions = helpers.hasRequiredPermissions(loggedInUser, permissions);
+            if (!hasPermissions) {
+                notifications.show({
+                    title: "Missing Permissions",
+                    message: "You don't have the required permissions to view this page.",
+                    color: "red",
+                    autoClose: 3000,
+                });
+                setRedirect(true);
+            }
         }
-    }, [user, permissions, authChecked, setRedirect]);
+    }, [authChecked, loggedInUser, permissions, setRedirect]);
 
+    // Handle redirect
     useEffect(() => {
         if (redirect) {
             setRedirect(false);
