@@ -18,17 +18,10 @@ import "./sass/app.scss";
 // Layout
 import Layout from "./base/Layout";
 import ProtectedRoute from "./base/ProtectedRoute";
+import routes from "./base/routes.config";
 
 // Fontawesome icons
 loadIcons();
-
-// Pages
-import HomePage from "./pages/HomePage";
-import NotFoundPage from "./pages/NotFoundPage";
-import CommitteePage from "./pages/CommitteePage";
-import AdminPage from "./pages/AdminPage";
-import UserPage from "./pages/UserPage";
-import VotingListPage from "./pages/VotingListPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
@@ -37,66 +30,21 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 <Notifications />
                 <Router>
                     <Routes>
-                        <Route
-                            path="/"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout title="Home" icon="home" page={<HomePage />} />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/committee"
-                            element={
-                                <ProtectedRoute permissions={["committee"]}>
-                                    <Layout
-                                        title="Committee"
-                                        icon="users"
-                                        page={<CommitteePage />}
-                                    />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin"
-                            element={
-                                <ProtectedRoute permissions={["admin"]}>
-                                    <Layout title="Admin" icon="user-shield" page={<AdminPage />} />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/user"
-                            element={
-                                <ProtectedRoute permissions={["user"]}>
-                                    <Layout title="User" icon="user-friends" page={<UserPage />} />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/voting"
-                            element={
-                                <ProtectedRoute permissions={["committee"]}>
-                                    <Layout
-                                        title="Voting"
-                                        icon="poll-h"
-                                        page={<VotingListPage />}
-                                    />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="*"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout
-                                        title="404"
-                                        icon="exclamation-triangle"
-                                        page={<NotFoundPage />}
-                                    />
-                                </ProtectedRoute>
-                            }
-                        />
+                        {routes.map((route) => (
+                            <Route
+                                key={route.path}
+                                path={route.path}
+                                element={
+                                    <ProtectedRoute permissions={route.permissions}>
+                                        <Layout
+                                            title={route.title}
+                                            icon={route.icon}
+                                            page={route.component}
+                                        />
+                                    </ProtectedRoute>
+                                }
+                            />
+                        ))}
                     </Routes>
                 </Router>
             </MantineProvider>
