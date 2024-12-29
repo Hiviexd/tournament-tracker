@@ -7,7 +7,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 
 interface RouteConfig {
     path: string;
-    component: JSX.Element;
+    page: JSX.Element;
     title: string;
     icon: string;
     permissions?: string[];
@@ -16,41 +16,41 @@ interface RouteConfig {
 const routes: RouteConfig[] = [
     {
         path: "/",
-        component: <HomePage />,
+        page: <HomePage />,
         title: "Home",
         icon: "home",
     },
     {
         path: "/committee",
-        component: <CommitteePage />,
+        page: <CommitteePage />,
         title: "Committee",
         icon: "users",
         permissions: ["committee"],
     },
     {
         path: "/admin",
-        component: <AdminPage />,
+        page: <AdminPage />,
         title: "Admin",
         icon: "user-shield",
         permissions: ["admin"],
     },
     {
         path: "/user",
-        component: <UserPage />,
+        page: <UserPage />,
         title: "User",
         icon: "user-friends",
         permissions: ["user"],
     },
     {
         path: "/voting",
-        component: <VotingListPage />,
+        page: <VotingListPage />,
         title: "Voting",
         icon: "poll-h",
         permissions: ["committee"],
     },
     {
         path: "*",
-        component: <NotFoundPage />,
+        page: <NotFoundPage />,
         title: "404",
         icon: "exclamation-triangle",
     },

@@ -9,7 +9,6 @@ const queryClient = new QueryClient();
 // Mantine
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./themes/main";
-import loadIcons from "./themes/icons";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -21,6 +20,7 @@ import ProtectedRoute from "./base/ProtectedRoute";
 import routes from "./base/routes.config";
 
 // Fontawesome icons
+import loadIcons from "./themes/icons";
 loadIcons();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -39,7 +39,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                                         <Layout
                                             title={route.title}
                                             icon={route.icon}
-                                            page={route.component}
+                                            page={route.page}
                                         />
                                     </ProtectedRoute>
                                 }
