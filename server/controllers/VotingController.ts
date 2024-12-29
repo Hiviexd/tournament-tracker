@@ -3,52 +3,50 @@ import Vote from "../models/voteModel";
 import { VotingQueryParams } from "../../interfaces/Voting";
 import User from "../models/userModel";
 import Tournament from "../models/tournamentModel";
+import { IUser } from "../../interfaces/User";
+import { ITournament } from "../../interfaces/Tournament";
+
+const DEFAULT_POPULATE = [
+    { path: "author", select: "username osuId groups" },
+    {
+        path: "votes",
+        populate: {
+            path: "author",
+            select: "username osuId groups",
+        },
+    },
+    { path: "targetUser", select: "username osuId" },
+    { path: "targetTournament", select: "name" },
+];
+
+const DEFAULT_LIMIT = 20;
 
 class VotingController {
-    private defaultPopulate = [
-        {
-            path: "votes",
-            populate: {
-                path: "author",
-                select: "username osuId groups"
-            },
-        },
-        { path: "author", select: "username osuId groups" },
-        { path: "targetUser", select: "username osuId" },
-        { path: "targetTournament", select: "name" },
-    ];
-
-    private defaultLimit = 20;
-
     /** GET voting listing */
     public async index(req, res) {
-        const { title, author, category, isActive, page = 1 } = req.query;
+        const { title, category, isActive, page = 1 } = req.query;
         const query: VotingQueryParams = {};
 
         if (title) query.title = new RegExp(title, "i");
-        if (author) {
-            const authorUser = await User.findByUsernameOrOsuId(author);
-            query.author = authorUser;
-        }
         if (category) query.category = category;
         if (isActive !== undefined) query.isActive = isActive === "true";
 
-        const skip = (Number(page) - 1) * this.defaultLimit;
+        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         const [votings, total] = await Promise.all([
-            Voting
-                .find(query)
-                .populate(this.defaultPopulate)
+            Voting.find(query)
                 .skip(skip)
-                .limit(this.defaultLimit),
-            Voting.countDocuments(query)
+                .limit(DEFAULT_LIMIT)
+                .sort({ createdAt: -1 })
+                .populate(DEFAULT_POPULATE),
+            Voting.countDocuments(query),
         ]);
 
         res.json({
             votings,
             total,
             page: Number(page),
-            pages: Math.ceil(total / this.defaultLimit),
+            pages: Math.ceil(total / DEFAULT_LIMIT),
         });
     }
 
@@ -56,7 +54,7 @@ class VotingController {
     public async getVoting(req, res) {
         const votingId = req.params.votingId;
 
-        const voting = await Voting.findById(votingId).populate(this.defaultPopulate).orFail();
+        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         res.json(voting);
     }
@@ -75,8 +73,7 @@ class VotingController {
         } = req.body;
 
         const author = res.locals.user;
-        const targetUser = await User.findByUsernameOrOsuId(targetUserId);
-        const targetTournament = await Tournament.findById(targetTournamentId);
+        let targetUser: IUser, targetTournament: ITournament;
 
         const voting = new Voting({
             author,
@@ -86,9 +83,17 @@ class VotingController {
             description,
             duration,
             options,
-            targetUser,
-            targetTournament,
         });
+
+        if (targetUserId) {
+            targetUser = await User.findByUsernameOrOsuId(targetUserId);
+            voting.targetUser = targetUser;
+        }
+
+        if (targetTournamentId) {
+            targetTournament = await Tournament.findById(targetTournamentId).orFail();
+            voting.targetTournament = targetTournament;
+        }
 
         await voting.save();
 
@@ -116,7 +121,7 @@ class VotingController {
             return res.json({ message: "Invalid option" });
         }
 
-        let vote = voting.votes.find(vote => vote.author.equals(author._id));
+        let vote = voting.votes.find((vote) => vote.author.equals(author._id));
         let isNewVote = false;
 
         if (!vote) {
@@ -162,12 +167,7 @@ class VotingController {
     /** POST update a voting */
     public async updateVoting(req, res) {
         const votingId = req.params.votingId;
-        const {
-            title,
-            description,
-            duration,
-            options,
-        } = req.body;
+        const { title, description, duration, options } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
 
@@ -215,7 +215,7 @@ class VotingController {
 
         const voting = await Voting.findById(votingId).orFail();
 
-        voting.votes = voting.votes.filter(vote => !vote.equals(voteId));
+        voting.votes = voting.votes.filter((vote) => !vote.equals(voteId));
 
         await voting.save();
 
