@@ -3,12 +3,14 @@ import { IVoting } from "../../interfaces/Voting";
 
 const VotingSchema = new Schema<IVoting>(
     {
+        author: { type: Schema.Types.ObjectId, ref: "User", required: true },
         category: { type: String, required: true },
+        assignedGroups: [{ type: String, required: true }],
         title: { type: String, required: true },
         description: { type: String, required: true },
         isActive: { type: Boolean, default: true },
         duration: { type: Number, required: true },
-        options: [{ type: String, default: ["Agree", "Neutral", "Disagree"] }],
+        options: [{ type: String, required: true }],
         votes: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
         targetUser: { type: Schema.Types.ObjectId, ref: "User" },
         targetTournament: { type: Schema.Types.ObjectId, ref: "Tournament" },
@@ -34,6 +36,14 @@ VotingSchema.virtual("isUserVote").get(function (this: IVoting) {
 
 VotingSchema.virtual("isDiscussionVote").get(function (this: IVoting) {
     return this.category === "discussion";
+});
+
+VotingSchema.virtual("isTournamentCommitteeVote").get(function (this: IVoting) {
+    return this.assignedGroups.includes("tc");
+});
+
+VotingSchema.virtual("isContestCommitteeVote").get(function (this: IVoting) {
+    return this.assignedGroups.includes("cc");
 });
 
 const Voting = mongoose.model<IVoting>("Voting", VotingSchema);
