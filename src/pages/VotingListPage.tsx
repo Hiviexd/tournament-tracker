@@ -26,7 +26,7 @@ export default function VotingListPage() {
         status: searchParams.get("status") || "",
     });
     const [opened, { open, close }] = useDisclosure(false);
-    const [debouncedTitle] = useDebouncedValue(searchInput.title, 300);
+    const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
 
     // Handle URL params
     useEffect(() => {
