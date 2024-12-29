@@ -21,6 +21,8 @@ const DEFAULT_POPULATE = [
 
 const DEFAULT_LIMIT = 20;
 
+const STRICT_PARTICIPATION_PERCENTAGE = 0.8;
+
 class VotingController {
     /** GET voting listing */
     public async index(req, res) {
@@ -77,7 +79,7 @@ class VotingController {
         let targetUser: IUser, targetTournament: ITournament;
 
         const assignedUsersCount = await User.countDocuments({ groups: { $in: assignedGroups } });
-        const requiredVotes = Math.ceil(0.8 * assignedUsersCount);
+        const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         const voting = new Voting({
             author,
