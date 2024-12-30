@@ -21,11 +21,13 @@ export default function ProtectedRoute({ permissions = [], children }: IPropType
 
     // Set user data
     useEffect(() => {
-        if (helpers.httpIsValid(user)) {
-            setLoggedInUser(user);
+        if (!isLoading) {  // Changed this condition
+            if (user) {
+                setLoggedInUser(user);
+            }
             setAuthChecked(true);
         }
-    }, [user, setLoggedInUser]);
+    }, [user, isLoading, setLoggedInUser]);
 
     // Check permissions after user data is set
     useEffect(() => {
