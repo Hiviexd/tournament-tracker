@@ -15,7 +15,6 @@ export default function MarkdownText({ content, className, allowHtml = false }: 
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={allowHtml ? [rehypeRaw] : []}
                 components={{
-                    // Custom link component
                     a: ({ ...props }) => (
                         <a
                             {...props}
