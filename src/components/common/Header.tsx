@@ -6,6 +6,7 @@ import routes from "../../base/nav.routes";
 // state
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
+import { useState } from "react";
 
 // Mantine
 import { AppShell, Burger, Button, Group, Image, Menu, Avatar } from "@mantine/core";
@@ -22,6 +23,12 @@ interface IPropTypes {
 export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
     const navigate = useNavigate();
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+    const handleLogin = () => {
+        setIsLoggingIn(true);
+        window.location.href = "/api/auth/login";
+    };
 
     return (
         <header>
@@ -80,14 +87,14 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                         )
                                 )
                             ) : (
-                                <a key="login" href="/api/auth/login">
-                                    <Button
-                                        variant="gradient"
-                                        gradient={{ from: "primary.4", to: "primary.9", deg: 90 }}
-                                        rightSection={<Image src="/assets/logo-osu.svg" h={20} />}>
-                                        Login
-                                    </Button>
-                                </a>
+                                <Button
+                                    onClick={handleLogin}
+                                    variant="gradient"
+                                    loading={isLoggingIn}
+                                    gradient={{ from: "primary.4", to: "primary.9", deg: 90 }}
+                                    leftSection={<Image src="/assets/logo-osu.svg" h={20} />}>
+                                    Login
+                                </Button>
                             )}
                             {user && (
                                 <Menu withArrow shadow="md">

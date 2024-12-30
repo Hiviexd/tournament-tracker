@@ -13,21 +13,11 @@ export default [
         title: "Tournaments",
         permissions: ["user"],
         href: "/tournaments",
-        links: [
-            { title: "Listing", to: "", icon: "trophy", permissions: ["user"] },
-            {
-                title: "Create",
-                to: "/create",
-                icon: "plus-circle",
-                permissions: ["user"],
-            },
-        ],
     },
     {
-        title: "Users",
-        permissions: ["user"],
-        href: "/users",
-        links: [{ title: "Listing", to: "", icon: "user-friends", permissions: ["user"] }],
+        title: "Voting",
+        permissions: ["committee"],
+        href: "/voting",
     },
     {
         title: "Contact",
@@ -43,33 +33,21 @@ export default [
             },
         ],
     },
-    {
-        title: "Voting",
-        permissions: ["committee"],
-        href: "/voting",
-        links: [
-            { title: "Listing", to: "", icon: "poll-h", permissions: ["committee"] },
-            {
-                title: "Create",
-                to: "/create",
-                icon: "vote-yea",
-                permissions: ["committee"],
-            },
-        ],
-    },
+
     {
         title: "Admin",
         permissions: ["admin"],
         href: "/admin",
         links: [
             { title: "Panel", to: "", icon: "shield-alt", permissions: ["admin"] },
+            { title: "Users", to: "/admin/users", icon: "users", permissions: ["admin"] },
             {
                 title: "Screening",
-                to: "/screening",
+                to: "/admin/screening",
                 icon: "user-shield",
                 permissions: ["admin"],
             },
-            { title: "Logs", to: "/logs", icon: "clipboard", permissions: ["admin"] },
+            { title: "Logs", to: "/admin/logs", icon: "clipboard", permissions: ["admin"] },
         ],
     },
 ];
