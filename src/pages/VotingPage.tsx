@@ -44,12 +44,12 @@ export default function VotingPage() {
         </Stack>
     );
 
-    const EmptyState = ({ hasError }: { hasError: boolean }) => {
+    const EmptyState = ({ error }: { error: string }) => {
         return (
             <Stack align="center" justify="center" h={200}>
                 <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
                 <Text size="lg" c="dimmed">
-                    {hasError ? "Error loading voting" : "Voting not found"}
+                    {error}
                 </Text>
 
                 <Button onClick={() => navigate("/votings")}>Return to votings</Button>
@@ -61,8 +61,8 @@ export default function VotingPage() {
         <>
             {isLoading ? (
                 <LoadingState />
-            ) : !voting ? (
-                <EmptyState hasError={false} />
+            ) : voting.error ? (
+                <EmptyState error={voting.error} />
             ) : (
                 <Stack gap="lg">
                     <VotingInfo

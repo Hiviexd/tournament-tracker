@@ -179,7 +179,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.json({ message: "Cannot edit inactive votes!" });
+            return res.json({ error: "Cannot edit inactive votes!" });
         }
 
         voting.title = title;
@@ -203,14 +203,18 @@ class VotingsController {
 
         const voting = await Voting.findById(votingId).orFail();
 
-        if (voting.votes.length > 0 && !res.locals.user.isAdmin) {
-            return res.json({ message: "Cannot delete voting with votes!" });
+        if (!voting.isActive) {
+            return res.json({ error: "Cannot delete concluded votings!" });
+        }
+
+        if (voting.votes.length && !res.locals.user.isAdmin) {
+            return res.json({ error: "Cannot delete voting with votes!" });
         }
 
         await voting.remove();
 
         res.json({
-            message: "Voting deleted successfully",
+            message: "Voting deleted successfully!",
         });
 
         // TODO logging and webhook
