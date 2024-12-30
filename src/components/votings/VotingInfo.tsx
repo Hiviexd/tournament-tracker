@@ -21,6 +21,7 @@ interface IProps {
     onNavigateBack: () => void;
 }
 
+// TODO markdown support for descriptions
 export default function VotingInfo({ votingId, voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const toggleStatusMutation = useToggleVotingStatus(votingId);

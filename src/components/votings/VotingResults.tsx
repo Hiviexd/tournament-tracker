@@ -11,6 +11,7 @@ interface IProps {
     user: IUser | null;
 }
 
+// TODO redo design
 export default function VotingResults({ votingId, voting, user }: IProps) {
     const deleteVoteMutation = useDeleteVote(votingId);
 
