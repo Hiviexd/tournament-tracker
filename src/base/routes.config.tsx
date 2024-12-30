@@ -5,6 +5,7 @@ import AdminPage from "../pages/AdminPage";
 import UserPage from "../pages/UserPage";
 import VotingListPage from "../pages/VotingListPage";
 import VotingPage from "../pages/VotingPage";
+import MarkdownPlaygroundPage from "../pages/MarkdownPlaygroundPage";
 
 interface RouteConfig {
     path: string;
@@ -20,6 +21,7 @@ const routes: RouteConfig[] = [
         page: <HomePage />,
         title: "Home",
         icon: "home",
+        permissions: [],
     },
     {
         path: "/committee",
@@ -50,17 +52,25 @@ const routes: RouteConfig[] = [
         permissions: ["committee"],
     },
     {
-        path: "*",
-        page: <NotFoundPage />,
-        title: "404",
-        icon: "exclamation-triangle",
-    },
-    {
         path: "/voting/:votingId",
         page: <VotingPage />,
         title: "Voting Details",
         icon: "poll-h",
         permissions: ["committee"],
+    },
+    {
+        path: "/markdown",
+        page: <MarkdownPlaygroundPage />,
+        title: "Markdown Playground",
+        icon: "file-alt",
+        permissions: [],
+    },
+    {
+        path: "*",
+        page: <NotFoundPage />,
+        title: "404",
+        icon: "exclamation-triangle",
+        permissions: [],
     },
 ];
 
