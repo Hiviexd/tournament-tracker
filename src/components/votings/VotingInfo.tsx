@@ -27,17 +27,30 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
     const deleteVotingMutation = useDeleteVoting();
 
     const handleToggleStatus = async () => {
+        if (!window.confirm("Are you sure you want to toggle the status of this voting?")) return;
         await toggleStatusMutation.mutateAsync();
     };
 
     const handleDelete = async () => {
+        if (!window.confirm("Are you sure you want to delete this voting?")) return;
         await deleteVotingMutation.mutateAsync(votingId);
         onNavigateBack();
     };
 
     return (
         <>
-            <Card shadow="sm" p="lg" bg="primary.11">
+            <Card
+                className={voting.isActive ? "voting-info-success-gradient" : "voting-info-danger-gradient"}
+                shadow="sm"
+                p="lg"
+                style={{
+                    borderTop: `4px solid ${
+                        voting.isActive
+                            ? "var(--mantine-color-success-6)"
+                            : "var(--mantine-color-danger-6)"
+                    }`,
+                }}
+                bg="primary.11">
                 <Stack gap="lg">
                     <Stack gap="xs">
                         <Group align="center" gap="xs">
@@ -73,7 +86,7 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                     <Group>
                         <Button
                             variant="filled"
-                            color={voting.isActive ? "warning" : "green"}
+                            color="warning"
                             onClick={handleToggleStatus}
                             loading={toggleStatusMutation.isPending}
                             leftSection={
@@ -81,10 +94,10 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                             }>
                             {voting.isActive ? "Conclude" : "Reopen"}
                         </Button>
-                        {(voting.votes.length || user?.isAdmin) && (
+                        {(!voting.votes.length || user?.isAdmin) && (
                             <Button
                                 variant="filled"
-                                color="red"
+                                color="danger"
                                 onClick={handleDelete}
                                 loading={deleteVotingMutation.isPending}
                                 leftSection={<FontAwesomeIcon icon="trash" />}>

@@ -46,6 +46,7 @@ export default function VotingCard({ voting }: IPropTypes) {
 
     return (
         <Card
+            className={voting.isActive ? "voting-card-success-gradient" : "voting-card-danger-gradient"}
             bg="primary.11"
             shadow="sm"
             p="lg"
@@ -57,7 +58,9 @@ export default function VotingCard({ voting }: IPropTypes) {
                 cursor: "pointer",
                 transition: "transform 0.2s ease",
                 borderLeft: `4px solid ${
-                    voting.isActive ? "var(--mantine-color-green-6)" : "var(--mantine-color-red-6)"
+                    voting.isActive
+                        ? "var(--mantine-color-success-6)"
+                        : "var(--mantine-color-danger-6)"
                 }`,
             }}
             onMouseEnter={(e) => {
@@ -92,7 +95,11 @@ export default function VotingCard({ voting }: IPropTypes) {
                             {getVotingAssignedGroups()}
                         </Badge>
                     </Tooltip>
-                    <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
+                    <VoteCountBadge
+                        voteCount={voting.votes.length}
+                        totalVotes={voting.requiredVotes}
+                        variant="light"
+                    />
                 </Group>
 
                 <Group>
@@ -101,9 +108,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                             Not voted
                         </Badge>
                     )}
-                    {voting.isActive && (
-                        <DueDateBadge date={voting.deadline} variant="light" />
-                    )}
+                    {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
                 </Group>
             </Group>
         </Card>
