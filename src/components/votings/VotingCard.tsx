@@ -22,7 +22,6 @@ export default function VotingCard({ voting }: IPropTypes) {
     const getVotingDeadlineColor = (): string => {
         const deadline = moment(voting.deadline);
         const now = moment();
-        // if deadline is in the past, return danger
         if (deadline.isBefore(now)) return "red";
         if (deadline.isBefore(now.add(24, "hours"))) return "yellow";
         return "green";
@@ -98,7 +97,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                         </Badge>
                     </Tooltip>
                     <Badge
-                        color={voting.votes.length === voting.requiredVotes ? "green" : "red"}
+                        color={voting.votes.length === voting.requiredVotes ? "success" : "danger"}
                         variant="light">
                         {voting.votes.length} / {voting.requiredVotes} votes
                     </Badge>
