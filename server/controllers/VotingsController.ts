@@ -105,7 +105,7 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: "Voting created successfully",
+            message: "Voting created successfully!",
             voting,
         });
 
@@ -147,7 +147,7 @@ class VotingsController {
         }
 
         res.json({
-            message: "Vote submitted successfully",
+            message: "Vote submitted successfully!",
             voting,
         });
 
@@ -190,7 +190,7 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: "Voting updated successfully",
+            message: "Voting updated successfully!",
             voting,
         });
 
@@ -231,7 +231,7 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: "Vote deleted successfully",
+            message: "Vote deleted successfully!",
             voting,
         });
 

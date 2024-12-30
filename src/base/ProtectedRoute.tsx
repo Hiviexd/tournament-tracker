@@ -36,7 +36,7 @@ export default function ProtectedRoute({ permissions = [], children }: IPropType
             if (!hasPermissions) {
                 notifications.show({
                     title: "Missing Permissions",
-                    message: "You don't have the required permissions to view this page.",
+                    message: "You don't have the required permissions to view this page!",
                     color: "red",
                     autoClose: 3000,
                 });
