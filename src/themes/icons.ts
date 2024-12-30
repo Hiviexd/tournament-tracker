@@ -28,6 +28,8 @@ import {
     faTrash,
     faTimes,
     faCheck,
+    faLock,
+    faLockOpen,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -58,6 +60,8 @@ export default function loadIcons() {
         faEdit,
         faTrash,
         faTimes,
-        faCheck
+        faCheck,
+        faLock,
+        faLockOpen,
     );
 }

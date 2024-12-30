@@ -5,7 +5,7 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
 
 // Mantine
-import { Card, Stack, Group, Title, Text, Badge, Button } from "@mantine/core";
+import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -25,7 +25,6 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const toggleStatusMutation = useToggleVotingStatus(votingId);
     const deleteVotingMutation = useDeleteVoting();
-    const isAuthor = voting.author._id === user?._id;
 
     const handleToggleStatus = async () => {
         await toggleStatusMutation.mutateAsync();
@@ -39,54 +38,50 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
     return (
         <>
             <Card shadow="sm" p="lg" bg="primary.11">
-                <Stack gap="md">
-                    <Group>
-                        <div>
-                            <Group>
-                                <Title order={2}>{voting.title}</Title>
-                                <Group wrap="wrap" gap="xs" align="center">
-                                    <Badge
-                                        color={voting.isActive ? "success" : "danger"}
-                                        variant="filled">
-                                        {voting.isActive ? "Active" : "Concluded"}
-                                    </Badge>
-                                    <VoteCountBadge
-                                        voteCount={voting.votes.length}
-                                        totalVotes={voting.requiredVotes}
-                                        variant="light"
-                                    />
-                                    {voting.isActive && (
-                                        <DueDateBadge date={voting.deadline} variant="light" />
-                                    )}
-                                </Group>
-                            </Group>
+                <Stack gap="lg">
+                    <Stack gap="xs">
+                        <Group align="center" gap="xs">
+                            <Title order={2}>{voting.title}</Title>
+                            {voting.isActive && (
+                                <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
+                                    <FontAwesomeIcon icon="edit" />
+                                </ActionIcon>
+                            )}
+                        </Group>
 
-                            <Text size="sm" c="dimmed">
-                                Created by {voting.author.username} •{" "}
-                                {moment(voting.createdAt).fromNow()}
-                            </Text>
-                        </div>
-                    </Group>
+                        <Group wrap="wrap" gap="xs" align="center">
+                            <Badge color={voting.isActive ? "success" : "danger"} variant="filled">
+                                {voting.isActive ? "Active" : "Concluded"}
+                            </Badge>
+                            <VoteCountBadge
+                                voteCount={voting.votes.length}
+                                totalVotes={voting.requiredVotes}
+                                variant="light"
+                            />
+                            {voting.isActive && (
+                                <DueDateBadge date={voting.deadline} variant="light" />
+                            )}
+                        </Group>
+
+                        <Text size="sm" c="dimmed">
+                            Created by {voting.author.username} •{" "}
+                            {moment(voting.createdAt).fromNow()}
+                        </Text>
+                    </Stack>
                     <Text>{voting.description}</Text>
-                    {(isAuthor || user?.isAdmin) && (
-                        <Group>
-                            <Button
-                                variant="filled"
-                                color="blue"
-                                onClick={openEditModal}
-                                leftSection={<FontAwesomeIcon icon="edit" />}>
-                                Edit
-                            </Button>
-                            <Button
-                                variant="filled"
-                                color={voting.isActive ? "red" : "green"}
-                                onClick={handleToggleStatus}
-                                loading={toggleStatusMutation.isPending}
-                                leftSection={
-                                    <FontAwesomeIcon icon={voting.isActive ? "times" : "check"} />
-                                }>
-                                {voting.isActive ? "Close" : "Reopen"}
-                            </Button>
+                    <Divider />
+                    <Group>
+                        <Button
+                            variant="filled"
+                            color={voting.isActive ? "warning" : "green"}
+                            onClick={handleToggleStatus}
+                            loading={toggleStatusMutation.isPending}
+                            leftSection={
+                                <FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />
+                            }>
+                            {voting.isActive ? "Conclude" : "Reopen"}
+                        </Button>
+                        {(voting.votes.length || user?.isAdmin) && (
                             <Button
                                 variant="filled"
                                 color="red"
@@ -95,8 +90,8 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                                 leftSection={<FontAwesomeIcon icon="trash" />}>
                                 Delete
                             </Button>
-                        </Group>
-                    )}
+                        )}
+                    </Group>
                 </Stack>
             </Card>
             <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
