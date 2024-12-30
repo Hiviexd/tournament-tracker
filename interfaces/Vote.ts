@@ -5,4 +5,5 @@ export interface IVote extends Document {
     author: IUser;
     comment: string;
     option: number;
+    createdAt: Date;
 }
