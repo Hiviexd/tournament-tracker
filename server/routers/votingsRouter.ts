@@ -2,15 +2,15 @@ import express from "express";
 import VotingsController from "../controllers/VotingsController";
 import permissions from "../middlewares/permissions";
 
-const votingRouter = express.Router();
+const votingsRouter = express.Router();
 
-votingRouter.get("/", permissions.isLoggedIn, permissions.isCommittee, VotingsController.index);
-votingRouter.post("/create", permissions.isLoggedIn, permissions.isCommittee, VotingsController.createVoting);
-votingRouter.get("/:votingId", permissions.isLoggedIn, permissions.isCommittee, VotingsController.getVoting);
-votingRouter.post("/:votingId/submitVote", permissions.isLoggedIn, permissions.isCommittee, VotingsController.submitVote);
-votingRouter.post("/:votingId/toggleStatus", permissions.isLoggedIn, permissions.isCommittee, VotingsController.toggleVotingStatus);
-votingRouter.post("/:votingId/update", permissions.isLoggedIn, permissions.isCommittee, VotingsController.updateVoting);
-votingRouter.post("/:votingId/delete", permissions.isLoggedIn, permissions.isCommittee, VotingsController.deleteVoting);
-votingRouter.post("/:votingId/deleteVote/:voteId", permissions.isLoggedIn, permissions.isAdmin, VotingsController.deleteVote);
+votingsRouter.get("/", permissions.isLoggedIn, permissions.isCommittee, VotingsController.index);
+votingsRouter.post("/create", permissions.isLoggedIn, permissions.isCommittee, VotingsController.createVoting);
+votingsRouter.get("/:votingId", permissions.isLoggedIn, permissions.isCommittee, VotingsController.getVoting);
+votingsRouter.post("/:votingId/submitVote", permissions.isLoggedIn, permissions.isCommittee, VotingsController.submitVote);
+votingsRouter.post("/:votingId/toggleStatus", permissions.isLoggedIn, permissions.isCommittee, VotingsController.toggleVotingStatus);
+votingsRouter.post("/:votingId/update", permissions.isLoggedIn, permissions.isCommittee, VotingsController.updateVoting);
+votingsRouter.post("/:votingId/delete", permissions.isLoggedIn, permissions.isCommittee, VotingsController.deleteVoting);
+votingsRouter.post("/:votingId/deleteVote/:voteId", permissions.isLoggedIn, permissions.isAdmin, VotingsController.deleteVote);
 
-export default votingRouter;
+export default votingsRouter;
