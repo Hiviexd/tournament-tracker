@@ -1,6 +1,11 @@
 .markdown-content {
     padding: 0;
 
+    h1,
+    h2 {
+        margin-top: 0;
+    }
+
     p {
         margin: 0.5rem 0;
 
@@ -20,6 +25,11 @@
         &:hover {
             text-decoration: underline;
         }
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
     }
 
     ul,
