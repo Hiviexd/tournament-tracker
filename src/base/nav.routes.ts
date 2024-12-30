@@ -2,7 +2,7 @@ export default [
     {
         title: "Home",
         permissions: [],
-        href: "",
+        href: "/",
         links: [
             { title: "Team", to: "/team", icon: "users", permissions: [] },
             { title: "Changelog", to: "/changelog", icon: "clipboard-list", permissions: [] },
