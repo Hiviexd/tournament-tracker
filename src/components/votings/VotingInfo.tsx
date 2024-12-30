@@ -1,11 +1,18 @@
-import { Card, Stack, Group, Title, Text, Badge, Button } from "@mantine/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// Base
+import moment from "moment";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
-import moment from "moment";
-import { useDisclosure } from "@mantine/hooks";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
+
+// Mantine
+import { Card, Stack, Group, Title, Text, Badge, Button } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useDisclosure } from "@mantine/hooks";
+
+// Components
 import VotingEditModal from "./VotingEditModal";
+import DueDateBadge from "../../components/common/badges/DueDateBadge";
+import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
 
 interface IProps {
     votingId: string;
@@ -41,25 +48,15 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                                     <Badge
                                         color={voting.isActive ? "success" : "danger"}
                                         variant="filled">
-                                        {voting.isActive ? "Active" : "Inactive"}
+                                        {voting.isActive ? "Active" : "Concluded"}
                                     </Badge>
-                                    <Badge
-                                        color={
-                                            voting.votes.length === voting.requiredVotes
-                                                ? "success"
-                                                : "danger"
-                                        }
-                                        variant="light">
-                                        {voting.votes.length} / {voting.requiredVotes} votes
-                                    </Badge>
+                                    <VoteCountBadge
+                                        voteCount={voting.votes.length}
+                                        totalVotes={voting.requiredVotes}
+                                        variant="light"
+                                    />
                                     {voting.isActive && (
-                                        <Badge
-                                            color={
-                                                moment().isAfter(voting.deadline) ? "red" : "green"
-                                            }
-                                            variant="light">
-                                            Due {moment(voting.deadline).fromNow()}
-                                        </Badge>
+                                        <DueDateBadge date={voting.deadline} variant="light" />
                                     )}
                                 </Group>
                             </Group>

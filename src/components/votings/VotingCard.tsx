@@ -12,20 +12,16 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
+// Components
+import DueDateBadge from "../../components/common/badges/DueDateBadge";
+import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
+
 interface IPropTypes {
     voting: IVoting;
 }
 
 export default function VotingCard({ voting }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
-
-    const getVotingDeadlineColor = (): string => {
-        const deadline = moment(voting.deadline);
-        const now = moment();
-        if (deadline.isBefore(now)) return "red";
-        if (deadline.isBefore(now.add(24, "hours"))) return "yellow";
-        return "green";
-    };
 
     const checkUserVoted = (): boolean => {
         return !!voting.votes.find((vote) => vote.author._id === user?._id);
@@ -96,11 +92,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                             {getVotingAssignedGroups()}
                         </Badge>
                     </Tooltip>
-                    <Badge
-                        color={voting.votes.length === voting.requiredVotes ? "success" : "danger"}
-                        variant="light">
-                        {voting.votes.length} / {voting.requiredVotes} votes
-                    </Badge>
+                    <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
                 </Group>
 
                 <Group>
@@ -110,11 +102,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                         </Badge>
                     )}
                     {voting.isActive && (
-                        <Tooltip label={moment(voting.deadline).format("LLL")}>
-                            <Badge color={getVotingDeadlineColor()} variant="light">
-                                Due {moment(voting.deadline).fromNow()}
-                            </Badge>
-                        </Tooltip>
+                        <DueDateBadge date={voting.deadline} variant="light" />
                     )}
                 </Group>
             </Group>
