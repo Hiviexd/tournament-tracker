@@ -87,10 +87,7 @@ a {
     text-decoration: none;
 }
 
-
-
 /* Triangles background */
-
 body {
     background-color: var(--mantine-color-primary-11);
 
@@ -106,6 +103,34 @@ body {
         z-index: -1;
     }
 
+}
+
+/* Scrollbar */
+html {
+    overflow-y: scroll;
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--mantine-color-primary-6) var(--mantine-color-primary-11);
+}
+
+/* Chrome/Edge/Safari */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--mantine-color-primary-11);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--mantine-color-primary-6);
+    border-radius: 8px;
+    border: 4px solid var(--mantine-color-primary-11);
+
+    &:hover {
+        background-color: var(--mantine-color-primary-5);
+    }
 }
 
 /* Components */
