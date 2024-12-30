@@ -9,7 +9,6 @@ import { UserGroup } from "../../interfaces/User";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { Card, Stack, Group, Pagination, Text, Button, Skeleton, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { notifications } from "@mantine/notifications";
 
 // Components
 import VotingCreateModal from "../components/votings/VotingCreateModal";
@@ -51,16 +50,6 @@ export default function VotingListPage() {
         page,
     });
 
-    useEffect(() => {
-        if (error) {
-            notifications.show({
-                title: "Error",
-                message: "Failed to load votings",
-                color: "red",
-            });
-        }
-    }, [error]);
-
     const LoadingState = () => (
         <Stack gap="md">
             {[1, 2, 3].map((i) => (
@@ -73,16 +62,16 @@ export default function VotingListPage() {
         </Stack>
     );
 
-    const EmptyState = ({ hasError }: { hasError: boolean }) => {
+    const EmptyState = ({ error }: { error: boolean }) => {
         return (
             <Stack align="center" justify="center" h={200}>
                 <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
                 <Text size="lg" c="dimmed">
-                    {hasError ? "Error loading votings" : "No votings found"}
+                    {error ? "Error loading votings" : "No votings found"}
                 </Text>
                 <Text size="sm" c="dimmed">
-                    {hasError
-                        ? "Try refreshing the page"
+                    {error
+                        ? `Try refreshing the page\n\n${error}`
                         : "Try adjusting your filters or create a new voting"}
                 </Text>
             </Stack>
@@ -114,7 +103,7 @@ export default function VotingListPage() {
             {isLoading ? (
                 <LoadingState />
             ) : !data || data.votings.length === 0 ? (
-                <EmptyState hasError={!data} />
+                <EmptyState hasError={error} />
             ) : (
                 <Stack gap="md">
                     {data.votings.map((voting: IVoting) => (
