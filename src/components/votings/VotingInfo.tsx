@@ -64,7 +64,7 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                         </Group>
 
                         <Group wrap="wrap" gap="xs" align="center">
-                            <Badge color={voting.isActive ? "success" : "danger"} variant="filled">
+                            <Badge color={voting.isActive ? "success" : "danger"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}
                             </Badge>
                             <VoteCountBadge
