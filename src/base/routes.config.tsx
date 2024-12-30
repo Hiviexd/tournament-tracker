@@ -1,9 +1,10 @@
 import HomePage from "../pages/HomePage";
+import NotFoundPage from "../pages/NotFoundPage";
 import CommitteePage from "../pages/CommitteePage";
 import AdminPage from "../pages/AdminPage";
 import UserPage from "../pages/UserPage";
 import VotingListPage from "../pages/VotingListPage";
-import NotFoundPage from "../pages/NotFoundPage";
+import VotingPage from "../pages/VotingPage";
 
 interface RouteConfig {
     path: string;
@@ -53,6 +54,13 @@ const routes: RouteConfig[] = [
         page: <NotFoundPage />,
         title: "404",
         icon: "exclamation-triangle",
+    },
+    {
+        path: "/voting/:votingId",
+        page: <VotingPage />,
+        title: "Voting Details",
+        icon: "poll-h",
+        permissions: ["committee"],
     },
 ];
 

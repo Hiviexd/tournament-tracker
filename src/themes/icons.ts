@@ -24,6 +24,9 @@ import {
     faPlus,
     faComments,
     faUser,
+    faEdit,
+    faTrash,
+    faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -50,6 +53,9 @@ export default function loadIcons() {
         faSearch,
         faPlus,
         faComments,
-        faUser
+        faUser,
+        faEdit,
+        faTrash,
+        faTimes,
     );
 }
