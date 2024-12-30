@@ -15,7 +15,7 @@ export default function VotingForm({ votingId, voting, user }: IProps) {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [comment, setComment] = useState("");
     const submitVoteMutation = useSubmitVote(votingId);
-    const userVote = voting.votes.find(vote => vote.author._id === user._id);
+    const userVote = voting.votes.find((vote) => vote.author._id === user._id);
 
     useEffect(() => {
         if (userVote) {
@@ -27,14 +27,14 @@ export default function VotingForm({ votingId, voting, user }: IProps) {
     const handleSubmit = async () => {
         await submitVoteMutation.mutateAsync({
             option: Number(selectedOption),
-            comment
+            comment,
         });
     };
 
     return (
         <Card shadow="sm" p="lg" bg="primary.11">
             <Stack gap="md">
-                <Title order={3}>{userVote ? "Your Vote" : "Cast Your Vote"}</Title>
+                <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
                 <Radio.Group
                     label="Select your option"
                     value={selectedOption}
