@@ -11,8 +11,9 @@ import { useDisclosure } from "@mantine/hooks";
 
 // Components
 import VotingEditModal from "./VotingEditModal";
-import DueDateBadge from "../../components/common/badges/DueDateBadge";
-import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
+import DueDateBadge from "../common/badges/DueDateBadge";
+import VoteCountBadge from "../common/badges/VoteCountBadge";
+import MarkdownText from "../common/MarkdownText";
 
 interface IProps {
     votingId: string;
@@ -82,7 +83,8 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
                             {moment(voting.createdAt).fromNow()}
                         </Text>
                     </Stack>
-                    <Text>{voting.description}</Text>
+                    <Divider />
+                    <MarkdownText content={voting.description} />
                     <Divider />
                     <Group>
                         <Button

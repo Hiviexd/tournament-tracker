@@ -60,8 +60,20 @@
     }
 
     /* Notifications */
+    /*.mantine-Notification-root {
+        background-color: var(--mantine-color-primary-10) !important;
+    }*/
+
+    /* 
+        Old design that colored the notif's body instead
+        TODO remove if truly abandoned
+    */
+
+    .mantine-Notification-title {
+        font-weight: 700 !important;
+    }
     .mantine-Notification-description {
-        color: var(--mantine-color-gray-4) !important;
+        color: var(--mantine-color-white) !important;
     }
 
     .mantine-Notification-root {
@@ -79,6 +91,10 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
     }
+}
+
+.mantine-Input-input {
+    background-color: var(--mantine-color-primary-10) !important;
 }
 
 /* Links */
@@ -136,3 +152,4 @@ html {
 /* Components */
 @import "components/VotingCard.scss";
 @import "components/VotingInfo.scss";
+@import "components/MarkdownText.scss";
