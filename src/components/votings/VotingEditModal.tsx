@@ -109,6 +109,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                         withAsterisk
                         minRows={3}
                         maxRows={8}
+                        resize="vertical"
                         autosize
                         {...form.getInputProps("description")}
                     />

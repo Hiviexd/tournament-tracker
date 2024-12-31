@@ -52,6 +52,9 @@ export default function VotingForm({ votingId, voting, user }: IProps) {
                     value={comment}
                     onChange={(e) => setComment(e.currentTarget.value)}
                     minRows={3}
+                    maxRows={8}
+                    resize="vertical"
+                    autosize
                 />
                 <Group>
                     <Button

@@ -121,6 +121,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         withAsterisk
                         minRows={3}
                         maxRows={8}
+                        resize="vertical"
                         autosize
                         {...form.getInputProps("description")}
                     />
