@@ -1,4 +1,5 @@
 // Base
+import { useState } from "react";
 import { IVoting } from "../../../interfaces/Voting";
 
 // Mantine
@@ -22,14 +23,26 @@ const VOTE_COLORS = [
 ];
 
 export default function VotingResults({ voting }: IProps) {
+    const [activeFilter, setActiveFilter] = useState<number | null>(null);
+
+    const filteredVotes =
+        activeFilter !== null
+            ? voting.votes.filter((vote) => vote.option === activeFilter)
+            : voting.votes;
+
     return (
         <Card shadow="sm" p="lg" bg="primary.11">
             <Stack gap="md">
                 <Title order={3}>Votes</Title>
-                <VotingStats voting={voting} voteColors={VOTE_COLORS} />
+                <VotingStats
+                    voting={voting}
+                    voteColors={VOTE_COLORS}
+                    onFilterChange={setActiveFilter}
+                    activeFilter={activeFilter}
+                />
                 <Divider />
                 <Stack gap="xs">
-                    {voting.votes.map((vote) => (
+                    {filteredVotes.map((vote) => (
                         <VoteCard
                             key={vote._id}
                             vote={vote}
