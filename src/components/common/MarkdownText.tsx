@@ -8,6 +8,10 @@ interface IProps {
     allowHtml?: boolean;
 }
 
+/**
+ * Plugins: https://github.com/remarkjs/remark/blob/main/doc/plugins.md#list-of-plugins
+ */
+
 export default function MarkdownText({ content, className, allowHtml = false }: IProps) {
     return (
         <div className={`markdown-content ${className || ""}`}>
