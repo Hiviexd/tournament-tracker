@@ -21,7 +21,7 @@ export default function ProtectedRoute({ permissions = [], children }: IPropType
 
     // Set user data
     useEffect(() => {
-        if (!isLoading) {  // Changed this condition
+        if (!isLoading) {
             if (user) {
                 setLoggedInUser(user);
             }

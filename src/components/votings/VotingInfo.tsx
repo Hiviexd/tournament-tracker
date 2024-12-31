@@ -16,15 +16,14 @@ import VoteCountBadge from "../common/badges/VoteCountBadge";
 import MarkdownText from "../common/MarkdownText";
 
 interface IProps {
-    votingId: string;
     voting: IVoting;
     user: IUser | null;
     onNavigateBack: () => void;
 }
 
-export default function VotingInfo({ votingId, voting, user, onNavigateBack }: IProps) {
+export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-    const toggleStatusMutation = useToggleVotingStatus(votingId);
+    const toggleStatusMutation = useToggleVotingStatus(voting.id);
     const deleteVotingMutation = useDeleteVoting();
 
     const handleToggleStatus = async () => {
@@ -34,7 +33,7 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
 
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this voting?")) return;
-        await deleteVotingMutation.mutateAsync(votingId);
+        await deleteVotingMutation.mutateAsync(voting.id);
         onNavigateBack();
     };
 

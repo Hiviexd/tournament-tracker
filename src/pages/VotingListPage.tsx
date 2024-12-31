@@ -62,16 +62,16 @@ export default function VotingListPage() {
         </Stack>
     );
 
-    const EmptyState = ({ error }: { error: boolean }) => {
+    const EmptyState = ({ hasError }: { hasError: boolean }) => {
         return (
             <Stack align="center" justify="center" h={200}>
                 <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
                 <Text size="lg" c="dimmed">
-                    {error ? "Error loading votings" : "No votings found"}
+                    {hasError ? "Error loading votings" : "No votings found"}
                 </Text>
                 <Text size="sm" c="dimmed">
-                    {error
-                        ? `Try refreshing the page\n\n${error}`
+                    {hasError
+                        ? `Try refreshing the page`
                         : "Try adjusting your filters or create a new voting"}
                 </Text>
             </Stack>
@@ -103,7 +103,7 @@ export default function VotingListPage() {
             {isLoading ? (
                 <LoadingState />
             ) : !data || data.votings.length === 0 ? (
-                <EmptyState hasError={error} />
+                <EmptyState hasError={!!error} />
             ) : (
                 <Stack gap="md">
                     {data.votings.map((voting: IVoting) => (

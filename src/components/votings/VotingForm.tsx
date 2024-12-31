@@ -6,15 +6,14 @@ import { useSubmitVote } from "../../hooks/useVotings";
 import { IUser } from "../../../interfaces/User";
 
 interface IProps {
-    votingId: string;
     voting: IVoting;
     user: IUser;
 }
 
-export default function VotingForm({ votingId, voting, user }: IProps) {
+export default function VotingForm({ voting, user }: IProps) {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [comment, setComment] = useState("");
-    const submitVoteMutation = useSubmitVote(votingId);
+    const submitVoteMutation = useSubmitVote(voting.id);
     const userVote = voting.votes.find((vote) => vote.author._id === user._id);
 
     useEffect(() => {

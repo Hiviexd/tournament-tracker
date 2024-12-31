@@ -66,18 +66,17 @@ export default function VotingPage() {
             ) : (
                 <Stack gap="lg">
                     <VotingInfo
-                        votingId={votingId!}
                         voting={voting}
                         user={loggedInUser}
                         onNavigateBack={() => navigate("/voting")}
                     />
 
                     {voting.isActive && (
-                        <VotingForm votingId={votingId!} voting={voting} user={loggedInUser!} />
+                        <VotingForm voting={voting} user={loggedInUser!} />
                     )}
 
                     {(!voting.isActive || loggedInUser?.isAdmin) && (
-                        <VotingResults votingId={votingId!} voting={voting} user={loggedInUser} />
+                        <VotingResults voting={voting} />
                     )}
 
                     <VotingEditModal

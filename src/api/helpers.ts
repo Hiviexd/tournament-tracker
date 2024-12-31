@@ -22,5 +22,5 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>, successMessa
         color: "green",
     });
 
-    return response.data || response;
+    return response.data || response as unknown as T;
 };
