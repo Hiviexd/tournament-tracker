@@ -72,6 +72,7 @@
     .mantine-Notification-title {
         font-weight: 700 !important;
     }
+
     .mantine-Notification-description {
         color: var(--mantine-color-white) !important;
     }
@@ -101,6 +102,10 @@
 a {
     color: var(--mantine-color-primary-3);
     text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 /* Triangles background */
