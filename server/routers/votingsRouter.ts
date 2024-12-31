@@ -11,6 +11,5 @@ votingsRouter.post("/:votingId/submitVote", permissions.isLoggedIn, permissions.
 votingsRouter.post("/:votingId/toggleStatus", permissions.isLoggedIn, permissions.isCommittee, VotingsController.toggleVotingStatus);
 votingsRouter.post("/:votingId/update", permissions.isLoggedIn, permissions.isCommittee, VotingsController.updateVoting);
 votingsRouter.post("/:votingId/delete", permissions.isLoggedIn, permissions.isCommittee, VotingsController.deleteVoting);
-votingsRouter.post("/:votingId/deleteVote/:voteId", permissions.isLoggedIn, permissions.isAdmin, VotingsController.deleteVote);
 
 export default votingsRouter;

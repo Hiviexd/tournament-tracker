@@ -219,24 +219,6 @@ class VotingsController {
 
         // TODO logging and webhook
     }
-
-    /** POST delete a vote */
-    public async deleteVote(req, res) {
-        const { votingId, voteId } = req.params;
-
-        const voting = await Voting.findById(votingId).orFail();
-
-        voting.votes = voting.votes.filter((vote) => !vote.equals(voteId));
-
-        await voting.save();
-
-        res.json({
-            message: "Vote deleted successfully!",
-            voting,
-        });
-
-        // TODO logging and webhook
-    }
 }
 
 export default new VotingsController();

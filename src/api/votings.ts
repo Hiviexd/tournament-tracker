@@ -39,8 +39,3 @@ export const deleteVoting = async (votingId: string) => {
     const response = await axios.post(`/api/votings/${votingId}/delete`);
     return response.data;
 };
-
-export const deleteVote = async (votingId: string, voteId: string) => {
-    const response = await axios.post(`/api/votings/${votingId}/deleteVote/${voteId}`);
-    return response.data;
-};

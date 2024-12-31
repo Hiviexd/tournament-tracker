@@ -7,7 +7,6 @@ import {
     toggleVotingStatus,
     updateVoting,
     deleteVoting,
-    deleteVote,
 } from "../api/votings";
 import { handleMutationResponse } from "../api/helpers";
 import { IVoting, VotingQueryParams } from "../../interfaces/Voting";
@@ -92,20 +91,6 @@ export function useDeleteVoting() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });
-        },
-    });
-}
-
-export function useDeleteVote(votingId: string) {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (voteId: string) => {
-            const response = await deleteVote(votingId, voteId);
-            return handleMutationResponse(response, "Vote deleted successfully");
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
         },
     });
 }
