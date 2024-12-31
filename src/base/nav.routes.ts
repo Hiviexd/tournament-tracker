@@ -1,8 +1,13 @@
+/**
+ * For parent pages, it will link to /{href}
+ * For child pages, it will link to /{href}/{to}
+ */
+
 export default [
     {
         title: "Home",
         permissions: [],
-        href: "/",
+        href: "",
         links: [
             { title: "Team", to: "/team", icon: "users", permissions: [] },
             { title: "Changelog", to: "/changelog", icon: "clipboard-list", permissions: [] },
@@ -40,14 +45,14 @@ export default [
         href: "/admin",
         links: [
             { title: "Panel", to: "", icon: "shield-alt", permissions: ["admin"] },
-            { title: "Users", to: "/admin/users", icon: "users", permissions: ["admin"] },
+            { title: "Users", to: "/users", icon: "users", permissions: ["admin"] },
             {
                 title: "Screening",
-                to: "/admin/screening",
+                to: "/screening",
                 icon: "user-shield",
                 permissions: ["admin"],
             },
-            { title: "Logs", to: "/admin/logs", icon: "clipboard", permissions: ["admin"] },
+            { title: "Logs", to: "/logs", icon: "clipboard", permissions: ["admin"] },
         ],
     },
 ];
