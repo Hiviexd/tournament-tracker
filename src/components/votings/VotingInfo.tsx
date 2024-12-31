@@ -5,7 +5,7 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
 
 // Mantine
-import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider } from "@mantine/core";
+import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -22,7 +22,6 @@ interface IProps {
     onNavigateBack: () => void;
 }
 
-// TODO markdown support for descriptions
 export default function VotingInfo({ votingId, voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const toggleStatusMutation = useToggleVotingStatus(votingId);
@@ -42,7 +41,9 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
     return (
         <>
             <Card
-                className={voting.isActive ? "voting-info-success-gradient" : "voting-info-danger-gradient"}
+                className={
+                    voting.isActive ? "voting-info-success-gradient" : "voting-info-danger-gradient"
+                }
                 shadow="sm"
                 p="lg"
                 style={{
@@ -80,7 +81,16 @@ export default function VotingInfo({ votingId, voting, user, onNavigateBack }: I
 
                         <Text size="sm" c="dimmed">
                             Created by {voting.author.username} •{" "}
-                            {moment(voting.createdAt).fromNow()}
+                            {voting.isActive && (
+                                <Tooltip label={moment(voting.createdAt).format("LLL")}>
+                                    <span>{moment(voting.createdAt).fromNow()}</span>
+                                </Tooltip>
+                            )}
+                            {!voting.isActive && (
+                                <Tooltip label={moment(voting.updatedAt).format("LLL")}>
+                                    <span>concluded {moment(voting.updatedAt).fromNow()}</span>
+                                </Tooltip>
+                            )}
                         </Text>
                     </Stack>
                     <Divider />
