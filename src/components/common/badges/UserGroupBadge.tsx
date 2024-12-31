@@ -1,4 +1,4 @@
-import { Badge } from "@mantine/core";
+import { Badge, Tooltip } from "@mantine/core";
 import { IUser } from "../../../../interfaces/User";
 
 interface IPropTypes {
@@ -8,12 +8,51 @@ interface IPropTypes {
 export default function UserGroupBadge({ user }: IPropTypes) {
     const getUserGroupBadge = () => {
         if (user.isTournamentCommittee) {
-            return <Badge color="primary">TC</Badge>;
+            return {
+                tooltip: "Tournament Committee",
+                props: {
+                    color: "warning",
+                    variant: "outline",
+                    style: {
+                        background: "color-mix(in srgb, black 25%, transparent)",
+                    },
+                    children: "TC",
+                },
+            };
         } else if (user.isContestCommittee) {
-            return <Badge color="primary">CC</Badge>;
+            return {
+                tooltip: "Contest Committee",
+                props: {
+                    color: "info",
+                    variant: "outline",
+                    style: {
+                        background: "color-mix(in srgb, black 25%, transparent)",
+                    },
+                    children: "CC",
+                },
+            };
         } else if (user.isAlumni) {
-            return <Badge color="secondary">ALM</Badge>;
+            return {
+                tooltip: "Alumni",
+                props: {
+                    color: "gray.6",
+                    variant: "outline",
+                    style: {
+                        background: "color-mix(in srgb, black 25%, transparent)",
+                    },
+                    children: "ALM",
+                },
+            };
         }
-    }
-    return getUserGroupBadge();
+        return null;
+    };
+
+    const badgeData = getUserGroupBadge();
+    if (!badgeData) return null;
+
+    return (
+        <Tooltip label={badgeData.tooltip} position="right">
+            <Badge {...badgeData.props} />
+        </Tooltip>
+    );
 }

@@ -103,6 +103,10 @@ a {
     color: var(--mantine-color-primary-3);
     text-decoration: none;
 
+    &.white-link {
+        color: var(--mantine-color-white);
+    }
+
     &:hover {
         text-decoration: underline;
     }
