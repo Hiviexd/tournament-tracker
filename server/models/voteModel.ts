@@ -4,8 +4,8 @@ import { IVote } from "../../interfaces/Vote";
 const VoteSchema = new Schema<IVote>(
     {
         author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-        comment: { type: String, required: true },
-        option: { type: Number },
+        comment: { type: String },
+        option: { type: Number, required: true },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

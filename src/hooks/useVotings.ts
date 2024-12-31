@@ -44,7 +44,7 @@ export function useSubmitVote(votingId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (voteData: { option: number; comment: string }) => {
+        mutationFn: async (voteData: { option: number; comment?: string }) => {
             const response = await submitVote(votingId, voteData);
             return handleMutationResponse(response, "Vote submitted successfully");
         },

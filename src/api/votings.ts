@@ -19,7 +19,7 @@ export const createVoting = async (votingData: Partial<IVoting>) => {
 
 export const submitVote = async (
     votingId: string,
-    voteData: { option: number; comment: string }
+    voteData: { option: number; comment?: string }
 ) => {
     const response = await axios.post(`/api/votings/${votingId}/submitVote`, voteData);
     return response.data;
