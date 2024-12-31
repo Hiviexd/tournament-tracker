@@ -1,5 +1,5 @@
 // base
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import helpers from "../../helpers";
 import routes from "../../base/nav.routes";
 
@@ -51,6 +51,8 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                                 <Menu.Target>
                                                     <Button
                                                         variant="subtle"
+                                                        component={Link}
+                                                        to={route.href}
                                                         onClick={() => navigate(route.href)}>
                                                         {route.title}
                                                     </Button>
@@ -65,6 +67,8 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                                                 ) && (
                                                                     <Menu.Item
                                                                         key={link.title}
+                                                                        component={Link}
+                                                                        to={route.href + link.to}
                                                                         leftSection={
                                                                             <FontAwesomeIcon
                                                                                 icon={
