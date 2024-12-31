@@ -47,6 +47,10 @@ UserSchema.virtual("isCommittee").get(function (this: IUser) {
     return this.isTournamentCommittee || this.isContestCommittee;
 });
 
+UserSchema.virtual("isAlumni").get(function (this: IUser) {
+    return !this.isCommittee && this.history.length > 0;
+});
+
 UserSchema.virtual("tcDuration").get(function (this: IUser) {
     return getDuration(this, "tc");
 });

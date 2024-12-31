@@ -25,6 +25,7 @@ export interface IUser extends Document {
     isTournamentCommittee: boolean;
     isContestCommittee: boolean;
     isAdmin: boolean;
+    isAlumni: boolean;
     isCommittee: boolean;
     tcDuration: number;
     ccDuration: number;
