@@ -114,5 +114,15 @@ export const theme = createTheme({
                 }
             }
         },
+        ActionIcon: {
+            styles: {
+                root: {
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                        transform: 'translateY(-2px)'
+                    }
+                }
+            }
+        },
     }
 });
