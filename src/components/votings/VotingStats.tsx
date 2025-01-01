@@ -1,4 +1,4 @@
-import { Stack, Group, Text, Box, ActionIcon } from "@mantine/core";
+import { Stack, Group, Text, Box, ActionIcon, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 
@@ -18,6 +18,19 @@ export default function VotingStats({ voting, voteColors, onFilterChange, active
         }
     };
 
+    const getWinningOptions = () => {
+        const votes = voting.options.map(
+            (_, index) => voting.votes.filter((v) => v.option === index).length
+        );
+        const maxVotes = Math.max(...votes);
+        return votes
+            .map((count, index) => ({ count, index }))
+            .filter((v) => v.count === maxVotes)
+            .map((v) => v.index);
+    };
+
+    const winningOptions = getWinningOptions();
+
     return (
         <Stack gap="xs">
             {voting.options.map((option, index) => {
@@ -31,19 +44,34 @@ export default function VotingStats({ voting, voteColors, onFilterChange, active
                             <Group gap="xs">
                                 {onFilterChange && (
                                     <ActionIcon
+                                        size="sm"
                                         variant={isActive ? "filled" : "subtle"}
                                         color={
                                             isActive
                                                 ? voteColors[index % voteColors.length]
                                                 : "gray"
                                         }
-                                        onClick={() => handleFilterClick(index)}
-                                        size="sm">
+                                        onClick={() => handleFilterClick(index)}>
                                         <FontAwesomeIcon icon={!isActive ? "filter" : "filter-circle-xmark"} />
                                     </ActionIcon>
                                 )}
                                 <Text size="sm" fw={500}>
                                     {option}
+                                    {winningOptions.includes(index) && (
+                                        <Tooltip
+                                            label={
+                                                winningOptions.length > 1
+                                                    ? "Tied for 1st"
+                                                    : "Winner"
+                                            }
+                                            position="right">
+                                            <FontAwesomeIcon
+                                                icon="check"
+                                                color="var(--mantine-color-success-6)"
+                                                style={{ marginLeft: "0.5rem" }}
+                                            />
+                                        </Tooltip>
+                                    )}
                                 </Text>
                             </Group>
                             <Text size="sm" c="dimmed">
