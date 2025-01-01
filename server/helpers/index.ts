@@ -29,9 +29,30 @@ function shorten(string: string = "", length: number = 50): string {
     return string.length > length ? string.substring(0, length - 3) + "..." : string;
 }
 
+type DiscordTimestampType = "relative" | "shortTime" | "longTime" | "shortDate" | "longDate" | "dateTime" | "dayDateTime";
+
+/**
+ * Creates a dynamic Discord timestamp
+ * @param date Date to convert
+ * @param type Type of timestamp (defaults to `relative`)
+ */
+function discordTimestamp(date: Date, type: DiscordTimestampType = "relative"): string {
+    const types: Record<DiscordTimestampType, string> = {
+        relative: "R",
+        shortTime: "t",
+        longTime: "T",
+        shortDate: "d",
+        longDate: "D",
+        dateTime: "f",
+        dayDateTime: "F"
+    };
+    return `<t:${Math.floor(date.getTime() / 1000)}:${types[type]}>`;
+}
+
 export default {
     setSession,
     escapeUsername,
     defaultErrorMessage,
     shorten,
+    discordTimestamp,
 };
