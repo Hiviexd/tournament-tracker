@@ -97,4 +97,22 @@ export const theme = createTheme({
     primaryColor: "primary",
     white: "#f8f9fa",
     black: "#212529",
+    components: {
+        Tooltip: {
+            defaultProps: {
+                withArrow: true,
+                color: "secondary",
+            }
+        },
+        Button: {
+            styles: {
+                root: {
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                        transform: 'translateY(-2px)'
+                    }
+                }
+            }
+        },
+    }
 });
