@@ -52,7 +52,7 @@ const routes: RouteConfig[] = [
         permissions: ["committee"],
     },
     {
-        path: "/voting/:votingId",
+        path: "/votings/:votingId",
         page: <VotingPage />,
         title: "Voting Details",
         icon: "poll-h",

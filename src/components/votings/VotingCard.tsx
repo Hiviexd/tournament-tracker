@@ -51,7 +51,7 @@ export default function VotingCard({ voting }: IPropTypes) {
             shadow="sm"
             p="lg"
             component={Link}
-            to={`/voting/${voting._id}`}
+            to={`/votings/${voting._id}`}
             style={{
                 textDecoration: "none",
                 color: "inherit",
