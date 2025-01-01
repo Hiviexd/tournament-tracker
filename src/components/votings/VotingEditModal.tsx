@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useUpdateVoting } from "../../hooks/useVotings";
 import { IVoting } from "../../../interfaces/Voting";
+import { VOTE_COLORS } from "../../constants";
 
 // Mantine
 import {
@@ -136,7 +137,13 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 <Pill
                                     key={index}
                                     withRemoveButton={isOptionRemovable(option)}
-                                    onRemove={() => handleRemoveOption(option)}>
+                                    onRemove={() => handleRemoveOption(option)}
+                                    variant="subtle"
+                                    style={{
+                                        backgroundColor: `color-mix(in srgb, ${VOTE_COLORS[index % VOTE_COLORS.length]} 15%, transparent)`,
+                                        color: VOTE_COLORS[index % VOTE_COLORS.length],
+                                        transition: 'all 0.2s ease',
+                                    }}>
                                     {option}
                                     {!isOptionRemovable(option) && (
                                         <Text span size="xs" ml={5} c="dimmed">

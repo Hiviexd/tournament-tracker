@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useCreateVoting } from "../../hooks/useVotings";
 import { VotingCategory } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
+import { VOTE_COLORS } from "../../constants";
 
 //Mantine
 import {
@@ -182,7 +183,13 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 <Pill
                                     key={index}
                                     withRemoveButton
-                                    onRemove={() => handleRemoveOption(option)}>
+                                    onRemove={() => handleRemoveOption(option)}
+                                    variant="subtle"
+                                    style={{
+                                        backgroundColor: `color-mix(in srgb, ${VOTE_COLORS[index % VOTE_COLORS.length]} 15%, transparent)`,
+                                        color: VOTE_COLORS[index % VOTE_COLORS.length],
+                                        transition: 'all 0.2s ease',
+                                    }}>
                                     {option}
                                 </Pill>
                             ))}
