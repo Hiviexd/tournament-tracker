@@ -17,17 +17,17 @@ export default function VoteCard({ vote, options, voteColors }: IProps) {
             radius="md"
             style={{
                 borderLeft: `4px solid ${voteColors[vote.option % voteColors.length]}`,
-                background: `linear-gradient(90deg, ${voteColors[vote.option % voteColors.length]} -20%, var(--mantine-color-primary-10) 3%) !important`
+                background: `linear-gradient(90deg, ${
+                    voteColors[vote.option % voteColors.length]
+                } -20%, var(--mantine-color-primary-10) 3%) !important`,
             }}>
             <Stack gap="xs">
                 <Group justify="space-between">
                     <UserDisplay user={vote.author} />
                     <Badge
                         size="lg"
-                        style={{
-                            backgroundColor: voteColors[vote.option % voteColors.length],
-                            color: "white",
-                        }}>
+                        variant="light"
+                        color={voteColors[vote.option % voteColors.length]}>
                         {options[vote.option]}
                     </Badge>
                 </Group>
