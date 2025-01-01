@@ -1,5 +1,5 @@
 import { AppShell, Container, Flex } from "@mantine/core";
-import { useDisclosure, useHeadroom } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import "../sass/Layout.scss";
 
 // components
@@ -17,11 +17,10 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
-    const pinned = useHeadroom({ fixedAt: 120 });
 
     return (
         <AppShell
-            header={{ height: 80, collapsed: !pinned }}
+            header={{ height: 70 }}
             navbar={{
                 width: 300,
                 breakpoint: "sm",
