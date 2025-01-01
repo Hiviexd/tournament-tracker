@@ -60,15 +60,6 @@
     }
 
     /* Notifications */
-    /*.mantine-Notification-root {
-        background-color: var(--mantine-color-primary-10) !important;
-    }*/
-
-    /* 
-        Old design that colored the notif's body instead
-        TODO remove if truly abandoned
-    */
-
     .mantine-Notification-title {
         font-weight: 700 !important;
     }
@@ -107,7 +98,7 @@ a {
         color: var(--mantine-color-white);
     }
 
-    &:hover {
+    &:hover:not(.mantine-Button-root) {
         text-decoration: underline;
     }
 }
@@ -159,6 +150,4 @@ html {
 }
 
 /* Components */
-@import "components/VotingCard.scss";
-@import "components/VotingInfo.scss";
-@import "components/MarkdownText.scss";
+@import "MarkdownText.scss";
