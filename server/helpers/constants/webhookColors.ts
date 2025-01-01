@@ -5,7 +5,7 @@ function parseColor(color: string): number {
 
 /* eslint-disable key-spacing */
 const webhookColors = {
-    darkRed:     parseColor("#861615"),
+    darkRed:     parseColor("#861615"), // deleteVoting
     red:         parseColor("#EE2629"),
     lightRed:    parseColor("#ff5050"),
 
@@ -13,13 +13,13 @@ const webhookColors = {
     orange:      parseColor("#f57e2a"),
     lightOrange: parseColor("#EEA578"),
 
-    darkYellow:  parseColor("#ffac00"),
-    yellow:      parseColor("#ffc85a"),
-    lightYellow: parseColor("#FFFF55"),
+    darkYellow:  parseColor("#ffac00"), // toggleVotingStatus
+    yellow:      parseColor("#ffc85a"), // toggleVotingStatus
+    lightYellow: parseColor("#FFFF55"), // createVoting
 
     darkGreen:   parseColor("#22A522"),
     green:       parseColor("#42D63E"),
-    lightGreen:  parseColor("#1df27d"),
+    lightGreen:  parseColor("#1df27d"), // submitVote
 
     darkBlue:    parseColor("#304989"),
     blue:        parseColor("#008cff"),

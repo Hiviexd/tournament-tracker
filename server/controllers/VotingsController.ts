@@ -5,6 +5,11 @@ import User from "../models/userModel";
 import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
+import Discord from "../helpers/classes/Discord";
+import webhookColors from "../helpers/constants/webhookColors";
+import config from "../../config.json";
+import LogService from "../services/LogService";
+import helpers from "../helpers";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -109,7 +114,39 @@ class VotingsController {
             voting,
         });
 
-        // TODO logging and webhook
+        // Logger
+        await LogService.generate(
+            res.locals.user._id,
+            `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            "voting"
+        );
+
+        // Discord
+        const roles: string[] = [];
+
+        if (voting.assignedGroups.includes("tc")) roles.push("tournament");
+        if (voting.assignedGroups.includes("cc")) roles.push("contest");
+
+        await Discord.roleHighlightWebhook(
+            roles,
+            [
+                {
+                    author: Discord.defaultWebhookAuthor(req.session),
+                    description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    color: webhookColors.lightYellow,
+                    fields: [
+                        {
+                            name: "Deadline",
+                            value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(voting.deadline, "dateTime")})`
+                        },
+                        {
+                            name: "Description",
+                            value: helpers.shorten(voting.description, 1024),
+                        },
+                    ],
+                },
+            ],
+        );
     }
 
     /** POST submit vote */
@@ -151,14 +188,32 @@ class VotingsController {
             voting,
         });
 
-        // TODO logging and webhook (for new votes)
+        if (isNewVote) {
+            // Logger
+            await LogService.generate(
+                res.locals.user._id,
+                `Submitted a vote for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                "voting"
+            );
+
+            // Discord
+            await Discord.webhook(
+                [
+                    {
+                        author: Discord.defaultWebhookAuthor(req.session),
+                        description: `Submitted a vote for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                        color: webhookColors.lightGreen,
+                    },
+                ],
+            );
+        }
     }
 
     /** POST toggle voting status */
     public async toggleVotingStatus(req, res) {
         const votingId = req.params.votingId;
 
-        const voting = await Voting.findById(votingId).orFail();
+        const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         voting.isActive = !voting.isActive;
 
@@ -168,7 +223,51 @@ class VotingsController {
             message: `Voting status is now ${voting.isActive ? "active" : "inactive"}`,
         });
 
-        // TODO logging and webhook
+        // Logger
+        await LogService.generate(
+            res.locals.user._id,
+            `Toggled voting status for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id}) to ${voting.isActive ? "active" : "inactive"}`,
+            "voting"
+        );
+
+        // Discord
+        const getVotingOptionStats = (optionIndex: number) => {
+            const votes = voting.votes.filter((vote) => vote.option === optionIndex).length;
+            const percentage = voting.votes.length ? Math.round((votes / voting.votes.length) * 100) : 0;
+
+            return { votes, percentage };
+        };
+
+        const getWinningOption = () => {
+            // reduce votes to an array of vote options
+            const voteOptions = voting.options.map((_, index) => getVotingOptionStats(index).votes);
+            const maxVotes = Math.max(...voteOptions);
+
+            return voting.options[voteOptions.indexOf(maxVotes)];
+        }
+
+        const results = voting.options.map((option, index) => `- **${option}** - ${getVotingOptionStats(index).percentage}% (${getVotingOptionStats(index).votes}/${voting.votes.length})`).join("\n");
+
+        await Discord.webhook(
+            [
+                {
+                    author: Discord.defaultWebhookAuthor(req.session),
+                    description: `${voting.isActive ? "Resumed" : "Concluded"} voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    color: voting.isActive ? webhookColors.yellow : webhookColors.darkYellow,
+                    fields: !voting.isActive ?
+                        [
+                            {
+                                name: "Results",
+                                value: helpers.shorten(results, 1024),
+                            },
+                            {
+                                name: "Winning option",
+                                value: getWinningOption(),
+                            }
+                        ] : [],
+                },
+            ],
+        );
     }
 
     /** POST update a voting */
@@ -194,7 +293,12 @@ class VotingsController {
             voting,
         });
 
-        // TODO logging and webhook
+        // Logger
+        await LogService.generate(
+            res.locals.user._id,
+            `Updated the voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            "voting"
+        );
     }
 
     /** POST delete a voting */
@@ -217,7 +321,23 @@ class VotingsController {
             message: "Voting deleted successfully!",
         });
 
-        // TODO logging and webhook
+        // Logger
+        await LogService.generate(
+            res.locals.user._id,
+            `Deleted the voting [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            "voting"
+        );
+
+        // Discord
+        await Discord.webhook(
+            [
+                {
+                    author: Discord.defaultWebhookAuthor(req.session),
+                    description: `Deleted a voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    color: webhookColors.darkRed,
+                },
+            ],
+        );
     }
 }
 
