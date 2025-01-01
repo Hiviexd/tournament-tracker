@@ -6,7 +6,7 @@ export interface IDiscordEmbed {
         url?: string;
     };
     description: string;
-    color: string;
+    color: number;
     fields?: {
         name: string;
         value: string;
