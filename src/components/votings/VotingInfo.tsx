@@ -40,9 +40,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     return (
         <>
             <Card
-                className={
-                    voting.isActive ? "voting-info-success-gradient" : "voting-info-danger-gradient"
-                }
                 shadow="sm"
                 p="lg"
                 style={{
@@ -51,8 +48,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             ? "var(--mantine-color-success-6)"
                             : "var(--mantine-color-danger-6)"
                     }`,
-                }}
-                bg="primary.11">
+                    background: `linear-gradient(180deg, var(${
+                        voting.isActive ? "--mantine-color-success-6" : "--mantine-color-danger-6"
+                    }) -60%, var(--mantine-color-primary-11) 4rem) !important`,
+                }}>
                 <Stack gap="lg">
                     <Stack gap="xs">
                         <Group align="center" gap="xs">

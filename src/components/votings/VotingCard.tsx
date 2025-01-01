@@ -46,8 +46,6 @@ export default function VotingCard({ voting }: IPropTypes) {
 
     return (
         <Card
-            className={voting.isActive ? "voting-card-success-gradient" : "voting-card-danger-gradient"}
-            bg="primary.11"
             shadow="sm"
             p="lg"
             component={Link}
@@ -62,6 +60,9 @@ export default function VotingCard({ voting }: IPropTypes) {
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)"
                 }`,
+                background: `linear-gradient(90deg, var(${
+                    voting.isActive ? "--mantine-color-success-6" : "--mantine-color-danger-6"
+                }) -20%, var(--mantine-color-primary-11) 3%) !important`,
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
