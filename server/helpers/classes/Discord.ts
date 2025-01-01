@@ -1,6 +1,5 @@
 import axios from "axios";
 import config from "../../../config.json";
-import { TournamentType } from "../../../interfaces/Tournament";
 import { IDiscordEmbed } from "../../../interfaces/Discord";
 import helpers from "..";
 import webhookColors from "../../helpers/constants/webhookColors";
@@ -99,7 +98,7 @@ class Discord {
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
     public async roleHighlightWebhook(
-        roles: TournamentType[],
+        roles: string[],
         embeds: IDiscordEmbed[],
         message?: string,
         threadId?: string,
