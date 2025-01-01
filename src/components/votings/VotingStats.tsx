@@ -1,15 +1,15 @@
 import { Stack, Group, Text, Box, ActionIcon, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
+import { VOTE_COLORS } from "../../constants";
 
 interface IProps {
     voting: IVoting;
-    voteColors: string[];
     onFilterChange?: (optionIndex: number | null) => void;
     activeFilter?: number | null;
 }
 
-export default function VotingStats({ voting, voteColors, onFilterChange, activeFilter }: IProps) {
+export default function VotingStats({ voting, onFilterChange, activeFilter }: IProps) {
     const totalVotes = voting.votes.length;
 
     const handleFilterClick = (index: number) => {
@@ -48,7 +48,7 @@ export default function VotingStats({ voting, voteColors, onFilterChange, active
                                         variant={isActive ? "filled" : "subtle"}
                                         color={
                                             isActive
-                                                ? voteColors[index % voteColors.length]
+                                                ? VOTE_COLORS[index % VOTE_COLORS.length]
                                                 : "gray"
                                         }
                                         onClick={() => handleFilterClick(index)}>
@@ -90,7 +90,7 @@ export default function VotingStats({ voting, voteColors, onFilterChange, active
                                 style={{
                                     width: `${percentage}%`,
                                     height: "100%",
-                                    backgroundColor: voteColors[index % voteColors.length],
+                                    backgroundColor: VOTE_COLORS[index % VOTE_COLORS.length],
                                     transition: "width 0.3s ease",
                                 }}
                             />

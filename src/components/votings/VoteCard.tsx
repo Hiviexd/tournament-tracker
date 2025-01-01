@@ -2,23 +2,23 @@ import { Card, Group, Stack, Badge } from "@mantine/core";
 import { IVote } from "../../../interfaces/Vote";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
+import { VOTE_COLORS } from "../../constants";
 
 interface IProps {
     vote: IVote;
     options: string[];
-    voteColors: string[];
 }
 
-export default function VoteCard({ vote, options, voteColors }: IProps) {
+export default function VoteCard({ vote, options }: IProps) {
     return (
         <Card
             shadow="xs"
             p="md"
             radius="md"
             style={{
-                borderLeft: `4px solid ${voteColors[vote.option % voteColors.length]}`,
+                borderLeft: `4px solid ${VOTE_COLORS[vote.option % VOTE_COLORS.length]}`,
                 background: `linear-gradient(90deg, ${
-                    voteColors[vote.option % voteColors.length]
+                    VOTE_COLORS[vote.option % VOTE_COLORS.length]
                 } -20%, var(--mantine-color-primary-10) 3%) !important`,
             }}>
             <Stack gap="xs">
@@ -27,7 +27,7 @@ export default function VoteCard({ vote, options, voteColors }: IProps) {
                     <Badge
                         size="lg"
                         variant="light"
-                        color={voteColors[vote.option % voteColors.length]}>
+                        color={VOTE_COLORS[vote.option % VOTE_COLORS.length]}>
                         {options[vote.option]}
                     </Badge>
                 </Group>
