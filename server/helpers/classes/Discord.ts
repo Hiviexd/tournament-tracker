@@ -2,13 +2,10 @@ import axios from "axios";
 import config from "../../../config.json";
 import { TournamentType } from "../../../interfaces/Tournament";
 import { IDiscordEmbed } from "../../../interfaces/Discord";
-import helpers from "helpers";
+import helpers from "..";
 import webhookColors from "../../helpers/constants/webhookColors";
 
 class Discord {
-    private username = "Tournament Tracker";
-    private avatar_url = "/images/tcommlogo.jpg";
-
     /** * Constructs a webhook link */
     private getWebhookLink(webhookType?: string, threadId?: string): string {
         let url = `https://discord.com/api/webhooks/`;
@@ -49,8 +46,8 @@ class Discord {
 
         try {
             await axios.post(url, {
-                username: this.username,
-                avatar_url: this.avatar_url,
+                username: config.discord.username,
+                avatar_url: config.discord.avatar_url,
                 embeds,
                 content: message || "",
             });
@@ -83,8 +80,8 @@ class Discord {
 
         try {
             await axios.post(url, {
-                username: this.username,
-                avatar_url: this.avatar_url,
+                username: config.discord.username,
+                avatar_url: config.discord.avatar_url,
                 embeds,
                 content: `${pings} ${message || ""}`,
             });
@@ -117,8 +114,8 @@ class Discord {
 
         try {
             await axios.post(url, {
-                username: this.username,
-                avatar_url: this.avatar_url,
+                username: config.discord.username,
+                avatar_url: config.discord.avatar_url,
                 embeds,
                 content: `${pings} ${message || ""}`,
             });
@@ -175,8 +172,8 @@ class Discord {
         // to avoid potential infinite looping in case that mathod is initially invoking an error.
         try {
             await axios.post(url, {
-                username: this.username,
-                avatar_url: this.avatar_url,
+                username: config.discord.username,
+                avatar_url: config.discord.avatar_url,
                 embeds: embed,
             });
         } catch (error) {

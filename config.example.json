@@ -7,6 +7,9 @@
         "redirect": "http://localhost:8088/api/auth/callback"
     },
     "discord": {
+        "baseUrl": "http://localhost:8088",
+        "username": "Tournament Tracker",
+        "avatar_url": "https://raw.githubusercontent.com/Hiviexd/tournament-tracker/refs/heads/main/public/assets/tcommlogo.jpg",
         "roles": {
             "tournament": "",
             "contest": ""
