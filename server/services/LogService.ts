@@ -14,7 +14,7 @@ class LogService {
     }
 
     /**
-     * Create a system log
+     * Create a log for a system action
      * @param action Action
      * @param category Log category
      */
