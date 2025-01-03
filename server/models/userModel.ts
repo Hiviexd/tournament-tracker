@@ -59,12 +59,12 @@ UserSchema.virtual("ccDuration").get(function (this: IUser) {
     return getDuration(this, "cc");
 });
 
-UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, user: string | number) {
-    const osuId = parseInt(user as string, 10);
+UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, userInput: string | number) {
+    const osuId = parseInt(userInput as string, 10);
 
     if (isNaN(osuId)) {
         return this.findOne({
-            username: new RegExp("^" + helpers.escapeUsername(user as string) + "$", "i"),
+            username: new RegExp("^" + helpers.escapeUsername(userInput as string) + "$", "i"),
         });
     } else {
         return this.findOne({ osuId });
