@@ -1,6 +1,6 @@
 import User from "../models/userModel";
 import helpers from "../helpers";
-import OsuApi from "../helpers/classes/OsuApi";
+import OsuApiService from "../services/OsuApiService";
 
 function unauthorize(req, res, next) {
     // Admin bypass
@@ -25,9 +25,9 @@ async function isLoggedIn(req, res, next) {
 
     // Refresh if less than 2 hours left for some possible edge cases
     if (new Date() > new Date(req.session.expireDate - 2 * 3600 * 1000)) {
-        const response = await OsuApi.refreshToken(req.session.refreshToken);
+        const response = await OsuApiService.refreshToken(req.session.refreshToken);
 
-        if (!response || OsuApi.isOsuResponseError(response)) {
+        if (!response || OsuApiService.isOsuResponseError(response)) {
             req.session.destroy((error) => {
                 console.log(error);
             });

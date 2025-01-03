@@ -5,7 +5,7 @@ import User from "../models/userModel";
 import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
-import Discord from "../helpers/classes/Discord";
+import DiscordService from "../services/DiscordService";
 import webhookColors from "../helpers/constants/webhookColors";
 import config from "../../config.json";
 import LogService from "../services/LogService";
@@ -127,11 +127,11 @@ class VotingsController {
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");
 
-        await Discord.roleHighlightWebhook(
+        await DiscordService.sendRoleHighlightWebhook(
             roles,
             [
                 {
-                    author: Discord.defaultWebhookAuthor(req.session),
+                    author: DiscordService.defaultWebhookAuthor(req.session),
                     description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.lightYellow,
                     fields: [
@@ -197,10 +197,10 @@ class VotingsController {
             );
 
             // Discord
-            await Discord.webhook(
+            await DiscordService.sendWebhook(
                 [
                     {
-                        author: Discord.defaultWebhookAuthor(req.session),
+                        author: DiscordService.defaultWebhookAuthor(req.session),
                         description: `Submitted a vote for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
                         color: webhookColors.lightGreen,
                     },
@@ -248,10 +248,10 @@ class VotingsController {
 
         const results = voting.options.map((option, index) => `- **${option}** - ${getVotingOptionStats(index).percentage}% (${getVotingOptionStats(index).votes}/${voting.votes.length})`).join("\n");
 
-        await Discord.webhook(
+        await DiscordService.sendWebhook(
             [
                 {
-                    author: Discord.defaultWebhookAuthor(req.session),
+                    author: DiscordService.defaultWebhookAuthor(req.session),
                     description: `${voting.isActive ? "Resumed" : "Concluded"} voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
                     color: voting.isActive ? webhookColors.yellow : webhookColors.darkYellow,
                     fields: !voting.isActive ?
@@ -329,10 +329,10 @@ class VotingsController {
         );
 
         // Discord
-        await Discord.webhook(
+        await DiscordService.sendWebhook(
             [
                 {
-                    author: Discord.defaultWebhookAuthor(req.session),
+                    author: DiscordService.defaultWebhookAuthor(req.session),
                     description: `Deleted a voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.darkRed,
                 },

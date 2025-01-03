@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import config from "../../config.json";
-import OsuApi from "../helpers/classes/OsuApi";
+import OsuApiService from "../services/OsuApiService";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
 import User from "../models/userModel";
@@ -46,16 +46,16 @@ class AuthController {
             return res.status(403).redirect("/error");
         }
 
-        const tokenResponse = await OsuApi.getToken(req.query.code.toString());
+        const tokenResponse = await OsuApiService.getToken(req.query.code.toString());
 
-        if (OsuApi.isOsuResponseError(tokenResponse)) {
+        if (OsuApiService.isOsuResponseError(tokenResponse)) {
             return res.status(500).redirect("/error");
         }
 
         helpers.setSession(req.session, tokenResponse);
-        const userResponse = await OsuApi.getLoggedInUserInfo(req.session.accessToken!);
+        const userResponse = await OsuApiService.getLoggedInUserInfo(req.session.accessToken!);
 
-        if (OsuApi.isOsuResponseError(userResponse)) {
+        if (OsuApiService.isOsuResponseError(userResponse)) {
             return req.session.destroy(() => {
                 res.status(500).redirect("/error");
             });

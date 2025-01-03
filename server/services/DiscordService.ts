@@ -1,10 +1,10 @@
 import axios from "axios";
-import config from "../../../config.json";
-import { IDiscordEmbed } from "../../../interfaces/Discord";
-import helpers from "..";
-import webhookColors from "../../helpers/constants/webhookColors";
+import config from "../../config.json";
+import { IDiscordEmbed } from "../../interfaces/Discord";
+import helpers from "../helpers";
+import webhookColors from "../helpers/constants/webhookColors";
 
-class Discord {
+class DiscordService {
     /** * Constructs a webhook link */
     private getWebhookLink(webhookType?: string, threadId?: string): string {
         let url = `https://discord.com/api/webhooks/`;
@@ -35,7 +35,7 @@ class Discord {
      * @param threadId Optional ID of the thread to send the message to
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
-    public async webhook(
+    public async sendWebhook(
         embeds: IDiscordEmbed[],
         message?: string,
         threadId?: string,
@@ -51,7 +51,7 @@ class Discord {
                 content: message || "",
             });
         } catch (error) {
-            this.errorWebhook(error, { message, embeds }, webhook);
+            this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
@@ -63,7 +63,7 @@ class Discord {
      * @param threadId Optional ID of the thread to send the message to
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
-    public async userHighlightWebhook(
+    public async sendUserHighlightWebhook(
         users: string[],
         embeds: IDiscordEmbed[],
         message?: string,
@@ -85,7 +85,7 @@ class Discord {
                 content: `${pings} ${message || ""}`,
             });
         } catch (error) {
-            this.errorWebhook(error, { message, embeds }, webhook);
+            this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
@@ -97,7 +97,7 @@ class Discord {
      * @param threadId Optional ID of the thread to send the message to
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
-    public async roleHighlightWebhook(
+    public async sendRoleHighlightWebhook(
         roles: string[],
         embeds: IDiscordEmbed[],
         message?: string,
@@ -119,11 +119,11 @@ class Discord {
                 content: `${pings} ${message || ""}`,
             });
         } catch (error) {
-            this.errorWebhook(error, { message, embeds }, webhook);
+            this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
-    private async errorWebhook(
+    private async sendErrorWebhook(
         error: any,
         embedInfo: { message?: string; embeds: IDiscordEmbed[] },
         webhookType?: string
@@ -167,8 +167,6 @@ class Discord {
             },
         ];
 
-        // Instead of using the `webhook()` method, we'll be making a direct request to the Discord API
-        // to avoid potential infinite looping in case that mathod is initially invoking an error.
         try {
             await axios.post(url, {
                 username: config.discord.username,
@@ -182,4 +180,4 @@ class Discord {
     }
 }
 
-export default new Discord();
+export default new DiscordService();
