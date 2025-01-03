@@ -16,21 +16,19 @@ interface IProps {
 
 export default function VotingFilters({ values, onChange }: IProps) {
     const categoryOptions = [
-        { value: "", label: "All Categories" },
         { value: "discussion", label: "Discussions" },
         { value: "tournament", label: "Tournaments" },
         { value: "user", label: "Users" },
     ];
 
     const assignedGroupOptions = [
-        { value: "", label: "All Groups" },
         { value: "tc", label: "Tournament Committee" },
         { value: "cc", label: "Contest Committee" },
     ];
 
     const statusOptions = [
-        { value: "", label: "All votes" },
         { value: "active", label: "Active votes only" },
+        { value: "concluded", label: "concluded votes only" },
     ];
 
     const handleChange = (key: keyof FilterValues, value: any) => {
@@ -47,18 +45,21 @@ export default function VotingFilters({ values, onChange }: IProps) {
                     style={{ flex: 1 }}
                 />
                 <Select
+                    placeholder="Category"
                     value={values.category}
                     onChange={(value) => handleChange("category", value as VotingCategory)}
                     data={categoryOptions}
                     style={{ width: 200 }}
                 />
                 <Select
+                    placeholder="Assigned Group"
                     value={values.assignedGroup}
                     onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                     data={assignedGroupOptions}
                     style={{ width: 200 }}
                 />
                 <Select
+                    placeholder="Status"
                     value={values.status}
                     onChange={(value) => handleChange("status", value)}
                     data={statusOptions}
