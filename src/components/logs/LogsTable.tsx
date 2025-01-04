@@ -2,6 +2,7 @@ import { Table, Card, Tooltip } from "@mantine/core";
 import { ILog } from "../../../interfaces/Log";
 import moment from "moment";
 import MarkdownText from "../common/MarkdownText";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     logs: ILog[];
@@ -27,7 +28,13 @@ export default function LogsTable({ logs }: IProps) {
                                     <span>{moment(log.createdAt).fromNow()}</span>
                                 </Tooltip>
                             </Table.Td>
-                            <Table.Td>{log.user?.username || "System"}</Table.Td>
+                            <Table.Td>
+                                {log.user?.username || (
+                                    <span>
+                                        System <FontAwesomeIcon icon="robot" />
+                                    </span>
+                                )}
+                            </Table.Td>
                             <Table.Td>{log.category}</Table.Td>
                             <Table.Td>
                                 <MarkdownText content={log.action} />

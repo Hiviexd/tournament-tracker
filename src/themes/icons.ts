@@ -34,6 +34,7 @@ import {
     faFilter,
     faFilterCircleXmark,
     faHistory,
+    faRobot,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -71,5 +72,6 @@ export default function loadIcons() {
         faFilter,
         faFilterCircleXmark,
         faHistory,
+        faRobot,
     );
 }
