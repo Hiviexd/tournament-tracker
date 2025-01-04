@@ -52,7 +52,7 @@ export default function VotingPage() {
                     {error}
                 </Text>
 
-                <Button onClick={() => navigate("/votings")}>Return to votings</Button>
+                <Button variant="subtle" onClick={() => navigate("/votings")}>Return to votings</Button>
             </Stack>
         );
     };
