@@ -25,13 +25,13 @@ export default [
         href: "/voting",
     },
     {
-        title: "Contact",
+        title: "Tournament Reports",
         permissions: ["user"],
-        href: "/contact",
+        href: "/reports",
         links: [
-            { title: "Submit Ticket", to: "", icon: "paper-plane", permissions: ["user"] },
+            { title: "Submit Report", to: "", icon: "paper-plane", permissions: ["user"] },
             {
-                title: "Manage Tickets",
+                title: "Manage Reports",
                 to: "/manage",
                 icon: "mail-bulk",
                 permissions: ["committee"],
