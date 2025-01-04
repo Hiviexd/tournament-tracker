@@ -123,9 +123,34 @@ class VotingsController {
 
         // Discord
         const roles: string[] = [];
+        const fields: { name: string; value: string; }[] = [];
 
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");
+
+        fields.push({
+            name: "Deadline",
+            value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(voting.deadline, "dateTime")})`
+        },)
+
+        if (voting.targetUser) {
+            fields.push({
+                name: "Target User",
+                value: `[**${voting.targetUser.username}**](https://osu.ppy.sh/users/${voting.targetUser.osuId})`
+            });
+        }
+
+        if (voting.targetTournament) {
+            fields.push({
+                name: "Target Tournament",
+                value: `[**${voting.targetTournament.name}**](${config.discord.baseUrl}/tournaments/${voting.targetTournament.id})`
+            });
+        }
+
+        fields.push({
+            name: "Description",
+            value: helpers.shorten(voting.description, 1024),
+        });
 
         await DiscordService.sendRoleHighlightWebhook(
             roles,
@@ -134,16 +159,7 @@ class VotingsController {
                     author: DiscordService.defaultWebhookAuthor(req.session),
                     description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.lightYellow,
-                    fields: [
-                        {
-                            name: "Deadline",
-                            value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(voting.deadline, "dateTime")})`
-                        },
-                        {
-                            name: "Description",
-                            value: helpers.shorten(voting.description, 1024),
-                        },
-                    ],
+                    fields,
                 },
             ],
         );
