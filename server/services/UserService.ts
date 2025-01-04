@@ -2,7 +2,7 @@ import User from "../models/userModel";
 import _ from "lodash";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
-import OsuApi from "../services/OsuApiService";
+import OsuApiService from "../services/OsuApiService";
 
 class UserService {
     /**
@@ -64,9 +64,9 @@ class UserService {
 
         if (user) return user;
 
-        const userResponse = await OsuApi.getUserInfo(accessToken, userInput);
+        const userResponse = await OsuApiService.getUserInfo(accessToken, userInput);
 
-        if (OsuApi.isOsuResponseError(userResponse)) {
+        if (OsuApiService.isOsuResponseError(userResponse)) {
             return null;
         }
 
