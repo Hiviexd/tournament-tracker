@@ -179,5 +179,15 @@ html {
     }
 }
 
+/* Navbar avatar hover effect */
+.user-avatar {
+    transition: border 0.2s ease;
+    border: 2px solid transparent;
+
+    &:hover {
+        border: 2px solid var(--mantine-color-primary-4);
+    }
+}
+
 /* Components */
 @import "MarkdownText.scss";

@@ -101,9 +101,14 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                 </Button>
                             )}
                             {user && (
-                                <Menu withArrow shadow="md">
+                                <Menu withArrow shadow="md" trigger="hover">
                                     <Menu.Target>
-                                        <Avatar size="md" src={user.avatarUrl} />
+                                        <Avatar
+                                            src={user.avatarUrl}
+                                            size="3rem"
+                                            className="user-avatar"
+                                            style={{ cursor: "pointer" }}
+                                        />
                                     </Menu.Target>
                                     <Menu.Dropdown>
                                         <Menu.Label>Welcome back, {user.username}!</Menu.Label>
