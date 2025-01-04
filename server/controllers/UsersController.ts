@@ -1,10 +1,36 @@
+import { IUser } from "../../interfaces/User";
 import User from "../models/userModel";
+import helpers from "../helpers";
+import UserService from "../services/UserService";
 
 class UsersController {
     /** GET logged in user */
     public getSelf(_, res): void {
         const user = res.locals.user;
         res.json(user);
+    }
+
+    /** GET users listing */
+    public async index(req, res): Promise<void> {
+        const { userInput } = req.query;
+
+        if (!userInput) {
+            return res.json([]);
+        }
+
+        let users: IUser[] = [];
+
+        if (helpers.isValidMongoId(userInput)) {
+            const user = await User.findById(userInput);
+            if (user) users.push(user);
+        } else if (!isNaN(userInput)) {
+            const user = await User.findOne({ osuId: userInput });
+            if (user) users.push(user);
+        } else {
+            users = await User.find({ username: { $regex: userInput, $options: "i" } });
+        }
+
+        res.json(users.slice(0, 5));
     }
 
     /** GET a user */
@@ -35,6 +61,15 @@ class UsersController {
         const committee = await User.find(query).orFail();
 
         res.json(committee);
+    }
+
+    /** POST create a user */
+    public async create(req, res): Promise<void> {
+        const { userInput } = req.body;
+
+        const user = await UserService.findOrCreateUser(req.session.accessToken, userInput);
+
+        res.json(user);
     }
 }
 
