@@ -96,7 +96,25 @@
 
     /* Inputs */
     .mantine-Input-input, 
-    .mantine-Select-dropdown {
+    .mantine-Popover-dropdown {
+        background-color: var(--mantine-color-primary-10) !important;
+    }
+
+    .mantine-Select-option,
+    .mantine-Combobox-option,
+    .mantine-MultiSelect-option {
+        background-color: var(--mantine-color-primary-10) !important;
+
+        &:hover {
+            background-color: var(--mantine-color-primary-9) !important;
+        }
+    }
+
+    .mantine-MultiSelect-pill {
+        background-color: var(--mantine-color-primary-9) !important;
+    }
+
+    .mantine-Pagination-control {
         background-color: var(--mantine-color-primary-10) !important;
     }
 }
