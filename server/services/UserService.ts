@@ -30,7 +30,7 @@ class UserService {
             });
 
             await user.save();
-            LogService.generate(user.id, "Logged in for the first time", "account");
+            LogService.generate(user.id, "Verified their account for the first time", "account");
         } else {
             let saveTrigger = false;
             let oldUsername: string | undefined;
