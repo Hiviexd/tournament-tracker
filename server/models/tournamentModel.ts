@@ -5,16 +5,18 @@ const TournamentSchema = new Schema<ITournament>(
     {
         name: { type: String, required: true },
         description: { type: String, required: true },
+        modes: [{ type: String, required: true }],
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
+        forumUrl: { type: String, required: true },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
+        status: { type: String, required: true },
+        isActive: { type: Boolean, default: true },
         bannerUrl: { type: String },
         badges: [{ type: String }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
-        status: { type: String, required: true },
-        isActive: { type: Boolean, default: true },
     }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 

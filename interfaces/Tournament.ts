@@ -16,7 +16,7 @@ export type TournamentStatus =
 
 export interface TournamentQueryParams {
     name?: string | RegExp;
-    modes?: GameMode[];
+    modes?: { $in: GameMode[] };
     host?: IUser;
     type?: TournamentType;
     status?: TournamentStatus;
@@ -32,12 +32,12 @@ export interface ITournament extends Document {
     forumUrl: string;
     host: IUser;
     type: TournamentType;
-    bannerUrl?: string;
-    badges: string[];
-    assignedReviewers: IUser[];
-    reviews: IVote[];
     status: TournamentStatus;
     isActive: boolean;
+    bannerUrl?: string;
+    badges?: string[];
+    assignedReviewers?: IUser[];
+    reviews?: IVote[];
 
     // virtuals
     isTournament: boolean;
