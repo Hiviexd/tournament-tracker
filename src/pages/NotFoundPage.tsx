@@ -11,7 +11,6 @@ export default function NotFoundPage() {
                     component={Link}
                     to="/"
                     variant="subtle"
-                    color="blue"
                 >
                     Return to Home
                 </Button>
