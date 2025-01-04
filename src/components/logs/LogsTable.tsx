@@ -15,6 +15,7 @@ export default function LogsTable({ logs }: IProps) {
                 <Table.Thead>
                     <Table.Tr>
                         <Table.Th>Date</Table.Th>
+                        <Table.Th w={0} p={0}></Table.Th>
                         <Table.Th>User</Table.Th>
                         <Table.Th>Category</Table.Th>
                         <Table.Th>Action</Table.Th>
@@ -28,13 +29,11 @@ export default function LogsTable({ logs }: IProps) {
                                     <span>{moment(log.createdAt).fromNow()}</span>
                                 </Tooltip>
                             </Table.Td>
-                            <Table.Td>
-                                {log.user?.username || (
-                                    <span>
-                                        System <FontAwesomeIcon icon="robot" />
-                                    </span>
-                                )}
+                            <Table.Td p={0}>
+                                {log.isSystemLog && <FontAwesomeIcon icon="robot" />}
                             </Table.Td>
+                            <Table.Td>{log.user?.username || "System"}</Table.Td>
+
                             <Table.Td>{log.category}</Table.Td>
                             <Table.Td>
                                 <MarkdownText content={log.action} />
