@@ -7,7 +7,7 @@ export default [
     {
         title: "Home",
         permissions: [],
-        href: "",
+        href: "/home",
         links: [
             { title: "Team", to: "/team", icon: "users", permissions: [] },
             { title: "Changelog", to: "/changelog", icon: "clipboard-list", permissions: [] },
@@ -40,19 +40,12 @@ export default [
     },
 
     {
-        title: "Admin",
-        permissions: ["admin"],
-        href: "/admin",
+        title: "Management",
+        permissions: ["committee"],
+        href: "/manage",
         links: [
-            { title: "Panel", to: "", icon: "shield-alt", permissions: ["admin"] },
-            { title: "Users", to: "/users", icon: "users", permissions: ["admin"] },
-            {
-                title: "Screening",
-                to: "/screening",
-                icon: "user-shield",
-                permissions: ["admin"],
-            },
-            { title: "Logs", to: "/logs", icon: "history", permissions: ["admin"] },
+            { title: "Users", to: "/users", icon: "users", permissions: ["committee"] },
+            { title: "Logs", to: "/logs", icon: "history", permissions: ["committee"] },
         ],
     },
 ];

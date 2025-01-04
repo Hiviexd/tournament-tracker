@@ -1,3 +1,4 @@
+import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import CommitteePage from "../pages/CommitteePage";
@@ -20,6 +21,13 @@ const routes: RouteConfig[] = [
     {
         path: "/",
         page: <HomePage />,
+        title: "Home",
+        icon: "home",
+        permissions: [],
+    },
+    {
+        path: "/home",
+        page: <Navigate to="/" replace />,
         title: "Home",
         icon: "home",
         permissions: [],
@@ -67,11 +75,11 @@ const routes: RouteConfig[] = [
         permissions: [],
     },
     {
-        path: "/admin/logs",
+        path: "/manage/logs",
         page: <LogsPage />,
         title: "Logs",
         icon: "history",
-        permissions: ["admin"],
+        permissions: ["committee"],
     },
     {
         path: "*",
