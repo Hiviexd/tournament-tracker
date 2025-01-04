@@ -6,6 +6,7 @@ import UserPage from "../pages/UserPage";
 import VotingListPage from "../pages/VotingListPage";
 import VotingPage from "../pages/VotingPage";
 import MarkdownPlaygroundPage from "../pages/MarkdownPlaygroundPage";
+import LogsPage from "../pages/LogsPage";
 
 interface RouteConfig {
     path: string;
@@ -64,6 +65,13 @@ const routes: RouteConfig[] = [
         title: "Markdown Playground",
         icon: "file-alt",
         permissions: [],
+    },
+    {
+        path: "/admin/logs",
+        page: <LogsPage />,
+        title: "Logs",
+        icon: "history",
+        permissions: ["admin"],
     },
     {
         path: "*",

@@ -33,6 +33,7 @@ import {
     faFileAlt,
     faFilter,
     faFilterCircleXmark,
+    faHistory,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -68,6 +69,7 @@ export default function loadIcons() {
         faLockOpen,
         faFileAlt,
         faFilter,
-        faFilterCircleXmark
+        faFilterCircleXmark,
+        faHistory,
     );
 }

@@ -52,7 +52,7 @@ export default [
                 icon: "user-shield",
                 permissions: ["admin"],
             },
-            { title: "Logs", to: "/logs", icon: "clipboard", permissions: ["admin"] },
+            { title: "Logs", to: "/logs", icon: "history", permissions: ["admin"] },
         ],
     },
 ];
