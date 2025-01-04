@@ -19,7 +19,7 @@ class LogService {
      * @param category Log category
      */
     public async generateSystem(action: string, category: LogCategory): Promise<void> {
-        const log = new Log({ action, category });
+        const log = new Log({ action, category, isSystemLog: true });
         await log.save();
     }
 }
