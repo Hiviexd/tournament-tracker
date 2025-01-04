@@ -3,6 +3,7 @@ import _ from "lodash";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
 import OsuApiService from "../services/OsuApiService";
+import LogService from "../services/LogService";
 
 class UserService {
     /**
@@ -29,10 +30,13 @@ class UserService {
             });
 
             await user.save();
+            LogService.generate(user.id, "Logged in for the first time", "account");
         } else {
             let saveTrigger = false;
+            let oldUsername: string | undefined;
 
             if (user.username !== username) {
+                oldUsername = user.username;
                 user.username = username;
                 saveTrigger = true;
             }
@@ -49,6 +53,10 @@ class UserService {
 
             if (saveTrigger) {
                 await user.save();
+
+                if (oldUsername) {
+                    LogService.generate(user.id, `Username changed from "${oldUsername}" to "${username}"`, "account");
+                }
             }
         }
 
