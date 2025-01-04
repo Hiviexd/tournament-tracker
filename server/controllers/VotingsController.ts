@@ -98,7 +98,7 @@ class VotingsController {
         });
 
         if (targetUserId) {
-            targetUser = await User.findByUsernameOrOsuId(targetUserId);
+            targetUser = await User.findById(targetUserId).orFail();
             voting.targetUser = targetUser;
         }
 
