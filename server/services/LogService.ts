@@ -4,12 +4,12 @@ import Log from "../models/logModel";
 class LogService {
     /**
      * Create a log for a user action
-     * @param user Action user
+     * @param userId Mongo ID of action user
      * @param action Action
      * @param category Log category
      */
-    public async generate(user: string, action: string, category: LogCategory): Promise<void> {
-        const log = new Log({ user, action, category });
+    public async generate(userId: string, action: string, category: LogCategory): Promise<void> {
+        const log = new Log({ user: userId, action, category });
         await log.save();
     }
 
