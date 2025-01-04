@@ -83,6 +83,14 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
     }
+
+    .mantine-Skeleton-root::before {
+        background-color: var(--mantine-color-secondary-9) !important;
+    }
+
+    .mantine-Skeleton-root::after {
+        background-color: var(--mantine-color-primary-10) !important;
+    }
 }
 
 .mantine-Input-input {
