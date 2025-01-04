@@ -49,10 +49,19 @@ function discordTimestamp(date: Date, type: DiscordTimestampType = "relative"): 
     return `<t:${Math.floor(date.getTime() / 1000)}:${types[type]}>`;
 }
 
+/**
+ * Validates a MongoDB ObjectId
+ * @param id ID to validate
+ */
+function isValidMongoId(id: string): boolean {
+    return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 export default {
     setSession,
     escapeUsername,
     defaultErrorMessage,
     shorten,
     discordTimestamp,
+    isValidMongoId,
 };
