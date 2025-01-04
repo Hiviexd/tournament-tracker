@@ -25,6 +25,9 @@ import {
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+// Components
+import UserSearch from "../common/UserSearch";
+
 interface IProps {
     opened: boolean;
     onClose: () => void;
@@ -42,7 +45,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             assignedGroups: [] as UserGroup[],
             duration: 7,
             options: ["Yes", "No"],
-            targetUserInput: "",
+            targetUserId: "",
             targetTournamentId: "",
         },
         validate: {
@@ -53,7 +56,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 value.length === 0 ? "At least one group is required" : null,
             duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
             options: (value) => (value.length < 2 ? "At least two options are required" : null),
-            targetUserInput: (value, values) =>
+            targetUserId: (value, values) =>
                 values.category === "user" && !value ? "Target user is required" : null,
             targetTournamentId: (value, values) =>
                 values.category === "tournament" && !value ? "Target tournament is required" : null,
@@ -136,11 +139,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     />
 
                     {form.values.category === "user" && (
-                        <TextInput
+                        <UserSearch
                             label="Target User"
-                            placeholder="Enter target user's username or osu! ID"
-                            withAsterisk
-                            {...form.getInputProps("targetUserInput")}
+                            onChange={(value) => form.setFieldValue("targetUserId", value)}
+                            error={form.errors.targetUserId}
+                            required
                         />
                     )}
 
@@ -186,9 +189,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                     onRemove={() => handleRemoveOption(option)}
                                     variant="subtle"
                                     style={{
-                                        backgroundColor: `color-mix(in srgb, ${VOTE_COLORS[index % VOTE_COLORS.length]} 15%, transparent)`,
+                                        backgroundColor: `color-mix(in srgb, ${
+                                            VOTE_COLORS[index % VOTE_COLORS.length]
+                                        } 15%, transparent)`,
                                         color: VOTE_COLORS[index % VOTE_COLORS.length],
-                                        transition: 'all 0.2s ease',
+                                        transition: "all 0.2s ease",
                                     }}>
                                     {option}
                                 </Pill>
