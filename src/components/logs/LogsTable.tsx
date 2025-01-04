@@ -1,4 +1,4 @@
-import { Table, Card, Tooltip } from "@mantine/core";
+import { Table, Card, Tooltip, Text } from "@mantine/core";
 import { ILog } from "../../../interfaces/Log";
 import moment from "moment";
 import MarkdownText from "../common/MarkdownText";
@@ -33,8 +33,9 @@ export default function LogsTable({ logs }: IProps) {
                                 {log.isSystemLog && <FontAwesomeIcon icon="robot" />}
                             </Table.Td>
                             <Table.Td>{log.user?.username || "System"}</Table.Td>
-
-                            <Table.Td>{log.category}</Table.Td>
+                            <Table.Td>
+                                <Text size="sm" tt="capitalize">{log.category}</Text>
+                            </Table.Td>
                             <Table.Td>
                                 <MarkdownText content={log.action} />
                             </Table.Td>
