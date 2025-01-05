@@ -30,6 +30,10 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
         window.location.href = "/api/auth/login";
     };
 
+    const handleLogout = () => {
+        window.location.href = "/api/auth/logout";
+    };
+
     return (
         <header>
             <AppShell.Header>
@@ -95,7 +99,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                     onClick={handleLogin}
                                     variant="gradient"
                                     loading={isLoggingIn}
-                                    gradient={{ from: "primary.4", to: "primary.9", deg: 90 }}
+                                    gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
                                     leftSection={<Image src="/assets/logo-osu.svg" h={20} />}>
                                     Login
                                 </Button>
@@ -123,15 +127,12 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                             Your Tournaments
                                         </Menu.Item>
                                         <Menu.Divider />
-                                        <a href="/api/auth/logout">
-                                            <Menu.Item
-                                                color="danger"
-                                                leftSection={
-                                                    <FontAwesomeIcon icon="sign-out-alt" />
-                                                }>
-                                                Logout
-                                            </Menu.Item>
-                                        </a>
+                                        <Menu.Item
+                                            onClick={handleLogout}
+                                            color="danger"
+                                            leftSection={<FontAwesomeIcon icon="sign-out-alt" />}>
+                                            Log Out
+                                        </Menu.Item>
                                     </Menu.Dropdown>
                                 </Menu>
                             )}
