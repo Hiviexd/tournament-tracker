@@ -1,6 +1,9 @@
 import { createTheme, MantineColorsTuple } from "@mantine/core";
 
-const primary: MantineColorsTuple = [
+/**
+ * Old purple theme
+ */
+/*const primary: MantineColorsTuple = [
     "#faedff",
     "#edd9f7",
     "#d8b1ea",
@@ -13,9 +16,9 @@ const primary: MantineColorsTuple = [
     "#6b218d",
     "#24222a",
     "#18171c",
-];
+];*/
 
-const secondary: MantineColorsTuple = [
+/*const secondary: MantineColorsTuple = [
     "#f4f4f6",
     "#e6e6e6",
     "#cac9cc",
@@ -26,6 +29,39 @@ const secondary: MantineColorsTuple = [
     "#6b6777",
     "#5f5b6b",
     "#524e60",
+];*/
+
+/**
+ * Current yellow theme
+ */
+// Not auto-generated
+const primary: MantineColorsTuple = [
+    "#fff9e5", // hsl(45, 100%, 95%)
+    "#fff2cc", // hsl(45, 100%, 90%)
+    "#ffe59a", // hsl(45, 100%, 80%)
+    "#ffd966", // hsl(45, 100%, 70%)
+    "#ffcc33", // hsl(45, 100%, 60%)
+    "#ffc61a", // hsl(45, 100%, 55%)
+    "#ffbf00", // hsl(45, 100%, 50%)
+    "#e6ac00", // hsl(45, 100%, 45%)
+    "#cc9900", // hsl(45, 100%, 40%)
+    "#b38600", // hsl(45, 100%, 35%)
+    "#2a2822", // hsl(45, 10%, 15%)
+    "#1c1b17", // hsl(45, 10%, 10%)
+];
+
+// Not auto-generated
+const secondary: MantineColorsTuple = [
+    "#f6f4ee", // hsl(45, 30%, 95%)
+    "#ede9de", // hsl(45, 30%, 90%)
+    "#dbd4bd", // hsl(45, 30%, 80%)
+    "#c9be9c", // hsl(45, 30%, 70%)
+    "#b8a87a", // hsl(45, 30%, 60%)
+    "#af9d6a", // hsl(45, 30%, 55%)
+    "#a69359", // hsl(45, 30%, 50%)
+    "#958450", // hsl(45, 30%, 45%)
+    "#857547", // hsl(45, 30%, 40%)
+    "#74673e", // hsl(45, 30%, 35%)
 ];
 
 const danger: MantineColorsTuple = [
@@ -102,27 +138,27 @@ export const theme = createTheme({
             defaultProps: {
                 withArrow: true,
                 color: "secondary",
-            }
+            },
         },
         Button: {
             styles: {
                 root: {
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                        transform: 'translateY(-2px)'
-                    }
-                }
-            }
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                        transform: "translateY(-2px)",
+                    },
+                },
+            },
         },
         ActionIcon: {
             styles: {
                 root: {
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                        transform: 'translateY(-2px)'
-                    }
-                }
-            }
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                        transform: "translateY(-2px)",
+                    },
+                },
+            },
         },
-    }
+    },
 });
