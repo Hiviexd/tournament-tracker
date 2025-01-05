@@ -66,12 +66,13 @@ class TournamentsController {
     }
 
     /** GET tournament */
-    public async get(req, res) {
+    public async getTournament(req, res) {
         const tournamentId = req.params.tournamentId;
+        const isCommittee = res.locals.user.isCommittee;
 
         const tournament = await Tournament
             .findById(tournamentId)
-            .select(this.selectFields(res.locals.user.isCommittee))
+            .select(this.selectFields(isCommittee))
             .populate(this.defaultPopulate);
 
         res.json(tournament);
