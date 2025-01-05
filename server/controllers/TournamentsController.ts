@@ -1,6 +1,6 @@
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
-import { GameMode, TournamentQueryParams, TournamentType } from "../../interfaces/Tournament";
+import { TournamentQueryParams, TournamentType } from "../../interfaces/Tournament";
 import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 
@@ -30,18 +30,18 @@ class TournamentsController {
 
     /** GET tournament listing */
     public async index(req, res) {
-        const { name, modes, host, type, status, isActive, page = 1 } = req.query;
+        const { name, modes, host, type, status, active, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
 
         if (name) query.name = new RegExp(name, "i");
-        if (modes) query.modes = modes.split(",") as GameMode[];
-        if (host) {
+        if (modes) query.modes = { $in: [modes] };
+        if (host && host.length) {
             const hostUser = await User.findByUsernameOrOsuId(host);
-            query.host = hostUser;
+            query.host = hostUser || null;
         }
         if (type) query.type = type;
         if (status) query.status = status;
-        if (isActive !== undefined) query.isActive = isActive === "true";
+        if (active) query.isActive = status === "active";
 
 
         const skip = (Number(page) - 1) * this.defaultLimit;
