@@ -4,6 +4,6 @@ import permissions from "../middlewares/permissions";
 
 const logsRouter = express.Router();
 
-logsRouter.get("/", permissions.isLoggedIn, permissions.isAdmin, LogsController.index);
+logsRouter.get("/", permissions.isLoggedIn, permissions.isCommittee, LogsController.index);
 
 export default logsRouter;
