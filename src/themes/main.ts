@@ -1,4 +1,21 @@
 import { createTheme, MantineColorsTuple } from "@mantine/core";
+import { generateColors } from "@mantine/colors-generator";
+import helpers from "../helpers";
+
+enum ColorType {
+    PRIMARY = "primary-color",
+    SECONDARY = "secondary-color",
+}
+
+const getStoredColors = (type: ColorType): MantineColorsTuple | null => {
+    const stored = localStorage.getItem(type);
+    return stored ? JSON.parse(stored) : null;
+};
+
+const setStoredColors = (type: ColorType, hue: number, color: MantineColorsTuple) => {
+    localStorage.setItem(type, JSON.stringify(color));
+    localStorage.setItem(`${type}-hue`, hue.toString());
+};
 
 /**
  * Old purple theme
@@ -35,7 +52,7 @@ import { createTheme, MantineColorsTuple } from "@mantine/core";
  * Current yellow theme
  */
 // Not auto-generated
-const primary: MantineColorsTuple = [
+const defaultPrimary: MantineColorsTuple = [
     "#fff9e5", // hsl(45, 100%, 95%)
     "#fff2cc", // hsl(45, 100%, 90%)
     "#ffe59a", // hsl(45, 100%, 80%)
@@ -51,7 +68,7 @@ const primary: MantineColorsTuple = [
 ];
 
 // Not auto-generated
-const secondary: MantineColorsTuple = [
+const defaultSecondary: MantineColorsTuple = [
     "#f6f4ee", // hsl(45, 30%, 95%)
     "#ede9de", // hsl(45, 30%, 90%)
     "#dbd4bd", // hsl(45, 30%, 80%)
@@ -116,6 +133,24 @@ const warning: MantineColorsTuple = [
     "#af7100",
 ];
 
+export const updateHue = (hue: number) => {
+    const hexColor = helpers.hslToHex(hue, 1, 0.5);
+
+    // handle primary color
+    const primaryColors = generateColors(hexColor) as unknown as string[];
+
+    // append the hsl(X, 10%, 15%) and hsl(X, 10%, 10%) versions manually
+    primaryColors.push(helpers.hslToHex(hue, 0.1, 0.15));
+    primaryColors.push(helpers.hslToHex(hue, 0.1, 0.1));
+
+    // handle secondary color
+    const secondaryColors = generateColors(helpers.hslToHex(hue, 0.3, 0.5)) as unknown as string[];
+
+    setStoredColors(ColorType.PRIMARY, hue, primaryColors as unknown as MantineColorsTuple);
+    setStoredColors(ColorType.SECONDARY, hue, secondaryColors as unknown as MantineColorsTuple);
+    window.location.reload();
+};
+
 export const theme = createTheme({
     fontFamily: "Nunito, sans-serif",
     shadows: {
@@ -123,8 +158,8 @@ export const theme = createTheme({
         xl: "5px 5px 3px rgba(0, 0, 0, .25)",
     },
     colors: {
-        primary,
-        secondary,
+        primary: getStoredColors(ColorType.PRIMARY) || defaultPrimary,
+        secondary: getStoredColors(ColorType.SECONDARY) || defaultSecondary,
         danger,
         info,
         success,
