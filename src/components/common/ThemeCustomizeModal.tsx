@@ -1,7 +1,7 @@
 import { Modal, Stack, Group, Button } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { updateHue } from "../../themes/main";
+import { updateTheme } from "../../themes/main";
 import { HueSlider, ColorSwatch, Checkbox, Divider } from "@mantine/core";
 
 interface IProps {
@@ -15,29 +15,27 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
     const [isGreyscale, setIsGreyscale] = useState(false);
 
     useEffect(() => {
-        const primaryHue = localStorage.getItem("primary-color-hue");
+        const hue = localStorage.getItem("hue");
         const isGreyscale = localStorage.getItem("greyscale");
-        if (primaryHue) {
-            setInitialHue(Number(primaryHue));
-            setNewHue(Number(primaryHue));
+        if (hue && isGreyscale) {
+            setInitialHue(Number(hue));
+            setNewHue(Number(hue));
             setIsGreyscale(isGreyscale === "true");
         }
     }, []);
 
     const getPreviewColor = (hue: number, isGreyscale: boolean) => {
         if (isGreyscale) return "#656565";
-        return `hsl(${hue}, 70%, 50%)`;
+        return `hsl(${hue}, 80%, 50%)`;
     };
 
     const handleSubmit = () => {
-        updateHue(newHue, isGreyscale);
+        updateTheme(newHue, isGreyscale);
     };
 
     const handleReset = () => {
-        localStorage.removeItem("primary-color");
-        localStorage.removeItem("primary-color-hue");
-        localStorage.removeItem("secondary-color");
-        localStorage.removeItem("secondary-color-hue");
+        localStorage.removeItem("hue");
+        localStorage.removeItem("greyscale");
         window.location.reload();
     };
 
