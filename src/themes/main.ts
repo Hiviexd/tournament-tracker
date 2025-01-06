@@ -98,7 +98,7 @@ export const theme = createTheme({
         Tooltip: {
             defaultProps: {
                 withArrow: true,
-                color: "secondary",
+                color: "primary.7",
             },
         },
         Button: {
