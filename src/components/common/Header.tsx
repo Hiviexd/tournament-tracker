@@ -10,10 +10,14 @@ import { useState } from "react";
 
 // Mantine
 import { AppShell, Burger, Button, Group, Image, Menu, Avatar } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 
 // icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+
+// components
+import ThemeCustomizeModal from "./ThemeCustomizeModal";
 
 interface IPropTypes {
     mobileHeaderOpened: boolean;
@@ -24,6 +28,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const [user] = useAtom(loggedInUserAtom);
     const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
 
     const handleLogin = () => {
         setIsLoggingIn(true);
@@ -36,6 +41,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
 
     return (
         <header>
+            <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
             <AppShell.Header>
                 <Group h="100%" px="xl">
                     <div className="nav-group">
@@ -125,6 +131,12 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                             onClick={() => navigate("/listing")}
                                             leftSection={<FontAwesomeIcon icon="trophy" />}>
                                             Your Tournaments
+                                        </Menu.Item>
+                                        <Menu.Divider />
+                                        <Menu.Item
+                                            onClick={openCustomize}
+                                            leftSection={<FontAwesomeIcon icon="palette" />}>
+                                            Customize Theme
                                         </Menu.Item>
                                         <Menu.Divider />
                                         <Menu.Item
