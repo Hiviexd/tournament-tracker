@@ -2,7 +2,7 @@ import { Modal, Stack, Group, Button } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateHue } from "../../themes/main";
-import { HueSlider, ColorSwatch, Checkbox } from "@mantine/core";
+import { HueSlider, ColorSwatch, Checkbox, Divider } from "@mantine/core";
 
 interface IProps {
     opened: boolean;
@@ -26,11 +26,10 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
 
     const getPreviewColor = (hue: number, isGreyscale: boolean) => {
         if (isGreyscale) return "#656565";
-        return `hsl(${hue}, 100%, 50%)`;
+        return `hsl(${hue}, 70%, 50%)`;
     };
 
     const handleSubmit = () => {
-        console.log("Submitting", newHue, isGreyscale);
         updateHue(newHue, isGreyscale);
     };
 
@@ -45,6 +44,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
     return (
         <Modal opened={opened} onClose={onClose} title="Customize Theme" size="sm">
             <Stack>
+                <Divider />
                 <HueSlider value={newHue} onChange={(value) => setNewHue(value)} />
                 <Checkbox
                     label="Greyscale"
@@ -63,7 +63,10 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={initialHue === newHue && isGreyscale === (localStorage.getItem("greyscale") === "true")}
+                        disabled={
+                            initialHue === newHue &&
+                            isGreyscale === (localStorage.getItem("greyscale") === "true")
+                        }
                         leftSection={<FontAwesomeIcon icon="palette" />}>
                         Apply Theme
                     </Button>

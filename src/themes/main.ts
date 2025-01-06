@@ -53,32 +53,32 @@ const setStoredColors = (type: ColorType, hue: number, color: MantineColorsTuple
  */
 // Not auto-generated
 const defaultPrimary: MantineColorsTuple = [
-    "#fff9e5", // hsl(45, 100%, 95%)
-    "#fff2cc", // hsl(45, 100%, 90%)
-    "#ffe59a", // hsl(45, 100%, 80%)
-    "#ffd966", // hsl(45, 100%, 70%)
-    "#ffcc33", // hsl(45, 100%, 60%)
-    "#ffc61a", // hsl(45, 100%, 55%)
-    "#ffbf00", // hsl(45, 100%, 50%)
-    "#e6ac00", // hsl(45, 100%, 45%)
-    "#cc9900", // hsl(45, 100%, 40%)
-    "#b38600", // hsl(45, 100%, 35%)
-    "#2a2822", // hsl(45, 10%, 15%)
-    "#1c1b17", // hsl(45, 10%, 10%)
+    helpers.hslToHex(45, 0.6, 0.95),    // Previously #fff9e5 - hsl(45, 100%, 95%)
+    helpers.hslToHex(45, 0.6, 0.90),    // Previously #fff2cc - hsl(45, 100%, 90%)
+    helpers.hslToHex(45, 0.6, 0.80),    // Previously #ffe59a - hsl(45, 100%, 80%)
+    helpers.hslToHex(45, 0.6, 0.70),    // Previously #ffd966 - hsl(45, 100%, 70%)
+    helpers.hslToHex(45, 0.6, 0.60),    // Previously #ffcc33 - hsl(45, 100%, 60%)
+    helpers.hslToHex(45, 0.6, 0.55),    // Previously #ffc61a - hsl(45, 100%, 55%)
+    helpers.hslToHex(45, 0.6, 0.50),    // Previously #ffbf00 - hsl(45, 100%, 50%)
+    helpers.hslToHex(45, 0.6, 0.45),    // Previously #e6ac00 - hsl(45, 100%, 45%)
+    helpers.hslToHex(45, 0.6, 0.40),    // Previously #cc9900 - hsl(45, 100%, 40%)
+    helpers.hslToHex(45, 1, 0.35),    // Previously #b38600 - hsl(45, 100%, 35%)
+    helpers.hslToHex(45, 0.1, 0.15),    // Previously #2a2822 - hsl(45, 10%, 15%)
+    helpers.hslToHex(45, 0.1, 0.10),    // Previously #1c1b17 - hsl(45, 10%, 10%)
 ];
 
 // Not auto-generated
 const defaultSecondary: MantineColorsTuple = [
-    "#f6f4ee", // hsl(45, 30%, 95%)
-    "#ede9de", // hsl(45, 30%, 90%)
-    "#dbd4bd", // hsl(45, 30%, 80%)
-    "#c9be9c", // hsl(45, 30%, 70%)
-    "#b8a87a", // hsl(45, 30%, 60%)
-    "#af9d6a", // hsl(45, 30%, 55%)
-    "#a69359", // hsl(45, 30%, 50%)
-    "#958450", // hsl(45, 30%, 45%)
-    "#857547", // hsl(45, 30%, 40%)
-    "#74673e", // hsl(45, 30%, 35%)
+    helpers.hslToHex(45, 0.3, 0.95),    // Previously #f6f4ee - hsl(45, 30%, 95%)
+    helpers.hslToHex(45, 0.3, 0.90),    // Previously #ede9de - hsl(45, 30%, 90%)
+    helpers.hslToHex(45, 0.3, 0.80),    // Previously #dbd4bd - hsl(45, 30%, 80%)
+    helpers.hslToHex(45, 0.3, 0.70),    // Previously #c9be9c - hsl(45, 30%, 70%)
+    helpers.hslToHex(45, 0.3, 0.60),    // Previously #b8a87a - hsl(45, 30%, 60%)
+    helpers.hslToHex(45, 0.3, 0.55),    // Previously #af9d6a - hsl(45, 30%, 55%)
+    helpers.hslToHex(45, 0.3, 0.50),    // Previously #a69359 - hsl(45, 30%, 50%)
+    helpers.hslToHex(45, 0.3, 0.45),    // Previously #958450 - hsl(45, 30%, 45%)
+    helpers.hslToHex(45, 0.3, 0.40),    // Previously #857547 - hsl(45, 30%, 40%)
+    helpers.hslToHex(45, 0.3, 0.35),    // Previously #74673e - hsl(45, 30%, 35%)
 ];
 
 const danger: MantineColorsTuple = [
@@ -134,9 +134,7 @@ const warning: MantineColorsTuple = [
 ];
 
 export const updateHue = (hue: number, isGreyscale: boolean) => {
-    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 1, 0.5);
-
-    console.log("Updating theme with hue", hue, "and greyscale", isGreyscale);
+    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 0.7, 0.5);
 
     // handle primary color
     const primaryColors = generateColors(primaryHexColor) as unknown as string[];

@@ -100,7 +100,7 @@ export default function VotingListPage() {
             <Divider />
 
             {/* Content area */}
-            {isLoading ? (
+            {!isLoading ? (
                 <LoadingState />
             ) : !data || data.votings.length === 0 ? (
                 <EmptyState hasError={!!error} />
