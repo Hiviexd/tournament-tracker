@@ -133,21 +133,28 @@ const warning: MantineColorsTuple = [
     "#af7100",
 ];
 
-export const updateHue = (hue: number) => {
-    const hexColor = helpers.hslToHex(hue, 1, 0.5);
+export const updateHue = (hue: number, isGreyscale: boolean) => {
+    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 1, 0.5);
+
+    console.log("Updating theme with hue", hue, "and greyscale", isGreyscale);
 
     // handle primary color
-    const primaryColors = generateColors(hexColor) as unknown as string[];
+    const primaryColors = generateColors(primaryHexColor) as unknown as string[];
 
     // append the hsl(X, 10%, 15%) and hsl(X, 10%, 10%) versions manually
-    primaryColors.push(helpers.hslToHex(hue, 0.1, 0.15));
-    primaryColors.push(helpers.hslToHex(hue, 0.1, 0.1));
+    const dark = isGreyscale ? "#262626" : helpers.hslToHex(hue, 0.1, 0.15);
+    const darker = isGreyscale ? "#1a1a1a" : helpers.hslToHex(hue, 0.1, 0.1);
+    primaryColors.push(dark);
+    primaryColors.push(darker);
 
     // handle secondary color
-    const secondaryColors = generateColors(helpers.hslToHex(hue, 0.3, 0.5)) as unknown as string[];
+    const secondaryHexColor = isGreyscale ? "#ffffff" : helpers.hslToHex(hue, 0.3, 0.5);
+    const secondaryColors = generateColors(secondaryHexColor) as unknown as string[];
 
     setStoredColors(ColorType.PRIMARY, hue, primaryColors as unknown as MantineColorsTuple);
     setStoredColors(ColorType.SECONDARY, hue, secondaryColors as unknown as MantineColorsTuple);
+    localStorage.setItem("greyscale", isGreyscale ? "true" : "false");
+
     window.location.reload();
 };
 
