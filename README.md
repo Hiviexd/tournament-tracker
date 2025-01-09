@@ -1,6 +1,6 @@
 # Tournament Tracker
 
-The one-stop shop for all official osu! tournament correspondence and information.
+The one-stop shop for all official osu! tournament correspondence and information!
 
 > [!WARNING]
 > This project is currently in active development and is not yet ready for production use.
