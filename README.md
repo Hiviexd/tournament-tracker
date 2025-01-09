@@ -3,7 +3,7 @@
 The one-stop shop for all official osu! tournament correspondence and information.
 
 > [!WARNING]
-> This project is currently in an extremely WIP stage (only the backend is (barely) functional)
+> This project is currently in active development and is not yet ready for production use.
 
 ## Development
 
