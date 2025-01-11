@@ -1,6 +1,6 @@
 // base
 import { useEffect, useCallback } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import helpers from "../../helpers";
 import { routes } from "../../base/header.config";
 
@@ -27,7 +27,6 @@ interface IPropTypes {
 
 export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
-    const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
     const location = useLocation();
@@ -101,26 +100,22 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                                         : "subtle"
                                                 }
                                                 rightSection={
-                                                    route.links?.length > 0 ? (
+                                                    route.links && route.links?.length > 0 ? (
                                                         <FontAwesomeIcon icon="caret-down" />
                                                     ) : null
                                                 }
                                                 component={route.link ? Link : "button"}
-                                                to={route.link || "#"}
-                                                onClick={() => navigate(route.link)}>
+                                                to={route.link || "#"}>
                                                 {route.title}
                                             </Button>
                                         </Menu.Target>
-                                        {route.links?.length > 0 && (
+                                        {route.links && route.links?.length > 0 && (
                                             <Menu.Dropdown>
                                                 {route.links.map((menuLink) => (
                                                     <Menu.Item
                                                         key={menuLink.title}
                                                         component={Link}
                                                         to={menuLink.link || "#"}
-                                                        onClick={() =>
-                                                            navigate(menuLink.link)
-                                                        }
                                                         leftSection={
                                                             <FontAwesomeIcon
                                                                 icon={menuLink.icon as IconProp}
@@ -156,16 +151,11 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                     <Menu.Dropdown>
                                         <Menu.Label>Welcome back, {user.username}!</Menu.Label>
                                         <Menu.Item
-                                            onClick={() => navigate("/users/" + user.osuId)}
-                                            leftSection={<FontAwesomeIcon icon="user-circle" />}>
-                                            Profile
-                                        </Menu.Item>
-                                        <Menu.Item
-                                            onClick={() => navigate("/listing")}
+                                            component={Link}
+                                            to="/tournaments"
                                             leftSection={<FontAwesomeIcon icon="trophy" />}>
                                             Your Tournaments
                                         </Menu.Item>
-                                        <Menu.Divider />
                                         <Menu.Item
                                             onClick={openCustomize}
                                             leftSection={<FontAwesomeIcon icon="palette" />}>

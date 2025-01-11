@@ -62,12 +62,8 @@
         background-color: var(--mantine-color-primary-11) !important;
     }
 
-    a.mantine-Menu-item {
+    .mantine-Menu-item {
         text-decoration: none !important;
-
-        &:hover {
-            background-color: var(--mantine-color-primary-9) !important;
-        }
     }
 
     /* Notifications */
@@ -105,7 +101,7 @@
     }
 
     /* Inputs */
-    .mantine-Input-input, 
+    .mantine-Input-input,
     .mantine-Popover-dropdown {
         background-color: var(--mantine-color-primary-10) !important;
     }
@@ -200,6 +196,7 @@ html {
     background-color: var(--mantine-color-primary-9);
     color: var(--mantine-color-text);
 }
+
 /* Navbar avatar hover effect */
 .user-avatar {
     margin-left: 1rem;

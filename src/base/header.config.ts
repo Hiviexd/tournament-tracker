@@ -1,8 +1,9 @@
 export interface IRoute {
     title: string;
+    icon?: string;
     permissions: string[];
-    link: string;
-    menuLinks?: IRoute[];
+    link?: string;
+    links?: IRoute[];
 }
 
 export const routes: IRoute[] = [
