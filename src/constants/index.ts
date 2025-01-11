@@ -8,3 +8,5 @@ export const VOTE_COLORS = [
     "var(--mantine-color-pink-6)",
     "var(--mantine-color-cyan-6)",
 ];
+
+export const DEFAULT_HUE = "280";

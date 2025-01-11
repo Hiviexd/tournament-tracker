@@ -1,6 +1,7 @@
 import { createTheme, MantineColorsTuple } from "@mantine/core";
 import { generateColors } from "@mantine/colors-generator";
 import helpers from "../helpers";
+import { DEFAULT_HUE } from "../constants";
 
 const danger: MantineColorsTuple = [
     "#ffeaec",
@@ -54,7 +55,7 @@ const warning: MantineColorsTuple = [
     "#af7100",
 ];
 
-const hue = parseInt(localStorage.getItem("hue") || "40", 10);
+const hue = parseInt(localStorage.getItem("hue") || DEFAULT_HUE, 10);
 const isGreyscale = localStorage.getItem("greyscale") === "true";
 
 const generateTheme = (hue: number, isGreyscale: boolean) => {
