@@ -59,7 +59,7 @@ const hue = parseInt(localStorage.getItem("hue") || DEFAULT_HUE, 10);
 const isGreyscale = localStorage.getItem("greyscale") === "true";
 
 const generateTheme = (hue: number, isGreyscale: boolean) => {
-    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 0.8, 0.5);
+    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 0.5, 0.5);
 
     const theme = generateColors(primaryHexColor) as unknown as string[];
 
