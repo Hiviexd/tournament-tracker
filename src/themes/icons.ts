@@ -37,6 +37,7 @@ import {
     faRobot,
     faPalette,
     faUndo,
+    faCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -77,5 +78,6 @@ export default function loadIcons() {
         faRobot,
         faPalette,
         faUndo,
+        faCaretDown,
     );
 }

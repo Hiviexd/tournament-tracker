@@ -1,7 +1,8 @@
 // base
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useCallback } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import helpers from "../../helpers";
-import routes from "../../base/nav.routes";
+import { routes } from "../../base/header.config";
 
 // state
 import { useAtom } from "jotai";
@@ -29,6 +30,33 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
+    const location = useLocation();
+
+    const getSelectedRoute = useCallback(() => {
+        // First check exact path matches
+        const mainRoute = routes.find((route) => route.link === location.pathname);
+        if (mainRoute) return mainRoute.title;
+
+        // Then check if current path starts with any main route's link
+        const parentByPrefix = routes.find(
+            (route) => route.link && location.pathname.startsWith(route.link)
+        );
+        if (parentByPrefix) return parentByPrefix.title;
+
+        // Finally check nested links
+        const parentByNestedLink = routes.find((route) =>
+            route.links?.some((link) => link.link === location.pathname)
+        );
+        if (parentByNestedLink) return parentByNestedLink.title;
+
+        return null;
+    }, [location.pathname]);
+
+    const [selectedRoute, setSelectedRoute] = useState<string | null>(getSelectedRoute());
+
+    useEffect(() => {
+        setSelectedRoute(getSelectedRoute());
+    }, [getSelectedRoute]);
 
     const handleLogin = () => {
         setIsLoggingIn(true);
@@ -38,6 +66,15 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const handleLogout = () => {
         window.location.href = "/api/auth/logout";
     };
+
+    const visibleRoutes = routes
+        .filter((route) => helpers.hasRequiredPermissions(user, route.permissions))
+        .map((route) => ({
+            ...route,
+            links: route.links?.filter((link) =>
+                helpers.hasRequiredPermissions(user, link.permissions)
+            ),
+        }));
 
     return (
         <header>
@@ -54,52 +91,48 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                         <Image src="/assets/logo-main.svg" alt="Logo" h={55} />
                         <Group ml="xl" gap={6} visibleFrom="sm">
                             {user ? (
-                                routes.map(
-                                    (route) =>
-                                        helpers.hasRequiredPermissions(user, route.permissions) && (
-                                            <Menu key={route.title} trigger="hover" shadow="md">
-                                                <Menu.Target>
-                                                    <Button
-                                                        variant="subtle"
+                                visibleRoutes.map((route) => (
+                                    <Menu key={route.title} trigger="hover" shadow="md">
+                                        <Menu.Target>
+                                            <Button
+                                                variant={
+                                                    selectedRoute === route.title
+                                                        ? "light"
+                                                        : "subtle"
+                                                }
+                                                rightSection={
+                                                    route.links?.length > 0 ? (
+                                                        <FontAwesomeIcon icon="caret-down" />
+                                                    ) : null
+                                                }
+                                                component={route.link ? Link : "button"}
+                                                to={route.link || "#"}
+                                                onClick={() => navigate(route.link)}>
+                                                {route.title}
+                                            </Button>
+                                        </Menu.Target>
+                                        {route.links?.length > 0 && (
+                                            <Menu.Dropdown>
+                                                {route.links.map((menuLink) => (
+                                                    <Menu.Item
+                                                        key={menuLink.title}
                                                         component={Link}
-                                                        to={route.href}
-                                                        onClick={() => navigate(route.href)}>
-                                                        {route.title}
-                                                    </Button>
-                                                </Menu.Target>
-                                                {route.links && route.links.length > 0 && (
-                                                    <Menu.Dropdown>
-                                                        {route.links.map(
-                                                            (link) =>
-                                                                helpers.hasRequiredPermissions(
-                                                                    user,
-                                                                    link.permissions
-                                                                ) && (
-                                                                    <Menu.Item
-                                                                        key={link.title}
-                                                                        component={Link}
-                                                                        to={route.href + link.to}
-                                                                        leftSection={
-                                                                            <FontAwesomeIcon
-                                                                                icon={
-                                                                                    link.icon as IconProp
-                                                                                }
-                                                                            />
-                                                                        }
-                                                                        onClick={() =>
-                                                                            navigate(
-                                                                                route.href + link.to
-                                                                            )
-                                                                        }>
-                                                                        {link.title}
-                                                                    </Menu.Item>
-                                                                )
-                                                        )}
-                                                    </Menu.Dropdown>
-                                                )}
-                                            </Menu>
-                                        )
-                                )
+                                                        to={menuLink.link || "#"}
+                                                        onClick={() =>
+                                                            navigate(menuLink.link)
+                                                        }
+                                                        leftSection={
+                                                            <FontAwesomeIcon
+                                                                icon={menuLink.icon as IconProp}
+                                                            />
+                                                        }>
+                                                        {menuLink.title}
+                                                    </Menu.Item>
+                                                ))}
+                                            </Menu.Dropdown>
+                                        )}
+                                    </Menu>
+                                ))
                             ) : (
                                 <Button
                                     onClick={handleLogin}
