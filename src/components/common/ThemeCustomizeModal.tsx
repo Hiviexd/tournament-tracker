@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateTheme } from "../../themes/main";
 import { HueSlider, ColorSwatch, Checkbox, Divider } from "@mantine/core";
+import { DEFAULT_HUE } from "../../constants";
 
 interface IProps {
     opened: boolean;
@@ -10,7 +11,7 @@ interface IProps {
 }
 
 export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
-    const [initialHue, setInitialHue] = useState(45);
+    const [initialHue, setInitialHue] = useState(Number(DEFAULT_HUE));
     const [newHue, setNewHue] = useState(initialHue);
     const [isGreyscale, setIsGreyscale] = useState(false);
 
@@ -26,7 +27,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
 
     const getPreviewColor = (hue: number, isGreyscale: boolean) => {
         if (isGreyscale) return "#656565";
-        return `hsl(${hue}, 80%, 50%)`;
+        return `hsl(${hue}, 50%, 50%)`;
     };
 
     const handleSubmit = () => {
