@@ -75,7 +75,7 @@ const routes: RouteConfig[] = [
         permissions: [],
     },
     {
-        path: "/manage/logs",
+        path: "/logs",
         page: <LogsPage />,
         title: "Logs",
         icon: "history",
