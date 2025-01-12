@@ -1,19 +1,31 @@
-import { Stack, Card, Text } from "@mantine/core";
-import { IUser } from "../../../interfaces/User";
+import { Stack, Card, Group, Skeleton } from "@mantine/core";
+import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 
 interface IProps {
-    users: IUser[];
-    isLoading: boolean;
-    onUserSelect: (user: IUser) => void;
+    active: boolean;
+    onSelect: (userId: string) => void;
 }
 
-export default function CommitteeTab({ users, isLoading, onUserSelect }: IProps) {
-    // TODO use skeletons
+export default function CommitteeTab({ active, onSelect }: IProps) {
+    const { data: users = [], isLoading } = useCommitteeUsers({
+        enabled: active,
+    });
+
     const LoadingState = () => (
-        <Card shadow="sm" p="md">
-            <Text c="dimmed">Loading...</Text>
-        </Card>
+        <Stack gap="md">
+            {[...Array(3)].map((_, i) => (
+                <Card key={i} shadow="sm" p="md">
+                    <Group>
+                        <Skeleton radius="md" height={40} width={40} />
+                        <Stack gap={8}>
+                            <Skeleton height={18} width={120} />
+                            <Skeleton radius="xl" height={20} width={37} />
+                        </Stack>
+                    </Group>
+                </Card>
+            ))}
+        </Stack>
     );
 
     return (
@@ -27,7 +39,7 @@ export default function CommitteeTab({ users, isLoading, onUserSelect }: IProps)
                         shadow="sm"
                         p="md"
                         style={{ cursor: "pointer" }}
-                        onClick={() => onUserSelect(user)}>
+                        onClick={() => onSelect(user.osuId.toString())}>
                         <UserDisplay user={user} />
                     </Card>
                 ))

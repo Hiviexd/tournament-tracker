@@ -1,27 +1,35 @@
+import { useState } from "react";
 import { Stack, Card, Group, Button, TextInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
+import { useCreateUser } from "../../hooks/useUsers";
 
 interface IProps {
-    onUserSelect: (user: IUser) => void;
-    userIdToCreate: string;
-    onUserIdChange: (value: string) => void;
-    onCreateUser: () => void;
-    isCreating: boolean;
+    onSelect: (userId: string) => void;
 }
 
-export default function UsersTab({
-    onUserSelect,
-    userIdToCreate,
-    onUserIdChange,
-    onCreateUser,
-    isCreating,
-}: IProps) {
+export default function UsersTab({ onSelect }: IProps) {
+    const [userIdToCreate, setUserIdToCreate] = useState("");
+    const createUserMutation = useCreateUser();
+
+    const handleCreateUser = async () => {
+        if (!userIdToCreate) return;
+
+        const user = await createUserMutation.mutateAsync(userIdToCreate);
+        if (user) {
+            setUserIdToCreate("");
+            onSelect(user.osuId.toString());
+        }
+    };
+
     return (
         <Stack gap="md" mt="md">
             <Card shadow="sm" p="md">
-                <UserSearch label="Load user" onChange={onUserSelect} width="25%" />
+                <UserSearch
+                    label="Load user"
+                    onChange={(user) => user && onSelect(user.osuId.toString())}
+                    width="25%"
+                />
             </Card>
 
             <Card shadow="sm" p="md">
@@ -30,17 +38,17 @@ export default function UsersTab({
                         label="Create user"
                         placeholder="Enter username or osu! ID..."
                         value={userIdToCreate}
-                        onChange={(e) => onUserIdChange(e.currentTarget.value)}
+                        onChange={(e) => setUserIdToCreate(e.currentTarget.value)}
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && userIdToCreate) {
-                                onCreateUser();
+                                handleCreateUser();
                             }
                         }}
                         style={{ width: "25%" }}
                     />
                     <Button
-                        onClick={onCreateUser}
-                        loading={isCreating}
+                        onClick={handleCreateUser}
+                        loading={createUserMutation.isPending}
                         disabled={!userIdToCreate}
                         leftSection={<FontAwesomeIcon icon="plus" />}>
                         Create User
