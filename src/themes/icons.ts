@@ -38,6 +38,7 @@ import {
     faPalette,
     faUndo,
     faCaretDown,
+    faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -79,5 +80,6 @@ export default function loadIcons() {
         faPalette,
         faUndo,
         faCaretDown,
+        faUserTie,
     );
 }

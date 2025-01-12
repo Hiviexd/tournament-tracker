@@ -8,6 +8,7 @@ import VotingListPage from "../pages/VotingListPage";
 import VotingPage from "../pages/VotingPage";
 import MarkdownPage from "../pages/MarkdownPage";
 import LogsPage from "../pages/LogsPage";
+import UsersPage from "../pages/UsersPage";
 
 interface RouteConfig {
     path: string;
@@ -79,6 +80,13 @@ const routes: RouteConfig[] = [
         page: <LogsPage />,
         title: "Logs",
         icon: "history",
+        permissions: ["committee"],
+    },
+    {
+        path: "/users",
+        page: <UsersPage />,
+        title: "Users",
+        icon: "users",
         permissions: ["committee"],
     },
     {
