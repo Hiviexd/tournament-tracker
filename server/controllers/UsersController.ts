@@ -37,7 +37,11 @@ class UsersController {
     public async getUser(req, res): Promise<void> {
         const userInput = req.params.userInput;
 
-        const user = await User.findByUsernameOrOsuId(userInput).orFail();
+        const user = await User.findByUsernameOrOsuId(userInput);
+
+        if (!user) {
+            return res.json({ error: "User not found" });
+        }
 
         res.json(user);
     }
@@ -67,7 +71,11 @@ class UsersController {
     public async create(req, res): Promise<void> {
         const { userInput } = req.body;
 
-        const user = await UserService.findOrCreateUser(req.session.accessToken, userInput);
+        const user = await UserService.findOrCreateUser(req.session.accessToken!, userInput);
+
+        if (!user) {
+            return res.json({ error: "User not found" });
+        }
 
         res.json(user);
     }
