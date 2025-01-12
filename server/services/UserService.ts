@@ -91,14 +91,14 @@ class UserService {
     public async assignReviewers(type: UserGroup): Promise<IUser[]> {
         const users = await User.find({
             groups: { $in: [type] },
-            isActive: true,
+            isActiveReviewer: true,
             inBag: true,
         }).orFail();
 
         // get count of total users in groups
         const totalUsersCount = await User.countDocuments({
             groups: { $in: [type] },
-            isActive: true,
+            isActiveReviewer: true,
         });
 
         // safer check if there's less than 2 active users in the group

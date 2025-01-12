@@ -15,7 +15,7 @@ export interface IUser extends Document {
     groups: UserGroup[];
     history: IUserHistory[];
     discordId?: string;
-    isActive: boolean;
+    isActiveReviewer: boolean;
     inBag: boolean;
     coverUrl?: string;
     country?: IOsuCountry;
