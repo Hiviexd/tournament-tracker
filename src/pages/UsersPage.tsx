@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, Stack } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSetAtom } from "jotai";
+import { selectedUserAtom } from "../store/atoms";
 import UserDetailsModal from "../components/users/UserDetailsModal";
 import UsersTab from "../components/users/UsersTab";
 import CommitteeTab from "../components/users/CommitteeTab";
@@ -9,10 +11,19 @@ import CommitteeTab from "../components/users/CommitteeTab";
 export default function UsersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState<string | null>("users");
+    const setSelectedUser = useSetAtom(selectedUserAtom);
+
+    const handleModalClose = () => {
+        setSearchParams({});
+        setSelectedUser(null);
+    };
 
     return (
         <Stack gap="md">
-            <UserDetailsModal userId={searchParams.get("id")} onClose={() => setSearchParams({})} />
+            <UserDetailsModal
+                userId={searchParams.get("id")}
+                onClose={handleModalClose}
+            />
 
             <Tabs defaultValue="users" onChange={setActiveTab}>
                 <Tabs.List>

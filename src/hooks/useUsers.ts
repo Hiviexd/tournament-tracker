@@ -36,11 +36,11 @@ export function useCommitteeUsers(options: CommitteeUsersOptions = {}) {
     });
 }
 
-export function useUser(id: string | null) {
+export function useUser(id: string | null, options: { enabled?: boolean, retry?: boolean } = {}) {
     return useQuery({
         queryKey: ["user", id],
         queryFn: () => getUserById(id!),
-        enabled: !!id,
-        retry: false,
+        enabled: options.enabled ?? !!id,
+        retry: options.retry ?? false,
     });
 }

@@ -1,6 +1,9 @@
 import { Stack, Card, Group, Skeleton } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
+import { useSetAtom } from "jotai";
+import { selectedUserAtom } from "../../store/atoms";
+import { IUser } from "../../../interfaces/User";
 
 interface IProps {
     active: boolean;
@@ -11,6 +14,12 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
     const { data: users = [], isLoading } = useCommitteeUsers({
         enabled: active,
     });
+    const setSelectedUser = useSetAtom(selectedUserAtom);
+
+    const handleUserSelect = (user: IUser) => {
+        setSelectedUser(user);
+        onSelect(user.osuId.toString());
+    };
 
     const LoadingState = () => (
         <Stack gap="md">
@@ -39,7 +48,7 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
                         shadow="sm"
                         p="md"
                         style={{ cursor: "pointer" }}
-                        onClick={() => onSelect(user.osuId.toString())}>
+                        onClick={() => handleUserSelect(user)}>
                         <UserDisplay user={user} />
                     </Card>
                 ))

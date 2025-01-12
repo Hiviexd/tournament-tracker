@@ -7,3 +7,4 @@ export const redirectAtom = atom(false);
 
 /* User */
 export const loggedInUserAtom = atom<IUser | null>(null);
+export const selectedUserAtom = atom<IUser | null>(null);
