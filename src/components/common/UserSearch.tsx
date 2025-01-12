@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Combobox, InputBase, Loader, Group, Avatar, Text, useCombobox, Stack, ActionIcon } from "@mantine/core";
+import {
+    Combobox,
+    InputBase,
+    Loader,
+    Group,
+    Avatar,
+    Text,
+    useCombobox,
+    Stack,
+    ActionIcon,
+} from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useUsers } from "../../hooks/useUsers";
 import { IUser } from "../../../interfaces/User";
@@ -10,6 +20,7 @@ interface IProps {
     label?: string;
     error?: React.ReactNode;
     required?: boolean;
+    width?: string;
 }
 
 const UserOption = ({ username, avatarUrl }: { username: string; avatarUrl: string }) => (
@@ -19,7 +30,7 @@ const UserOption = ({ username, avatarUrl }: { username: string; avatarUrl: stri
     </Group>
 );
 
-export default function UserSearch({ onChange, label, error, required }: IProps) {
+export default function UserSearch({ onChange, label, error, required, width = "100%" }: IProps) {
     const [search, setSearch] = useState("");
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const [debouncedSearch] = useDebouncedValue(search, 400);
@@ -49,6 +60,7 @@ export default function UserSearch({ onChange, label, error, required }: IProps)
             )}
             {selectedUser ? (
                 <InputBase
+                    w={width}
                     component="button"
                     type="button"
                     pointer
@@ -69,6 +81,7 @@ export default function UserSearch({ onChange, label, error, required }: IProps)
                 </InputBase>
             ) : (
                 <Combobox
+                    w={width}
                     store={combobox}
                     onOptionSubmit={(optionValue) => {
                         const user = users.find((u) => u.id === optionValue);
