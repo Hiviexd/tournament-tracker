@@ -85,7 +85,7 @@ const routes: RouteConfig[] = [
     {
         path: "/users",
         page: <UsersPage />,
-        title: "Users",
+        title: "User Management",
         icon: "users",
         permissions: ["committee"],
     },
