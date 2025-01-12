@@ -2,10 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { searchUsers, createUser, getCommitteeUsers, getUserById } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 
-interface CommitteeUsersOptions {
-    enabled?: boolean;
-}
-
 export function useUsers(search: string, limit?: number) {
     return useQuery({
         queryKey: ["users", search, limit],
@@ -28,11 +24,11 @@ export function useCreateUser() {
     });
 }
 
-export function useCommitteeUsers(options: CommitteeUsersOptions = {}) {
+export function useCommitteeUsers(options: { enabled?: boolean } = {}) {
     return useQuery({
         queryKey: ["committeeUsers"],
         queryFn: getCommitteeUsers,
-        enabled: options.enabled,
+        enabled: options.enabled ?? true,
     });
 }
 
