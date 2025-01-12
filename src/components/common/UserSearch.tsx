@@ -80,37 +80,40 @@ export default function UserSearch({ onChange, label, error, required, width = "
                     />
                 </InputBase>
             ) : (
-                <Combobox
-                    w={width}
-                    store={combobox}
-                    onOptionSubmit={(optionValue) => {
-                        const user = users.find((u) => u.id === optionValue);
-                        if (user) {
-                            onChange(user);
-                            setSelectedUser(user);
-                            setSearch("");
-                        }
-                        combobox.closeDropdown();
-                    }}>
-                    <Combobox.Target>
-                        <InputBase
-                            error={error}
-                            rightSection={isLoading ? <Loader size="xs" /> : <Combobox.Chevron />}
-                            onClick={() => combobox.openDropdown()}
-                            onFocus={() => combobox.openDropdown()}
-                            onChange={(e) => {
-                                setSearch(e.currentTarget.value);
-                                combobox.updateSelectedOptionIndex();
-                            }}
-                            value={search}
-                            placeholder="Search by username or osu! ID..."
-                        />
-                    </Combobox.Target>
+                <div style={{ width }}>
+                    <Combobox
+                        store={combobox}
+                        onOptionSubmit={(optionValue) => {
+                            const user = users.find((u) => u.id === optionValue);
+                            if (user) {
+                                onChange(user);
+                                setSelectedUser(user);
+                                setSearch("");
+                            }
+                            combobox.closeDropdown();
+                        }}>
+                        <Combobox.Target>
+                            <InputBase
+                                error={error}
+                                rightSection={
+                                    isLoading ? <Loader size="xs" /> : <Combobox.Chevron />
+                                }
+                                onClick={() => combobox.openDropdown()}
+                                onFocus={() => combobox.openDropdown()}
+                                onChange={(e) => {
+                                    setSearch(e.currentTarget.value);
+                                    combobox.updateSelectedOptionIndex();
+                                }}
+                                value={search}
+                                placeholder="Search by username or osu! ID..."
+                            />
+                        </Combobox.Target>
 
-                    <Combobox.Dropdown hidden={users.length === 0}>
-                        <Combobox.Options>{options}</Combobox.Options>
-                    </Combobox.Dropdown>
-                </Combobox>
+                        <Combobox.Dropdown hidden={users.length === 0}>
+                            <Combobox.Options>{options}</Combobox.Options>
+                        </Combobox.Dropdown>
+                    </Combobox>
+                </div>
             )}
         </Stack>
     );
