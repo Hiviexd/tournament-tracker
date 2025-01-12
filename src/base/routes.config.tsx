@@ -6,7 +6,7 @@ import AdminPage from "../pages/AdminPage";
 import UserPage from "../pages/UserPage";
 import VotingListPage from "../pages/VotingListPage";
 import VotingPage from "../pages/VotingPage";
-import MarkdownPlaygroundPage from "../pages/MarkdownPlaygroundPage";
+import MarkdownPage from "../pages/MarkdownPage";
 import LogsPage from "../pages/LogsPage";
 
 interface RouteConfig {
@@ -69,7 +69,7 @@ const routes: RouteConfig[] = [
     },
     {
         path: "/markdown",
-        page: <MarkdownPlaygroundPage />,
+        page: <MarkdownPage />,
         title: "Markdown Playground",
         icon: "file-alt",
         permissions: [],

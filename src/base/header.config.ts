@@ -53,6 +53,7 @@ export const routes: IRoute[] = [
         links: [
             { title: "Users", link: "/users", icon: "users", permissions: ["committee"] },
             { title: "Logs", link: "/logs", icon: "history", permissions: ["committee"] },
+            { title: "Markdown", link: "/markdown", icon: "file-alt", permissions: ["committee"] },
         ],
     },
 ];
