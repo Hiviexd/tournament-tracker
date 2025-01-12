@@ -23,7 +23,8 @@ export default function UserSearch({ onChange, label, error, required }: IProps)
     const [search, setSearch] = useState("");
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const [debouncedSearch] = useDebouncedValue(search, 400);
-    const { data: users = [], isLoading } = useUsers(debouncedSearch);
+    const limit = 5;
+    const { data: users = [], isLoading } = useUsers(debouncedSearch, limit);
     const combobox = useCombobox();
 
     const options = users.map((user) => (

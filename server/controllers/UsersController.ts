@@ -12,7 +12,7 @@ class UsersController {
 
     /** GET users listing */
     public async index(req, res): Promise<void> {
-        const { userInput } = req.query;
+        const { userInput, limit } = req.query;
 
         if (!userInput) {
             return res.json([]);
@@ -30,7 +30,7 @@ class UsersController {
             users = await User.find({ username: { $regex: userInput, $options: "i" } });
         }
 
-        res.json(users.slice(0, 5));
+        res.json(limit ? users.slice(0, parseInt(limit, 10)) : users);
     }
 
     /** GET a user */

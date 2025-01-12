@@ -7,8 +7,9 @@ export const getLoggedInUser = async () => {
     return helpers.httpIsValid(response.data) ? response.data : null;
 };
 
-export const searchUsers = async (search: string): Promise<IUser[]> => {
+export const searchUsers = async (search: string, limit?: number): Promise<IUser[]> => {
     if (!search) return [];
-    const response = await axios.get(`/api/users?userInput=${search}`);
+    const params = { userInput: search, limit };
+    const response = await axios.get("/api/users", { params });
     return response.data;
 };
