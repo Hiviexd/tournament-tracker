@@ -21,7 +21,7 @@ class AuthController {
                 config.osuApp.id
             }&redirect_uri=${encodeURIComponent(
                 config.osuApp.redirect
-            )}&state=${hashedState}&scope=identify`
+            )}&state=${hashedState}&scope=public+identify`
         );
     }
 
