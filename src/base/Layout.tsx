@@ -1,5 +1,5 @@
 import { AppShell, Container, Flex } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import "../sass/Layout.scss";
 
 // components
@@ -17,6 +17,10 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
+
+    useDocumentTitle(
+        title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker"
+    );
 
     return (
         <AppShell
