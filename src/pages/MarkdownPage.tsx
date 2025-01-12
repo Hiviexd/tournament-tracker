@@ -3,7 +3,7 @@ import { Card, Stack, Textarea } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import MarkdownText from "../components/common/MarkdownText";
 
-export default function MarkdownPlaygroundPage() {
+export default function MarkdownPage() {
     const initialText = `# Main Title
 
 ## Features
@@ -41,8 +41,8 @@ interface User {
 }
 
 const user: User = {
-    name: "John",
-    age: 30
+    name: "Albion",
+    age: 64
 };
 \`\`\`
 
