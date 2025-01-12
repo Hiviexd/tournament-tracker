@@ -5,7 +5,18 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
 
 // Mantine
-import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip } from "@mantine/core";
+import {
+    Card,
+    Stack,
+    Group,
+    Title,
+    Text,
+    Badge,
+    Button,
+    ActionIcon,
+    Divider,
+    Tooltip,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -42,16 +53,14 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
             <Card
                 shadow="sm"
                 p="lg"
-                style={{
-                    borderTop: `4px solid ${
-                        voting.isActive
+                className="voting-info"
+                style={
+                    {
+                        "--card-status-color": voting.isActive
                             ? "var(--mantine-color-success-6)"
-                            : "var(--mantine-color-danger-6)"
-                    }`,
-                    background: `linear-gradient(180deg, var(${
-                        voting.isActive ? "--mantine-color-success-6" : "--mantine-color-danger-6"
-                    }) -60%, var(--mantine-color-primary-11) 4rem) !important`,
-                }}>
+                            : "var(--mantine-color-danger-6)",
+                    } as React.CSSProperties
+                }>
                 <Stack gap="lg">
                     <Stack gap="xs">
                         <Group align="center" gap="xs">

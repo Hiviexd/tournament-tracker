@@ -1,0 +1,28 @@
+.voting-list-card {
+    text-decoration: none !important;
+    position: relative;
+    border-left: 4px solid var(--card-status-color);
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+        background: linear-gradient(90deg,
+                var(--card-status-color) -60%,
+                var(--mantine-color-primary-11) 4rem);
+    }
+
+    >* {
+        position: relative;
+        z-index: 1;
+    }
+}

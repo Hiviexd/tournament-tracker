@@ -48,22 +48,16 @@ export default function VotingCard({ voting }: IPropTypes) {
         <Card
             shadow="sm"
             p="lg"
+            className="voting-list-card"
             component={Link}
             to={`/votings/${voting._id}`}
-            style={{
-                textDecoration: "none",
-                color: "inherit",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                borderLeft: `4px solid ${
-                    voting.isActive
+            style={
+                {
+                    "--card-status-color": voting.isActive
                         ? "var(--mantine-color-success-6)"
-                        : "var(--mantine-color-danger-6)"
-                }`,
-                background: `linear-gradient(90deg, var(${
-                    voting.isActive ? "--mantine-color-success-6" : "--mantine-color-danger-6"
-                }) -20%, var(--mantine-color-primary-11) 3%) !important`,
-            }}
+                        : "var(--mantine-color-danger-6)",
+                } as React.CSSProperties
+            }
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
             }}

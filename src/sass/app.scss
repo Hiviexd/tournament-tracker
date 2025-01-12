@@ -1,3 +1,9 @@
+/* Components */
+
+@import "MarkdownText.scss";
+@import "components/VotingInfo.scss";
+@import "components/VotingCard.scss";
+
 /* Fonts */
 
 @font-face {
@@ -208,5 +214,3 @@ html {
     }
 }
 
-/* Components */
-@import "MarkdownText.scss";
