@@ -6,7 +6,7 @@ import { IUser } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
-    onChange: (value: string) => void;
+    onChange: (user: IUser | null) => void;
     label?: string;
     error?: React.ReactNode;
     required?: boolean;
@@ -36,7 +36,7 @@ export default function UserSearch({ onChange, label, error, required }: IProps)
     const handleUnselect = () => {
         setSelectedUser(null);
         setSearch("");
-        onChange("");
+        onChange(null);
     };
 
     return (
@@ -73,7 +73,7 @@ export default function UserSearch({ onChange, label, error, required }: IProps)
                     onOptionSubmit={(optionValue) => {
                         const user = users.find((u) => u.id === optionValue);
                         if (user) {
-                            onChange(optionValue);
+                            onChange(user);
                             setSelectedUser(user);
                             setSearch("");
                         }
