@@ -25,7 +25,7 @@ export default function VotingPage() {
 
     const LoadingState = () => (
         <Stack gap="md">
-            <Card shadow="sm" p="lg" bg="primary.11">
+            <Card shadow="sm" p="lg">
                 <Skeleton height={24} width="60%" mb="xs" />
                 <Skeleton height={16} width="20%" mb="lg" />
                 <Skeleton height={16} width="50%" mb="xs" />
@@ -33,13 +33,12 @@ export default function VotingPage() {
                 <Skeleton height={16} width="20%" />
             </Card>
 
-            <Card shadow="sm" p="lg" bg="primary.11">
+            <Card shadow="sm" p="lg">
                 <Skeleton height={24} width="20%" mb="lg" />
                 <Skeleton height={16} width="15%" mb="xs" />
                 <Skeleton height={16} width="15%" mb="xs" />
                 <Skeleton height={16} width="15%" mb="lg" />
                 <Skeleton height={24} width="40%" />
-
             </Card>
         </Stack>
     );
@@ -52,7 +51,9 @@ export default function VotingPage() {
                     {error}
                 </Text>
 
-                <Button variant="subtle" onClick={() => navigate("/votings")}>Return to votings</Button>
+                <Button variant="subtle" onClick={() => navigate("/votings")}>
+                    Return to votings
+                </Button>
             </Stack>
         );
     };
@@ -71,9 +72,7 @@ export default function VotingPage() {
                         onNavigateBack={() => navigate("/voting")}
                     />
 
-                    {voting.isActive && (
-                        <VotingForm voting={voting} user={loggedInUser!} />
-                    )}
+                    {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
 
                     {(!voting.isActive || loggedInUser?.isAdmin) && (
                         <VotingResults voting={voting} />

@@ -36,7 +36,14 @@ export default function VotingListPage() {
         if (searchInput.status) params.set("status", searchInput.status);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
-    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status, page, setSearchParams]);
+    }, [
+        debouncedTitle,
+        searchInput.category,
+        searchInput.assignedGroup,
+        searchInput.status,
+        page,
+        setSearchParams,
+    ]);
 
     useEffect(() => {
         setPage(1);
@@ -53,7 +60,7 @@ export default function VotingListPage() {
     const LoadingState = () => (
         <Stack gap="md">
             {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg" bg="primary.11">
+                <Card key={i} shadow="sm" p="lg">
                     <Skeleton height={24} width="40%" mb="xs" />
                     <Skeleton height={16} width="20%" mb="lg" />
                     <Skeleton height={16} width="70%" />
@@ -76,7 +83,7 @@ export default function VotingListPage() {
                 </Text>
             </Stack>
         );
-    }
+    };
 
     return (
         <Stack gap="md">

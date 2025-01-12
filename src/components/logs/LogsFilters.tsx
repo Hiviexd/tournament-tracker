@@ -31,7 +31,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
     };
 
     return (
-        <Card shadow="sm" p="md" bg="primary.11">
+        <Card shadow="sm" p="md">
             <Group align="flex-end">
                 <TextInput
                     placeholder="Enter username or osu! ID..."

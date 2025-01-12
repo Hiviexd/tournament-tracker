@@ -37,7 +37,7 @@ export default function LogsPage() {
     const LoadingState = () => (
         <Stack gap="md">
             {
-                <Card shadow="sm" p="lg" bg="primary.11">
+                <Card shadow="sm" p="lg">
                     <Skeleton height={32} width="100%" mb="lg" />
                     {[...Array(10)].map((_, index) => (
                         <Skeleton key={index} height={24} width="100%" mb="xs" />

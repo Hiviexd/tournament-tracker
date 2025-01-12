@@ -10,7 +10,7 @@ interface IProps {
 
 export default function LogsTable({ logs }: IProps) {
     return (
-        <Card shadow="sm" p="lg" bg="primary.11">
+        <Card shadow="sm" p="lg">
             <Table>
                 <Table.Thead>
                     <Table.Tr>
@@ -34,7 +34,9 @@ export default function LogsTable({ logs }: IProps) {
                             </Table.Td>
                             <Table.Td>{log.user?.username || "System"}</Table.Td>
                             <Table.Td>
-                                <Text size="sm" tt="capitalize">{log.category}</Text>
+                                <Text size="sm" tt="capitalize">
+                                    {log.category}
+                                </Text>
                             </Table.Td>
                             <Table.Td>
                                 <MarkdownText content={log.action} />

@@ -31,7 +31,7 @@ export default function VotingForm({ voting, user }: IProps) {
     };
 
     return (
-        <Card shadow="sm" p="lg" bg="primary.11">
+        <Card shadow="sm" p="lg">
             <Stack gap="md">
                 <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
                 <Radio.Group

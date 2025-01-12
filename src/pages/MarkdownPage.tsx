@@ -69,10 +69,8 @@ const user: User = {
 
     return (
         <Stack gap="lg">
-            <Card shadow="sm" p="lg" bg="primary.11">
-                <MarkdownText
-                    content="This website supports [Markdown](https://www.markdownguide.org/basic-syntax/) formatting. Here's a playground to test out all available features:"
-                />
+            <Card shadow="sm" p="lg">
+                <MarkdownText content="This website supports [Markdown](https://www.markdownguide.org/basic-syntax/) formatting. Here's a playground to test out all available features:" />
                 <Textarea
                     value={text}
                     onChange={(e) => setText(e.currentTarget.value)}
@@ -84,7 +82,7 @@ const user: User = {
                 />
             </Card>
 
-            <Card shadow="sm" p="lg" bg="primary.11">
+            <Card shadow="sm" p="lg">
                 <MarkdownText content={debouncedText} />
             </Card>
         </Stack>

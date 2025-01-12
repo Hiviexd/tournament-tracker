@@ -122,5 +122,10 @@ export const theme = createTheme({
                 },
             },
         },
+        Card: {
+            defaultProps: {
+                bg: "primary.11",
+            },
+        },
     },
 });

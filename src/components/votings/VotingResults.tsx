@@ -22,7 +22,7 @@ export default function VotingResults({ voting }: IProps) {
             : voting.votes;
 
     return (
-        <Card shadow="sm" p="lg" bg="primary.11">
+        <Card shadow="sm" p="lg">
             <Stack gap="md">
                 <Title order={3}>Votes</Title>
                 <VotingStats
@@ -33,11 +33,7 @@ export default function VotingResults({ voting }: IProps) {
                 <Divider />
                 <Stack gap="xs">
                     {filteredVotes.map((vote) => (
-                        <VoteCard
-                            key={vote._id}
-                            vote={vote}
-                            options={voting.options}
-                        />
+                        <VoteCard key={vote._id} vote={vote} options={voting.options} />
                     ))}
                 </Stack>
             </Stack>
