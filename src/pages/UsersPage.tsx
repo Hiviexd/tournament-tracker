@@ -1,18 +1,14 @@
-// Base
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { IUser } from "../../interfaces/User";
 import { useUser, useCommitteeUsers, useCreateUser } from "../hooks/useUsers";
-
-// Mantine
-import { Tabs, Stack, Card, Group, Button, TextInput, Modal, Text } from "@mantine/core";
+import { Tabs, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
-
-// Components
-import UserSearch from "../components/common/UserSearch";
-import UserDisplay from "../components/common/UserDisplay";
+import UserDetailsModal from "../components/users/UserDetailsModal";
+import UsersTab from "../components/users/UsersTab";
+import CommitteeTab from "../components/users/CommitteeTab";
 
 export default function UsersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -21,15 +17,11 @@ export default function UsersPage() {
     const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [activeTab, setActiveTab] = useState<string | null>("users");
 
-    // URL param handling
     const urlUserId = searchParams.get("id");
     const { data: userFromUrl, isLoading: isLoadingUser } = useUser(urlUserId);
-
-    // Committee users - only enabled when committee tab is active
     const { data: committeeUsers = [], isLoading: isLoadingCommittee } = useCommitteeUsers({
         enabled: activeTab === "committee",
     });
-
     const createUserMutation = useCreateUser();
 
     const handleUserSelect = useCallback(
@@ -46,12 +38,6 @@ export default function UsersPage() {
         setSelectedUser(null);
         closeModal();
     }, [setSearchParams, closeModal]);
-
-    const handleUserSearch = (user: IUser | null) => {
-        if (user) {
-            handleUserSelect(user);
-        }
-    };
 
     const handleCreateUser = async () => {
         if (!userIdToCreate) return;
@@ -78,31 +64,15 @@ export default function UsersPage() {
         }
     }, [urlUserId, userFromUrl, isLoadingUser, handleUserSelect, handleModalClose]);
 
-    // TODO use skeletons
-    const LoadingState = () => (
-        <Card shadow="sm" p="md">
-            <Text c="dimmed">Loading...</Text>
-        </Card>
-    );
-
-    // TODO use skeletons
-    const ModalLoadingState = () => (
-        <Card shadow="sm" p="md">
-            <Text c="dimmed">Loading...</Text>
-        </Card>
-    );
-
     return (
         <Stack gap="md">
-            <Modal opened={modalOpened} onClose={handleModalClose} title="User Details" size="lg">
-                {isLoadingUser ? (
-                    <ModalLoadingState />
-                ) : selectedUser ? (
-                    <Stack>
-                        <UserDisplay user={selectedUser} />
-                    </Stack>
-                ) : null}
-            </Modal>
+            <UserDetailsModal
+                opened={modalOpened}
+                onClose={handleModalClose}
+                user={selectedUser}
+                isLoading={isLoadingUser}
+            />
+
             <Tabs defaultValue="users" onChange={setActiveTab}>
                 <Tabs.List>
                     <Tabs.Tab value="users" leftSection={<FontAwesomeIcon icon="users" />}>
@@ -114,54 +84,21 @@ export default function UsersPage() {
                 </Tabs.List>
 
                 <Tabs.Panel value="users">
-                    <Stack gap="md" mt="md">
-                        <Card shadow="sm" p="md">
-                            <UserSearch label="Load user" onChange={handleUserSearch} width="25%" />
-                        </Card>
-
-                        <Card shadow="sm" p="md">
-                            <Group align="flex-end">
-                                <TextInput
-                                    label="Create user"
-                                    placeholder="Enter username or osu! ID..."
-                                    value={userIdToCreate}
-                                    onChange={(e) => setUserIdToCreate(e.currentTarget.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" && userIdToCreate) {
-                                            handleCreateUser();
-                                        }
-                                    }}
-                                    style={{ width: "25%" }}
-                                />
-                                <Button
-                                    onClick={handleCreateUser}
-                                    loading={createUserMutation.isPending}
-                                    disabled={!userIdToCreate}
-                                    leftSection={<FontAwesomeIcon icon="plus" />}>
-                                    Create User
-                                </Button>
-                            </Group>
-                        </Card>
-                    </Stack>
+                    <UsersTab
+                        onUserSelect={handleUserSelect}
+                        userIdToCreate={userIdToCreate}
+                        onUserIdChange={setUserIdToCreate}
+                        onCreateUser={handleCreateUser}
+                        isCreating={createUserMutation.isPending}
+                    />
                 </Tabs.Panel>
 
                 <Tabs.Panel value="committee">
-                    <Stack gap="md" mt="md">
-                        {isLoadingCommittee ? (
-                            <LoadingState />
-                        ) : (
-                            committeeUsers.map((user) => (
-                                <Card
-                                    key={user._id}
-                                    shadow="sm"
-                                    p="md"
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() => handleUserSelect(user)}>
-                                    <UserDisplay user={user} />
-                                </Card>
-                            ))
-                        )}
-                    </Stack>
+                    <CommitteeTab
+                        users={committeeUsers}
+                        isLoading={isLoadingCommittee}
+                        onUserSelect={handleUserSelect}
+                    />
                 </Tabs.Panel>
             </Tabs>
         </Stack>
