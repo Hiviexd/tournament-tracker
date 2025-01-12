@@ -2,8 +2,8 @@ import { Modal, Stack, Group, Skeleton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useUser } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
-import { useEffect, useCallback } from "react";
 import { notifications } from "@mantine/notifications";
+import { useEffect, useCallback } from "react";
 
 interface IProps {
     userId: string | null;
@@ -19,6 +19,16 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
         close();
     }, [close, onClose]);
 
+    // load modal as soon as there's a userId param
+    useEffect(() => {
+        if (userId) {
+            open();
+        } else {
+            close();
+        }
+    }, [userId, open, close]);
+
+    // handle data loading errors
     useEffect(() => {
         if (userId && !isLoading) {
             if (!user || user.error) {
@@ -28,11 +38,9 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                     color: "red",
                 });
                 handleClose();
-            } else {
-                open();
             }
         }
-    }, [userId, user, isLoading, open, handleClose]);
+    }, [userId, user, isLoading, handleClose]);
 
     const LoadingState = () => (
         <Stack>
@@ -54,7 +62,6 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                 user && (
                     <Stack>
                         <UserDisplay user={user} />
-                        {/* Add more user details and management options here */}
                     </Stack>
                 )
             )}
