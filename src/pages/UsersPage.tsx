@@ -116,19 +116,22 @@ export default function UsersPage() {
                 <Tabs.Panel value="users">
                     <Stack gap="md" mt="md">
                         <Card shadow="sm" p="md">
-                            <Group align="flex-end">
-                                <UserSearch label="Load user" onChange={handleUserSearch} />
-                            </Group>
+                            <UserSearch label="Load user" onChange={handleUserSearch} width="25%" />
                         </Card>
 
                         <Card shadow="sm" p="md">
                             <Group align="flex-end">
                                 <TextInput
                                     label="Create user"
-                                    placeholder="Enter osu! ID"
+                                    placeholder="Enter username or osu! ID..."
                                     value={userIdToCreate}
                                     onChange={(e) => setUserIdToCreate(e.currentTarget.value)}
-                                    style={{ flex: 1 }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && userIdToCreate) {
+                                            handleCreateUser();
+                                        }
+                                    }}
+                                    style={{ width: "25%" }}
                                 />
                                 <Button
                                     onClick={handleCreateUser}
