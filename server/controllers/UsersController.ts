@@ -2,6 +2,9 @@ import { IUser } from "../../interfaces/User";
 import User from "../models/userModel";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
+import DiscordService from "../services/DiscordService";
+import webhookColors from "../helpers/constants/webhookColors";
+import LogService from "../services/LogService";
 
 class UsersController {
     /** GET logged in user */
@@ -76,6 +79,30 @@ class UsersController {
         if (!user) {
             return res.json({ error: "User not found" });
         }
+
+        res.json(user);
+    }
+
+    /** POST toggle isActiveReviewer */
+    public async toggleReviewer(req, res): Promise<void> {
+        const { id } = req.params;
+
+        const user = await User.findById(id).orFail();
+
+        user.isActiveReviewer = !user.isActiveReviewer;
+        await user.save();
+
+        await LogService.generate(req.session.mongoId, `Toggled reviewer status for ${user.username} to ${user.isActiveReviewer}`, "user");
+
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.blue,
+                description: `Marked **[${user.username}](https://osu.ppy.sh/users/${
+                    user.osuId
+                })** as ${user.isActiveReviewer ? "active" : "inactive"} reviewer`,
+            },
+        ], undefined, undefined, "dev");
 
         res.json(user);
     }
