@@ -21,7 +21,7 @@ export default function MobileHeader({ opened, onClose }: IProps) {
 
             <Transition mounted={opened} transition="slide-right" duration={200}>
                 {(styles) => (
-                    <AppShell.Navbar py="md" px="md" hiddenFrom="sm" style={styles}>
+                    <AppShell.Navbar py="md" px="md" hiddenFrom="md" style={styles}>
                         <AppShell.Section grow>
                             <Stack gap="md">
                                 <MobileUserSection
