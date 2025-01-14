@@ -1,4 +1,4 @@
-import { Card, Group, TextInput, Select } from "@mantine/core";
+import { Card, Group, TextInput, Select, Stack } from "@mantine/core";
 import { VotingCategory } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
 
@@ -37,35 +37,37 @@ export default function VotingFilters({ values, onChange }: IProps) {
 
     return (
         <Card shadow="sm" p="md">
-            <Group align="flex-end">
+            <Stack align="stretch" w="100%">
                 <TextInput
                     placeholder="Search by title..."
                     value={values.title}
                     onChange={(e) => handleChange("title", e.currentTarget.value)}
-                    style={{ flex: 1 }}
+                    w="100%"
                 />
-                <Select
-                    placeholder="Category"
-                    value={values.category}
-                    onChange={(value) => handleChange("category", value as VotingCategory)}
-                    data={categoryOptions}
-                    style={{ width: 200 }}
-                />
-                <Select
-                    placeholder="Assigned Group"
-                    value={values.assignedGroup}
-                    onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
-                    data={assignedGroupOptions}
-                    style={{ width: 200 }}
-                />
-                <Select
-                    placeholder="Status"
-                    value={values.status}
-                    onChange={(value) => handleChange("status", value)}
-                    data={statusOptions}
-                    style={{ width: 200 }}
-                />
-            </Group>
+                <Group>
+                    <Select
+                        placeholder="Category"
+                        value={values.category}
+                        onChange={(value) => handleChange("category", value as VotingCategory)}
+                        data={categoryOptions}
+                        style={{ flex: 1, minWidth: 200 }}
+                    />
+                    <Select
+                        placeholder="Assigned Group"
+                        value={values.assignedGroup}
+                        onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                        data={assignedGroupOptions}
+                        style={{ flex: 1, minWidth: 200 }}
+                    />
+                    <Select
+                        placeholder="Status"
+                        value={values.status}
+                        onChange={(value) => handleChange("status", value)}
+                        data={statusOptions}
+                        style={{ flex: 1, minWidth: 200 }}
+                    />
+                </Group>
+            </Stack>
         </Card>
     );
 }
