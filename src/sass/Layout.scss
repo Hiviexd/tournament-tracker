@@ -48,30 +48,39 @@
     display: flex;
     width: 100%;
     height: auto;
-    justify-content: space-between;
     align-items: center;
     margin: 0 auto;
 
-    @media (max-width: 48em) {
-        // Below sm breakpoint
+    // Position logo container absolutely in mobile view
+    >a {
+        @media (max-width: calc(62em - 1px)) {
+            // Below md breakpoint
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+
+    // Ensure burger menu stays above
+    >.mantine-Burger-root {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: calc(62em - 1px)) {
+        // Below md breakpoint
         justify-content: flex-start;
         align-items: center;
     }
 
-    @media (min-width: 48em) {
-        // sm - 48em
-        justify-content: flex-start;
-        max-width: 48em;
-    }
-
     @media (min-width: 62em) {
-        // md - 62em
+        // md and above
         justify-content: space-between;
         max-width: 62em;
     }
 
     @media (min-width: 75em) {
-        // lg - 75em
+        // lg and above
         max-width: 75em;
     }
 
