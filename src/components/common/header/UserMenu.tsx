@@ -58,7 +58,6 @@ export default function UserMenu({ user }: IProps) {
                         size="3rem"
                         className="user-avatar"
                         style={{
-                            cursor: "pointer",
                             borderColor:
                                 hovered || menuOpened
                                     ? "var(--mantine-color-primary-4)"

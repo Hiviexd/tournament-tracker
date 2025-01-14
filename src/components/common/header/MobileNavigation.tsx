@@ -91,6 +91,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                                         }
                                         active={location.pathname === link.link}
                                         onClick={handleSubLinkClick}
+                                        variant="subtle"
                                     />
                                 ))}
                             </Stack>
