@@ -9,5 +9,6 @@ usersRouter.get("/me", permissions.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", UsersController.getCommittee);
 usersRouter.post("/create", permissions.isLoggedIn, permissions.isCommittee, UsersController.create);
 usersRouter.get("/:userInput", UsersController.getUser);
+usersRouter.post("/:userId/toggleReviewerStatus", permissions.isLoggedIn, permissions.isCommittee, UsersController.toggleReviewerStatus);
 
 export default usersRouter;
