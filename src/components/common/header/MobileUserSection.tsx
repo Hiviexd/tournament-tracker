@@ -1,52 +1,64 @@
-import { UnstyledButton, Group, Avatar, Stack, Text, Collapse } from "@mantine/core";
+import { useState } from "react";
+import { UnstyledButton, Button, Stack, Text, Collapse, Image, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import ThemeCustomizeModal from "../ThemeCustomizeModal";
-import SettingsModal from "../SettingsModal";
+import MobileUserSectionCard from "./MobileUserSectionCard";
 
-export default function MobileUserSection() {
+interface IProps {
+    onClose: () => void;
+    onOpenCustomize: () => void;
+    onOpenSettings: () => void;
+}
+
+export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSettings }: IProps) {
     const [opened, { toggle }] = useDisclosure(false);
     const [user] = useAtom(loggedInUserAtom);
-    const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
-    const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-    if (!user) return null;
+    const handleLogin = () => {
+        setIsLoggingIn(true);
+        window.location.href = "/api/auth/login";
+    };
+
+    const handleCustomize = () => {
+        onClose();
+        onOpenCustomize();
+    };
+
+    const handleSettings = () => {
+        onClose();
+        onOpenSettings();
+    };
+
+    if (!user)
+        return (
+            <Button
+                onClick={handleLogin}
+                variant="gradient"
+                loading={isLoggingIn}
+                gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
+                leftSection={<Image src="/assets/logo-osu.svg" h={20} />}>
+                Login
+            </Button>
+        );
 
     return (
         <Stack>
-            <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
-            <SettingsModal opened={settingsOpened} onClose={closeSettings} />
-            <UnstyledButton onClick={toggle}>
-                <Group p="xs">
-                    <Avatar src={user.avatarUrl} size="md" />
-                    <Stack gap={2} style={{ flex: 1 }}>
-                        <Text size="sm" fw={500}>
-                            {user.username}
-                        </Text>
-                    </Stack>
-                    <FontAwesomeIcon
-                        icon="caret-down"
-                        style={{
-                            transform: opened ? "rotate(180deg)" : "none",
-                            transition: "transform 200ms ease",
-                        }}
-                    />
-                </Group>
-            </UnstyledButton>
+            <MobileUserSectionCard user={user} opened={opened} onClick={toggle} />
 
             <Collapse in={opened}>
                 <Stack px="xs" pb="xs">
-                    <UnstyledButton component={Link} to="/tournaments">
+                    <UnstyledButton component={Link} to="/tournaments" onClick={onClose}>
                         <Group>
                             <FontAwesomeIcon icon="trophy" />
                             <Text size="sm">Your Tournaments</Text>
                         </Group>
                     </UnstyledButton>
 
-                    <UnstyledButton onClick={openCustomize}>
+                    <UnstyledButton onClick={handleCustomize}>
                         <Group>
                             <FontAwesomeIcon icon="palette" />
                             <Text size="sm">Customize Theme</Text>
@@ -54,7 +66,7 @@ export default function MobileUserSection() {
                     </UnstyledButton>
 
                     {user.isCommittee && (
-                        <UnstyledButton onClick={openSettings}>
+                        <UnstyledButton onClick={handleSettings}>
                             <Group>
                                 <FontAwesomeIcon icon="cog" />
                                 <Text size="sm">Settings</Text>
@@ -62,10 +74,17 @@ export default function MobileUserSection() {
                         </UnstyledButton>
                     )}
 
-                    <UnstyledButton onClick={() => (window.location.href = "/api/auth/logout")}>
+                    <UnstyledButton
+                        onClick={() => {
+                            window.location.href = "/api/auth/logout";
+                            onClose();
+                        }}>
                         <Group>
-                            <FontAwesomeIcon icon="sign-out-alt" />
-                            <Text size="sm" c="red">
+                            <FontAwesomeIcon
+                                icon="sign-out-alt"
+                                color="var(--mantine-color-danger-5)"
+                            />
+                            <Text size="sm" c="danger">
                                 Log Out
                             </Text>
                         </Group>

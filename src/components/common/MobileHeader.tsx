@@ -1,21 +1,41 @@
-import { AppShell, Stack, Divider } from "@mantine/core";
+import { AppShell, Stack, Divider, Transition } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import MobileUserSection from "./header/MobileUserSection";
 import MobileNavLinks from "./header/MobileNavLinks";
+import ThemeCustomizeModal from "./ThemeCustomizeModal";
+import SettingsModal from "./SettingsModal";
 
 interface IProps {
     opened: boolean;
+    onClose: () => void;
 }
 
-export default function MobileHeader({ opened }: IProps) {
-    if (!opened) return null;
+export default function MobileHeader({ opened, onClose }: IProps) {
+    const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
+    const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
 
     return (
-        <AppShell.Navbar py="md" px={4}>
-            <Stack>
-                <MobileUserSection />
-                <Divider />
-                <MobileNavLinks />
-            </Stack>
-        </AppShell.Navbar>
+        <>
+            <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
+            <SettingsModal opened={settingsOpened} onClose={closeSettings} />
+
+            <Transition mounted={opened} transition="slide-right" duration={200}>
+                {(styles) => (
+                    <AppShell.Navbar py="md" px="md" hiddenFrom="sm" style={styles}>
+                        <AppShell.Section grow>
+                            <Stack gap="md">
+                                <MobileUserSection
+                                    onClose={onClose}
+                                    onOpenCustomize={openCustomize}
+                                    onOpenSettings={openSettings}
+                                />
+                                <Divider />
+                                <MobileNavLinks onClose={onClose} />
+                            </Stack>
+                        </AppShell.Section>
+                    </AppShell.Navbar>
+                )}
+            </Transition>
+        </>
     );
 }

@@ -36,7 +36,7 @@ export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
                 <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
             </AppShell.Header>
 
-            <MobileHeader opened={opened} />
+            <MobileHeader opened={opened} onClose={toggle} />
 
             <AppShell.Main>
                 <div className="main-layout">

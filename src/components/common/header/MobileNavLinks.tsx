@@ -1,18 +1,25 @@
-import { Stack, UnstyledButton, Group, Text, Collapse } from "@mantine/core";
+import { Stack, NavLink, Collapse } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { routes } from "../../../base/header.config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import helpers from "../../../helpers";
 import { useState } from "react";
+import { IRoute } from "../../../base/header.config";
 
-export default function MobileNavLinks() {
+interface IProps {
+    onClose: () => void;
+}
+
+export default function MobileNavLinks({ onClose }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const location = useLocation();
+    const navigate = useNavigate();
     const [expandedRoute, setExpandedRoute] = useState<string | null>(null);
 
+    // Use same visible routes logic as Header component
     const visibleRoutes = routes
         .filter((route) => helpers.hasRequiredPermissions(user, route.permissions))
         .map((route) => ({
@@ -22,30 +29,41 @@ export default function MobileNavLinks() {
             ),
         }));
 
-    const handleRouteClick = (routeTitle: string) => {
-        setExpandedRoute(expandedRoute === routeTitle ? null : routeTitle);
+    const isRouteActive = (route: IRoute) => {
+        // Direct match
+        if (location.pathname === route.link) return true;
+        // Match any child route
+        return route.links?.some((link) => location.pathname === link.link);
+    };
+
+    const handleRouteClick = (route: IRoute) => {
+        if (route.links?.length) {
+            // Toggle dropdown if route has children
+            setExpandedRoute(expandedRoute === route.title ? null : route.title);
+        } else if (route.link) {
+            // Navigate if route has a direct link
+            navigate(route.link);
+            onClose();
+        }
+    };
+
+    const handleSubLinkClick = () => {
+        onClose(); // Close mobile menu when clicking any sublink
     };
 
     return (
         <Stack>
             {visibleRoutes.map((route) => (
                 <Stack key={route.title} gap={0}>
-                    <UnstyledButton
-                        onClick={() => handleRouteClick(route.title)}
-                        component={route.link && !route.links?.length ? Link : "button"}
-                        to={route.link}
-                        p="xs"
-                        style={{
-                            backgroundColor:
-                                location.pathname === route.link
-                                    ? "var(--mantine-color-primary-9)"
-                                    : undefined,
-                        }}>
-                        <Group justify="space-between">
-                            <Text size="sm" fw={500}>
-                                {route.title}
-                            </Text>
-                            {route.links?.length ? (
+                    <NavLink
+                        label={route.title}
+                        leftSection={
+                            route.icon && <FontAwesomeIcon icon={route.icon as IconProp} />
+                        }
+                        active={isRouteActive(route)}
+                        onClick={() => handleRouteClick(route)}
+                        rightSection={
+                            route.links?.length ? (
                                 <FontAwesomeIcon
                                     icon="caret-down"
                                     style={{
@@ -56,34 +74,28 @@ export default function MobileNavLinks() {
                                         transition: "transform 200ms ease",
                                     }}
                                 />
-                            ) : null}
-                        </Group>
-                    </UnstyledButton>
-
-                    {route.links?.length ? (
+                            ) : null
+                        }
+                    />
+                    {route.links?.length && (
                         <Collapse in={expandedRoute === route.title}>
                             <Stack gap={0} pl="md">
                                 {route.links.map((link) => (
-                                    <UnstyledButton
+                                    <NavLink
                                         key={link.title}
+                                        label={link.title}
                                         component={Link}
                                         to={link.link || "#"}
-                                        p="xs"
-                                        style={{
-                                            backgroundColor:
-                                                location.pathname === link.link
-                                                    ? "var(--mantine-color-primary-9)"
-                                                    : undefined,
-                                        }}>
-                                        <Group>
+                                        leftSection={
                                             <FontAwesomeIcon icon={link.icon as IconProp} />
-                                            <Text size="sm">{link.title}</Text>
-                                        </Group>
-                                    </UnstyledButton>
+                                        }
+                                        active={location.pathname === link.link}
+                                        onClick={handleSubLinkClick}
+                                    />
                                 ))}
                             </Stack>
                         </Collapse>
-                    ) : null}
+                    )}
                 </Stack>
             ))}
         </Stack>
