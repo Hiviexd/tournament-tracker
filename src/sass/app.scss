@@ -130,6 +130,15 @@
     .mantine-Pagination-control {
         background-color: var(--mantine-color-primary-10) !important;
     }
+
+    /* NavLink styles */
+    .mantine-NavLink-root {
+        text-decoration: none !important;
+
+        &[data-active] {
+            text-decoration: none !important;
+        }
+    }
 }
 
 /* Links */
@@ -209,6 +218,5 @@ html {
     transition: border 0.2s ease;
     border: 2px solid transparent;
 
-    
-}
 
+}
