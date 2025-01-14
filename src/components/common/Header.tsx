@@ -11,7 +11,7 @@ import { useState } from "react";
 
 // Mantine
 import { AppShell, Burger, Button, Group, Image, Menu, Avatar } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useHover } from "@mantine/hooks";
 
 // icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +32,8 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
     const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
     const location = useLocation();
+    const [menuOpened, setMenuOpened] = useState(false);
+    const { hovered, ref } = useHover();
 
     const getSelectedRoute = useCallback(() => {
         // First check exact path matches
@@ -107,7 +109,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                                         <FontAwesomeIcon icon="caret-down" />
                                                     ) : null
                                                 }
-                                                component={route.link ? Link : "button" as any}
+                                                component={route.link ? Link : ("button" as any)}
                                                 to={route.link || "#"}>
                                                 {route.title}
                                             </Button>
@@ -142,13 +144,25 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                 </Button>
                             )}
                             {user && (
-                                <Menu withArrow shadow="md" trigger="hover">
+                                <Menu
+                                    withArrow
+                                    shadow="md"
+                                    trigger="hover"
+                                    opened={menuOpened}
+                                    onChange={setMenuOpened}>
                                     <Menu.Target>
                                         <Avatar
+                                            ref={ref}
                                             src={user.avatarUrl}
                                             size="3rem"
                                             className="user-avatar"
-                                            style={{ cursor: "pointer" }}
+                                            style={{
+                                                cursor: "pointer",
+                                                borderColor:
+                                                    hovered || menuOpened
+                                                        ? "var(--mantine-color-primary-4)"
+                                                        : "transparent",
+                                            }}
                                         />
                                     </Menu.Target>
                                     <Menu.Dropdown>
