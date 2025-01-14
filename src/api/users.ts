@@ -29,3 +29,8 @@ export const createUser = async (id: string) => {
     const response = await axios.post("/api/users/create", { userInput: id });
     return response.data;
 };
+
+export const toggleReviewerStatus = async (userId: string) => {
+    const response = await axios.post(`/api/users/${userId}/toggleReviewerStatus`);
+    return response.data;
+};

@@ -19,6 +19,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 // components
 import ThemeCustomizeModal from "./ThemeCustomizeModal";
+import SettingsModal from "./SettingsModal";
 
 interface IPropTypes {
     mobileHeaderOpened: boolean;
@@ -29,6 +30,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const [user] = useAtom(loggedInUserAtom);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
+    const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
     const location = useLocation();
 
     const getSelectedRoute = useCallback(() => {
@@ -78,6 +80,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     return (
         <header>
             <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
+            <SettingsModal opened={settingsOpened} onClose={closeSettings} />
             <AppShell.Header>
                 <Group h="100%" px="xl">
                     <div className="nav-group">
@@ -104,7 +107,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                                         <FontAwesomeIcon icon="caret-down" />
                                                     ) : null
                                                 }
-                                                component={route.link ? Link : "button"}
+                                                component={route.link ? Link : "button" as any}
                                                 to={route.link || "#"}>
                                                 {route.title}
                                             </Button>
@@ -152,7 +155,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                         <Menu.Label>Welcome back, {user.username}!</Menu.Label>
                                         <Menu.Item
                                             component={Link}
-                                            to="/tournaments"
+                                            to="/tournaments" // TODO: replace a query for user's tournaments
                                             leftSection={<FontAwesomeIcon icon="trophy" />}>
                                             Your Tournaments
                                         </Menu.Item>
@@ -161,6 +164,13 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                             leftSection={<FontAwesomeIcon icon="palette" />}>
                                             Customize Theme
                                         </Menu.Item>
+                                        {user.isCommittee && (
+                                            <Menu.Item
+                                                onClick={openSettings}
+                                                leftSection={<FontAwesomeIcon icon="cog" />}>
+                                                Settings
+                                            </Menu.Item>
+                                        )}
                                         <Menu.Divider />
                                         <Menu.Item
                                             onClick={handleLogout}

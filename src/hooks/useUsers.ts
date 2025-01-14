@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { searchUsers, createUser, getCommitteeUsers, getUserById } from "../api/users";
+import { searchUsers, createUser, getCommitteeUsers, getUserById, toggleReviewerStatus } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../store/atoms";
 
 export function useUsers(search: string, limit?: number) {
     return useQuery({
@@ -38,5 +40,30 @@ export function useUser(id: string | null, options: { enabled?: boolean, retry?:
         queryFn: () => getUserById(id!),
         enabled: options.enabled ?? !!id,
         retry: options.retry ?? false,
+    });
+}
+
+export function useToggleReviewerStatus(userId: string) {
+    const queryClient = useQueryClient();
+    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await toggleReviewerStatus(userId);
+            return handleMutationResponse(
+                response,
+                `Reviewer status updated successfully`
+            );
+        },
+        onSuccess: (updatedUser) => {
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+
+            // Update loggedInUser when relevant
+            if (loggedInUser?._id === userId) {
+                queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+                setLoggedInUser(updatedUser);
+            }
+        }
     });
 }
