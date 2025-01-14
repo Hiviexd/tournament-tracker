@@ -20,8 +20,6 @@ export default function HomePage() {
             <Link to="/committee">Committee Page</Link>
             <br />
             <Link to="/admin">Admin Page</Link>
-
-            <pre>{JSON.stringify(user, null, 2)}</pre>
         </div>
     );
 }
