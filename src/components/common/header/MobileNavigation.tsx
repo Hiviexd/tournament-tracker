@@ -13,7 +13,7 @@ interface IProps {
     onClose: () => void;
 }
 
-export default function MobileNavLinks({ onClose }: IProps) {
+export default function MobileNavigation({ onClose }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const location = useLocation();
     const navigate = useNavigate();

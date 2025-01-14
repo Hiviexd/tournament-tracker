@@ -1,7 +1,7 @@
 import { AppShell, Stack, Divider, Transition } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import MobileUserSection from "./header/MobileUserSection";
-import MobileNavLinks from "./header/MobileNavLinks";
+import MobileNavigation from "./header/MobileNavigation";
 import ThemeCustomizeModal from "./ThemeCustomizeModal";
 import SettingsModal from "./SettingsModal";
 
@@ -30,7 +30,7 @@ export default function MobileHeader({ opened, onClose }: IProps) {
                                     onOpenSettings={openSettings}
                                 />
                                 <Divider />
-                                <MobileNavLinks onClose={onClose} />
+                                <MobileNavigation onClose={onClose} />
                             </Stack>
                         </AppShell.Section>
                     </AppShell.Navbar>
