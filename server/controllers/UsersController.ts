@@ -80,29 +80,46 @@ class UsersController {
             return res.json({ error: "User not found" });
         }
 
+        await DiscordService.sendWebhook(
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.blue,
+                    description: `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`,
+                },
+            ],
+            undefined,
+            undefined,
+            "dev"
+        );
+
         res.json(user);
     }
 
     /** POST toggle isActiveReviewer */
-    public async toggleReviewer(req, res): Promise<void> {
-        const { id } = req.params;
+    public async toggleReviewerStatus(req, res): Promise<void> {
+        const { userId } = req.params;
 
-        const user = await User.findById(id).orFail();
+        const user = await User.findById(userId).orFail();
 
         user.isActiveReviewer = !user.isActiveReviewer;
         await user.save();
 
-        await LogService.generate(req.session.mongoId, `Toggled reviewer status for ${user.username} to ${user.isActiveReviewer}`, "user");
+        await LogService.generate(
+            req.session.mongoId,
+            `Toggled reviewer status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
+            "user"
+        );
 
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.blue,
-                description: `Marked **[${user.username}](https://osu.ppy.sh/users/${
+                color: webhookColors.orange,
+                description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${
                     user.osuId
-                })** as ${user.isActiveReviewer ? "active" : "inactive"} reviewer`,
+                }) as **${user.isActiveReviewer ? "active" : "inactive"}** reviewer`,
             },
-        ], undefined, undefined, "dev");
+        ]);
 
         res.json(user);
     }
