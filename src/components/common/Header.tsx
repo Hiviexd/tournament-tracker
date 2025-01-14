@@ -199,14 +199,6 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                     </div>
                 </Group>
             </AppShell.Header>
-
-            {/* TODO mobile navbar */}
-            <AppShell.Navbar py="md" px={4}>
-                <Button>mobile</Button>
-                <Button>navbar</Button>
-                <Button>don't forget</Button>
-                <Button>about this</Button>
-            </AppShell.Navbar>
         </header>
     );
 }
