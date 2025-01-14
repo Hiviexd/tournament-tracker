@@ -4,6 +4,7 @@ import "../sass/Layout.scss";
 
 // components
 import Header from "../components/common/Header";
+import MobileHeader from "../components/common/MobileHeader";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -34,6 +35,8 @@ export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
             <AppShell.Header>
                 <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
             </AppShell.Header>
+
+            <MobileHeader opened={opened} />
 
             <AppShell.Main>
                 <div className="main-layout">
