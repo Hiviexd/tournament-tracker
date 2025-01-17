@@ -62,7 +62,7 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
                                             label={
                                                 winningOptions.length > 1
                                                     ? "Tied for 1st"
-                                                    : "Winner"
+                                                    : "Winning option"
                                             }
                                             position="right">
                                             <FontAwesomeIcon
