@@ -1,13 +1,10 @@
 import { SimpleGrid, Card, Stack, Skeleton, Group, Title, Divider } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
-import { useSetAtom } from "jotai";
-import { selectedUserAtom } from "../../store/atoms";
 import { IUser } from "../../../interfaces/User";
 import UserCard from "../common/UserCard";
 
 interface IProps {
-    active: boolean;
-    onSelect: (userId: string) => void;
+    onSelect: (user: IUser) => void;
 }
 
 interface ISectionProps {
@@ -15,37 +12,39 @@ interface ISectionProps {
     users: IUser[];
 }
 
-export default function CommitteeTab({ active, onSelect }: IProps) {
-    const { data: users = [], isLoading } = useCommitteeUsers({
-        enabled: active,
-    });
-    const setSelectedUser = useSetAtom(selectedUserAtom);
-
-    const handleUserSelect = (user: IUser) => {
-        setSelectedUser(user);
-        onSelect(user.osuId.toString());
-    };
+export default function CommitteeSection({ onSelect }: IProps) {
+    const { data: users = [], isLoading } = useCommitteeUsers();
 
     const LoadingState = () => (
-        <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
-            {[...Array(8)].map((_, i) => (
-                <Card key={i} shadow="sm" p="md" style={{ minWidth: 240 }}>
-                    <Group>
-                        <Skeleton radius="md" height={40} width={40} />
-                        <Stack gap={8}>
-                            <Skeleton height={18} width={120} />
-                            <Skeleton radius="xl" height={20} width={37} />
-                        </Stack>
-                    </Group>
+        <Stack gap="xl">
+            {[...Array(3)].map((_, sectionIndex) => (
+                <Card key={sectionIndex} shadow="sm" p="md">
+                    <Stack gap="md">
+                        <Skeleton height={28} width={200} />
+                        <Divider />
+                        <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
+                            {[...Array(4)].map((_, cardIndex) => (
+                                <Card key={cardIndex} bg="primary.10" shadow="sm" p="md" style={{ minWidth: 240 }}>
+                                    <Group>
+                                        <Skeleton radius="md" height={40} width={40} />
+                                        <Stack gap={8}>
+                                            <Skeleton height={18} width={120} />
+                                            <Skeleton radius="xl" height={20} width={37} />
+                                        </Stack>
+                                    </Group>
+                                </Card>
+                            ))}
+                        </SimpleGrid>
+                    </Stack>
                 </Card>
             ))}
-        </SimpleGrid>
+        </Stack>
     );
 
     const UserGrid = ({ users }: { users: IUser[] }) => (
         <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
             {users.map((user) => (
-                <UserCard key={user._id} user={user} onSelect={handleUserSelect} />
+                <UserCard key={user._id} user={user} onSelect={onSelect} />
             ))}
         </SimpleGrid>
     );
@@ -71,7 +70,7 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
     const almUsers = users.filter((user) => user.isAlumni);
 
     return (
-        <Stack gap="xl" mt="md">
+        <Stack gap="md">
             <CommitteeSection title="Tournament Committee" users={tcUsers} />
             <CommitteeSection title="Contest Committee" users={ccUsers} />
             <CommitteeSection title="Alumni" users={almUsers} />

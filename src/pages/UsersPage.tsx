@@ -1,16 +1,14 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Tabs, Stack } from "@mantine/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Divider, Stack } from "@mantine/core";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import UserDetailsModal from "../components/users/UserDetailsModal";
-import UsersTab from "../components/users/UsersTab";
-import CommitteeTab from "../components/users/CommitteeTab";
+import UsersSection from "../components/users/UsersSection";
+import CommitteeSection from "../components/users/CommitteeSection";
+import { IUser } from "../../interfaces/User";
 
 export default function UsersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [activeTab, setActiveTab] = useState<string | null>("users");
     const setSelectedUser = useSetAtom(selectedUserAtom);
 
     const handleModalClose = () => {
@@ -18,34 +16,20 @@ export default function UsersPage() {
         setSelectedUser(null);
     };
 
+    const handleUserSelect = (user: IUser | null) => {
+        if (user) {
+            setSelectedUser(user);
+            setSearchParams({ id: user.osuId.toString() });
+        }
+    };
+
     return (
-        <Stack gap="md">
-            <UserDetailsModal
-                userId={searchParams.get("id")}
-                onClose={handleModalClose}
-            />
+        <Stack gap="xl">
+            <UserDetailsModal userId={searchParams.get("id")} onClose={handleModalClose} />
 
-            <Tabs defaultValue="users" onChange={setActiveTab}>
-                <Tabs.List>
-                    <Tabs.Tab value="users" leftSection={<FontAwesomeIcon icon="users" />}>
-                        Users
-                    </Tabs.Tab>
-                    <Tabs.Tab value="committee" leftSection={<FontAwesomeIcon icon="user-tie" />}>
-                        Committee
-                    </Tabs.Tab>
-                </Tabs.List>
-
-                <Tabs.Panel value="users">
-                    <UsersTab onSelect={(userId) => setSearchParams({ id: userId })} />
-                </Tabs.Panel>
-
-                <Tabs.Panel value="committee">
-                    <CommitteeTab
-                        active={activeTab === "committee"}
-                        onSelect={(userId) => setSearchParams({ id: userId })}
-                    />
-                </Tabs.Panel>
-            </Tabs>
+            <UsersSection onSelect={handleUserSelect} />
+            <Divider />
+            <CommitteeSection onSelect={handleUserSelect} />
         </Stack>
     );
 }
