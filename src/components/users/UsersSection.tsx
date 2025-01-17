@@ -26,31 +26,36 @@ export default function UsersSection({ onSelect }: IProps) {
     return (
         <Stack gap="md" mt="md">
             <Card shadow="sm" p="md">
-                <UserSearch label="Load user" onChange={onSelect} width="25%" />
-            </Card>
-
-            <Card shadow="sm" p="md">
-                <Group align="flex-end">
-                    <TextInput
-                        label="Create user"
-                        placeholder="Enter username or osu! ID..."
-                        value={userIdToCreate}
-                        onChange={(e) => setUserIdToCreate(e.currentTarget.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && userIdToCreate) {
-                                handleCreateUser();
-                            }
-                        }}
-                        style={{ width: "25%" }}
-                    />
-                    <Button
-                        onClick={handleCreateUser}
-                        loading={createUserMutation.isPending}
-                        disabled={!userIdToCreate}
-                        leftSection={<FontAwesomeIcon icon="plus" />}>
-                        Create User
-                    </Button>
-                </Group>
+                <Stack gap="md">
+                    <Group wrap="wrap" align="flex-end">
+                        <UserSearch
+                            label="Load user"
+                            onChange={onSelect}
+                            width="250px"
+                        />
+                        <Group grow align="flex-end">
+                            <TextInput
+                                label="Create user"
+                                placeholder="Enter username or osu! ID..."
+                                value={userIdToCreate}
+                                onChange={(e) => setUserIdToCreate(e.currentTarget.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && userIdToCreate) {
+                                        handleCreateUser();
+                                    }
+                                }}
+                                style={{ minWidth: 250, flex: 1 }}
+                            />
+                            <Button
+                                onClick={handleCreateUser}
+                                loading={createUserMutation.isPending}
+                                disabled={!userIdToCreate}
+                                leftSection={<FontAwesomeIcon icon="plus" />}>
+                                Create
+                            </Button>
+                        </Group>
+                    </Group>
+                </Stack>
             </Card>
         </Stack>
     );
