@@ -5,15 +5,16 @@ import UserDisplay from "./UserDisplay";
 interface IProps {
     user: IUser;
     onSelect: (user: IUser) => void;
+    static?: boolean;
 }
 
-export default function UserCard({ user, onSelect }: IProps) {
+export default function UserCard({ user, onSelect, static: isStatic = false }: IProps) {
     return (
         <Card
             key={user._id}
             shadow="sm"
             p="md"
-            className="user-card"
+            className={isStatic ? "user-card user-card-static" : "user-card"}
             style={{ minWidth: 240 }}
             onClick={() => onSelect(user)}>
             <div

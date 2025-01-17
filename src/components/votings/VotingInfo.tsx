@@ -107,7 +107,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         {voting.targetUser && (
                             <Stack gap="xs" w="25%">
                                 <Title order={5}>Target User</Title>
-                                <UserCard user={voting.targetUser} onSelect={handleUserCardClick} />
+                                <UserCard static user={voting.targetUser} onSelect={handleUserCardClick} />
                             </Stack>
                         )}
                     </Stack>

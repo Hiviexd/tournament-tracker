@@ -4,7 +4,7 @@
     overflow: hidden;
     transition: transform 0.2s ease;
 
-    &:hover {
+    &:not(.user-card-static):hover {
         transform: translateY(-4px);
     }
 
