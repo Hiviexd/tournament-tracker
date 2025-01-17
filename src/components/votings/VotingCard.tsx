@@ -57,13 +57,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)",
                 } as React.CSSProperties
-            }
-            onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-            }}>
+            }>
             <Group justify="space-between" mb="xs">
                 <div>
                     <Title order={4}>{voting.title}</Title>
