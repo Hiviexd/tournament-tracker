@@ -12,6 +12,7 @@ interface IProps {
 export default function VoteCard({ vote, options }: IProps) {
     return (
         <Card
+            bg="primary.10"
             shadow="xs"
             p="md"
             radius="md"
