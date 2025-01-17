@@ -22,9 +22,9 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
     };
 
     const LoadingState = () => (
-        <SimpleGrid cols={4}>
+        <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
             {[...Array(8)].map((_, i) => (
-                <Card key={i} shadow="sm" p="md">
+                <Card key={i} shadow="sm" p="md" style={{ minWidth: 240 }}>
                     <Group>
                         <Skeleton radius="md" height={40} width={40} />
                         <Stack gap={8}>
@@ -42,9 +42,15 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
             {isLoading ? (
                 <LoadingState />
             ) : (
-                <SimpleGrid cols={4}>
+                <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
                     {users.map((user) => (
-                        <Card key={user._id} shadow="sm" p="md" className="user-card">
+                        <Card
+                            key={user._id}
+                            shadow="sm"
+                            p="md"
+                            className="user-card"
+                            style={{ minWidth: 240 }}
+                            onClick={() => handleUserSelect(user)}>
                             <div
                                 style={{
                                     position: "absolute",
@@ -60,8 +66,7 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
                                 }}
                             />
                             <div
-                                className="user-card-content"
-                                onClick={() => handleUserSelect(user)}>
+                                className="user-card-content">
                                 <UserDisplay user={user} />
                             </div>
                         </Card>
