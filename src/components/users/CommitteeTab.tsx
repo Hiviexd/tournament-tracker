@@ -1,13 +1,18 @@
-import { SimpleGrid, Card, Stack, Skeleton, Group } from "@mantine/core";
+import { SimpleGrid, Card, Stack, Skeleton, Group, Title, Divider } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
-import UserDisplay from "../common/UserDisplay";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../../store/atoms";
 import { IUser } from "../../../interfaces/User";
+import UserCard from "../common/UserCard";
 
 interface IProps {
     active: boolean;
     onSelect: (userId: string) => void;
+}
+
+interface ISectionProps {
+    title: string;
+    users: IUser[];
 }
 
 export default function CommitteeTab({ active, onSelect }: IProps) {
@@ -37,42 +42,39 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
         </SimpleGrid>
     );
 
+    const UserGrid = ({ users }: { users: IUser[] }) => (
+        <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
+            {users.map((user) => (
+                <UserCard key={user._id} user={user} onSelect={handleUserSelect} />
+            ))}
+        </SimpleGrid>
+    );
+
+    const CommitteeSection = ({ title, users }: ISectionProps) => {
+        if (users.length === 0) return null;
+
+        return (
+            <Card shadow="sm" p="md">
+                <Stack gap="md">
+                    <Title order={3}>{title}</Title>
+                    <Divider />
+                    <UserGrid users={users} />
+                </Stack>
+            </Card>
+        );
+    };
+
+    if (isLoading) return <LoadingState />;
+
+    const tcUsers = users.filter((user) => user.isTournamentCommittee);
+    const ccUsers = users.filter((user) => user.isContestCommittee);
+    const almUsers = users.filter((user) => user.isAlumni);
+
     return (
-        <Stack gap="md" mt="md">
-            {isLoading ? (
-                <LoadingState />
-            ) : (
-                <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
-                    {users.map((user) => (
-                        <Card
-                            key={user._id}
-                            shadow="sm"
-                            p="md"
-                            className="user-card"
-                            style={{ minWidth: 240 }}
-                            onClick={() => handleUserSelect(user)}>
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    backgroundImage: `url(${user.coverUrl})`,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    filter: "brightness(0.4)",
-                                    zIndex: 0,
-                                }}
-                            />
-                            <div
-                                className="user-card-content">
-                                <UserDisplay user={user} />
-                            </div>
-                        </Card>
-                    ))}
-                </SimpleGrid>
-            )}
+        <Stack gap="xl" mt="md">
+            <CommitteeSection title="Tournament Committee" users={tcUsers} />
+            <CommitteeSection title="Contest Committee" users={ccUsers} />
+            <CommitteeSection title="Alumni" users={almUsers} />
         </Stack>
     );
 }
