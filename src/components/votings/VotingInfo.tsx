@@ -25,6 +25,7 @@ import VotingEditModal from "./VotingEditModal";
 import DueDateBadge from "../common/badges/DueDateBadge";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
 import MarkdownText from "../common/MarkdownText";
+import UserCard from "../common/UserCard";
 
 interface IProps {
     voting: IVoting;
@@ -46,6 +47,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         if (!window.confirm("Are you sure you want to delete this voting?")) return;
         await deleteVotingMutation.mutateAsync(voting.id);
         onNavigateBack();
+    };
+
+    const handleUserCardClick = (targetUser: IUser) => {
+        window.open(`https://osu.ppy.sh/users/${targetUser.osuId}`, "_blank");
     };
 
     return (
@@ -99,6 +104,12 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 </Tooltip>
                             )}
                         </Text>
+                        {voting.targetUser && (
+                            <Stack gap="xs" w="25%">
+                                <Title order={5}>Target User</Title>
+                                <UserCard user={voting.targetUser} onSelect={handleUserCardClick} />
+                            </Stack>
+                        )}
                     </Stack>
                     <Divider />
                     <MarkdownText content={voting.description} />

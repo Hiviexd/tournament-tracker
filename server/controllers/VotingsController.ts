@@ -20,7 +20,7 @@ const DEFAULT_POPULATE = [
             select: "username osuId groups",
         },
     },
-    { path: "targetUser", select: "username osuId" },
+    { path: "targetUser", select: "username osuId groups coverUrl" },
     { path: "targetTournament", select: "name" },
 ];
 
