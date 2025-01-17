@@ -51,7 +51,7 @@ class DiscordService {
                 content: message || "",
             });
         } catch (error) {
-            this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
@@ -85,7 +85,7 @@ class DiscordService {
                 content: `${pings} ${message || ""}`,
             });
         } catch (error) {
-            this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
@@ -119,7 +119,7 @@ class DiscordService {
                 content: `${pings} ${message || ""}`,
             });
         } catch (error) {
-            this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
     }
 
