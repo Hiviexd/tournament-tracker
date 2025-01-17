@@ -1,4 +1,4 @@
-import { Stack, Card, Group, Skeleton } from "@mantine/core";
+import { SimpleGrid, Card, Stack, Skeleton, Group } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 import { useSetAtom } from "jotai";
@@ -22,8 +22,8 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
     };
 
     const LoadingState = () => (
-        <Stack gap="md">
-            {[...Array(3)].map((_, i) => (
+        <SimpleGrid cols={4}>
+            {[...Array(8)].map((_, i) => (
                 <Card key={i} shadow="sm" p="md">
                     <Group>
                         <Skeleton radius="md" height={40} width={40} />
@@ -34,7 +34,7 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
                     </Group>
                 </Card>
             ))}
-        </Stack>
+        </SimpleGrid>
     );
 
     return (
@@ -42,16 +42,31 @@ export default function CommitteeTab({ active, onSelect }: IProps) {
             {isLoading ? (
                 <LoadingState />
             ) : (
-                users.map((user) => (
-                    <Card
-                        key={user._id}
-                        shadow="sm"
-                        p="md"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleUserSelect(user)}>
-                        <UserDisplay user={user} />
-                    </Card>
-                ))
+                <SimpleGrid cols={4}>
+                    {users.map((user) => (
+                        <Card key={user._id} shadow="sm" p="md" className="user-card">
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundImage: `url(${user.coverUrl})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    filter: "brightness(0.4)",
+                                    zIndex: 0,
+                                }}
+                            />
+                            <div
+                                className="user-card-content"
+                                onClick={() => handleUserSelect(user)}>
+                                <UserDisplay user={user} />
+                            </div>
+                        </Card>
+                    ))}
+                </SimpleGrid>
             )}
         </Stack>
     );

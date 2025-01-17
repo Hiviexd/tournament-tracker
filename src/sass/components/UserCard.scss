@@ -1,0 +1,15 @@
+.user-card {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+
+    &-content {
+        position: relative;
+        z-index: 1;
+    }
+}
