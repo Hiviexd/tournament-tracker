@@ -25,10 +25,9 @@ export interface TournamentQueryParams {
 }
 export interface ITournament extends Document {
     name: string;
-    description: string;
     modes: GameMode[];
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | null;
+    endDate: Date | null;
     forumUrl: string;
     host: IUser;
     type: TournamentType;
@@ -38,6 +37,7 @@ export interface ITournament extends Document {
     badges?: string[];
     assignedReviewers?: IUser[];
     reviews?: IVote[];
+    createdAt: Date;
 
     // virtuals
     isTournament: boolean;

@@ -4,7 +4,6 @@ import { ITournament } from "../../interfaces/Tournament";
 const TournamentSchema = new Schema<ITournament>(
     {
         name: { type: String, required: true },
-        description: { type: String, required: true },
         modes: [{ type: String, required: true }],
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
@@ -17,7 +16,8 @@ const TournamentSchema = new Schema<ITournament>(
         badges: [{ type: String }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
-    }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+    },
+    { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 TournamentSchema.virtual("isTournament").get(function (this: ITournament) {

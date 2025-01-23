@@ -9,6 +9,7 @@ import VotingPage from "../pages/VotingPage";
 import MarkdownPage from "../pages/MarkdownPage";
 import LogsPage from "../pages/LogsPage";
 import UsersPage from "../pages/UsersPage";
+import TournamentsListPage from "../pages/TournamentsListPage";
 
 interface RouteConfig {
     path: string;
@@ -88,6 +89,13 @@ const routes: RouteConfig[] = [
         title: "User Management",
         icon: "users",
         permissions: ["committee"],
+    },
+    {
+        path: "/tournaments",
+        page: <TournamentsListPage />,
+        title: "Tournaments Listing",
+        icon: "users",
+        permissions: ["user"],
     },
     {
         path: "*",
