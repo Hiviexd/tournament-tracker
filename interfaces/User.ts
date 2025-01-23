@@ -9,6 +9,11 @@ export interface IUserHistory {
     kind: "join" | "leave";
 }
 
+export interface UserListQuery {
+    userInput?: string;
+    limit?: string;
+}
+
 export interface IUser extends Document {
     osuId: number;
     username: string;

@@ -23,7 +23,7 @@ class DiscordService {
     /** * Construts a webhook author from the current user */
     public defaultWebhookAuthor(session: Session) {
         return {
-            name: session.username,
+            name: session.username ?? "Unknown",
             icon_url: `https://a.ppy.sh/${session.osuId}`,
             url: `https://osu.ppy.sh/users/${session.osuId}`,
         };

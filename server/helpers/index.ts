@@ -58,6 +58,14 @@ function isValidMongoId(id: string): boolean {
     return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
+/**
+ * Checks if a string is a valid whole number
+ * @param str String to check
+ */
+export function isNumeric(str: string): boolean {
+    return /^\d+$/.test(str);
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -65,4 +73,5 @@ export default {
     shorten,
     discordTimestamp,
     isValidMongoId,
+    isNumeric,
 };

@@ -10,6 +10,13 @@ export interface LogQueryParams {
     page?: number;
 }
 
+export interface LogListQuery {
+    user?: string;
+    category?: LogCategory;
+    type?: string;
+    page?: number;
+}
+
 export interface ILog extends Document {
     user: IUser;
     action: string;

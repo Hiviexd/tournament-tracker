@@ -1,6 +1,6 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
-import { VotingQueryParams } from "../../interfaces/Voting";
+import { VotingQueryParams, VotingListQuery } from "../../interfaces/Voting";
 import User from "../models/userModel";
 import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
@@ -33,23 +33,24 @@ const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 class VotingsController {
     /** GET voting listing */
     public async index(req: Request, res: Response) {
-        const { title, category, assignedGroup, status, page = 1 } = req.query;
-        const query: VotingQueryParams = {};
+        const reqQuery = req.query as VotingListQuery;
+        const dbQuery: VotingQueryParams = {};
 
-        if (title) query.title = new RegExp(title, "i");
-        if (category) query.category = category;
-        if (assignedGroup) query.assignedGroups = { $in: [assignedGroup] };
-        if (status) query.isActive = status === "active";
+        if (reqQuery.title) dbQuery.title = new RegExp(reqQuery.title, "i");
+        if (reqQuery.category) dbQuery.category = reqQuery.category;
+        if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
+        if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
 
-        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
+        const page = Number(reqQuery.page || 1);
+        const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [votings, total] = await Promise.all([
-            Voting.find(query)
+            Voting.find(dbQuery)
                 .skip(skip)
                 .limit(DEFAULT_LIMIT)
                 .sort({ createdAt: -1 })
                 .populate(DEFAULT_POPULATE),
-            Voting.countDocuments(query),
+            Voting.countDocuments(dbQuery),
         ]);
 
         res.json({
@@ -61,7 +62,7 @@ class VotingsController {
     }
 
     /** GET a voting */
-    public async getVoting(req, res) {
+    public async getVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
 
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
@@ -70,7 +71,7 @@ class VotingsController {
     }
 
     /** POST create a voting */
-    public async createVoting(req, res) {
+    public async createVoting(req: Request, res: Response) {
         const {
             category,
             assignedGroups,
@@ -168,7 +169,7 @@ class VotingsController {
     }
 
     /** POST submit vote */
-    public async submitVote(req, res) {
+    public async submitVote(req: Request, res: Response) {
         const votingId = req.params.votingId;
         const { option, comment } = req.body;
 
@@ -228,7 +229,7 @@ class VotingsController {
     }
 
     /** POST toggle voting status */
-    public async toggleVotingStatus(req, res) {
+    public async toggleVotingStatus(req: Request, res: Response) {
         const votingId = req.params.votingId;
 
         const voting = await Voting.findById(votingId).populate("votes").orFail();
@@ -289,7 +290,7 @@ class VotingsController {
     }
 
     /** POST update a voting */
-    public async updateVoting(req, res) {
+    public async updateVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
         const { title, description, duration, options } = req.body;
 
@@ -320,7 +321,7 @@ class VotingsController {
     }
 
     /** POST delete a voting */
-    public async deleteVoting(req, res) {
+    public async deleteVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
 
         const voting = await Voting.findById(votingId).orFail();

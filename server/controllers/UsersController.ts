@@ -1,43 +1,44 @@
-import { IUser } from "../../interfaces/User";
+import { IUser, UserListQuery } from "../../interfaces/User";
 import User from "../models/userModel";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../helpers/constants/webhookColors";
 import LogService from "../services/LogService";
+import { Request, Response } from "express";
 
 class UsersController {
     /** GET logged in user */
-    public getSelf(_, res): void {
+    public getSelf(_: Request, res: Response) {
         const user = res.locals.user;
         res.json(user);
     }
 
     /** GET users listing */
-    public async index(req, res): Promise<void> {
-        const { userInput, limit } = req.query;
+    public async index(req: Request, res: Response) {
+        const reqQuery = req.query as UserListQuery;
 
-        if (!userInput) {
+        if (!reqQuery.userInput) {
             return res.json([]);
         }
 
         let users: IUser[] = [];
 
-        if (helpers.isValidMongoId(userInput)) {
-            const user = await User.findById(userInput);
+        if (helpers.isValidMongoId(reqQuery.userInput)) {
+            const user = await User.findById(reqQuery.userInput);
             if (user) users.push(user);
-        } else if (!isNaN(userInput)) {
-            const user = await User.findOne({ osuId: userInput });
+        } else if (helpers.isNumeric(reqQuery.userInput)) {
+            const user = await User.findOne({ osuId: parseInt(reqQuery.userInput, 10) });
             if (user) users.push(user);
         } else {
-            users = await User.find({ username: { $regex: userInput, $options: "i" } });
+            users = await User.find({ username: { $regex: reqQuery.userInput, $options: "i" } });
         }
 
-        res.json(limit ? users.slice(0, parseInt(limit, 10)) : users);
+        res.json(reqQuery.limit ? users.slice(0, parseInt(reqQuery.limit, 10)) : users);
     }
 
     /** GET a user */
-    public async getUser(req, res): Promise<void> {
+    public async getUser(req: Request, res: Response) {
         const userInput = req.params.userInput;
 
         const user = await User.findByUsernameOrOsuId(userInput);
@@ -50,7 +51,7 @@ class UsersController {
     }
 
     /** GET users in a committee */
-    public async getCommittee(req, res): Promise<void> {
+    public async getCommittee(req: Request, res: Response) {
         const type = req.query.type;
         let query;
 
@@ -71,7 +72,7 @@ class UsersController {
     }
 
     /** POST create a user */
-    public async create(req, res): Promise<void> {
+    public async create(req: Request, res: Response) {
         const { userInput } = req.body;
 
         const user = await UserService.findOrCreateUser(req.session.accessToken!, userInput);
@@ -97,7 +98,7 @@ class UsersController {
     }
 
     /** POST toggle isActiveReviewer */
-    public async toggleReviewerStatus(req, res): Promise<void> {
+    public async toggleReviewerStatus(req: Request, res: Response): Promise<void> {
         const { userId } = req.params;
 
         const user = await User.findById(userId).orFail();
@@ -106,7 +107,7 @@ class UsersController {
         await user.save();
 
         await LogService.generate(
-            req.session.mongoId,
+            res.locals.user._id,
             `Toggled reviewer status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
             "user"
         );

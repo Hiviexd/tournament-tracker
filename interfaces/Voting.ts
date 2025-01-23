@@ -17,6 +17,14 @@ export interface VotingQueryParams {
     isActive?: boolean;
 }
 
+export interface VotingListQuery {
+    title?: string;
+    category?: VotingCategory;
+    assignedGroup?: UserGroup;
+    status?: string;
+    page?: number;
+}
+
 export interface IVoting extends Document {
     author: IUser;
     category: VotingCategory;

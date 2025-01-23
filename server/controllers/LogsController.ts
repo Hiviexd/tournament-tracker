@@ -1,6 +1,7 @@
 import Log from "../models/logModel";
 import User from "../models/userModel";
-import { LogQueryParams } from "../../interfaces/Log";
+import { LogQueryParams, LogListQuery } from "../../interfaces/Log";
+import { Request, Response } from "express";
 
 const DEFAULT_POPULATE = [
     {
@@ -13,28 +14,29 @@ const DEFAULT_LIMIT = 20;
 
 class LogsController {
     /** GET logs listing */
-    public async index(req, res) {
-        const { user, category, type, page = 1 } = req.query;
-        const query: LogQueryParams = {};
+    public async index(req: Request, res: Response) {
+        const reqQuery = req.query as LogListQuery;
+        const dbQuery: LogQueryParams = {};
 
-        if (user && user.length) {
-            const userDoc = await User.findByUsernameOrOsuId(user);
-            query.user = userDoc || null;
-            query.isSystemLog = false;
+        if (reqQuery.user && reqQuery.user.length) {
+            const userDoc = await User.findByUsernameOrOsuId(reqQuery.user);
+            dbQuery.user = userDoc || null;
+            dbQuery.isSystemLog = false;
         }
-        if (category) query.category = category;
-        if (type === "system") query.isSystemLog = true;
-        if (type === "user") query.isSystemLog = false;
+        if (reqQuery.category) dbQuery.category = reqQuery.category;
+        if (reqQuery.type === "system") dbQuery.isSystemLog = true;
+        if (reqQuery.type === "user") dbQuery.isSystemLog = false;
 
-        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
+        const page = Number(reqQuery.page || 1);
+        const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [logs, total] = await Promise.all([
-            Log.find(query)
+            Log.find(dbQuery)
                 .skip(skip)
                 .limit(DEFAULT_LIMIT)
                 .sort({ createdAt: -1 })
                 .populate(DEFAULT_POPULATE),
-            Log.countDocuments(query),
+            Log.countDocuments(dbQuery),
         ]);
 
         res.json({
