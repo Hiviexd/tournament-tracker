@@ -3,7 +3,7 @@ import {
     getTournaments,
     getTournament,
     createTournament,
-    assignReviewers,
+    // assignReviewers,
     TournamentQueryParams,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
@@ -37,6 +37,7 @@ export function useCreateTournament() {
     });
 }
 
+/*
 export function useAssignReviewers(tournamentId: string) {
     const queryClient = useQueryClient();
 
@@ -50,3 +51,4 @@ export function useAssignReviewers(tournamentId: string) {
         },
     });
 }
+*/
