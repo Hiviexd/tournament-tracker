@@ -11,12 +11,20 @@
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
+        "typeRoots": [
+            "../node_modules/@types",
+            "../interfaces"
+        ],
         "paths": {
             "@controllers/*": ["controllers/*"],
             "@routers/*": ["routers/*"],
-            "@models/*": ["models/*"]
+            "@models/*": ["models/*"],
+            "@interfaces/*": ["../interfaces/*"],
+            "@helpers/*": ["helpers/*"],
+            "@middlewares/*": ["middlewares/*"],
+            "@services/*": ["services/*"],
         }
     },
-    "include": ["."],
+    "include": [".", "../interfaces"],
     "exclude": ["../src"],
 }

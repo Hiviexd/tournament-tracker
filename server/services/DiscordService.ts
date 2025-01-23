@@ -3,6 +3,7 @@ import config from "../../config.json";
 import { IDiscordEmbed } from "../../interfaces/Discord";
 import helpers from "../helpers";
 import webhookColors from "../helpers/constants/webhookColors";
+import { Session } from "express-session";
 
 class DiscordService {
     /** * Constructs a webhook link */
@@ -20,7 +21,7 @@ class DiscordService {
     }
 
     /** * Construts a webhook author from the current user */
-    public defaultWebhookAuthor(session: any) {
+    public defaultWebhookAuthor(session: Session) {
         return {
             name: session.username,
             icon_url: `https://a.ppy.sh/${session.osuId}`,

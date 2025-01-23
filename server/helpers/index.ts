@@ -1,7 +1,8 @@
 import { IOsuAuthResponse } from "../../interfaces/OsuApi";
 import moment from "moment";
+import { Session } from "express-session";
 
-function setSession(session, response: IOsuAuthResponse) {
+function setSession(session: Session, response: IOsuAuthResponse) {
     // set the cookie's maxAge to 7 days
     session.cookie.maxAge = moment.duration(7, "days").asMilliseconds();
 

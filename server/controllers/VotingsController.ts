@@ -10,6 +10,8 @@ import webhookColors from "../helpers/constants/webhookColors";
 import config from "../../config.json";
 import LogService from "../services/LogService";
 import helpers from "../helpers";
+import { Request, Response } from "express";
+
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -30,7 +32,7 @@ const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
 class VotingsController {
     /** GET voting listing */
-    public async index(req, res) {
+    public async index(req: Request, res: Response) {
         const { title, category, assignedGroup, status, page = 1 } = req.query;
         const query: VotingQueryParams = {};
 

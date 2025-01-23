@@ -4,10 +4,11 @@ import OsuApiService from "../services/OsuApiService";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
 import User from "../models/userModel";
+import { Request, Response } from "express";
 
 class AuthController {
     /** osu! OAuth login */
-    public login(req, res): void {
+    public login(req: Request, res: Response): void {
         const state = crypto.randomBytes(48).toString("hex");
         res.cookie("_state", state, { httpOnly: true });
         const hashedState = Buffer.from(state).toString("base64");
@@ -26,14 +27,14 @@ class AuthController {
     }
 
     /** Log out through destroying session */
-    public logout(req, res): void {
+    public logout(req: Request, res: Response): void {
         req.session.destroy(() => {
             res.redirect("/");
         });
     }
 
     /** osu! OAuth callback */
-    public async callback(req, res) {
+    public async callback(req: Request, res: Response) {
         if (!req.query.code || req.query.error || !req.query.state) {
             return res.status(500).redirect("/error");
         }
