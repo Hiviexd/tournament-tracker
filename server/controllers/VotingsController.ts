@@ -298,7 +298,7 @@ class VotingsController {
         ]);
     }
 
-    /** POST update a voting */
+    /** POST update voting */
     public async updateVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
         const { title, description, duration, options } = req.body;
