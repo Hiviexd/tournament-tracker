@@ -5,6 +5,7 @@ import User from "../models/userModel";
 import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
+import { IDiscordField } from "@interfaces/Discord";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../helpers/constants/webhookColors";
 import config from "../../config.json";
@@ -126,7 +127,7 @@ class VotingsController {
 
         // Discord
         const roles: string[] = [];
-        const fields: { name: string; value: string; }[] = [];
+        const fields: IDiscordField[] = [];
 
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");

@@ -1,17 +1,21 @@
+export interface IDiscordAuthor {
+    name: string;
+    icon_url: string;
+    url?: string;
+}
+
+export interface IDiscordField {
+    name: string;
+    value: string;
+    inline?: boolean;
+}
+
 export interface IDiscordEmbed {
     title?: string;
-    author?: {
-        name: string;
-        icon_url: string;
-        url?: string;
-    };
+    author?: IDiscordAuthor;
     description: string;
     color: number;
-    fields?: {
-        name: string;
-        value: string;
-        inline?: boolean;
-    }[];
+    fields?: IDiscordField[];
     image? : {
         url: string;
     };

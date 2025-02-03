@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "../../config.json";
-import { IDiscordEmbed } from "../../interfaces/Discord";
+import { IDiscordEmbed, IDiscordAuthor } from "../../interfaces/Discord";
 import helpers from "../helpers";
 import webhookColors from "../helpers/constants/webhookColors";
 import { Session } from "express-session";
@@ -21,7 +21,7 @@ class DiscordService {
     }
 
     /** * Construts a webhook author from the current user */
-    public defaultWebhookAuthor(session: Session) {
+    public defaultWebhookAuthor(session: Session): IDiscordAuthor {
         return {
             name: session.username ?? "Unknown",
             icon_url: `https://a.ppy.sh/${session.osuId}`,
