@@ -51,26 +51,13 @@
     align-items: center;
     margin: 0 auto;
 
-    // Position logo container absolutely in mobile view
-    >a {
-        @media (max-width: calc(62em - 1px)) {
-            // Below md breakpoint
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+    > a {
+        display: flex;
     }
 
-    // Ensure burger menu stays above
-    >.mantine-Burger-root {
-        position: relative;
-        z-index: 1;
-    }
-
-    @media (max-width: calc(62em - 1px)) {
+    @media (max-width: 62em) {
         // Below md breakpoint
-        justify-content: flex-start;
-        align-items: center;
+        justify-content: space-between;
     }
 
     @media (min-width: 62em) {

@@ -2,8 +2,8 @@ import { AppShell, Stack, Divider, Transition } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import MobileUserSection from "./header/MobileUserSection";
 import MobileNavigation from "./header/MobileNavigation";
-import ThemeCustomizeModal from "./ThemeCustomizeModal";
-import SettingsModal from "./SettingsModal";
+import ThemeCustomizeModal from "./modals/ThemeCustomizeModal";
+import SettingsModal from "./modals/SettingsModal";
 
 interface IProps {
     opened: boolean;
@@ -19,7 +19,7 @@ export default function MobileHeader({ opened, onClose }: IProps) {
             <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
             <SettingsModal opened={settingsOpened} onClose={closeSettings} />
 
-            <Transition mounted={opened} transition="slide-right" duration={200}>
+            <Transition mounted={opened} transition="slide-left" duration={200}>
                 {(styles) => (
                     <AppShell.Navbar py="md" px="md" hiddenFrom="md" style={styles}>
                         <AppShell.Section grow>

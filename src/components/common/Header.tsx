@@ -25,12 +25,6 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
             <AppShell.Header>
                 <Group h="100%" px="xl">
                     <div className="nav-group">
-                        <Burger
-                            opened={mobileHeaderOpened}
-                            onClick={mobileHeaderToggle}
-                            hiddenFrom="md"
-                            size="sm"
-                        />
                         <Link to="/">
                             <Image src="/assets/logo-main.svg" alt="Logo" h={55} />
                         </Link>
@@ -38,6 +32,12 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                             {user && <MainNavigation user={user} />}
                             <UserMenu user={user} />
                         </Group>
+                        <Burger
+                            opened={mobileHeaderOpened}
+                            onClick={mobileHeaderToggle}
+                            hiddenFrom="md"
+                            size="sm"
+                        />
                     </div>
                 </Group>
             </AppShell.Header>
