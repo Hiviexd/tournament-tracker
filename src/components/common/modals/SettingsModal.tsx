@@ -1,6 +1,6 @@
 import { Modal, Stack, Divider } from "@mantine/core";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../store/atoms";
+import { loggedInUserAtom } from "../../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
 
 interface IProps {

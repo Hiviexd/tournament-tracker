@@ -1,7 +1,7 @@
 import { Group, Switch, Text, Loader } from "@mantine/core";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../../store/atoms";
-import { useToggleReviewerStatus } from "../../../hooks/useUsers";
+import { loggedInUserAtom } from "../../../../store/atoms";
+import { useToggleReviewerStatus } from "../../../../hooks/useUsers";
 
 export default function ReviewerStatusSetting() {
     const [user] = useAtom(loggedInUserAtom);

@@ -1,9 +1,9 @@
 import { Modal, Stack, Group, Button } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { updateTheme } from "../../themes/main";
+import { updateTheme } from "../../../themes/main";
 import { HueSlider, ColorSwatch, Checkbox, Divider } from "@mantine/core";
-import { DEFAULT_HUE } from "../../constants";
+import { DEFAULT_HUE } from "../../../constants";
 
 interface IProps {
     opened: boolean;

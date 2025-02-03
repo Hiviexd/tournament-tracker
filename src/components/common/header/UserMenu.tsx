@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { IUser } from "../../../../interfaces/User";
-import ThemeCustomizeModal from "../ThemeCustomizeModal";
-import SettingsModal from "../SettingsModal";
+import ThemeCustomizeModal from "../modals/ThemeCustomizeModal";
+import SettingsModal from "../modals/SettingsModal";
 
 interface IProps {
     user: IUser | null;
