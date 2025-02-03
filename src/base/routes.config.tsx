@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
+import ErrorPage from "../pages/ErrorPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import CommitteePage from "../pages/CommitteePage";
 import AdminPage from "../pages/AdminPage";
@@ -32,6 +33,13 @@ const routes: RouteConfig[] = [
         page: <Navigate to="/" replace />,
         title: "Home",
         icon: "home",
+        permissions: [],
+    },
+    {
+        path: "/error",
+        page: <ErrorPage />,
+        title: "Error",
+        icon: "exclamation-circle",
         permissions: [],
     },
     {
