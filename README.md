@@ -1,5 +1,7 @@
 # Tournament Tracker
 
+[![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker)
+
 The one-stop shop for all official osu! tournament correspondence and information!
 
 > [!WARNING]
