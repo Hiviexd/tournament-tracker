@@ -20,7 +20,7 @@ interface FilterValues {
     host: string;
     type: TournamentType | "";
     status: TournamentStatus | "";
-    active: string;
+    state: string;
 }
 
 export default function TournamentListPage() {
@@ -32,7 +32,7 @@ export default function TournamentListPage() {
         host: searchParams.get("host") || "",
         type: (searchParams.get("type") as TournamentType) || "",
         status: (searchParams.get("status") as TournamentStatus) || "",
-        active: searchParams.get("active") || "",
+        state: searchParams.get("state") || "",
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedName] = useDebouncedValue(filters.name, 400);
@@ -44,7 +44,7 @@ export default function TournamentListPage() {
         host: debouncedHost,
         type: filters.type,
         status: filters.status,
-        active: filters.active,
+        state: filters.state,
         page,
     });
 
@@ -56,7 +56,7 @@ export default function TournamentListPage() {
         if (debouncedHost) params.set("host", debouncedHost);
         if (filters.type) params.set("type", filters.type);
         if (filters.status) params.set("status", filters.status);
-        if (filters.active) params.set("active", filters.active);
+        if (filters.state) params.set("state", filters.state);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
     }, [
@@ -65,7 +65,7 @@ export default function TournamentListPage() {
         filters.mode,
         filters.type,
         filters.status,
-        filters.active,
+        filters.state,
         page,
         setSearchParams,
     ]);

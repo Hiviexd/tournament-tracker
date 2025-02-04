@@ -10,7 +10,7 @@ interface IProps {
         host: string;
         type: TournamentType | "";
         status: TournamentStatus | "";
-        active: string;
+        state: string;
     };
     onChange: (values: any) => void;
 }
@@ -85,8 +85,8 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     />
                     <Select
                         placeholder="State"
-                        value={values.active}
-                        onChange={(value) => handleChange("active", value)}
+                        value={values.state}
+                        onChange={(value) => handleChange("state", value)}
                         data={activeOptions}
                         clearable
                     />

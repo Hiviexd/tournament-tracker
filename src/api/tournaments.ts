@@ -7,7 +7,7 @@ export interface TournamentQueryParams {
     host?: string;
     type?: string;
     status?: string;
-    active?: string;
+    state?: string;
     page?: number;
 }
 

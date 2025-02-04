@@ -30,7 +30,7 @@ const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -as
 class TournamentsController {
     /** GET tournament listing */
     public async index(req, res) {
-        const { name, mode, hostId, type, status, active, page = 1 } = req.query;
+        const { name, mode, hostId, type, status, state, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
 
         if (name) query.name = new RegExp(name, "i");
@@ -41,7 +41,7 @@ class TournamentsController {
         }
         if (type) query.type = type;
         if (status) query.status = status;
-        if (active) query.isActive = status === "active";
+        if (state) query.isActive = state === "active";
 
         const skip = (Number(page) - 1) * defaultLimit;
         const isCommittee = res.locals.user.isCommittee;
@@ -77,8 +77,7 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req, res) {
-        const { name, hostId, modes, type, bannerUrl, forumUrl, startDate, endDate } =
-            req.body;
+        const { name, hostId, modes, type, bannerUrl, forumUrl, startDate, endDate } = req.body;
 
         const host = await User.findById(hostId).orFail();
 
