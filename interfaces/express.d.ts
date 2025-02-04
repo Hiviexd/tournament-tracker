@@ -21,8 +21,8 @@ declare module "express" {
 
 declare module "express" {
     interface Response {
-        locals: {
-            user: IUser;
+        locals?: {
+            user?: IUser;
         };
     }
 }
