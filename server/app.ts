@@ -1,11 +1,11 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import logger from "morgan";
 import mongoose from "mongoose";
 import session from "express-session";
 import MongoStoreSession from "connect-mongo";
 import config from "../config.json";
 import "express-async-errors";
+import { logger } from "./middlewares/logger";
 
 // Return the 'new' updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -25,7 +25,7 @@ import { handleCrawlers } from "./middlewares/seo";
 app.use(handleCrawlers as express.RequestHandler);
 
 // settings/middlewares
-app.use(logger("dev"));
+app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
