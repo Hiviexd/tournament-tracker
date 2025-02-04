@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { match } from "path-to-regexp";
 import config from "../../config.json";
-import { seoRoutes, defaultMetadata, modelMap, type SEOMetadata } from "./seo.config";
+import { seoRoutes, defaultMetadata, modelMap, type SEOMetadata } from "../constants/seo.config";
 import { Model } from "mongoose";
 
 

@@ -3,14 +3,14 @@ import User from "../models/userModel";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
 import DiscordService from "../services/DiscordService";
-import webhookColors from "../helpers/constants/webhookColors";
+import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
 
 class UsersController {
     /** GET logged in user */
     public getSelf(_: Request, res: Response) {
-        const user = res.locals.user;
+        const user = res.locals!.user!;
         res.json(user);
     }
 
@@ -107,7 +107,7 @@ class UsersController {
         await user.save();
 
         await LogService.generate(
-            res.locals.user._id,
+            req.session.mongoId!,
             `Toggled reviewer status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
             "user"
         );

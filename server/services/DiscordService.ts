@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "../../config.json";
 import { IDiscordEmbed, IDiscordAuthor } from "../../interfaces/Discord";
 import helpers from "../helpers";
-import webhookColors from "../helpers/constants/webhookColors";
+import webhookColors from "../constants/webhookColors";
 import { Session } from "express-session";
 
 class DiscordService {
