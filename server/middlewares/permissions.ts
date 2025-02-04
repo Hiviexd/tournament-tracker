@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 
 function unauthorize(req: Request, res: Response, next: NextFunction) {
     // Admin bypass
-    const user = res.locals.user || null;
+    const user = res.locals!.user || null;
     if (user && user.isAdmin) {
         return next();
     }
@@ -39,19 +39,19 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
         helpers.setSession(req.session, response);
     }
 
-    res.locals.user = user;
+    res.locals!.user = user;
     next();
 }
 
 function isCommittee(req: Request, res: Response, next: NextFunction) {
-    const user = res.locals.user;
+    const user = res.locals!.user;
     if (!user || !user.isCommittee) return unauthorize(req, res, next);
 
     next();
 }
 
 function isAdmin(req: Request, res: Response, next: NextFunction) {
-    const user = res.locals.user;
+    const user = res.locals!.user;
     if (!user || !user.isAdmin) return unauthorize(req, res, next);
 
     next();
