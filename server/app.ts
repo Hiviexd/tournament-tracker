@@ -19,6 +19,11 @@ mongoose.plugin((schema) => {
 const app = express();
 const MongoStore = MongoStoreSession(session);
 
+// SEO
+import { handleCrawlers } from "./middlewares/seo";
+
+app.use(handleCrawlers as express.RequestHandler);
+
 // settings/middlewares
 app.use(logger("dev"));
 app.use(express.json());
