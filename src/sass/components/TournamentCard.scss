@@ -3,9 +3,28 @@
     position: relative;
     border-left: 4px solid var(--card-status-color);
     transition: transform 0.2s ease;
+    overflow: hidden;
 
     &:hover {
         transform: translateY(-4px);
+    }
+
+    &-banner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: var(--banner-url);
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.4);
+        z-index: 0;
+    }
+
+    &-content {
+        position: relative;
+        z-index: 1;
     }
 
     &::after {
@@ -17,10 +36,5 @@
         bottom: 0;
         z-index: 0;
         background: linear-gradient(90deg, var(--card-status-color) -60%, transparent 4rem);
-    }
-
-    > * {
-        position: relative;
-        z-index: 1;
     }
 }
