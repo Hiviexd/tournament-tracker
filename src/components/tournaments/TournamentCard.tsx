@@ -33,7 +33,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     bottom: 0,
                     backgroundImage: tournament.bannerUrl
                         ? `url(${tournament.bannerUrl})`
-                        : undefined,
+                        : "url(https://nats.are-la.me/29HdcgA.png)",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     filter: "brightness(0.4)",

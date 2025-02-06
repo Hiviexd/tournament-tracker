@@ -9,19 +9,17 @@
     }
 
     &::after {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         z-index: 0;
-        background: linear-gradient(90deg,
-                var(--card-status-color) -60%,
-                var(--mantine-color-primary-11) 4rem);
+        background: linear-gradient(90deg, var(--card-status-color) -60%, transparent 4rem);
     }
 
-    >* {
+    > * {
         position: relative;
         z-index: 1;
     }
