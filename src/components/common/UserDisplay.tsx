@@ -8,14 +8,10 @@ interface IPropTypes {
 
 export default function UserDisplay({ user }: IPropTypes) {
     return (
-        <Group align="center" gap="sm">
+        <Group align="center" gap="sm" onClick={(e) => e.stopPropagation()}>
             <Avatar src={user.avatarUrl} size={40} radius="md" />
             <Stack gap={2}>
-                <Text
-                    fw={700}
-                    component="a"
-                    href={`https://osu.ppy.sh/users/${user.osuId}`}
-                    target="_blank">
+                <Text fw={700} component="a" href={`https://osu.ppy.sh/users/${user.osuId}`} target="_blank">
                     {user.username}
                 </Text>
                 <UserGroupBadge user={user} />

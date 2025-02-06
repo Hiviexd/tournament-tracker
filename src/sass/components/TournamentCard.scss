@@ -25,14 +25,14 @@
             content: "";
             position: absolute;
             inset: 0;
-            z-index: 2;
+            z-index: 1;
             background: linear-gradient(135deg, var(--mantine-color-primary-11) 30%, transparent 300%);
         }
     }
 
     &-content {
         position: relative;
-        z-index: 3;
+        z-index: 10;
     }
 
     &::after {

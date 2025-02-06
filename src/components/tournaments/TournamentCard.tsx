@@ -26,7 +26,7 @@ export default function TournamentCard({ tournament }: IProps) {
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
-            <Stack gap="md" style={{ position: "relative", zIndex: 1 }}>
+            <Stack gap="md" className="tournament-card-content">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap="xs">
                         <Title order={4}>{tournament.name}</Title>
