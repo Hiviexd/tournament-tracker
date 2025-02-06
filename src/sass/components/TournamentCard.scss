@@ -18,23 +18,28 @@
         background-image: var(--banner-url);
         background-size: cover;
         background-position: center;
-        filter: brightness(0.4);
+        filter: brightness(1.1);
         z-index: 0;
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: linear-gradient(135deg, var(--mantine-color-primary-11) 30%, transparent 300%);
+        }
     }
 
     &-content {
         position: relative;
-        z-index: 1;
+        z-index: 3;
     }
 
     &::after {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 0;
+        inset: 0;
+        z-index: 1;
         background: linear-gradient(90deg, var(--card-status-color) -60%, transparent 4rem);
     }
 }
