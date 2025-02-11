@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { ITicket } from "../interfaces/Ticket";
+import { ITicket } from "@interfaces/Ticket";
 
 const TicketSchema = new Schema(
     {
