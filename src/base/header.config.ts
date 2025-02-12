@@ -28,13 +28,13 @@ export const routes: IRoute[] = [
         link: "/voting",
     },
     {
-        title: "Tickets & Reports",
+        title: "Reports & Tickets",
         permissions: ["user"],
         links: [
             {
                 title: "Submit Report",
                 link: "/reports/create",
-                icon: "paper-plane",
+                icon: "flag",
                 permissions: ["user"],
             },
             {
