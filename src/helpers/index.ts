@@ -113,9 +113,19 @@ function hslToHex(h: number, s: number, l: number): string {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/**
+ * Checks if a link is an osu! forum topic link
+ *
+ * @param {string} link
+ */
+export function isOsuForumLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
     hexToHsl,
     hslToHex,
+    isOsuForumLink,
 };

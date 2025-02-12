@@ -66,6 +66,15 @@ export function isNumeric(str: string): boolean {
     return /^\d+$/.test(str);
 }
 
+/**
+ * Checks if a link is an osu! forum topic link
+ *
+ * @param {string} link
+ */
+export function isOsuForumLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -74,4 +83,5 @@ export default {
     discordTimestamp,
     isValidMongoId,
     isNumeric,
+    isOsuForumLink,
 };
