@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { UseFormReturnType } from "@mantine/form";
-import { Stack, Select, Textarea, TextInput } from "@mantine/core";
+import { Stack, Select, Textarea, TextInput, Card, Alert } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
+import MarkdownText from "../common/MarkdownText";
 import UserSearch from "../common/UserSearch";
 
 const GROUP_OPTIONS = [
@@ -19,58 +21,78 @@ export default function ReportForm({ form }: IProps) {
 
     return (
         <Stack gap="md">
-            <Select
-                label="Contact Group"
-                placeholder="Select which committee to contact"
-                data={GROUP_OPTIONS}
-                {...form.getInputProps("assignedGroup")}
-                withAsterisk
-            />
+            <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
+                <MarkdownText
+                    content={`Reports are used to notify committee members about concerning behavior from tournament participants or issues with tournament organization.
 
-            <Select
-                label="Report Type"
-                placeholder="Select report type"
-                data={[
-                    { value: "user", label: "User Report" },
-                    { value: "tournament", label: "Tournament Report" },
-                ]}
-                onChange={(value) => setReportType(value as "user" | "tournament")}
-                withAsterisk
-            />
+Reports are **private** and only visible to you and committee members.
 
-            {reportType === "user" && (
-                <UserSearch
-                    label="Target User"
-                    error={form.errors.targetUser}
-                    onChange={(user) => form.setFieldValue("targetUser", user?.id)}
-                    required
+You can report either:
+- A **user** for behavior that violates tournament rules
+- A **tournament** for organization/management issues
+
+**Please provide as much detail as possible** (including screenshots, logs, etc.) to help the committee investigate the issue.`}
                 />
-            )}
+            </Alert>
 
-            {reportType === "tournament" && (
-                <>
-                    <TextInput
-                        label="Tournament Name"
-                        placeholder="Enter tournament name"
-                        {...form.getInputProps("tournamentName")}
+            <Card shadow="xs" padding="lg">
+                <Stack gap="md">
+                    <Select
+                        label="Contact Group"
+                        placeholder="Select which committee to contact"
+                        data={GROUP_OPTIONS}
+                        {...form.getInputProps("assignedGroup")}
                         withAsterisk
                     />
-                    <TextInput
-                        label="Tournament Forum URL"
-                        placeholder="Enter forum URL"
-                        {...form.getInputProps("forumUrl")}
+
+                    <Select
+                        label="Report Type"
+                        placeholder="Select report type"
+                        data={[
+                            { value: "user", label: "User Report" },
+                            { value: "tournament", label: "Tournament Report" },
+                        ]}
+                        onChange={(value) => setReportType(value as "user" | "tournament")}
                         withAsterisk
                     />
-                </>
-            )}
 
-            <Textarea
-                label="Message"
-                placeholder="Tell us about your issue"
-                minRows={4}
-                {...form.getInputProps("message")}
-                withAsterisk
-            />
+                    {reportType === "user" && (
+                        <UserSearch
+                            label="Target User"
+                            error={form.errors.targetUser}
+                            onChange={(user) => form.setFieldValue("targetUser", user?.id)}
+                            required
+                        />
+                    )}
+
+                    {reportType === "tournament" && (
+                        <>
+                            <TextInput
+                                label="Tournament Name"
+                                placeholder="Enter tournament name"
+                                {...form.getInputProps("tournamentName")}
+                                withAsterisk
+                            />
+                            <TextInput
+                                label="Tournament Forum URL"
+                                placeholder="Enter forum URL"
+                                {...form.getInputProps("forumUrl")}
+                                withAsterisk
+                            />
+                        </>
+                    )}
+
+                    <Textarea
+                        label="Message"
+                        placeholder="Tell us about your issue"
+                        minRows={6}
+                        resize="vertical"
+                        autosize
+                        {...form.getInputProps("message")}
+                        withAsterisk
+                    />
+                </Stack>
+            </Card>
         </Stack>
     );
 }
