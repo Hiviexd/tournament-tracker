@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../hooks/useTickets";
+import { UserGroup } from "../../interfaces/User";
 
 // Mantine
 import { Tabs, Stack, Title } from "@mantine/core";
@@ -14,6 +15,7 @@ export interface ITicketFormValues {
     title: string;
     message: string;
     type: "ticket" | "report";
+    assignedGroup?: UserGroup;
     targetUserId?: string;
     targetTournamentName?: string;
     targetTournamentForumUrl?: string;
@@ -33,6 +35,7 @@ export default function TicketCreatePage() {
         validate: {
             title: (value, values) => (values.type === "ticket" && !value ? "Title is required" : null),
             message: (value) => (!value ? "Message is required" : null),
+            assignedGroup: (value) => (!value ? "Committee selection is required" : null),
             targetUserId: (value, values) =>
                 values.type === "report" && !value && !values.targetTournamentName
                     ? "Either user or tournament must be selected"
