@@ -12,8 +12,9 @@ export interface IDiscordField {
 
 export interface IDiscordEmbed {
     title?: string;
+    url?: string;
     author?: IDiscordAuthor;
-    description: string;
+    description?: string;
     color: number;
     fields?: IDiscordField[];
     image? : {
