@@ -28,21 +28,26 @@ export const routes: IRoute[] = [
         link: "/voting",
     },
     {
-        title: "Tournament Reports",
+        title: "Tickets & Reports",
         permissions: ["user"],
-        link: "/reports",
         links: [
             {
                 title: "Submit Report",
-                link: "/reports",
+                link: "/reports/create",
                 icon: "paper-plane",
-                permissions: ["committee"],
+                permissions: ["user"],
             },
             {
-                title: "Manage Reports",
-                link: "/reports/manage",
+                title: "Submit Ticket",
+                link: "/tickets/create",
+                icon: "paper-plane",
+                permissions: ["user"],
+            },
+            {
+                title: "Tickets listing",
+                link: "/tickets",
                 icon: "mail-bulk",
-                permissions: ["committee"],
+                permissions: ["user"],
             },
         ],
     },

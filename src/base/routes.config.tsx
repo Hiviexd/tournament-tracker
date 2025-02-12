@@ -11,6 +11,7 @@ import MarkdownPage from "../pages/MarkdownPage";
 import LogsPage from "../pages/LogsPage";
 import UsersPage from "../pages/UsersPage";
 import TournamentsListPage from "../pages/TournamentsListPage";
+import TicketCreatePage from "../pages/TicketCreatePage";
 
 interface RouteConfig {
     path: string;
@@ -103,6 +104,20 @@ const routes: RouteConfig[] = [
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
         icon: "users",
+        permissions: ["user"],
+    },
+    {
+        path: "/tickets/create",
+        page: <TicketCreatePage />,
+        title: "Create Ticket",
+        icon: "paper-plane",
+        permissions: ["user"],
+    },
+    {
+        path: "/reports/create",
+        page: <TicketCreatePage />,
+        title: "Create Report",
+        icon: "flag",
         permissions: ["user"],
     },
     {
