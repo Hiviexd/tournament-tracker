@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Ticket from "../models/TicketModel";
-import Message from "../models/mmessageModel";
+import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
 import LogService from "../services/LogService";
