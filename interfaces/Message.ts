@@ -5,4 +5,5 @@ export interface IMessage extends Document {
     author: IUser;
     content: string;
     isCommittee: boolean;
+    isNote?: boolean;
 }
