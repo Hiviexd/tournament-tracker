@@ -7,6 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import UserSearch from "../common/UserSearch";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
+import helpers from "../../helpers";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -23,6 +24,10 @@ export default function ReportForm() {
             title: "",
             message: "",
             type: "report",
+            assignedGroup: undefined,
+            targetUserId: "",
+            targetTournamentName: "",
+            targetTournamentForumUrl: "",
         },
         validate: {
             message: (value) => (!value ? "Message is required" : null),
@@ -37,8 +42,13 @@ export default function ReportForm() {
                 }
                 return null;
             },
-            targetTournamentForumUrl: (value) =>
-                reportType === "tournament" && !value ? "Forum URL is required" : null,
+            targetTournamentForumUrl: (value) => {
+                if (reportType === "tournament") {
+                    if (!value) return "Forum URL is required";
+                    if (!helpers.isOsuForumLink(value)) return "Invalid osu! forum URL format";
+                }
+                return null;
+            },
         },
     });
 
