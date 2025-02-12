@@ -34,6 +34,14 @@
     }
   },
   "include": ["src"],
-  "exclude": ["server"],
+  "exclude": [
+    "server",
+    "node_modules",
+    "dist",
+    "build",
+    "public/assets",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

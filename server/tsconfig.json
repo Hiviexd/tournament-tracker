@@ -26,5 +26,13 @@
         }
     },
     "include": [".", "../interfaces"],
-    "exclude": ["../src"],
+    "exclude": [
+        "../src",
+        "node_modules",
+        "dist",
+        "build",
+        "public/assets",
+        "**/*.test.ts",
+        "**/*.spec.ts"
+    ],
 }
