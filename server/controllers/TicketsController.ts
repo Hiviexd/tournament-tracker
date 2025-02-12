@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Ticket from "@models/TicketModel";
-import Message from "@models/MessageModel";
+import Ticket from "../models/TicketModel";
+import Message from "../models/MessageModel";
 import LogService from "../services/LogService";
-import { IDiscordField } from "@interfaces/Discord";
+import { IDiscordField } from "../../interfaces/Discord";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
