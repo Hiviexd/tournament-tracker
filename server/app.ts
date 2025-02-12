@@ -62,6 +62,7 @@ import usersRouter from "./routers/usersRouter";
 import votingsRouter from "./routers/votingsRouter";
 import logsRouter from "./routers/logsRouter";
 import tournamentsRouter from "./routers/tournamentsRouter";
+import ticketsRouter from "./routers/ticketsRouter";
 
 // setup api routes
 const apiRouter = express.Router();
@@ -71,6 +72,7 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/votings", votingsRouter);
 apiRouter.use("/logs", logsRouter);
 apiRouter.use("/tournaments", tournamentsRouter);
+apiRouter.use("/tickets", ticketsRouter);
 
 app.use("/api", apiRouter);
 
