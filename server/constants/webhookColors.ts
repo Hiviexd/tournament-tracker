@@ -7,7 +7,7 @@ function parseColor(color: string): number {
 const webhookColors = {
     darkRed:     parseColor("#861615"), // deleteVoting
     red:         parseColor("#EE2629"),
-    lightRed:    parseColor("#ff5050"),
+    lightRed:    parseColor("#ff5050"), // create report
 
     darkOrange:  parseColor("#CE5310"),
     orange:      parseColor("#f57e2a"),
@@ -22,7 +22,7 @@ const webhookColors = {
     lightGreen:  parseColor("#1df27d"), // submitVote
 
     darkBlue:    parseColor("#304989"),
-    blue:        parseColor("#008cff"),
+    blue:        parseColor("#008cff"), // create ticket
     lightBlue:   parseColor("#83E3FF"),
 
     darkPurple:  parseColor("#721C6F"),

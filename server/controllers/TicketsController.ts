@@ -6,11 +6,12 @@ import { IDiscordField } from "../../interfaces/Discord";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
-
+import helpers from "../helpers";
 
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
+        //TODO: remake this
         const user = res.locals!.user!;
         const query: any = {};
 
@@ -38,7 +39,7 @@ class TicketsController {
         if (type === "report") {
             const count = await Ticket.countDocuments({ type: "report" });
             const reportType = targetUserId ? "User" : "Tournament";
-            constructedTitle = `${reportType}Report #${count + 1}`;
+            constructedTitle = `${reportType} Report #${count + 1}`;
         }
 
         const ticket = new Ticket({
@@ -46,11 +47,15 @@ class TicketsController {
             type,
             author,
             assignedGroup,
-            targetUser: targetUserId,
             targetTournamentName,
             targetTournamentForumUrl,
             isActive: true,
         });
+
+        if (targetUserId) {
+            targetUser = await User.findById(targetUserId).orFail();
+            ticket.targetUser = targetUser;
+        }
 
         const initialMessage = new Message({
             author,
@@ -75,30 +80,37 @@ class TicketsController {
         if (ticket.assignedGroup === "tc") roles.push("tournament");
         if (ticket.assignedGroup === "cc") roles.push("contest");
 
-        const reportFields: IDiscordField[] = [];
+        const fields: IDiscordField[] = [];
 
-        if (targetUserId) {
-            reportFields.push({
-                name: "Target User",
-                value: `[**${ticket.targetUser?.username}**](https://osu.ppy.sh/users/${ticket.targetUser?.osuId})`,
-            });
-        } else {
-            reportFields.push({
-                name: "Target Tournament",
-                value: `[**${targetTournamentName}**](${targetTournamentForumUrl})`,
-            });
+        if (type === "report") {
+            if (targetUserId) {
+                fields.push({
+                    name: "Target User",
+                    value: `[**${ticket.targetUser?.username}**](https://osu.ppy.sh/users/${ticket.targetUser?.osuId})`,
+                });
+            } else {
+                fields.push({
+                    name: "Target Tournament",
+                    value: `[**${targetTournamentName}**](${targetTournamentForumUrl})`,
+                });
+            }
         }
+
+        fields.push({ name: "Message", value: helpers.shorten(message, 512) });
+
+        const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
 
         await DiscordService.sendRoleHighlightWebhook(roles, [
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.blue,
-                description: `Submitted a new ${type}: [**${ticket.title}**](/tickets/${ticket._id})`,
-                fields: type === "report" ? reportFields : [],
+                color: type === "report" ? webhookColors.lightRed : webhookColors.blue,
+                title: embedTitle,
+                url: `${config.discord.baseUrl}/tickets/${ticket._id}`,
+                fields,
             },
         ]);
 
-        res.json({ message: `${type} created successfully`, ticket });
+        res.json({ message: `${type} created successfully!`, ticket });
     }
 }
 
