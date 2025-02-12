@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Ticket from "../models/TicketModel";
 import Message from "../models/MessageModel";
+import User from "../models/userModel";
+import { IUser } from "../../interfaces/User";
 import LogService from "../services/LogService";
 import { IDiscordField } from "../../interfaces/Discord";
 import DiscordService from "../services/DiscordService";
@@ -32,6 +34,8 @@ class TicketsController {
         const author = res.locals!.user!;
         const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentForumUrl } =
             req.body;
+
+        let targetUser: IUser;
 
         // construct report title
         let constructedTitle: string = title;
