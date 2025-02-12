@@ -27,10 +27,10 @@
     /* Paths */
     "baseUrl": "./",
     "paths": {
-        "@components/*": ["src/components/*"],
-        "@pages/*": ["src/pages/*"],
-        "@store/*": ["src/store/*"],
-        "@interfaces/*": ["interfaces/*"],
+        "@components/*": ["./src/components/*"],
+        "@pages/*": ["./src/pages/*"],
+        "@store/*": ["./src/store/*"],
+        "@interfaces/*": ["./interfaces/*"],
     }
   },
   "include": ["src"],

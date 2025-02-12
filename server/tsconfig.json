@@ -16,13 +16,13 @@
             "../interfaces"
         ],
         "paths": {
-            "@controllers/*": ["controllers/*"],
-            "@routers/*": ["routers/*"],
-            "@models/*": ["models/*"],
+            "@controllers/*": ["./controllers/*"],
+            "@routers/*": ["./routers/*"],
+            "@models/*": ["./models/*"],
             "@interfaces/*": ["../interfaces/*"],
-            "@helpers/*": ["helpers/*"],
-            "@middlewares/*": ["middlewares/*"],
-            "@services/*": ["services/*"],
+            "@helpers/*": ["./helpers/*"],
+            "@middlewares/*": ["./middlewares/*"],
+            "@services/*": ["./services/*"],
         }
     },
     "include": [".", "../interfaces"],
