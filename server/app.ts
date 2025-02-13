@@ -7,6 +7,7 @@ import config from "../config.json";
 import "express-async-errors";
 import { logger } from "./middlewares/logger";
 import path from "path";
+import { styles } from "./helpers/consoleStyles";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -40,9 +41,9 @@ mongoose.connect(config.connection, {
 });
 const database = mongoose.connection;
 
-database.on("error", console.error.bind(console, "Database connection error:"));
+database.on("error", console.error.bind(console, styles("✗ Database connection error", ["red", "underline"])));
 database.once("open", function () {
-    console.log("✓ Database connected!");
+    console.log(styles("✓ Database connected", ["green", "bold", "underline"]));
 });
 
 app.use(
@@ -109,11 +110,19 @@ app.use((err, req, res, next) => {
 
 // server setup
 const port = process.env.PORT || "3000";
+const environmentString = process.env.NODE_ENV || "⚠ Unknown";
+const environmentStyled = process.env.NODE_ENV
+    ? styles(process.env.NODE_ENV, ["yellow", "underline"])
+    : styles("⚠ Unknown", ["orange", "underline"]);
+
 app.set("port", port);
 app.listen(port, () => {
-    console.log("✓ Server started");
-    console.log(`├─ Port: ${port}`);
-    console.log(`└─ Environment: ${process.env.NODE_ENV ?? "⚠ Unknown"}`);
+    console.log("┌──────────────────────────────────────────────────────────┐");
+    console.log(`│ ${styles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
+    console.log(`│   ${styles("Port:", ["dim"])} ${styles(port, ["cyan"])}${" ".repeat(49 - port.length)}│`);
+    console.log(`│   ${styles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(42 - environmentString.length)}│`);
+    console.log("└──────────────────────────────────────────────────────────┘");
+
     // insert automation stuff below
 });
 
