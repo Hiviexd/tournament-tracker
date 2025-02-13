@@ -1,38 +1,36 @@
 import morgan from "morgan";
 import moment from "moment";
+import { styles, type StyleName } from "../helpers/consoleStyles";
 
 morgan.token("time", () => moment().format("HH:mm:ss.SSS"));
 
 morgan.token("status-colored", (req, res) => {
     const status = res.statusCode;
-    const color =
-        status >= 500
-            ? 31 // red
-            : status >= 400
-                ? 33 // yellow
-                : status >= 300
-                    ? 36 // cyan
-                    : 32; // green
+    const style: StyleName[] =
+        status >= 500 ? ["red"] : status >= 400 ? ["yellow"] : status >= 300 ? ["cyan"] : ["green"];
 
-    return `\x1b[${color}m${status}\x1b[0m`;
+    return styles(status.toString(), style);
 });
 
 morgan.token("method-colored", (req) => {
-    const method = req.method;
-    const color =
+    const method = req.method as string;
+    const style: StyleName[] =
         method === "GET"
-            ? 32 // green
+            ? ["green"]
             : method === "POST"
-                ? 34 // blue
+                ? ["cyan"]
                 : method === "PUT" || method === "PATCH"
-                    ? 33 // yellow
+                    ? ["yellow"]
                     : method === "DELETE"
-                        ? 31 // red
-                        : 90; // grey
+                        ? ["red"]
+                        : ["dim"];
 
-    return `\x1b[${color}m${method}\x1b[0m`;
+    return styles(method, style);
 });
 
 export const logger = morgan(
-    ":time -- :method-colored\x1b[0m \x1b[33m:url\x1b[0m :status-colored \x1b[35m:response-time ms\x1b[0m"
+    `${styles(":time", ["dim"])} -- :method-colored ${styles(":url", ["yellow", "bold"])} :status-colored ${styles(
+        ":response-time ms",
+        ["magenta"]
+    )}`
 );
