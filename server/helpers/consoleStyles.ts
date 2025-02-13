@@ -5,6 +5,7 @@ const stylesCodes = {
     orange: "\x1b[38;5;208m",
     yellow: "\x1b[33m",
     green: "\x1b[32m",
+    magenta: "\x1b[35m",
 
     // Modifiers
     italic: "\x1b[3m",
@@ -14,7 +15,7 @@ const stylesCodes = {
     reset: "\x1b[0m",
 } as const;
 
-type StyleName = keyof typeof stylesCodes;
+export type StyleName = keyof typeof stylesCodes;
 
 /**
  * Applies multiple styles to text
