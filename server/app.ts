@@ -6,8 +6,9 @@ import MongoStoreSession from "connect-mongo";
 import config from "../config.json";
 import "express-async-errors";
 import { logger } from "./middlewares/logger";
+import path from "path";
 
-// Return the 'new' updated object by default when doing findByIdAndUpdate
+// Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
     schema.pre("findOneAndUpdate", function (this: any) {
         if (!("new" in this.options)) {
@@ -41,7 +42,7 @@ const database = mongoose.connection;
 
 database.on("error", console.error.bind(console, "Database connection error:"));
 database.once("open", function () {
-    console.log("Database connected!");
+    console.log("✓ Database connected!");
 });
 
 app.use(
@@ -76,6 +77,15 @@ apiRouter.use("/tickets", ticketsRouter);
 
 app.use("/api", apiRouter);
 
+// serve production frontend
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../../dist")));
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../../dist/index.html"));
+    });
+}
+
 // catch 404
 app.use((req, res) => {
     res.status(404);
@@ -101,7 +111,9 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || "3000";
 app.set("port", port);
 app.listen(port, () => {
-    console.log("Listening on " + port);
+    console.log("✓ Server started");
+    console.log(`├─ Port: ${port}`);
+    console.log(`└─ Environment: ${process.env.NODE_ENV ?? "⚠ Unknown"}`);
     // insert automation stuff below
 });
 
