@@ -38,19 +38,19 @@ export default function TicketCreatePage() {
     };
 
     return (
-        <Tabs value={activeTab} onChange={handleTabChange}>
+        <Tabs color="primary.6" value={activeTab} onChange={handleTabChange}>
             <Stack gap="md">
                 <Tabs.List>
-                    <Tabs.Tab value="ticket">Ticket</Tabs.Tab>
                     <Tabs.Tab value="report">Report</Tabs.Tab>
+                    <Tabs.Tab value="ticket">Ticket</Tabs.Tab>
                 </Tabs.List>
-
-                <Tabs.Panel value="ticket">
-                    <TicketForm />
-                </Tabs.Panel>
 
                 <Tabs.Panel value="report">
                     <ReportForm />
+                </Tabs.Panel>
+
+                <Tabs.Panel value="ticket">
+                    <TicketForm />
                 </Tabs.Panel>
             </Stack>
         </Tabs>
