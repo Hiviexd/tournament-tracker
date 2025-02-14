@@ -2,9 +2,6 @@ import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import ErrorPage from "../pages/ErrorPage";
 import NotFoundPage from "../pages/NotFoundPage";
-import CommitteePage from "../pages/CommitteePage";
-import AdminPage from "../pages/AdminPage";
-import UserPage from "../pages/UserPage";
 import VotingListPage from "../pages/VotingListPage";
 import VotingPage from "../pages/VotingPage";
 import MarkdownPage from "../pages/MarkdownPage";
@@ -42,27 +39,6 @@ const routes: RouteConfig[] = [
         title: "Error",
         icon: "exclamation-circle",
         permissions: [],
-    },
-    {
-        path: "/committee",
-        page: <CommitteePage />,
-        title: "Committee",
-        icon: "users",
-        permissions: ["committee"],
-    },
-    {
-        path: "/admin",
-        page: <AdminPage />,
-        title: "Admin",
-        icon: "user-shield",
-        permissions: ["admin"],
-    },
-    {
-        path: "/user",
-        page: <UserPage />,
-        title: "User",
-        icon: "user-friends",
-        permissions: ["user"],
     },
     {
         path: "/voting",
