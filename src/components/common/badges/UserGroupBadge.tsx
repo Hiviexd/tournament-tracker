@@ -18,7 +18,7 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
         color: "var(--mantine-color-warning-6)",
     },
     cc: {
-        tooltip: "Content Committee",
+        tooltip: "Contest Committee",
         label: "CC",
         color: "var(--mantine-color-info-6)",
     },
