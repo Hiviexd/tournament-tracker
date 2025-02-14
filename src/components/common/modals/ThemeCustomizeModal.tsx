@@ -27,7 +27,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
 
     const getPreviewColor = (hue: number, isGreyscale: boolean) => {
         if (isGreyscale) return "#656565";
-        return `hsl(${hue}, 50%, 50%)`;
+        return `hsl(${hue}, 75%, 50%)`;
     };
 
     const handleSubmit = () => {
@@ -63,8 +63,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
                     <Button
                         onClick={handleSubmit}
                         disabled={
-                            initialHue === newHue &&
-                            isGreyscale === (localStorage.getItem("greyscale") === "true")
+                            initialHue === newHue && isGreyscale === (localStorage.getItem("greyscale") === "true")
                         }
                         leftSection={<FontAwesomeIcon icon="palette" />}>
                         Apply Theme
