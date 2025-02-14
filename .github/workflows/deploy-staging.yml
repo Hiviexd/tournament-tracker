@@ -75,7 +75,7 @@ jobs:
                     
                     # Reload service
                     echo "Reloading service..."
-                    PORT=8088 pm2 reload staging-tcomm || PORT=8088 pm2 start "yarn prod" --name staging-tcomm
+                    pm2 reload staging-tcomm || pm2 start "yarn prod" --name staging-tcomm
                     
                     # Ensure it's running
                     sleep 5
