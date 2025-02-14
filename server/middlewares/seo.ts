@@ -115,6 +115,12 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
 }
 
 function generateHTML(metadata: SEOMetadata & { url: string }): string {
+    const imageUrl = metadata.image ?
+        metadata.image.startsWith(config.discord.baseUrl) ?
+            metadata.image :
+            `${config.discord.baseUrl}/api/proxy-image?url=${encodeURIComponent(metadata.image)}`
+        : null;
+
     return `
         <!DOCTYPE html>
         <html>
@@ -128,7 +134,7 @@ function generateHTML(metadata: SEOMetadata & { url: string }): string {
                 <meta property="og:title" content="${metadata.title}">
                 ${metadata.ogSiteName ? `<meta property="og:site_name" content="${metadata.ogSiteName}">` : ""}
                 <meta property="og:description" content="${metadata.description}">
-                ${metadata.image ? `<meta property="og:image" content="${metadata.image}">` : ""}
+                ${imageUrl ? `<meta property="og:image" content="${imageUrl}">` : ""}
                 
                 <!-- Twitter -->
                 <meta name="twitter:card" content="summary_large_image">
@@ -136,10 +142,10 @@ function generateHTML(metadata: SEOMetadata & { url: string }): string {
                 <meta name="twitter:title" content="${metadata.title}">
                 ${metadata.ogSiteName ? `<meta name="twitter:site" content="${metadata.ogSiteName}">` : ""}
                 <meta name="twitter:description" content="${metadata.description}">
-                ${metadata.image ? `<meta name="twitter:image" content="${metadata.image}">` : ""}
+                ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}">` : ""}
                 
                 <!-- Theme -->
-                <meta name="theme-color" content="##900ecf">
+                <meta name="theme-color" content="#900ecf">
                 
                 <!-- Redirect -->
                 <!-- <meta http-equiv="refresh" content="0;url=${metadata.url}"> -->
@@ -147,7 +153,7 @@ function generateHTML(metadata: SEOMetadata & { url: string }): string {
             <body>
                 <h1>${metadata.title}</h1>
                 <p>${metadata.description}</p>
-                ${metadata.image ? `<img src="${metadata.image}" alt="${metadata.title}">` : ""}
+                ${imageUrl ? `<img src="${imageUrl}" alt="${metadata.title}">` : ""}
             </body>
         </html>`;
 }
