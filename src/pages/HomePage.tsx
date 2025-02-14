@@ -1,25 +1,26 @@
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
-import { Link } from "react-router-dom";
+import { useDisclosure } from "@mantine/hooks";
+import { Text, Collapse } from "@mantine/core";
 
 export default function HomePage() {
     const [user] = useAtom(loggedInUserAtom);
+    const [opened, { toggle }] = useDisclosure(false);
 
     return (
         <div>
-            <p>{user ? <>Welcome back, {user.username}!</> : "Hello, newcomer!"}</p>
-
-            {user && <a href="/api/auth/logout">Logout</a>}
+            <Text>{user ? <>Welcome back, {user.username}!</> : "Hello, newcomer!"}</Text>
             <br />
-            {!user && <a href="/api/auth/login">Login</a>}
+            <Text>pretend this is a complete home page...</Text>
             <br />
-            <Link to="/">Home Page</Link>
-            <br />
-            <Link to="/user">User Page</Link>
-            <br />
-            <Link to="/committee">Committee Page</Link>
-            <br />
-            <Link to="/admin">Admin Page</Link>
+            {user?.username === "Hivie" && (
+                <a href="#" onClick={toggle}>
+                    view loggedInUser object
+                </a>
+            )}
+            <Collapse in={opened}>
+                <pre>{JSON.stringify(user, null, 2)}</pre>
+            </Collapse>
         </div>
     );
 }
