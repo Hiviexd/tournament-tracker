@@ -13,20 +13,21 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        if: always()
         environment: staging
 
         steps:
             - name: Send Deploy Start Notification
               uses: sarisia/actions-status-discord@v1
+              if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                  status: info
                   title: "🚀 Staging Deployment Started"
                   description: |
                       Starting deployment to staging environment
-                      Reason: ${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}
+                      - - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                       Triggered by: ${{ github.actor }}
-                  color: 0x3498db
+                  color: 0x008cff
 
             - name: Verify Dependencies
               uses: appleboy/ssh-action@master
@@ -109,9 +110,8 @@ jobs:
               if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                  status: ${{ needs.deploy.result }}
-                  title: ${{ needs.deploy.result == 'success' && '🚀 Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
+                  title: ${{ needs.deploy.result == 'success' && '✅ Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
                   description: |
-                      Staging deployment ${{ needs.deploy.result }}
-                      Reason: ${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}
+                      Staging deployment was ${{ needs.deploy.result }}!\n
+                      Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
