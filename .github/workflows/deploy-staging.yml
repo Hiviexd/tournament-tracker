@@ -133,4 +133,4 @@ jobs:
 
                       Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
-                  content: ${{ needs.deploy.result != 'success' && '<@341321481390784512>' || '' }}
+                  content: ${{ needs.deploy.result != 'success' && '<@341321481390784512> ⚠️ Deploy failed' || '' }}
