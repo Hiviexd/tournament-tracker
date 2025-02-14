@@ -22,7 +22,7 @@ jobs:
               if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                  status: ""
+                  noprefix: true
                   title: "🚀 Staging Deployment Started"
                   description: |
                       Starting deployment to staging environment
@@ -110,7 +110,7 @@ jobs:
               if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
-                  status: ""
+                  noprefix: true
                   title: ${{ needs.deploy.result == 'success' && '✅ Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
                   description: |
                       Staging deployment was ${{ needs.deploy.result }}!
