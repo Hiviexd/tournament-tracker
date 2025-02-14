@@ -7,7 +7,7 @@
         "dev-client": "cross-env NODE_ENV=development vite --mode development",
         "dev-server": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --no-notify --project server/tsconfig.json server/app.ts",
         "prod": "cross-env NODE_ENV=production node ./dist/server/app.js",
-        "deploy": "yarn build-client && yarn build-server && yarn prod",
+        "build": "yarn build-client && yarn build-server",
         "build-client": "vite build",
         "build-server": "cross-env NODE_ENV=production tsc --project server/tsconfig.json",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
