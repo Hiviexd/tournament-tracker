@@ -139,7 +139,7 @@ function generateHTML(metadata: SEOMetadata & { url: string }): string {
                 ${metadata.image ? `<meta name="twitter:image" content="${metadata.image}">` : ""}
                 
                 <!-- Theme -->
-                <meta name="theme-color" content="#672887">
+                <meta name="theme-color" content="##900ecf">
                 
                 <!-- Redirect -->
                 <!-- <meta http-equiv="refresh" content="0;url=${metadata.url}"> -->
