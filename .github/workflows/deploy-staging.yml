@@ -110,7 +110,7 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ needs.deploy.result }}
-                  title: "Staging Deployment"
+                  title: ${{ needs.deploy.result == 'success' && '🚀 Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
                   description: |
                       Staging deployment ${{ needs.deploy.result }}
                       Reason: ${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}
