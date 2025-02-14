@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserGroup } from "../../interfaces/User";
 
@@ -25,6 +25,11 @@ export default function TicketCreatePage() {
 
     const initialTab = location.pathname.includes("/reports/create") ? "report" : "ticket";
     const [activeTab, setActiveTab] = useState<"ticket" | "report">(initialTab);
+
+    useEffect(() => {
+        const newTab = location.pathname.includes("/reports/create") ? "report" : "ticket";
+        setActiveTab(newTab);
+    }, [location.pathname]);
 
     const handleTabChange = (value: string | null) => {
         const newTab = (value ?? "ticket") as "ticket" | "report";
