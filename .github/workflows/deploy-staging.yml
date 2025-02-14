@@ -82,9 +82,9 @@ jobs:
                     pm2 ls
                     
                     # Show initial logs
-                    echo "Success! Showing startup logs for 30 seconds..."
+                    echo "Success! Showing startup logs for 10 seconds..."
                     sleep 3
-                    timeout 30 pm2 logs staging-tcomm --lines 50 || true
+                    timeout 10 pm2 logs staging-tcomm --lines 50 || true
                     exit 0
 
     notify:
