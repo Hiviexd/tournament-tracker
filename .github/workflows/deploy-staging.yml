@@ -22,11 +22,11 @@ jobs:
               if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  status: ""
                   title: "🚀 Staging Deployment Started"
                   description: |
                       Starting deployment to staging environment
-                      - - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
-                      Triggered by: ${{ github.actor }}
+                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: 0x008cff
 
             - name: Verify Dependencies
@@ -110,8 +110,10 @@ jobs:
               if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  status: ""
                   title: ${{ needs.deploy.result == 'success' && '✅ Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
                   description: |
-                      Staging deployment was ${{ needs.deploy.result }}!\n
+                      Staging deployment was ${{ needs.deploy.result }}!
+
                       Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
