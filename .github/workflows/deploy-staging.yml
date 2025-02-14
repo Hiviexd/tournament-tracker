@@ -25,7 +25,7 @@ jobs:
                   noprefix: true
                   title: "🚀 Staging Deployment Started"
                   description: |
-                      Starting deployment to staging environment
+                      Starting deployment to staging environment...
                       - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: 0x008cff
 
@@ -129,8 +129,7 @@ jobs:
                   noprefix: true
                   title: ${{ needs.deploy.result == 'success' && '✅ Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
                   description: |
-                      Staging deployment was ${{ needs.deploy.result }}!
-
-                      Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
+                      - Status: `${{ needs.deploy.result }}`
+                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
                   content: ${{ needs.deploy.result != 'success' && '⚠️ Staging deploy failed! <@341321481390784512>' || '' }}
