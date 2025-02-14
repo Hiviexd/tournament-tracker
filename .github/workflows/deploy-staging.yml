@@ -76,9 +76,25 @@ jobs:
                   script: |
                       # Pull latest changes
                       cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
-                      git pull
 
-                      # Install dependencies
+                      # Check if there are any uncommitted changes
+                      if [[ -n $(git status -s) ]]; then
+                          echo "Error: Working directory is not clean. Please commit or stash changes."
+                          exit 1
+                      fi
+
+                      # Try to pull and capture the output
+                      pull_output=$(git pull 2>&1)
+                      pull_status=$?
+                      echo "$pull_output"
+
+                      # Check for conflicts or errors
+                      if [[ $pull_status -ne 0 ]] || [[ $pull_output == *"CONFLICT"* ]] || [[ $pull_output == *"error:"* ]]; then
+                          echo "Error: Git pull failed or encountered conflicts"
+                          git status
+                          exit 1
+                      fi
+
                       echo "Installing dependencies..."
                       yarn install
 
