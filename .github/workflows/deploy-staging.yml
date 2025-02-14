@@ -1,0 +1,102 @@
+name: Deploy to Staging
+
+on:
+    workflow_dispatch:
+        inputs:
+            reason:
+                description: "Reason for staging deployment"
+                required: false
+                type: string
+    push:
+        branches: [main]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        environment: staging
+
+        steps:
+            - name: Verify Dependencies
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      echo "Checking dependencies..."
+                      echo "========================"
+
+                      # Node.js check and install
+                      if ! command -v node &> /dev/null; then
+                          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                          sudo apt-get install -y nodejs
+                      fi
+
+                      # Check Yarn
+                      if ! command -v yarn &> /dev/null; then
+                          echo "Installing Yarn..."
+                          npm install -g yarn
+                      fi
+
+                      # PM2 check
+                      if ! command -v pm2 &> /dev/null; then
+                          npm install -g pm2
+                      fi
+
+            - name: List Current PM2 Processes
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      echo "List of current pm2 processes:"
+                      echo "==============================="
+                      pm2 ls
+
+            - name: Pull Changes & Build
+              uses: appleboy/ssh-action@master
+              with:
+                host: ${{ secrets.SERVER_HOST }}
+                username: ${{ secrets.SERVER_USER }}
+                key: ${{ secrets.SSH_PRIVATE_KEY }}
+                script: |
+                    # Pull latest changes
+                    cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
+                    git pull
+                    
+                    # Install dependencies
+                    echo "Installing dependencies..."
+                    yarn install
+                    
+                    # Build both frontend and backend
+                    echo "Building project..."
+                    yarn build
+                    
+                    # Reload service
+                    echo "Reloading service..."
+                    pm2 reload staging-tcomm || PORT=8088 pm2 start "yarn prod" --name staging-tcomm
+                    
+                    # Ensure it's running
+                    sleep 5
+                    pm2 ls
+                    
+                    # Show initial logs
+                    pm2 logs tournament-tracker-staging --lines 20 || true
+
+    notify:
+        needs: deploy
+        runs-on: ubuntu-latest
+        if: always()
+        steps:
+            - name: Send Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              if: always()
+              with:
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  status: ${{ needs.deploy.result }}
+                  title: "Staging Deployment"
+                  description: |
+                      Staging deployment ${{ needs.deploy.result }}
+                      Reason: ${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}
+                  color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
