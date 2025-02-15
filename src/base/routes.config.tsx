@@ -87,14 +87,14 @@ const routes: RouteConfig[] = [
         path: "/tickets",
         page: <TicketsListPage />,
         title: "Tickets Listing",
-        icon: "paper-plane",
+        icon: "mail-bulk",
         permissions: ["user"],
     },
     {
         path: "/reports",
         page: <TicketsListPage />,
         title: "Reports Listing",
-        icon: "paper-plane",
+        icon: "mail-bulk",
         permissions: ["user"],
     },
     {
