@@ -16,6 +16,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import DueDateBadge from "../../components/common/badges/DueDateBadge";
 import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
 import UserLink from "../common/UserLink";
+import UserGroupBadge from "../common/badges/UserGroupBadge";
 
 interface IPropTypes {
     voting: IVoting;
@@ -23,26 +24,23 @@ interface IPropTypes {
 
 export default function VotingCard({ voting }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
+    const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
     const checkUserVoted = (): boolean => {
         return !!voting.votes.find((vote) => vote.author._id === user?._id);
     };
 
-    const getVotingTypeInfo = (): { icon: IconProp; text: string } => {
+    const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
         switch (voting.category) {
             case "tournament":
-                return { icon: "trophy", text: "Tournament" };
+                return { icon: "trophy", text: "Tournament", color: "orange" };
             case "user":
-                return { icon: "user", text: "User" };
+                return { icon: "user", text: "User", color: "red" };
             case "discussion":
-                return { icon: "comments", text: "Discussion" };
+                return { icon: "comments", text: "Discussion", color: "blue" };
             default:
-                return { icon: "question", text: "Unknown" };
+                return { icon: "question", text: "Unknown", color: "gray" };
         }
-    };
-
-    const getVotingAssignedGroups = (): string => {
-        return voting.assignedGroups.join("/");
     };
 
     return (
@@ -80,10 +78,13 @@ export default function VotingCard({ voting }: IPropTypes) {
             <Group mt="md" justify="space-between">
                 <Group>
                     <Tooltip label={getVotingTypeInfo().text}>
-                        <Badge color="primary" variant="filled">
-                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} /> {getVotingAssignedGroups()}
+                        <Badge color={getVotingTypeInfo().color} variant="filled">
+                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
                         </Badge>
                     </Tooltip>
+                    {sortedGroups.map((group, index) => (
+                        <UserGroupBadge key={index} group={group} tooltip="top" />
+                    ))}
                     <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
                 </Group>
 
