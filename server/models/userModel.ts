@@ -48,7 +48,7 @@ UserSchema.virtual("isCommittee").get(function (this: IUser) {
 });
 
 UserSchema.virtual("isAlumni").get(function (this: IUser) {
-    return !this.isCommittee && this.history?.length > 0;
+    return this.groups && this.groups.includes("alm");
 });
 
 UserSchema.virtual("tcDuration").get(function (this: IUser) {

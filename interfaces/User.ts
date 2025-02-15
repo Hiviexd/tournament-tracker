@@ -1,7 +1,7 @@
 import { IOsuCountry } from './OsuApi';
 import { Document, Model, DocumentQuery } from 'mongoose';
 
-export type UserGroup = "user" | "tc" | "cc" | "admin";
+export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm";
 
 export interface IUserHistory {
     date: Date;
