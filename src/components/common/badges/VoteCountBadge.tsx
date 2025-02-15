@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Badge, BadgeVariant } from "@mantine/core";
 
 interface IPropTypes {
@@ -15,7 +16,8 @@ export default function VoteCountBadge({
 }: IPropTypes) {
     return (
         <Badge color={voteCount >= totalVotes ? "success" : "danger"} variant={variant}>
-            {voteCount} / {totalVotes} {textOverride}
+            <FontAwesomeIcon icon={voteCount >= totalVotes ? "check" : "times"} /> {voteCount} / {totalVotes}{" "}
+            {textOverride}
         </Badge>
     );
 }

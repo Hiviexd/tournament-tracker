@@ -81,21 +81,16 @@ export default function VotingCard({ voting }: IPropTypes) {
                 <Group>
                     <Tooltip label={getVotingTypeInfo().text}>
                         <Badge color="primary" variant="filled">
-                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} />{" "}
-                            {getVotingAssignedGroups()}
+                            <FontAwesomeIcon icon={getVotingTypeInfo().icon} /> {getVotingAssignedGroups()}
                         </Badge>
                     </Tooltip>
-                    <VoteCountBadge
-                        voteCount={voting.votes.length}
-                        totalVotes={voting.requiredVotes}
-                        variant="light"
-                    />
+                    <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
                 </Group>
 
                 <Group>
                     {!checkUserVoted() && (
-                        <Badge color="gray" variant="light">
-                            Not voted
+                        <Badge color="warning" variant="light">
+                            <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
                         </Badge>
                     )}
                     {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
