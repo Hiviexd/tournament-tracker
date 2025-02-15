@@ -9,6 +9,7 @@ import LogsPage from "../pages/LogsPage";
 import UsersPage from "../pages/UsersPage";
 import TournamentsListPage from "../pages/TournamentsListPage";
 import TicketCreatePage from "../pages/TicketCreatePage";
+import TicketsListPage from "../pages/TicketsListPage";
 
 interface RouteConfig {
     path: string;
@@ -80,6 +81,20 @@ const routes: RouteConfig[] = [
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
         icon: "users",
+        permissions: ["user"],
+    },
+    {
+        path: "/tickets",
+        page: <TicketsListPage />,
+        title: "Tickets Listing",
+        icon: "paper-plane",
+        permissions: ["user"],
+    },
+    {
+        path: "/reports",
+        page: <TicketsListPage />,
+        title: "Reports Listing",
+        icon: "paper-plane",
         permissions: ["user"],
     },
     {

@@ -3,7 +3,10 @@ import { ITicket } from "../../interfaces/Ticket";
 
 interface TicketQueryParams {
     type?: "ticket" | "report";
+    title?: string;
+    assignedGroup?: string;
     isActive?: boolean;
+    page?: number;
 }
 
 export const getTickets = async (params?: TicketQueryParams) => {

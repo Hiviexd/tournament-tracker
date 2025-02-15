@@ -10,23 +10,39 @@ import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import helpers from "../helpers";
 
+const DEFAULT_POPULATE = ["author", "messages", "targetUser"];
+const DEFAULT_LIMIT = 12;
+
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
-        //TODO: remake this
-        const user = res.locals!.user!;
+        const { type, title, assignedGroup, status, page = 1 } = req.query;
         const query: any = {};
 
-        // Non-committee users can only see:
-        // - Their own tickets/reports
-        // - Tickets assigned to their committee
+        if (type) query.type = type;
+        if (title) query.title = new RegExp(title as string, "i");
+        if (assignedGroup) query.assignedGroup = assignedGroup;
+        if (status) query.isActive = status === "active";
+
+        // Non-committee users can only see their own tickets/reports and public tickets
+        const user = res.locals!.user!;
         if (!user.isCommittee) {
             query.$or = [{ author: user._id }, { type: "ticket" }];
         }
 
-        const tickets = await Ticket.find(query).populate("author messages targetUser").sort({ updatedAt: -1 });
+        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
-        res.json(tickets);
+        const [tickets, total] = await Promise.all([
+            Ticket.find(query).sort({ updatedAt: -1 }).skip(skip).limit(DEFAULT_LIMIT).populate(DEFAULT_POPULATE),
+            Ticket.countDocuments(query),
+        ]);
+
+        res.json({
+            tickets,
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / DEFAULT_LIMIT),
+        });
     }
 
     /** POST create ticket */

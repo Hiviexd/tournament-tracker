@@ -9,7 +9,10 @@ import { getTickets, getTicket, createTicket } from "../api/tickets";
 // Types
 interface TicketQueryParams {
     type?: "ticket" | "report";
+    title?: string;
+    assignedGroup?: string;
     isActive?: boolean;
+    page?: number;
 }
 
 export function useTickets(params?: TicketQueryParams) {

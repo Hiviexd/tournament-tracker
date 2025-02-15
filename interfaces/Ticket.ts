@@ -14,6 +14,8 @@ export interface ITicket extends Document {
     isActive: boolean;
     targetUser?: IUser;
     targetTournament?: ITournament;
+    createdAt: Date;
+    updatedAt: Date;
 
     // temporary until tournaments model is used
     targetTournamentName?: string;
