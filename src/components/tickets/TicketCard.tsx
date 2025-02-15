@@ -46,9 +46,12 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             }
             if (ticket.targetTournamentName) {
                 return (
-                    <Anchor onClick={handleLinkClick} component={Link} to={`https://mantine.dev/core/anchor/`}>
-                        {ticket.targetTournamentName}
-                    </Anchor>
+                    <Text fw={700}>
+                        Tournament:{" "}
+                        <Anchor onClick={handleLinkClick} href={ticket.targetTournamentLink} target="_blank">
+                            {ticket.targetTournamentName}
+                        </Anchor>
+                    </Text>
                 );
             }
         }
