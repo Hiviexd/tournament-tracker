@@ -1,9 +1,9 @@
 import { Badge, Tooltip } from "@mantine/core";
-import { IUser } from "../../../../interfaces/User";
+import { IUser, type UserGroup } from "../../../../interfaces/User";
 
 interface IPropTypes {
     user?: IUser;
-    group?: "tc" | "cc" | "alm";
+    group?: UserGroup;
     tooltip?: "top" | "right" | "bottom" | "left";
 }
 
