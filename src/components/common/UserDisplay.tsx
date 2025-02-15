@@ -1,19 +1,20 @@
-import { Stack, Group, Avatar, Text } from "@mantine/core";
+import { Stack, Group, Avatar } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import UserGroupBadge from "./badges/UserGroupBadge";
+import UserLink from "./UserLink";
 
 interface IPropTypes {
     user: IUser;
+    asText?: boolean;
 }
 
-export default function UserDisplay({ user }: IPropTypes) {
+export default function UserDisplay({ user, asText }: IPropTypes) {
+
     return (
         <Group align="center" gap="sm">
             <Avatar src={user.avatarUrl} size={40} radius="md" />
             <Stack gap={2}>
-                <Text fw={700} component="a" href={`https://osu.ppy.sh/users/${user.osuId}`} target="_blank">
-                    {user.username}
-                </Text>
+                <UserLink user={user} asText={asText} c="white" />
                 <UserGroupBadge user={user} />
             </Stack>
         </Group>
