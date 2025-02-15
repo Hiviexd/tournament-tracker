@@ -96,7 +96,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         </Badge>
                     </Tooltip>
 
-                    <UserGroupBadge group={ticket.assignedGroup} tooltip="bottom" />
+                    <UserGroupBadge group={ticket.assignedGroup} tooltip="top" />
 
                     {targetInfo && (
                         <Tooltip label={targetInfo.text}>
