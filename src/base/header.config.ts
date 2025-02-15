@@ -28,8 +28,9 @@ export const routes: IRoute[] = [
         link: "/voting",
     },
     {
-        title: "Reports & Tickets",
+        title: "Tournament Reports",
         permissions: ["user"],
+        link: "/reports/create",
         links: [
             {
                 title: "Submit Report",
@@ -37,6 +38,20 @@ export const routes: IRoute[] = [
                 icon: "flag",
                 permissions: ["user"],
             },
+            {
+                title: "Reports listing",
+                link: "/reports",
+                icon: "mail-bulk",
+                permissions: ["user"],
+            },
+        ],
+    },
+
+    {
+        title: "Tickets",
+        permissions: ["user"],
+        link: "/tickets/create",
+        links: [
             {
                 title: "Submit Ticket",
                 link: "/tickets/create",
