@@ -11,6 +11,7 @@ import UserDisplay from "../common/UserDisplay";
 import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import DateBadge from "../common/badges/DateBadge";
+import UserGroupBadge from "../common/badges/UserGroupBadge";
 
 interface ITicketCardProps {
     ticket: ITicket;
@@ -94,6 +95,8 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                             <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />{" "}
                         </Badge>
                     </Tooltip>
+
+                    <UserGroupBadge group={ticket.assignedGroup} tooltip="bottom" />
 
                     {targetInfo && (
                         <Tooltip label={targetInfo.text}>
