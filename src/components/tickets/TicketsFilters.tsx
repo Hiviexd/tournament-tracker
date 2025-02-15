@@ -60,3 +60,10 @@ export default function TicketsFilters({ values, onChange }: IProps) {
         </Card>
     );
 }
+
+/**
+ * TODO:
+ * 1. Reports should be searchable by username and tournament name
+ * 2. Need a "Show my own tickets" checkbox
+ * 3. Do not display report filters for non-committee users, use an alert instead
+ */
