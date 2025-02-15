@@ -43,7 +43,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             description: "",
             category: "" as VotingCategory,
             assignedGroups: [] as UserGroup[],
-            duration: 7,
+            duration: 3,
             options: ["Yes", "No"],
             targetUserId: "",
             targetTournamentId: "",
@@ -103,7 +103,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     ];
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Create New Voting" size="lg">
+        <Modal opened={opened} onClose={onClose} title="Create New Vote" size="lg">
             <LoadingOverlay
                 visible={createVotingMutation.isPending}
                 zIndex={1000}
@@ -114,14 +114,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     <Divider />
                     <TextInput
                         label="Title"
-                        placeholder="Enter voting title"
+                        placeholder="Enter vote title"
                         withAsterisk
                         {...form.getInputProps("title")}
                     />
 
                     <Textarea
                         label="Description"
-                        placeholder="Enter voting description"
+                        placeholder="Enter vote description"
                         withAsterisk
                         minRows={3}
                         maxRows={8}
@@ -132,7 +132,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
                     <Select
                         label="Category"
-                        placeholder="Select voting category"
+                        placeholder="Select vote category"
                         data={categoryOptions}
                         withAsterisk
                         {...form.getInputProps("category")}

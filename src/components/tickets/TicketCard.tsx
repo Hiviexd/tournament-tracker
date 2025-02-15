@@ -2,7 +2,6 @@
 import { Card, Group, Stack, Text, Badge, Tooltip, Anchor } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
 
 // Types
 import { ITicket } from "../../../interfaces/Ticket";
@@ -11,6 +10,7 @@ import { ITicket } from "../../../interfaces/Ticket";
 import UserDisplay from "../common/UserDisplay";
 import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import DateBadge from "../common/badges/DateBadge";
 
 interface ITicketCardProps {
     ticket: ITicket;
@@ -72,10 +72,10 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         : "var(--mantine-color-danger-6)",
                 } as React.CSSProperties
             }>
-            <Stack gap="md">
+            <Stack gap="md" justify="space-between">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap="xs">
-                        <Text size="lg" fw={500} lineClamp={1}>
+                        <Text size="lg" fw={500}>
                             {ticket.title}
                         </Text>
                         <Text size="sm" c="dimmed">
@@ -85,7 +85,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                     </Stack>
                 </Group>
 
-                <Group>
+                <Group mt="auto">
                     <Tooltip label={ticket.type === "ticket" ? "Ticket" : "Report"}>
                         <Badge color={ticket.type === "ticket" ? "blue" : "red"} variant="filled">
                             <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />{" "}
@@ -108,12 +108,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         </Tooltip>
                     </Badge>
 
-                    <Badge variant="light">
-                        <FontAwesomeIcon icon="clock" />{" "}
-                        <Tooltip label={moment(ticket.createdAt).format("LLL")}>
-                            <span>{moment(ticket.createdAt).fromNow()}</span>
-                        </Tooltip>
-                    </Badge>
+                    <DateBadge date={ticket.updatedAt} warningAge={7} dangerAge={10} />
                 </Group>
             </Stack>
         </Card>

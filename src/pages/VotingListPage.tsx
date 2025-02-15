@@ -36,14 +36,7 @@ export default function VotingListPage() {
         if (searchInput.status) params.set("status", searchInput.status);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
-    }, [
-        debouncedTitle,
-        searchInput.category,
-        searchInput.assignedGroup,
-        searchInput.status,
-        page,
-        setSearchParams,
-    ]);
+    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status, page, setSearchParams]);
 
     useEffect(() => {
         setPage(1);
@@ -77,9 +70,7 @@ export default function VotingListPage() {
                     {hasError ? "Error loading votings" : "No votings found"}
                 </Text>
                 <Text size="sm" c="dimmed">
-                    {hasError
-                        ? `Try refreshing the page`
-                        : "Try adjusting your filters or create a new voting"}
+                    {hasError ? `Try refreshing the page` : "Try adjusting your filters or create a new voting"}
                 </Text>
             </Stack>
         );
@@ -97,7 +88,7 @@ export default function VotingListPage() {
                     variant="filled"
                     color="primary"
                     fullWidth>
-                    Create New Voting
+                    New Vote
                 </Button>
             </Stack>
 
