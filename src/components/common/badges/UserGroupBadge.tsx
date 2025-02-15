@@ -2,7 +2,9 @@ import { Badge, Tooltip } from "@mantine/core";
 import { IUser } from "../../../../interfaces/User";
 
 interface IPropTypes {
-    user: IUser;
+    user?: IUser;
+    group?: "tc" | "cc" | "alm";
+    tooltip?: "top" | "right" | "bottom" | "left";
 }
 
 interface IBadgeConfig {
@@ -15,7 +17,7 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
     tc: {
         tooltip: "Tournament Committee",
         label: "TC",
-        color: "var(--mantine-color-warning-6)",
+        color: "#FFB969",
     },
     cc: {
         tooltip: "Contest Committee",
@@ -29,11 +31,12 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
     },
 };
 
-export default function UserGroupBadge({ user }: IPropTypes) {
+export default function UserGroupBadge({ user, group, tooltip }: IPropTypes) {
     const getBadgeType = () => {
-        if (user.isTournamentCommittee) return "tc";
-        if (user.isContestCommittee) return "cc";
-        if (user.isAlumni) return "alm";
+        if (group) return group;
+        if (user?.isTournamentCommittee) return "tc";
+        if (user?.isContestCommittee) return "cc";
+        if (user?.isAlumni) return "alm";
         return null;
     };
 
@@ -43,13 +46,12 @@ export default function UserGroupBadge({ user }: IPropTypes) {
     const usegroup = USER_GROUP_BADGES[badgeType];
 
     return (
-        <Tooltip label={usegroup.tooltip} position="right">
+        <Tooltip label={usegroup.tooltip} position={tooltip ?? "right"}>
             <Badge
                 color={usegroup.color}
                 variant="light"
                 style={{
-                    background:
-                        "color-mix(in srgb, var(--mantine-color-primary-11) 75%, transparent)",
+                    background: "color-mix(in srgb, var(--mantine-color-primary-11) 75%, transparent)",
                     border: `1px solid ${usegroup.color}`,
                 }}>
                 {usegroup.label}
