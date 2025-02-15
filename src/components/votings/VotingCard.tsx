@@ -15,6 +15,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 // Components
 import DueDateBadge from "../../components/common/badges/DueDateBadge";
 import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
+import UserLink from "../common/UserLink";
 
 interface IPropTypes {
     voting: IVoting;
@@ -62,7 +63,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                 <div>
                     <Title order={4}>{voting.title}</Title>
                     <Text size="sm" c="dimmed">
-                        Created by {voting.author.username} •{" "}
+                        Created by <UserLink user={voting.author} /> •{" "}
                         {voting.isActive && (
                             <Tooltip label={moment(voting.createdAt).format("LLL")}>
                                 <span>{moment(voting.createdAt).fromNow()}</span>
