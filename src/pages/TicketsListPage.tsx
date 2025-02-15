@@ -66,7 +66,7 @@ export default function TicketsListPage() {
         type: activeTab === "tickets" ? "ticket" : "report",
         title: debouncedTitle,
         assignedGroup: searchInput.assignedGroup,
-        isActive: searchInput.status === "active",
+        isActive: searchInput.status ? searchInput.status === "active" : undefined,
         page,
     });
 
@@ -103,7 +103,7 @@ export default function TicketsListPage() {
                 {hasError ? `Error loading ${activeTab}` : `No ${activeTab} found`}
             </Text>
             <Text size="sm" c="dimmed">
-                {hasError ? "Try refreshing the page" : "Try adjusting your filters or create a new ticket"}
+                {hasError ? "Try refreshing the page" : "Try adjusting your filters"}
             </Text>
         </Stack>
     );

@@ -5,6 +5,14 @@ import { IMessage } from "./Message";
 
 export type TicketType = "ticket" | "report";
 
+export interface TicketQueryParams {
+    type?: TicketType;
+    title?: string;
+    assignedGroup?: string;
+    isActive?: boolean;
+    page?: number;
+}
+
 export interface ITicket extends Document {
     author: IUser;
     type: TicketType;

@@ -7,13 +7,7 @@ import { handleMutationResponse } from "../api/helpers";
 import { getTickets, getTicket, createTicket } from "../api/tickets";
 
 // Types
-interface TicketQueryParams {
-    type?: "ticket" | "report";
-    title?: string;
-    assignedGroup?: string;
-    isActive?: boolean;
-    page?: number;
-}
+import { TicketQueryParams } from "../../interfaces/Ticket";
 
 export function useTickets(params?: TicketQueryParams) {
     return useQuery({

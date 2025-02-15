@@ -16,13 +16,13 @@ const DEFAULT_LIMIT = 12;
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
-        const { type, title, assignedGroup, status, page = 1 } = req.query;
+        const { type, title, assignedGroup, isActive, page = 1 } = req.query;
         const query: any = {};
 
         if (type) query.type = type;
         if (title) query.title = new RegExp(title as string, "i");
         if (assignedGroup) query.assignedGroup = assignedGroup;
-        if (status) query.isActive = status === "active";
+        if (isActive) query.isActive = isActive;
 
         // Non-committee users can only see their own tickets/reports and public tickets
         const user = res.locals!.user!;

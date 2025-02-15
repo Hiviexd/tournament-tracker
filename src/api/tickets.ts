@@ -1,13 +1,5 @@
 import axios from "axios";
-import { ITicket } from "../../interfaces/Ticket";
-
-interface TicketQueryParams {
-    type?: "ticket" | "report";
-    title?: string;
-    assignedGroup?: string;
-    isActive?: boolean;
-    page?: number;
-}
+import { ITicket, TicketQueryParams } from "../../interfaces/Ticket";
 
 export const getTickets = async (params?: TicketQueryParams) => {
     const response = await axios.get("/api/tickets", { params });
