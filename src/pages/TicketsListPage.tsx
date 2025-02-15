@@ -73,18 +73,28 @@ export default function TicketsListPage() {
     const LoadingState = () => (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
             {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg">
-                    <Stack gap="md">
-                        <Group justify="space-between">
+                <Card
+                    key={i}
+                    shadow="sm"
+                    p="lg"
+                    radius="md"
+                    className="ticket-card"
+                    style={{
+                        "--card-status-color": "var(--mantine-color-primary-6)",
+                    }}>
+                    <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
+                        <Stack gap="xs">
                             <Stack gap="xs">
-                                <Skeleton height={24} width="60%" />
-                                <Skeleton height={16} width="40%" />
+                                <Skeleton height={24} width="80%" />
+                                <Skeleton height={16} width={120} />
                             </Stack>
-                            <Skeleton height={24} width={80} radius="xl" />
-                        </Group>
-                        <Group>
-                            <Skeleton height={24} width={100} radius="xl" />
-                            <Skeleton height={24} width={120} radius="xl" />
+                        </Stack>
+
+                        <Group mt="auto">
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={80} radius="xl" />
                         </Group>
                     </Stack>
                 </Card>
