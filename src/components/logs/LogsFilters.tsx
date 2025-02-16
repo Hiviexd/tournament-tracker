@@ -22,6 +22,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
         { value: "tournament", label: "Tournament" },
         { value: "report", label: "Report" },
         { value: "voting", label: "Voting" },
+        { value: "ticket", label: "Ticket" },
     ];
 
     const typeOptions = [
