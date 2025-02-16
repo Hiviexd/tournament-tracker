@@ -27,7 +27,7 @@ export default function ReportForm() {
             assignedGroup: undefined,
             targetUserId: "",
             targetTournamentName: "",
-            targetTournamentForumUrl: "",
+            targetTournamentLink: "",
         },
         validate: {
             message: (value) => (!value ? "Message is required" : null),
@@ -37,12 +37,12 @@ export default function ReportForm() {
                 if (reportType === "tournament" && !value) {
                     return "Tournament name is required";
                 }
-                if (reportType === "tournament" && value && !values.targetTournamentForumUrl) {
+                if (reportType === "tournament" && value && !values.targetTournamentLink) {
                     return "Forum URL is required for tournament reports";
                 }
                 return null;
             },
-            targetTournamentForumUrl: (value) => {
+            targetTournamentLink: (value) => {
                 if (reportType === "tournament") {
                     if (!value) return "Forum URL is required";
                     if (!helpers.isOsuForumLink(value)) return "Invalid osu! forum URL format";
@@ -61,7 +61,7 @@ export default function ReportForm() {
             form.setValues({
                 ...form.values,
                 targetTournamentName: "",
-                targetTournamentForumUrl: "",
+                targetTournamentLink: "",
             });
         } else if (type === "tournament") {
             form.setValues({
@@ -137,7 +137,7 @@ You can report either:
                                 <TextInput
                                     label="Tournament Forum URL"
                                     placeholder="Enter forum URL"
-                                    {...form.getInputProps("targetTournamentForumUrl")}
+                                    {...form.getInputProps("targetTournamentLink")}
                                     withAsterisk
                                 />
                             </>

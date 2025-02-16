@@ -16,7 +16,7 @@ export interface ITicketFormValues {
     assignedGroup?: UserGroup;
     targetUserId?: string;
     targetTournamentName?: string;
-    targetTournamentForumUrl?: string;
+    targetTournamentLink?: string;
 }
 
 export default function TicketCreatePage() {

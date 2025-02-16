@@ -48,7 +48,7 @@ class TicketsController {
     /** POST create ticket */
     public async create(req: Request, res: Response) {
         const author = res.locals!.user!;
-        const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentForumUrl } =
+        const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentLink } =
             req.body;
 
         let targetUser: IUser;
@@ -67,14 +67,17 @@ class TicketsController {
             type,
             author,
             assignedGroup,
-            targetTournamentName,
-            targetTournamentForumUrl,
             isActive: true,
         });
 
-        if (targetUserId) {
-            targetUser = await User.findById(targetUserId).orFail();
-            ticket.targetUser = targetUser;
+        if (type === "report") {
+            if (targetUserId) {
+                targetUser = await User.findById(targetUserId).orFail();
+                ticket.targetUser = targetUser;
+            } else {
+                ticket.targetTournamentName = targetTournamentName;
+                ticket.targetTournamentLink = targetTournamentLink;
+            }
         }
 
         const initialMessage = new Message({
@@ -111,7 +114,7 @@ class TicketsController {
             } else {
                 fields.push({
                     name: "Target Tournament",
-                    value: `[**${targetTournamentName}**](${targetTournamentForumUrl})`,
+                    value: `[**${targetTournamentName}**](${targetTournamentLink})`,
                 });
             }
         }
