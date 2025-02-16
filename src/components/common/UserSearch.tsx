@@ -1,15 +1,5 @@
 import React, { useState } from "react";
-import {
-    Combobox,
-    InputBase,
-    Loader,
-    Group,
-    Avatar,
-    Text,
-    useCombobox,
-    Stack,
-    ActionIcon,
-} from "@mantine/core";
+import { Combobox, InputBase, Loader, Group, Avatar, Text, useCombobox, Stack, ActionIcon } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useUsers } from "../../hooks/useUsers";
 import { IUser } from "../../../interfaces/User";
@@ -18,6 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface IProps {
     onChange: (user: IUser | null) => void;
     label?: string;
+    placeholder?: string;
+    leftSection?: React.ReactNode;
     error?: React.ReactNode;
     required?: boolean;
     width?: string;
@@ -30,7 +22,15 @@ const UserOption = ({ username, avatarUrl }: { username: string; avatarUrl: stri
     </Group>
 );
 
-export default function UserSearch({ onChange, label, error, required, width = "100%" }: IProps) {
+export default function UserSearch({
+    onChange,
+    label,
+    placeholder,
+    leftSection,
+    error,
+    required,
+    width = "100%",
+}: IProps) {
     const [search, setSearch] = useState("");
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const [debouncedSearch] = useDebouncedValue(search, 400);
@@ -54,8 +54,7 @@ export default function UserSearch({ onChange, label, error, required, width = "
         <Stack gap={2}>
             {label && (
                 <Text size="sm" fw={500}>
-                    {label}{" "}
-                    {required && <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>}
+                    {label} {required && <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>}
                 </Text>
             )}
             {selectedUser ? (
@@ -65,19 +64,12 @@ export default function UserSearch({ onChange, label, error, required, width = "
                     type="button"
                     pointer
                     rightSection={
-                        <ActionIcon
-                            size="sm"
-                            variant="subtle"
-                            color="gray"
-                            onClick={handleUnselect}>
+                        <ActionIcon size="sm" variant="subtle" color="gray" onClick={handleUnselect}>
                             <FontAwesomeIcon icon="times" />
                         </ActionIcon>
                     }
                     error={error}>
-                    <UserOption
-                        username={selectedUser.username}
-                        avatarUrl={selectedUser.avatarUrl}
-                    />
+                    <UserOption username={selectedUser.username} avatarUrl={selectedUser.avatarUrl} />
                 </InputBase>
             ) : (
                 <div style={{ width }}>
@@ -94,10 +86,9 @@ export default function UserSearch({ onChange, label, error, required, width = "
                         }}>
                         <Combobox.Target>
                             <InputBase
+                                leftSection={leftSection}
                                 error={error}
-                                rightSection={
-                                    isLoading ? <Loader size="xs" /> : <Combobox.Chevron />
-                                }
+                                rightSection={isLoading ? <Loader size="xs" /> : <Combobox.Chevron />}
                                 onClick={() => combobox.openDropdown()}
                                 onFocus={() => combobox.openDropdown()}
                                 onChange={(e) => {
@@ -105,7 +96,7 @@ export default function UserSearch({ onChange, label, error, required, width = "
                                     combobox.updateSelectedOptionIndex();
                                 }}
                                 value={search}
-                                placeholder="Search by username or osu! ID..."
+                                placeholder={placeholder ?? "Search by username or osu! ID..."}
                             />
                         </Combobox.Target>
 

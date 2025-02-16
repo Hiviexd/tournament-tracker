@@ -62,6 +62,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         <Group>
                             <Select
                                 placeholder="Committee"
+                                leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                                 data={assignedGroupOptions}
@@ -70,6 +71,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                             />
                             <Select
                                 placeholder="Status"
+                                leftSection={<FontAwesomeIcon icon="rotate" />}
                                 value={values.status}
                                 onChange={(value) => handleChange("status", value)}
                                 data={statusOptions}
@@ -88,7 +90,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                     <>
                         <Group grow>
                             <UserSearch
-                                label="Search by reported user"
+                                placeholder="Search by reported user..."
+                                leftSection={<FontAwesomeIcon icon="user" />}
                                 onChange={(user) => handleChange("targetUser", user?.osuId.toString() || "")}
                                 width="100%"
                             />
@@ -102,6 +105,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         <Group>
                             <Select
                                 placeholder="Committee"
+                                leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                                 data={assignedGroupOptions}
@@ -110,6 +114,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                             />
                             <Select
                                 placeholder="Status"
+                                leftSection={<FontAwesomeIcon icon="rotate" />}
                                 value={values.status}
                                 onChange={(value) => handleChange("status", value)}
                                 data={statusOptions}

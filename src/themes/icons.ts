@@ -44,6 +44,7 @@ import {
     faInfoCircle,
     faFlag,
     faClock,
+    faRotate,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -91,5 +92,6 @@ export default function loadIcons() {
         faInfoCircle,
         faFlag,
         faClock,
+        faRotate,
     );
 }
