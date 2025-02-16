@@ -12,7 +12,7 @@ import { theme } from "./themes/main";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
-import '@mantine/dates/styles.css';
+import "@mantine/dates/styles.css";
 import "./sass/app.scss";
 
 // Layout
@@ -23,6 +23,20 @@ import routes from "./base/routes.config";
 // Fontawesome icons
 import loadIcons from "./themes/icons";
 loadIcons();
+
+// PWA
+import { registerSW } from "virtual:pwa-register";
+
+// Register service worker
+if ("serviceWorker" in navigator) {
+    const updateSW = registerSW({
+        onNeedRefresh() {
+            if (confirm("New content available. Reload?")) {
+                updateSW();
+            }
+        },
+    });
+}
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <StateProvider>
@@ -37,11 +51,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                                 path={route.path}
                                 element={
                                     <ProtectedRoute permissions={route.permissions}>
-                                        <Layout
-                                            title={route.title}
-                                            icon={route.icon}
-                                            page={route.page}
-                                        />
+                                        <Layout title={route.title} icon={route.icon} page={route.page} />
                                     </ProtectedRoute>
                                 }
                             />
