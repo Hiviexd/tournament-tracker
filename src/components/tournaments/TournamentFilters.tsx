@@ -1,5 +1,6 @@
-import { Card, TextInput, Group, Select, Stack } from "@mantine/core";
-import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
+import { Card, TextInput, Select, Stack, SimpleGrid } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
 
@@ -53,24 +54,32 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
-                <Group grow>
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     <TextInput
-                        placeholder="Search by name..."
+                        placeholder="Tournament name..."
+                        leftSection={<FontAwesomeIcon icon="search" />}
                         value={values.name}
                         onChange={(e) => handleChange("name", e.currentTarget.value)}
                     />
-                    <UserSearch label="" onChange={handleHostSelect} width="100%" />
+                    <UserSearch
+                        placeholder="Tournament host..."
+                        leftSection={<FontAwesomeIcon icon="user" />}
+                        onChange={handleHostSelect}
+                    />
                     <Select
                         placeholder="Game mode"
+                        leftSection={<FontAwesomeIcon icon="gamepad" />}
                         value={values.mode}
                         onChange={(value) => handleChange("mode", value as GameMode)}
                         data={modeOptions}
                         clearable
                     />
-                </Group>
-                <Group grow>
+                </SimpleGrid>
+
+                <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                     <Select
                         placeholder="Type"
+                        leftSection={<FontAwesomeIcon icon="trophy" />}
                         value={values.type}
                         onChange={(value) => handleChange("type", value as TournamentType)}
                         data={typeOptions}
@@ -78,6 +87,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     />
                     <Select
                         placeholder="Status"
+                        leftSection={<FontAwesomeIcon icon="list" />}
                         value={values.status}
                         onChange={(value) => handleChange("status", value as TournamentStatus)}
                         data={statusOptions}
@@ -85,12 +95,13 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     />
                     <Select
                         placeholder="State"
+                        leftSection={<FontAwesomeIcon icon="clock" />}
                         value={values.state}
                         onChange={(value) => handleChange("state", value)}
                         data={activeOptions}
                         clearable
                     />
-                </Group>
+                </SimpleGrid>
             </Stack>
         </Card>
     );

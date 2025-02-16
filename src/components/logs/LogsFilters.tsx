@@ -1,5 +1,8 @@
-import { Card, Group, TextInput, Select } from "@mantine/core";
+import { Card, Stack, Select, SimpleGrid } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LogCategory } from "../../../interfaces/Log";
+import UserSearch from "../common/UserSearch";
+import { IUser } from "../../../interfaces/User";
 
 interface FilterValues {
     user: string;
@@ -30,30 +33,38 @@ export default function LogsFilters({ values, onChange }: IProps) {
         onChange({ ...values, [key]: value });
     };
 
+    const handleUserSelect = (user: IUser | null) => {
+        handleChange("user", user ? user.username : "");
+    };
+
     return (
         <Card shadow="sm" p="md">
-            <Group align="flex-end">
-                <TextInput
-                    placeholder="Enter username or osu! ID..."
-                    value={values.user}
-                    onChange={(e) => handleChange("user", e.currentTarget.value)}
-                    style={{ flex: 1 }}
+            <Stack gap="md">
+                <UserSearch
+                    placeholder="Search by username or osu! ID..."
+                    leftSection={<FontAwesomeIcon icon="user" />}
+                    onChange={handleUserSelect}
+                    width="100%"
                 />
-                <Select
-                    placeholder="Category"
-                    value={values.category}
-                    onChange={(value) => handleChange("category", value as LogCategory)}
-                    data={categoryOptions}
-                    style={{ width: 200 }}
-                />
-                <Select
-                    placeholder="Type"
-                    value={values.type}
-                    onChange={(value) => handleChange("type", value)}
-                    data={typeOptions}
-                    style={{ width: 200 }}
-                />
-            </Group>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Select
+                        placeholder="Category"
+                        leftSection={<FontAwesomeIcon icon="folder" />}
+                        value={values.category}
+                        onChange={(value) => handleChange("category", value as LogCategory)}
+                        data={categoryOptions}
+                        clearable
+                    />
+                    <Select
+                        placeholder="Type"
+                        leftSection={<FontAwesomeIcon icon="list" />}
+                        value={values.type}
+                        onChange={(value) => handleChange("type", value)}
+                        data={typeOptions}
+                        clearable
+                    />
+                </SimpleGrid>
+            </Stack>
         </Card>
     );
 }

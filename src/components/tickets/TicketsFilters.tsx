@@ -1,4 +1,4 @@
-import { Card, Group, TextInput, Select, Stack, Alert, Checkbox } from "@mantine/core";
+import { Card, TextInput, Select, Stack, Alert, Checkbox, SimpleGrid } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserGroup } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
@@ -53,13 +53,13 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                     // Ticket Filters
                     <>
                         <TextInput
-                            placeholder="Search by title..."
+                            placeholder="Ticket title..."
                             leftSection={<FontAwesomeIcon icon="search" />}
                             value={values.title}
                             onChange={(e) => handleChange("title", e.currentTarget.value)}
                             w="100%"
                         />
-                        <Group>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <Select
                                 placeholder="Committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
@@ -67,7 +67,6 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                                 data={assignedGroupOptions}
                                 clearable
-                                style={{ flex: 1, minWidth: 200 }}
                             />
                             <Select
                                 placeholder="Status"
@@ -76,9 +75,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 onChange={(value) => handleChange("status", value)}
                                 data={statusOptions}
                                 clearable
-                                style={{ flex: 1, minWidth: 200 }}
                             />
-                        </Group>
+                        </SimpleGrid>
                         <Checkbox
                             label="Show only my tickets"
                             checked={values.showOwn}
@@ -88,21 +86,21 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                 ) : (
                     // Report Filters
                     <>
-                        <Group grow>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <UserSearch
-                                placeholder="Search by reported user..."
+                                placeholder="Reported user..."
                                 leftSection={<FontAwesomeIcon icon="user" />}
                                 onChange={(user) => handleChange("targetUser", user?.osuId.toString() || "")}
                                 width="100%"
                             />
                             <TextInput
-                                placeholder="Search by tournament name..."
+                                placeholder="Tournament name..."
                                 leftSection={<FontAwesomeIcon icon="trophy" />}
                                 value={values.targetTournament}
                                 onChange={(e) => handleChange("targetTournament", e.currentTarget.value)}
                             />
-                        </Group>
-                        <Group>
+                        </SimpleGrid>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <Select
                                 placeholder="Committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
@@ -110,7 +108,6 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                                 data={assignedGroupOptions}
                                 clearable
-                                style={{ flex: 1, minWidth: 200 }}
                             />
                             <Select
                                 placeholder="Status"
@@ -119,9 +116,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 onChange={(value) => handleChange("status", value)}
                                 data={statusOptions}
                                 clearable
-                                style={{ flex: 1, minWidth: 200 }}
                             />
-                        </Group>
+                        </SimpleGrid>
                     </>
                 )}
             </Stack>
