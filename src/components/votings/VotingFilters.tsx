@@ -1,6 +1,7 @@
 import { Card, Group, TextInput, Select, Stack } from "@mantine/core";
 import { VotingCategory } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface FilterValues {
     title: string;
@@ -27,8 +28,8 @@ export default function VotingFilters({ values, onChange }: IProps) {
     ];
 
     const statusOptions = [
-        { value: "active", label: "Active votes only" },
-        { value: "concluded", label: "concluded votes only" },
+        { value: "active", label: "Active" },
+        { value: "concluded", label: "Concluded" },
     ];
 
     const handleChange = (key: keyof FilterValues, value: any) => {
@@ -39,7 +40,8 @@ export default function VotingFilters({ values, onChange }: IProps) {
         <Card shadow="sm" p="md">
             <Stack align="stretch" w="100%">
                 <TextInput
-                    placeholder="Search by title..."
+                    placeholder="Voting title..."
+                    leftSection={<FontAwesomeIcon icon="search" />}
                     value={values.title}
                     onChange={(e) => handleChange("title", e.currentTarget.value)}
                     w="100%"
@@ -47,6 +49,7 @@ export default function VotingFilters({ values, onChange }: IProps) {
                 <Group>
                     <Select
                         placeholder="Category"
+                        leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
                         onChange={(value) => handleChange("category", value as VotingCategory)}
                         data={categoryOptions}
@@ -54,6 +57,7 @@ export default function VotingFilters({ values, onChange }: IProps) {
                     />
                     <Select
                         placeholder="Assigned Group"
+                        leftSection={<FontAwesomeIcon icon="user-group" />}
                         value={values.assignedGroup}
                         onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                         data={assignedGroupOptions}
@@ -61,6 +65,7 @@ export default function VotingFilters({ values, onChange }: IProps) {
                     />
                     <Select
                         placeholder="Status"
+                        leftSection={<FontAwesomeIcon icon="rotate" />}
                         value={values.status}
                         onChange={(value) => handleChange("status", value)}
                         data={statusOptions}
