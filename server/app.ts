@@ -78,19 +78,29 @@ apiRouter.use("/tickets", ticketsRouter);
 
 app.use("/api", apiRouter);
 
+// 404 handler for API routes
+app.use("/api/*", (req, res) => {
+    res.status(404).json({ error: "API endpoint not found" });
+});
+
 // serve production frontend
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../../dist")));
 
-    app.get("*", (req, res) => {
+    // exclude API routes
+    app.get(/^(?!\/api\/).*/, (req, res) => {
         res.sendFile(path.join(__dirname, "../../dist/index.html"));
     });
 }
 
 // catch 404
 app.use((req, res) => {
-    res.status(404);
-    res.json({ error: "Not Found" });
+    // Check if it's an API request
+    if (req.path.startsWith("/api/")) {
+        res.status(404).json({ error: "API endpoint not found" });
+    } else {
+        res.status(404).json({ error: "Not Found" });
+    }
 });
 
 // error handler
@@ -120,7 +130,9 @@ app.listen(port, () => {
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${styles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
     console.log(`│   ${styles("Port:", ["dim"])} ${styles(port, ["cyan"])}${" ".repeat(49 - port.length)}│`);
-    console.log(`│   ${styles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(42 - environmentString.length)}│`);
+    console.log(
+        `│   ${styles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(42 - environmentString.length)}│`
+    );
     console.log("└──────────────────────────────────────────────────────────┘");
 
     // insert automation stuff below
