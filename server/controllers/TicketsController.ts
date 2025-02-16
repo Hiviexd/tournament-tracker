@@ -16,16 +16,28 @@ const DEFAULT_LIMIT = 12;
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
-        const { type, title, assignedGroup, isActive, page = 1 } = req.query;
+        const { type, title, targetUser, targetTournament, assignedGroup, isActive, showOwn, page = 1 } = req.query;
+
         const query: any = {};
+        const user = res.locals!.user!;
 
         if (type) query.type = type;
-        if (title) query.title = new RegExp(title as string, "i");
+        if (type === "ticket" && title) {
+            query.title = new RegExp(title as string, "i");
+        }
+        if (type === "report") {
+            if (targetUser) {
+                const user = await User.findByUsernameOrOsuId(targetUser as string);
+                if (user) query.targetUser = user._id;
+            }
+            if (targetTournament) {
+                query.targetTournamentName = new RegExp(targetTournament as string, "i");
+            }
+        }
         if (assignedGroup) query.assignedGroup = assignedGroup;
-        if (isActive) query.isActive = isActive;
+        if (showOwn === "true") query.author = user._id;
+        if (isActive !== undefined) query.isActive = isActive === "true";
 
-        // Non-committee users can only see their own tickets/reports and public tickets
-        const user = res.locals!.user!;
         if (!user.isCommittee) {
             query.$or = [{ author: user._id }, { type: "ticket" }];
         }

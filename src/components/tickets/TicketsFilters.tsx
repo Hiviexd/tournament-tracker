@@ -1,19 +1,28 @@
-import { Card, Group, TextInput, Select, Stack } from "@mantine/core";
+import { Card, Group, TextInput, Select, Stack, Alert, Checkbox } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserGroup } from "../../../interfaces/User";
+import UserSearch from "../common/UserSearch";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface FilterValues {
     title: string;
+    targetUser: string;
+    targetTournament: string;
     assignedGroup: UserGroup;
     status: string;
+    showOwn: boolean;
 }
 
 interface IProps {
     values: FilterValues;
     onChange: (values: FilterValues) => void;
+    type: "tickets" | "reports";
 }
 
-export default function TicketsFilters({ values, onChange }: IProps) {
+export default function TicketsFilters({ values, onChange, type }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+
     const assignedGroupOptions = [
         { value: "tc", label: "Tournament Committee" },
         { value: "cc", label: "Contest Committee" },
@@ -28,42 +37,89 @@ export default function TicketsFilters({ values, onChange }: IProps) {
         onChange({ ...values, [key]: value });
     };
 
+    // Non-committee users viewing reports
+    if (type === "reports" && !user?.isCommittee) {
+        return (
+            <Alert color="info" title="Note" icon={<FontAwesomeIcon icon="info-circle" />}>
+                Below is a list of all of your submitted reports.
+            </Alert>
+        );
+    }
+
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
-                <TextInput
-                    placeholder="Search by title..."
-                    leftSection={<FontAwesomeIcon icon="search" />}
-                    value={values.title}
-                    onChange={(e) => handleChange("title", e.currentTarget.value)}
-                    w="100%"
-                />
-                <Group>
-                    <Select
-                        placeholder="Committee"
-                        value={values.assignedGroup}
-                        onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
-                        data={assignedGroupOptions}
-                        clearable
-                        style={{ flex: 1, minWidth: 200 }}
-                    />
-                    <Select
-                        placeholder="Status"
-                        value={values.status}
-                        onChange={(value) => handleChange("status", value)}
-                        data={statusOptions}
-                        clearable
-                        style={{ flex: 1, minWidth: 200 }}
-                    />
-                </Group>
+                {type === "tickets" ? (
+                    // Ticket Filters
+                    <>
+                        <TextInput
+                            placeholder="Search by title..."
+                            leftSection={<FontAwesomeIcon icon="search" />}
+                            value={values.title}
+                            onChange={(e) => handleChange("title", e.currentTarget.value)}
+                            w="100%"
+                        />
+                        <Group>
+                            <Select
+                                placeholder="Committee"
+                                value={values.assignedGroup}
+                                onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                                data={assignedGroupOptions}
+                                clearable
+                                style={{ flex: 1, minWidth: 200 }}
+                            />
+                            <Select
+                                placeholder="Status"
+                                value={values.status}
+                                onChange={(value) => handleChange("status", value)}
+                                data={statusOptions}
+                                clearable
+                                style={{ flex: 1, minWidth: 200 }}
+                            />
+                        </Group>
+                        <Checkbox
+                            label="Show only my tickets"
+                            checked={values.showOwn}
+                            onChange={(e) => handleChange("showOwn", e.currentTarget.checked)}
+                        />
+                    </>
+                ) : (
+                    // Report Filters
+                    <>
+                        <Group grow>
+                            <UserSearch
+                                label="Search by reported user"
+                                onChange={(user) => handleChange("targetUser", user?.osuId.toString() || "")}
+                                width="100%"
+                            />
+                            <TextInput
+                                placeholder="Search by tournament name..."
+                                leftSection={<FontAwesomeIcon icon="trophy" />}
+                                value={values.targetTournament}
+                                onChange={(e) => handleChange("targetTournament", e.currentTarget.value)}
+                            />
+                        </Group>
+                        <Group>
+                            <Select
+                                placeholder="Committee"
+                                value={values.assignedGroup}
+                                onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                                data={assignedGroupOptions}
+                                clearable
+                                style={{ flex: 1, minWidth: 200 }}
+                            />
+                            <Select
+                                placeholder="Status"
+                                value={values.status}
+                                onChange={(value) => handleChange("status", value)}
+                                data={statusOptions}
+                                clearable
+                                style={{ flex: 1, minWidth: 200 }}
+                            />
+                        </Group>
+                    </>
+                )}
             </Stack>
         </Card>
     );
 }
-
-/**
- * TODO:
- * 1. Reports should be searchable by username and tournament name
- * 2. Need a "Show my own tickets" checkbox
- * 3. Do not display report filters for non-committee users, use an alert instead
- */

@@ -16,8 +16,11 @@ import TicketsFilters from "../components/tickets/TicketsFilters";
 
 interface FilterValues {
     title: string;
+    targetUser: string;
+    targetTournament: string;
     assignedGroup: UserGroup;
     status: string;
+    showOwn: boolean;
 }
 
 export default function TicketsListPage() {
@@ -30,8 +33,11 @@ export default function TicketsListPage() {
     const [activeTab, setActiveTab] = useState<"tickets" | "reports">(initialTab);
     const [searchInput, setSearchInput] = useState<FilterValues>({
         title: searchParams.get("title") || "",
+        targetUser: searchParams.get("targetUser") || "",
+        targetTournament: searchParams.get("targetTournament") || "",
         assignedGroup: (searchParams.get("assignedGroup") as UserGroup) || "",
         status: searchParams.get("status") || "",
+        showOwn: searchParams.get("showOwn") === "true",
     });
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
 
@@ -50,12 +56,28 @@ export default function TicketsListPage() {
     // Handle URL params
     useEffect(() => {
         const params = new URLSearchParams();
-        if (debouncedTitle) params.set("title", debouncedTitle);
+        if (activeTab === "tickets") {
+            if (debouncedTitle) params.set("title", debouncedTitle);
+            if (searchInput.showOwn) params.set("showOwn", "true");
+        } else {
+            if (searchInput.targetUser) params.set("targetUser", searchInput.targetUser);
+            if (searchInput.targetTournament) params.set("targetTournament", searchInput.targetTournament);
+        }
         if (searchInput.assignedGroup) params.set("assignedGroup", searchInput.assignedGroup);
         if (searchInput.status) params.set("status", searchInput.status);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
-    }, [debouncedTitle, searchInput.assignedGroup, searchInput.status, page, setSearchParams]);
+    }, [
+        debouncedTitle,
+        searchInput.targetUser,
+        searchInput.targetTournament,
+        searchInput.assignedGroup,
+        searchInput.status,
+        searchInput.showOwn,
+        page,
+        setSearchParams,
+        activeTab,
+    ]);
 
     // Reset page when filters change
     useEffect(() => {
@@ -67,6 +89,7 @@ export default function TicketsListPage() {
         title: debouncedTitle,
         assignedGroup: searchInput.assignedGroup,
         isActive: searchInput.status ? searchInput.status === "active" : undefined,
+        showOwn: searchInput.showOwn,
         page,
     });
 
@@ -127,7 +150,7 @@ export default function TicketsListPage() {
                         <Tabs.Tab value="tickets">Tickets</Tabs.Tab>
                     </Tabs.List>
 
-                    <TicketsFilters values={searchInput} onChange={setSearchInput} />
+                    <TicketsFilters values={searchInput} onChange={setSearchInput} type={activeTab} />
 
                     <Divider />
 

@@ -10,6 +10,7 @@ export interface TicketQueryParams {
     title?: string;
     assignedGroup?: string;
     isActive?: boolean;
+    showOwn?: boolean;
     page?: number;
 }
 
