@@ -40,6 +40,7 @@ export default function TicketsListPage() {
         showOwn: searchParams.get("showOwn") === "true",
     });
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
+    const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
 
     // Handle tab changes
     useEffect(() => {
@@ -61,7 +62,7 @@ export default function TicketsListPage() {
             if (searchInput.showOwn) params.set("showOwn", "true");
         } else {
             if (searchInput.targetUser) params.set("targetUser", searchInput.targetUser);
-            if (searchInput.targetTournament) params.set("targetTournament", searchInput.targetTournament);
+            if (debouncedTournament) params.set("targetTournament", debouncedTournament);
         }
         if (searchInput.assignedGroup) params.set("assignedGroup", searchInput.assignedGroup);
         if (searchInput.status) params.set("status", searchInput.status);
@@ -69,6 +70,7 @@ export default function TicketsListPage() {
         setSearchParams(params);
     }, [
         debouncedTitle,
+        debouncedTournament,
         searchInput.targetUser,
         searchInput.targetTournament,
         searchInput.assignedGroup,
@@ -82,11 +84,13 @@ export default function TicketsListPage() {
     // Reset page when filters change
     useEffect(() => {
         setPage(1);
-    }, [debouncedTitle, searchInput.assignedGroup, searchInput.status]);
+    }, [debouncedTitle, debouncedTournament, searchInput.assignedGroup, searchInput.status]);
 
     const { data, isLoading, error } = useTickets({
         type: activeTab === "tickets" ? "ticket" : "report",
         title: debouncedTitle,
+        targetUser: searchInput.targetUser,
+        targetTournament: debouncedTournament,
         assignedGroup: searchInput.assignedGroup,
         isActive: searchInput.status ? searchInput.status === "active" : undefined,
         showOwn: searchInput.showOwn,

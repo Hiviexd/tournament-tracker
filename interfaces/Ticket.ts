@@ -8,6 +8,8 @@ export type TicketType = "ticket" | "report";
 export interface TicketQueryParams {
     type?: TicketType;
     title?: string;
+    targetUser?: string;
+    targetTournament?: string;
     assignedGroup?: string;
     isActive?: boolean;
     showOwn?: boolean;
