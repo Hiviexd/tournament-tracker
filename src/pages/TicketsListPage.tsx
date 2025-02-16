@@ -123,8 +123,8 @@ export default function TicketsListPage() {
             <Tabs color="primary.6" value={activeTab} onChange={handleTabChange}>
                 <Stack gap="md">
                     <Tabs.List>
-                        <Tabs.Tab value="tickets">Tickets</Tabs.Tab>
                         <Tabs.Tab value="reports">Reports</Tabs.Tab>
+                        <Tabs.Tab value="tickets">Tickets</Tabs.Tab>
                     </Tabs.List>
 
                     <TicketsFilters values={searchInput} onChange={setSearchInput} />
