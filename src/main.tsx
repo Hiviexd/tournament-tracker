@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from 'react-helmet-async';
 
 const queryClient = new QueryClient();
 
@@ -39,26 +40,28 @@ if ("serviceWorker" in navigator) {
 }
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <StateProvider>
-        <QueryClientProvider client={queryClient}>
-            <MantineProvider defaultColorScheme="dark" theme={theme}>
-                <Notifications />
-                <Router>
-                    <Routes>
-                        {routes.map((route) => (
-                            <Route
-                                key={route.path}
-                                path={route.path}
-                                element={
-                                    <ProtectedRoute permissions={route.permissions}>
-                                        <Layout title={route.title} icon={route.icon} page={route.page} />
-                                    </ProtectedRoute>
-                                }
-                            />
-                        ))}
-                    </Routes>
-                </Router>
-            </MantineProvider>
-        </QueryClientProvider>
-    </StateProvider>
+    <HelmetProvider>
+        <StateProvider>
+            <QueryClientProvider client={queryClient}>
+                <MantineProvider defaultColorScheme="dark" theme={theme}>
+                    <Notifications />
+                    <Router>
+                        <Routes>
+                            {routes.map((route) => (
+                                <Route
+                                    key={route.path}
+                                    path={route.path}
+                                    element={
+                                        <ProtectedRoute permissions={route.permissions}>
+                                            <Layout title={route.title} icon={route.icon} page={route.page} />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                            ))}
+                        </Routes>
+                    </Router>
+                </MantineProvider>
+            </QueryClientProvider>
+        </StateProvider>
+    </HelmetProvider>
 );
