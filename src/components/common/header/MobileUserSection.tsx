@@ -51,7 +51,7 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
 
             <Collapse in={opened}>
                 <Stack px="xs" pb="xs">
-                    <UnstyledButton component={Link} to="/tournaments" onClick={onClose}>
+                    <UnstyledButton component={Link} to={`/tournaments?host=${user.osuId}`} onClick={onClose}>
                         <Group>
                             <FontAwesomeIcon icon="trophy" />
                             <Text size="sm">Your Tournaments</Text>

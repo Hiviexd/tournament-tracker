@@ -45,12 +45,7 @@ export default function UserMenu({ user }: IProps) {
             <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
             <SettingsModal opened={settingsOpened} onClose={closeSettings} />
 
-            <Menu
-                withArrow
-                shadow="md"
-                trigger="hover"
-                opened={menuOpened}
-                onChange={setMenuOpened}>
+            <Menu withArrow shadow="md" trigger="hover" opened={menuOpened} onChange={setMenuOpened}>
                 <Menu.Target>
                     <Avatar
                         ref={ref}
@@ -58,10 +53,7 @@ export default function UserMenu({ user }: IProps) {
                         size="3rem"
                         className="user-avatar"
                         style={{
-                            borderColor:
-                                hovered || menuOpened
-                                    ? "var(--mantine-color-primary-4)"
-                                    : "transparent",
+                            borderColor: hovered || menuOpened ? "var(--mantine-color-primary-4)" : "transparent",
                         }}
                     />
                 </Menu.Target>
@@ -69,19 +61,15 @@ export default function UserMenu({ user }: IProps) {
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>
                     <Menu.Item
                         component={Link}
-                        to="/tournaments"
+                        to={`/tournaments?host=${user.osuId}`}
                         leftSection={<FontAwesomeIcon icon="trophy" />}>
                         Your Tournaments
                     </Menu.Item>
-                    <Menu.Item
-                        onClick={openCustomize}
-                        leftSection={<FontAwesomeIcon icon="palette" />}>
+                    <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>
                     {user.isCommittee && (
-                        <Menu.Item
-                            onClick={openSettings}
-                            leftSection={<FontAwesomeIcon icon="cog" />}>
+                        <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
                             Settings
                         </Menu.Item>
                     )}
