@@ -32,7 +32,7 @@ export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
         if (isGreyscale) {
             return "#656565";
         }
-        return helpers.hslToHex(hue, 0.75, 0.5);
+        return helpers.hslToHex(hue, 0.75, 0.3);
     };
 
     const [themeColor, setThemeColor] = useState(getThemeColor());
