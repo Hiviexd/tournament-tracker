@@ -3,6 +3,7 @@ import { searchUsers, createUser, getCommitteeUsers, getUserById, toggleReviewer
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
+import { IUser } from "../../interfaces/User";
 
 export function useUsers(search: string, limit?: number) {
     return useQuery({
@@ -62,7 +63,7 @@ export function useToggleReviewerStatus(userId: string) {
             // Update loggedInUser when relevant
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
-                setLoggedInUser(updatedUser);
+                setLoggedInUser(updatedUser as IUser);
             }
         }
     });
