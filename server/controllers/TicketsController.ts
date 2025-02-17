@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Ticket from "../models/TicketModel";
+import Ticket from "../models/dickwang";
 import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
@@ -168,7 +168,7 @@ class TicketsController {
     public async sendMessage(req: Request, res: Response) {
         const user = res.locals!.user!;
         const { ticketId } = req.params;
-        const { content } = req.body;
+        const { content, isNote } = req.body;
 
         const ticket = await Ticket.findById(ticketId).populate("author").orFail();
         const isTicketAuthor = ticket.author.id === user.id;
@@ -182,6 +182,14 @@ class TicketsController {
             content,
             isCommittee: isTicketAuthor ? false : user.isCommittee,
         });
+
+        // auth for notes
+        if (isNote && !user.isCommittee) {
+            return res.json({ error: "Not authorized to add notes" });
+        }
+
+        message.isNote = isNote;
+
         await message.save();
 
         ticket.messages.push(message._id);
@@ -212,3 +220,5 @@ class TicketsController {
 }
 
 export default new TicketsController();
+
+// ! IMPORTANT TODO: SECURITY (extra checks for population)

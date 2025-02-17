@@ -23,6 +23,10 @@ TicketSchema.virtual("isReport").get(function (this: ITicket) {
     return this.type === "report";
 });
 
+TicketSchema.virtual("isTicket").get(function (this: ITicket) {
+    return this.type === "ticket";
+});
+
 const Ticket = mongoose.model<ITicket>("Ticket", TicketSchema);
 
 export default Ticket;
