@@ -4,16 +4,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useSendMessage } from "../../hooks/useTickets";
+import { ITicket } from "../../../interfaces/Ticket";
 
 interface IProps {
-    ticketId: string;
+    ticket: ITicket;
 }
 
-export default function TicketMessageForm({ ticketId }: IProps) {
+export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isNote, setIsNote] = useState(false);
     const [content, setContent] = useState("");
-    const createMessageMutation = useSendMessage(ticketId);
+    const createMessageMutation = useSendMessage(ticket.id);
 
     const handleSubmit = async () => {
         await createMessageMutation.mutateAsync({

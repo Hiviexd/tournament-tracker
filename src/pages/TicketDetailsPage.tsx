@@ -28,8 +28,8 @@ export default function TicketDetailsPage() {
     return (
         <Stack gap="md">
             <TicketInfo ticket={ticket} />
-            <TicketMessages ticket={ticket} messages={ticket.messages} />
-            <TicketMessageForm ticketId={ticket._id} />
+            <TicketMessages ticket={ticket} />
+            <TicketMessageForm ticket={ticket} />
         </Stack>
     );
 }
