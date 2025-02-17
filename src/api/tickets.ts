@@ -15,3 +15,8 @@ export const createTicket = async (ticketData: Partial<ITicket>) => {
     const response = await axios.post("/api/tickets/create", ticketData);
     return response.data;
 };
+
+export const sendMessage = async (ticketId: string, messageData: { content: string }) => {
+    const response = await axios.post(`/api/tickets/${ticketId}/sendMessage`, messageData);
+    return response.data;
+}

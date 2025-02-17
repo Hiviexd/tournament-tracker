@@ -4,7 +4,7 @@ import { ITicket } from "../../interfaces/Ticket";
 import { handleMutationResponse } from "../api/helpers";
 
 // API
-import { getTickets, getTicket, createTicket } from "../api/tickets";
+import { getTickets, getTicket, createTicket, sendMessage } from "../api/tickets";
 
 // Types
 import { TicketQueryParams } from "../../interfaces/Ticket";
@@ -36,6 +36,20 @@ export function useCreateTicket() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tickets"] });
+        },
+    });
+}
+
+export function useSendMessage(ticketId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (messageData: { content: string }) => {
+            const response = await sendMessage(ticketId, messageData);
+            return handleMutationResponse(response, "Message sent successfully");
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
         },
     });
 }

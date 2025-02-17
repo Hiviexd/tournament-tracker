@@ -10,7 +10,17 @@ import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import helpers from "../helpers";
 
-const DEFAULT_POPULATE = ["author", "messages", "targetUser"];
+const DEFAULT_POPULATE = [
+    { path: "author", select: "username osuId groups" },
+    {
+        path: "messages",
+        populate: {
+            path: "author",
+            select: "username osuId groups",
+        },
+    },
+    { path: "targetUser", select: "username osuId groups" },
+];
 const DEFAULT_LIMIT = 12;
 
 class TicketsController {
@@ -55,6 +65,12 @@ class TicketsController {
             page: Number(page),
             pages: Math.ceil(total / DEFAULT_LIMIT),
         });
+    }
+
+    /** GET ticket */
+    public async getTicket(req: Request, res: Response) {
+        const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
+        res.json(ticket);
     }
 
     /** POST create ticket */
@@ -146,6 +162,52 @@ class TicketsController {
         ]);
 
         res.json({ message: `${type} created successfully!`, ticket });
+    }
+
+    /** POST send message in ticket */
+    public async sendMessage(req: Request, res: Response) {
+        const user = res.locals!.user!;
+        const { ticketId } = req.params;
+        const { content } = req.body;
+
+        const ticket = await Ticket.findById(ticketId).populate("author").orFail();
+        const isTicketAuthor = ticket.author.id === user.id;
+
+        if (!user.isCommittee && !isTicketAuthor) {
+            return res.json({ error: "Not authorized to message this ticket" });
+        }
+
+        const message = new Message({
+            author: user._id,
+            content,
+            isCommittee: isTicketAuthor ? false : user.isCommittee,
+        });
+        await message.save();
+
+        ticket.messages.push(message._id);
+        await ticket.save();
+
+        // Log the action
+        await LogService.generate(
+            user._id,
+            `Added message to ticket: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+            "ticket"
+        );
+
+        // Send Discord webhook notification
+        await DiscordService.sendRoleHighlightWebhook(ticket.assignedGroup === "tc" ? ["tournament"] : ["contest"], [
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: ticket.type === "report" ? webhookColors.lightRed : webhookColors.blue,
+                title: `New message in ${ticket.type}: ${ticket.title}`,
+                url: `${config.discord.baseUrl}/tickets/${ticket._id}`,
+                fields: [{ name: "Message", value: helpers.shorten(content, 512) }],
+            },
+        ]);
+
+        // Return populated message
+        const populatedMessage = await Message.findById(message._id).populate("author", "username osuId groups");
+        res.json(populatedMessage);
     }
 }
 

@@ -6,4 +6,5 @@ export interface IMessage extends Document {
     content: string;
     isCommittee: boolean;
     isNote?: boolean;
+    createdAt: Date;
 }
