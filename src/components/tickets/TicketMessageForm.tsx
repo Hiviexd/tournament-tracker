@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Stack, Textarea, Group, Button, Switch } from "@mantine/core";
+import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
@@ -11,14 +11,14 @@ interface IProps {
 
 export default function TicketMessageForm({ ticketId }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const [content, setContent] = useState("");
     const [isNote, setIsNote] = useState(false);
+    const [content, setContent] = useState("");
     const createMessageMutation = useSendMessage(ticketId);
 
     const handleSubmit = async () => {
         await createMessageMutation.mutateAsync({
             content,
-            //isNote: user?.isCommittee ? isNote : false,
+            isNote,
         });
         setContent("");
     };
@@ -27,25 +27,37 @@ export default function TicketMessageForm({ ticketId }: IProps) {
         <Card shadow="sm" p="lg">
             <Stack gap="md">
                 <Textarea
-                    placeholder="Type your message..."
+                    placeholder={isNote ? "Add a note..." : "Type your message..."}
                     minRows={3}
                     value={content}
                     onChange={(e) => setContent(e.currentTarget.value)}
                 />
                 <Group justify="space-between">
+                    <Group>
+                        <Button
+                            color={isNote ? "info" : "primary"}
+                            onClick={handleSubmit}
+                            loading={createMessageMutation.isPending}
+                            leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
+                            {isNote ? "Add Note" : "Send Message"}
+                        </Button>
+                    </Group>
                     {user?.isCommittee && (
-                        <Switch
-                            label="Mark as note"
-                            checked={isNote}
-                            onChange={(e) => setIsNote(e.currentTarget.checked)}
-                        />
+                        <Group>
+                            <Tooltip label={isNote ? "Switch to Message Mode" : "Switch to Note Mode"}>
+                                <ActionIcon
+                                    variant={isNote ? "filled" : "outline"}
+                                    color="info"
+                                    onClick={() => setIsNote(!isNote)}
+                                    size="lg">
+                                    <FontAwesomeIcon icon="sticky-note" />
+                                </ActionIcon>
+                            </Tooltip>
+                            <Button color="red" leftSection={<FontAwesomeIcon icon="lock" />}>
+                                Close Ticket
+                            </Button>
+                        </Group>
                     )}
-                    <Button
-                        onClick={handleSubmit}
-                        loading={createMessageMutation.isPending}
-                        leftSection={<FontAwesomeIcon icon="paper-plane" />}>
-                        Send
-                    </Button>
                 </Group>
             </Stack>
         </Card>

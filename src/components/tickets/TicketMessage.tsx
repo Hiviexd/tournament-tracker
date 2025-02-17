@@ -1,9 +1,10 @@
-import { Card, Group, Stack, Text } from "@mantine/core";
-import moment from "moment";
+import { Card, Group, Stack, Alert } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
+import DateBadge from "../common/badges/DateBadge";
 
 interface IProps {
     ticket: ITicket;
@@ -20,28 +21,45 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 group: ticket.assignedGroup,
             };
         }
-
         return {
             user: message.author,
         };
     };
 
-    return (
-        <Card
-            shadow="sm"
-            p="lg"
-            style={(theme) => ({
-                borderLeft: `4px solid ${message.isCommittee ? theme.colors.primary[6] : theme.colors.blue[6]}`,
-            })}>
-            <Stack gap="sm">
-                <Group justify="space-between" align="center">
-                    <UserDisplay {...getUserDisplayProps()} />
-                    <Text size="sm" c="dimmed">
-                        {moment(message.createdAt).format("LLL")}
-                    </Text>
-                </Group>
-                <MarkdownText content={message.content} />
-            </Stack>
-        </Card>
+    const getBorderColor = (theme: any) => {
+        if (message.isCommittee) {
+            if (ticket.assignedGroup === "tc") return theme.colors.warning[6];
+            if (ticket.assignedGroup === "cc") return theme.colors.info[6];
+        }
+        return theme.colors.primary[6];
+    };
+
+    const MessageContent = () => (
+        <Stack gap="sm">
+            <Group justify="space-between" align="center">
+                <UserDisplay {...getUserDisplayProps()} />
+                <DateBadge date={message.createdAt} staticColor />
+            </Group>
+            <MarkdownText content={message.content} />
+        </Stack>
     );
+
+    if (message.isNote && showTrueAuthor) {
+        return (
+            <Alert radius="md" variant="light" color="warning" icon={<FontAwesomeIcon icon="sticky-note" />}>
+                <MessageContent />
+            </Alert>
+        );
+    } else if (!message.isNote)
+        return (
+            <Card
+                shadow="sm"
+                p="lg"
+                radius="md"
+                style={(theme) => ({
+                    borderLeft: `4px solid ${getBorderColor(theme)}`,
+                })}>
+                <MessageContent />
+            </Card>
+        );
 }

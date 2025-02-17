@@ -44,7 +44,7 @@ export function useSendMessage(ticketId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (messageData: { content: string }) => {
+        mutationFn: async (messageData: { content: string, isNote: boolean }) => {
             const response = await sendMessage(ticketId, messageData);
             return handleMutationResponse(response, "Message sent successfully");
         },

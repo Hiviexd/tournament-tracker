@@ -114,7 +114,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         </Tooltip>
                     </Badge>
 
-                    <DateBadge date={ticket.updatedAt} warningAge={7} dangerAge={10} />
+                    <DateBadge date={ticket.updatedAt} warningAge={7} dangerAge={10} staticColor={!ticket.isActive} />
                 </Group>
             </Stack>
         </Card>
