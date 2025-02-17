@@ -5,18 +5,7 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
 
 // Mantine
-import {
-    Card,
-    Stack,
-    Group,
-    Title,
-    Text,
-    Badge,
-    Button,
-    ActionIcon,
-    Divider,
-    Tooltip,
-} from "@mantine/core";
+import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -58,6 +47,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
             <Card
                 shadow="sm"
                 p="lg"
+                radius="md"
                 className="voting-info"
                 style={
                     {
@@ -86,9 +76,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 totalVotes={voting.requiredVotes}
                                 variant="light"
                             />
-                            {voting.isActive && (
-                                <DueDateBadge date={voting.deadline} variant="light" />
-                            )}
+                            {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
                         </Group>
 
                         <Text size="sm" c="dimmed">
@@ -120,9 +108,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             color="warning"
                             onClick={handleToggleStatus}
                             loading={toggleStatusMutation.isPending}
-                            leftSection={
-                                <FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />
-                            }>
+                            leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
                             {voting.isActive ? "Conclude" : "Reopen"}
                         </Button>
                         {(!voting.votes.length || user?.isAdmin) && (

@@ -47,6 +47,7 @@ export default function VotingCard({ voting }: IPropTypes) {
         <Card
             shadow="sm"
             p="lg"
+            radius="md"
             className="voting-list-card"
             component={Link}
             to={`/votings/${voting._id}`}
