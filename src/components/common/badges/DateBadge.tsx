@@ -4,13 +4,21 @@ import moment from "moment";
 
 interface IDateBadgeProps {
     date: Date;
+    staticColor?: boolean;
     warningAge?: number; // Days before warning color
     dangerAge?: number; // Days before danger color
     variant?: "light" | "filled";
 }
 
-export default function DateBadge({ date, warningAge = 7, dangerAge = 14, variant = "light" }: IDateBadgeProps) {
+export default function DateBadge({
+    date,
+    warningAge = 7,
+    dangerAge = 14,
+    variant = "light",
+    staticColor = false,
+}: IDateBadgeProps) {
     const getColor = () => {
+        if (staticColor) return "gray";
         const daysOld = moment().diff(moment(date), "days");
 
         if (daysOld >= dangerAge) return "danger";
