@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Ticket from "../models/dickwang";
+import Ticket from "../models/ticketModel";
 import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
