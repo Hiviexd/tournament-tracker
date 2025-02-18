@@ -4,16 +4,16 @@ import helpers from "../helpers";
 import { DEFAULT_HUE } from "../constants";
 
 const danger: MantineColorsTuple = [
-    "#ffeaec",
-    "#fdd4d6",
-    "#f4a7ac",
-    "#ec777e",
-    "#e64f57",
-    "#e3353f",
-    "#e22732",
-    "#c91a25",
-    "#b31220",
-    "#9e0419",
+    "#ffe8e9",
+    "#ffd1d1",
+    "#fba0a0",
+    "#f76d6d",
+    "#f44141",
+    "#f22625",
+    "#f21616",
+    "#d8070b",
+    "#c10007",
+    "#a90003",
 ];
 
 const info: MantineColorsTuple = [
