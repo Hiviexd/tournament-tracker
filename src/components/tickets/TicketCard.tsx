@@ -60,6 +60,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
     };
 
     const targetInfo = getTargetInfo();
+    const messageCount = ticket.messages.filter(message => !message.isNote).length;
 
     return (
         <Card
@@ -107,9 +108,9 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                     )}
 
                     <Badge variant="light">
-                        <Tooltip label={`${ticket.messages.length} messages`}>
+                        <Tooltip label={`${messageCount} ${messageCount === 1 ? "message" : "messages"}`}>
                             <span>
-                                <FontAwesomeIcon icon="comments" /> {ticket.messages.length}
+                                <FontAwesomeIcon icon="comments" /> {messageCount}
                             </span>
                         </Tooltip>
                     </Badge>
