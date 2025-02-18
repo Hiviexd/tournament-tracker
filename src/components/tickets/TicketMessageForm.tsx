@@ -28,7 +28,14 @@ export default function TicketMessageForm({ ticket }: IProps) {
         <Card shadow="sm" p="lg">
             <Stack gap="md">
                 <Textarea
-                    placeholder={isNote ? "Add a note..." : "Type your message..."}
+                    placeholder={
+                        !ticket.isActive && !isNote
+                            ? "Cannot message closed tickets"
+                            : isNote
+                                ? "Add a note..."
+                                : "Type your message..."
+                    }
+                    disabled={!ticket.isActive && !isNote}
                     minRows={3}
                     value={content}
                     onChange={(e) => setContent(e.currentTarget.value)}
@@ -39,6 +46,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                             color={isNote ? "info" : "primary"}
                             onClick={handleSubmit}
                             loading={createMessageMutation.isPending}
+                            disabled={!content || (!ticket.isActive && !isNote)}
                             leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
                             {isNote ? "Add Note" : "Send Message"}
                         </Button>
@@ -54,8 +62,10 @@ export default function TicketMessageForm({ ticket }: IProps) {
                                     <FontAwesomeIcon icon="sticky-note" />
                                 </ActionIcon>
                             </Tooltip>
-                            <Button color="red" leftSection={<FontAwesomeIcon icon="lock" />}>
-                                Close Ticket
+                            <Button
+                                color={ticket.isActive ? "danger" : "warning"}
+                                leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
+                                {ticket.isActive ? "Close Ticket" : "Reopen Ticket"}
                             </Button>
                         </Group>
                     )}
