@@ -91,7 +91,7 @@ export default function VotingCard({ voting }: IPropTypes) {
 
                 <Group>
                     {!checkUserVoted() && (
-                        <Badge color="warning" variant="light">
+                        <Badge color="orange" variant="light">
                             <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
                         </Badge>
                     )}
