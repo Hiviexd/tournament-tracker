@@ -222,3 +222,6 @@ class TicketsController {
 export default new TicketsController();
 
 // ! IMPORTANT TODO: SECURITY (extra checks for population)
+// TODO discord notif considerations for notes
+// TODO better protection for getting tickets
+// TODO more form validation
