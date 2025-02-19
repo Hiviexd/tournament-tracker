@@ -10,6 +10,7 @@ import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import helpers from "../helpers";
 import TicketService from "../services/TicketService";
+import _ from "lodash";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -183,7 +184,7 @@ class TicketsController {
             },
         ]);
 
-        res.json({ message: `${type} created successfully!`, ticket });
+        res.json({ message: `${_.capitalize(type)} created successfully!`, ticket });
     }
 
     /** POST send message in ticket */
@@ -223,7 +224,7 @@ class TicketsController {
         // Logger
         await LogService.generate(
             user._id,
-            `Sent a message in ticket: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+            `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
             "ticket"
         );
 
@@ -232,13 +233,46 @@ class TicketsController {
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
-                description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+                description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
+                    config.discord.baseUrl
+                }/tickets/${ticket._id})`,
                 fields: [{ name: isNote ? "Note" : "Message", value: helpers.shorten(content, 512) }],
             },
         ]);
 
         const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
         res.json(sanitizedTicket);
+    }
+
+    /** POST close or reopen ticket */
+    public async toggleStatus(req: Request, res: Response) {
+        const user = res.locals!.user!;
+        const ticket = await Ticket.findById(req.params.ticketId).orFail();
+
+        ticket.isActive = !ticket.isActive;
+        await ticket.save();
+
+        res.json({ message: `${_.capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`, ticket });
+
+        // Logger
+        await LogService.generate(
+            user._id,
+            `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
+                config.discord.baseUrl
+            }/tickets/${ticket._id})`,
+            "ticket"
+        );
+
+        // Discord
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
+                description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
+                    config.discord.baseUrl
+                }/tickets/${ticket._id})`,
+            },
+        ]);
     }
 }
 

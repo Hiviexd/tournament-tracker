@@ -16,7 +16,12 @@ export const createTicket = async (ticketData: Partial<ITicket>) => {
     return response.data;
 };
 
-export const sendMessage = async (ticketId: string, messageData: { content: string, isNote: boolean }) => {
+export const sendMessage = async (ticketId: string, messageData: { content: string; isNote: boolean }) => {
     const response = await axios.post(`/api/tickets/${ticketId}/sendMessage`, messageData);
     return response.data;
-}
+};
+
+export const toggleStatus = async (ticketId: string) => {
+    const response = await axios.post(`/api/tickets/${ticketId}/toggleStatus`);
+    return response.data;
+};

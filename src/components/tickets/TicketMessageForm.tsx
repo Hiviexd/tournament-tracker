@@ -3,7 +3,7 @@ import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip } from "@mant
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
-import { useSendMessage } from "../../hooks/useTickets";
+import { useSendMessage, useToggleStatus } from "../../hooks/useTickets";
 import { ITicket } from "../../../interfaces/Ticket";
 
 interface IProps {
@@ -16,6 +16,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [content, setContent] = useState("");
     const [error, setError] = useState<string | null>(null);
     const createMessageMutation = useSendMessage(ticket.id);
+    const toggleStatusMutation = useToggleStatus(ticket.id);
 
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
@@ -46,6 +47,11 @@ export default function TicketMessageForm({ ticket }: IProps) {
         } catch (err) {
             setError("Failed to send message. Please try again.");
         }
+    };
+
+    const handleToggleStatus = async () => {
+        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ticket?`)) return;
+        await toggleStatusMutation.mutateAsync();
     };
 
     return (
@@ -91,6 +97,8 @@ export default function TicketMessageForm({ ticket }: IProps) {
                                 </ActionIcon>
                             </Tooltip>
                             <Button
+                                onClick={handleToggleStatus}
+                                loading={toggleStatusMutation.isPending}
                                 color={ticket.isActive ? "danger" : "warning"}
                                 leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
                                 {ticket.isActive ? "Close Ticket" : "Reopen Ticket"}

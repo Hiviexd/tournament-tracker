@@ -4,7 +4,7 @@ import { ITicket } from "../../interfaces/Ticket";
 import { handleMutationResponse } from "../api/helpers";
 
 // API
-import { getTickets, getTicket, createTicket, sendMessage } from "../api/tickets";
+import { getTickets, getTicket, createTicket, sendMessage, toggleStatus } from "../api/tickets";
 
 // Types
 import { TicketQueryParams } from "../../interfaces/Ticket";
@@ -47,6 +47,20 @@ export function useSendMessage(ticketId: string) {
         mutationFn: async (messageData: { content: string, isNote: boolean }) => {
             const response = await sendMessage(ticketId, messageData);
             return handleMutationResponse(response, "Message sent successfully");
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+        },
+    });
+}
+
+export function useToggleStatus(ticketId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await toggleStatus(ticketId);
+            return handleMutationResponse(response, response.message || "Ticket status toggled successfully");
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
