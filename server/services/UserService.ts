@@ -2,8 +2,8 @@ import User from "../models/userModel";
 import _ from "lodash";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
-import OsuApiService from "../services/OsuApiService";
-import LogService from "../services/LogService";
+import OsuApiService from "./OsuApiService";
+import LogService from "./LogService";
 
 class UserService {
     /**
