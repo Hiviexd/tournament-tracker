@@ -46,7 +46,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
 
     if (message.isNote && showTrueAuthor) {
         return (
-            <Alert radius="md" variant="light" color="warning" icon={<FontAwesomeIcon icon="sticky-note" />}>
+            <Alert radius="md" variant="light" color="info" icon={<FontAwesomeIcon icon="sticky-note" />}>
                 <MessageContent />
             </Alert>
         );
