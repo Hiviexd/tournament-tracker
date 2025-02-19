@@ -16,10 +16,10 @@ export default function UsersSection({ onSelect }: IProps) {
     const handleCreateUser = async () => {
         if (!userIdToCreate) return;
 
-        const user = (await createUserMutation.mutateAsync(userIdToCreate)) as IUser | null;
-        if (user) {
+        const data = await createUserMutation.mutateAsync(userIdToCreate) as { user: IUser, message: string };
+        if (data.user) {
             setUserIdToCreate("");
-            onSelect(user);
+            onSelect(data.user);
         }
     };
 
@@ -28,11 +28,7 @@ export default function UsersSection({ onSelect }: IProps) {
             <Card shadow="sm" p="md">
                 <Stack gap="md">
                     <Group wrap="wrap" align="flex-end">
-                        <UserSearch
-                            label="Load user"
-                            onChange={onSelect}
-                            width="250px"
-                        />
+                        <UserSearch label="Load user" onChange={onSelect} width="250px" />
                         <Group grow align="flex-end">
                             <TextInput
                                 label="Create user"
