@@ -22,8 +22,18 @@ export default function TicketForm() {
             type: "ticket",
         },
         validate: {
-            title: (value) => (!value ? "Title is required" : null),
-            message: (value) => (!value ? "Message is required" : null),
+            title: (value) => {
+                if (!value.trim()) return "Title is required";
+                if (value.length < 5) return "Title must be at least 5 characters";
+                if (value.length > 80) return "Title cannot exceed 80 characters";
+                return null;
+            },
+            message: (value) => {
+                if (!value.trim()) return "Message is required";
+                if (value.length < 10) return "Message must be at least 10 characters";
+                if (value.length > 6000) return "Message cannot exceed 6000 characters";
+                return null;
+            },
             assignedGroup: (value) => (!value ? "Committee selection is required" : null),
         },
     });
@@ -66,6 +76,7 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             placeholder="Enter ticket title"
                             {...form.getInputProps("title")}
                             withAsterisk
+                            description={`${form.values.title.length}/80`}
                         />
 
                         <Textarea
@@ -76,6 +87,7 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
+                            description={`${form.values.message.length}/6000`}
                         />
 
                         <Group justify="flex-end" mt="md">

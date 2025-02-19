@@ -17,6 +17,7 @@ export interface ITicketFormValues {
     targetUserId?: string;
     targetTournamentName?: string;
     targetTournamentLink?: string;
+    reportType?: "user" | "tournament";
 }
 
 export default function TicketCreatePage() {

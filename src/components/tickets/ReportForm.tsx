@@ -28,17 +28,23 @@ export default function ReportForm() {
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
+            reportType: undefined as "user" | "tournament" | undefined,
         },
         validate: {
-            message: (value) => (!value ? "Message is required" : null),
+            message: (value) => {
+                if (!value.trim()) return "Message is required";
+                if (value.length < 10) return "Message must be at least 10 characters";
+                if (value.length > 6000) return "Message cannot exceed 6000 characters";
+                return null;
+            },
             assignedGroup: (value) => (!value ? "Committee selection is required" : null),
             targetUserId: (value) => (reportType === "user" && !value ? "Target user is required" : null),
             targetTournamentName: (value, values) => {
-                if (reportType === "tournament" && !value) {
-                    return "Tournament name is required";
-                }
-                if (reportType === "tournament" && value && !values.targetTournamentLink) {
-                    return "Forum URL is required for tournament reports";
+                if (reportType === "tournament") {
+                    if (!value || !value.trim()) return "Tournament name is required";
+                    if (value.length < 5) return "Tournament name must be at least 5 characters";
+                    if (value.length > 120) return "Tournament name cannot exceed 120 characters";
+                    if (value && !values.targetTournamentLink) return "Forum URL is required for tournament reports";
                 }
                 return null;
             },
@@ -49,6 +55,7 @@ export default function ReportForm() {
                 }
                 return null;
             },
+            reportType: (value) => (!value ? "Report type is required" : null),
         },
     });
 
@@ -113,7 +120,11 @@ You can report either:
                                 { value: "user", label: "User Report" },
                                 { value: "tournament", label: "Tournament Report" },
                             ]}
-                            onChange={handleReportTypeChange}
+                            {...form.getInputProps("reportType")}
+                            onChange={(value) => {
+                                form.setFieldValue("reportType", value as "user" | "tournament");
+                                handleReportTypeChange(value);
+                            }}
                             withAsterisk
                         />
 
@@ -151,6 +162,7 @@ You can report either:
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
+                            description={`${form.values.message.length}/6000`}
                         />
 
                         <Group justify="flex-end" mt="md">

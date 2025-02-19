@@ -21,9 +21,9 @@ const webhookColors = {
     green:       parseColor("#42D63E"),
     lightGreen:  parseColor("#1df27d"), // submitVote
 
-    darkBlue:    parseColor("#304989"),
+    darkBlue:    parseColor("#304989"), // send ticket message
     blue:        parseColor("#008cff"), // create ticket
-    lightBlue:   parseColor("#83E3FF"),
+    lightBlue:   parseColor("#83E3FF"), // add ticket note
 
     darkPurple:  parseColor("#721C6F"),
     purple:      parseColor("#8240A8"),

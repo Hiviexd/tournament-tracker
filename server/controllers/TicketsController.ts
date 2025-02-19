@@ -9,6 +9,7 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import helpers from "../helpers";
+import TicketService from "../services/TicketService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -59,6 +60,8 @@ class TicketsController {
             Ticket.countDocuments(query),
         ]);
 
+        tickets.forEach((ticket) => TicketService.sanitizeTicket(ticket, user));
+
         res.json({
             tickets,
             total,
@@ -69,8 +72,15 @@ class TicketsController {
 
     /** GET ticket */
     public async getTicket(req: Request, res: Response) {
+        const user = res.locals!.user!;
         const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
-        res.json(ticket);
+
+        if (!ticket.isTicket && !user.isCommittee && !ticket.author.equals(user._id)) {
+            return res.json({ error: "Not authorized to view this ticket" });
+        }
+
+        const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
+        res.json(sanitizedTicket);
     }
 
     /** POST create ticket */
@@ -81,8 +91,14 @@ class TicketsController {
 
         let targetUser: IUser;
 
+        if (type === "ticket" && (title.length < 5 || title.length > 80))
+            return res.json({ error: "Title must be between 5 and 80 characters" });
+
+        if (message.length < 10 || message.length > 6000)
+            return res.json({ error: "Message must be between 10 and 6000 characters" });
+
         // construct report title
-        let constructedTitle: string = title;
+        let constructedTitle: string = title.trim();
 
         if (type === "report") {
             const count = await Ticket.countDocuments({ type: "report" });
@@ -103,14 +119,20 @@ class TicketsController {
                 targetUser = await User.findById(targetUserId).orFail();
                 ticket.targetUser = targetUser;
             } else {
-                ticket.targetTournamentName = targetTournamentName;
-                ticket.targetTournamentLink = targetTournamentLink;
+                if (targetTournamentName.length < 5 || targetTournamentName.length > 120)
+                    return res.json({ error: "Tournament name must be between 5 and 120 characters" });
+
+                if (!helpers.isOsuForumLink(targetTournamentLink))
+                    return res.json({ error: "Invalid tournament forum link" });
+
+                ticket.targetTournamentName = targetTournamentName.trim();
+                ticket.targetTournamentLink = targetTournamentLink.trim();
             }
         }
 
         const initialMessage = new Message({
             author,
-            content: message,
+            content: message.trim(),
             isCommittee: false,
         });
 
@@ -170,23 +192,26 @@ class TicketsController {
         const { ticketId } = req.params;
         const { content, isNote } = req.body;
 
-        const ticket = await Ticket.findById(ticketId).populate("author").orFail();
+        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const isTicketAuthor = ticket.author.id === user.id;
 
         if (!user.isCommittee && !isTicketAuthor) {
             return res.json({ error: "Not authorized to message this ticket" });
         }
 
+        // auth for notes
+        if (isNote && !user.isCommittee) {
+            return res.json({ error: "Not authorized to add notes" });
+        }
+
+        if (content.length < 10 || content.length > 6000)
+            return res.json({ error: "Message must be between 10 and 6000 characters" });
+
         const message = new Message({
             author: user._id,
             content,
             isCommittee: isTicketAuthor ? false : user.isCommittee,
         });
-
-        // auth for notes
-        if (isNote && !user.isCommittee) {
-            return res.json({ error: "Not authorized to add notes" });
-        }
 
         message.isNote = isNote;
 
@@ -195,33 +220,26 @@ class TicketsController {
         ticket.messages.push(message._id);
         await ticket.save();
 
-        // Log the action
+        // Logger
         await LogService.generate(
             user._id,
-            `Added message to ticket: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+            `Sent a message in ticket: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
             "ticket"
         );
 
-        // Send Discord webhook notification
-        await DiscordService.sendRoleHighlightWebhook(ticket.assignedGroup === "tc" ? ["tournament"] : ["contest"], [
+        // Discord
+        await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                color: ticket.type === "report" ? webhookColors.lightRed : webhookColors.blue,
-                title: `New message in ${ticket.type}: ${ticket.title}`,
-                url: `${config.discord.baseUrl}/tickets/${ticket._id}`,
-                fields: [{ name: "Message", value: helpers.shorten(content, 512) }],
+                color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
+                description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+                fields: [{ name: isNote ? "Note" : "Message", value: helpers.shorten(content, 512) }],
             },
         ]);
 
-        // Return populated message
-        const populatedMessage = await Message.findById(message._id).populate("author", "username osuId groups");
-        res.json(populatedMessage);
+        const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
+        res.json(sanitizedTicket);
     }
 }
 
 export default new TicketsController();
-
-// ! IMPORTANT TODO: SECURITY (extra checks for population)
-// TODO discord notif considerations for notes
-// TODO better protection for getting tickets
-// TODO more form validation

@@ -14,14 +14,38 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isNote, setIsNote] = useState(false);
     const [content, setContent] = useState("");
+    const [error, setError] = useState<string | null>(null);
     const createMessageMutation = useSendMessage(ticket.id);
 
+    const validateMessage = (message: string): string | null => {
+        if (!message.trim()) return "Message is required";
+        if (message.length < 10) return "Message must be at least 10 characters";
+        if (message.length > 6000) return "Message cannot exceed 6000 characters";
+        return null;
+    };
+
+    const handleContentChange = (value: string) => {
+        setContent(value);
+        if (error) setError(null);
+    };
+
     const handleSubmit = async () => {
-        await createMessageMutation.mutateAsync({
-            content,
-            isNote,
-        });
-        setContent("");
+        const validationError = validateMessage(content);
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
+        try {
+            await createMessageMutation.mutateAsync({
+                content,
+                isNote,
+            });
+            setContent("");
+            setError(null);
+        } catch (err) {
+            setError("Failed to send message. Please try again.");
+        }
     };
 
     return (
@@ -37,8 +61,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     }
                     disabled={!ticket.isActive && !isNote}
                     minRows={3}
+                    resize="vertical"
+                    autosize
                     value={content}
-                    onChange={(e) => setContent(e.currentTarget.value)}
+                    onChange={(e) => handleContentChange(e.currentTarget.value)}
+                    error={error}
+                    description={`${content.length}/6000`}
                 />
                 <Group justify="space-between">
                     <Group>
@@ -46,7 +74,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                             color={isNote ? "info" : "primary"}
                             onClick={handleSubmit}
                             loading={createMessageMutation.isPending}
-                            disabled={!content || (!ticket.isActive && !isNote)}
+                            disabled={!!error || !content || (!ticket.isActive && !isNote)}
                             leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
                             {isNote ? "Add Note" : "Send Message"}
                         </Button>
