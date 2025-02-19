@@ -1,10 +1,10 @@
-name: Deploy to Staging
+name: Deploy to Production
 
 on:
     workflow_dispatch:
         inputs:
             reason:
-                description: "Reason for staging deployment"
+                description: "Reason for production deployment"
                 required: false
                 type: string
     push:
@@ -14,7 +14,7 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         if: always()
-        environment: staging
+        environment: production
 
         steps:
             - name: Send Deploy Start Notification
@@ -23,9 +23,9 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   noprefix: true
-                  title: "🚀 Staging Deployment Started"
+                  title: "🚀 Deployment Started"
                   description: |
-                      Starting deployment to staging environment...
+                      Starting deployment to production environment...
                       - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: 0x008cff
 
@@ -75,7 +75,7 @@ jobs:
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
                       # Pull latest changes
-                      cd ~/staging/tournament-tracker || { echo "Directory not found"; exit 1; }
+                      cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
 
                       # Check if there are any uncommitted changes
                       if [[ -n $(git status -s) ]]; then
@@ -104,7 +104,7 @@ jobs:
 
                       # Reload service
                       echo "Reloading service..."
-                      pm2 reload tcomm-dev || pm2 start "yarn prod" --name tcomm-dev
+                      pm2 reload tcomm || pm2 start "yarn prod" --name tcomm
 
                       # Ensure it's running
                       sleep 5
@@ -112,7 +112,7 @@ jobs:
 
                       # Show initial logs
                       echo "Success! Showing startup logs for 5 seconds..."
-                      timeout 5 pm2 logs tcomm-dev --lines 10 || true
+                      timeout 5 pm2 logs tcomm --lines 10 || true
                       exit 0
 
     notify:
@@ -126,9 +126,9 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   noprefix: true
-                  title: ${{ needs.deploy.result == 'success' && '✅ Staging Deployment Successful' || '❌ Staging Deployment Failed' }}
+                  title: ${{ needs.deploy.result == 'success' && '✅ Deployment Successful' || '❌ Deployment Failed' }}
                   description: |
                       - Status: `${{ needs.deploy.result }}`
                       - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
                   color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
-                  content: ${{ needs.deploy.result != 'success' && '⚠️ Staging deploy failed! <@341321481390784512>' || '' }}
+                  content: ${{ needs.deploy.result != 'success' && '⚠️ deploy failed! <@341321481390784512>' || '' }}
