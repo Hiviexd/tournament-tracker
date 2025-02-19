@@ -19,7 +19,7 @@ export function useCreateUser() {
     return useMutation({
         mutationFn: async (userData: any) => {
             const response = await createUser(userData);
-            return handleMutationResponse(response, "User created successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -35,7 +35,7 @@ export function useCommitteeUsers(options: { enabled?: boolean } = {}) {
     });
 }
 
-export function useUser(id: string | null, options: { enabled?: boolean, retry?: boolean } = {}) {
+export function useUser(id: string | null, options: { enabled?: boolean; retry?: boolean } = {}) {
     return useQuery({
         queryKey: ["user", id],
         queryFn: () => getUserById(id!),
@@ -51,10 +51,7 @@ export function useToggleReviewerStatus(userId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleReviewerStatus(userId);
-            return handleMutationResponse(
-                response,
-                `Reviewer status updated successfully`
-            );
+            return handleMutationResponse(response);
         },
         onSuccess: (updatedUser) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
@@ -65,6 +62,6 @@ export function useToggleReviewerStatus(userId: string) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 setLoggedInUser(updatedUser as IUser);
             }
-        }
+        },
     });
 }

@@ -240,8 +240,7 @@ class TicketsController {
             },
         ]);
 
-        const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
-        res.json(sanitizedTicket);
+        res.json({ message: "Message sent successfully!" });
     }
 
     /** POST close or reopen ticket */

@@ -31,7 +31,7 @@ export function useCreateVoting() {
     return useMutation({
         mutationFn: async (votingData: Partial<IVoting>) => {
             const response = await createVoting(votingData);
-            return handleMutationResponse(response, "Voting created successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });
@@ -45,7 +45,7 @@ export function useSubmitVote(votingId: string) {
     return useMutation({
         mutationFn: async (voteData: { option: number; comment?: string }) => {
             const response = await submitVote(votingId, voteData);
-            return handleMutationResponse(response, "Vote submitted successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -59,7 +59,7 @@ export function useToggleVotingStatus(votingId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleVotingStatus(votingId);
-            return handleMutationResponse(response, `Voting status updated successfully`);
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -73,7 +73,7 @@ export function useUpdateVoting(votingId: string) {
     return useMutation({
         mutationFn: async (votingData: Partial<IVoting>) => {
             const response = await updateVoting(votingId, votingData);
-            return handleMutationResponse(response, "Voting updated successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -87,7 +87,7 @@ export function useDeleteVoting() {
     return useMutation({
         mutationFn: async (votingId: string) => {
             const response = await deleteVoting(votingId);
-            return handleMutationResponse(response, "Voting deleted successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });

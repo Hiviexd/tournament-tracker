@@ -29,10 +29,7 @@ export function useCreateTicket() {
     return useMutation({
         mutationFn: async (ticketData: Partial<ITicket>) => {
             const response = await createTicket(ticketData);
-            return handleMutationResponse(
-                response,
-                ticketData.type === "ticket" ? "Ticket created successfully" : "Report submitted successfully"
-            );
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tickets"] });
@@ -44,9 +41,9 @@ export function useSendMessage(ticketId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (messageData: { content: string, isNote: boolean }) => {
+        mutationFn: async (messageData: { content: string; isNote: boolean }) => {
             const response = await sendMessage(ticketId, messageData);
-            return handleMutationResponse(response, "Message sent successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
@@ -60,7 +57,7 @@ export function useToggleStatus(ticketId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleStatus(ticketId);
-            return handleMutationResponse(response, response.message || "Ticket status toggled successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });

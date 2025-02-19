@@ -29,7 +29,7 @@ export function useCreateTournament() {
     return useMutation({
         mutationFn: async (tournamentData: Partial<ITournament>) => {
             const response = await createTournament(tournamentData);
-            return handleMutationResponse(response, "Tournament created successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournaments"] });

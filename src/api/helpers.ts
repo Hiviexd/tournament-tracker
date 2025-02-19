@@ -6,7 +6,8 @@ export interface ApiResponse<T = any> {
     error?: string;
 }
 
-export const handleMutationResponse = <T>(response: ApiResponse<T>, successMessage: string): T => {
+export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
+    const successMessage = response.message || "Action successful!";
     if (response.error) {
         notifications.show({
             title: "Error",

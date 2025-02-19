@@ -97,7 +97,7 @@ class TournamentsController {
 
         await tournament.save();
 
-        res.json(tournament);
+        res.json({ message: "Tournament created successfully!", tournament });
 
         // TODO: logging and discord
     }

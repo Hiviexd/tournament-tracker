@@ -94,7 +94,7 @@ class UsersController {
             "dev"
         );
 
-        res.json(user);
+        res.json({ message: "User created successfully!", user });
     }
 
     /** POST toggle isActiveReviewer */
@@ -122,7 +122,7 @@ class UsersController {
             },
         ]);
 
-        res.json(user);
+        res.json({ message: `Set reviewer status as ${user.isActiveReviewer ? "active" : "inactive"} successfully!`, user });
     }
 }
 
