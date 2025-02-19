@@ -16,7 +16,7 @@ import VotingInfo from "../components/votings/VotingInfo";
 import VotingForm from "../components/votings/VotingForm";
 import VotingResults from "../components/votings/VotingResults";
 
-export default function VotingPage() {
+export default function VotingDetailsPage() {
     const { votingId } = useParams();
     const navigate = useNavigate();
     const [loggedInUser] = useAtom(loggedInUserAtom);

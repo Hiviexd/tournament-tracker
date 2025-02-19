@@ -3,7 +3,7 @@ import HomePage from "../pages/HomePage";
 import ErrorPage from "../pages/ErrorPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import VotingListPage from "../pages/VotingListPage";
-import VotingPage from "../pages/VotingPage";
+import VotingDetailsPage from "../pages/VotingDetailsPage";
 import MarkdownPage from "../pages/MarkdownPage";
 import LogsPage from "../pages/LogsPage";
 import UsersPage from "../pages/UsersPage";
@@ -51,7 +51,7 @@ const routes: RouteConfig[] = [
     },
     {
         path: "/votings/:votingId",
-        page: <VotingPage />,
+        page: <VotingDetailsPage />,
         title: "Voting Details",
         icon: "poll-h",
         permissions: ["committee"],
