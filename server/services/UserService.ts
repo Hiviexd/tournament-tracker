@@ -17,6 +17,7 @@ class UserService {
         const groups = ["user"];
         const coverUrl = userResponse.cover.url;
         const country = userResponse.country;
+        const osuGroups = userResponse.groups.map((group) => group.id);
 
         let user = existingUser;
 
@@ -58,6 +59,12 @@ class UserService {
                     LogService.generate(user.id, `Username changed from "${oldUsername}" to "${username}"`, "account");
                 }
             }
+        }
+
+        // Mark users in dev usergroup as admin
+        if (osuGroups.includes(11)) {
+            user.groups.push("admin");
+            await user.save();
         }
 
         return user;
@@ -111,10 +118,7 @@ class UserService {
 
         const selectedUsers: IUser[] = _.sampleSize(users, 2);
 
-        await User.updateMany(
-            { _id: { $in: selectedUsers.map(user => user._id) } },
-            { $set: { inBag: false } }
-        );
+        await User.updateMany({ _id: { $in: selectedUsers.map((user) => user._id) } }, { $set: { inBag: false } });
 
         return selectedUsers;
     }

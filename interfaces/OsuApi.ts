@@ -51,6 +51,7 @@ export interface IOsuUser {
     username: string;
     country: IOsuCountry;
     cover: IOsuCover;
+    groups: IOsuGroup[];
 }
 
 export interface IOsuAuthResponse {
