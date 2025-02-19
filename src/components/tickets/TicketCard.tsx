@@ -60,7 +60,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
     };
 
     const targetInfo = getTargetInfo();
-    const messageCount = ticket.messages.filter(message => !message.isNote).length;
+    const messageCount = ticket.messages.filter((message) => !message.isNote).length;
 
     return (
         <Card
@@ -90,7 +90,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                     </Stack>
                 </Group>
 
-                <Group mt="auto">
+                <Group gap="xs" mt="auto">
                     <Tooltip label={ticket.type === "ticket" ? "Ticket" : "Report"}>
                         <Badge color={ticket.type === "ticket" ? "blue" : "red"} variant="filled">
                             <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />{" "}

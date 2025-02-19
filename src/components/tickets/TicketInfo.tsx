@@ -39,7 +39,7 @@ export default function TicketInfo({ ticket }: IProps) {
                             <DateBadge date={ticket.updatedAt} />
                         </Text>
                     </Stack>
-                    <Group>
+                    <Group gap="xs">
                         <Tooltip label={ticket.type === "ticket" ? "Ticket" : "Report"}>
                             <Badge color={ticket.type === "ticket" ? "info" : "red"} variant="filled">
                                 <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />

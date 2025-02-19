@@ -77,7 +77,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                 </div>
             </Group>
             <Group mt="md" justify="space-between">
-                <Group>
+                <Group gap="xs">
                     <Tooltip label={getVotingTypeInfo().text}>
                         <Badge color={getVotingTypeInfo().color} variant="filled">
                             <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
@@ -89,7 +89,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                     <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
                 </Group>
 
-                <Group>
+                <Group gap="xs">
                     {!checkUserVoted() && (
                         <Badge color="orange" variant="light">
                             <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
