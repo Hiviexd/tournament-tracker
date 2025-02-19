@@ -16,7 +16,18 @@ export default function TicketInfo({ ticket }: IProps) {
         window.open(`https://osu.ppy.sh/users/${targetUser.osuId}`, "_blank");
     };
     return (
-        <Card shadow="sm" p="lg">
+        <Card
+            shadow="sm"
+            p="lg"
+            radius="md"
+            className="ticket-info"
+            style={
+                {
+                    "--card-status-color": ticket.isActive
+                        ? "var(--mantine-color-success-6)"
+                        : "var(--mantine-color-danger-6)",
+                } as React.CSSProperties
+            }>
             <Stack gap="md">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap={4}>

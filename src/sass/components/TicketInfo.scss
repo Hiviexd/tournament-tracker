@@ -1,0 +1,21 @@
+.ticket-info {
+    border-top: 4px solid var(--card-status-color);
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+        background: linear-gradient(180deg, var(--card-status-color) -120%, var(--mantine-color-primary-11) 4rem);
+    }
+
+    // Ensure content stays above pseudo-element
+    > * {
+        position: relative;
+        z-index: 1;
+    }
+}

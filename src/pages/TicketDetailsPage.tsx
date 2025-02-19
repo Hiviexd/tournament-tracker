@@ -17,7 +17,14 @@ export default function TicketDetailsPage() {
         return (
             <Stack gap="md">
                 {/* TicketInfo skeleton */}
-                <Card shadow="sm" p="lg">
+                <Card
+                    shadow="sm"
+                    p="lg"
+                    radius="md"
+                    className="ticket-info"
+                    style={{
+                        "--card-status-color": "var(--mantine-color-primary-6)",
+                    }}>
                     <Stack gap="md">
                         <Group justify="space-between">
                             <Stack gap="xs">
