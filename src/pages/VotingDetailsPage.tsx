@@ -6,15 +6,15 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 
 // Mantine
-import { Stack, Text, Card, Skeleton, Button } from "@mantine/core";
+import { Stack, Card, Skeleton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Components
 import VotingEditModal from "../components/votings/VotingEditModal";
 import VotingInfo from "../components/votings/VotingInfo";
 import VotingForm from "../components/votings/VotingForm";
 import VotingResults from "../components/votings/VotingResults";
+import EmptyState from "../components/common/EmptyState";
 
 export default function VotingDetailsPage() {
     const { votingId } = useParams();
@@ -43,46 +43,26 @@ export default function VotingDetailsPage() {
         </Stack>
     );
 
-    const EmptyState = ({ error }: { error: string }) => {
-        return (
-            <Stack align="center" justify="center" h={200}>
-                <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
-                <Text size="lg" c="dimmed">
-                    {error}
-                </Text>
-
-                <Button variant="subtle" onClick={() => navigate("/votings")}>
-                    Return to votings
-                </Button>
-            </Stack>
-        );
-    };
-
     return (
         <>
             {isLoading ? (
                 <LoadingState />
             ) : voting.error ? (
-                <EmptyState error={voting.error} />
+                <EmptyState
+                    icon="poll-h"
+                    title="Vote not found..."
+                    returnLink="/voting"
+                    returnText="Return to voting list"
+                />
             ) : (
                 <Stack gap="lg">
-                    <VotingInfo
-                        voting={voting}
-                        user={loggedInUser}
-                        onNavigateBack={() => navigate("/voting")}
-                    />
+                    <VotingInfo voting={voting} user={loggedInUser} onNavigateBack={() => navigate("/voting")} />
 
                     {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
 
-                    {(!voting.isActive || loggedInUser?.isAdmin) && (
-                        <VotingResults voting={voting} />
-                    )}
+                    {(!voting.isActive || loggedInUser?.isAdmin) && <VotingResults voting={voting} />}
 
-                    <VotingEditModal
-                        voting={voting}
-                        opened={editModalOpened}
-                        onClose={closeEditModal}
-                    />
+                    <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
                 </Stack>
             )}
         </>
