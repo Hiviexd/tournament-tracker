@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert } from "@mantine/core";
+import { Card, Group, Stack, Alert, Anchor, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -41,6 +41,17 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <DateBadge date={message.createdAt} staticColor />
             </Group>
             <MarkdownText content={message.content} />
+            {message.attachments && message.attachments.length > 0 && (
+                <Group>
+                    {message.attachments.map((attachment) => (
+                        <Anchor href={attachment.url} target="_blank" key={attachment.originalName}>
+                            <Text size="sm">
+                                {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
+                            </Text>
+                        </Anchor>
+                    ))}
+                </Group>
+            )}
         </Stack>
     );
 

@@ -16,6 +16,7 @@ declare module "express-session" {
 declare module "express" {
     interface Request {
         session: Session;
+        files?: Express.Multer.File[];
     }
 }
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip } from "@mantine/core";
+import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip, FileInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useSendMessage, useToggleStatus } from "../../hooks/useTickets";
 import { ITicket } from "../../../interfaces/Ticket";
+import { useFileUpload } from "../../hooks/useFileUpload";
+import { IMessageFormData } from "../../../interfaces/Message";
 
 interface IProps {
     ticket: ITicket;
@@ -15,6 +17,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [isNote, setIsNote] = useState(false);
     const [content, setContent] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
     const toggleStatusMutation = useToggleStatus(ticket.id);
 
@@ -37,13 +40,16 @@ export default function TicketMessageForm({ ticket }: IProps) {
             return;
         }
 
+        const formData = new FormData() as IMessageFormData;
+        formData.append("content", content);
+        formData.append("isNote", isNote.toString());
+        files.forEach((file) => formData.append("files", file));
+
         try {
-            await createMessageMutation.mutateAsync({
-                content,
-                isNote,
-            });
+            await createMessageMutation.mutateAsync(formData);
             setContent("");
             setError(null);
+            clearFiles();
         } catch (err) {
             setError("Failed to send message. Please try again.");
         }
@@ -73,6 +79,15 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     onChange={(e) => handleContentChange(e.currentTarget.value)}
                     error={error}
                     description={`${content.length}/6000`}
+                />
+                <FileInput
+                    accept=".jpg,.png,.zip,.rar,.txt"
+                    multiple
+                    label="Attachments"
+                    description="Up to 5 files (5MB each)"
+                    placeholder="Upload files"
+                    value={files}
+                    onChange={handleFileChange}
                 />
                 <Group justify="space-between">
                     <Group>

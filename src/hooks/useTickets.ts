@@ -8,6 +8,7 @@ import { getTickets, getTicket, createTicket, sendMessage, toggleStatus } from "
 
 // Types
 import { TicketQueryParams } from "../../interfaces/Ticket";
+import { IMessageFormData } from "../../interfaces/Message";
 
 export function useTickets(params?: TicketQueryParams) {
     return useQuery({
@@ -41,7 +42,7 @@ export function useSendMessage(ticketId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (messageData: { content: string; isNote: boolean }) => {
+        mutationFn: async (messageData: IMessageFormData) => {
             const response = await sendMessage(ticketId, messageData);
             return handleMutationResponse(response);
         },

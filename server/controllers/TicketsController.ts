@@ -11,6 +11,7 @@ import config from "../../config.json";
 import helpers from "../helpers";
 import TicketService from "../services/TicketService";
 import _ from "lodash";
+import UploadService from "../services/UploadService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -192,32 +193,50 @@ class TicketsController {
         const user = res.locals!.user!;
         const { ticketId } = req.params;
         const { content, isNote } = req.body;
+        const files = req.files as Express.Multer.File[];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const isTicketAuthor = ticket.author.id === user.id;
 
+        // Authorization checks
         if (!user.isCommittee && !isTicketAuthor) {
             return res.json({ error: "Not authorized to message this ticket" });
         }
 
-        // auth for notes
         if (isNote && !user.isCommittee) {
             return res.json({ error: "Not authorized to add notes" });
         }
 
-        if (content.length < 10 || content.length > 6000)
+        if (content.length < 10 || content.length > 6000) {
             return res.json({ error: "Message must be between 10 and 6000 characters" });
+        }
 
         const message = new Message({
             author: user._id,
             content,
             isCommittee: isTicketAuthor ? false : user.isCommittee,
+            isNote,
+            attachments: [],
         });
 
-        message.isNote = isNote;
+        // Handle file uploads
+        if (files?.length) {
+            const attachments = await Promise.all(
+                files.map(async (file) => {
+                    const url = await UploadService.uploadFile(file, ticketId);
+                    return {
+                        originalName: file.originalname,
+                        url,
+                        size: file.size,
+                        type: file.mimetype,
+                    };
+                })
+            );
+
+            message.attachments = attachments;
+        }
 
         await message.save();
-
         ticket.messages.push(message._id);
         await ticket.save();
 
@@ -251,7 +270,10 @@ class TicketsController {
         ticket.isActive = !ticket.isActive;
         await ticket.save();
 
-        res.json({ message: `${_.capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`, ticket });
+        res.json({
+            message: `${_.capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`,
+            ticket,
+        });
 
         // Logger
         await LogService.generate(
