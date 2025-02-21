@@ -26,6 +26,8 @@ const DEFAULT_POPULATE = [
 ];
 const DEFAULT_LIMIT = 12;
 
+const FILE_UPLOAD_CATEGORY = "tickets";
+
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
@@ -90,6 +92,7 @@ class TicketsController {
         const author = res.locals!.user!;
         const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentLink } =
             req.body;
+        const files = req.files as Express.Multer.File[];
 
         let targetUser: IUser;
 
@@ -136,7 +139,11 @@ class TicketsController {
             author,
             content: message.trim(),
             isCommittee: false,
+            attachments: [],
         });
+
+        // Handle file uploads
+        initialMessage.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id);
 
         await initialMessage.save();
         ticket.messages.push(initialMessage._id);
@@ -220,21 +227,7 @@ class TicketsController {
         });
 
         // Handle file uploads
-        if (files?.length) {
-            const attachments = await Promise.all(
-                files.map(async (file) => {
-                    const url = await UploadService.uploadFile(file, ticketId);
-                    return {
-                        originalName: file.originalname,
-                        url,
-                        size: file.size,
-                        type: file.mimetype,
-                    };
-                })
-            );
-
-            message.attachments = attachments;
-        }
+        message.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id);
 
         await message.save();
         ticket.messages.push(message._id);
