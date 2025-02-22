@@ -15,6 +15,7 @@ import DueDateBadge from "../common/badges/DueDateBadge";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
 import MarkdownText from "../common/MarkdownText";
 import UserCard from "../common/UserCard";
+import AttachmentDisplay from "../common/AttachmentDisplay";
 
 interface IProps {
     voting: IVoting;
@@ -102,6 +103,18 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     <Divider />
                     <MarkdownText content={voting.description} />
                     <Divider />
+                    {voting.attachments?.length > 0 && (
+                        <Stack gap="sm">
+                            <Text size="sm" c="dimmed">
+                                Attachments
+                            </Text>
+                            <Group gap="sm">
+                                {voting.attachments.map((attachment) => (
+                                    <AttachmentDisplay key={attachment._id} attachment={attachment} />
+                                ))}
+                            </Group>
+                        </Stack>
+                    )}
                     <Group>
                         <Button
                             variant="filled"

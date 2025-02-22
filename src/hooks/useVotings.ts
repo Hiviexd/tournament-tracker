@@ -9,7 +9,7 @@ import {
     deleteVoting,
 } from "../api/votings";
 import { handleMutationResponse } from "../api/helpers";
-import { IVoting, VotingQueryParams } from "../../interfaces/Voting";
+import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
 
 export function useVotings(params?: VotingQueryParams) {
     return useQuery({
@@ -29,7 +29,7 @@ export function useCreateVoting() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (votingData: Partial<IVoting>) => {
+        mutationFn: async (votingData: VotingFormData) => {
             const response = await createVoting(votingData);
             return handleMutationResponse(response);
         },

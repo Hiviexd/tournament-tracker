@@ -1,9 +1,10 @@
 // Base
 import { useState } from "react";
 import { useCreateVoting } from "../../hooks/useVotings";
-import { VotingCategory } from "../../../interfaces/Voting";
+import { VotingCategory, type VotingFormData } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
 import { VOTE_COLORS } from "../../constants";
+import { useFileUpload } from "../../hooks/useFileUpload";
 
 //Mantine
 import {
@@ -16,11 +17,10 @@ import {
     NumberInput,
     Button,
     Group,
-    LoadingOverlay,
     Pill,
     ActionIcon,
     Text,
-    Divider,
+    FileInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,6 +35,7 @@ interface IProps {
 
 export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
+    const { files, handleFileChange } = useFileUpload();
     const [newOption, setNewOption] = useState("");
 
     const form = useForm({
@@ -52,22 +53,39 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             title: (value) => (!value ? "Title is required" : null),
             description: (value) => (!value ? "Description is required" : null),
             category: (value) => (!value ? "Category is required" : null),
-            assignedGroups: (value) =>
-                value.length === 0 ? "At least one group is required" : null,
+            assignedGroups: (value) => (value.length === 0 ? "At least one group is required" : null),
             duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
             options: (value) => (value.length < 2 ? "At least two options are required" : null),
-            targetUserId: (value, values) =>
-                values.category === "user" && !value ? "Target user is required" : null,
+            targetUserId: (value, values) => (values.category === "user" && !value ? "Target user is required" : null),
             targetTournamentId: (value, values) =>
                 values.category === "tournament" && !value ? "Target tournament is required" : null,
         },
     });
 
-    const handleSubmit = async (values) => {
-        await createVotingMutation.mutateAsync(values);
+    const handleSubmit = form.onSubmit(async (values) => {
+        const formData = new FormData() as VotingFormData;
+
+        // Add form fields
+        Object.entries(values).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+                if (Array.isArray(value)) {
+                    // Handle arrays by appending each value with the same key
+                    value.forEach((item) => {
+                        formData.append(key, item);
+                    });
+                } else {
+                    formData.append(key, value.toString());
+                }
+            }
+        });
+
+        // Add files
+        files.forEach((file) => formData.append("files", file));
+
+        await createVotingMutation.mutateAsync(formData);
         form.reset();
         onClose();
-    };
+    });
 
     const handleAddOption = () => {
         const trimmedOption = newOption.trim();
@@ -104,14 +122,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
     return (
         <Modal opened={opened} onClose={onClose} title="Create New Vote" size="lg">
-            <LoadingOverlay
-                visible={createVotingMutation.isPending}
-                zIndex={1000}
-                overlayProps={{ radius: "sm", blur: 2 }}
-            />
-            <form onSubmit={form.onSubmit(handleSubmit)} style={{ position: "relative" }}>
+            <form onSubmit={handleSubmit} style={{ position: "relative" }}>
                 <Stack gap="md">
-                    <Divider />
                     <TextInput
                         label="Title"
                         placeholder="Enter vote title"
@@ -217,6 +229,17 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             </ActionIcon>
                         </Group>
                     </Stack>
+
+                    <FileInput
+                        accept=".jpg,.png,.zip,.rar,.txt"
+                        multiple
+                        leftSection={<FontAwesomeIcon icon="upload" />}
+                        label="Attachments"
+                        description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
+                        placeholder="Upload files"
+                        value={files}
+                        onChange={handleFileChange}
+                    />
 
                     <Group justify="flex-end" mt="md">
                         <Button variant="subtle" onClick={onClose}>

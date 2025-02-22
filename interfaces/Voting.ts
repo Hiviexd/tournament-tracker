@@ -2,6 +2,7 @@ import { Document } from "mongoose";
 import { UserGroup, IUser } from "./User";
 import { IVote } from "./Vote";
 import { ITournament } from "./Tournament";
+import { IAttachment } from "./Attachment";
 
 export type VotingCategory = "tournament" | "user" | "discussion";
 
@@ -25,6 +26,12 @@ export interface VotingListQuery {
     page?: number;
 }
 
+export interface IVotingFormData extends FormData {
+    files?: File[];
+}
+
+export type VotingFormData = Partial<IVoting> & IVotingFormData;
+
 export interface IVoting extends Document {
     author: IUser;
     category: VotingCategory;
@@ -38,6 +45,7 @@ export interface IVoting extends Document {
     targetUser?: IUser;
     targetTournament?: ITournament;
     requiredVotes: number;
+    attachments: IAttachment[];
     createdAt: Date;
     updatedAt: Date;
 

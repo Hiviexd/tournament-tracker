@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { IVoting, VotingQueryParams } from "../../interfaces/Voting";
+import { IVoting, VotingQueryParams, type VotingFormData } from "../../interfaces/Voting";
 
 export const getVotings = async (params?: VotingQueryParams) => {
     const response = await axios.get("/api/votings", { params });
@@ -12,7 +12,7 @@ export const getVoting = async (votingId: string) => {
     return response.data;
 };
 
-export const createVoting = async (votingData: Partial<IVoting>) => {
+export const createVoting = async (votingData: VotingFormData) => {
     const response = await axios.post("/api/votings/create", votingData);
     return response.data;
 };

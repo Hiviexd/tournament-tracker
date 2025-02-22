@@ -12,6 +12,7 @@ import config from "../../config.json";
 import LogService from "../services/LogService";
 import helpers from "../helpers";
 import { Request, Response } from "express";
+import UploadService from "../services/UploadService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -24,11 +25,14 @@ const DEFAULT_POPULATE = [
     },
     { path: "targetUser", select: "username osuId groups coverUrl" },
     { path: "targetTournament", select: "name" },
+    { path: "attachments", select: "originalName url size type" },
 ];
 
 const DEFAULT_LIMIT = 10;
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
+
+const FILE_UPLOAD_CATEGORY = "votings";
 
 class VotingsController {
     /** GET voting listing */
@@ -45,11 +49,7 @@ class VotingsController {
         const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [votings, total] = await Promise.all([
-            Voting.find(dbQuery)
-                .skip(skip)
-                .limit(DEFAULT_LIMIT)
-                .sort({ createdAt: -1 })
-                .populate(DEFAULT_POPULATE),
+            Voting.find(dbQuery).skip(skip).limit(DEFAULT_LIMIT).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE),
             Voting.countDocuments(dbQuery),
         ]);
 
@@ -72,16 +72,9 @@ class VotingsController {
 
     /** POST create a voting */
     public async createVoting(req: Request, res: Response) {
-        const {
-            category,
-            assignedGroups,
-            title,
-            description,
-            duration,
-            options,
-            targetUserId,
-            targetTournamentId,
-        } = req.body;
+        const { category, assignedGroups, title, description, duration, options, targetUserId, targetTournamentId } =
+            req.body;
+        const files = req.files as Express.Multer.File[];
 
         const author = res.locals!.user!;
         let targetUser: IUser, targetTournament: ITournament;
@@ -108,6 +101,16 @@ class VotingsController {
         if (targetTournamentId) {
             targetTournament = await Tournament.findById(targetTournamentId).orFail();
             voting.targetTournament = targetTournament;
+        }
+
+        // Handle file uploads
+        if (files?.length) {
+            voting.attachments = await UploadService.handleFileUploads(
+                files,
+                FILE_UPLOAD_CATEGORY,
+                voting._id,
+                author._id
+            );
         }
 
         await voting.save();
@@ -243,18 +246,16 @@ class VotingsController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Toggled voting status for [**${voting.title}**](${config.discord.baseUrl}/votings/${
-                voting._id
-            }) to ${voting.isActive ? "active" : "inactive"}`,
+            `Toggled voting status for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id}) to ${
+                voting.isActive ? "active" : "inactive"
+            }`,
             "voting"
         );
 
         // Discord
         const getVotingOptionStats = (optionIndex: number) => {
             const votes = voting.votes.filter((vote) => vote.option === optionIndex).length;
-            const percentage = voting.votes.length
-                ? Math.round((votes / voting.votes.length) * 100)
-                : 0;
+            const percentage = voting.votes.length ? Math.round((votes / voting.votes.length) * 100) : 0;
 
             return { votes, percentage };
         };
@@ -279,9 +280,9 @@ class VotingsController {
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `${voting.isActive ? "Resumed" : "Concluded"} voting for [**${
-                    voting.title
-                }**](${config.discord.baseUrl}/votings/${voting._id})`,
+                description: `${voting.isActive ? "Resumed" : "Concluded"} voting for [**${voting.title}**](${
+                    config.discord.baseUrl
+                }/votings/${voting._id})`,
                 color: voting.isActive ? webhookColors.yellow : webhookColors.darkYellow,
                 fields: !voting.isActive
                     ? [
