@@ -1,10 +1,11 @@
-import { Card, Group, Stack, Alert, Anchor, Text } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import DateBadge from "../common/badges/DateBadge";
+import AttachmentDisplay from "../common/AttachmentDisplay";
 
 interface IProps {
     ticket: ITicket;
@@ -42,15 +43,16 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
             </Group>
             <MarkdownText content={message.content} />
             {message.attachments && message.attachments.length > 0 && (
-                <Group>
-                    {message.attachments.map((attachment) => (
-                        <Anchor href={attachment.url} target="_blank" key={attachment.originalName}>
-                            <Text size="sm">
-                                {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
-                            </Text>
-                        </Anchor>
-                    ))}
-                </Group>
+                <Stack mt="lg" gap="sm">
+                    <Text size="sm" c="grey">
+                        Attachments
+                    </Text>
+                    <Group gap="sm">
+                        {message.attachments.map((attachment) => (
+                            <AttachmentDisplay key={attachment.originalName} attachment={attachment} />
+                        ))}
+                    </Group>
+                </Stack>
             )}
         </Stack>
     );

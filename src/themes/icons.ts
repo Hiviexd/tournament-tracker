@@ -31,6 +31,8 @@ import {
     faLock,
     faLockOpen,
     faFileAlt,
+    faFileArchive,
+    faFile,
     faFilter,
     faFilterCircleXmark,
     faHistory,
@@ -49,6 +51,7 @@ import {
     faList,
     faFolder,
     faStickyNote,
+    faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -83,6 +86,8 @@ export default function loadIcons() {
         faLock,
         faLockOpen,
         faFileAlt,
+        faFileArchive,
+        faFile,
         faFilter,
         faFilterCircleXmark,
         faHistory,
@@ -100,6 +105,7 @@ export default function loadIcons() {
         faGamepad,
         faList,
         faFolder,
-        faStickyNote
+        faStickyNote,
+        faDownload,
     );
 }
