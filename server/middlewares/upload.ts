@@ -12,6 +12,9 @@ export const uploadMiddleware = multer({
             "image/jpeg",
             "image/png",
             "application/zip",
+            "application/x-zip",
+            "application/x-zip-compressed",
+            "application/octet-stream",
             "application/x-rar-compressed",
             "text/plain",
         ];

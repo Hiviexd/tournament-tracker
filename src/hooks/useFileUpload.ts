@@ -10,7 +10,16 @@ interface UseFileUploadOptions {
 const defaultOptions = {
     maxFiles: 5,
     maxSize: 5 * 1024 * 1024, // 5MB
-    allowedTypes: ["image/jpeg", "image/png", "application/zip", "application/x-rar-compressed", "text/plain"],
+    allowedTypes: [
+        "image/jpeg",
+        "image/png",
+        "application/zip",
+        "application/x-zip",
+        "application/x-zip-compressed",
+        "application/octet-stream",
+        "application/x-rar-compressed",
+        "text/plain",
+    ],
 };
 
 export function useFileUpload(options: UseFileUploadOptions = {}) {
