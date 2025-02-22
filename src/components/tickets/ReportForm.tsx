@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "@mantine/form";
-import { Stack, Select, Textarea, TextInput, Card, Alert, Group, Button } from "@mantine/core";
+import { Stack, Select, Textarea, TextInput, Card, Alert, Group, Button, FileInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
 import MarkdownText from "../common/MarkdownText";
@@ -8,6 +8,8 @@ import UserSearch from "../common/UserSearch";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
 import helpers from "../../helpers";
+import { useFileUpload } from "../../hooks/useFileUpload";
+import { type TicketFormData } from "../../../interfaces/Ticket";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -18,6 +20,7 @@ export default function ReportForm() {
     const navigate = useNavigate();
     const createTicketMutation = useCreateTicket();
     const [reportType, setReportType] = useState<"user" | "tournament">();
+    const { files, handleFileChange } = useFileUpload();
 
     const form = useForm<ITicketFormValues>({
         initialValues: {
@@ -32,7 +35,7 @@ export default function ReportForm() {
         },
         validate: {
             message: (value) => {
-                if (!value.trim()) return "Message is required";
+                if (!value || !value.trim()) return "Message is required";
                 if (value.length < 10) return "Message must be at least 10 characters";
                 if (value.length > 6000) return "Message cannot exceed 6000 characters";
                 return null;
@@ -55,35 +58,65 @@ export default function ReportForm() {
                 }
                 return null;
             },
-            reportType: (value) => (!value ? "Report type is required" : null),
+            reportType: (value: string | null | undefined) => {
+                if (!value || !["user", "tournament"].includes(value)) {
+                    return "Report type is required";
+                }
+                return null;
+            },
         },
     });
 
     // Clear irrelevant fields when report type changes
     const handleReportTypeChange = (value: string | null) => {
+        if (!value) return;
+
         const type = value as "user" | "tournament";
         setReportType(type);
+        form.setFieldValue("reportType", type);
 
         if (type === "user") {
             form.setValues({
                 ...form.values,
+                reportType: type,
                 targetTournamentName: "",
                 targetTournamentLink: "",
             });
         } else if (type === "tournament") {
             form.setValues({
                 ...form.values,
+                reportType: type,
                 targetUserId: "",
             });
         }
     };
 
     const handleSubmit = form.onSubmit(async (values) => {
-        await createTicketMutation.mutateAsync({
-            ...values,
-            type: "report",
+        const formData = new FormData() as TicketFormData;
+
+        // Remove type from values since we're adding it explicitly
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { type, reportType, ...restValues } = values;
+
+        // Add form fields with null/undefined checks
+        Object.entries(restValues).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+                formData.append(key, value.toString());
+            }
         });
-        navigate("/tickets");
+
+        // Add type explicitly
+        formData.append("type", "report");
+
+        // Add files
+        files.forEach((file) => formData.append("files", file));
+
+        try {
+            await createTicketMutation.mutateAsync(formData);
+            navigate("/reports");
+        } catch (error) {
+            console.error("Failed to create report:", error);
+        }
     });
 
     return (
@@ -163,6 +196,17 @@ You can report either:
                             {...form.getInputProps("message")}
                             withAsterisk
                             description={`${form.values.message.length}/6000`}
+                        />
+
+                        <FileInput
+                            accept=".jpg,.png,.zip,.rar,.txt"
+                            multiple
+                            leftSection={<FontAwesomeIcon icon="upload" />}
+                            label="Attachments"
+                            description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
+                            placeholder="Upload files"
+                            value={files}
+                            onChange={handleFileChange}
                         />
 
                         <Group justify="flex-end" mt="md">
