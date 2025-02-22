@@ -103,7 +103,7 @@ class TicketsController {
             return res.json({ error: "Message must be between 10 and 6000 characters" });
 
         // construct report title
-        let constructedTitle: string = title.trim();
+        let constructedTitle: string = title ? title.trim() : "";
 
         if (type === "report") {
             const count = await Ticket.countDocuments({ type: "report" });
