@@ -16,6 +16,12 @@ export interface TicketQueryParams {
     page?: number;
 }
 
+export interface ITicketFormData extends FormData {
+    files?: File[];
+}
+
+export type TicketFormData = Partial<ITicket> & ITicketFormData;
+
 export interface ITicket extends Document {
     author: IUser;
     type: TicketType;

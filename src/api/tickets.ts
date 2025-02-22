@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ITicket, TicketQueryParams } from "../../interfaces/Ticket";
+import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
 import { IMessageFormData } from "../../interfaces/Message";
 
 export const getTickets = async (params?: TicketQueryParams) => {
@@ -12,8 +12,12 @@ export const getTicket = async (ticketId: string) => {
     return response.data;
 };
 
-export const createTicket = async (ticketData: Partial<ITicket>) => {
-    const response = await axios.post("/api/tickets/create", ticketData);
+export const createTicket = async (ticketData: TicketFormData) => {
+    const response = await axios.post("/api/tickets/create", ticketData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
     return response.data;
 };
 

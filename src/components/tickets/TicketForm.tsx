@@ -1,10 +1,12 @@
 import { useForm } from "@mantine/form";
-import { Stack, TextInput, Textarea, Select, Card, Alert, Group, Button } from "@mantine/core";
+import { Stack, TextInput, Textarea, Select, Card, Alert, Group, Button, FileInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
 import MarkdownText from "../common/MarkdownText";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
+import { useFileUpload } from "../../hooks/useFileUpload";
+import { type TicketFormData } from "../../../interfaces/Ticket";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -14,6 +16,7 @@ const GROUP_OPTIONS = [
 export default function TicketForm() {
     const navigate = useNavigate();
     const createTicketMutation = useCreateTicket();
+    const { files, handleFileChange } = useFileUpload();
 
     const form = useForm<ITicketFormValues>({
         initialValues: {
@@ -39,11 +42,29 @@ export default function TicketForm() {
     });
 
     const handleSubmit = form.onSubmit(async (values) => {
-        await createTicketMutation.mutateAsync({
-            ...values,
-            type: "ticket",
+        const formData = new FormData() as TicketFormData;
+
+        // Remove type from values since we're adding it explicitly
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { type, ...restValues } = values;
+
+        // Add form fields
+        Object.entries(restValues).forEach(([key, value]) => {
+            if (value) formData.append(key, value.toString());
         });
-        navigate("/tickets");
+
+        // Add type separately
+        formData.append("type", "ticket");
+
+        // Add files with correct field name
+        files.forEach((file) => formData.append("files", file));
+
+        try {
+            await createTicketMutation.mutateAsync(formData);
+            navigate("/tickets");
+        } catch (error) {
+            console.error("Failed to create ticket:", error);
+        }
     });
 
     return (
@@ -88,6 +109,17 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             {...form.getInputProps("message")}
                             withAsterisk
                             description={`${form.values.message.length}/6000`}
+                        />
+
+                        <FileInput
+                            accept=".jpg,.png,.zip,.rar,.txt"
+                            multiple
+                            leftSection={<FontAwesomeIcon icon="upload" />}
+                            label="Attachments"
+                            description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
+                            placeholder="Upload files"
+                            value={files}
+                            onChange={handleFileChange}
                         />
 
                         <Group justify="flex-end" mt="md">

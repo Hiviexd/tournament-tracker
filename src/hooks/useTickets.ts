@@ -1,13 +1,12 @@
 // Base
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ITicket } from "../../interfaces/Ticket";
 import { handleMutationResponse } from "../api/helpers";
 
 // API
 import { getTickets, getTicket, createTicket, sendMessage, toggleStatus } from "../api/tickets";
 
 // Types
-import { TicketQueryParams } from "../../interfaces/Ticket";
+import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
 import { IMessageFormData } from "../../interfaces/Message";
 
 export function useTickets(params?: TicketQueryParams) {
@@ -28,12 +27,15 @@ export function useCreateTicket() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (ticketData: Partial<ITicket>) => {
+        mutationFn: async (ticketData: TicketFormData) => {
             const response = await createTicket(ticketData);
             return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tickets"] });
+        },
+        onError: (error) => {
+            console.error("Create ticket error:", error);
         },
     });
 }
