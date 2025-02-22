@@ -83,8 +83,9 @@ export default function TicketMessageForm({ ticket }: IProps) {
                 <FileInput
                     accept=".jpg,.png,.zip,.rar,.txt"
                     multiple
+                    leftSection={<FontAwesomeIcon icon="upload" />}
                     label="Attachments"
-                    description="Up to 5 files (5MB each)"
+                    description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
                     placeholder="Upload files"
                     value={files}
                     onChange={handleFileChange}
