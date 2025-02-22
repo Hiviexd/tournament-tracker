@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "../../config.json";
 import { IAttachment } from "../../interfaces/Attachment";
+import Attachment from "../models/attachmentModel";
 
 class UploadService {
     private client: S3Client;
@@ -43,35 +44,41 @@ class UploadService {
      * @param files Files to upload
      * @param category Category of the files (e.g. tickets, votings)
      * @param categoryObjectId ID of the category object (e.g. ticket ID, voting ID)
+     * @param userId ID of the user uploading the files
      * @returns Array of attachment metadata
      * @throws Error if file upload fails
      */
-    public async handleFileUploads(files: Express.Multer.File[], category: string, categoryObjectId: string): Promise<IAttachment[]> {
+    public async handleFileUploads(
+        files: Express.Multer.File[],
+        category: string,
+        categoryObjectId: string,
+        userId: string
+    ): Promise<IAttachment[]> {
         if (!files?.length) return [];
 
         try {
             const uploadPromises = files.map(async (file) => {
                 try {
                     const url = await this.uploadFile(file, category, categoryObjectId);
-                    return {
+
+                    const attachment = new Attachment({
                         originalName: file.originalname,
                         url,
                         size: file.size,
                         type: file.mimetype,
-                    };
+                        category,
+                        categoryObjectId,
+                        uploadedBy: userId,
+                    });
+
+                    await attachment.save();
+                    return attachment;
                 } catch (error) {
                     throw new Error(`Failed to upload file ${file.originalname}`);
                 }
             });
 
-            // Wait for all uploads to complete
             const attachments = await Promise.all(uploadPromises);
-
-            // Validate all attachments have URLs
-            if (attachments.some((attachment) => !attachment.url)) {
-                throw new Error("One or more file uploads failed to generate URLs");
-            }
-
             return attachments;
         } catch (error) {
             throw new Error(`File upload failed`);

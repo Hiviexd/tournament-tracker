@@ -17,10 +17,13 @@ const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
     {
         path: "messages",
-        populate: {
-            path: "author",
-            select: "username osuId groups",
-        },
+        populate: [
+            {
+                path: "author",
+                select: "username osuId groups",
+            },
+            { path: "attachments", select: "originalName url size type" },
+        ],
     },
     { path: "targetUser", select: "username osuId groups coverUrl" },
 ];
@@ -143,7 +146,12 @@ class TicketsController {
         });
 
         // Handle file uploads
-        initialMessage.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id);
+        initialMessage.attachments = await UploadService.handleFileUploads(
+            files,
+            FILE_UPLOAD_CATEGORY,
+            ticket._id,
+            author._id
+        );
 
         await initialMessage.save();
         ticket.messages.push(initialMessage._id);
@@ -227,7 +235,7 @@ class TicketsController {
         });
 
         // Handle file uploads
-        message.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id);
+        message.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id, user._id);
 
         await message.save();
         ticket.messages.push(message._id);
