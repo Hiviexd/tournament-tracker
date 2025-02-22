@@ -24,5 +24,13 @@
                 "token": ""
             }
         }
+    },
+    "r2": {
+        "accountId": "your-cloudflare-account-id",
+        "accessKeyId": "your-r2-access-key-id",
+        "secretAccessKey": "your-r2-secret-access-key",
+        "bucketName": "your-bucket-name",
+        "baseUrl": "https://bucket-public-url.com",
+        "baseFolder": "tcomm"
     }
 }
