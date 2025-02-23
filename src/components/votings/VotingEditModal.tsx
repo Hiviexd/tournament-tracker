@@ -134,26 +134,30 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 </Text>
                             )}
                         </Group>
-
                         <Group gap="xs">
-                            {form.values.options.map((option, index) => (
-                                <Pill
-                                    key={index}
-                                    withRemoveButton={!hasVotes && form.values.options.length > 2}
-                                    onRemove={() => handleRemoveOption(option)}
-                                    variant="subtle"
-                                    style={{
-                                        backgroundColor: `color-mix(in srgb, ${
-                                            VOTE_COLORS[index % VOTE_COLORS.length]
-                                        } 15%, transparent)`,
-                                        color: VOTE_COLORS[index % VOTE_COLORS.length],
-                                        transition: "all 0.2s ease",
-                                    }}>
-                                    {option}
-                                </Pill>
-                            ))}
+                            {form.values.options.length === 0 ? (
+                                <Text size="xs" c="danger">
+                                    No options!
+                                </Text>
+                            ) : (
+                                form.values.options.map((option, index) => (
+                                    <Pill
+                                        key={index}
+                                        withRemoveButton={!hasVotes}
+                                        onRemove={() => handleRemoveOption(option)}
+                                        variant="subtle"
+                                        style={{
+                                            backgroundColor: `color-mix(in srgb, ${
+                                                VOTE_COLORS[index % VOTE_COLORS.length]
+                                            } 15%, transparent)`,
+                                            color: VOTE_COLORS[index % VOTE_COLORS.length],
+                                            transition: "all 0.2s ease",
+                                        }}>
+                                        {option}
+                                    </Pill>
+                                ))
+                            )}
                         </Group>
-
                         {!hasVotes && (
                             <Group gap="xs" flex={1} align="flex-start">
                                 <TextInput
