@@ -82,7 +82,7 @@ class TicketsController {
         const user = res.locals!.user!;
         const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
 
-        if (!ticket.isTicket && !user.isAdmin &&!user.isCommittee && !ticket.author.equals(user._id)) {
+        if (!ticket.isTicket && !user.isAdmin && !user.isCommittee && !ticket.author.equals(user._id)) {
             return res.json({ error: "Not authorized to view this ticket" });
         }
 
@@ -127,14 +127,21 @@ class TicketsController {
                 targetUser = await User.findById(targetUserId).orFail();
                 ticket.targetUser = targetUser;
             } else {
-                if (targetTournamentName.length < 5 || targetTournamentName.length > 120)
+                if (!targetTournamentName || !targetTournamentLink) {
+                    return res.json({ error: "Missing target tournament details" });
+                }
+
+                const sanitizedTournamentName: string = targetTournamentName.trim();
+                const sanitizedTournamentLink: string = targetTournamentLink.trim();
+
+                if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
                     return res.json({ error: "Tournament name must be between 5 and 120 characters" });
 
-                if (!helpers.isOsuForumLink(targetTournamentLink))
+                if (!helpers.isOsuForumLink(sanitizedTournamentLink))
                     return res.json({ error: "Invalid tournament forum link" });
 
-                ticket.targetTournamentName = targetTournamentName.trim();
-                ticket.targetTournamentLink = targetTournamentLink.trim();
+                ticket.targetTournamentName = sanitizedTournamentName;
+                ticket.targetTournamentLink = sanitizedTournamentLink;
             }
         }
 
