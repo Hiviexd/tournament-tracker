@@ -172,6 +172,10 @@ class VotingsController {
             value: helpers.shorten(voting.description, 1024),
         });
 
+        if (voting.attachments?.length) {
+            fields.push(helpers.getAttachmentsField(voting.attachments)!);
+        }
+
         await DiscordService.sendRoleHighlightWebhook(roles, [
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),

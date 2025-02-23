@@ -1,6 +1,8 @@
 import { IOsuAuthResponse } from "../../interfaces/OsuApi";
 import moment from "moment";
 import { Session } from "express-session";
+import { IDiscordField } from "../../interfaces/Discord";
+import { IAttachment } from "../../interfaces/Attachment";
 
 function setSession(session: Session, response: IOsuAuthResponse) {
     // set the cookie's maxAge to 7 days
@@ -30,7 +32,14 @@ function shorten(string: string = "", length: number = 50): string {
     return string.length > length ? string.substring(0, length - 3) + "..." : string;
 }
 
-type DiscordTimestampType = "relative" | "shortTime" | "longTime" | "shortDate" | "longDate" | "dateTime" | "dayDateTime";
+type DiscordTimestampType =
+    | "relative"
+    | "shortTime"
+    | "longTime"
+    | "shortDate"
+    | "longDate"
+    | "dateTime"
+    | "dayDateTime";
 
 /**
  * Creates a dynamic Discord timestamp
@@ -45,7 +54,7 @@ function discordTimestamp(date: Date, type: DiscordTimestampType = "relative"): 
         shortDate: "d",
         longDate: "D",
         dateTime: "f",
-        dayDateTime: "F"
+        dayDateTime: "F",
     };
     return `<t:${Math.floor(date.getTime() / 1000)}:${types[type]}>`;
 }
@@ -62,7 +71,7 @@ function isValidMongoId(id: string): boolean {
  * Checks if a string is a valid whole number
  * @param str String to check
  */
-export function isNumeric(str: string): boolean {
+function isNumeric(str: string): boolean {
     return /^\d+$/.test(str);
 }
 
@@ -71,8 +80,41 @@ export function isNumeric(str: string): boolean {
  *
  * @param {string} link
  */
-export function isOsuForumLink(link: string): boolean {
+function isOsuForumLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+}
+
+/**
+ * Truncates a filename to a certain length
+ * @param filename Filename to truncate
+ * @param maxLength Maximum length of the filename (defaults to `30`)
+ */
+function truncateFilename(filename: string, maxLength: number = 30): string {
+    if (filename.length <= maxLength) return filename;
+
+    const extension = filename.includes(".") ? filename.split(".").pop()! : "";
+    const nameWithoutExt = filename.substring(0, filename.lastIndexOf("."));
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension.length - 3);
+
+    return `${truncatedName}...${extension ? "." + extension : ""}`;
+}
+
+/**
+ * Returns a Discord field for attachments
+ * @param attachments Attachments to display
+ * @returns Discord field or `null` if no attachments
+ */
+function getAttachmentsField(attachments: IAttachment[]): IDiscordField | null {
+    if (!attachments?.length) return null;
+
+    const attachmentsList = attachments
+        .map(att => `• [${truncateFilename(att.originalName)}](${att.url})`)
+        .join('\n');
+
+    return {
+        name: "Attachments",
+        value: attachmentsList
+    };
 }
 
 export default {
@@ -84,4 +126,6 @@ export default {
     isValidMongoId,
     isNumeric,
     isOsuForumLink,
+    truncateFilename,
+    getAttachmentsField,
 };

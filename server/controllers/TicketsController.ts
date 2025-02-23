@@ -188,6 +188,10 @@ class TicketsController {
 
         fields.push({ name: "Message", value: helpers.shorten(message, 512) });
 
+        if (initialMessage.attachments?.length) {
+            fields.push(helpers.getAttachmentsField(initialMessage.attachments)!);
+        }
+
         const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
 
         await DiscordService.sendRoleHighlightWebhook(roles, [
@@ -250,6 +254,17 @@ class TicketsController {
         );
 
         // Discord
+        const fields: IDiscordField[] = [
+            {
+                name: isNote ? "Note" : "Message",
+                value: helpers.shorten(content, 512),
+            },
+        ];
+
+        if (message.attachments?.length) {
+            fields.push(helpers.getAttachmentsField(message.attachments)!);
+        }
+
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
@@ -257,7 +272,7 @@ class TicketsController {
                 description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
                     config.discord.baseUrl
                 }/tickets/${ticket._id})`,
-                fields: [{ name: isNote ? "Note" : "Message", value: helpers.shorten(content, 512) }],
+                fields,
             },
         ]);
 
