@@ -83,7 +83,8 @@ export default function TicketDetailsPage() {
         );
     }
 
-    const showMessageForm = ticket.isActive || user?.isCommittee;
+    // only show to author when ticket is active
+    const showMessageForm = (ticket.isActive && ticket.author.id === user?.id) || user?.isCommittee;
 
     return (
         <Stack gap="md">
