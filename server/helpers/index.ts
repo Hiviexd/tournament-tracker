@@ -108,7 +108,7 @@ function getAttachmentsField(attachments: IAttachment[]): IDiscordField | null {
     if (!attachments?.length) return null;
 
     const attachmentsList = attachments
-        .map(att => `• [${truncateFilename(att.originalName)}](${att.url})`)
+        .map(att => `• [${truncateFilename(att.originalName)}](${new URL(att.url).href})`)
         .join('\n');
 
     return {
