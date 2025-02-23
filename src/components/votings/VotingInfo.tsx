@@ -141,7 +141,8 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 </Text>
                                 <UserCard
                                     user={voting.targetUser}
-                                    onClick={() => handleUserCardClick(voting.targetUser!)}
+                                    onSelect={() => handleUserCardClick(voting.targetUser!)}
+                                    static
                                 />
                             </Stack>
                         </>
