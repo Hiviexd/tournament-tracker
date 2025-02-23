@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
-import { Card, Stack, Title, Radio, Slider, Textarea, Button, Group, Text } from "@mantine/core";
+import { useState } from "react";
+import { Card, Stack, Title, Textarea, Button, Group } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import { useSubmitVote } from "../../hooks/useVotings";
 import { VoteType, ClassicVote, BinaryVote, VariableVote } from "../../../interfaces/Vote";
+import helpers from "../../helpers";
+import ClassicVoteInput from "./votes/ClassicVoteInput";
+import BinaryVoteInput from "./votes/BinaryVoteInput";
+import VariableVoteInput from "./votes/VariableVoteInput";
+import TextLengthIndicator from "../common/TextLengthIndicator";
 
 interface IProps {
     voting: IVoting;
@@ -15,37 +20,8 @@ export default function VotingForm({ voting, user }: IProps) {
     const submitVoteMutation = useSubmitVote(voting._id);
     const userVote = voting.votes.find((vote) => vote.author._id === user._id);
 
-    // Initialize comment from existing vote if it exists
     const [comment, setComment] = useState(userVote?.comment ?? "");
-
-    // Update comment when userVote changes
-    useEffect(() => {
-        if (userVote?.comment) {
-            setComment(userVote.comment);
-        }
-    }, [userVote]);
-
-    const [voteData, setVoteData] = useState<VoteType>(() => {
-        if (userVote) {
-            return userVote.data;
-        }
-
-        // Initialize based on voting type
-        switch (voting.type) {
-            case "classic":
-                return { type: "classic", option: 0 } as ClassicVote;
-            case "binary":
-                return { type: "binary", score: 0 } as BinaryVote;
-            case "variable":
-                return {
-                    type: "variable",
-                    scores: voting.options.map((_, index) => ({
-                        optionIndex: index,
-                        score: 0,
-                    })),
-                } as VariableVote;
-        }
-    });
+    const [voteData, setVoteData] = useState<VoteType>(() => helpers.getInitialVoteData(voting, userVote));
 
     const handleSubmit = async () => {
         try {
@@ -53,7 +29,6 @@ export default function VotingForm({ voting, user }: IProps) {
                 data: voteData,
                 comment: comment.trim() || undefined,
             });
-            // Only clear comment if this is a new vote
             if (!userVote && submitVoteMutation.isSuccess) {
                 setComment("");
             }
@@ -64,88 +39,39 @@ export default function VotingForm({ voting, user }: IProps) {
 
     const renderVoteInput = () => {
         switch (voting.type) {
-            case "classic": {
-                const classicVote = voteData as ClassicVote;
+            case "classic":
                 return (
-                    <Radio.Group
-                        value={classicVote.option.toString()}
-                        onChange={(value) =>
+                    <ClassicVoteInput
+                        options={voting.options}
+                        value={(voteData as ClassicVote).option}
+                        onChange={(value) => setVoteData({ type: "classic", option: value })}
+                    />
+                );
+
+            case "binary":
+                return (
+                    <BinaryVoteInput
+                        options={[voting.options[0], voting.options[1]]}
+                        value={(voteData as BinaryVote).score}
+                        onChange={(value) => setVoteData({ type: "binary", score: value })}
+                    />
+                );
+
+            case "variable":
+                return (
+                    <VariableVoteInput
+                        options={voting.options}
+                        values={(voteData as VariableVote).scores}
+                        onChange={(optionIndex, score) => {
                             setVoteData({
-                                type: "classic",
-                                option: Number(value),
-                            })
-                        }
-                        label="Select your option"
-                        withAsterisk>
-                        <Stack gap="xs">
-                            {voting.options.map((option, index) => (
-                                <Radio key={index} value={index.toString()} label={option} />
-                            ))}
-                        </Stack>
-                    </Radio.Group>
+                                type: "variable",
+                                scores: (voteData as VariableVote).scores.map((s) =>
+                                    s.optionIndex === optionIndex ? { ...s, score } : s
+                                ),
+                            });
+                        }}
+                    />
                 );
-            }
-
-            case "binary": {
-                const binaryVote = voteData as BinaryVote;
-                return (
-                    <Stack gap="xs">
-                        <Group justify="space-between">
-                            <Text>{voting.options[1]}</Text>
-                            <Text>{voting.options[0]}</Text>
-                        </Group>
-                        <Slider
-                            value={binaryVote.score}
-                            onChange={(value) =>
-                                setVoteData({
-                                    type: "binary",
-                                    score: value,
-                                })
-                            }
-                            min={-5}
-                            max={5}
-                            step={1}
-                            marks={[
-                                { value: -5, label: "-5" },
-                                { value: 0, label: "0" },
-                                { value: 5, label: "5" },
-                            ]}
-                        />
-                    </Stack>
-                );
-            }
-
-            case "variable": {
-                const variableVote = voteData as VariableVote;
-                return (
-                    <Stack gap="md">
-                        {voting.options.map((option, index) => (
-                            <Stack key={index} gap="xs">
-                                <Text size="sm">{option}</Text>
-                                <Slider
-                                    value={variableVote.scores.find((s) => s.optionIndex === index)?.score ?? 0}
-                                    onChange={(value) => {
-                                        setVoteData({
-                                            type: "variable",
-                                            scores: variableVote.scores.map((s) =>
-                                                s.optionIndex === index ? { ...s, score: value } : s
-                                            ),
-                                        });
-                                    }}
-                                    min={-5}
-                                    max={5}
-                                    step={1}
-                                    marks={[
-                                        { value: -5, label: "-5" },
-                                        { value: 0, label: "0" },
-                                        { value: 5, label: "5" },
-                                    ]}
-                                />
-                            </Stack>
-                        ))}
-                    </Stack>
-                );
-            }
         }
     };
 
@@ -164,6 +90,7 @@ export default function VotingForm({ voting, user }: IProps) {
                     minRows={3}
                     maxRows={8}
                     autosize
+                    description={<TextLengthIndicator length={comment.length} maxLength={6000} />}
                 />
 
                 <Group justify="flex-end">

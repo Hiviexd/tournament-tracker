@@ -23,10 +23,7 @@ function hasRequiredPermissions(user: IUser | null, permissions: string[]): bool
     if (user.isAdmin) return true;
 
     // Check if user has the required permissions
-    if (
-        (permissions.includes("admin") && !user.isAdmin) ||
-        (permissions.includes("committee") && !user.isCommittee)
-    )
+    if ((permissions.includes("admin") && !user.isAdmin) || (permissions.includes("committee") && !user.isCommittee))
         return false;
 
     return true;
@@ -118,8 +115,29 @@ function hslToHex(h: number, s: number, l: number): string {
  *
  * @param {string} link
  */
-export function isOsuForumLink(link: string): boolean {
+function isOsuForumLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+}
+
+function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType {
+    if (userVote) {
+        return userVote.data;
+    }
+
+    switch (voting.type) {
+        case "classic":
+            return { type: "classic", option: 0 } as ClassicVote;
+        case "binary":
+            return { type: "binary", score: 0 } as BinaryVote;
+        case "variable":
+            return {
+                type: "variable",
+                scores: voting.options.map((_, index) => ({
+                    optionIndex: index,
+                    score: 0,
+                })),
+            } as VariableVote;
+    }
 }
 
 export default {
@@ -128,4 +146,5 @@ export default {
     hexToHsl,
     hslToHex,
     isOsuForumLink,
+    getInitialVoteData,
 };
