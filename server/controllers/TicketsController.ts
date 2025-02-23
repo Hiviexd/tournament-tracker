@@ -110,7 +110,7 @@ class TicketsController {
 
         if (type === "report") {
             const count = await Ticket.countDocuments({ type: "report" });
-            const reportType = targetUserId ? "User" : "Tournament";
+            const reportType = targetUserId ? "User" : assignedGroup === "cc" ? "Contest" : "Tournament";
             constructedTitle = `${reportType} Report #${count + 1}`;
         }
 
