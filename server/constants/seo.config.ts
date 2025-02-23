@@ -1,6 +1,6 @@
-import TournamentModel from "../models/tournamentModel";
+// import TournamentModel from "../models/tournamentModel";
 import VotingModel from "../models/votingModel";
-import UserModel from "../models/userModel";
+import TicketModel from "../models/ticketModel";
 import _ from "lodash";
 
 interface SEORoute {
@@ -43,8 +43,8 @@ export const seoRoutes: SEORoute[] = [
     // },
     {
         path: "/votes",
-        name: "Votes",
-        description: "Browse committee votes and decisions"
+        name: "Votes Listing",
+        description: "Browse committee votes and decisions.",
     },
     {
         path: "/votes/:votingId",
@@ -59,26 +59,58 @@ export const seoRoutes: SEORoute[] = [
     {
         path: "/users",
         name: "User Management",
-        description: "Manage committee members and users",
+        description: "Manage committee members and users.",
     },
     {
         path: "/logs",
         name: "Logs",
-        description: "View system activity logs",
+        description: "View system activity logs.",
+    },
+    {
+        path: "/tickets",
+        name: "Tickets Listing",
+        description: "Browse through the compendium of tickets created by users!",
+    },
+    {
+        path: "/tickets/create",
+        name: "Create Ticket",
+        description: "Create a new ticket whether you have a simple question or need help with a specific issue!",
+    },
+    {
+        path: "/reports",
+        name: "Reports Listing",
+        description: "View reports submitted by users.",
+    },
+    {
+        path: "/reports/create",
+        name: "Create Report",
+        description:
+            "The tournament report form is the prime way to report any issues or concerns you have with a tournament or one of its players!",
+    },
+    {
+        path: "/tickets/:ticketId",
+        name: "Ticket Details",
+        isDynamic: true,
+        model: "Ticket",
+        modelId: "ticketId",
+        getMetadata: (ticket) => {
+            return {
+                title: `${ticket.title} - ${_.capitalize(ticket.type)} Details`,
+                description: ticket.type === "ticket" ? `Ticket created by ${ticket.author.username}`: `View and discuss this report.`,
+            };
+        },
     },
 ];
 
 export const defaultMetadata: SEOMetadata = {
     title: "Tournament Tracker",
-    description:
-        "The one-stop shop for all official osu! tournament correspondence and information!",
-    image: "https://tcomm.hivie.tn/assets/logo-512.png",
+    description: "The one-stop shop for all official osu! tournament correspondence and information!",
+    // image: "https://tcomm.hivie.tn/assets/logo-512.png",
 };
 
 export const modelMap = {
-    Tournament: TournamentModel,
     Voting: VotingModel,
-    User: UserModel,
+    Ticket: TicketModel,
 };
 
 export type { SEORoute, SEOMetadata };

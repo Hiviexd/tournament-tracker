@@ -21,10 +21,17 @@ export async function handleCrawlers(req: Request, res: Response, next: NextFunc
     }
 }
 
-function formatTitle(pageTitle: string, isHome = false, dynamicName?: string) {
+function formatTitle(pageTitle: string, isHome = false, dynamicName?: string, fullTitleOverride?: string) {
     if (isHome) {
         return {
             title: "Tournament Tracker",
+        };
+    }
+
+    if (fullTitleOverride) {
+        return {
+            title: fullTitleOverride,
+            ogSiteName: "Tournament Tracker",
         };
     }
 
@@ -80,11 +87,18 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
         if (matchResult && typeof matchResult !== "boolean") {
             const id = matchResult.params[route.modelId];
             const Model = modelMap[route.model] as Model<any>;
-            const data = await Model.findById(id).populate("host author", "username").lean();
-
+            const data = await Model.findById(id).populate("author", "username").lean();
             if (data && route.getMetadata) {
                 const customMetadata = route.getMetadata(data);
-                const titleFormat = formatTitle(route.name, false, data.name || data.title);
+
+                if (!customMetadata) {
+                    return {
+                        ...defaultMetadata,
+                        url: `${baseUrl}${path}`,
+                    };
+                }
+
+                const titleFormat = formatTitle(route.name, false, data.name || data.title, customMetadata.title);
 
                 return {
                     ...customMetadata,
