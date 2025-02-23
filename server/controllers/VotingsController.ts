@@ -422,7 +422,9 @@ class VotingsController {
         voting.title = title;
         voting.description = description;
         voting.duration = duration;
-        voting.options = options;
+
+        // only update options when there is no votes
+        if (!voting.votes.length) voting.options = options;
 
         await voting.save();
 
