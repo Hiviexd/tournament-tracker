@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Text, Badge, Tooltip, Title, Anchor } from "@mantine/core";
+import { Card, Group, Stack, Text, Badge, Tooltip, Title, Anchor, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "../../../interfaces/Ticket";
 import UserLink from "../common/UserLink";
@@ -6,12 +6,23 @@ import UserGroupBadge from "../common/badges/UserGroupBadge";
 import DateBadge from "../common/badges/DateBadge";
 import UserCard from "../common/UserCard";
 import { IUser } from "../../../interfaces/User";
+import { useToggleStatus } from "../../hooks/useTickets";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
     ticket: ITicket;
 }
 
 export default function TicketInfo({ ticket }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const toggleStatusMutation = useToggleStatus(ticket._id);
+
+    const handleToggleStatus = async () => {
+        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ticket?`)) return;
+        await toggleStatusMutation.mutateAsync();
+    };
+
     const handleUserCardClick = (targetUser: IUser) => {
         window.open(`https://osu.ppy.sh/users/${targetUser.osuId}`, "_blank");
     };
@@ -64,6 +75,17 @@ export default function TicketInfo({ ticket }: IProps) {
                             {ticket.targetTournamentName}
                         </Anchor>
                     </Text>
+                )}
+                {user?.isCommittee && (
+                    <Group>
+                        <Button
+                            onClick={handleToggleStatus}
+                            loading={toggleStatusMutation.isPending}
+                            color={ticket.isActive ? "danger" : "warning"}
+                            leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
+                            {ticket.isActive ? "Close Ticket" : "Reopen Ticket"}
+                        </Button>
+                    </Group>
                 )}
             </Stack>
         </Card>

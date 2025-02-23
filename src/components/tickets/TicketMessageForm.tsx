@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip } from "@mantine/core";
+import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSendMessage } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
-import { useSendMessage, useToggleStatus } from "../../hooks/useTickets";
 import { ITicket } from "../../../interfaces/Ticket";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { IMessageFormData } from "../../../interfaces/Message";
@@ -31,7 +31,6 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [error, setError] = useState<string | null>(null);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
-    const toggleStatusMutation = useToggleStatus(ticket.id);
 
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
@@ -67,11 +66,6 @@ export default function TicketMessageForm({ ticket }: IProps) {
         }
     };
 
-    const handleToggleStatus = async () => {
-        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ticket?`)) return;
-        await toggleStatusMutation.mutateAsync();
-    };
-
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="md">
@@ -98,37 +92,32 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     }
                 />
                 <FileUploadInput value={files} onChange={handleFileChange} />
-                <Group justify="space-between">
-                    <Group>
-                        <Button
-                            color={isNote ? "info" : "primary"}
-                            onClick={handleSubmit}
-                            loading={createMessageMutation.isPending}
-                            disabled={!!error || !content || (!ticket.isActive && !isNote)}
-                            leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
-                            {isNote ? "Add Note" : "Send Message"}
-                        </Button>
-                    </Group>
-                    {user?.isCommittee && (
-                        <Group>
-                            <Tooltip label={isNote ? "Switch to Message Mode" : "Switch to Note Mode"}>
-                                <ActionIcon
-                                    variant={isNote ? "filled" : "outline"}
-                                    color="info"
-                                    onClick={() => setIsNote(!isNote)}
-                                    size="lg">
-                                    <FontAwesomeIcon icon="sticky-note" />
-                                </ActionIcon>
-                            </Tooltip>
-                            <Button
-                                onClick={handleToggleStatus}
-                                loading={toggleStatusMutation.isPending}
-                                color={ticket.isActive ? "danger" : "warning"}
-                                leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
-                                {ticket.isActive ? "Close Ticket" : "Reopen Ticket"}
-                            </Button>
-                        </Group>
+                <Group justify="end">
+                    {user?.isCommittee && isNote && (
+                        <Text fs="italic" size="xs" c="dimmed">
+                            Notes are only visible to committee members!
+                        </Text>
                     )}
+                    {user?.isCommittee && (
+                        <Tooltip label={isNote ? "Switch to Message Mode" : "Switch to Note Mode"}>
+                            <ActionIcon
+                                variant={isNote ? "filled" : "outline"}
+                                color="info"
+                                onClick={() => setIsNote(!isNote)}
+                                size="lg">
+                                <FontAwesomeIcon icon="sticky-note" />
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
+                    <Button
+                        w={130}
+                        color={isNote ? "info" : "primary"}
+                        onClick={handleSubmit}
+                        loading={createMessageMutation.isPending}
+                        disabled={!!error || !content || (!ticket.isActive && !isNote)}
+                        leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
+                        {isNote ? "Add Note" : "Send"}
+                    </Button>
                 </Group>
             </Stack>
         </Card>
