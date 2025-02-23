@@ -16,6 +16,8 @@ import VoteCountBadge from "../common/badges/VoteCountBadge";
 import MarkdownText from "../common/MarkdownText";
 import UserCard from "../common/UserCard";
 import AttachmentDisplay from "../common/AttachmentDisplay";
+import UserLink from "../common/UserLink";
+import UserGroupBadge from "../common/badges/UserGroupBadge";
 
 interface IProps {
     voting: IVoting;
@@ -27,6 +29,24 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const toggleStatusMutation = useToggleVotingStatus(voting.id);
     const deleteVotingMutation = useDeleteVoting();
+    const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
+
+    const checkUserVoted = (): boolean => {
+        return !!voting.votes.find((vote) => vote.author._id === user?._id);
+    };
+
+    const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
+        switch (voting.category) {
+            case "tournament":
+                return { icon: "trophy", text: "Tournament", color: "orange" };
+            case "user":
+                return { icon: "user", text: "User", color: "red" };
+            case "discussion":
+                return { icon: "comments", text: "Discussion", color: "blue" };
+            default:
+                return { icon: "question", text: "Unknown", color: "gray" };
+        }
+    };
 
     const handleToggleStatus = async () => {
         if (!window.confirm("Are you sure you want to toggle the status of this voting?")) return;
@@ -58,51 +78,74 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     } as React.CSSProperties
                 }>
                 <Stack gap="lg">
-                    <Stack gap="xs">
-                        <Group align="center" gap="xs">
-                            <Title order={2}>{voting.title}</Title>
-                            {voting.isActive && (
-                                <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
-                                    <FontAwesomeIcon icon="edit" />
-                                </ActionIcon>
-                            )}
-                        </Group>
-
-                        <Group wrap="wrap" gap="xs" align="center">
+                    <Group justify="space-between" align="flex-start">
+                        <Stack gap={4}>
+                            <Group align="center" gap="xs">
+                                <Title order={2}>{voting.title}</Title>
+                                {voting.isActive && (
+                                    <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
+                                        <FontAwesomeIcon icon="edit" />
+                                    </ActionIcon>
+                                )}
+                            </Group>
+                            <Text size="sm" c="dimmed">
+                                Created by <UserLink user={voting.author} /> •{" "}
+                                {voting.isActive ? (
+                                    <Tooltip label={moment(voting.createdAt).format("LLL")}>
+                                        <span>{moment(voting.createdAt).fromNow()}</span>
+                                    </Tooltip>
+                                ) : (
+                                    <Tooltip label={moment(voting.updatedAt).format("LLL")}>
+                                        <span>concluded {moment(voting.updatedAt).fromNow()}</span>
+                                    </Tooltip>
+                                )}
+                            </Text>
+                        </Stack>
+                        <Group gap="xs">
+                            <Tooltip label={getVotingTypeInfo().text}>
+                                <Badge color={getVotingTypeInfo().color} variant="filled">
+                                    <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
+                                </Badge>
+                            </Tooltip>
+                            {sortedGroups.map((group, index) => (
+                                <UserGroupBadge key={index} group={group} tooltip="top" />
+                            ))}
                             <Badge color={voting.isActive ? "success" : "danger"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}
                             </Badge>
-                            <VoteCountBadge
-                                voteCount={voting.votes.length}
-                                totalVotes={voting.requiredVotes}
-                                variant="light"
-                            />
-                            {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
                         </Group>
+                    </Group>
 
-                        <Text size="sm" c="dimmed">
-                            Created by {voting.author.username} •{" "}
-                            {voting.isActive && (
-                                <Tooltip label={moment(voting.createdAt).format("LLL")}>
-                                    <span>{moment(voting.createdAt).fromNow()}</span>
-                                </Tooltip>
-                            )}
-                            {!voting.isActive && (
-                                <Tooltip label={moment(voting.updatedAt).format("LLL")}>
-                                    <span>concluded {moment(voting.updatedAt).fromNow()}</span>
-                                </Tooltip>
-                            )}
-                        </Text>
-                        {voting.targetUser && (
-                            <Stack gap="xs" w="25%">
-                                <Title order={5}>Target User</Title>
-                                <UserCard static user={voting.targetUser} onSelect={handleUserCardClick} />
-                            </Stack>
+                    <Group wrap="wrap" gap="xs">
+                        <VoteCountBadge
+                            voteCount={voting.votes.length}
+                            totalVotes={voting.requiredVotes}
+                            variant="light"
+                        />
+                        {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
+                        {!checkUserVoted() && user && (
+                            <Badge color="orange" variant="light">
+                                <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
+                            </Badge>
                         )}
-                    </Stack>
+                    </Group>
+
                     <Divider />
                     <MarkdownText content={voting.description} />
                     <Divider />
+                    {voting.targetUser && (
+                        <>
+                            <Stack gap="sm" maw={300}>
+                                <Text size="sm" c="dimmed">
+                                    Target User
+                                </Text>
+                                <UserCard
+                                    user={voting.targetUser}
+                                    onClick={() => handleUserCardClick(voting.targetUser!)}
+                                />
+                            </Stack>
+                        </>
+                    )}
                     {voting.attachments?.length > 0 && (
                         <Stack gap="sm">
                             <Text size="sm" c="dimmed">
