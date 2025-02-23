@@ -45,7 +45,7 @@ const routes: RouteConfig[] = [
     {
         path: "/votes",
         page: <VotingListPage />,
-        title: "Votes",
+        title: "Votes Listing",
         icon: "poll-h",
         permissions: ["committee"],
     },
