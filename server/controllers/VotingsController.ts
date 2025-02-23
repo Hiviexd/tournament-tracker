@@ -6,6 +6,7 @@ import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
 import { IDiscordField } from "@interfaces/Discord";
+import { IVote, BinaryVote, VariableVote } from "@interfaces/Vote";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
@@ -72,8 +73,17 @@ class VotingsController {
 
     /** POST create a voting */
     public async createVoting(req: Request, res: Response) {
-        const { category, assignedGroups, title, description, duration, options, targetUserId, targetTournamentId } =
-            req.body;
+        const {
+            category,
+            assignedGroups,
+            title,
+            description,
+            duration,
+            options,
+            targetUserId,
+            targetTournamentId,
+            type,
+        } = req.body;
         const files = req.files as Express.Multer.File[];
 
         const author = res.locals!.user!;
@@ -89,6 +99,7 @@ class VotingsController {
             title,
             description,
             duration,
+            type,
             options,
             requiredVotes,
         });
@@ -174,7 +185,7 @@ class VotingsController {
     /** POST submit vote */
     public async submitVote(req: Request, res: Response) {
         const votingId = req.params.votingId;
-        const { option, comment } = req.body;
+        const { data, comment } = req.body;
 
         const author = res.locals!.user!;
         const voting = await Voting.findById(votingId).populate("votes").orFail();
@@ -183,19 +194,53 @@ class VotingsController {
             return res.json({ message: "Voting is not active" });
         }
 
-        if (option < 0 || option >= voting.options.length) {
-            return res.json({ message: "Invalid option" });
+        // Validate vote based on voting type
+        if (data.type !== voting.type) {
+            return res.json({ error: "Vote type does not match voting type" });
+        }
+
+        // Validate vote data based on type
+        switch (data.type) {
+            case "classic":
+                if (typeof data.option !== "number" || data.option >= voting.options.length) {
+                    return res.json({ error: "Invalid option index" });
+                }
+                break;
+            case "binary":
+                if (typeof data.score !== "number" || data.score < -5 || data.score > 5) {
+                    return res.json({ error: "Invalid score (must be between -5 and 5)" });
+                }
+                break;
+            case "variable":
+                if (
+                    !Array.isArray(data.scores) ||
+                    !data.scores.every(
+                        (s) =>
+                            typeof s.optionIndex === "number" &&
+                            s.optionIndex < voting.options.length &&
+                            typeof s.score === "number" &&
+                            s.score >= -5 &&
+                            s.score <= 5
+                    )
+                ) {
+                    return res.json({ error: "Invalid scores" });
+                }
+                break;
         }
 
         let vote = voting.votes.find((vote) => vote.author.equals(author._id));
         let isNewVote = false;
 
         if (!vote) {
-            vote = new Vote({ author, option, comment });
+            vote = new Vote({
+                author,
+                comment,
+                data,
+            });
             isNewVote = true;
         } else {
-            vote.option = option;
             vote.comment = comment;
+            vote.data = data;
         }
 
         await vote.save();
@@ -232,11 +277,9 @@ class VotingsController {
     /** POST toggle voting status */
     public async toggleVotingStatus(req: Request, res: Response) {
         const votingId = req.params.votingId;
-
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         voting.isActive = !voting.isActive;
-
         await voting.save();
 
         res.json({
@@ -252,51 +295,117 @@ class VotingsController {
             "voting"
         );
 
-        // Discord
-        const getVotingOptionStats = (optionIndex: number) => {
-            const votes = voting.votes.filter((vote) => vote.option === optionIndex).length;
-            const percentage = voting.votes.length ? Math.round((votes / voting.votes.length) * 100) : 0;
+        // Only send results if concluding the vote
+        if (!voting.isActive) {
+            const getVotingResults = () => {
+                switch (voting.type) {
+                    case "classic": {
+                        const optionCounts = voting.options.map((option, index) => {
+                            const votes = voting.votes.filter(
+                                (v) => v.data.type === "classic" && v.data.option === index
+                            ).length;
+                            const percentage = voting.votes.length
+                                ? Math.round((votes / voting.votes.length) * 100)
+                                : 0;
+                            return { option, votes, percentage };
+                        });
 
-            return { votes, percentage };
-        };
+                        const maxVotes = Math.max(...optionCounts.map((o) => o.votes));
+                        const winners = optionCounts.filter((o) => o.votes === maxVotes);
 
-        const getWinningOption = () => {
-            // reduce votes to an array of vote options
-            const voteOptions = voting.options.map((_, index) => getVotingOptionStats(index).votes);
-            const maxVotes = Math.max(...voteOptions);
+                        return {
+                            results: optionCounts
+                                .map((o) => `- **${o.option}** - ${o.percentage}% (${o.votes}/${voting.votes.length})`)
+                                .join("\n"),
+                            winners: winners.map((w) => w.option).join(", "),
+                        };
+                    }
 
-            return voting.options[voteOptions.indexOf(maxVotes)];
-        };
+                    case "binary": {
+                        const scores = voting.votes
+                            .filter((v): v is IVote & { data: BinaryVote } => v.data.type === "binary")
+                            .map((v) => v.data.score);
 
-        const results = voting.options
-            .map(
-                (option, index) =>
-                    `- **${option}** - ${getVotingOptionStats(index).percentage}% (${
-                        getVotingOptionStats(index).votes
-                    }/${voting.votes.length})`
-            )
-            .join("\n");
+                        const avgScore = scores.length
+                            ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
+                            : "N/A";
 
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `${voting.isActive ? "Resumed" : "Concluded"} voting for [**${voting.title}**](${
-                    config.discord.baseUrl
-                }/votings/${voting._id})`,
-                color: voting.isActive ? webhookColors.yellow : webhookColors.darkYellow,
-                fields: !voting.isActive
-                    ? [
+                        return {
+                            results:
+                                `Average score: **${avgScore}** (${scores.length} votes)\n\n` +
+                                `Distribution:\n` +
+                                `- ${voting.options[0]} (1 to 5): ${scores.filter((s) => s > 0).length}\n` +
+                                `- Neutral (0): ${scores.filter((s) => s === 0).length}\n` +
+                                `- ${voting.options[1]} (-5 to -1): ${scores.filter((s) => s < 0).length}`,
+                            winners: `Average: ${avgScore}`,
+                        };
+                    }
+
+                    case "variable": {
+                        const optionScores = voting.options.map((option, index) => {
+                            const scores = voting.votes
+                                .filter((v): v is IVote & { data: VariableVote } => v.data.type === "variable")
+                                .map((v) => v.data.scores.find((s) => s.optionIndex === index)?.score ?? 0);
+
+                            const avgScore = scores.length
+                                ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
+                                : "N/A";
+
+                            return { option, avgScore, votes: scores.length };
+                        });
+
+                        const maxScore = Math.max(...optionScores.map((o) => Number(o.avgScore)));
+                        const winners = optionScores.filter((o) => Number(o.avgScore) === maxScore);
+
+                        return {
+                            results: optionScores
+                                .map((o) => `- **${o.option}** - Avg: ${o.avgScore} (${o.votes} votes)`)
+                                .join("\n"),
+                            winners: winners.map((w) => w.option).join(", "),
+                        };
+                    }
+                }
+            };
+
+            const { results, winners } = getVotingResults();
+
+            await DiscordService.sendWebhook([
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    description: `Concluded voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    color: webhookColors.darkYellow,
+                    fields: [
+                        {
+                            name: "Vote Type",
+                            value: `*${voting.type}*`,
+                            inline: true,
+                        },
+                        {
+                            name: "Total Votes",
+                            value: `${voting.votes.length}`,
+                            inline: true,
+                        },
                         {
                             name: "Results",
                             value: helpers.shorten(results, 1024),
                         },
                         {
-                            name: "Winning option",
-                            value: getWinningOption(),
+                            name: voting.type === "binary" ? "Final Score" : "Winner(s)",
+                            value: winners,
                         },
-                    ] : [],
-            },
-        ]);
+                    ],
+                },
+            ]);
+        } else {
+            // Voting resumed
+            await DiscordService.sendWebhook([
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    description: `Resumed voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    color: webhookColors.yellow,
+                },
+            ]);
+        }
     }
 
     /** POST update voting */

@@ -10,6 +10,7 @@ import {
 } from "../api/votings";
 import { handleMutationResponse } from "../api/helpers";
 import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
+import { type VoteType } from "../../interfaces/Vote";
 
 export function useVotings(params?: VotingQueryParams) {
     return useQuery({
@@ -43,7 +44,7 @@ export function useSubmitVote(votingId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (voteData: { option: number; comment?: string }) => {
+        mutationFn: async (voteData: { data: VoteType; comment?: string }) => {
             const response = await submitVote(votingId, voteData);
             return handleMutationResponse(response);
         },

@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { type VoteType } from "../../interfaces/Vote";
 import { IVoting, VotingQueryParams, type VotingFormData } from "../../interfaces/Voting";
 
 export const getVotings = async (params?: VotingQueryParams) => {
@@ -19,7 +19,7 @@ export const createVoting = async (votingData: VotingFormData) => {
 
 export const submitVote = async (
     votingId: string,
-    voteData: { option: number; comment?: string }
+    voteData: { data: VoteType; comment?: string }
 ) => {
     const response = await axios.post(`/api/votings/${votingId}/submitVote`, voteData);
     return response.data;

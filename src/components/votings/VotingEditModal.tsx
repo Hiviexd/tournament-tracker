@@ -31,6 +31,7 @@ interface IProps {
 export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     const updateVotingMutation = useUpdateVoting(voting._id);
     const [newOption, setNewOption] = useState("");
+    const hasVotes = voting.votes.length > 0;
 
     const form = useForm({
         initialValues: {
@@ -38,12 +39,19 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             description: voting.description,
             duration: voting.duration,
             options: [...voting.options],
+            type: voting.type, // Add type to form values
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
             description: (value) => (!value ? "Description is required" : null),
             duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
-            options: (value) => (value.length < 2 ? "At least two options are required" : null),
+            options: (value) => {
+                if (value.length < 2) return "At least two options are required";
+                if (voting.type === "binary" && value.length !== 2) {
+                    return "Binary votes must have exactly 2 options";
+                }
+                return null;
+            },
         },
     });
 
@@ -53,6 +61,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleAddOption = () => {
+        if (hasVotes) return;
+
         const trimmedOption = newOption.trim();
         if (trimmedOption && !form.values.options.includes(trimmedOption)) {
             form.setFieldValue("options", [...form.values.options, trimmedOption]);
@@ -61,14 +71,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleRemoveOption = (optionToRemove: string) => {
-        // Don't allow removing options that already have votes
-        const hasVotes = voting.votes.some(
-            (vote) => voting.options[vote.option] === optionToRemove
-        );
-
-        if (hasVotes) {
-            return;
-        }
+        if (hasVotes) return;
 
         form.setFieldValue(
             "options",
@@ -81,10 +84,6 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             e.preventDefault();
             handleAddOption();
         }
-    };
-
-    const isOptionRemovable = (option: string) => {
-        return !voting.votes.some((vote) => voting.options[vote.option] === option);
     };
 
     return (
@@ -124,52 +123,60 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                     />
 
                     <Stack gap="xs">
-                        <Text size="sm" fw={500}>
-                            Options
-                        </Text>
-                        <Group gap="xs">
-                            {form.values.options.length === 0 && (
-                                <Text size="xs" c="danger">
-                                    No options!
+                        <Group justify="space-between">
+                            <Text size="sm" fw={500}>
+                                Options {voting.type === "binary" && "(Must be exactly 2)"}
+                                {voting.type === "variable" && "(Each will be rated -5 to +5)"}
+                            </Text>
+                            {hasVotes && (
+                                <Text size="xs" c="dimmed">
+                                    Options cannot be modified after votes are cast
                                 </Text>
                             )}
+                        </Group>
+
+                        <Group gap="xs">
                             {form.values.options.map((option, index) => (
                                 <Pill
                                     key={index}
-                                    withRemoveButton={isOptionRemovable(option)}
+                                    withRemoveButton={!hasVotes && form.values.options.length > 2}
                                     onRemove={() => handleRemoveOption(option)}
                                     variant="subtle"
                                     style={{
-                                        backgroundColor: `color-mix(in srgb, ${VOTE_COLORS[index % VOTE_COLORS.length]} 15%, transparent)`,
+                                        backgroundColor: `color-mix(in srgb, ${
+                                            VOTE_COLORS[index % VOTE_COLORS.length]
+                                        } 15%, transparent)`,
                                         color: VOTE_COLORS[index % VOTE_COLORS.length],
-                                        transition: 'all 0.2s ease',
+                                        transition: "all 0.2s ease",
                                     }}>
                                     {option}
-                                    {!isOptionRemovable(option) && (
-                                        <Text span size="xs" ml={5} c="dimmed">
-                                            (has votes)
-                                        </Text>
-                                    )}
                                 </Pill>
                             ))}
                         </Group>
-                        <Group gap="xs" flex={1} align="flex-start">
-                            <TextInput
-                                placeholder="Add new option"
-                                size="xs"
-                                value={newOption}
-                                onChange={(e) => setNewOption(e.currentTarget.value)}
-                                onKeyDown={handleKeyPress}
-                                error={form.errors.options}
-                            />
-                            <ActionIcon
-                                variant="filled"
-                                color="primary"
-                                onClick={handleAddOption}
-                                disabled={!newOption.trim()}>
-                                <FontAwesomeIcon icon="plus" />
-                            </ActionIcon>
-                        </Group>
+
+                        {!hasVotes && (
+                            <Group gap="xs" flex={1} align="flex-start">
+                                <TextInput
+                                    placeholder="Add new option"
+                                    size="xs"
+                                    value={newOption}
+                                    onChange={(e) => setNewOption(e.currentTarget.value)}
+                                    onKeyDown={handleKeyPress}
+                                    error={form.errors.options}
+                                    disabled={form.values.type === "binary" && form.values.options.length >= 2}
+                                />
+                                <ActionIcon
+                                    variant="filled"
+                                    color="primary"
+                                    onClick={handleAddOption}
+                                    disabled={
+                                        !newOption.trim() ||
+                                        (form.values.type === "binary" && form.values.options.length >= 2)
+                                    }>
+                                    <FontAwesomeIcon icon="plus" />
+                                </ActionIcon>
+                            </Group>
+                        )}
                     </Stack>
 
                     <Group justify="flex-end" mt="md">

@@ -18,18 +18,14 @@ export default function VotingResults({ voting }: IProps) {
 
     const filteredVotes =
         activeFilter !== null
-            ? voting.votes.filter((vote) => vote.option === activeFilter)
+            ? voting.votes.filter((vote) => vote.data.type === "classic" && vote.data.option === activeFilter)
             : voting.votes;
 
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="md">
                 <Title order={3}>Votes</Title>
-                <VotingStats
-                    voting={voting}
-                    onFilterChange={setActiveFilter}
-                    activeFilter={activeFilter}
-                />
+                <VotingStats voting={voting} onFilterChange={setActiveFilter} activeFilter={activeFilter} />
                 <Divider />
                 <Stack gap="xs">
                     {filteredVotes.map((vote) => (

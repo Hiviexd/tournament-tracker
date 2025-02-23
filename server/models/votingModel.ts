@@ -4,12 +4,22 @@ import { IVoting } from "../../interfaces/Voting";
 const VotingSchema = new Schema<IVoting>(
     {
         author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-        category: { type: String, required: true },
+        category: {
+            type: String,
+            required: true,
+            enum: ["tournament", "user", "discussion"],
+        },
         assignedGroups: [{ type: String, required: true }],
         title: { type: String, required: true },
         description: { type: String, required: true },
         isActive: { type: Boolean, default: true },
         duration: { type: Number, required: true },
+        type: {
+            type: String,
+            required: true,
+            enum: ["variable", "binary", "classic"],
+            default: "classic",
+        },
         options: [{ type: String, required: true }],
         votes: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
         targetUser: { type: Schema.Types.ObjectId, ref: "User" },
@@ -19,6 +29,23 @@ const VotingSchema = new Schema<IVoting>(
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+VotingSchema.pre("save", function (next) {
+    switch (this.type) {
+        case "binary":
+            if (this.options.length !== 2) {
+                next(new Error("Binary votes must have exactly 2 options"));
+            }
+            break;
+        case "classic":
+        case "variable":
+            if (this.options.length < 2) {
+                next(new Error("Votes must have at least 2 options"));
+            }
+            break;
+    }
+    next();
+});
 
 VotingSchema.virtual("deadline").get(function (this: IVoting) {
     return new Date(this.createdAt.getTime() + this.duration * 24 * 60 * 60 * 1000);

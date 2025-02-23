@@ -1,7 +1,7 @@
 // Base
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCreateVoting } from "../../hooks/useVotings";
-import { VotingCategory, type VotingFormData } from "../../../interfaces/Voting";
+import { VotingCategory, type VotingFormData, VotingType } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
 import { VOTE_COLORS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
@@ -45,7 +45,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             category: "" as VotingCategory,
             assignedGroups: [] as UserGroup[],
             duration: 3,
-            options: ["Yes", "No"],
+            type: "classic" as VotingType,
+            options: ["Agree", "Disagree"],
             targetUserId: "",
             targetTournamentId: "",
         },
@@ -55,7 +56,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             category: (value) => (!value ? "Category is required" : null),
             assignedGroups: (value) => (value.length === 0 ? "At least one group is required" : null),
             duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
-            options: (value) => (value.length < 2 ? "At least two options are required" : null),
+            options: (value, values) => {
+                if (value.length < 2) return "At least two options are required";
+                if (values.type === "binary" && value.length !== 2) {
+                    return "Binary votes must have exactly 2 options";
+                }
+                return null;
+            },
+            type: (value) => (!value ? "Vote type is required" : null),
             targetUserId: (value, values) => (values.category === "user" && !value ? "Target user is required" : null),
             targetTournamentId: (value, values) =>
                 values.category === "tournament" && !value ? "Target tournament is required" : null,
@@ -65,15 +73,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const handleSubmit = form.onSubmit(async (values) => {
         const formData = new FormData() as VotingFormData;
 
-        // Add form fields
+        // Handle arrays and single values differently
         Object.entries(values).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== "") {
                 if (Array.isArray(value)) {
-                    // Handle arrays by appending each value with the same key
-                    value.forEach((item) => {
-                        formData.append(key, item);
-                    });
+                    // For arrays like assignedGroups and options
+                    value.forEach((item) => formData.append(key, item));
                 } else {
+                    // For single values like type, title, etc.
                     formData.append(key, value.toString());
                 }
             }
@@ -82,9 +89,13 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         // Add files
         files.forEach((file) => formData.append("files", file));
 
-        await createVotingMutation.mutateAsync(formData);
-        form.reset();
-        onClose();
+        try {
+            await createVotingMutation.mutateAsync(formData);
+            form.reset();
+            onClose();
+        } catch (error) {
+            console.error("Failed to create voting:", error);
+        }
     });
 
     const handleAddOption = () => {
@@ -120,9 +131,28 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         { value: "cc", label: "Contest Committee" },
     ];
 
+    const typeOptions = [
+        { value: "classic", label: "Classic (Single Choice)" },
+        { value: "binary", label: "Binary (Yes/No Score)" },
+        { value: "variable", label: "Variable (Multiple Scores)" },
+    ];
+
+    // Set default options
+    const setDefaultOptions = useCallback(() => {
+        if (form.values.options.length === 0) {
+            form.setFieldValue("options", ["Agree", "Disagree"]);
+        }
+    }, [form]);
+
+    useEffect(() => {
+        if (form.values.type !== form.getInputProps("type").value) {
+            setDefaultOptions();
+        }
+    }, [form, form.values.type, setDefaultOptions]);
+
     return (
         <Modal opened={opened} onClose={onClose} title="Create New Vote" size="lg">
-            <form onSubmit={handleSubmit} style={{ position: "relative" }}>
+            <form onSubmit={handleSubmit}>
                 <Stack gap="md">
                     <TextInput
                         label="Title"
@@ -184,32 +214,42 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("duration")}
                     />
 
+                    <Select
+                        label="Vote Type"
+                        placeholder="Select vote type"
+                        data={typeOptions}
+                        withAsterisk
+                        {...form.getInputProps("type")}
+                    />
+
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>
-                            Options
+                            Options {form.values.type === "binary" && "(Must be exactly 2)"}
+                            {form.values.type === "variable" && "(Each will be rated -5 to +5)"}
                         </Text>
                         <Group gap="xs">
-                            {form.values.options.length === 0 && (
+                            {form.values.options.length === 0 ? (
                                 <Text size="xs" c="danger">
                                     No options!
                                 </Text>
+                            ) : (
+                                form.values.options.map((option, index) => (
+                                    <Pill
+                                        key={index}
+                                        withRemoveButton
+                                        onRemove={() => handleRemoveOption(option)}
+                                        variant="subtle"
+                                        style={{
+                                            backgroundColor: `color-mix(in srgb, ${
+                                                VOTE_COLORS[index % VOTE_COLORS.length]
+                                            } 15%, transparent)`,
+                                            color: VOTE_COLORS[index % VOTE_COLORS.length],
+                                            transition: "all 0.2s ease",
+                                        }}>
+                                        {option}
+                                    </Pill>
+                                ))
                             )}
-                            {form.values.options.map((option, index) => (
-                                <Pill
-                                    key={index}
-                                    withRemoveButton
-                                    onRemove={() => handleRemoveOption(option)}
-                                    variant="subtle"
-                                    style={{
-                                        backgroundColor: `color-mix(in srgb, ${
-                                            VOTE_COLORS[index % VOTE_COLORS.length]
-                                        } 15%, transparent)`,
-                                        color: VOTE_COLORS[index % VOTE_COLORS.length],
-                                        transition: "all 0.2s ease",
-                                    }}>
-                                    {option}
-                                </Pill>
-                            ))}
                         </Group>
                         <Group gap="xs" flex={1} align="flex-start">
                             <TextInput
@@ -219,12 +259,16 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 onChange={(e) => setNewOption(e.currentTarget.value)}
                                 onKeyDown={handleKeyPress}
                                 error={form.errors.options}
+                                disabled={form.values.type === "binary" && form.values.options.length >= 2}
                             />
                             <ActionIcon
                                 variant="filled"
                                 color="primary"
                                 onClick={handleAddOption}
-                                disabled={!newOption.trim()}>
+                                disabled={
+                                    !newOption.trim() ||
+                                    (form.values.type === "binary" && form.values.options.length >= 2)
+                                }>
                                 <FontAwesomeIcon icon="plus" />
                             </ActionIcon>
                         </Group>
