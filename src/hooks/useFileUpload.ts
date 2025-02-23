@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { showNotification } from "@mantine/notifications";
 
-interface UseFileUploadOptions {
+export interface UseFileUploadOptions {
     maxFiles?: number;
     maxSize?: number; // in bytes
     allowedTypes?: string[];

@@ -20,13 +20,13 @@ import {
     Pill,
     ActionIcon,
     Text,
-    FileInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Components
 import UserSearch from "../common/UserSearch";
+import FileUploadInput from "../common/FileUploadInput";
 
 interface IProps {
     opened: boolean;
@@ -144,6 +144,18 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         }
     }, [form]);
 
+    const getVotingMethodDescription = () => {
+        switch (form.values.type) {
+            case "classic":
+                return "Classic voting allows users to select a single option from the provided list.";
+            case "binary":
+                return "Binary voting allows users to vote between 2 options using a score ranging from -5 to +5, with the green option being +5 and the red option being -5.";
+            case "variable":
+                return "Variable voting allows users to rate each option with a score ranging from -5 to +5.";
+            default:
+                return "";
+        }
+    };
     useEffect(() => {
         if (form.values.type !== form.getInputProps("type").value) {
             setDefaultOptions();
@@ -225,8 +237,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>
                             Options {form.values.type === "binary" && "(Must be exactly 2)"}
-                            {form.values.type === "variable" && "(Each will be rated -5 to +5)"}
                         </Text>
+                        {form.values.type && (<Text size="xs" c="dimmed" fs="italic" mb="xs">
+                            {getVotingMethodDescription()}
+                        </Text>)}
                         <Group gap="xs">
                             {form.values.options.length === 0 ? (
                                 <Text size="xs" c="danger">
@@ -274,16 +288,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         </Group>
                     </Stack>
 
-                    <FileInput
-                        accept=".jpg,.png,.zip,.rar,.txt"
-                        multiple
-                        leftSection={<FontAwesomeIcon icon="upload" />}
-                        label="Attachments"
-                        description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
-                        placeholder="Upload files"
-                        value={files}
-                        onChange={handleFileChange}
-                    />
+                    <FileUploadInput value={files} onChange={handleFileChange} />
 
                     <Group justify="flex-end" mt="md">
                         <Button variant="subtle" onClick={onClose}>

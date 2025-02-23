@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { Stack, TextInput, Textarea, Select, Card, Alert, Group, Button, FileInput } from "@mantine/core";
+import { Stack, TextInput, Textarea, Select, Card, Alert, Group, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
 import MarkdownText from "../common/MarkdownText";
@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { type TicketFormData } from "../../../interfaces/Ticket";
+import TextLengthIndicator from "../common/TextLengthIndicator";
+import FileUploadInput from "../common/FileUploadInput";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -97,7 +99,7 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             placeholder="Enter ticket title"
                             {...form.getInputProps("title")}
                             withAsterisk
-                            description={`${form.values.title.length}/80`}
+                            description={<TextLengthIndicator length={form.values.title.length} maxLength={80} />}
                         />
 
                         <Textarea
@@ -108,19 +110,10 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
-                            description={`${form.values.message.length}/6000`}
+                            description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
                         />
 
-                        <FileInput
-                            accept=".jpg,.png,.zip,.rar,.txt"
-                            multiple
-                            leftSection={<FontAwesomeIcon icon="upload" />}
-                            label="Attachments"
-                            description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
-                            placeholder="Upload files"
-                            value={files}
-                            onChange={handleFileChange}
-                        />
+                        <FileUploadInput value={files} onChange={handleFileChange} />
 
                         <Group justify="flex-end" mt="md">
                             <Button

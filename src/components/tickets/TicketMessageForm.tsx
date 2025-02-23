@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip, FileInput } from "@mantine/core";
+import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
@@ -10,6 +10,7 @@ import { IMessageFormData } from "../../../interfaces/Message";
 import { useAutoSave } from "../../hooks/useAutoSave";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import AutoSaveIndicator from "../common/AutoSaveIndicator";
+import FileUploadInput from "../common/FileUploadInput";
 
 interface IProps {
     ticket: ITicket;
@@ -96,16 +97,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                         </Group>
                     }
                 />
-                <FileInput
-                    accept=".jpg,.png,.zip,.rar,.txt"
-                    multiple
-                    leftSection={<FontAwesomeIcon icon="upload" />}
-                    label="Attachments"
-                    description="Up to 5 files (5MB each, allowed types: jpg, png, zip, rar, txt)"
-                    placeholder="Upload files"
-                    value={files}
-                    onChange={handleFileChange}
-                />
+                <FileUploadInput value={files} onChange={handleFileChange} />
                 <Group justify="space-between">
                     <Group>
                         <Button
