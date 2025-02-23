@@ -207,7 +207,8 @@ class TicketsController {
     public async sendMessage(req: Request, res: Response) {
         const user = res.locals!.user!;
         const { ticketId } = req.params;
-        const { content, isNote } = req.body;
+        const { content } = req.body;
+        const isNote = req.body.isNote === "true" || req.body.isNote === false;
         const files = req.files as Express.Multer.File[];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
