@@ -7,6 +7,9 @@ import { useSendMessage, useToggleStatus } from "../../hooks/useTickets";
 import { ITicket } from "../../../interfaces/Ticket";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { IMessageFormData } from "../../../interfaces/Message";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import TextLengthIndicator from "../common/TextLengthIndicator";
+import AutoSaveIndicator from "../common/AutoSaveIndicator";
 
 interface IProps {
     ticket: ITicket;
@@ -15,7 +18,15 @@ interface IProps {
 export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isNote, setIsNote] = useState(false);
-    const [content, setContent] = useState("");
+    const {
+        value: content,
+        setValue: setContent,
+        clear: clearContent,
+        isSaved,
+    } = useAutoSave({
+        key: `ticket-message-${ticket.id}`,
+        debounceMs: 500,
+    });
     const [error, setError] = useState<string | null>(null);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
@@ -47,7 +58,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
 
         try {
             await createMessageMutation.mutateAsync(formData);
-            setContent("");
+            clearContent();
             setError(null);
             clearFiles();
         } catch (err) {
@@ -78,7 +89,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     value={content}
                     onChange={(e) => handleContentChange(e.currentTarget.value)}
                     error={error}
-                    description={`${content.length}/6000`}
+                    description={
+                        <Group gap={4} justify="flex-start" align="center">
+                            <TextLengthIndicator length={content.length} maxLength={6000} />
+                            <AutoSaveIndicator isSaved={isSaved} />
+                        </Group>
+                    }
                 />
                 <FileInput
                     accept=".jpg,.png,.zip,.rar,.txt"
