@@ -4,7 +4,7 @@ import permissions from "../middlewares/permissions";
 
 const tournamentsRouter = express.Router();
 
-tournamentsRouter.get("/", permissions.isLoggedIn, TournamentsController.index);
-tournamentsRouter.post("/create", permissions.isLoggedIn, permissions.isCommittee, TournamentsController.create);
+tournamentsRouter.get("/", permissions.isLoggedIn, permissions.isAdmin, TournamentsController.index);
+tournamentsRouter.post("/create", permissions.isLoggedIn, permissions.isAdmin, TournamentsController.create);
 
 export default tournamentsRouter;

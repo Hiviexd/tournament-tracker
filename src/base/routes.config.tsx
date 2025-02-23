@@ -82,7 +82,7 @@ const routes: RouteConfig[] = [
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
         icon: "users",
-        permissions: ["user"],
+        permissions: ["admin"],
     },
     {
         path: "/tickets",

@@ -17,11 +17,11 @@ export const routes: IRoute[] = [
             { title: "News", link: "/news", icon: "newspaper", permissions: [] },
         ],
     },
-    {
-        title: "Tournaments",
-        permissions: ["user"],
-        link: "/tournaments",
-    },
+    // {
+    //     title: "Tournaments",
+    //     permissions: ["user"],
+    //     link: "/tournaments",
+    // },
     {
         title: "Voting",
         permissions: ["committee"],

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, Avatar, Button, Image } from "@mantine/core";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { IUser } from "../../../../interfaces/User";
@@ -59,12 +59,13 @@ export default function UserMenu({ user }: IProps) {
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>
-                    <Menu.Item
+                    {/* TODO: uncomment when tournaments are implemented */}
+                    {/* <Menu.Item
                         component={Link}
                         to={`/tournaments?host=${user.osuId}`}
                         leftSection={<FontAwesomeIcon icon="trophy" />}>
                         Your Tournaments
-                    </Menu.Item>
+                    </Menu.Item> */}
                     <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>

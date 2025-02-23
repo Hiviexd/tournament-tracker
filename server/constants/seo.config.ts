@@ -25,22 +25,22 @@ export const seoRoutes: SEORoute[] = [
         path: "/",
         name: "Home",
     },
-    {
-        path: "/tournaments",
-        name: "Tournaments Listing",
-        description: "Browse the compendium of osu! tournaments and contests",
-    },
-    {
-        path: "/tournaments/:tournamentId",
-        name: "Tournament Details",
-        isDynamic: true,
-        model: "Tournament",
-        modelId: "tournamentId",
-        getMetadata: (tournament) => ({
-            description: `${_.capitalize(tournament.type)} hosted by ${tournament.host.username}`,
-            image: tournament.bannerUrl,
-        }),
-    },
+    // {
+    //     path: "/tournaments",
+    //     name: "Tournaments Listing",
+    //     description: "Browse the compendium of osu! tournaments and contests",
+    // },
+    // {
+    //     path: "/tournaments/:tournamentId",
+    //     name: "Tournament Details",
+    //     isDynamic: true,
+    //     model: "Tournament",
+    //     modelId: "tournamentId",
+    //     getMetadata: (tournament) => ({
+    //         description: `${_.capitalize(tournament.type)} hosted by ${tournament.host.username}`,
+    //         image: tournament.bannerUrl,
+    //     }),
+    // },
     {
         path: "/votings",
         name: "Votings",
@@ -72,7 +72,7 @@ export const defaultMetadata: SEOMetadata = {
     title: "Tournament Tracker",
     description:
         "The one-stop shop for all official osu! tournament correspondence and information!",
-    image: "/assets/logo-main.svg",
+    image: "https://tcomm.hivie.tn/assets/logo-512.png",
 };
 
 export const modelMap = {
