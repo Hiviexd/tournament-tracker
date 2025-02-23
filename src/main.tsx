@@ -1,6 +1,6 @@
 // Base
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -17,9 +17,7 @@ import "@mantine/dates/styles.css";
 import "./sass/app.scss";
 
 // Layout
-import Layout from "./base/Layout";
-import ProtectedRoute from "./base/ProtectedRoute";
-import routes from "./base/routes.config";
+import AuthRouter from "./base/AuthRouter";
 
 // Fontawesome icons
 import loadIcons from "./themes/icons";
@@ -32,19 +30,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 <MantineProvider defaultColorScheme="dark" theme={theme}>
                     <Notifications />
                     <Router>
-                        <Routes>
-                            {routes.map((route) => (
-                                <Route
-                                    key={route.path}
-                                    path={route.path}
-                                    element={
-                                        <ProtectedRoute permissions={route.permissions}>
-                                            <Layout title={route.title} icon={route.icon} page={route.page} />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                            ))}
-                        </Routes>
+                        <AuthRouter />
                     </Router>
                 </MantineProvider>
             </QueryClientProvider>
