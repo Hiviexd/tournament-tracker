@@ -5,7 +5,7 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
 
 // Mantine
-import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip } from "@mantine/core";
+import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip, Anchor } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -18,6 +18,7 @@ import UserCard from "../common/UserCard";
 import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
     voting: IVoting;
@@ -146,6 +147,14 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 />
                             </Stack>
                         </>
+                    )}
+                    {voting.targetTournamentName && (
+                        <Text fw={700}>
+                            Target Tournament:{" "}
+                            <Anchor href={voting.targetTournamentLink} target="_blank">
+                                {voting.targetTournamentName}
+                            </Anchor>
+                        </Text>
                     )}
                     {voting.attachments?.length > 0 && (
                         <Stack gap="sm">

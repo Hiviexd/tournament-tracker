@@ -77,7 +77,7 @@ export default function VotingForm({ voting, user }: IProps) {
 
     return (
         <Card shadow="sm" p="lg">
-            <Stack gap="md">
+            <Stack gap="lg">
                 <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
 
                 {renderVoteInput()}
@@ -89,6 +89,7 @@ export default function VotingForm({ voting, user }: IProps) {
                     onChange={(e) => setComment(e.currentTarget.value)}
                     minRows={3}
                     maxRows={8}
+                    mt="lg"
                     autosize
                     description={<TextLengthIndicator length={comment.length} maxLength={6000} />}
                 />

@@ -2,9 +2,7 @@ import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
 import { VotingQueryParams, VotingListQuery } from "../../interfaces/Voting";
 import User from "../models/userModel";
-import Tournament from "../models/tournamentModel";
 import { IUser } from "../../interfaces/User";
-import { ITournament } from "../../interfaces/Tournament";
 import { IDiscordField } from "@interfaces/Discord";
 import { IVote, BinaryVote, VariableVote } from "@interfaces/Vote";
 import DiscordService from "../services/DiscordService";
@@ -81,13 +79,14 @@ class VotingsController {
             duration,
             options,
             targetUserId,
-            targetTournamentId,
+            targetTournamentName,
+            targetTournamentLink,
             type,
         } = req.body;
         const files = req.files as Express.Multer.File[];
 
         const author = res.locals!.user!;
-        let targetUser: IUser, targetTournament: ITournament;
+        let targetUser: IUser;
 
         const assignedUsersCount = await User.countDocuments({ groups: { $in: assignedGroups } });
         const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
@@ -104,14 +103,31 @@ class VotingsController {
             requiredVotes,
         });
 
-        if (targetUserId) {
+        if (category === "user") {
+            if (!targetUserId) {
+                return res.json({ error: "Missing target user ID" });
+            }
+
             targetUser = await User.findById(targetUserId).orFail();
             voting.targetUser = targetUser;
         }
 
-        if (targetTournamentId) {
-            targetTournament = await Tournament.findById(targetTournamentId).orFail();
-            voting.targetTournament = targetTournament;
+        if (category === "tournament") {
+            if (!targetTournamentName || !targetTournamentLink) {
+                return res.json({ error: "Missing target tournament details" });
+            }
+
+            const sanitizedTournamentName = targetTournamentName.trim();
+            const sanitizedTournamentLink = targetTournamentLink.trim();
+
+            if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
+                return res.json({ error: "Tournament name must be between 5 and 120 characters" });
+
+            if (!helpers.isOsuForumLink(sanitizedTournamentLink))
+                return res.json({ error: "Invalid tournament forum link" });
+
+            voting.targetTournamentName = sanitizedTournamentName;
+            voting.targetTournamentLink = sanitizedTournamentLink;
         }
 
         // Handle file uploads
@@ -160,10 +176,10 @@ class VotingsController {
             });
         }
 
-        if (voting.targetTournament) {
+        if (voting.targetTournamentName && voting.targetTournamentLink) {
             fields.push({
                 name: "Target Tournament",
-                value: `[**${voting.targetTournament.name}**](${config.baseUrl}/tournaments/${voting.targetTournament.id})`,
+                value: `[**${voting.targetTournamentName}**](${voting.targetTournamentLink})`,
             });
         }
 

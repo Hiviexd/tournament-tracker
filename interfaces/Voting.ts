@@ -1,7 +1,6 @@
 import { Document } from "mongoose";
 import { UserGroup, IUser } from "./User";
 import { IVote } from "./Vote";
-import { ITournament } from "./Tournament";
 import { IAttachment } from "./Attachment";
 
 export type VotingCategory = "tournament" | "user" | "discussion";
@@ -52,7 +51,8 @@ export interface IVoting extends Document {
     options: string[];
     votes: IVote[];
     targetUser?: IUser;
-    targetTournament?: ITournament;
+    targetTournamentName?: string;
+    targetTournamentLink?: string;
     requiredVotes: number;
     attachments: IAttachment[];
     createdAt: Date;

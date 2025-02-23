@@ -5,6 +5,7 @@ import { VotingCategory, type VotingFormData, VotingType } from "../../../interf
 import { UserGroup } from "../../../interfaces/User";
 import { VOTE_COLORS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
+import helpers from "../../helpers";
 
 //Mantine
 import {
@@ -48,7 +49,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             type: "classic" as VotingType,
             options: ["Agree", "Disagree"],
             targetUserId: "",
-            targetTournamentId: "",
+            targetTournamentName: "",
+            targetTournamentLink: "",
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
@@ -65,8 +67,22 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             },
             type: (value) => (!value ? "Vote type is required" : null),
             targetUserId: (value, values) => (values.category === "user" && !value ? "Target user is required" : null),
-            targetTournamentId: (value, values) =>
-                values.category === "tournament" && !value ? "Target tournament is required" : null,
+            targetTournamentName: (value, values) => {
+                if (values.category === "tournament") {
+                    if (!value || !value.trim()) return "Tournament name is required";
+                    if (value.length < 5) return "Tournament name must be at least 5 characters";
+                    if (value.length > 120) return "Tournament name cannot exceed 120 characters";
+                    if (value && !values.targetTournamentLink) return "Forum URL is required for tournament reports";
+                }
+                return null;
+            },
+            targetTournamentLink: (value, values) => {
+                if (values.category === "tournament") {
+                    if (!value) return "Forum URL is required";
+                    if (!helpers.isOsuForumLink(value)) return "Invalid osu! forum URL format";
+                }
+                return null;
+            },
         },
     });
 
@@ -202,12 +218,20 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     )}
 
                     {form.values.category === "tournament" && (
-                        <TextInput
-                            label="Target Tournament ID"
-                            placeholder="Enter target tournament ID"
-                            withAsterisk
-                            {...form.getInputProps("targetTournamentId")}
-                        />
+                        <>
+                            <TextInput
+                                label="Tournament Name"
+                                placeholder="Enter tournament name"
+                                {...form.getInputProps("targetTournamentName")}
+                                withAsterisk
+                            />
+                            <TextInput
+                                label="Tournament Forum URL"
+                                placeholder="Enter forum URL"
+                                {...form.getInputProps("targetTournamentLink")}
+                                withAsterisk
+                            />
+                        </>
                     )}
 
                     <MultiSelect
