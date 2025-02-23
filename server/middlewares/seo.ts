@@ -4,16 +4,7 @@ import config from "../../config.json";
 import { seoRoutes, defaultMetadata, modelMap, type SEOMetadata } from "../constants/seo.config";
 import { Model } from "mongoose";
 
-
-const CRAWLER_USER_AGENTS = [
-    "discord",
-    "twitter",
-    "facebook",
-    "linkedin",
-    "slack",
-    "telegram",
-    "whatsapp",
-];
+const CRAWLER_USER_AGENTS = ["discord", "twitter", "facebook", "linkedin", "slack", "telegram", "whatsapp"];
 
 export async function handleCrawlers(req: Request, res: Response, next: NextFunction) {
     const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
@@ -52,7 +43,7 @@ function formatTitle(pageTitle: string, isHome = false, dynamicName?: string) {
 
 async function generateMetadata(req: Request): Promise<SEOMetadata & { url: string }> {
     const path = req.path;
-    const baseUrl = config.discord.baseUrl;
+    const baseUrl = config.baseUrl;
 
     if (path === "/" || path === "/home") {
         return {

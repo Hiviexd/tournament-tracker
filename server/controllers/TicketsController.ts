@@ -160,7 +160,7 @@ class TicketsController {
         // Logger
         await LogService.generate(
             author._id,
-            `Created a new ${type}: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+            `Created a new ${type}: [**${ticket.title}**](${config.baseUrl}/tickets/${ticket._id})`,
             "ticket"
         );
 
@@ -199,7 +199,7 @@ class TicketsController {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: type === "report" ? webhookColors.lightRed : webhookColors.blue,
                 title: embedTitle,
-                url: `${config.discord.baseUrl}/tickets/${ticket._id}`,
+                url: `${config.baseUrl}/tickets/${ticket._id}`,
                 fields,
             },
         ]);
@@ -249,7 +249,7 @@ class TicketsController {
         // Logger
         await LogService.generate(
             user._id,
-            `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.discord.baseUrl}/tickets/${ticket._id})`,
+            `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/tickets/${ticket._id})`,
             "ticket"
         );
 
@@ -270,7 +270,7 @@ class TicketsController {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
                 description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
-                    config.discord.baseUrl
+                    config.baseUrl
                 }/tickets/${ticket._id})`,
                 fields,
             },
@@ -296,7 +296,7 @@ class TicketsController {
         await LogService.generate(
             user._id,
             `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
-                config.discord.baseUrl
+                config.baseUrl
             }/tickets/${ticket._id})`,
             "ticket"
         );
@@ -307,7 +307,7 @@ class TicketsController {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
                 description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
-                    config.discord.baseUrl
+                    config.baseUrl
                 }/tickets/${ticket._id})`,
             },
         ]);

@@ -134,7 +134,7 @@ class VotingsController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            `Created a new **${voting.category}** voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
             "voting"
         );
 
@@ -163,7 +163,7 @@ class VotingsController {
         if (voting.targetTournament) {
             fields.push({
                 name: "Target Tournament",
-                value: `[**${voting.targetTournament.name}**](${config.discord.baseUrl}/tournaments/${voting.targetTournament.id})`,
+                value: `[**${voting.targetTournament.name}**](${config.baseUrl}/tournaments/${voting.targetTournament.id})`,
             });
         }
 
@@ -179,7 +179,7 @@ class VotingsController {
         await DiscordService.sendRoleHighlightWebhook(roles, [
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                 color: webhookColors.lightYellow,
                 fields,
             },
@@ -263,7 +263,7 @@ class VotingsController {
             // Logger
             await LogService.generate(
                 req.session.mongoId!,
-                `Submitted a vote for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                 "voting"
             );
 
@@ -271,7 +271,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Submitted a vote for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.lightGreen,
                 },
             ]);
@@ -293,7 +293,7 @@ class VotingsController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Toggled voting status for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id}) to ${
+            `Toggled voting status for [**${voting.title}**](${config.baseUrl}/votings/${voting._id}) to ${
                 voting.isActive ? "active" : "inactive"
             }`,
             "voting"
@@ -376,7 +376,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Concluded voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    description: `Concluded voting for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.darkYellow,
                     fields: [
                         {
@@ -405,7 +405,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Resumed voting for [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                    description: `Resumed voting for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                     color: webhookColors.yellow,
                 },
             ]);
@@ -440,7 +440,7 @@ class VotingsController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Updated the voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            `Updated the voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
             "voting"
         );
     }
@@ -468,7 +468,7 @@ class VotingsController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Deleted the voting [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+            `Deleted the voting [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
             "voting"
         );
 
@@ -476,7 +476,7 @@ class VotingsController {
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Deleted a voting: [**${voting.title}**](${config.discord.baseUrl}/votings/${voting._id})`,
+                description: `Deleted a voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
                 color: webhookColors.darkRed,
             },
         ]);
