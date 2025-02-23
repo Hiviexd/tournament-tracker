@@ -56,7 +56,7 @@ class TicketsController {
         if (showOwn === "true") query.author = user._id;
         if (isActive !== undefined) query.isActive = isActive === "true";
 
-        if (!user.isCommittee) {
+        if (!user.isCommittee && !user.isAdmin) {
             query.$or = [{ author: user._id }, { type: "ticket" }];
         }
 
@@ -82,7 +82,7 @@ class TicketsController {
         const user = res.locals!.user!;
         const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
 
-        if (!ticket.isTicket && !user.isCommittee && !ticket.author.equals(user._id)) {
+        if (!ticket.isTicket && !user.isAdmin &&!user.isCommittee && !ticket.author.equals(user._id)) {
             return res.json({ error: "Not authorized to view this ticket" });
         }
 
