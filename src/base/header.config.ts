@@ -23,9 +23,9 @@ export const routes: IRoute[] = [
     //     link: "/tournaments",
     // },
     {
-        title: "Voting",
+        title: "Votes",
         permissions: ["committee"],
-        link: "/voting",
+        link: "/votes",
     },
     {
         title: "Reports",

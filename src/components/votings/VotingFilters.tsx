@@ -40,7 +40,7 @@ export default function VotingFilters({ values, onChange }: IProps) {
         <Card shadow="sm" p="md">
             <Stack align="stretch" w="100%">
                 <TextInput
-                    placeholder="Voting title..."
+                    placeholder="Vote title..."
                     leftSection={<FontAwesomeIcon icon="search" />}
                     value={values.title}
                     onChange={(e) => handleChange("title", e.currentTarget.value)}

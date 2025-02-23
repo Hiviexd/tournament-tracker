@@ -94,7 +94,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             form.reset();
             onClose();
         } catch (error) {
-            console.error("Failed to create voting:", error);
+            console.error("Failed to create vote:", error);
         }
     });
 
@@ -238,9 +238,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         <Text size="sm" fw={500}>
                             Options {form.values.type === "binary" && "(Must be exactly 2)"}
                         </Text>
-                        {form.values.type && (<Text size="xs" c="dimmed" fs="italic" mb="xs">
-                            {getVotingMethodDescription()}
-                        </Text>)}
+                        {form.values.type && (
+                            <Text size="xs" c="dimmed" fs="italic" mb="xs">
+                                {getVotingMethodDescription()}
+                            </Text>
+                        )}
                         <Group gap="xs">
                             {form.values.options.length === 0 ? (
                                 <Text size="xs" c="danger">
@@ -295,7 +297,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             Cancel
                         </Button>
                         <Button type="submit" loading={createVotingMutation.isPending}>
-                            Create Voting
+                            Create Vote
                         </Button>
                     </Group>
                 </Stack>

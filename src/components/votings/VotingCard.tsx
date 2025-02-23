@@ -50,7 +50,7 @@ export default function VotingCard({ voting }: IPropTypes) {
             radius="md"
             className="voting-list-card"
             component={Link}
-            to={`/votings/${voting._id}`}
+            to={`/votes/${voting._id}`}
             style={
                 {
                     "--card-status-color": voting.isActive

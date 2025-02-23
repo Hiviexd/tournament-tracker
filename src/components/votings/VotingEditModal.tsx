@@ -15,7 +15,6 @@ import {
     LoadingOverlay,
     ActionIcon,
     Text,
-    Divider,
     Pill,
     Textarea,
 } from "@mantine/core";
@@ -87,7 +86,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Edit Voting" size="lg">
+        <Modal opened={opened} onClose={onClose} title="Edit Vote" size="lg">
             <LoadingOverlay
                 visible={updateVotingMutation.isPending}
                 zIndex={1000}
@@ -95,17 +94,16 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             />
             <form onSubmit={form.onSubmit(handleSubmit)} style={{ position: "relative" }}>
                 <Stack gap="md">
-                    <Divider />
                     <TextInput
                         label="Title"
-                        placeholder="Enter voting title"
+                        placeholder="Enter vote title"
                         withAsterisk
                         {...form.getInputProps("title")}
                     />
 
                     <Textarea
                         label="Description"
-                        placeholder="Enter voting description"
+                        placeholder="Enter vote description"
                         withAsterisk
                         minRows={3}
                         maxRows={8}

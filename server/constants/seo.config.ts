@@ -42,18 +42,18 @@ export const seoRoutes: SEORoute[] = [
     //     }),
     // },
     {
-        path: "/votings",
-        name: "Votings",
-        description: "Browse committee votings and decisions"
+        path: "/votes",
+        name: "Votes",
+        description: "Browse committee votes and decisions"
     },
     {
-        path: "/votings/:votingId",
-        name: "Voting Details",
+        path: "/votes/:votingId",
+        name: "Vote Details",
         isDynamic: true,
         model: "Voting",
         modelId: "votingId",
         getMetadata: (voting) => ({
-            description: `${_.capitalize(voting.category)} voting by ${voting.author.username}`,
+            description: `${_.capitalize(voting.category)} vote by ${voting.author.username}`,
         }),
     },
     {

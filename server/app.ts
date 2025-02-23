@@ -71,7 +71,7 @@ const apiRouter = express.Router();
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
-apiRouter.use("/votings", votingsRouter);
+apiRouter.use("/votes", votingsRouter);
 apiRouter.use("/logs", logsRouter);
 apiRouter.use("/tournaments", tournamentsRouter);
 apiRouter.use("/tickets", ticketsRouter);

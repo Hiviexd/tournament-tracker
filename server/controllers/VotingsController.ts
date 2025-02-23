@@ -127,14 +127,14 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: "Voting created successfully!",
+            message: "Vote created successfully!",
             voting,
         });
 
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Created a new **${voting.category}** voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+            `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting"
         );
 
@@ -179,7 +179,7 @@ class VotingsController {
         await DiscordService.sendRoleHighlightWebhook(roles, [
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Created a new **${voting.category}** voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                 color: webhookColors.lightYellow,
                 fields,
             },
@@ -195,7 +195,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         if (!voting.isActive) {
-            return res.json({ message: "Voting is not active" });
+            return res.json({ message: "Vote is not active" });
         }
 
         // Validate vote based on voting type
@@ -271,7 +271,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                    description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                     color: webhookColors.lightGreen,
                 },
             ]);
@@ -287,13 +287,13 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: `Voting status is now ${voting.isActive ? "active" : "inactive"}`,
+            message: `Vote status is now ${voting.isActive ? "active" : "concluded"}`,
         });
 
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Toggled voting status for [**${voting.title}**](${config.baseUrl}/votings/${voting._id}) to ${
+            `Toggled vote status for [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${
                 voting.isActive ? "active" : "inactive"
             }`,
             "voting"
@@ -376,7 +376,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Concluded voting for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                    description: `Concluded vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                     color: webhookColors.darkYellow,
                     fields: [
                         {
@@ -405,7 +405,7 @@ class VotingsController {
             await DiscordService.sendWebhook([
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Resumed voting for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                    description: `Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                     color: webhookColors.yellow,
                 },
             ]);
@@ -433,14 +433,14 @@ class VotingsController {
         await voting.save();
 
         res.json({
-            message: "Voting updated successfully!",
+            message: "Vote updated successfully!",
             voting,
         });
 
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Updated the voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+            `Updated the vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting"
         );
     }
@@ -452,7 +452,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.json({ error: "Cannot delete concluded votings!" });
+            return res.json({ error: "Cannot delete concluded votes!" });
         }
 
         if (voting.votes.length && !res.locals!.user!.isAdmin) {
@@ -462,13 +462,13 @@ class VotingsController {
         await voting.remove();
 
         res.json({
-            message: "Voting deleted successfully!",
+            message: "Vote deleted successfully!",
         });
 
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Deleted the voting [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+            `Deleted the vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting"
         );
 
@@ -476,7 +476,7 @@ class VotingsController {
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Deleted a voting: [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                description: `Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                 color: webhookColors.darkRed,
             },
         ]);
