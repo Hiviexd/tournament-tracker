@@ -96,7 +96,7 @@ function truncateFilename(filename: string, maxLength: number = 30): string {
     const nameWithoutExt = filename.substring(0, filename.lastIndexOf("."));
     const truncatedName = nameWithoutExt.substring(0, maxLength - extension.length - 3);
 
-    return `${truncatedName}...${extension ? "." + extension : ""}`;
+    return `${truncatedName}[...]${extension ? "." + extension : ""}`;
 }
 
 /**
