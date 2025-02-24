@@ -63,12 +63,11 @@ export default function BadgeTracker({ user }: IProps) {
         <Stack gap="xs">
             <Title order={4}>Badge & Duration</Title>
             {/* Duration Display */}
-            {(user.isCommittee || user.tcDuration > 0 || user.ccDuration > 0) ? (
+            {user.isCommittee || user.tcDuration > 0 || user.ccDuration > 0 ? (
                 <Stack gap={8}>
                     <Text size="sm" c="dimmed">
                         Member for:
                     </Text>
-                    <FontAwesomeIcon icon="ban" size="sm" />
                     {(user.isTournamentCommittee || user.tcDuration > 0) && (
                         <Group gap="xs">
                             <UserGroupBadge group="tc" />

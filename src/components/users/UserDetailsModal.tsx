@@ -81,7 +81,7 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
 
     const LoadingState = () => (
         <Stack>
-            <Skeleton height={240} radius="md" mb="md" />
+            <Skeleton height={78} radius="md" mb="md" />
             <Skeleton height={28} width={120} mb="xs" />
             <Skeleton height={100} radius="sm" mb="md" />
             <Skeleton height={28} width={140} mb="xs" />
