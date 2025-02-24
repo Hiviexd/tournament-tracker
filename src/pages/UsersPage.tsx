@@ -1,9 +1,9 @@
 import { useSearchParams } from "react-router-dom";
-import { Divider, Stack } from "@mantine/core";
+import { Card, Divider, Stack } from "@mantine/core";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import UserDetailsModal from "../components/users/UserDetailsModal";
-import UsersSection from "../components/users/UsersSection";
+import UserSearch from "../components/common/UserSearch";
 import CommitteeSection from "../components/users/CommitteeSection";
 import { IUser } from "../../interfaces/User";
 
@@ -24,10 +24,12 @@ export default function UsersPage() {
     };
 
     return (
-        <Stack gap="xl">
+        <Stack gap="lg">
             <UserDetailsModal userId={searchParams.get("id")} onClose={handleModalClose} />
 
-            <UsersSection onSelect={handleUserSelect} />
+            <Card shadow="sm" p="md">
+                <UserSearch label="Load or create user" width="100%" onChange={handleUserSelect} allowUserCreation />
+            </Card>
             <Divider />
             <CommitteeSection onSelect={handleUserSelect} />
         </Stack>
