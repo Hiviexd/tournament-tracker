@@ -54,12 +54,16 @@ export default function CommitteeSection({ onSelect }: IProps) {
     const CommitteeSection = ({ title, users }: ISectionProps) => {
         if (users.length === 0) return null;
 
+        const sortedUsers = [...users].sort((a, b) =>
+            a.username.toLowerCase().localeCompare(b.username.toLowerCase())
+        );
+
         return (
             <Card shadow="sm" p="md">
                 <Stack gap="md">
                     <Title order={3}>{title}</Title>
                     <Divider />
-                    <UserGrid users={users} />
+                    <UserGrid users={sortedUsers} />
                 </Stack>
             </Card>
         );
