@@ -12,5 +12,6 @@ usersRouter.get("/:userInput", UsersController.getUser);
 usersRouter.post("/:userId/toggleReviewerStatus", permissions.isLoggedIn, permissions.isCommittee, UsersController.toggleReviewerStatus);
 usersRouter.post("/:userId/groupMove", permissions.isLoggedIn, permissions.isAdmin, UsersController.updateUserGroups);
 usersRouter.post("/:userId/updateBadge", permissions.isLoggedIn, permissions.isAdmin, UsersController.updateBadge);
+usersRouter.post("/:userId/sync", permissions.isLoggedIn, permissions.isCommittee, UsersController.syncUser);
 
 export default usersRouter;

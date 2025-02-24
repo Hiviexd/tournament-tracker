@@ -7,6 +7,7 @@ import {
     toggleReviewerStatus,
     updateUserGroup,
     updateUserBadge,
+    syncUser,
 } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
@@ -111,6 +112,29 @@ export function useUpdateUserBadge(userId: string) {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["logs"] });
+
+            // Update selectedUser if it matches
+            if (selectedUser?._id === userId) {
+                const res = data as { message: string; user: IUser };
+                setSelectedUser(res.user as IUser);
+            }
+        },
+    });
+}
+
+export function useSyncUser(userId: string) {
+    const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (userId: string) => {
+            const response = await syncUser(userId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            // Invalidate all relevant queries
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
 
             // Update selectedUser if it matches
             if (selectedUser?._id === userId) {

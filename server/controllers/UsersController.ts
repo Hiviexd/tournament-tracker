@@ -3,6 +3,7 @@ import User from "../models/userModel";
 import helpers from "../helpers";
 import UserService from "../services/UserService";
 import DiscordService from "../services/DiscordService";
+import OsuApiService from "../services/OsuApiService";
 import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
@@ -235,6 +236,25 @@ class UsersController {
         return res.json({
             message: `Badge level updated to ${user.badgeValue}`,
             user,
+        });
+    }
+
+    /** POST sync user data with osu! */
+    public async syncUser(req: Request, res: Response) {
+        const { userId } = req.params;
+        const user = await User.findById(userId).orFail();
+
+        const userResponse = await OsuApiService.getUserInfo(req.session.accessToken!, user.osuId);
+
+        if (OsuApiService.isOsuResponseError(userResponse)) {
+            return res.json({ error: "Failed to fetch user data from osu!" });
+        }
+
+        const updatedUser = await UserService.createOrUpdateUser(userResponse, user);
+
+        res.json({
+            message: "User data synced successfully!",
+            user: updatedUser,
         });
     }
 }

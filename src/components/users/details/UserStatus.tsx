@@ -1,15 +1,35 @@
-import { Stack, Group, Text, Title } from "@mantine/core";
+import { Stack, Group, Text, Title, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IUser } from "../../../../interfaces/User";
+import { useSyncUser } from "../../../hooks/useUsers";
 
 interface IProps {
     user: IUser;
 }
 
 export default function UserStatus({ user }: IProps) {
+    const syncUserMutation = useSyncUser(user._id || "");
+
+    const handleSync = async () => {
+        try {
+            await syncUserMutation.mutateAsync(user._id);
+        } catch (error) {
+            console.error("Failed to sync user: " + error);
+        }
+    }
+
     return (
         <Stack gap="xs">
             <Title order={4}>Status</Title>
+
+            <Button
+                variant="light"
+                size="xs"
+                leftSection={<FontAwesomeIcon icon="sync" />}
+                onClick={handleSync}
+                loading={syncUserMutation.isPending}>
+                Sync osu! data
+            </Button>
 
             <Group gap="xs">
                 <FontAwesomeIcon

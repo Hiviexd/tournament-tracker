@@ -48,4 +48,9 @@ export const updateUserBadge = async (data: UpdateBadgeRequest) => {
         increment: data.increment,
     });
     return response.data;
-}
+};
+
+export const syncUser = async (userId: string) => {
+    const response = await axios.post(`/api/users/${userId}/sync`);
+    return response.data;
+};
