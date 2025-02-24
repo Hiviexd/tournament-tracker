@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { Combobox, InputBase, Loader, Group, Avatar, Text, useCombobox, Stack, ActionIcon } from "@mantine/core";
+import {
+    Combobox,
+    InputBase,
+    Loader,
+    Group,
+    Avatar,
+    Text,
+    useCombobox,
+    Stack,
+    ActionIcon,
+    Button,
+} from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useUsers } from "../../hooks/useUsers";
+import { useUsers, useCreateUser } from "../../hooks/useUsers";
 import { IUser } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -22,6 +33,22 @@ const UserOption = ({ username, avatarUrl }: { username: string; avatarUrl: stri
     </Group>
 );
 
+const NoResultsOption = ({ search, onAdd, isLoading }: { search: string; onAdd: () => void; isLoading: boolean }) => (
+    <Group p="xs" justify="space-between" wrap="nowrap">
+        <Text size="sm" c="dimmed">
+            No users found matching "{search}"
+        </Text>
+        <Button
+            variant="light"
+            size="xs"
+            onClick={onAdd}
+            leftSection={<FontAwesomeIcon icon="plus" />}
+            loading={isLoading}>
+            Add User
+        </Button>
+    </Group>
+);
+
 export default function UserSearch({
     onChange,
     label,
@@ -32,11 +59,28 @@ export default function UserSearch({
     width = "100%",
 }: IProps) {
     const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedValue] = useDebouncedValue(search, 400);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
-    const [debouncedSearch] = useDebouncedValue(search, 400);
     const limit = 5;
     const { data: users = [], isLoading } = useUsers(debouncedSearch, limit);
+    const createUserMutation = useCreateUser();
     const combobox = useCombobox();
+
+    const handleCreateUser = async () => {
+        if (!search) return;
+
+        try {
+            const data = (await createUserMutation.mutateAsync(search)) as { user: IUser; message: string };
+            if (data.user) {
+                onChange(data.user);
+                setSelectedUser(data.user);
+                setSearch("");
+                combobox.closeDropdown();
+            }
+        } catch (error) {
+            console.error("Failed to create user:", error);
+        }
+    };
 
     const options = users.map((user) => (
         <Combobox.Option value={user.id} key={user.id}>
@@ -49,6 +93,8 @@ export default function UserSearch({
         setSearch("");
         onChange(null);
     };
+
+    const shouldShowDropdown = search && (isLoading || users.length > 0 || (search === debouncedSearch && !isLoading));
 
     return (
         <Stack gap={2}>
@@ -88,11 +134,19 @@ export default function UserSearch({
                             <InputBase
                                 leftSection={leftSection}
                                 error={error}
-                                rightSection={isLoading ? <Loader size="xs" /> : <Combobox.Chevron />}
+                                rightSection={
+                                    isLoading || createUserMutation.isPending ? (
+                                        <Loader size="xs" />
+                                    ) : (
+                                        <Combobox.Chevron />
+                                    )
+                                }
                                 onClick={() => combobox.openDropdown()}
                                 onFocus={() => combobox.openDropdown()}
                                 onChange={(e) => {
-                                    setSearch(e.currentTarget.value);
+                                    const value = e.currentTarget.value;
+                                    setSearch(value);
+                                    setDebouncedValue(value);
                                     combobox.updateSelectedOptionIndex();
                                 }}
                                 value={search}
@@ -100,8 +154,21 @@ export default function UserSearch({
                             />
                         </Combobox.Target>
 
-                        <Combobox.Dropdown hidden={users.length === 0}>
+                        <Combobox.Dropdown hidden={!shouldShowDropdown}>
                             <Combobox.Options>{options}</Combobox.Options>
+                            {/* Only show NoResultsOption when:
+                                1. There's a search term
+                                2. The search is complete (not loading)
+                                3. No results were found
+                                4. The debounced search matches the current search
+                            */}
+                            {search && !isLoading && users.length === 0 && search === debouncedSearch && (
+                                <NoResultsOption
+                                    search={search}
+                                    onAdd={handleCreateUser}
+                                    isLoading={createUserMutation.isPending}
+                                />
+                            )}
                         </Combobox.Dropdown>
                     </Combobox>
                 </div>
