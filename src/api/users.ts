@@ -1,6 +1,6 @@
 import axios from "axios";
 import helpers from "../helpers";
-import { IUser } from "../../interfaces/User";
+import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interfaces/User";
 
 export const getLoggedInUser = async () => {
     const response = await axios.get("/api/users/me");
@@ -34,3 +34,18 @@ export const toggleReviewerStatus = async (userId: string) => {
     const response = await axios.post(`/api/users/${userId}/toggleReviewerStatus`);
     return response.data;
 };
+
+export const updateUserGroup = async (data: UpdateUserGroupsRequest) => {
+    const response = await axios.post(`/api/users/${data.userId}/groupMove`, {
+        group: data.group,
+        join: data.join,
+    });
+    return response.data;
+};
+
+export const updateUserBadge = async (data: UpdateBadgeRequest) => {
+    const response = await axios.post(`/api/users/${data.userId}/updateBadge`, {
+        increment: data.increment,
+    });
+    return response.data;
+}

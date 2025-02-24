@@ -3,6 +3,8 @@ import { Document, Model, DocumentQuery } from 'mongoose';
 
 export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm";
 
+export type BadgedUserGroup = Exclude<UserGroup, "user" | "admin">;
+
 export interface IUserHistory {
     date: Date;
     group: UserGroup;
@@ -12,6 +14,17 @@ export interface IUserHistory {
 export interface UserListQuery {
     userInput?: string;
     limit?: string;
+}
+
+export interface UpdateUserGroupsRequest {
+    userId: string;
+    group: string;
+    join: boolean;
+}
+
+export interface UpdateBadgeRequest {
+    userId: string;
+    increment: boolean;
 }
 
 export interface IUser extends Document {
@@ -24,6 +37,7 @@ export interface IUser extends Document {
     inBag: boolean;
     coverUrl?: string;
     country?: IOsuCountry;
+    badgeValue: number;
 
     // virtuals
     avatarUrl: string;

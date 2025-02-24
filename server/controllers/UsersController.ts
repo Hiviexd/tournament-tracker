@@ -116,13 +116,126 @@ class UsersController {
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: webhookColors.orange,
-                description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${
-                    user.osuId
-                }) as **${user.isActiveReviewer ? "active" : "inactive"}** reviewer`,
+                description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
+                    user.isActiveReviewer ? "active" : "inactive"
+                }** reviewer`,
             },
         ]);
 
-        res.json({ message: `Set reviewer status as ${user.isActiveReviewer ? "active" : "inactive"} successfully!`, user });
+        res.json({
+            message: `Set reviewer status as ${user.isActiveReviewer ? "active" : "inactive"} successfully!`,
+            user,
+        });
+    }
+
+    /** POST update user group */
+    public async updateUserGroups(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { group, join } = req.body;
+
+        // Validate input
+        if (!["tc", "cc"].includes(group)) {
+            return res.json({ error: "Invalid group" });
+        }
+
+        const user = await User.findById(userId).orFail();
+
+        if (join) {
+            // Add to group if not already in it
+            if (!user.groups.includes(group)) {
+                user.groups.push(group);
+            }
+
+            user.groups = user.groups.filter((g) => g !== "alm");
+        } else {
+            // Remove from group
+            user.groups = user.groups.filter((g) => g !== group);
+
+            // Add to alumni if removing from last committee
+            if (!user.groups.some((g) => ["tc", "cc"].includes(g)) && !user.groups.includes("alm")) {
+                user.groups.push("alm");
+            }
+        }
+
+        await user.save();
+
+        // Create history entry
+        const historyEntry = {
+            date: new Date(),
+            group,
+            kind: join ? "join" : ("leave" as "join" | "leave"),
+        };
+
+        user.history.push(historyEntry);
+        await user.save();
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
+                join ? "to" : "from"
+            } **${group.toUpperCase()}**`,
+            "user"
+        );
+
+        // Discord webhook
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: join ? webhookColors.green : webhookColors.red,
+                description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
+                    user.osuId
+                }) ${join ? "to" : "from"} **${group.toUpperCase()}**`,
+            },
+        ]);
+
+        res.json({
+            message: `User ${join ? "added to" : "removed from"} ${group.toUpperCase()} successfully!`,
+            user,
+        });
+    }
+
+    /** POST update user badge value */
+    public async updateBadge(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { increment } = req.body;
+
+        const user = await User.findById(userId).orFail();
+        const oldValue = user.badgeValue;
+
+        // Update badge value
+        if (increment && user.badgeValue < 10) {
+            user.badgeValue++;
+        } else if (!increment && user.badgeValue > 0) {
+            user.badgeValue--;
+        } else {
+            return res.json({
+                error: increment ? "Badge value cannot exceed 10" : "Badge value cannot be less than 0",
+            });
+        }
+
+        await user.save();
+
+        // Log the change
+        await LogService.generate(
+            req.session.mongoId!,
+            `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
+            "user"
+        );
+
+        // Discord webhook notification
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.orange,
+                description: `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
+            },
+        ]);
+
+        return res.json({
+            message: `Badge level updated to ${user.badgeValue}`,
+            user,
+        });
     }
 }
 

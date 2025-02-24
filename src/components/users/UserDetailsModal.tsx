@@ -1,11 +1,15 @@
-import { Modal, Stack, Group, Skeleton } from "@mantine/core";
+import { Modal, Stack, Skeleton, Divider } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useAtom } from "jotai";
 import { useCallback, useEffect } from "react";
-import { selectedUserAtom } from "../../store/atoms";
+import { loggedInUserAtom, selectedUserAtom } from "../../store/atoms";
 import { useUser } from "../../hooks/useUsers";
-import UserDisplay from "../common/UserDisplay";
+import UserCard from "../common/UserCard";
+import UserHistory from "./details/UserHistory";
+import UserGroupMoves from "./details/UserGroupMoves";
+import BadgeTracker from "./details/BadgeTracker";
+import UserStatus from "./details/UserStatus";
 
 interface IProps {
     userId: string | null;
@@ -13,6 +17,8 @@ interface IProps {
 }
 
 export default function UserDetailsModal({ userId, onClose }: IProps) {
+    const [loggedInUser] = useAtom(loggedInUserAtom);
+
     const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
 
     // If we already have a user in the atom, check if it matches userId
@@ -71,25 +77,15 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                 }
             }
         }
-    }, [
-        userId,
-        isLoading,
-        fetchedUser,
-        shouldFetch,
-        selectedUserMatches,
-        handleClose,
-        setSelectedUser,
-    ]);
+    }, [userId, isLoading, fetchedUser, shouldFetch, selectedUserMatches, handleClose, setSelectedUser]);
 
     const LoadingState = () => (
         <Stack>
-            <Group>
-                <Skeleton circle height={40} />
-                <Stack gap={8}>
-                    <Skeleton height={20} width={120} />
-                    <Skeleton height={16} width={80} />
-                </Stack>
-            </Group>
+            <Skeleton height={240} radius="md" mb="md" />
+            <Skeleton height={28} width={120} mb="xs" />
+            <Skeleton height={100} radius="sm" mb="md" />
+            <Skeleton height={28} width={140} mb="xs" />
+            <Skeleton height={120} radius="sm" />
         </Stack>
     );
 
@@ -98,8 +94,21 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
             {isLoading ? (
                 <LoadingState />
             ) : selectedUser ? (
-                <Stack>
-                    <UserDisplay user={selectedUser} />
+                <Stack gap="md">
+                    <UserCard user={selectedUser} onSelect={() => {}} static />
+
+                    <UserStatus user={selectedUser} />
+                    <Divider />
+                    <UserHistory history={selectedUser.history} />
+                    <Divider />
+                    <BadgeTracker user={selectedUser} />
+
+                    {loggedInUser!.isAdmin && (
+                        <Stack gap="xs">
+                            <Divider />
+                            <UserGroupMoves user={selectedUser} />
+                        </Stack>
+                    )}
                 </Stack>
             ) : null}
         </Modal>

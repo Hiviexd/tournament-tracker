@@ -1,9 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { searchUsers, createUser, getCommitteeUsers, getUserById, toggleReviewerStatus } from "../api/users";
+import {
+    searchUsers,
+    createUser,
+    getCommitteeUsers,
+    getUserById,
+    toggleReviewerStatus,
+    updateUserGroup,
+    updateUserBadge,
+} from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../store/atoms";
-import { IUser } from "../../interfaces/User";
+import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
+import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interfaces/User";
 
 export function useUsers(search: string, limit?: number) {
     return useQuery({
@@ -61,6 +69,53 @@ export function useToggleReviewerStatus(userId: string) {
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 setLoggedInUser(updatedUser as IUser);
+            }
+        },
+    });
+}
+
+export function useUpdateUserGroups(userId: string) {
+    const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (data: UpdateUserGroupsRequest) => {
+            const response = await updateUserGroup(data);
+            return handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            // Invalidate relevant queries
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["logs"] });
+
+            // Update selectedUser if it matches
+            if (selectedUser?._id === userId) {
+                const res = data as { message: string; user: IUser };
+                setSelectedUser(res.user as IUser);
+            }
+        },
+    });
+}
+
+export function useUpdateUserBadge(userId: string) {
+    const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (data: UpdateBadgeRequest) => {
+            const response = await updateUserBadge(data);
+            return handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["logs"] });
+
+            // Update selectedUser if it matches
+            if (selectedUser?._id === userId) {
+                const res = data as { message: string; user: IUser };
+                setSelectedUser(res.user as IUser);
             }
         },
     });

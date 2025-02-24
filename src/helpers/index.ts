@@ -1,4 +1,7 @@
 import { IUser } from "@interfaces/User";
+import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "@interfaces/Vote";
+import { IVoting } from "@interfaces/Voting";
+import moment from "moment";
 
 /**
  * Check if a http request is valid (doesn't contain an error)
@@ -140,6 +143,26 @@ function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType {
     }
 }
 
+/**
+ * Get the number of years from a number of days
+ * @param days Number of days
+ */
+function getYearsFromDays(days: number) {
+    const duration = moment.duration(days, "days");
+    return Math.floor(duration.asYears());
+}
+
+function generateBadgeCommand(osuId: number, years: number, badgeValue: number) {
+    const description = "Longstanding contribution to the Tournament Committee";
+    const wikiLink = "https://osu.ppy.sh/wiki/en/People/Tournament_Committee";
+    const durationString = years > 1 ? `${years} years` : "1 year";
+    const replaceOption = badgeValue > 0 ? `--replace tcomm-${badgeValue}y.png` : "";
+
+    const command = `.add-badge ${osuId} tcomm-${years}y.png "${description} - ${durationString}" ${wikiLink} ${replaceOption}`;
+
+    return command.trim();
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
@@ -147,4 +170,6 @@ export default {
     hslToHex,
     isOsuForumLink,
     getInitialVoteData,
+    getYearsFromDays,
+    generateBadgeCommand,
 };

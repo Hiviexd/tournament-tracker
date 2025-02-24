@@ -54,6 +54,12 @@ import {
     faDownload,
     faUpload,
     faFloppyDisk,
+    faUserPlus,
+    faUserMinus,
+    faChevronLeft,
+    faChevronRight,
+    faCopy,
+    faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -111,5 +117,11 @@ export default function loadIcons() {
         faDownload,
         faUpload,
         faFloppyDisk,
+        faUserPlus,
+        faUserMinus,
+        faChevronLeft,
+        faChevronRight,
+        faCopy,
+        faMagnifyingGlass,
     );
 }

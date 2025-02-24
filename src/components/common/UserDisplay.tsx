@@ -26,7 +26,7 @@ export default function UserDisplay({ user, username, avatarUrl, group, asText }
             <Stack gap={2}>
                 <UserLink user={user} username={username} asText={!!username || asText} c="white" />
                 <Group gap="0.5rem">
-                    {group && <UserGroupBadge group={group} />}
+                    {group && <UserGroupBadge group={group as BadgedUserGroup} />}
                     {userGroups?.map((g) => (
                         <UserGroupBadge key={g} group={g} />
                     ))}

@@ -23,6 +23,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
             code: { type: String },
             name: { type: String },
         },
+        badgeValue: { type: Number, default: 0 },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
