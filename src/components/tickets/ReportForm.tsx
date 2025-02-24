@@ -169,6 +169,7 @@ You can report either:
                                 error={form.errors.targetUserId}
                                 onChange={(user) => form.setFieldValue("targetUserId", user?.id)}
                                 required
+                                allowUserCreation
                             />
                         )}
 
@@ -197,12 +198,7 @@ You can report either:
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
-                            description={
-                                <TextLengthIndicator
-                                    length={form.values.message.length}
-                                    maxLength={6000}
-                                />
-                            }
+                            description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
                         />
 
                         <FileUploadInput value={files} onChange={handleFileChange} />

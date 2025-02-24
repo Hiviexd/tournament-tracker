@@ -1,14 +1,5 @@
 import { useCreateTournament } from "../../hooks/useTournaments";
-import {
-    Modal,
-    TextInput,
-    Stack,
-    Select,
-    MultiSelect,
-    Button,
-    Group,
-    LoadingOverlay,
-} from "@mantine/core";
+import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
@@ -91,6 +82,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         onChange={(user) => form.setFieldValue("hostId", user?.id || "")}
                         error={form.errors.host}
                         required
+                        allowUserCreation
                     />
 
                     <MultiSelect

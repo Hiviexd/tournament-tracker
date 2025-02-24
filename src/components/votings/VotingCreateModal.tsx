@@ -214,6 +214,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             onChange={(value) => form.setFieldValue("targetUserId", value?.id)}
                             error={form.errors.targetUserId}
                             required
+                            allowUserCreation
                         />
                     )}
 

@@ -46,6 +46,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
                     leftSection={<FontAwesomeIcon icon="user" />}
                     onChange={handleUserSelect}
                     width="100%"
+                    allowUserCreation
                 />
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Select
