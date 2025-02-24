@@ -152,8 +152,8 @@ function getYearsFromDays(days: number) {
     return Math.floor(duration.asYears());
 }
 
-function generateBadgeCommand(osuId: number, years: number, badgeValue: number) {
-    const description = "Longstanding contribution to the Tournament Committee";
+function generateBadgeCommand(osuId: number, years: number, badgeValue: number, committee: string) {
+    const description = `Longstanding contribution to the ${committee === "tc" ? "Tournament" : "Contest"} Committee`;
     const wikiLink = "https://osu.ppy.sh/wiki/en/People/Tournament_Committee";
     const durationString = years > 1 ? `${years} years` : "1 year";
     const replaceOption = badgeValue > 0 ? `--replace tcomm-${badgeValue}y.png` : "";
