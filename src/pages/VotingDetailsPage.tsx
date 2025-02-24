@@ -51,12 +51,12 @@ export default function VotingDetailsPage() {
                 <EmptyState
                     icon="poll-h"
                     title="Vote not found..."
-                    returnLink="/voting"
-                    returnText="Return to voting list"
+                    returnLink="/votes"
+                    returnText="Return to votes list"
                 />
             ) : (
                 <Stack gap="lg">
-                    <VotingInfo voting={voting} user={loggedInUser} onNavigateBack={() => navigate("/voting")} />
+                    <VotingInfo voting={voting} user={loggedInUser} onNavigateBack={() => navigate("/votes")} />
 
                     {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
 
