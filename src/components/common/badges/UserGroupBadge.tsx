@@ -1,9 +1,8 @@
 import { Badge, Tooltip } from "@mantine/core";
-import { IUser, type UserGroup } from "../../../../interfaces/User";
+import { type BadgedUserGroup } from "../../../../interfaces/User";
 
 interface IPropTypes {
-    user?: IUser;
-    group?: UserGroup;
+    group?: BadgedUserGroup;
     tooltip?: "top" | "right" | "bottom" | "left";
 }
 
@@ -31,19 +30,9 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
     },
 };
 
-export default function UserGroupBadge({ user, group, tooltip }: IPropTypes) {
-    const getBadgeType = () => {
-        if (group) return group;
-        if (user?.isTournamentCommittee) return "tc";
-        if (user?.isContestCommittee) return "cc";
-        if (user?.isAlumni) return "alm";
-        return null;
-    };
-
-    const badgeType = getBadgeType();
-    if (!badgeType) return null;
-
-    const usegroup = USER_GROUP_BADGES[badgeType];
+export default function UserGroupBadge({ group, tooltip }: IPropTypes) {
+    if (!group) return null;
+    const usegroup = USER_GROUP_BADGES[group];
 
     return (
         <Tooltip label={usegroup.tooltip} position={tooltip ?? "right"}>
