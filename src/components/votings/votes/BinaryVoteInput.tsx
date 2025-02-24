@@ -24,6 +24,11 @@ export default function BinaryVoteInput({ options, value, onChange }: IProps) {
                     { value: 0, label: "0" },
                     { value: 5, label: "5" },
                 ]}
+                labelTransitionProps={{
+                    transition: "fade",
+                    duration: 150,
+                    timingFunction: "ease-out",
+                }}
             />
         </Stack>
     );

@@ -23,6 +23,11 @@ export default function VariableVoteInput({ options, values, onChange }: IProps)
                             { value: 0, label: "0" },
                             { value: 5, label: "5" },
                         ]}
+                        labelTransitionProps={{
+                            transition: "fade",
+                            duration: 150,
+                            timingFunction: "ease-out",
+                        }}
                     />
                 </Stack>
             ))}
