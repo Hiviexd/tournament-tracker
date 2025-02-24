@@ -43,7 +43,7 @@ export default function BadgeManager({ user, committee }: IProps) {
     };
 
     const NoBadgeCard = () => (
-        <Card w={86} h={40} bg="var(--mantine-color-dark-6)" p="xs" radius="sm">
+        <Card w={86} h={40} bg="var(--mantine-color-primary-10)" p="xs" radius="sm">
             <Group h="100%" justify="center" align="center">
                 <Text size="xs">None...</Text>
             </Group>
