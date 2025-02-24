@@ -132,7 +132,7 @@ export default function TicketsListPage() {
     const EmptyState = ({ hasError }: { hasError: boolean }) => (
         <Stack align="center" justify="center" h={200}>
             <FontAwesomeIcon
-                icon={activeTab === "tickets" ? "ticket-alt" : "flag"}
+                icon={activeTab === "tickets" ? "paper-plane" : "flag"}
                 size="2x"
                 style={{ opacity: 0.5 }}
             />
