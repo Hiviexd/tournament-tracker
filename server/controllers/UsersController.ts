@@ -54,6 +54,8 @@ class UsersController {
     /** GET users in a committee */
     public async getCommittee(req: Request, res: Response) {
         const type = req.query.type;
+        const includeAlumni = req.query.includeAlumni === "true" || false;
+
         let query;
 
         switch (type) {
@@ -64,7 +66,7 @@ class UsersController {
                 query = { groups: "cc" };
                 break;
             default:
-                query = { groups: { $in: ["tc", "cc"] } };
+                query = includeAlumni ? { groups: { $in: ["tc", "cc", "alm"] } } : { groups: { $in: ["tc", "cc"] } };
         }
 
         const committee = await User.find(query).orFail();

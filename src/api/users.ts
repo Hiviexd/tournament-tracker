@@ -15,8 +15,10 @@ export const searchUsers = async (search: string, limit?: number): Promise<IUser
     return response.data;
 };
 
-export const getCommitteeUsers = async (): Promise<IUser[]> => {
-    const response = await axios.get("/api/users/getCommittee");
+export const getCommitteeUsers = async (includeAlumni?: boolean): Promise<IUser[]> => {
+    const response = await axios.get("/api/users/getCommittee", {
+        params: { includeAlumni }
+    });
     return response.data;
 };
 

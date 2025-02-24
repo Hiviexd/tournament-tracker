@@ -13,7 +13,9 @@ interface ISectionProps {
 }
 
 export default function CommitteeSection({ onSelect }: IProps) {
-    const { data: users = [], isLoading } = useCommitteeUsers();
+    const { data: users = [], isLoading } = useCommitteeUsers({
+        includeAlumni: true,
+    });
 
     const LoadingState = () => (
         <Stack gap="xl">

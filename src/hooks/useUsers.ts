@@ -36,10 +36,10 @@ export function useCreateUser() {
     });
 }
 
-export function useCommitteeUsers(options: { enabled?: boolean } = {}) {
+export function useCommitteeUsers(options: { enabled?: boolean; includeAlumni?: boolean } = {}) {
     return useQuery({
-        queryKey: ["committeeUsers"],
-        queryFn: getCommitteeUsers,
+        queryKey: ["committeeUsers", options.includeAlumni],
+        queryFn: () => getCommitteeUsers(options.includeAlumni),
         enabled: options.enabled ?? true,
     });
 }
