@@ -67,10 +67,10 @@ export default function VotingListPage() {
             <Stack align="center" justify="center" h={200}>
                 <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
                 <Text size="lg" c="dimmed">
-                    {hasError ? "Error loading votings" : "No votings found"}
+                    {hasError ? "Error loading votes" : "No votes found"}
                 </Text>
                 <Text size="sm" c="dimmed">
-                    {hasError ? `Try refreshing the page` : "Try adjusting your filters or create a new voting"}
+                    {hasError ? `Try refreshing the page` : "Try adjusting your filters or create a new vote"}
                 </Text>
             </Stack>
         );
