@@ -1,8 +1,8 @@
 import { Badge, Tooltip } from "@mantine/core";
-import { type BadgedUserGroup } from "../../../../interfaces/User";
+import { type UserGroup } from "../../../../interfaces/User";
 
 interface IPropTypes {
-    group?: BadgedUserGroup;
+    group?: UserGroup;
     tooltip?: "top" | "right" | "bottom" | "left";
 }
 
