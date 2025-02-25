@@ -95,6 +95,9 @@ export default function VotingCard({ voting }: IPropTypes) {
                     {sortedGroups.map((group, index) => (
                         <UserGroupBadge key={index} group={group} tooltip="top" />
                     ))}
+                    <Badge color={voting.isActive ? "success" : "danger"} variant="light">
+                        {voting.isActive ? "Active" : "Concluded"}
+                    </Badge>
                     <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
                 </Group>
 
