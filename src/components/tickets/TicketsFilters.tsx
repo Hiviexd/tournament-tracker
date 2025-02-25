@@ -17,7 +17,7 @@ interface FilterValues {
 interface IProps {
     values: FilterValues;
     onChange: (values: FilterValues) => void;
-    type: "tickets" | "reports";
+    type: "ticket" | "report";
 }
 
 export default function TicketsFilters({ values, onChange, type }: IProps) {
@@ -38,7 +38,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
     };
 
     // Non-committee users viewing reports
-    if (type === "reports" && !user?.isCommittee && !user?.isAdmin) {
+    if (type === "report" && !user?.isCommittee && !user?.isAdmin) {
         return (
             <Alert color="info" title="Note" icon={<FontAwesomeIcon icon="info-circle" />}>
                 Below is a list of all of your submitted reports.
@@ -49,7 +49,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
-                {type === "tickets" ? (
+                {type === "ticket" ? (
                     // Ticket Filters
                     <>
                         <TextInput
