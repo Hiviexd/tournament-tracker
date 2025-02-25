@@ -1,27 +1,36 @@
 .voting-list-card {
     text-decoration: none !important;
     position: relative;
-    border-left: 4px solid var(--card-status-color);
     transition: transform 0.2s ease;
+    overflow: hidden;
 
     &:hover {
         transform: translateY(-4px);
     }
 
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 0;
-        background: linear-gradient(90deg,
-                var(--card-status-color) -60%,
-                var(--mantine-color-primary-11) 4rem);
+    // Active voting card styles
+    &[data-active="true"] {
+        border-left: 4px solid var(--card-status-color);
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            background: linear-gradient(90deg, var(--card-status-color) -30%, var(--mantine-color-primary-11) 5rem);
+        }
     }
 
-    >* {
+    // Inactive voting card styles
+    &[data-active="false"] {
+        border: none;
+        background: var(--mantine-color-primary-11);
+    }
+
+    > * {
         position: relative;
         z-index: 1;
     }

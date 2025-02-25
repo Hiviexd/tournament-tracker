@@ -9,6 +9,7 @@ import { IUser } from "../../../interfaces/User";
 import { useToggleStatus } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
+import moment from "moment";
 
 interface IProps {
     ticket: ITicket;
@@ -17,6 +18,15 @@ interface IProps {
 export default function TicketInfo({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const toggleStatusMutation = useToggleStatus(ticket._id);
+
+    const getStatusColor = (): string => {
+        if (!ticket.isActive) return "danger";
+
+        const updatedDays = moment().diff(moment(ticket.updatedAt), "days");
+        if (updatedDays >= 10) return "danger";
+        if (updatedDays >= 7) return "warning";
+        return "success";
+    };
 
     const handleToggleStatus = async () => {
         if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ticket?`)) return;
@@ -32,12 +42,13 @@ export default function TicketInfo({ ticket }: IProps) {
             p="lg"
             radius="md"
             className="ticket-info"
+            data-active={ticket.isActive}
             style={
-                {
-                    "--card-status-color": ticket.isActive
-                        ? "var(--mantine-color-success-6)"
-                        : "var(--mantine-color-danger-6)",
-                } as React.CSSProperties
+                ticket.isActive
+                    ? {
+                        ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
+                    }
+                    : undefined
             }>
             <Stack gap="md">
                 <Group justify="space-between" align="flex-start">

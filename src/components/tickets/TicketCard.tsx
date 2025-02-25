@@ -12,6 +12,7 @@ import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import DateBadge from "../common/badges/DateBadge";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import moment from "moment";
 
 interface ITicketCardProps {
     ticket: ITicket;
@@ -59,6 +60,15 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
         return null;
     };
 
+    const getStatusColor = (): string => {
+        if (!ticket.isActive) return "danger";
+
+        const updatedDays = moment().diff(moment(ticket.updatedAt), "days");
+        if (updatedDays >= 10) return "danger";
+        if (updatedDays >= 7) return "warning";
+        return "success";
+    };
+
     const targetInfo = getTargetInfo();
     const messageCount = ticket.messages.filter((message) => !message.isNote).length;
 
@@ -70,12 +80,13 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             padding="lg"
             radius="md"
             className="ticket-card"
+            data-active={ticket.isActive}
             style={
-                {
-                    "--card-status-color": ticket.isActive
-                        ? "var(--mantine-color-success-6)"
-                        : "var(--mantine-color-danger-6)",
-                } as React.CSSProperties
+                ticket.isActive
+                    ? {
+                        ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
+                    }
+                    : undefined
             }>
             <Stack gap="md" justify="space-between">
                 <Group justify="space-between" align="flex-start">

@@ -43,6 +43,14 @@ export default function VotingCard({ voting }: IPropTypes) {
         }
     };
 
+    const getDueDateColor = (): string => {
+        const deadline = moment(voting.deadline);
+        const now = moment();
+        if (deadline.isBefore(now)) return "danger";
+        if (deadline.isBefore(now.add(24, "hours"))) return "warning";
+        return "success";
+    };
+
     return (
         <Card
             shadow="sm"
@@ -51,12 +59,13 @@ export default function VotingCard({ voting }: IPropTypes) {
             className="voting-list-card"
             component={Link}
             to={`/votes/${voting._id}`}
+            data-active={voting.isActive}
             style={
-                {
-                    "--card-status-color": voting.isActive
-                        ? "var(--mantine-color-success-6)"
-                        : "var(--mantine-color-danger-6)",
-                } as React.CSSProperties
+                voting.isActive
+                    ? {
+                        ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
+                    }
+                    : undefined
             }>
             <Group justify="space-between" mb="xs">
                 <div>

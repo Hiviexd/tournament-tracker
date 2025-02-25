@@ -1,22 +1,31 @@
 .voting-info {
-    border-top: 4px solid var(--card-status-color);
     position: relative;
+    overflow: hidden;
 
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 0;
-        background: linear-gradient(180deg,
-                var(--card-status-color) -120%,
-                var(--mantine-color-primary-11) 4rem);
+    // Active voting styles
+    &[data-active="true"] {
+        border-top: 4px solid var(--card-status-color);
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            background: linear-gradient(180deg, var(--card-status-color) -60%, var(--mantine-color-primary-11) 5rem);
+        }
+    }
+
+    // Inactive voting styles
+    &[data-active="false"] {
+        border: none;
+        background: var(--mantine-color-primary-11);
     }
 
     // Ensure content stays above pseudo-element
-    >* {
+    > * {
         position: relative;
         z-index: 1;
     }
