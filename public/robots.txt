@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /tickets/
+Allow: /tickets/create
+Disallow: /reports/
+Allow: /reports/create
