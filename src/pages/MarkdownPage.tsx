@@ -24,7 +24,7 @@ Here's what this Markdown can do:
      2. Second item
 
 ### Links and Images
-This is an [external Link](https://github.com). It can also [support **formatting** within it](https://github.com)!
+This is an [external Link](https://osu.ppy.sh/groups/50). It can also [support **formatting** within it](https://osu.ppy.sh/groups/50)!
 
 Below is a random image.
 
@@ -42,7 +42,7 @@ interface User {
 
 const user: User = {
     name: "Albion",
-    age: 64
+    age: 84
 };
 \`\`\`
 
