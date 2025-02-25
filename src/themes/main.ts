@@ -99,7 +99,18 @@ export const theme = createTheme({
         Tooltip: {
             defaultProps: {
                 withArrow: true,
-                color: "primary.7",
+                color: "primary.11",
+            },
+            styles: {
+                tooltip: {
+                    border: "1px solid var(--mantine-color-primary-6)",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1))",
+                },
+                arrow: {
+                    border: "1px solid var(--mantine-color-primary-6)",
+                    filter: "drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1))",
+                },
             },
         },
         Button: {
