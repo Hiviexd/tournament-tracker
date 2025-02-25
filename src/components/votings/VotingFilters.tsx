@@ -1,4 +1,4 @@
-import { Card, Group, TextInput, Select, Stack } from "@mantine/core";
+import { Card, Group, TextInput, Select, Stack, Checkbox } from "@mantine/core";
 import { VotingCategory } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,6 +8,7 @@ interface FilterValues {
     category: VotingCategory;
     assignedGroup: UserGroup;
     status: string;
+    showNeedsAttention: boolean; // Add this field
 }
 
 interface IProps {
@@ -33,7 +34,16 @@ export default function VotingFilters({ values, onChange }: IProps) {
     ];
 
     const handleChange = (key: keyof FilterValues, value: any) => {
-        onChange({ ...values, [key]: value });
+        // If toggling needs attention, also set status to active
+        if (key === "showNeedsAttention" && value === true) {
+            onChange({
+                ...values,
+                showNeedsAttention: true,
+                status: "active",
+            });
+        } else {
+            onChange({ ...values, [key]: value });
+        }
     };
 
     return (
@@ -70,8 +80,14 @@ export default function VotingFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("status", value)}
                         data={statusOptions}
                         style={{ flex: 1, minWidth: 200 }}
+                        disabled={values.showNeedsAttention}
                     />
                 </Group>
+                <Checkbox
+                    label="Only show votes that need my attention"
+                    checked={values.showNeedsAttention}
+                    onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
+                />
             </Stack>
         </Card>
     );

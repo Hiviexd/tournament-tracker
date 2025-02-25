@@ -18,6 +18,7 @@ export interface VotingQueryParams {
     category?: VotingCategory;
     assignedGroup?: UserGroup;
     status?: string;
+    showNeedsAttention?: boolean;
     page?: number;
 
     // backend only
@@ -30,6 +31,7 @@ export interface VotingListQuery {
     category?: VotingCategory;
     assignedGroup?: UserGroup;
     status?: string;
+    showNeedsAttention?: string;
     page?: number;
 }
 

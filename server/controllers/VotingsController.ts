@@ -47,15 +47,27 @@ class VotingsController {
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
 
-        const [votings, total] = await Promise.all([
-            Voting.find(dbQuery).skip(skip).limit(DEFAULT_LIMIT).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE),
-            Voting.countDocuments(dbQuery),
-        ]);
+        let votings = await Voting.find(dbQuery)
+            .skip(skip)
+            .limit(DEFAULT_LIMIT)
+            .sort({ createdAt: -1 })
+            .populate(DEFAULT_POPULATE);
+
+        // Filter votings that need attention
+        if (reqQuery.showNeedsAttention === "true") {
+            votings = votings.filter((voting) => {
+                return (
+                    voting.isActive && !voting.votes.some((vote) => vote.author._id.toString() === req.session.mongoId)
+                );
+            });
+        }
+
+        const total = votings.length;
 
         res.json({
             votings,
             total,
-            page: Number(page),
+            page,
             pages: Math.ceil(total / DEFAULT_LIMIT),
         });
     }

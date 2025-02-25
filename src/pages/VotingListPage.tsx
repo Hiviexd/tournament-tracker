@@ -23,6 +23,7 @@ export default function VotingListPage() {
         category: (searchParams.get("category") as VotingCategory) || "",
         assignedGroup: (searchParams.get("group") as UserGroup) || "",
         status: searchParams.get("status") || "",
+        showNeedsAttention: searchParams.get("needsAttention") === "true",
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
@@ -34,9 +35,18 @@ export default function VotingListPage() {
         if (searchInput.category) params.set("category", searchInput.category);
         if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
         if (searchInput.status) params.set("status", searchInput.status);
+        if (searchInput.showNeedsAttention) params.set("needsAttention", "true");
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
-    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status, page, setSearchParams]);
+    }, [
+        debouncedTitle,
+        searchInput.category,
+        searchInput.assignedGroup,
+        searchInput.status,
+        searchInput.showNeedsAttention,
+        page,
+        setSearchParams,
+    ]);
 
     useEffect(() => {
         setPage(1);
@@ -47,6 +57,7 @@ export default function VotingListPage() {
         category: searchInput.category,
         assignedGroup: searchInput.assignedGroup,
         status: searchInput.status,
+        showNeedsAttention: searchInput.showNeedsAttention,
         page,
     });
 
