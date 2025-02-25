@@ -13,7 +13,7 @@ export default function BadgeTracker({ user }: IProps) {
         const years = helpers.getYearsFromDays(days);
         const yearsDisplay = years > 0 ? (years > 1 ? `${years} years,` : "1 year,") : "";
 
-        const remainingDays = days - years * 365;
+        const remainingDays = Math.round(days % 365);
         const daysDisplay = remainingDays > 0 ? (remainingDays > 1 ? `${remainingDays} days` : "1 day") : "0 days";
 
         return `${yearsDisplay} ${daysDisplay}`;
