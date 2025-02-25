@@ -60,7 +60,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
             const confirmed = window.confirm(
                 `Are you sure you want to ${
                     isNote ? "add a note" : "send a message"
-                }? Please doublecheck that you're not trying to add a note while in message mode.`
+                }? Please double check that you're not trying to add a note while in message mode.`
             );
             if (!confirmed) return;
         }
