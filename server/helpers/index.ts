@@ -108,13 +108,26 @@ function getAttachmentsField(attachments: IAttachment[]): IDiscordField | null {
     if (!attachments?.length) return null;
 
     const attachmentsList = attachments
-        .map(att => `• [${truncateFilename(att.originalName)}](${new URL(att.url).href})`)
-        .join('\n');
+        .map((att) => `• [${truncateFilename(att.originalName)}](${new URL(att.url).href})`)
+        .join("\n");
 
     return {
         name: "Attachments",
-        value: attachmentsList
+        value: attachmentsList,
     };
+}
+
+function validateOsuProfileLink(input: string): string | null {
+    const urlPattern = /^(?:https?:\/\/)?osu\.ppy\.sh\/users\/([\w\-[\]]+)\/?$/i;
+
+    const urlMatch = input.match(urlPattern);
+
+    if (urlMatch) {
+        const value = urlMatch[1];
+        return value;
+    }
+
+    return null;
 }
 
 export default {
@@ -128,4 +141,5 @@ export default {
     isOsuForumLink,
     truncateFilename,
     getAttachmentsField,
+    validateOsuProfileLink,
 };

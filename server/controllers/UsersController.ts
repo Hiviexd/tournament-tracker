@@ -19,20 +19,26 @@ class UsersController {
     public async index(req: Request, res: Response) {
         const reqQuery = req.query as UserListQuery;
 
-        if (!reqQuery.userInput) {
+        let userInput = reqQuery.userInput;
+
+        if (userInput && helpers.validateOsuProfileLink(userInput)) {
+            userInput = helpers.validateOsuProfileLink(userInput)!;
+        }
+
+        if (!userInput) {
             return res.json([]);
         }
 
         let users: IUser[] = [];
 
-        if (helpers.isValidMongoId(reqQuery.userInput)) {
-            const user = await User.findById(reqQuery.userInput);
+        if (helpers.isValidMongoId(userInput)) {
+            const user = await User.findById(userInput);
             if (user) users.push(user);
-        } else if (helpers.isNumeric(reqQuery.userInput)) {
-            const user = await User.findOne({ osuId: parseInt(reqQuery.userInput, 10) });
+        } else if (helpers.isNumeric(userInput)) {
+            const user = await User.findOne({ osuId: parseInt(userInput, 10) });
             if (user) users.push(user);
         } else {
-            users = await User.find({ username: { $regex: reqQuery.userInput, $options: "i" } });
+            users = await User.find({ username: { $regex: userInput, $options: "i" } });
         }
 
         res.json(reqQuery.limit ? users.slice(0, parseInt(reqQuery.limit, 10)) : users);
