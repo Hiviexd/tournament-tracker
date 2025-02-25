@@ -16,7 +16,8 @@ export default function ReviewerStatusSetting() {
                     Reviewer Status
                 </Text>
                 <Text size="xs" c="dimmed">
-                    Toggle your availability for reviewing tournaments
+                    {/* Toggle your availability for reviewing tournaments */}
+                    This setting is currently unused, safe to ignore.
                 </Text>
                 {toggleReviewerMutation.error && (
                     <Text size="xs" c="red">
