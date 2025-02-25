@@ -96,6 +96,19 @@ export const theme = createTheme({
     white: "#f8f9fa",
     black: "#212529",
     components: {
+        Anchor: {
+            styles: (theme) => ({
+                root: {
+                    color: isGreyscale ? theme.colors.info[4] : theme.colors.primary[3],
+                    "&:hover": {
+                        textDecoration: "underline",
+                    },
+                    "&.white-link": {
+                        color: theme.white,
+                    },
+                },
+            }),
+        },
         Tooltip: {
             defaultProps: {
                 withArrow: true,

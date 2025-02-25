@@ -1,3 +1,4 @@
+import { Anchor } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -19,13 +20,10 @@ export default function MarkdownText({ content, className, allowHtml = false }: 
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={allowHtml ? [rehypeRaw] : []}
                 components={{
-                    a: ({ ...props }) => (
-                        <a
-                            {...props}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="markdown-link"
-                        />
+                    a: ({ href, children }) => (
+                        <Anchor href={href} target="_blank" rel="noopener noreferrer" className="markdown-link">
+                            {children}
+                        </Anchor>
                     ),
                 }}>
                 {content}
