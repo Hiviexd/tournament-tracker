@@ -4,7 +4,7 @@ import config from "../../config.json";
 import { seoRoutes, defaultMetadata, modelMap, type SEOMetadata } from "../constants/seo.config";
 import { Model } from "mongoose";
 
-const CRAWLER_USER_AGENTS = ["discord", "twitter", "facebook", "linkedin", "slack", "telegram", "whatsapp"];
+const CRAWLER_USER_AGENTS = ["discord"];
 
 export async function handleCrawlers(req: Request, res: Response, next: NextFunction) {
     const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
