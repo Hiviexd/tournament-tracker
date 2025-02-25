@@ -1,16 +1,11 @@
-// Base
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useTickets } from "../hooks/useTickets";
 import { UserGroup } from "../../interfaces/User";
 import { ITicket } from "../../interfaces/Ticket";
-
-// Mantine
-import { Stack, Tabs, Card, SimpleGrid, Group, Pagination, Text, Skeleton, Divider } from "@mantine/core";
+import { Stack, Card, SimpleGrid, Group, Pagination, Text, Skeleton, Divider } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-// Components
 import TicketCard from "../components/tickets/TicketCard";
 import TicketsFilters from "../components/tickets/TicketsFilters";
 
@@ -24,13 +19,11 @@ interface FilterValues {
 }
 
 export default function TicketsListPage() {
-    const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
+    const type = location.pathname.includes("/reports") ? "report" : "ticket";
 
-    const initialTab = location.pathname.includes("/reports") ? "reports" : "tickets";
-    const [activeTab, setActiveTab] = useState<"tickets" | "reports">(initialTab);
     const [searchInput, setSearchInput] = useState<FilterValues>({
         title: searchParams.get("title") || "",
         targetUser: searchParams.get("targetUser") || "",
@@ -39,25 +32,14 @@ export default function TicketsListPage() {
         status: searchParams.get("status") || "",
         showOwn: searchParams.get("showOwn") === "true",
     });
+
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
     const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
-
-    // Handle tab changes
-    useEffect(() => {
-        const newTab = location.pathname.includes("/reports") ? "reports" : "tickets";
-        setActiveTab(newTab);
-    }, [location.pathname]);
-
-    const handleTabChange = (value: string | null) => {
-        const newTab = (value ?? "tickets") as "tickets" | "reports";
-        setActiveTab(newTab);
-        navigate(newTab === "tickets" ? "/tickets" : "/reports", { replace: true });
-    };
 
     // Handle URL params
     useEffect(() => {
         const params = new URLSearchParams();
-        if (activeTab === "tickets") {
+        if (type === "ticket") {
             if (debouncedTitle) params.set("title", debouncedTitle);
             if (searchInput.showOwn) params.set("showOwn", "true");
         } else {
@@ -78,7 +60,7 @@ export default function TicketsListPage() {
         searchInput.showOwn,
         page,
         setSearchParams,
-        activeTab,
+        type,
     ]);
 
     // Reset page when filters change
@@ -87,7 +69,7 @@ export default function TicketsListPage() {
     }, [debouncedTitle, debouncedTournament, searchInput.assignedGroup, searchInput.status]);
 
     const { data, isLoading, error } = useTickets({
-        type: activeTab === "tickets" ? "ticket" : "report",
+        type,
         title: debouncedTitle,
         targetUser: searchInput.targetUser,
         targetTournament: debouncedTournament,
@@ -111,12 +93,9 @@ export default function TicketsListPage() {
                     }}>
                     <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
                         <Stack gap="xs">
-                            <Stack gap="xs">
-                                <Skeleton height={24} width="80%" />
-                                <Skeleton height={16} width={120} />
-                            </Stack>
+                            <Skeleton height={24} width="80%" />
+                            <Skeleton height={16} width={120} />
                         </Stack>
-
                         <Group mt="auto">
                             <Skeleton height={22} width={40} radius="xl" />
                             <Skeleton height={22} width={40} radius="xl" />
@@ -131,13 +110,9 @@ export default function TicketsListPage() {
 
     const EmptyState = ({ hasError }: { hasError: boolean }) => (
         <Stack align="center" justify="center" h={200}>
-            <FontAwesomeIcon
-                icon={activeTab === "tickets" ? "paper-plane" : "flag"}
-                size="2x"
-                style={{ opacity: 0.5 }}
-            />
+            <FontAwesomeIcon icon={type === "ticket" ? "paper-plane" : "flag"} size="2x" style={{ opacity: 0.5 }} />
             <Text size="lg" c="dimmed">
-                {hasError ? `Error loading ${activeTab}` : `No ${activeTab} found`}
+                {hasError ? `Error loading ${type}s` : `No ${type}s found`}
             </Text>
             <Text size="sm" c="dimmed">
                 {hasError ? "Try refreshing the page" : "Try adjusting your filters"}
@@ -147,38 +122,29 @@ export default function TicketsListPage() {
 
     return (
         <Stack gap="md">
-            <Tabs color="primary.6" value={activeTab} onChange={handleTabChange}>
+            <TicketsFilters values={searchInput} onChange={setSearchInput} type={type} />
+
+            <Divider />
+
+            {isLoading ? (
+                <LoadingState />
+            ) : !data || data.tickets.length === 0 ? (
+                <EmptyState hasError={!!error} />
+            ) : (
                 <Stack gap="md">
-                    <Tabs.List>
-                        <Tabs.Tab value="reports">Reports</Tabs.Tab>
-                        <Tabs.Tab value="tickets">Tickets</Tabs.Tab>
-                    </Tabs.List>
+                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                        {data.tickets.map((ticket: ITicket) => (
+                            <TicketCard key={ticket._id} ticket={ticket} />
+                        ))}
+                    </SimpleGrid>
 
-                    <TicketsFilters values={searchInput} onChange={setSearchInput} type={activeTab} />
-
-                    <Divider />
-
-                    {isLoading ? (
-                        <LoadingState />
-                    ) : !data || data.tickets.length === 0 ? (
-                        <EmptyState hasError={!!error} />
-                    ) : (
-                        <Stack gap="md">
-                            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                                {data.tickets.map((ticket: ITicket) => (
-                                    <TicketCard key={ticket._id} ticket={ticket} />
-                                ))}
-                            </SimpleGrid>
-
-                            {data.pages > 1 && (
-                                <Group justify="center" mt="xl">
-                                    <Pagination value={page} onChange={setPage} total={data.pages} />
-                                </Group>
-                            )}
-                        </Stack>
+                    {data.pages > 1 && (
+                        <Group justify="center" mt="xl">
+                            <Pagination value={page} onChange={setPage} total={data.pages} />
+                        </Group>
                     )}
                 </Stack>
-            </Tabs>
+            )}
         </Stack>
     );
 }
