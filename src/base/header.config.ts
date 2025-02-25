@@ -11,11 +11,11 @@ export const routes: IRoute[] = [
         title: "Home",
         permissions: [],
         link: "/home",
-        links: [
-            // { title: "Team", link: "/team", icon: "users", permissions: [] },
-            // { title: "Changelog", link: "/changelog", icon: "clipboard-list", permissions: [] },
-            // { title: "News", link: "/news", icon: "newspaper", permissions: [] },
-        ],
+        // links: [
+        //     { title: "Team", link: "/team", icon: "users", permissions: [] },
+        //     { title: "Changelog", link: "/changelog", icon: "clipboard-list", permissions: [] },
+        //     { title: "News", link: "/news", icon: "newspaper", permissions: [] },
+        // ],
     },
     // {
     //     title: "Tournaments",
