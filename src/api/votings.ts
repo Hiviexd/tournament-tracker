@@ -39,3 +39,8 @@ export const deleteVoting = async (votingId: string) => {
     const response = await axios.post(`/api/votes/${votingId}/delete`);
     return response.data;
 };
+
+export const toggleVotingPublic = async (votingId: string) => {
+    const response = await axios.post(`/api/votes/${votingId}/togglePublic`);
+    return response.data;
+};

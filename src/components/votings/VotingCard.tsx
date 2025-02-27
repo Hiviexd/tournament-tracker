@@ -27,7 +27,8 @@ export default function VotingCard({ voting }: IPropTypes) {
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
     const checkUserVoted = (): boolean => {
-        return !!voting.votes.find((vote) => vote.author._id === user?._id);
+        if (!voting.votes || !user) return false;
+        return voting.votes.some((vote) => vote.author && vote.author._id === user._id);
     };
 
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
@@ -71,7 +72,11 @@ export default function VotingCard({ voting }: IPropTypes) {
                 <div>
                     <Title order={4}>{voting.title}</Title>
                     <Text size="sm" c="dimmed">
-                        Created by <UserLink user={voting.author} /> •{" "}
+                        {(user?.isCommittee || voting.isActive) && voting.author && (
+                            <>
+                                Created by <UserLink user={voting.author} /> •{" "}
+                            </>
+                        )}
                         {voting.isActive && (
                             <Tooltip label={moment(voting.createdAt).format("LLL")}>
                                 <span>{moment(voting.createdAt).fromNow()}</span>
@@ -92,17 +97,30 @@ export default function VotingCard({ voting }: IPropTypes) {
                             <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
                         </Badge>
                     </Tooltip>
+                    {!voting.isActive && (
+                        <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>
+                            <Badge color={voting.isPublic ? "blue" : "gray"} variant="light">
+                                <FontAwesomeIcon icon={voting.isPublic ? "eye" : "eye-slash"} />
+                            </Badge>
+                        </Tooltip>
+                    )}
                     {sortedGroups.map((group, index) => (
                         <UserGroupBadge key={index} group={group} tooltip="top" />
                     ))}
                     <Badge color={voting.isActive ? "success" : "danger"} variant="light">
                         {voting.isActive ? "Active" : "Concluded"}
                     </Badge>
-                    <VoteCountBadge voteCount={voting.votes.length} totalVotes={voting.requiredVotes} variant="light" />
+                    {(user?.isCommittee || voting.isActive) && (
+                        <VoteCountBadge
+                            voteCount={voting.votes.length}
+                            totalVotes={voting.requiredVotes}
+                            variant="light"
+                        />
+                    )}
                 </Group>
 
                 <Group gap="xs">
-                    {!checkUserVoted() && (
+                    {!checkUserVoted() && user?.isCommittee && (
                         <Badge color="orange" variant="light">
                             <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
                         </Badge>

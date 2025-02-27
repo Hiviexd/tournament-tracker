@@ -7,6 +7,7 @@ import {
     toggleVotingStatus,
     updateVoting,
     deleteVoting,
+    toggleVotingPublic,
 } from "../api/votings";
 import { handleMutationResponse } from "../api/helpers";
 import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
@@ -91,6 +92,22 @@ export function useDeleteVoting() {
             return handleMutationResponse(response);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+        },
+    });
+}
+
+export function useToggleVotingPublic(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            console.log("toggleVotingPublic", votingId);
+            const response = await toggleVotingPublic(votingId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
             queryClient.invalidateQueries({ queryKey: ["votings"] });
         },
     });

@@ -2,7 +2,7 @@
 import moment from "moment";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
-import { useToggleVotingStatus, useDeleteVoting } from "../../hooks/useVotings";
+import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic } from "../../hooks/useVotings";
 
 // Mantine
 import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip, Anchor } from "@mantine/core";
@@ -28,12 +28,15 @@ interface IProps {
 
 export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-    const toggleStatusMutation = useToggleVotingStatus(voting.id);
+    const toggleStatusMutation = useToggleVotingStatus(voting._id);
+    const togglePublicMutation = useToggleVotingPublic(voting._id);
     const deleteVotingMutation = useDeleteVoting();
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
     const checkUserVoted = (): boolean => {
-        return !!voting.votes.find((vote) => vote.author._id === user?._id);
+        if (!voting.votes || !user) return false;
+        // Handle case where vote.author might be undefined for non-committee members
+        return voting.votes.some((vote) => vote.author && vote.author._id === user._id);
     };
 
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
@@ -62,9 +65,14 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         await toggleStatusMutation.mutateAsync();
     };
 
+    const handleTogglePublic = async () => {
+        if (!window.confirm("Are you sure you want to toggle the publicity of this voting?")) return;
+        await togglePublicMutation.mutateAsync();
+    };
+
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this voting?")) return;
-        await deleteVotingMutation.mutateAsync(voting.id);
+        await deleteVotingMutation.mutateAsync(voting._id);
         onNavigateBack();
     };
 
@@ -92,14 +100,18 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         <Stack gap={4}>
                             <Group align="center" gap="xs">
                                 <Title order={2}>{voting.title}</Title>
-                                {voting.isActive && (
+                                {voting.isActive && user?.isCommittee && (
                                     <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
                                         <FontAwesomeIcon icon="edit" />
                                     </ActionIcon>
                                 )}
                             </Group>
                             <Text size="sm" c="dimmed">
-                                Created by <UserLink user={voting.author} /> •{" "}
+                                {(user?.isCommittee || voting.isActive) && (
+                                    <>
+                                        Created by <UserLink user={voting.author} /> •{" "}
+                                    </>
+                                )}
                                 {voting.isActive ? (
                                     <Tooltip label={moment(voting.createdAt).format("LLL")}>
                                         <span>{moment(voting.createdAt).fromNow()}</span>
@@ -117,6 +129,13 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
                                 </Badge>
                             </Tooltip>
+                            {!voting.isActive && (
+                                <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>
+                                    <Badge color={voting.isPublic ? "blue" : "gray"} variant="light">
+                                        <FontAwesomeIcon icon={voting.isPublic ? "eye" : "eye-slash"} />
+                                    </Badge>
+                                </Tooltip>
+                            )}
                             {sortedGroups.map((group, index) => (
                                 <UserGroupBadge key={index} group={group} tooltip="top" />
                             ))}
@@ -127,79 +146,100 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     </Group>
 
                     <Group wrap="wrap" gap="xs">
-                        <VoteCountBadge
-                            voteCount={voting.votes.length}
-                            totalVotes={voting.requiredVotes}
-                            variant="light"
-                        />
-                        {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
-                        {!checkUserVoted() && user && (
+                        {(user?.isCommittee || voting.isActive) && (
+                            <VoteCountBadge
+                                voteCount={voting.votes.length}
+                                totalVotes={voting.requiredVotes}
+                                variant="light"
+                            />
+                        )}
+                        {voting.isActive && user?.isCommittee && (
+                            <DueDateBadge date={voting.deadline} variant="light" />
+                        )}
+                        {!checkUserVoted() && user?.isCommittee && (
                             <Badge color="orange" variant="light">
                                 <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
                             </Badge>
                         )}
                     </Group>
 
-                    <Divider />
-                    <MarkdownText content={voting.description} />
-                    <Divider />
-                    {voting.targetUser && (
+                    {user?.isCommittee || voting.isActive ? (
                         <>
-                            <Stack gap="sm" maw={300}>
-                                <Text size="sm" c="dimmed">
-                                    Target User
+                            <Divider />
+                            <MarkdownText content={voting.description} />
+                            <Divider />
+                            {voting.targetUser && (
+                                <>
+                                    <Stack gap="sm" maw={300}>
+                                        <Text size="sm" c="dimmed">
+                                            Target User
+                                        </Text>
+                                        <UserCard
+                                            user={voting.targetUser}
+                                            onSelect={() => handleUserCardClick(voting.targetUser!)}
+                                            static
+                                        />
+                                    </Stack>
+                                </>
+                            )}
+                            {voting.targetTournamentName && (
+                                <Text fw={700}>
+                                    Target Tournament:{" "}
+                                    <Anchor href={voting.targetTournamentLink} target="_blank">
+                                        {voting.targetTournamentName}
+                                    </Anchor>
                                 </Text>
-                                <UserCard
-                                    user={voting.targetUser}
-                                    onSelect={() => handleUserCardClick(voting.targetUser!)}
-                                    static
-                                />
-                            </Stack>
+                            )}
+                            {voting.attachments?.length > 0 && (
+                                <Stack gap="sm">
+                                    <Text size="sm" c="dimmed">
+                                        Attachments
+                                    </Text>
+                                    <Group gap="sm">
+                                        {voting.attachments.map((attachment) => (
+                                            <AttachmentDisplay key={attachment._id} attachment={attachment} />
+                                        ))}
+                                    </Group>
+                                </Stack>
+                            )}
                         </>
-                    )}
-                    {voting.targetTournamentName && (
-                        <Text fw={700}>
-                            Target Tournament:{" "}
-                            <Anchor href={voting.targetTournamentLink} target="_blank">
-                                {voting.targetTournamentName}
-                            </Anchor>
-                        </Text>
-                    )}
-                    {voting.attachments?.length > 0 && (
-                        <Stack gap="sm">
-                            <Text size="sm" c="dimmed">
-                                Attachments
-                            </Text>
-                            <Group gap="sm">
-                                {voting.attachments.map((attachment) => (
-                                    <AttachmentDisplay key={attachment._id} attachment={attachment} />
-                                ))}
-                            </Group>
-                        </Stack>
-                    )}
-                    <Group>
-                        <Button
-                            variant="filled"
-                            color="warning"
-                            onClick={handleToggleStatus}
-                            loading={toggleStatusMutation.isPending}
-                            leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
-                            {voting.isActive ? "Conclude" : "Reopen"}
-                        </Button>
-                        {(!voting.votes.length || user?.isAdmin) && (
+                    ) : null}
+
+                    {user?.isCommittee && (
+                        <Group>
                             <Button
                                 variant="filled"
-                                color="danger"
-                                onClick={handleDelete}
-                                loading={deleteVotingMutation.isPending}
-                                leftSection={<FontAwesomeIcon icon="trash" />}>
-                                Delete
+                                color="warning"
+                                onClick={handleToggleStatus}
+                                loading={toggleStatusMutation.isPending}
+                                leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
+                                {voting.isActive ? "Conclude" : "Reopen"}
                             </Button>
-                        )}
-                    </Group>
+                            {!voting.isActive && (
+                                <Button
+                                    variant="filled"
+                                    color={voting.isPublic ? "gray" : "blue"}
+                                    onClick={handleTogglePublic}
+                                    loading={togglePublicMutation.isPending}
+                                    leftSection={<FontAwesomeIcon icon={voting.isPublic ? "eye-slash" : "eye"} />}>
+                                    {voting.isPublic ? "Make Private" : "Make Public"}
+                                </Button>
+                            )}
+                            {!voting.votes.length && (
+                                <Button
+                                    variant="filled"
+                                    color="danger"
+                                    onClick={handleDelete}
+                                    loading={deleteVotingMutation.isPending}
+                                    leftSection={<FontAwesomeIcon icon="trash" />}>
+                                    Delete
+                                </Button>
+                            )}
+                        </Group>
+                    )}
                 </Stack>
             </Card>
-            <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
+            {user?.isCommittee && <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />}
         </>
     );
 }

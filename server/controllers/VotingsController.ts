@@ -1,6 +1,6 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
-import { VotingQueryParams, VotingListQuery } from "../../interfaces/Voting";
+import { VotingQueryParams, VotingListQuery, IVoting } from "../../interfaces/Voting";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
@@ -12,6 +12,7 @@ import LogService from "../services/LogService";
 import helpers from "../helpers";
 import { Request, Response } from "express";
 import UploadService from "../services/UploadService";
+import VotingService from "../services/VotingService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -38,11 +39,19 @@ class VotingsController {
     public async index(req: Request, res: Response) {
         const reqQuery = req.query as VotingListQuery;
         const dbQuery: VotingQueryParams = {};
+        const user = res.locals!.user!;
 
         if (reqQuery.title) dbQuery.title = new RegExp(reqQuery.title, "i");
         if (reqQuery.category) dbQuery.category = reqQuery.category;
         if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
-        if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
+
+        // Only show concluded AND public votes to non-committee members
+        if (!user.isCommittee) {
+            dbQuery.isActive = false;
+            dbQuery.isPublic = true;
+        } else if (reqQuery.status) {
+            dbQuery.isActive = reqQuery.status === "active";
+        }
 
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
@@ -53,8 +62,13 @@ class VotingsController {
             .sort({ createdAt: -1 })
             .populate(DEFAULT_POPULATE);
 
-        // Filter votings that need attention
-        if (reqQuery.showNeedsAttention === "true") {
+        // Censor votings for non-committee members
+        if (!user.isCommittee) {
+            votings = votings.map((voting) => VotingService.censorVotingForNonCommittee(voting)) as unknown as IVoting[];
+        }
+
+        // Filter votings that need attention (only for committee members)
+        if (reqQuery.showNeedsAttention === "true" && user.isCommittee) {
             votings = votings.filter((voting) => {
                 return (
                     voting.isActive && !voting.votes.some((vote) => vote.author._id.toString() === req.session.mongoId)
@@ -75,8 +89,19 @@ class VotingsController {
     /** GET a voting */
     public async getVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
+        const user = res.locals!.user!;
 
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+
+        // Non-committee members can only view concluded public votes
+        if (!user.isCommittee && (voting.isActive || !voting.isPublic)) {
+            return res.json({ error: "You can only view concluded public votes" });
+        }
+
+        // Censor voting for non-committee members
+        if (!user.isCommittee) {
+            return res.json(VotingService.censorVotingForNonCommittee(voting));
+        }
 
         res.json(voting);
     }
@@ -483,7 +508,7 @@ class VotingsController {
             return res.json({ error: "Cannot delete concluded votes!" });
         }
 
-        if (voting.votes.length && !res.locals!.user!.isAdmin) {
+        if (voting.votes.length) {
             return res.json({ error: "Cannot delete voting with votes!" });
         }
 
@@ -506,6 +531,43 @@ class VotingsController {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 description: `Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                 color: webhookColors.darkRed,
+            },
+        ]);
+    }
+
+    /** POST toggle voting public */
+    public async toggleVotingPublic(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+        const voting = await Voting.findById(votingId).orFail();
+
+        if (voting.isActive) {
+            return res.json({ error: "Cannot change publicity of active votes" });
+        }
+
+        voting.isPublic = !voting.isPublic;
+        await voting.save();
+
+        res.json({
+            message: `Vote is now ${voting.isPublic ? "public" : "private"}`,
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
+                voting.isPublic ? "public" : "private"
+            }`,
+            "voting"
+        );
+
+        // Discord
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                description: `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
+                    voting.isPublic ? "available for **public** viewing" : "private"
+                }`,
+                color: voting.isPublic ? webhookColors.lightPurple : webhookColors.darkPurple,
             },
         ]);
     }

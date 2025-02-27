@@ -14,6 +14,7 @@ export type VotingCategory = "tournament" | "user" | "discussion";
 export type VotingType = "variable" | "binary" | "classic";
 
 export interface VotingQueryParams {
+    isPublic?: boolean;
     title?: string | RegExp;
     category?: VotingCategory;
     assignedGroup?: UserGroup;
@@ -59,6 +60,7 @@ export interface IVoting extends Document {
     attachments: IAttachment[];
     createdAt: Date;
     updatedAt: Date;
+    isPublic: boolean;
 
     // virtuals
     deadline: Date;

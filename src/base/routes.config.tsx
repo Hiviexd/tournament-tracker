@@ -47,14 +47,14 @@ const routes: RouteConfig[] = [
         page: <VotingListPage />,
         title: "Votes Listing",
         icon: "poll-h",
-        permissions: ["committee"],
+        permissions: ["user"],
     },
     {
         path: "/votes/:votingId",
         page: <VotingDetailsPage />,
         title: "Vote Details",
         icon: "poll-h",
-        permissions: ["committee"],
+        permissions: ["user"],
     },
     {
         path: "/markdown",

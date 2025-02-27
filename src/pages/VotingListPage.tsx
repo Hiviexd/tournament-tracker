@@ -15,6 +15,10 @@ import VotingCreateModal from "../components/votings/VotingCreateModal";
 import VotingCard from "../components/votings/VotingCard";
 import VotingFilters from "../components/votings/VotingFilters";
 
+// Atom
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../store/atoms";
+
 export default function VotingListPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
@@ -27,6 +31,8 @@ export default function VotingListPage() {
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
+
+    const [user] = useAtom(loggedInUserAtom);
 
     // Handle URL params
     useEffect(() => {
@@ -89,19 +95,20 @@ export default function VotingListPage() {
 
     return (
         <Stack gap="md">
-            {/* Filters */}
-            <Stack gap="md">
-                <VotingFilters values={searchInput} onChange={setSearchInput} />
-                {/* Create voting button */}
-                <Button
-                    onClick={open}
-                    leftSection={<FontAwesomeIcon icon="plus" />}
-                    variant="filled"
-                    color="primary"
-                    fullWidth>
-                    New Vote
-                </Button>
-            </Stack>
+            {/* Only show filters and create button for committee members */}
+            {user?.isCommittee && (
+                <Stack gap="md">
+                    <VotingFilters values={searchInput} onChange={setSearchInput} />
+                    <Button
+                        onClick={open}
+                        leftSection={<FontAwesomeIcon icon="plus" />}
+                        variant="filled"
+                        color="primary"
+                        fullWidth>
+                        New Vote
+                    </Button>
+                </Stack>
+            )}
 
             {/* Create voting modal */}
             <VotingCreateModal opened={opened} onClose={close} />
