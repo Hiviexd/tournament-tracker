@@ -130,6 +130,11 @@ function validateOsuProfileLink(input: string): string | null {
     return null;
 }
 
+/** * Delay execution for specified milliseconds */
+const delay = (ms: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 export default {
     setSession,
     escapeUsername,
@@ -142,4 +147,5 @@ export default {
     truncateFilename,
     getAttachmentsField,
     validateOsuProfileLink,
+    delay,
 };

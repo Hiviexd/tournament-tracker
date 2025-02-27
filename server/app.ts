@@ -8,6 +8,7 @@ import "express-async-errors";
 import { logger } from "./middlewares/logger";
 import path from "path";
 import { styles } from "./helpers/consoleStyles";
+import AutomationService from "./services/AutomationService";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -135,7 +136,8 @@ app.listen(port, () => {
     );
     console.log("└──────────────────────────────────────────────────────────┘");
 
-    // insert automation stuff below
+    // Start automation service
+    AutomationService.start();
 });
 
 export default app;

@@ -36,12 +36,7 @@ class DiscordService {
      * @param threadId Optional ID of the thread to send the message to
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
-    public async sendWebhook(
-        embeds: IDiscordEmbed[],
-        message?: string,
-        threadId?: string,
-        webhook?: string
-    ) {
+    public async sendWebhook(embeds: IDiscordEmbed[], message?: string, threadId?: string, webhook?: string) {
         const url = this.getWebhookLink(webhook, threadId);
 
         try {
@@ -51,6 +46,7 @@ class DiscordService {
                 embeds,
                 content: message || "",
             });
+            await helpers.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
@@ -85,6 +81,7 @@ class DiscordService {
                 embeds,
                 content: `${pings} ${message || ""}`,
             });
+            await helpers.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
@@ -119,6 +116,7 @@ class DiscordService {
                 embeds,
                 content: `${pings} ${message || ""}`,
             });
+            await helpers.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }

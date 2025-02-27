@@ -4,6 +4,7 @@
     "version": "0.0.0",
     "scripts": {
         "dev": "run-p -rl dev-server dev-client",
+        "dev-automation": "cross-env AUTOMATION_DEBUG=true run-p -rl dev-server dev-client",
         "dev-client": "cross-env NODE_ENV=development vite --mode development",
         "dev-server": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --no-notify --project server/tsconfig.json server/app.ts",
         "prod": "cross-env NODE_ENV=production PORT=8088 node ./dist/server/app.js",
@@ -32,6 +33,7 @@
         "chroma-js": "^3.1.2",
         "connect-mongo": "3.2.0",
         "cookie-parser": "^1.4.6",
+        "cron": "^4.1.0",
         "cross-env": "^7.0.3",
         "dayjs": "^1.11.13",
         "express": "^4.19.2",
