@@ -22,7 +22,7 @@ export default function TicketInfo({ ticket }: IProps) {
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
 
-        const updatedDays = moment().diff(moment(ticket.updatedAt), "days");
+        const updatedDays = moment().diff(moment(ticket.lastResponseAt), "days");
         if (updatedDays >= 10) return "danger";
         if (updatedDays >= 7) return "warning";
         return "success";
@@ -58,7 +58,7 @@ export default function TicketInfo({ ticket }: IProps) {
                         </Text>
                         <Text size="sm" c="dimmed">
                             Created by <UserLink user={ticket.author} /> • Last updated{" "}
-                            <DateBadge date={ticket.updatedAt} />
+                            <DateBadge date={ticket.lastResponseAt} />
                         </Text>
                     </Stack>
                     <Group gap="xs">

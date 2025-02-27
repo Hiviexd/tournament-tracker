@@ -63,7 +63,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
 
-        const updatedDays = moment().diff(moment(ticket.updatedAt), "days");
+        const updatedDays = moment().diff(moment(ticket.lastResponseAt), "days");
         if (updatedDays >= 10) return "danger";
         if (updatedDays >= 7) return "warning";
         return "success";
@@ -126,7 +126,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         </Tooltip>
                     </Badge>
 
-                    <DateBadge date={ticket.updatedAt} warningAge={7} dangerAge={10} staticColor={!ticket.isActive} />
+                    <DateBadge date={ticket.lastResponseAt} warningAge={7} dangerAge={10} staticColor={!ticket.isActive} />
                 </Group>
             </Stack>
         </Card>
