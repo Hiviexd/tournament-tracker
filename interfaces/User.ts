@@ -41,6 +41,7 @@ export interface IUser extends Document {
 
     // virtuals
     avatarUrl: string;
+    osuProfileUrl: string;
     isTournamentCommittee: boolean;
     isContestCommittee: boolean;
     isAdmin: boolean;

@@ -27,6 +27,16 @@ TicketSchema.virtual("isTicket").get(function (this: ITicket) {
     return this.type === "ticket";
 });
 
+TicketSchema.virtual("lastResponseAt").get(function (this: ITicket) {
+    if (!this.messages?.length) return this.createdAt;
+
+    const lastMessage = this.messages
+        .filter((message) => !message.isNote)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+    return lastMessage ? lastMessage.createdAt : this.createdAt;
+});
+
 const Ticket = mongoose.model<ITicket>("Ticket", TicketSchema);
 
 export default Ticket;

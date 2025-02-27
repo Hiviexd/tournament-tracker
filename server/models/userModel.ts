@@ -32,6 +32,10 @@ UserSchema.virtual("avatarUrl").get(function (this: IUser) {
     return `https://a.ppy.sh/${this.osuId}`;
 });
 
+UserSchema.virtual("osuProfileUrl").get(function (this: IUser) {
+    return `https://osu.ppy.sh/users/${this.osuId}`;
+});
+
 UserSchema.virtual("isTournamentCommittee").get(function (this: IUser) {
     return this.groups && this.groups.includes("tc");
 });

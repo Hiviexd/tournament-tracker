@@ -41,4 +41,5 @@ export interface ITicket extends Document {
     // virtuals
     isReport: boolean;
     isTicket: boolean;
+    lastResponseAt: Date;
 }
