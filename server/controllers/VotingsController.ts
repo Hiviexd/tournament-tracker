@@ -4,7 +4,6 @@ import { VotingQueryParams, VotingListQuery, IVoting } from "../../interfaces/Vo
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
-import { IVote, BinaryVote, VariableVote } from "@interfaces/Vote";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
@@ -64,7 +63,9 @@ class VotingsController {
 
         // Censor votings for non-committee members
         if (!user.isCommittee) {
-            votings = votings.map((voting) => VotingService.censorVotingForNonCommittee(voting)) as unknown as IVoting[];
+            votings = votings.map((voting) =>
+                VotingService.censorVotingForNonCommittee(voting)
+            ) as unknown as IVoting[];
         }
 
         // Filter votings that need attention (only for committee members)
@@ -354,105 +355,21 @@ class VotingsController {
 
         // Only send results if concluding the vote
         if (!voting.isActive) {
-            const getVotingResults = () => {
-                switch (voting.type) {
-                    case "classic": {
-                        const optionCounts = voting.options.map((option, index) => {
-                            const votes = voting.votes.filter(
-                                (v) => v.data.type === "classic" && v.data.option === index
-                            ).length;
-                            const percentage = voting.votes.length
-                                ? Math.round((votes / voting.votes.length) * 100)
-                                : 0;
-                            return { option, votes, percentage };
-                        });
+            const fields = VotingService.generateVotingResults(voting);
 
-                        const maxVotes = Math.max(...optionCounts.map((o) => o.votes));
-                        const winners = optionCounts.filter((o) => o.votes === maxVotes);
-
-                        return {
-                            results: optionCounts
-                                .map((o) => `- **${o.option}** - ${o.percentage}% (${o.votes}/${voting.votes.length})`)
-                                .join("\n"),
-                            winners: winners.map((w) => w.option).join(", "),
-                        };
-                    }
-
-                    case "binary": {
-                        const scores = voting.votes
-                            .filter((v): v is IVote & { data: BinaryVote } => v.data.type === "binary")
-                            .map((v) => v.data.score);
-
-                        const avgScore = scores.length
-                            ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
-                            : "N/A";
-
-                        return {
-                            results:
-                                `Average score: **${avgScore}** (${scores.length} votes)\n\n` +
-                                `Distribution:\n` +
-                                `- ${voting.options[0]} (1 to 5): ${scores.filter((s) => s > 0).length}\n` +
-                                `- Neutral (0): ${scores.filter((s) => s === 0).length}\n` +
-                                `- ${voting.options[1]} (-5 to -1): ${scores.filter((s) => s < 0).length}`,
-                            winners: `Average: ${avgScore}`,
-                        };
-                    }
-
-                    case "variable": {
-                        const optionScores = voting.options.map((option, index) => {
-                            const scores = voting.votes
-                                .filter((v): v is IVote & { data: VariableVote } => v.data.type === "variable")
-                                .map((v) => v.data.scores.find((s) => s.optionIndex === index)?.score ?? 0);
-
-                            const avgScore = scores.length
-                                ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
-                                : "N/A";
-
-                            return { option, avgScore, votes: scores.length };
-                        });
-
-                        const maxScore = Math.max(...optionScores.map((o) => Number(o.avgScore)));
-                        const winners = optionScores.filter((o) => Number(o.avgScore) === maxScore);
-
-                        return {
-                            results: optionScores
-                                .map((o) => `- **${o.option}** - Avg: ${o.avgScore} (${o.votes} votes)`)
-                                .join("\n"),
-                            winners: winners.map((w) => w.option).join(", "),
-                        };
-                    }
-                }
-            };
-
-            const { results, winners } = getVotingResults();
-
-            await DiscordService.sendWebhook([
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Concluded vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                    color: webhookColors.darkYellow,
-                    fields: [
-                        {
-                            name: "Vote Type",
-                            value: `*${voting.type}*`,
-                            inline: true,
-                        },
-                        {
-                            name: "Total Votes",
-                            value: `${voting.votes.length}`,
-                            inline: true,
-                        },
-                        {
-                            name: "Results",
-                            value: helpers.shorten(results, 1024),
-                        },
-                        {
-                            name: voting.type === "binary" ? "Final Score" : "Winner(s)",
-                            value: winners,
-                        },
-                    ],
-                },
-            ]);
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: webhookColors.darkYellow,
+                        description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                        fields,
+                    },
+                ],
+                undefined,
+                undefined,
+                "main"
+            );
         } else {
             // Voting resumed
             await DiscordService.sendWebhook([
