@@ -15,7 +15,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
                 kind: { type: String, enum: ["join", "leave"], required: true },
             },
         ],
-        discordId: { type: String },
+        discordId: { type: Number },
         isActiveReviewer: { type: Boolean, default: true },
         inBag: { type: Boolean, default: true },
         coverUrl: { type: String },

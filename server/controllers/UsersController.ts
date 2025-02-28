@@ -265,6 +265,32 @@ class UsersController {
             user: updatedUser,
         });
     }
+
+    /** POST update discord ID */
+    public async updateDiscordId(req: Request, res: Response) {
+        const userId = req.params.userId;
+        const { discordId } = req.body;
+
+        const user = await User.findById(userId).orFail();
+
+        if (Number.isNaN(Number(discordId))) {
+            return res.json({ error: "Invalid Discord ID!" });
+        }
+
+        user.discordId = Number(discordId);
+        await user.save();
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `Updated Discord ID for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})`,
+            "user"
+        );
+
+        res.json({
+            message: `Updated Discord ID successfully!`,
+            user,
+        });
+    }
 }
 
 export default new UsersController();

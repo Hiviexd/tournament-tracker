@@ -17,7 +17,7 @@ export const searchUsers = async (search: string, limit?: number): Promise<IUser
 
 export const getCommitteeUsers = async (includeAlumni?: boolean): Promise<IUser[]> => {
     const response = await axios.get("/api/users/getCommittee", {
-        params: { includeAlumni }
+        params: { includeAlumni },
     });
     return response.data;
 };
@@ -54,5 +54,10 @@ export const updateUserBadge = async (data: UpdateBadgeRequest) => {
 
 export const syncUser = async (userId: string) => {
     const response = await axios.post(`/api/users/${userId}/sync`);
+    return response.data;
+};
+
+export const updateDiscordId = async (userId: string, discordId: string) => {
+    const response = await axios.post(`/api/users/${userId}/updateDiscordId`, { discordId });
     return response.data;
 };

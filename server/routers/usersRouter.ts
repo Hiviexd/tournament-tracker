@@ -13,5 +13,6 @@ usersRouter.post("/:userId/toggleReviewerStatus", permissions.isLoggedIn, permis
 usersRouter.post("/:userId/groupMove", permissions.isLoggedIn, permissions.isAdmin, UsersController.updateUserGroups);
 usersRouter.post("/:userId/updateBadge", permissions.isLoggedIn, permissions.isAdmin, UsersController.updateBadge);
 usersRouter.post("/:userId/sync", permissions.isLoggedIn, permissions.isCommittee, UsersController.syncUser);
+usersRouter.post("/:userId/updateDiscordId", permissions.isLoggedIn, permissions.isCommittee, UsersController.updateDiscordId);
 
 export default usersRouter;

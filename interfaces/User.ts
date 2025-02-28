@@ -1,5 +1,5 @@
-import { IOsuCountry } from './OsuApi';
-import { Document, Model, DocumentQuery } from 'mongoose';
+import { IOsuCountry } from "./OsuApi";
+import { Document, Model, DocumentQuery } from "mongoose";
 
 export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm";
 
@@ -32,7 +32,7 @@ export interface IUser extends Document {
     username: string;
     groups: UserGroup[];
     history: IUserHistory[];
-    discordId?: string;
+    discordId?: number;
     isActiveReviewer: boolean;
     inBag: boolean;
     coverUrl?: string;

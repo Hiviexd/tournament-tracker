@@ -8,6 +8,7 @@ import {
     updateUserGroup,
     updateUserBadge,
     syncUser,
+    updateDiscordId,
 } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
@@ -62,14 +63,15 @@ export function useToggleReviewerStatus(userId: string) {
             const response = await toggleReviewerStatus(userId);
             return handleMutationResponse(response);
         },
-        onSuccess: (updatedUser) => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
 
             // Update loggedInUser when relevant
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
-                setLoggedInUser(updatedUser as IUser);
+                const res = data as { message: string; user: IUser };
+                setLoggedInUser(res.user as IUser);
             }
         },
     });
@@ -140,6 +142,29 @@ export function useSyncUser(userId: string) {
             if (selectedUser?._id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
+            }
+        },
+    });
+}
+
+export function useUpdateDiscordId(userId: string) {
+    const queryClient = useQueryClient();
+    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
+
+    return useMutation({
+        mutationFn: async (discordId: string) => {
+            const response = await updateDiscordId(userId, discordId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+
+            // Update loggedInUser when relevant
+            if (loggedInUser?._id === userId) {
+                queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+                const res = data as { message: string; user: IUser };
+                setLoggedInUser(res.user as IUser);
             }
         },
     });

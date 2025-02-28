@@ -2,6 +2,7 @@ import { Modal, Stack, Divider } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
+import DiscordIdSetting from "./settings/DiscordIdSetting";
 
 interface IProps {
     opened: boolean;
@@ -16,8 +17,9 @@ export default function SettingsModal({ opened, onClose }: IProps) {
     return (
         <Modal opened={opened} onClose={onClose} title="Settings" size="md">
             <Stack>
-                <Divider />
                 <ReviewerStatusSetting />
+                <Divider />
+                <DiscordIdSetting />
             </Stack>
         </Modal>
     );
