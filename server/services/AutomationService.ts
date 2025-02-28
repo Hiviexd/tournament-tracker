@@ -8,11 +8,13 @@ import webhookColors from "../constants/webhookColors";
 import VotingService from "./VotingService";
 import { styles } from "../helpers/consoleStyles";
 import helpers from "../helpers/index";
+import User from "../models/userModel";
 
 class AutomationService {
     private checkOverdueVotingsJob: CronJob;
     private checkConcludableVotingsJob: CronJob;
     private checkStaleTicketsJob: CronJob;
+    private checkBadgeUpdatesJob: CronJob;
 
     constructor() {
         // Run at 17:00 UTC every day
@@ -23,6 +25,9 @@ class AutomationService {
 
         // Run at 18:00 UTC every day
         this.checkStaleTicketsJob = new CronJob("0 18 * * *", this.checkStaleTickets.bind(this));
+
+        // Run at 19:00 UTC every day
+        this.checkBadgeUpdatesJob = new CronJob("0 19 * * *", this.checkBadgeUpdates.bind(this));
     }
 
     public start() {
@@ -31,6 +36,7 @@ class AutomationService {
         this.checkOverdueVotingsJob.start();
         this.checkConcludableVotingsJob.start();
         this.checkStaleTicketsJob.start();
+        this.checkBadgeUpdatesJob.start();
 
         console.log(styles("✓ Automation service started!", ["green", "bold", "underline"]));
 
@@ -40,6 +46,7 @@ class AutomationService {
             this.checkOverdueVotings();
             this.checkConcludableVotings();
             this.checkStaleTickets();
+            this.checkBadgeUpdates();
         }
     }
 
@@ -161,7 +168,11 @@ class AutomationService {
                         description: `[**${ticket.title}**](${ticketUrl}) has had no response in ${daysSinceLastResponse} days!`,
                         fields: [
                             { name: "Type", value: ticketType, inline: true },
-                            { name: "Author", value: `[**${ticket.author.username}**](${ticket.author.osuProfileUrl})`, inline: true },
+                            {
+                                name: "Author",
+                                value: `[**${ticket.author.username}**](${ticket.author.osuProfileUrl})`,
+                                inline: true,
+                            },
                             {
                                 name: "Last Response",
                                 value: helpers.discordTimestamp(ticket.lastResponseAt),
@@ -188,6 +199,48 @@ class AutomationService {
                     },
                 ]);
             }
+        }
+    }
+
+    private async checkBadgeUpdates() {
+        const activeCommitteeMembers = await User.find({
+            groups: { $in: ["tc", "cc"] },
+        });
+
+        const hivie = await User.findByUsernameOrOsuId(14102976);
+        const chillier = await User.findByUsernameOrOsuId(9501251);
+
+        if (!hivie?.discordId || !chillier?.discordId) {
+            console.error("Could not find Discord IDs for badge managers");
+            return;
+        }
+
+        const usersToPing = [hivie.discordId, chillier.discordId];
+
+        for (const user of activeCommitteeMembers) {
+            const tcYears = helpers.getYearsFromDays(user.tcDuration);
+            const ccYears = helpers.getYearsFromDays(user.ccDuration);
+
+            // Skip if badge is up to date
+            if (user.groups.includes("tc") && user.badgeValue === tcYears) continue;
+            if (user.groups.includes("cc") && user.badgeValue === ccYears) continue;
+
+            const committee = user.groups.includes("tc") ? "tc" : "cc";
+            const years = committee === "tc" ? tcYears : ccYears;
+            const commandString = helpers.generateBadgeCommand(user.osuId, years, user.badgeValue, committee);
+
+            await DiscordService.sendUserHighlightWebhook(usersToPing, [
+                {
+                    color: webhookColors.orange,
+                    description: `[**${user.username}**](${config.baseUrl}/users?id=${user.osuId}) needs a badge update!`,
+                    fields: [
+                        { name: "Current Badge", value: user.badgeValue.toString(), inline: true },
+                        { name: "Eligible Years", value: years.toString(), inline: true },
+                        { name: "Team", value: committee.toUpperCase(), inline: true },
+                        { name: "Command", value: `\`\`\`${commandString}\`\`\``, inline: false },
+                    ],
+                },
+            ]);
         }
     }
 }
