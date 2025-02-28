@@ -2,6 +2,7 @@
     "connection": "",
     "session": "",
     "baseUrl": "http://localhost:8088",
+    "automation": false,
     "osuApp": {
         "id": 0,
         "secret": "",
