@@ -277,12 +277,12 @@ class UsersController {
             return res.json({ error: "Invalid Discord ID!" });
         }
 
-        user.discordId = Number(discordId);
+        user.discordId = discordId;
         await user.save();
 
         await LogService.generate(
             req.session.mongoId!,
-            `Updated Discord ID for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})`,
+            `Updated Discord ID for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${discordId}`,
             "user"
         );
 

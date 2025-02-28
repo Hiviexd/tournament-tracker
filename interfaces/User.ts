@@ -32,7 +32,7 @@ export interface IUser extends Document {
     username: string;
     groups: UserGroup[];
     history: IUserHistory[];
-    discordId?: number;
+    discordId?: string;
     isActiveReviewer: boolean;
     inBag: boolean;
     coverUrl?: string;
