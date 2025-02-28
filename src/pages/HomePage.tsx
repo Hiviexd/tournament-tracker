@@ -1,26 +1,99 @@
+import { Container, Stack, Title, Text, Card, SimpleGrid, Group } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
-import { useDisclosure } from "@mantine/hooks";
-import { Text, Collapse } from "@mantine/core";
+import LoginButton from "../components/common/LoginButton";
+import CommitteeSection from "../components/users/CommitteeSection";
+import { IUser } from "@interfaces/User";
+
+interface Feature {
+    icon: IconProp;
+    title: string;
+    description: string;
+}
+
+const features: Feature[] = [
+    {
+        icon: "poll-h",
+        title: "Votes",
+        description: "View concluded committee votes that have been made public",
+    },
+    {
+        icon: "flag",
+        title: "Tournament Reports",
+        description: "Submit and track your tournament reports",
+    },
+    {
+        icon: "paper-plane",
+        title: "Tickets",
+        description: "Create and browse through the compendium of tickets created by users",
+    },
+    {
+        icon: "trophy",
+        title: "Official Support Status (coming soon)",
+        description: "Browse and view the official support status of tournaments",
+    },
+];
 
 export default function HomePage() {
     const [user] = useAtom(loggedInUserAtom);
-    const [opened, { toggle }] = useDisclosure(false);
+
+    const handleUserSelect = (user: IUser) => {
+        window.open(user.osuProfileUrl, "_blank");
+    };
 
     return (
-        <div>
-            <Text>{user ? <>Welcome back, {user.username}!</> : "Hello, newcomer!"}</Text>
-            <br />
-            <Text>pretend this is a complete home page...</Text>
-            <br />
-            {user?.username === "Hivie" && (
-                <a href="#" onClick={toggle}>
-                    view loggedInUser object
-                </a>
-            )}
-            <Collapse in={opened}>
-                <pre>{JSON.stringify(user, null, 2)}</pre>
-            </Collapse>
-        </div>
+        <Container size="lg">
+            <Stack gap="xl" py="xl">
+                {/* Hero Section */}
+                <Stack ta="center" gap="md">
+                    <Title order={1}>Tournament Tracker</Title>
+                    <Text size="xl" c="dimmed" maw={600} mx="auto">
+                        The one-stop shop for all official osu! tournament correspondence and information!
+                    </Text>
+                </Stack>
+
+                {/* Features Grid */}
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                    {features.map((feature, index) => (
+                        <Card key={index} withBorder padding="lg" radius="md">
+                            <Group mb="xs">
+                                <FontAwesomeIcon
+                                    icon={feature.icon}
+                                    size="lg"
+                                    style={{ color: "var(--mantine-color-primary-6)" }}
+                                />
+                                <Title order={4}>{feature.title}</Title>
+                            </Group>
+                            <Text size="sm" c="dimmed">
+                                {feature.description}
+                            </Text>
+                        </Card>
+                    ))}
+                </SimpleGrid>
+
+                {/* Login Section */}
+                {!user && (
+                    <Card withBorder padding="xl" radius="md">
+                        <Stack align="center" gap="md">
+                            <Title order={3}>Get Started</Title>
+                            <Text c="dimmed" ta="center" maw={400}>
+                                Sign in with your osu! account to access the platform's features
+                            </Text>
+                            <LoginButton size="lg" />
+                        </Stack>
+                    </Card>
+                )}
+
+                {/* Committee Section */}
+                <Stack gap="md">
+                    <Title order={2} ta="center">
+                        Meet the Committee
+                    </Title>
+                    <CommitteeSection onSelect={handleUserSelect} />
+                </Stack>
+            </Stack>
+        </Container>
     );
 }
