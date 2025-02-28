@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Menu, Avatar, Button, Image } from "@mantine/core";
+import { Menu, Avatar } from "@mantine/core";
 // import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { IUser } from "../../../../interfaces/User";
 import ThemeCustomizeModal from "../modals/ThemeCustomizeModal";
 import SettingsModal from "../modals/SettingsModal";
+import LoginButton from "../LoginButton";
 
 interface IProps {
     user: IUser | null;
@@ -14,31 +15,10 @@ interface IProps {
 export default function UserMenu({ user }: IProps) {
     const [menuOpened, setMenuOpened] = useState(false);
     const { hovered, ref } = useHover();
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
     const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
 
-    const handleLogin = () => {
-        setIsLoggingIn(true);
-        window.location.href = "/api/auth/login";
-    };
-
-    const handleLogout = () => {
-        window.location.href = "/api/auth/logout";
-    };
-
-    if (!user) {
-        return (
-            <Button
-                onClick={handleLogin}
-                variant="gradient"
-                loading={isLoggingIn}
-                gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
-                leftSection={<Image src="/assets/logo-osu.svg" h={20} />}>
-                Login
-            </Button>
-        );
-    }
+    if (!user) return <LoginButton size="sm" />;
 
     return (
         <>
@@ -76,7 +56,9 @@ export default function UserMenu({ user }: IProps) {
                     )}
                     <Menu.Divider />
                     <Menu.Item
-                        onClick={handleLogout}
+                        onClick={() => {
+                            window.location.href = "/api/auth/logout";
+                        }}
                         color="danger"
                         leftSection={<FontAwesomeIcon icon="sign-out-alt" />}>
                         Log Out
