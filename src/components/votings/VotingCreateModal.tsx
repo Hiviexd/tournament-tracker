@@ -1,9 +1,9 @@
 // Base
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useCreateVoting } from "../../hooks/useVotings";
 import { VotingCategory, type VotingFormData, VotingType } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
-import { VOTE_COLORS } from "../../constants";
+import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import helpers from "../../helpers";
 
@@ -19,15 +19,14 @@ import {
     Button,
     Group,
     Pill,
-    ActionIcon,
     Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Components
 import UserSearch from "../common/UserSearch";
 import FileUploadInput from "../common/FileUploadInput";
+import OptionSearch from "../common/OptionSearch";
 
 interface IProps {
     opened: boolean;
@@ -37,7 +36,6 @@ interface IProps {
 export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
     const { files, handleFileChange } = useFileUpload();
-    const [newOption, setNewOption] = useState("");
 
     const form = useForm({
         initialValues: {
@@ -114,26 +112,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         }
     });
 
-    const handleAddOption = () => {
-        const trimmedOption = newOption.trim();
-        if (trimmedOption && !form.values.options.includes(trimmedOption)) {
-            form.setFieldValue("options", [...form.values.options, trimmedOption]);
-            setNewOption("");
-        }
-    };
-
     const handleRemoveOption = (optionToRemove: string) => {
         form.setFieldValue(
             "options",
             form.values.options.filter((option) => option !== optionToRemove)
         );
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddOption();
-        }
     };
 
     const categoryOptions = [
@@ -152,6 +135,21 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         { value: "binary", label: "Binary (Yes/No Score)" },
         { value: "variable", label: "Variable (Multiple Scores)" },
     ];
+
+    const presetOptions = [
+        { value: "userAddition", label: "User Addition" },
+        { value: "tournamentBans", label: "Tournament Ban" },
+    ];
+
+    const handlePresetChange = (preset: string) => {
+        if (!preset) return;
+
+        const selectedPreset = VOTE_PRESETS[preset as keyof typeof VOTE_PRESETS];
+        if (selectedPreset) {
+            form.setFieldValue("type", selectedPreset.type);
+            form.setFieldValue("options", [...selectedPreset.options]);
+        }
+    };
 
     // Set default options
     const setDefaultOptions = useCallback(() => {
@@ -259,6 +257,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("type")}
                     />
 
+                    <Select
+                        label="Vote Preset"
+                        placeholder="Select a preset configuration"
+                        data={presetOptions}
+                        onChange={(value) => handlePresetChange(value || "")}
+                        clearable
+                    />
+
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>
                             Options {form.values.type === "binary" && "(Must be exactly 2)"}
@@ -292,27 +298,16 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 ))
                             )}
                         </Group>
-                        <Group gap="xs" flex={1} align="flex-start">
-                            <TextInput
-                                placeholder="Add new option"
-                                size="xs"
-                                value={newOption}
-                                onChange={(e) => setNewOption(e.currentTarget.value)}
-                                onKeyDown={handleKeyPress}
-                                error={form.errors.options}
-                                disabled={form.values.type === "binary" && form.values.options.length >= 2}
-                            />
-                            <ActionIcon
-                                variant="filled"
-                                color="primary"
-                                onClick={handleAddOption}
-                                disabled={
-                                    !newOption.trim() ||
-                                    (form.values.type === "binary" && form.values.options.length >= 2)
-                                }>
-                                <FontAwesomeIcon icon="plus" />
-                            </ActionIcon>
-                        </Group>
+                        <OptionSearch
+                            options={PREDEFINED_OPTIONS.filter((option) => !form.values.options.includes(option))}
+                            onOptionAdd={(option) => {
+                                if (!form.values.options.includes(option)) {
+                                    form.setFieldValue("options", [...form.values.options, option]);
+                                }
+                            }}
+                            error={form.errors.options}
+                            disabled={form.values.type === "binary" && form.values.options.length >= 2}
+                        />
                     </Stack>
 
                     <FileUploadInput value={files} onChange={handleFileChange} />
