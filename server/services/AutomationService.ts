@@ -26,8 +26,8 @@ class AutomationService {
         // Run at 18:00 UTC every day
         this.checkStaleTicketsJob = new CronJob("0 18 * * *", this.checkStaleTickets.bind(this));
 
-        // Run at 19:00 UTC every day
-        this.checkBadgeUpdatesJob = new CronJob("0 19 * * *", this.checkBadgeUpdates.bind(this));
+        // Run at 12:00 UTC every day
+        this.checkBadgeUpdatesJob = new CronJob("0 12 * * *", this.checkBadgeUpdates.bind(this));
     }
 
     public start() {
