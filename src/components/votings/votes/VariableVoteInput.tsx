@@ -8,7 +8,7 @@ interface IProps {
 
 export default function VariableVoteInput({ options, values, onChange }: IProps) {
     return (
-        <Stack gap="md">
+        <Stack gap="lg">
             {options.map((option, index) => (
                 <Stack key={index} gap="xs">
                     <Text size="sm">{option}</Text>
