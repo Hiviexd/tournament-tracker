@@ -44,6 +44,12 @@ export const routes: IRoute[] = [
                 icon: "mail-bulk",
                 permissions: ["user"],
             },
+            {
+                title: "Import Reports",
+                link: "/reports/import",
+                icon: "file-import",
+                permissions: ["admin"],
+            },
         ],
     },
 

@@ -3,6 +3,7 @@ import Ticket from "../models/ticketModel";
 import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
+import { ImportReport } from "../../interfaces/Ticket";
 import LogService from "../services/LogService";
 import { IDiscordField } from "../../interfaces/Discord";
 import DiscordService from "../services/DiscordService";
@@ -12,6 +13,12 @@ import helpers from "../helpers";
 import TicketService from "../services/TicketService";
 import _ from "lodash";
 import UploadService from "../services/UploadService";
+import UserService from "../services/UserService";
+import fs from "fs/promises";
+
+interface MulterFiles {
+    [fieldname: string]: Express.Multer.File[];
+}
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -220,7 +227,8 @@ class TicketsController {
         const { ticketId } = req.params;
         const { content } = req.body;
         const isNote = req.body.isNote === "true" || req.body.isNote === false;
-        const files = req.files as Express.Multer.File[];
+        const uploadedFiles = req.files as MulterFiles | undefined;
+        const files = uploadedFiles?.files || [];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const isTicketAuthor = ticket.author.id === user.id;
@@ -318,6 +326,122 @@ class TicketsController {
                 }/tickets/${ticket._id})`,
             },
         ]);
+    }
+
+    /** POST import reports */
+    public async importReports(req: Request, res: Response) {
+        const author = res.locals!.user!;
+        const uploadedFiles = req.files as MulterFiles | undefined;
+        const file = uploadedFiles?.file?.[0];
+
+        if (!file) {
+            return res.json({ error: "No file uploaded" });
+        }
+
+        try {
+            // Read and parse JSON file
+            const jsonContent = await fs.readFile(file.path, "utf-8");
+            let reports: ImportReport[];
+
+            try {
+                reports = JSON.parse(jsonContent);
+                if (!Array.isArray(reports)) {
+                    throw new Error("File content must be an array of reports");
+                }
+            } catch (e) {
+                return res.json({ error: "Invalid JSON format" });
+            }
+
+            // Validate report objects
+            const isValidReport = (report: any): report is ImportReport => {
+                return (
+                    typeof report.id === "number" &&
+                    typeof report.created_at === "string" &&
+                    typeof report.updated_at === "string" &&
+                    typeof report.user_id === "number" &&
+                    typeof report.username === "string" &&
+                    typeof report.tournament_thread === "string" &&
+                    typeof report.content === "string"
+                );
+            };
+
+            if (!reports.every(isValidReport)) {
+                return res.json({ error: "One or more reports have invalid format" });
+            }
+
+            for (const report of reports) {
+                // Try to find or create the user
+                let user = await UserService.findOrCreateUser(req.session.accessToken!, report.user_id);
+
+                // If user lookup/creation fails, create a makeshift user
+                if (!user) {
+                    console.log(`Creating makeshift user for osuId: ${report.user_id}`);
+                    user = new User({
+                        username: report.user_id.toString(),
+                        osuId: report.user_id,
+                        groups: ["user"],
+                    });
+                    await user.save();
+                }
+                console.log(`User processed successfully: ${user.username} (${user.osuId})`);
+
+                // Add delay to prevent rate limiting
+                await helpers.delay(1000);
+
+                // Create the report
+                const count = await Ticket.countDocuments({ type: "report" });
+                const ticket = new Ticket({
+                    title: `Tournament Report #${count + 1}`,
+                    type: "report",
+                    author: user,
+                    assignedGroup: "tc", // Default to tournament committee
+                    isActive: false, // As specified in requirements
+                    targetTournamentName: "Imported Report", // Generic name since we only have the thread link
+                    targetTournamentLink: report.tournament_thread,
+                });
+
+                // Create the initial message
+                const initialMessage = new Message({
+                    author: user,
+                    content: report.content.trim(),
+                    isCommittee: false,
+                    attachments: [],
+                });
+                // Set timestamps from the old database
+                initialMessage.createdAt = new Date(report.created_at);
+                initialMessage.updatedAt = new Date(report.updated_at);
+
+                ticket.createdAt = new Date(report.created_at);
+                ticket.updatedAt = new Date(report.updated_at);
+
+                await initialMessage.save();
+                ticket.messages.push(initialMessage._id);
+                await ticket.save();
+
+                console.log(`Report imported successfully: ${ticket.title} (ID: ${ticket._id})`);
+
+                // Logger
+                await LogService.generate(
+                    author._id,
+                    `Imported report: [**${ticket.title}**](${config.baseUrl}/tickets/${ticket._id})`,
+                    "ticket"
+                );
+            }
+
+            // Clean up uploaded file
+            await fs.unlink(file.path);
+
+            res.json({ message: `Successfully imported ${reports.length} reports` });
+        } catch (error) {
+            console.error("Error importing reports:", error);
+            // Clean up uploaded file in case of error
+            try {
+                await fs.unlink(file.path);
+            } catch (e) {
+                console.error("Error deleting uploaded file:", e);
+            }
+            res.json({ error: "Failed to import reports" });
+        }
     }
 }
 

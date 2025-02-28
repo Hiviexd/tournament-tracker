@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleMutationResponse } from "../api/helpers";
 
 // API
-import { getTickets, getTicket, createTicket, sendMessage, toggleStatus } from "../api/tickets";
+import { getTickets, getTicket, createTicket, sendMessage, toggleStatus, importReports } from "../api/tickets";
 
 // Types
 import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
@@ -64,6 +64,20 @@ export function useToggleStatus(ticketId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+        },
+    });
+}
+
+export function useImportReports() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (formData: FormData) => {
+            const response = await importReports(formData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tickets"] });
         },
     });
 }

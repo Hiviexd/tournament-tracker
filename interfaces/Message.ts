@@ -16,4 +16,5 @@ export interface IMessage extends Document {
     isNote?: boolean;
     attachments?: IAttachment[];
     createdAt: Date;
+    updatedAt: Date;
 }

@@ -11,6 +11,7 @@ import TournamentsListPage from "../pages/TournamentsListPage";
 import TicketCreatePage from "../pages/TicketCreatePage";
 import TicketsListPage from "../pages/TicketsListPage";
 import TicketDetailsPage from "../pages/TicketDetailsPage";
+import ReportImportPage from "../pages/ReportImportPage";
 
 interface RouteConfig {
     path: string;
@@ -118,6 +119,13 @@ const routes: RouteConfig[] = [
         title: "Ticket Details",
         icon: "flag",
         permissions: ["user"],
+    },
+    {
+        path: "/reports/import",
+        page: <ReportImportPage />,
+        title: "Import Reports",
+        icon: "file-import",
+        permissions: ["admin"],
     },
     {
         path: "*",

@@ -30,3 +30,12 @@ export const toggleStatus = async (ticketId: string) => {
     const response = await axios.post(`/api/tickets/${ticketId}/toggleStatus`);
     return response.data;
 };
+
+export const importReports = async (formData: FormData) => {
+    const response = await axios.post("/api/tickets/import", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+};

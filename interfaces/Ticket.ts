@@ -16,6 +16,16 @@ export interface TicketQueryParams {
     page?: number;
 }
 
+export interface ImportReport {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    user_id: number;
+    username: string;
+    tournament_thread: string;
+    content: string;
+}
+
 export interface ITicketFormData extends FormData {
     files?: File[];
 }
