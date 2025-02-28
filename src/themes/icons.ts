@@ -63,6 +63,7 @@ import {
     faSync,
     faEye,
     faEyeSlash,
+    faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -129,5 +130,6 @@ export default function loadIcons() {
         faSync,
         faEye,
         faEyeSlash,
+        faIdCard,
     );
 }

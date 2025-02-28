@@ -46,6 +46,13 @@ export default function UserStatus({ user }: IProps) {
                 />
                 <Text size="sm">Administrator: {user.isAdmin ? "Yes" : "No"}</Text>
             </Group>
+            <Group gap="xs">
+                <FontAwesomeIcon
+                    icon="id-card"
+                    color={user.discordId ? "var(--mantine-color-success-6)" : "var(--mantine-color-danger-6)"}
+                />
+                <Text size="sm">Discord ID: {user.discordId ?? "Not set!"}</Text>
+            </Group>
         </Stack>
     );
 }
