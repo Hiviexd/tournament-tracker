@@ -81,7 +81,7 @@ export default function HomePage() {
                             <Text c="dimmed" ta="center" maw={400}>
                                 Sign in with your osu! account to access the platform's features
                             </Text>
-                            <LoginButton size="lg" />
+                            <LoginButton size="lg" text="Sign in with osu!" />
                         </Stack>
                     </Card>
                 )}
