@@ -14,6 +14,7 @@ export default function UserCard({ user, onSelect, static: isStatic = false }: I
             key={user._id}
             shadow="sm"
             p="md"
+            bg="primary.10"
             className={isStatic ? "user-card user-card-static" : "user-card"}
             style={{ minWidth: 240 }}
             onClick={() => onSelect(user)}>
