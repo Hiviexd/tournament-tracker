@@ -8,7 +8,7 @@ interface FilterValues {
     category: VotingCategory;
     assignedGroup: UserGroup;
     status: string;
-    showNeedsAttention: boolean; // Add this field
+    showNeedsAttention: boolean;
 }
 
 interface IProps {

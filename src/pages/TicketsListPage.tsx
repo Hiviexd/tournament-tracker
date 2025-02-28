@@ -36,6 +36,22 @@ export default function TicketsListPage() {
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
     const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
 
+    const handleFilterChange = (newFilters) => {
+        setSearchInput(newFilters);
+        setPage(1);
+    };
+
+    const { data, isLoading, error } = useTickets({
+        type,
+        title: debouncedTitle,
+        targetUser: searchInput.targetUser,
+        targetTournament: debouncedTournament,
+        assignedGroup: searchInput.assignedGroup,
+        isActive: searchInput.status ? searchInput.status === "active" : undefined,
+        showOwn: searchInput.showOwn,
+        page,
+    });
+
     // Handle URL params
     useEffect(() => {
         const params = new URLSearchParams();
@@ -49,7 +65,7 @@ export default function TicketsListPage() {
         if (searchInput.assignedGroup) params.set("assignedGroup", searchInput.assignedGroup);
         if (searchInput.status) params.set("status", searchInput.status);
         if (page > 1) params.set("page", page.toString());
-        setSearchParams(params);
+        setSearchParams(params, { replace: true });
     }, [
         debouncedTitle,
         debouncedTournament,
@@ -62,22 +78,6 @@ export default function TicketsListPage() {
         setSearchParams,
         type,
     ]);
-
-    // Reset page when filters change
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedTitle, debouncedTournament, searchInput.assignedGroup, searchInput.status]);
-
-    const { data, isLoading, error } = useTickets({
-        type,
-        title: debouncedTitle,
-        targetUser: searchInput.targetUser,
-        targetTournament: debouncedTournament,
-        assignedGroup: searchInput.assignedGroup,
-        isActive: searchInput.status ? searchInput.status === "active" : undefined,
-        showOwn: searchInput.showOwn,
-        page,
-    });
 
     const LoadingState = () => (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
@@ -122,7 +122,7 @@ export default function TicketsListPage() {
 
     return (
         <Stack gap="md">
-            <TicketsFilters values={searchInput} onChange={setSearchInput} type={type} />
+            <TicketsFilters values={searchInput} onChange={handleFilterChange} type={type} />
 
             <Divider />
 

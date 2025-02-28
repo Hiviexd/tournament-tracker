@@ -52,8 +52,23 @@ class VotingsController {
             dbQuery.isActive = reqQuery.status === "active";
         }
 
+        // Handle needs attention filter for committee members
+        if (reqQuery.showNeedsAttention === "true" && user.isCommittee) {
+            dbQuery.isActive = true;
+            dbQuery["votes"] = {
+                $not: {
+                    $elemMatch: {
+                        author: req.session.mongoId,
+                    },
+                },
+            };
+        }
+
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
+
+        // Get total count before pagination
+        const total = await Voting.countDocuments(dbQuery);
 
         let votings = await Voting.find(dbQuery)
             .skip(skip)
@@ -67,17 +82,6 @@ class VotingsController {
                 VotingService.censorVotingForNonCommittee(voting)
             ) as unknown as IVoting[];
         }
-
-        // Filter votings that need attention (only for committee members)
-        if (reqQuery.showNeedsAttention === "true" && user.isCommittee) {
-            votings = votings.filter((voting) => {
-                return (
-                    voting.isActive && !voting.votes.some((vote) => vote.author._id.toString() === req.session.mongoId)
-                );
-            });
-        }
-
-        const total = votings.length;
 
         res.json({
             votings,

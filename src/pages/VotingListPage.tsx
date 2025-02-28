@@ -34,29 +34,10 @@ export default function VotingListPage() {
 
     const [user] = useAtom(loggedInUserAtom);
 
-    // Handle URL params
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (debouncedTitle) params.set("title", debouncedTitle);
-        if (searchInput.category) params.set("category", searchInput.category);
-        if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
-        if (searchInput.status) params.set("status", searchInput.status);
-        if (searchInput.showNeedsAttention) params.set("needsAttention", "true");
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params);
-    }, [
-        debouncedTitle,
-        searchInput.category,
-        searchInput.assignedGroup,
-        searchInput.status,
-        searchInput.showNeedsAttention,
-        page,
-        setSearchParams,
-    ]);
-
-    useEffect(() => {
+    const handleFilterChange = (newFilters) => {
+        setSearchInput(newFilters);
         setPage(1);
-    }, [debouncedTitle, searchInput.category, searchInput.assignedGroup, searchInput.status]);
+    };
 
     const { data, isLoading, error } = useVotings({
         title: debouncedTitle,
@@ -66,6 +47,33 @@ export default function VotingListPage() {
         showNeedsAttention: searchInput.showNeedsAttention,
         page,
     });
+
+    // Ensure page number is valid when data changes
+    useEffect(() => {
+        if (data && page > data.pages && data.pages > 0) {
+            setPage(data.pages);
+        }
+    }, [data, page]);
+
+    // Handle URL params
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (debouncedTitle) params.set("title", debouncedTitle);
+        if (searchInput.category) params.set("category", searchInput.category);
+        if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
+        if (searchInput.status) params.set("status", searchInput.status);
+        if (searchInput.showNeedsAttention) params.set("needsAttention", "true");
+        if (page > 1) params.set("page", page.toString());
+        setSearchParams(params, { replace: true });
+    }, [
+        debouncedTitle,
+        searchInput.category,
+        searchInput.assignedGroup,
+        searchInput.status,
+        searchInput.showNeedsAttention,
+        page,
+        setSearchParams,
+    ]);
 
     const LoadingState = () => (
         <Stack gap="md">
@@ -98,7 +106,7 @@ export default function VotingListPage() {
             {/* Only show filters and create button for committee members */}
             {user?.isCommittee && (
                 <Stack gap="md">
-                    <VotingFilters values={searchInput} onChange={setSearchInput} />
+                    <VotingFilters values={searchInput} onChange={handleFilterChange} />
                     <Button
                         onClick={open}
                         leftSection={<FontAwesomeIcon icon="plus" />}
