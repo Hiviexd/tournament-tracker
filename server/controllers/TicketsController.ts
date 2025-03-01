@@ -172,7 +172,7 @@ class TicketsController {
         // Logger
         await LogService.generate(
             author._id,
-            `Created a new ${type}: [**${ticket.title}**](${config.baseUrl}/tickets/${ticket._id})`,
+            `Created a new ${type}: [**${ticket.title}**](${config.baseUrl}/${type}s/${ticket._id})`,
             "ticket"
         );
 
@@ -211,7 +211,7 @@ class TicketsController {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: type === "report" ? webhookColors.lightRed : webhookColors.blue,
                 title: embedTitle,
-                url: `${config.baseUrl}/tickets/${ticket._id}`,
+                url: `${config.baseUrl}/${type}s/${ticket._id}`,
                 fields,
             },
         ]);
@@ -284,7 +284,7 @@ class TicketsController {
                     },
                     content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
                         ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
-                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/tickets/${ticket._id}).`,
+                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${ticket._id}).`,
                 });
             }
         }
@@ -292,7 +292,7 @@ class TicketsController {
         // Logger
         await LogService.generate(
             user._id,
-            `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/tickets/${ticket._id})`,
+            `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket"
         );
 
@@ -323,7 +323,7 @@ class TicketsController {
                 color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
                 description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
                     config.baseUrl
-                }/tickets/${ticket._id})`,
+                }/${ticket.type}s/${ticket._id})`,
                 fields,
             },
         ]);
@@ -355,7 +355,7 @@ class TicketsController {
             user._id,
             `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
                 config.baseUrl
-            }/tickets/${ticket._id})`,
+            }/${ticket.type}s/${ticket._id})`,
             "ticket"
         );
 
@@ -366,7 +366,7 @@ class TicketsController {
                 color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
                 description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
                     config.baseUrl
-                }/tickets/${ticket._id})`,
+                }/${ticket.type}s/${ticket._id})`,
             },
         ]);
     }

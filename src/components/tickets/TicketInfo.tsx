@@ -29,7 +29,7 @@ export default function TicketInfo({ ticket }: IProps) {
     };
 
     const handleToggleStatus = async () => {
-        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ticket?`)) return;
+        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`)) return;
         await toggleStatusMutation.mutateAsync();
     };
 
