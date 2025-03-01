@@ -26,7 +26,12 @@ export default function CommitteeSection({ onSelect }: IProps) {
                         <Divider />
                         <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
                             {[...Array(4)].map((_, cardIndex) => (
-                                <Card key={cardIndex} bg="primary.10" shadow="sm" p="md" style={{ minWidth: 240 }}>
+                                <Card
+                                    key={cardIndex}
+                                    bg="primary.10"
+                                    shadow="sm"
+                                    p="md"
+                                    style={{ minWidth: 240 }}>
                                     <Group>
                                         <Skeleton radius="md" height={40} width={40} />
                                         <Stack gap={8}>
@@ -70,6 +75,8 @@ export default function CommitteeSection({ onSelect }: IProps) {
     };
 
     if (isLoading) return <LoadingState />;
+
+    if (!Array.isArray(users)) return;
 
     const tcUsers = users.filter((user) => user.isTournamentCommittee);
     const ccUsers = users.filter((user) => user.isContestCommittee);
