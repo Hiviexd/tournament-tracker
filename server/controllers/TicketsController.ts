@@ -21,7 +21,7 @@ const DEFAULT_POPULATE = [
         populate: [
             {
                 path: "author",
-                select: "username osuId groups",
+                select: "username osuId groups discordId",
             },
             { path: "attachments", select: "originalName url size type" },
         ],
@@ -308,7 +308,16 @@ class TicketsController {
             fields.push(helpers.getAttachmentsField(message.attachments)!);
         }
 
-        await DiscordService.sendWebhook([
+        // ping the committee members who sent messages in the ticket
+        const committeeMembers = new Set<string>();
+
+        ticket.messages.forEach((msg) => {
+            if (msg?.author && !msg.isNote && msg.isCommittee) {
+                committeeMembers.add(msg.author.discordId || msg.author.username);
+            }
+        });
+
+        await DiscordService.sendUserHighlightWebhook(Array.from(committeeMembers), [
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
