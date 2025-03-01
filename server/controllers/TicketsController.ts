@@ -12,6 +12,7 @@ import helpers from "../helpers";
 import TicketService from "../services/TicketService";
 import _ from "lodash";
 import UploadService from "../services/UploadService";
+import OsuBotService from "../services/OsuBotService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups" },
@@ -135,7 +136,9 @@ class TicketsController {
                 const sanitizedTournamentLink: string = targetTournamentLink.trim();
 
                 if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
-                    return res.json({ error: "Tournament name must be between 5 and 120 characters" });
+                    return res.json({
+                        error: "Tournament name must be between 5 and 120 characters",
+                    });
 
                 if (!helpers.isOsuForumLink(sanitizedTournamentLink))
                     return res.json({ error: "Invalid tournament forum link" });
@@ -253,6 +256,37 @@ class TicketsController {
         ticket.messages.push(message._id);
         await ticket.save();
 
+        // osu! notification
+        let osuNotification: boolean = false;
+
+        if (message.isCommittee && !isNote) {
+            osuNotification = true;
+
+            const uniqueUsers = new Set<number>();
+
+            uniqueUsers.add(ticket.author.osuId);
+
+            // Include sender if they're a committee member
+            if (user.isCommittee) {
+                uniqueUsers.add(user.osuId);
+            }
+
+            const userIds = Array.from(uniqueUsers);
+
+            console.log(userIds);
+            if (userIds.length > 0) {
+                await OsuBotService.sendAnnouncement(userIds, {
+                    channel: {
+                        name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
+                        description: `Response regarding: ${ticket.title}`,
+                    },
+                    content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
+                        ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
+                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/tickets/${ticket._id}).`,
+                });
+            }
+        }
+
         // Logger
         await LogService.generate(
             user._id,
@@ -283,7 +317,13 @@ class TicketsController {
             },
         ]);
 
-        res.json({ message: "Message sent successfully!" });
+        const response = osuNotification
+            ? "Sent! A copy of the osu! notification was sent to you for confirmation."
+            : isNote
+                ? "Added a note successfully!"
+                : "Message sent successfully!";
+
+        res.json({ message: response });
     }
 
     /** POST close or reopen ticket */
