@@ -59,3 +59,14 @@ export interface IOsuAuthResponse {
     access_token: string;
     refresh_token: string;
 }
+
+export interface IOsuMessageChannel {
+    name: string;
+    description?: string;
+}
+
+export interface IOsuBotMessage {
+    channel: IOsuMessageChannel;
+    content: string;
+}
+

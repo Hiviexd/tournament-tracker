@@ -12,7 +12,7 @@ export default class OsuApiService {
         return (errorResponse as ErrorResponse).error !== undefined;
     }
 
-    private static async executeRequest(options: AxiosRequestConfig) {
+    protected static async executeRequest(options: AxiosRequestConfig) {
         try {
             const res = await axios(options);
 
@@ -79,7 +79,10 @@ export default class OsuApiService {
         return await this.executeRequest(options);
     }
 
-    static async getUserInfo(token: string, userInput: string | number): Promise<IOsuUser | ErrorResponse> {
+    static async getUserInfo(
+        token: string,
+        userInput: string | number
+    ): Promise<IOsuUser | ErrorResponse> {
         const options: AxiosRequestConfig = {
             url: `https://osu.ppy.sh/api/v2/users/${userInput}`,
             method: "GET",

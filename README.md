@@ -29,6 +29,7 @@ The one-stop shop for all official osu! tournament correspondence and informatio
   - `baseUrl`: base URL of the website
   - `automation`: boolean for whether to run automation jobs or not
   - `osuApp`: credentials for the osu! API v2 client
+  - `osuBot`: credentials for the osu! bot API client
   - `discord`: Discord webhook setup
   - `r2`: the Cloudflare R2 bucket's credentials (optional)
 - Run `yarn dev`, the project will be served in `http://localhost:8088`
