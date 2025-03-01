@@ -32,6 +32,8 @@ const DEFAULT_LIMIT = 12;
 
 const FILE_UPLOAD_CATEGORY = "tickets";
 
+const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
+
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
@@ -112,7 +114,7 @@ class TicketsController {
         if (type === "report") {
             const count = await Ticket.countDocuments({ type: "report" });
             const reportType = targetUserId ? "User" : assignedGroup === "cc" ? "Contest" : "Tournament";
-            constructedTitle = `${reportType} Report #${count + 1}`;
+            constructedTitle = `${reportType} Report #${PIF_REPORT_COUNT_OFFSET + count + 1}`;
         }
 
         const ticket = new Ticket({
