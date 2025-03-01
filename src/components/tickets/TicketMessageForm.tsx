@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Card, Stack, Textarea, Group, Button, Tooltip, Text } from "@mantine/core";
+import { Card, Stack, Textarea, Group, Button, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSendMessage } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
@@ -18,7 +18,6 @@ interface IProps {
 
 export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const [isNote, setIsNote] = useState(false);
     const {
         value: content,
         setValue: setContent,
@@ -44,7 +43,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
         if (error) setError(null);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (isNote: boolean) => {
         const validationError = validateMessage(content);
         if (validationError) {
             setError(validationError);
@@ -60,7 +59,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
             const confirmed = window.confirm(
                 `Are you sure you want to ${
                     isNote ? "add a note" : "send a message"
-                }? Please double check that you're not trying to add a note while in message mode.`
+                }? Please double check your selection.`
             );
             if (!confirmed) return;
         }
@@ -80,13 +79,11 @@ export default function TicketMessageForm({ ticket }: IProps) {
             <Stack gap="md">
                 <Textarea
                     placeholder={
-                        !ticket.isActive && !isNote
+                        !ticket.isActive && !user?.isCommittee
                             ? "Cannot message closed tickets"
-                            : isNote
-                                ? "Add a note..."
-                                : "Type your message..."
+                            : "Type your message..."
                     }
-                    disabled={!ticket.isActive && !isNote}
+                    disabled={!ticket.isActive && !user?.isCommittee}
                     minRows={3}
                     resize="vertical"
                     autosize
@@ -101,32 +98,34 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     }
                 />
                 <FileUploadInput value={files} onChange={handleFileChange} />
-                <Group justify="end">
-                    {user?.isCommittee && isNote && (
+                <Group justify="end" align="center">
+                    {user?.isCommittee && (
                         <Text fs="italic" size="xs" c="dimmed">
-                            Notes are only visible to committee members!
+                            Notes are only visible to committee members
                         </Text>
                     )}
-                    {user?.isCommittee && (
-                        <Tooltip label={isNote ? "Switch to Message Mode" : "Switch to Note Mode"}>
-                            <ActionIcon
-                                variant={isNote ? "filled" : "outline"}
+                    <Group>
+                        {user?.isCommittee && (
+                            <Button
                                 color="info"
-                                onClick={() => setIsNote(!isNote)}
-                                size="lg">
-                                <FontAwesomeIcon icon="sticky-note" />
-                            </ActionIcon>
-                        </Tooltip>
-                    )}
-                    <Button
-                        w={130}
-                        color={isNote ? "info" : "primary"}
-                        onClick={handleSubmit}
-                        loading={createMessageMutation.isPending}
-                        disabled={!!error || !content || (!ticket.isActive && !isNote)}
-                        leftSection={<FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane"} />}>
-                        {isNote ? "Add Note" : "Send"}
-                    </Button>
+                                onClick={() => handleSubmit(true)}
+                                loading={createMessageMutation.isPending}
+                                disabled={!!error || !content}
+                                leftSection={<FontAwesomeIcon icon="sticky-note" />}>
+                                Add Note
+                            </Button>
+                        )}
+                        <Button
+                            color="primary"
+                            onClick={() => handleSubmit(false)}
+                            loading={createMessageMutation.isPending}
+                            disabled={
+                                !!error || !content || !ticket.isActive
+                            }
+                            leftSection={<FontAwesomeIcon icon="paper-plane" />}>
+                            Send Message
+                        </Button>
+                    </Group>
                 </Group>
             </Stack>
         </Card>
