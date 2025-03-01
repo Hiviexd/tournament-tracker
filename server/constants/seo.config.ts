@@ -100,6 +100,19 @@ export const seoRoutes: SEORoute[] = [
             };
         },
     },
+    {
+        path: "/reports/:ticketId",
+        name: "Report Details",
+        isDynamic: true,
+        model: "Ticket",
+        modelId: "ticketId",
+        getMetadata: (ticket) => {
+            return {
+                title: `${ticket.title} - ${_.capitalize(ticket.type)} Details`,
+                description: `View and discuss this report.`,
+            };
+        },
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {

@@ -75,7 +75,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
     return (
         <Card
             component={Link}
-            to={`/tickets/${ticket._id}`}
+            to={`/${ticket.type === "ticket" ? "tickets" : "reports"}/${ticket._id}`}
             shadow="sm"
             padding="lg"
             radius="md"

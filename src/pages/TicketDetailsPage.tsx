@@ -1,5 +1,5 @@
 import { Card, Group, Skeleton, Stack } from "@mantine/core";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, Navigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useTicket } from "../hooks/useTickets";
@@ -10,8 +10,22 @@ import EmptyState from "../components/common/EmptyState";
 
 export default function TicketDetailsPage() {
     const { ticketId } = useParams();
+    const location = useLocation();
     const [user] = useAtom(loggedInUserAtom);
     const { data: ticket, isLoading } = useTicket(ticketId!);
+
+    const isReportRoute = location.pathname.includes("/reports/");
+
+    // Handle route mismatch after data is loaded
+    if (ticket && !ticket.error) {
+        const isReport = ticket.type === "report";
+        const correctPath = isReport ? `/reports/${ticketId}` : `/tickets/${ticketId}`;
+
+        // Redirect if we're on the wrong route type
+        if ((isReport && !isReportRoute) || (!isReport && isReportRoute)) {
+            return <Navigate to={correctPath} replace />;
+        }
+    }
 
     if (isLoading) {
         return (
@@ -76,9 +90,11 @@ export default function TicketDetailsPage() {
     if (!ticket || ticket.error) {
         return (
             <EmptyState
-                icon="paper-plane"
-                title="Ticket not found"
-                description="This ticket does not exist or you don't have permission to view it"
+                icon={isReportRoute ? "flag" : "paper-plane"}
+                title={`${isReportRoute ? "Report" : "Ticket"} not found`}
+                description={`This ${
+                    isReportRoute ? "report" : "ticket"
+                } does not exist or you don't have permission to view it`}
             />
         );
     }

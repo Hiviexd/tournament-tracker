@@ -94,7 +94,7 @@ export default function TicketInfo({ ticket }: IProps) {
                             loading={toggleStatusMutation.isPending}
                             color={ticket.isActive ? "danger" : "warning"}
                             leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
-                            {ticket.isActive ? "Close Ticket" : "Reopen Ticket"}
+                            {ticket.isActive ? "Close" : "Reopen"}
                         </Button>
                     </Group>
                 )}

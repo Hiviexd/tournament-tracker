@@ -116,6 +116,13 @@ const routes: RouteConfig[] = [
         path: "/tickets/:ticketId",
         page: <TicketDetailsPage />,
         title: "Ticket Details",
+        icon: "paper-plane",
+        permissions: ["user"],
+    },
+    {
+        path: "/reports/:ticketId",
+        page: <TicketDetailsPage />,
+        title: "Report Details",
         icon: "flag",
         permissions: ["user"],
     },
