@@ -389,9 +389,8 @@ class TicketsController {
                 await helpers.delay(1000);
 
                 // Create the report
-                const count = await Ticket.countDocuments({ type: "report" });
                 const ticket = new Ticket({
-                    title: `Tournament Report #${count + 1}`,
+                    title: `Tournament Report #${report.id}`,
                     type: "report",
                     author: user,
                     assignedGroup: "tc", // Default to tournament committee
