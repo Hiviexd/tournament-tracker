@@ -9,6 +9,9 @@ import { useFileUpload } from "../../hooks/useFileUpload";
 import { type TicketFormData } from "../../../interfaces/Ticket";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import FileUploadInput from "../common/FileUploadInput";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
+import SignInBanner from "../common/SignInBanner";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -19,6 +22,7 @@ export default function TicketForm() {
     const navigate = useNavigate();
     const createTicketMutation = useCreateTicket();
     const { files, handleFileChange } = useFileUpload();
+    const [user] = useAtom(loggedInUserAtom);
 
     const form = useForm<ITicketFormValues>({
         initialValues: {
@@ -83,6 +87,8 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                 />
             </Alert>
 
+            {!user && <SignInBanner />}
+
             <Card shadow="xs" padding="lg">
                 <form onSubmit={handleSubmit}>
                     <Stack gap="md">
@@ -92,6 +98,7 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             data={GROUP_OPTIONS}
                             {...form.getInputProps("assignedGroup")}
                             withAsterisk
+                            disabled={!user}
                         />
 
                         <TextInput
@@ -99,6 +106,7 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             placeholder="Enter ticket title"
                             {...form.getInputProps("title")}
                             withAsterisk
+                            disabled={!user}
                             description={<TextLengthIndicator length={form.values.title.length} maxLength={80} />}
                         />
 
@@ -110,16 +118,18 @@ Try searching for your issue in the **[Tickets listing](/tickets)** before creat
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
+                            disabled={!user}
                             description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
                         />
 
-                        <FileUploadInput value={files} onChange={handleFileChange} />
+                        <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
 
                         <Group justify="flex-end" mt="md">
                             <Button
                                 type="submit"
                                 leftSection={<FontAwesomeIcon icon="paper-plane" />}
-                                loading={createTicketMutation.isPending}>
+                                loading={createTicketMutation.isPending}
+                                disabled={!user}>
                                 Submit Ticket
                             </Button>
                         </Group>

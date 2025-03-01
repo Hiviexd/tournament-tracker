@@ -16,6 +16,7 @@ interface IProps {
     required?: boolean;
     width?: string;
     allowUserCreation?: boolean;
+    disabled?: boolean;
 }
 
 export default function UserSearch({
@@ -27,6 +28,7 @@ export default function UserSearch({
     required,
     width = "100%",
     allowUserCreation = false,
+    disabled = false,
 }: IProps) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedValue] = useDebouncedValue(search, 400);
@@ -103,6 +105,7 @@ export default function UserSearch({
                             onChange={(e) => handleChange(e.currentTarget.value)}
                             value={search}
                             placeholder={placeholder}
+                            disabled={disabled}
                         />
                     </Combobox.Target>
 

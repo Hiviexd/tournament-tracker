@@ -12,6 +12,9 @@ import { useFileUpload } from "../../hooks/useFileUpload";
 import { type TicketFormData } from "../../../interfaces/Ticket";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import FileUploadInput from "../common/FileUploadInput";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
+import SignInBanner from "../common/SignInBanner";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -23,6 +26,7 @@ export default function ReportForm() {
     const createTicketMutation = useCreateTicket();
     const [reportType, setReportType] = useState<"user" | "tournament">();
     const { files, handleFileChange } = useFileUpload();
+    const [user] = useAtom(loggedInUserAtom);
 
     const form = useForm<ITicketFormValues>({
         initialValues: {
@@ -69,7 +73,6 @@ export default function ReportForm() {
         },
     });
 
-    // Clear irrelevant fields when report type changes
     const handleReportTypeChange = (value: string | null) => {
         if (!value) return;
 
@@ -137,6 +140,8 @@ You can report either:
                 />
             </Alert>
 
+            {!user && <SignInBanner />}
+
             <Card shadow="xs" padding="lg">
                 <form onSubmit={handleSubmit}>
                     <Stack gap="md">
@@ -146,6 +151,7 @@ You can report either:
                             data={GROUP_OPTIONS}
                             {...form.getInputProps("assignedGroup")}
                             withAsterisk
+                            disabled={!user}
                         />
 
                         <Select
@@ -161,6 +167,7 @@ You can report either:
                                 handleReportTypeChange(value);
                             }}
                             withAsterisk
+                            disabled={!user}
                         />
 
                         {reportType === "user" && (
@@ -170,6 +177,7 @@ You can report either:
                                 onChange={(user) => form.setFieldValue("targetUserId", user?.id)}
                                 required
                                 allowUserCreation
+                                disabled={!user}
                             />
                         )}
 
@@ -180,12 +188,14 @@ You can report either:
                                     placeholder="Enter tournament name"
                                     {...form.getInputProps("targetTournamentName")}
                                     withAsterisk
+                                    disabled={!user}
                                 />
                                 <TextInput
                                     label="Tournament Forum URL"
                                     placeholder="Enter forum URL"
                                     {...form.getInputProps("targetTournamentLink")}
                                     withAsterisk
+                                    disabled={!user}
                                 />
                             </>
                         )}
@@ -198,16 +208,18 @@ You can report either:
                             autosize
                             {...form.getInputProps("message")}
                             withAsterisk
+                            disabled={!user}
                             description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
                         />
 
-                        <FileUploadInput value={files} onChange={handleFileChange} />
+                        <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
 
                         <Group justify="flex-end" mt="md">
                             <Button
                                 type="submit"
                                 leftSection={<FontAwesomeIcon icon="flag" />}
-                                loading={createTicketMutation.isPending}>
+                                loading={createTicketMutation.isPending}
+                                disabled={!user}>
                                 Submit Report
                             </Button>
                         </Group>

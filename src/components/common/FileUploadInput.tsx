@@ -10,6 +10,7 @@ interface IProps {
     description?: string;
     placeholder?: string;
     options?: UseFileUploadOptions;
+    disabled?: boolean;
 }
 
 export default function FileUploadInput({
@@ -19,6 +20,7 @@ export default function FileUploadInput({
     description = "Allowed types: jpg, png, zip, rar, txt",
     placeholder = "Up to 5 files, maximum of 5MB each",
     options,
+    disabled = false,
 }: IProps) {
     const { files, handleFileChange } = useFileUpload(options);
 
@@ -37,6 +39,7 @@ export default function FileUploadInput({
             placeholder={placeholder}
             value={value ?? files}
             onChange={handleChange}
+            disabled={disabled}
         />
     );
 }

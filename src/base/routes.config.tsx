@@ -103,14 +103,14 @@ const routes: RouteConfig[] = [
         page: <TicketCreatePage />,
         title: "Create Ticket",
         icon: "paper-plane",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/reports/create",
         page: <TicketCreatePage />,
         title: "Create Report",
         icon: "flag",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/tickets/:ticketId",
