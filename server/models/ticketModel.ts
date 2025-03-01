@@ -30,11 +30,21 @@ TicketSchema.virtual("isTicket").get(function (this: ITicket) {
 TicketSchema.virtual("lastResponseAt").get(function (this: ITicket) {
     if (!this.messages?.length) return this.createdAt;
 
-    const lastMessage = this.messages
-        .filter((message) => !message.isNote)
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    // Filter out notes and undefined messages
+    const validMessages = this.messages.filter(
+        (message) => message && !message.isNote && message.createdAt
+    );
 
-    return lastMessage ? lastMessage.createdAt : this.createdAt;
+    if (!validMessages.length) return this.createdAt;
+
+    // Sort messages by createdAt, handling potential undefined values
+    const sortedMessages = validMessages.sort((a, b) => {
+        const timeA = a.createdAt?.getTime() || 0;
+        const timeB = b.createdAt?.getTime() || 0;
+        return timeB - timeA;
+    });
+
+    return sortedMessages[0]?.createdAt || this.createdAt;
 });
 
 const Ticket = mongoose.model<ITicket>("Ticket", TicketSchema);
