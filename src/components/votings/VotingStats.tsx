@@ -111,9 +111,9 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
                     </Text>
                     <Stack gap={4}>
                         {[
-                            { label: `${voting.options[0]} (1 to 5)`, count: distribution.positive, color: "green.6" },
-                            { label: "Neutral (0)", count: distribution.neutral, color: "gray.6" },
-                            { label: `${voting.options[1]} (-5 to -1)`, count: distribution.negative, color: "red.6" },
+                            { label: `${voting.options[0]}`, count: distribution.positive, color: "green.6" },
+                            { label: "Neutral", count: distribution.neutral, color: "gray.6" },
+                            { label: `${voting.options[1]}`, count: distribution.negative, color: "red.6" },
                         ].map(({ label, count, color }) => (
                             <Group key={label} wrap="nowrap">
                                 <Text size="sm" w={150} truncate title={label}>
