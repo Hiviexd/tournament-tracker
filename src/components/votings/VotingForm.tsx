@@ -83,14 +83,15 @@ export default function VotingForm({ voting, user }: IProps) {
                 {renderVoteInput()}
 
                 <Textarea
-                    label="Comment (optional)"
-                    placeholder="Add a comment to your vote"
+                    label="Comment"
+                    placeholder="Add a comment explaining your vote"
                     value={comment}
                     onChange={(e) => setComment(e.currentTarget.value)}
                     minRows={3}
                     maxRows={8}
                     mt="lg"
                     autosize
+                    required
                     description={<TextLengthIndicator length={comment.length} maxLength={6000} />}
                 />
 
@@ -98,6 +99,7 @@ export default function VotingForm({ voting, user }: IProps) {
                     <Button
                         onClick={handleSubmit}
                         loading={submitVoteMutation.isPending}
+                        disabled={comment.trim().length === 0}
                         leftSection={<FontAwesomeIcon icon={userVote ? "edit" : "check"} />}>
                         {userVote ? "Update Vote" : "Submit Vote"}
                     </Button>

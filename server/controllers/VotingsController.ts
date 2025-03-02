@@ -273,6 +273,10 @@ class VotingsController {
             return res.json({ message: "Vote is not active" });
         }
 
+        if (!comment || comment.trim().length === 0) {
+            return res.json({ error: "Comment is required" });
+        }
+
         // Validate vote based on voting type
         if (data.type !== voting.type) {
             return res.json({ error: "Vote type does not match voting type" });
