@@ -103,7 +103,7 @@ export const theme = createTheme({
                     "&:hover": {
                         textDecoration: "underline",
                     },
-                    "&.white-link": {
+                    "&.whiteLink": {
                         color: theme.white,
                     },
                 },
