@@ -17,6 +17,7 @@ import DueDateBadge from "../../components/common/badges/DueDateBadge";
 import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import NotVotedBadge from "../common/badges/NotVotedBadge";
 
 interface IPropTypes {
     voting: IVoting;
@@ -25,11 +26,6 @@ interface IPropTypes {
 export default function VotingCard({ voting }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
-
-    const checkUserVoted = (): boolean => {
-        if (!voting.votes || !user) return false;
-        return voting.votes.some((vote) => vote.author && vote.author._id === user._id);
-    };
 
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
         switch (voting.category) {
@@ -120,11 +116,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                 </Group>
 
                 <Group gap="xs">
-                    {!checkUserVoted() && user?.isCommittee && (
-                        <Badge color="orange" variant="light">
-                            <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
-                        </Badge>
-                    )}
+                    {user?.isCommittee && <NotVotedBadge voting={voting} user={user} variant="light" />}
                     {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
                 </Group>
             </Group>

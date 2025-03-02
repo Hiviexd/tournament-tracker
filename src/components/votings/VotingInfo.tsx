@@ -18,6 +18,7 @@ import UserCard from "../common/UserCard";
 import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import NotVotedBadge from "../common/badges/NotVotedBadge";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
@@ -32,12 +33,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const togglePublicMutation = useToggleVotingPublic(voting._id);
     const deleteVotingMutation = useDeleteVoting();
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
-
-    const checkUserVoted = (): boolean => {
-        if (!voting.votes || !user) return false;
-        // Handle case where vote.author might be undefined for non-committee members
-        return voting.votes.some((vote) => vote.author && vote.author._id === user._id);
-    };
 
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
         switch (voting.category) {
@@ -156,11 +151,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         {voting.isActive && user?.isCommittee && (
                             <DueDateBadge date={voting.deadline} variant="light" />
                         )}
-                        {!checkUserVoted() && user?.isCommittee && (
-                            <Badge color="orange" variant="light">
-                                <FontAwesomeIcon icon="exclamation-triangle" /> Not voted
-                            </Badge>
-                        )}
+                        {user?.isCommittee && <NotVotedBadge voting={voting} user={user} variant="light" />}
                     </Group>
 
                     {user?.isCommittee || voting.isActive ? (
