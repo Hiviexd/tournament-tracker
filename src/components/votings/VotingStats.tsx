@@ -4,6 +4,14 @@ import { IVoting } from "../../../interfaces/Voting";
 import { VOTE_COLORS } from "../../constants";
 import { BinaryVote, VariableVote } from "../../../interfaces/Vote";
 
+const getScoreColor = (score: number) => {
+    if (score === 0) return "gray.2";
+    const intensity = Math.abs(score);
+    const level = Math.round((intensity / 5) * 8); // Map 0-5 to color levels 1-8
+    const color = score > 0 ? "green" : "red";
+    return `${color}.${level}`;
+};
+
 interface IProps {
     voting: IVoting;
     onFilterChange?: (optionIndex: number | null) => void;
@@ -94,7 +102,7 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
             <Stack gap="md">
                 <Group align="center" gap="xs">
                     <Text fw={500}>Average Score:</Text>
-                    <Text c={avgScore > 0 ? "green" : avgScore < 0 ? "red" : "dimmed"}>{avgScore.toFixed(2)}</Text>
+                    <Text c={getScoreColor(avgScore)}>{avgScore.toFixed(2)}</Text>
                     <Text c="dimmed">({totalVotes} votes)</Text>
                 </Group>
                 <Stack gap="xs">
@@ -103,9 +111,9 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
                     </Text>
                     <Stack gap={4}>
                         {[
-                            { label: `${voting.options[0]} (1 to 5)`, count: distribution.positive, color: "green" },
-                            { label: "Neutral (0)", count: distribution.neutral, color: "gray" },
-                            { label: `${voting.options[1]} (-5 to -1)`, count: distribution.negative, color: "red" },
+                            { label: `${voting.options[0]} (1 to 5)`, count: distribution.positive, color: "green.6" },
+                            { label: "Neutral (0)", count: distribution.neutral, color: "gray.6" },
+                            { label: `${voting.options[1]} (-5 to -1)`, count: distribution.negative, color: "red.6" },
                         ].map(({ label, count, color }) => (
                             <Group key={label} wrap="nowrap">
                                 <Text size="sm" w={150} truncate title={label}>
@@ -130,6 +138,7 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
         return voting.options.map((option, index) => {
             const scores = variableVotes.map((v) => v.data.scores.find((s) => s.optionIndex === index)?.score ?? 0);
             const avgScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+            const color = getScoreColor(avgScore);
 
             return (
                 <Box key={index}>
@@ -138,7 +147,7 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
                             {option}
                         </Text>
                         <Group gap="xs">
-                            <Text size="sm" c={avgScore > 0 ? "green" : avgScore < 0 ? "red" : "gray.6"}>
+                            <Text size="sm" c={color}>
                                 {avgScore.toFixed(2)}
                             </Text>
                             <Text size="sm" c="dimmed">
@@ -146,12 +155,7 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
                             </Text>
                         </Group>
                     </Group>
-                    <Progress
-                        value={((avgScore + 5) / 10) * 100}
-                        color={avgScore > 0 ? "green" : avgScore < 0 ? "red" : "gray.6"}
-                        size="lg"
-                        radius="xl"
-                    />
+                    <Progress value={((avgScore + 5) / 10) * 100} color={color} size="lg" radius="xl" />
                 </Box>
             );
         });

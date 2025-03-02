@@ -4,6 +4,14 @@ import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import { VOTE_COLORS } from "../../constants";
 
+const getScoreColor = (score: number, separator: string = ".") => {
+    if (score === 0) return "gray" + separator + "2";
+    const intensity = Math.abs(score);
+    const level = Math.round((intensity / 5) * 8); // Map 0-5 to color levels 1-8
+    const color = score > 0 ? "green" : "red";
+    return `${color}${separator}${level}`;
+};
+
 interface IProps {
     vote: IVote;
     options: string[];
@@ -11,14 +19,23 @@ interface IProps {
 
 export default function VoteCard({ vote, options }: IProps) {
     const getVoteBorderColor = () => {
+        let color = "var(--mantine-color-primary-6)";
+
         switch (vote.data.type) {
             case "classic":
-                return VOTE_COLORS[vote.data.option % VOTE_COLORS.length];
+                color = VOTE_COLORS[vote.data.option % VOTE_COLORS.length];
+                break;
             case "binary":
-                return `var(--mantine-color-${vote.data.score > 0 ? "green" : vote.data.score < 0 ? "red" : "gray"}-6)`;
-            default:
-                return "var(--mantine-color-primary-6)";
+                color = `var(--mantine-color-${getScoreColor(vote.data.score, "-")})`;
+                break;
+            case "variable": {
+                const avgScore = vote.data.scores.reduce((sum, s) => sum + s.score, 0) / vote.data.scores.length;
+                color = `var(--mantine-color-${getScoreColor(avgScore, "-")})`;
+                break;
+            }
         }
+
+        return color;
     };
 
     const renderVoteData = () => {
@@ -32,7 +49,7 @@ export default function VoteCard({ vote, options }: IProps) {
 
             case "binary":
                 // eslint-disable-next-line no-case-declarations
-                const color = vote.data.score > 0 ? "green" : vote.data.score < 0 ? "red" : "gray";
+                const color = getScoreColor(vote.data.score);
 
                 return (
                     <Stack gap="xs">
@@ -48,7 +65,7 @@ export default function VoteCard({ vote, options }: IProps) {
                     <Card bg="primary.11" p="xs" radius="sm" withBorder>
                         <Stack gap={4}>
                             {vote.data.scores.map((score) => {
-                                const color = score.score > 0 ? "green" : score.score < 0 ? "red" : "gray";
+                                const color = getScoreColor(score.score);
 
                                 return (
                                     <Group key={score.optionIndex} wrap="nowrap">
