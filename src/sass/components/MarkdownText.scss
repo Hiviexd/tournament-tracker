@@ -1,5 +1,6 @@
 .markdown-content {
     padding: 0;
+    overflow: hidden;
 
     h1,
     h2 {
@@ -64,6 +65,12 @@
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
         font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        word-break: normal;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        display: inline-block;
     }
 
     pre {
@@ -71,10 +78,15 @@
         padding: 1rem;
         border-radius: 4px;
         overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        word-break: normal;
+        max-width: 100%;
 
         code {
             background-color: transparent;
             padding: 0;
+            display: block;
         }
     }
 
