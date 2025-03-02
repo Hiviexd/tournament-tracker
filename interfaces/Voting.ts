@@ -25,6 +25,7 @@ export interface VotingQueryParams {
     // backend only
     assignedGroups?: { $in: UserGroup[] };
     isActive?: boolean;
+    $and?: any[]; // For complex MongoDB queries
 }
 
 export interface VotingListQuery {

@@ -39,7 +39,6 @@ export default function VotingFilters({ values, onChange }: IProps) {
             onChange({
                 ...values,
                 showNeedsAttention: true,
-                status: "active",
             });
         } else {
             onChange({ ...values, [key]: value });
@@ -72,6 +71,7 @@ export default function VotingFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
                         data={assignedGroupOptions}
                         style={{ flex: 1, minWidth: 200 }}
+                        disabled={values.showNeedsAttention}
                     />
                     <Select
                         placeholder="Status"

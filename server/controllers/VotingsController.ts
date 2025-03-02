@@ -55,13 +55,30 @@ class VotingsController {
         // Handle needs attention filter for committee members
         if (reqQuery.showNeedsAttention === "true" && user.isCommittee) {
             dbQuery.isActive = true;
-            dbQuery["votes"] = {
-                $not: {
-                    $elemMatch: {
-                        author: req.session.mongoId,
+            // Only show votes where:
+            // 1. User hasn't voted yet
+            // 2. User is in one of the assigned groups
+            dbQuery.$and = [
+                {
+                    votes: {
+                        $not: {
+                            $elemMatch: {
+                                author: req.session.mongoId,
+                            },
+                        },
                     },
                 },
-            };
+                {
+                    $or: [
+                        {
+                            $and: [{ assignedGroups: "tc" }, { $expr: { $eq: [user.isTournamentCommittee, true] } }],
+                        },
+                        {
+                            $and: [{ assignedGroups: "cc" }, { $expr: { $eq: [user.isContestCommittee, true] } }],
+                        },
+                    ],
+                },
+            ];
         }
 
         const page = Number(reqQuery.page || 1);
