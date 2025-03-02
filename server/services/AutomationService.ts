@@ -17,11 +17,11 @@ class AutomationService {
     private checkBadgeUpdatesJob: CronJob;
 
     constructor() {
-        // Run at 17:00 UTC every day
-        this.checkOverdueVotingsJob = new CronJob("0 17 * * *", this.checkOverdueVotings.bind(this));
-
         // Run every hour
         this.checkConcludableVotingsJob = new CronJob("0 * * * *", this.checkConcludableVotings.bind(this));
+
+        // Run at 17:00 UTC every day
+        this.checkOverdueVotingsJob = new CronJob("0 17 * * *", this.checkOverdueVotings.bind(this));
 
         // Run at 18:00 UTC every day
         this.checkStaleTicketsJob = new CronJob("0 18 * * *", this.checkStaleTickets.bind(this));
@@ -33,8 +33,8 @@ class AutomationService {
     public start() {
         if (!config.automation) return;
 
-        this.checkOverdueVotingsJob.start();
         this.checkConcludableVotingsJob.start();
+        this.checkOverdueVotingsJob.start();
         this.checkStaleTicketsJob.start();
         this.checkBadgeUpdatesJob.start();
 
@@ -43,8 +43,8 @@ class AutomationService {
         // Run immediately for testing
         if (process.env.AUTOMATION_DEBUG === "true") {
             console.log(styles("Running automation checks immediately...", ["yellow", "bold"]));
-            this.checkOverdueVotings();
             this.checkConcludableVotings();
+            this.checkOverdueVotings();
             this.checkStaleTickets();
             this.checkBadgeUpdates();
         }
@@ -116,9 +116,27 @@ class AutomationService {
     }
 
     private async checkConcludableVotings() {
+        const now = moment();
         const concludableVotings = await Voting.find({
             isActive: true,
-            $expr: { $gte: [{ $size: "$votes" }, "$requiredVotes"] },
+            $expr: {
+                $and: [
+                    // Check if required votes are met
+                    { $gte: [{ $size: "$votes" }, "$requiredVotes"] },
+                    // Check if deadline has passed (createdAt + duration days < now)
+                    {
+                        $lt: [
+                            {
+                                $add: [
+                                    "$createdAt",
+                                    { $multiply: ["$duration", 24 * 60 * 60 * 1000] }, // Convert days to milliseconds
+                                ],
+                            },
+                            now.toDate(),
+                        ],
+                    },
+                ],
+            },
         }).populate("votes");
 
         for (const voting of concludableVotings) {
