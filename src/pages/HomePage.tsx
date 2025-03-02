@@ -108,7 +108,7 @@ export default function HomePage() {
 
                 {/* Login Section */}
                 {!user && (
-                    <Card withBorder padding="xl" radius="md">
+                    <Card padding="xl" radius="md">
                         <Stack align="center" gap="md">
                             <Title order={3}>Get Started</Title>
                             <Text c="dimmed" ta="center" maw={400}>
