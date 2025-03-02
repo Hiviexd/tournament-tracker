@@ -8,6 +8,8 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TicketCard from "../components/tickets/TicketCard";
 import TicketsFilters from "../components/tickets/TicketsFilters";
+import { loggedInUserAtom } from "../store/atoms";
+import { useAtom } from "jotai";
 
 interface FilterValues {
     title: string;
@@ -35,6 +37,8 @@ export default function TicketsListPage() {
 
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
     const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
+
+    const [user] = useAtom(loggedInUserAtom);
 
     const handleFilterChange = (newFilters) => {
         setSearchInput(newFilters);
@@ -112,10 +116,14 @@ export default function TicketsListPage() {
         <Stack align="center" justify="center" h={200}>
             <FontAwesomeIcon icon={type === "ticket" ? "paper-plane" : "flag"} size="2x" style={{ opacity: 0.5 }} />
             <Text size="lg" c="dimmed">
-                {hasError ? `Error loading ${type}s` : `No ${type}s found`}
+                {hasError ? `Error loading ${type}s` : `No ${type}s found...`}
             </Text>
             <Text size="sm" c="dimmed">
-                {hasError ? "Try refreshing the page" : "Try adjusting your filters"}
+                {hasError
+                    ? "Try refreshing the page"
+                    : type === "ticket" || user?.isCommittee
+                        ? "Try adjusting your filters"
+                        : ""}
             </Text>
         </Stack>
     );
