@@ -273,13 +273,26 @@ class VotingsController {
             return res.json({ message: "Vote is not active" });
         }
 
-        if (!comment || comment.trim().length === 0) {
-            return res.json({ error: "Comment is required" });
-        }
-
         // Validate vote based on voting type
         if (data.type !== voting.type) {
             return res.json({ error: "Vote type does not match voting type" });
+        }
+
+        const isExtremeVote = (value: number) => Math.abs(value) >= 4;
+        let requiresComment = false;
+
+        // Check if comment is required based on vote type and values
+        switch (data.type) {
+            case "binary":
+                requiresComment = isExtremeVote(data.score);
+                break;
+            case "variable":
+                requiresComment = data.scores.some((s) => isExtremeVote(s.score));
+                break;
+        }
+
+        if (requiresComment && (!comment || comment.trim().length === 0)) {
+            return res.json({ error: "Comment is required for extreme votes (-5/-4 or 4/5)" });
         }
 
         // Validate vote data based on type

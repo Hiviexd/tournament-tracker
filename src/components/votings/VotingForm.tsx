@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, Stack, Title, Textarea, Button, Group } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
@@ -10,6 +10,8 @@ import ClassicVoteInput from "./votes/ClassicVoteInput";
 import BinaryVoteInput from "./votes/BinaryVoteInput";
 import VariableVoteInput from "./votes/VariableVoteInput";
 import TextLengthIndicator from "../common/TextLengthIndicator";
+
+const isExtremeVote = (value: number) => Math.abs(value) >= 4;
 
 interface IProps {
     voting: IVoting;
@@ -23,7 +25,22 @@ export default function VotingForm({ voting, user }: IProps) {
     const [comment, setComment] = useState(userVote?.comment ?? "");
     const [voteData, setVoteData] = useState<VoteType>(() => helpers.getInitialVoteData(voting, userVote));
 
+    const isCommentRequired = useMemo(() => {
+        switch (voteData.type) {
+            case "binary":
+                return isExtremeVote(voteData.score);
+            case "variable":
+                return voteData.scores.some((s) => isExtremeVote(s.score));
+            default:
+                return false;
+        }
+    }, [voteData]);
+
     const handleSubmit = async () => {
+        if (isCommentRequired && !comment.trim()) {
+            return; // Button will be disabled, but extra safety check
+        }
+
         try {
             await submitVoteMutation.mutateAsync({
                 data: voteData,
@@ -83,15 +100,20 @@ export default function VotingForm({ voting, user }: IProps) {
                 {renderVoteInput()}
 
                 <Textarea
-                    label="Comment"
-                    placeholder="Add a comment explaining your vote"
+                    label={`Comment${isCommentRequired ? " (Required for extreme votes)" : " (Optional)"}`}
+                    placeholder={
+                        isCommentRequired
+                            ? "Please explain your extreme vote (-5/-4 or 4/5)"
+                            : "Add a comment to your vote"
+                    }
                     value={comment}
                     onChange={(e) => setComment(e.currentTarget.value)}
                     minRows={3}
                     maxRows={8}
                     mt="lg"
                     autosize
-                    required
+                    required={isCommentRequired}
+                    error={isCommentRequired && !comment.trim() ? "Comment is required for extreme votes" : null}
                     description={<TextLengthIndicator length={comment.length} maxLength={6000} />}
                 />
 
@@ -99,7 +121,7 @@ export default function VotingForm({ voting, user }: IProps) {
                     <Button
                         onClick={handleSubmit}
                         loading={submitVoteMutation.isPending}
-                        disabled={comment.trim().length === 0}
+                        disabled={isCommentRequired && !comment.trim()}
                         leftSection={<FontAwesomeIcon icon={userVote ? "edit" : "check"} />}>
                         {userVote ? "Update Vote" : "Submit Vote"}
                     </Button>
