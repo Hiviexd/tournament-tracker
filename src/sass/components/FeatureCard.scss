@@ -5,6 +5,13 @@
     overflow: hidden;
     border-top: 4px solid transparent;
 
+    &:last-child:nth-child(2n + 1) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        max-width: 600px;
+        width: 100%;
+    }
+
     &::after {
         content: "";
         position: absolute;
