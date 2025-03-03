@@ -11,6 +11,9 @@ import TournamentsListPage from "../pages/TournamentsListPage";
 import TicketCreatePage from "../pages/TicketCreatePage";
 import TicketsListPage from "../pages/TicketsListPage";
 import TicketDetailsPage from "../pages/TicketDetailsPage";
+import ArticlePage from "../pages/ArticlePage";
+import DocumentationListPage from "../pages/DocumentationListPage";
+import CreateArticlePage from "../pages/CreateArticlePage";
 
 interface RouteConfig {
     path: string;
@@ -74,7 +77,7 @@ const routes: RouteConfig[] = [
         path: "/users",
         page: <UsersPage />,
         title: "User Management",
-        icon: "users",
+        icon: "users-gear",
         permissions: ["committee"],
     },
     {
@@ -125,6 +128,41 @@ const routes: RouteConfig[] = [
         title: "Report Details",
         icon: "flag",
         permissions: ["user"],
+    },
+    {
+        path: "/docs",
+        page: <DocumentationListPage />,
+        title: "Documentation",
+        icon: "book",
+        permissions: ["committee"],
+    },
+    {
+        path: "/docs/:slug",
+        page: <ArticlePage />,
+        title: "Documentation Article",
+        icon: "book",
+        permissions: ["committee"],
+    },
+    {
+        path: "/resources/official",
+        page: <ArticlePage />,
+        title: "Official Resources",
+        icon: "file-alt",
+        permissions: [],
+    },
+    {
+        path: "/resources/community",
+        page: <ArticlePage />,
+        title: "Community Resources",
+        icon: "users",
+        permissions: [],
+    },
+    {
+        path: "/articles/create",
+        page: <CreateArticlePage />,
+        title: "Create Article",
+        icon: "file-circle-plus",
+        permissions: ["admin"],
     },
     {
         path: "*",

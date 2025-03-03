@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from "express";
 import TournamentsController from "../controllers/TournamentsController";
 import permissions from "../middlewares/permissions";

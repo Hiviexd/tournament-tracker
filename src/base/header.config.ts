@@ -68,10 +68,41 @@ export const routes: IRoute[] = [
     },
 
     {
+        title: "Resources",
+        permissions: ["user"],
+        links: [
+            {
+                title: "TC Documentation",
+                link: "/docs",
+                icon: "book",
+                permissions: ["committee"],
+            },
+            {
+                title: "Official Resources",
+                link: "/resources/official",
+                icon: "file-alt",
+                permissions: ["user"],
+            },
+            {
+                title: "Community Resources",
+                link: "/resources/community",
+                icon: "users",
+                permissions: ["user"],
+            },
+            {
+                title: "Create Article",
+                link: "/articles/create",
+                icon: "file-circle-plus",
+                permissions: ["admin"],
+            },
+        ],
+    },
+
+    {
         title: "Management",
         permissions: ["committee"],
         links: [
-            { title: "Users", link: "/users", icon: "users", permissions: ["committee"] },
+            { title: "Users", link: "/users", icon: "users-gear", permissions: ["committee"] },
             { title: "Logs", link: "/logs", icon: "history", permissions: ["committee"] },
             { title: "Markdown", link: "/markdown", icon: "file-alt", permissions: ["committee"] },
         ],

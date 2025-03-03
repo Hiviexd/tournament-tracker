@@ -1,7 +1,7 @@
 import { IUser } from "./User";
 import { Document } from "mongoose";
 
-export type LogCategory = "account" | "user" | "tournament" | "report" | "voting" | "ticket";
+export type LogCategory = "account" | "user" | "tournament" | "voting" | "ticket" | "article";
 
 export interface LogQueryParams {
     user?: IUser;
