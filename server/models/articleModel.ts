@@ -38,14 +38,14 @@ const articleSchema = new Schema<IArticle>(
 articleSchema.pre("save", async function (next) {
     if (this.isModified("title")) {
         // Generate base slug from title
-        const baseSlug = slugify(this.title, { replacement: "_", strict: true });
+        const baseSlug = slugify(this.title, { lower: true, strict: true });
 
         // Check if slug exists
         let slug = baseSlug;
         let counter = 1;
 
         while (await Article.exists({ slug, _id: { $ne: this._id } })) {
-            slug = `${baseSlug}_${counter}`;
+            slug = `${baseSlug}-${counter}`;
             counter++;
         }
 
