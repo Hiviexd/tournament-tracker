@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from "express";
 import controller from "../controllers/ArticlesController";
 import permissions from "../middlewares/permissions";

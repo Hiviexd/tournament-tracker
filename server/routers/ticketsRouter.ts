@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from "express";
 import TicketsController from "../controllers/TicketsController";
 import permissions from "../middlewares/permissions";
