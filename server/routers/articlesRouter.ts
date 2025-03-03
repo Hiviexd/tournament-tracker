@@ -5,7 +5,8 @@ import permissions from "../middlewares/permissions";
 
 const articleRouter = express.Router();
 
-articleRouter.get("/:slug", controller.getArticle);
+articleRouter.get("/:slug/public", controller.getPublicArticle);
+articleRouter.get("/:slug/private", permissions.isLoggedIn, controller.getPrivateArticle);
 articleRouter.get("/documentation", permissions.isLoggedIn, permissions.isCommittee, controller.getDocumentation);
 articleRouter.post("/create", permissions.isLoggedIn, permissions.isAdmin, controller.createArticle);
 articleRouter.post("/:slug/edit", permissions.isLoggedIn, permissions.isCommittee, controller.editArticle);

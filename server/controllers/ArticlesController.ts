@@ -4,15 +4,32 @@ import LogService from "../services/LogService";
 import config from "../../config.json";
 
 class ArticlesController {
-    /** GET article by slug */
-    public async getArticle(req: Request, res: Response) {
+    /** GET public article by slug */
+    public async getPublicArticle(req: Request, res: Response) {
         const { slug } = req.params;
-        const user = res.locals!.user;
 
-        const article = await Article.findOne({ slug }).orFail();
+        const article = await Article.findOne({ slug, isPublic: true });
+
+        if (!article) {
+            return res.json({ error: "Article not found" });
+        }
+
+        res.json(article);
+    }
+
+    /** GET private article by slug (requires auth) */
+    public async getPrivateArticle(req: Request, res: Response) {
+        const { slug } = req.params;
+        const user = res.locals!.user!;
+
+        const article = await Article.findOne({ slug });
+
+        if (!article) {
+            return res.json({ error: "Article not found" });
+        }
 
         // Check if user can access private article
-        if (!article.isPublic && !user?.isCommittee) {
+        if (!article.isPublic && !user.isCommittee) {
             return res.json({ error: "You don't have permission to view this article" });
         }
 
