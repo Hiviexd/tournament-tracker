@@ -61,6 +61,7 @@
     }
 
     code {
+        font-size: 0.9rem;
         background-color: var(--mantine-color-primary-10);
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
@@ -92,7 +93,7 @@
 
     table {
         border-collapse: collapse;
-        margin: 0.5rem 0;
+        margin: 1rem 0;
 
         th,
         td {

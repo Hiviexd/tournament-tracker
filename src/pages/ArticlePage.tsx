@@ -98,7 +98,10 @@ export default function ArticlePage() {
                 </Group>
 
                 <Card shadow="sm" p="lg">
-                    <MarkdownText content={article.content} />
+                    <MarkdownText
+                        content={article.content}
+                        allowHtml={article.type === "documentation" && !article.isPublic}
+                    />
                 </Card>
 
                 <Modal

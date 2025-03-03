@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Stack, TextInput, Textarea, Switch, Select, Button, Group, Alert } from "@mantine/core";
+import { Card, Stack, TextInput, Textarea, Switch, Select, Button, Group, Alert, Title, Divider } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useCreateArticle } from "../hooks/useArticle";
 import MarkdownText from "../components/common/MarkdownText";
@@ -82,8 +82,11 @@ export default function CreateArticlePage() {
 
             {content && (
                 <Card shadow="sm" p="lg">
-                    <h3>Preview</h3>
-                    <MarkdownText content={content} />
+                    <Stack gap="md">
+                        <Title order={3}>Preview</Title>
+                        <Divider />
+                        <MarkdownText content={content} allowHtml={type === "documentation" && !isPublic} />
+                    </Stack>
                 </Card>
             )}
         </Stack>
