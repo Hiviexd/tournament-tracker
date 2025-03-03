@@ -8,7 +8,10 @@ class ArticlesController {
     public async getPublicArticle(req: Request, res: Response) {
         const { slug } = req.params;
 
-        const article = await Article.findOne({ slug, isPublic: true });
+        const article = await Article.findOne({
+            slug: { $regex: new RegExp(`^${slug}$`, "i") },
+            isPublic: true,
+        });
 
         if (!article) {
             return res.json({ error: "Article not found" });
@@ -22,7 +25,9 @@ class ArticlesController {
         const { slug } = req.params;
         const user = res.locals!.user!;
 
-        const article = await Article.findOne({ slug });
+        const article = await Article.findOne({
+            slug: { $regex: new RegExp(`^${slug}$`, "i") },
+        });
 
         if (!article) {
             return res.json({ error: "Article not found" });
@@ -81,7 +86,9 @@ class ArticlesController {
         const { slug } = req.params;
         const { content } = req.body;
 
-        const article = await Article.findOne({ slug }).orFail();
+        const article = await Article.findOne({
+            slug: { $regex: new RegExp(`^${slug}$`, "i") },
+        }).orFail();
 
         article.content = content;
 
