@@ -10,5 +10,6 @@ articleRouter.get("/:slug/private", permissions.isLoggedIn, controller.getPrivat
 articleRouter.get("/documentation", permissions.isLoggedIn, permissions.isCommittee, controller.getDocumentation);
 articleRouter.post("/create", permissions.isLoggedIn, permissions.isAdmin, controller.createArticle);
 articleRouter.post("/:slug/edit", permissions.isLoggedIn, permissions.isCommittee, controller.editArticle);
+articleRouter.post("/:slug/delete", permissions.isLoggedIn, permissions.isAdmin, controller.deleteArticle);
 
 export default articleRouter;

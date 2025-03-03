@@ -3,7 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { Button, Card, Group, Modal, Stack, Textarea, Title, Container, Skeleton, Text } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
-import { useArticle, useEditArticle } from "../hooks/useArticle";
+import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticle";
 import MarkdownText from "../components/common/MarkdownText";
 import EmptyState from "../components/common/EmptyState";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,6 +23,7 @@ export default function ArticlePage() {
 
     const { data: article, isLoading, isError } = useArticle(articleSlug!);
     const { mutate: editArticle, isPending: isEditing } = useEditArticle(articleSlug!);
+    const deleteArticleMutation = useDeleteArticle(articleSlug!);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editContent, setEditContent] = useState("");
 
@@ -76,6 +77,14 @@ export default function ArticlePage() {
         });
     };
 
+    const handleDelete = async () => {
+        // confirm the deletion
+        const confirm = window.confirm("Are you sure you want to delete this article? This action is irreversible.");
+        if (!confirm) return;
+
+        await deleteArticleMutation.mutateAsync();
+    };
+
     return (
         <Container size="lg">
             <Stack gap="lg">
@@ -90,9 +99,14 @@ export default function ArticlePage() {
                             <Text fs="italic" size="xs" c="dimmed">
                                 Last edited: {moment(article.updatedAt).format("YYYY-MM-DD, HH:mm:ss")}
                             </Text>
-                            <Button onClick={handleEdit} leftSection={<FontAwesomeIcon icon="edit" />}>
+                            <Button bg="info" onClick={handleEdit} leftSection={<FontAwesomeIcon icon="edit" />}>
                                 Edit
                             </Button>
+                            {user?.isAdmin && (
+                                <Button bg="danger" onClick={handleDelete} leftSection={<FontAwesomeIcon icon="trash" />} loading={deleteArticleMutation.isPending}>
+                                    Delete
+                                </Button>
+                            )}
                         </>
                     )}
                 </Group>

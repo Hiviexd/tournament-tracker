@@ -33,3 +33,8 @@ export const editArticle = async (slug: string, content: string) => {
     const response = await axios.post(`/api/articles/${slug}/edit`, { content });
     return response.data;
 };
+
+export const deleteArticle = async (slug: string) => {
+    const response = await axios.post(`/api/articles/${slug}/delete`);
+    return response.data;
+};

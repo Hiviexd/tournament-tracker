@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Stack, TextInput, Textarea, Switch, Select, Button, Group, Alert, Title, Divider } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useCreateArticle } from "../hooks/useArticle";
@@ -13,6 +13,10 @@ export default function CreateArticlePage() {
     const [title, setTitle] = useState("");
     const [isPublic, setIsPublic] = useState(false);
     const [type, setType] = useState<ArticleType>("documentation");
+
+    useEffect(() => {
+        setIsPublic(type === "resource");
+    }, [type]);
 
     const handleSubmit = () => {
         createArticle(
@@ -36,6 +40,9 @@ export default function CreateArticlePage() {
         <Stack gap="lg">
             <Alert icon={<FontAwesomeIcon icon="exclamation-triangle" />} title="Warning" color="red" variant="light">
                 Do not interact with this unless you know what you're doing.
+                <br />
+                This page is not intended for streamlined usage yet, and will definitely get a rehaul when committee
+                members will need to create articles.
             </Alert>
 
             <Card shadow="sm" p="lg">
@@ -58,9 +65,18 @@ export default function CreateArticlePage() {
                         ]}
                         required
                         error={!type && "Type is required"}
+                        allowDeselect={false}
+                        withAsterisk
                     />
 
-                    <Switch label="Public" checked={isPublic} onChange={(e) => setIsPublic(e.currentTarget.checked)} />
+                    <Switch
+                        label="Public"
+                        checked={isPublic}
+                        disabled
+                        description={
+                            type === "resource" ? "Resource articles are always public" : "Documentation is always private"
+                        }
+                    />
 
                     <Textarea
                         label="Content"

@@ -106,6 +106,26 @@ class ArticlesController {
             "article"
         );
     }
+
+    /** POST delete article */
+    public async deleteArticle(req: Request, res: Response) {
+        const { slug } = req.params;
+
+        const article = await Article.findOne({ slug: { $regex: new RegExp(`^${slug}$`, "i") } }).orFail();
+
+        await article.remove();
+
+        res.json({
+            message: "Article deleted successfully",
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Deleted the ${article.type} article: [**${article.title}**](${config.baseUrl}/articles/${article.slug})`,
+            "article"
+        );
+    }
 }
 
 export default new ArticlesController();
