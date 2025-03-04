@@ -20,7 +20,7 @@ interface IProps {
 
 export default function VotingResults({ voting, user }: IProps) {
     const [filteredOptionIndex, setFilteredOptionIndex] = useState<number | null>(null);
-    const [opened, { toggle }] = useDisclosure(false);
+    const [opened, { toggle }] = useDisclosure(!voting.isActive);
 
     /**
      * Filters votes based on the selected option index
