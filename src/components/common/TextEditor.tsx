@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Box } from "@mantine/core";
 import { useAutoSave } from "../../hooks/useAutoSave";
+import { useEditorPreferences } from "../../hooks/useEditorPreferences";
 import { MarkdownEditor, RichTextEditor } from "./editor";
 
 interface TextEditorProps {
@@ -27,7 +27,8 @@ export default function TextEditor({
     disabled = false,
     autoSaveKey,
 }: TextEditorProps) {
-    const [isMarkdownMode, setIsMarkdownMode] = useState(false);
+    // Use the editor preferences hook to get and set markdown mode
+    const { isMarkdownMode, toggleMarkdownMode } = useEditorPreferences();
 
     // Setup autosave
     const isAutoSaveEnabled = !!autoSaveKey;
@@ -60,11 +61,6 @@ export default function TextEditor({
     const handleMarkdownChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value;
         handleChange(newValue);
-    };
-
-    // Toggle between markdown and rich text modes
-    const toggleMarkdownMode = () => {
-        setIsMarkdownMode((prev) => !prev);
     };
 
     // Show save indicator when content is saved and not typing
