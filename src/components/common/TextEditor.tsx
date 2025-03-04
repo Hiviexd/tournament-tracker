@@ -5,9 +5,10 @@ import LinkExtension from "@tiptap/extension-link";
 import { Markdown } from "tiptap-markdown";
 import { useEffect, useState } from "react";
 import Placeholder from "@tiptap/extension-placeholder";
-import { ActionIcon, Box, Group, Textarea, Tooltip, Text } from "@mantine/core";
+import { ActionIcon, Box, Group, Textarea, Tooltip, Text, Badge, Transition } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { useAutoSave } from "../../hooks/useAutoSave";
 
 interface TextEditorProps {
     value: string;
@@ -17,6 +18,7 @@ interface TextEditorProps {
     maxHeight?: number;
     className?: string;
     disabled?: boolean;
+    autoSaveKey?: string; // Optional key for autosaving
 }
 
 export default function TextEditor({
@@ -27,8 +29,43 @@ export default function TextEditor({
     maxHeight,
     className,
     disabled = false,
+    autoSaveKey,
 }: TextEditorProps) {
     const [isMarkdownMode, setIsMarkdownMode] = useState(false);
+    const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+
+    // Always call useAutoSave to avoid conditional hook call
+    const {
+        value: autoSavedValue,
+        setValue: setAutoSavedValue,
+        isSaved: autoSaveIsSaved,
+        isTyping: autoSaveIsTyping,
+    } = useAutoSave({
+        key: autoSaveKey || "temp-editor-key",
+        initialValue: value,
+        onSave: () => {
+            // This callback is optional - we're already calling onChange
+            // when the editor content changes
+        },
+    });
+
+    // Only use autoSave values if autoSaveKey is provided
+    const isAutoSaveEnabled = Boolean(autoSaveKey);
+    const editorValue = isAutoSaveEnabled ? autoSavedValue : value;
+    const setEditorValue = isAutoSaveEnabled ? setAutoSavedValue : () => {};
+
+    // Handle the saved indicator visibility
+    useEffect(() => {
+        if (isAutoSaveEnabled) {
+            if (autoSaveIsSaved) {
+                // Show the indicator when content is saved
+                setShowSavedIndicator(true);
+            } else if (autoSaveIsTyping) {
+                // Hide the indicator when typing
+                setShowSavedIndicator(false);
+            }
+        }
+    }, [autoSaveIsSaved, autoSaveIsTyping, isAutoSaveEnabled]);
 
     // Calculate approximate number of rows based on minHeight
     // Assuming average line height of 20px
@@ -53,10 +90,18 @@ export default function TextEditor({
                 placeholder,
             }),
         ],
-        content: value,
+        content: editorValue,
         onUpdate: ({ editor }) => {
             // Get the content as markdown and pass it to the onChange handler
             const markdown = editor.storage.markdown.getMarkdown();
+
+            if (isAutoSaveEnabled) {
+                // Only update if content has actually changed
+                if (markdown !== autoSavedValue) {
+                    setEditorValue(markdown);
+                }
+            }
+
             onChange(markdown);
         },
         editable: !disabled && !isMarkdownMode,
@@ -64,13 +109,13 @@ export default function TextEditor({
 
     // Update editor content when value prop changes externally
     useEffect(() => {
-        if (editor && value !== undefined) {
+        if (editor && value !== undefined && !isAutoSaveEnabled) {
             const currentMarkdown = editor.storage.markdown.getMarkdown();
             if (currentMarkdown !== value) {
                 editor.commands.setContent(value);
             }
         }
-    }, [editor, value]);
+    }, [editor, value, isAutoSaveEnabled]);
 
     // Update editor's editable state when disabled prop or mode changes
     useEffect(() => {
@@ -82,6 +127,14 @@ export default function TextEditor({
     // Handle markdown text changes in raw mode
     const handleMarkdownChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value;
+
+        if (isAutoSaveEnabled) {
+            // Only update if content has actually changed
+            if (newValue !== autoSavedValue) {
+                setEditorValue(newValue);
+            }
+        }
+
         onChange(newValue);
     };
 
@@ -109,7 +162,7 @@ export default function TextEditor({
                             backgroundColor: "var(--mantine-color-primary-10)",
                         }}>
                         <Group justify="space-between" wrap="nowrap">
-                            <Box>
+                            <Group gap="xs">
                                 <Text fw={500} fz="14px">
                                     Markdown Editor{" "}
                                     <Link
@@ -120,7 +173,17 @@ export default function TextEditor({
                                         (guide)
                                     </Link>
                                 </Text>
-                            </Box>
+                                <Transition
+                                    mounted={isAutoSaveEnabled && showSavedIndicator}
+                                    transition="fade"
+                                    duration={400}>
+                                    {(styles) => (
+                                        <Badge color="green" size="xs" variant="light" style={styles}>
+                                            Saved
+                                        </Badge>
+                                    )}
+                                </Transition>
+                            </Group>
                             <Tooltip label="Rich Text Mode" position="bottom">
                                 <ActionIcon
                                     variant="default"
@@ -140,7 +203,7 @@ export default function TextEditor({
                         </Group>
                     </Box>
                     <Textarea
-                        value={value}
+                        value={editorValue}
                         onChange={handleMarkdownChange}
                         placeholder={placeholder}
                         minRows={approximateMinRows}
@@ -184,10 +247,6 @@ export default function TextEditor({
                             borderColor: "var(--mantine-color-primary-5)",
                         },
                         control: {
-                            "&[data-active]": {
-                                backgroundColor: "var(--mantine-color-primary-5)",
-                                color: "var(--mantine-color-white)",
-                            },
                             "&:hover": {
                                 backgroundColor: "var(--mantine-color-primary-4)",
                             },
@@ -224,17 +283,29 @@ export default function TextEditor({
                                 </RichTextEditor.ControlsGroup>
                             </Group>
 
-                            <RichTextEditor.ControlsGroup>
-                                <Tooltip label="Markdown Mode" position="bottom">
-                                    <ActionIcon
-                                        variant="default"
-                                        onClick={toggleMarkdownMode}
-                                        disabled={disabled}
-                                        aria-label="Toggle markdown mode">
-                                        <FontAwesomeIcon icon={["fab", "markdown"]} />
-                                    </ActionIcon>
-                                </Tooltip>
-                            </RichTextEditor.ControlsGroup>
+                            <Group gap="xs">
+                                <Transition
+                                    mounted={isAutoSaveEnabled && showSavedIndicator}
+                                    transition="fade"
+                                    duration={400}>
+                                    {(styles) => (
+                                        <Badge color="green" size="xs" variant="light" style={styles}>
+                                            Saved
+                                        </Badge>
+                                    )}
+                                </Transition>
+                                <RichTextEditor.ControlsGroup>
+                                    <Tooltip label="Markdown Mode" position="bottom">
+                                        <ActionIcon
+                                            variant="default"
+                                            onClick={toggleMarkdownMode}
+                                            disabled={disabled}
+                                            aria-label="Toggle markdown mode">
+                                            <FontAwesomeIcon icon={["fab", "markdown"]} />
+                                        </ActionIcon>
+                                    </Tooltip>
+                                </RichTextEditor.ControlsGroup>
+                            </Group>
                         </Group>
                     </RichTextEditor.Toolbar>
 

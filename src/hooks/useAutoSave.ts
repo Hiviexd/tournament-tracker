@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 
 interface UseAutoSaveOptions {
@@ -8,28 +8,47 @@ interface UseAutoSaveOptions {
     onSave?: (value: string) => void;
 }
 
-export function useAutoSave({ key, initialValue = "", debounceMs = 1000, onSave }: UseAutoSaveOptions) {
+export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }: UseAutoSaveOptions) {
     // Try to get saved value from localStorage, fallback to initialValue
     const [value, setValue] = useState(() => {
         const saved = localStorage.getItem(key);
         return saved ?? initialValue;
     });
     const [isSaved, setIsSaved] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+
+    // Track the last saved value to prevent unnecessary saves
+    const lastSavedValueRef = useRef<string | null>(null);
 
     const [debouncedValue] = useDebouncedValue(value, debounceMs);
 
-    // Save to localStorage when value changes
+    // Detect when user is typing (value changes)
     useEffect(() => {
-        if (debouncedValue) {
-            localStorage.setItem(key, debouncedValue);
-            onSave?.(debouncedValue);
-            setIsSaved(true);
-
-            const timeout = setTimeout(() => setIsSaved(false), 1000);
-            return () => clearTimeout(timeout);
-        } else {
-            localStorage.removeItem(key);
+        // If value changes and it's different from the last saved value, user is typing
+        if (value !== lastSavedValueRef.current) {
+            setIsTyping(true);
+            // Hide the saved indicator while typing
+            setIsSaved(false);
         }
+    }, [value]);
+
+    // Save to localStorage when debounced value changes
+    useEffect(() => {
+        // Skip empty values or values that are exactly the same as last saved
+        if (!debouncedValue || debouncedValue === lastSavedValueRef.current) {
+            return;
+        }
+
+        // Save to localStorage
+        localStorage.setItem(key, debouncedValue);
+        lastSavedValueRef.current = debouncedValue;
+
+        // Call onSave callback if provided
+        onSave?.(debouncedValue);
+
+        // Show saved indicator and mark that we're no longer typing
+        setIsSaved(true);
+        setIsTyping(false);
     }, [debouncedValue, key, onSave]);
 
     // Clear saved value
@@ -37,6 +56,8 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 1000, onSave 
         setValue("");
         localStorage.removeItem(key);
         setIsSaved(false);
+        setIsTyping(false);
+        lastSavedValueRef.current = null;
     };
 
     return {
@@ -44,5 +65,6 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 1000, onSave 
         setValue,
         clear,
         isSaved,
+        isTyping,
     };
 }
