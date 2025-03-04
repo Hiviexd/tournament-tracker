@@ -1,4 +1,4 @@
-import { Container, Stack, Title, Text, Card, SimpleGrid, Group } from "@mantine/core";
+import { Container, Stack, Title, Text, Card, SimpleGrid, Group, Badge } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useAtom } from "jotai";
@@ -37,7 +37,7 @@ const features: Feature[] = [
     },
     {
         icon: "trophy",
-        title: "Official Support Status (coming soon)",
+        title: "Official Support Status",
         description: "Browse and view the official support status of tournaments",
         link: "/tournaments",
         disabled: true,
@@ -61,6 +61,11 @@ export default function HomePage() {
                         style={{ color: "var(--mantine-color-primary-6)" }}
                     />
                     <Title order={4}>{feature.title}</Title>
+                    {feature.disabled && (
+                        <Badge size="sm" variant="light">
+                            Coming Soon
+                        </Badge>
+                    )}
                 </Group>
                 <Text size="sm" c="dimmed">
                     {feature.description}
