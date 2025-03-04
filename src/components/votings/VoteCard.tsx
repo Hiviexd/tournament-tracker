@@ -69,7 +69,7 @@ export default function VoteCard({ vote, options }: IProps) {
 
                                 return (
                                     <Group key={score.optionIndex} wrap="nowrap">
-                                        <Text size="sm" w={100} truncate title={options[score.optionIndex]}>
+                                        <Text size="sm" w={120} truncate title={options[score.optionIndex]}>
                                             {options[score.optionIndex]}
                                         </Text>
                                         <Badge
