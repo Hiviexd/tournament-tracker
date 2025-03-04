@@ -11,8 +11,8 @@ import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import { useEffect } from "react";
-import SaveIndicator from "./SaveIndicator";
-import TableControls from "./TableControls";
+import AutoSaveBadge from "../badges/AutoSaveBadge";
+// import TableControls from "./TableControls";
 
 interface RichTextEditorProps {
     value: string;
@@ -153,11 +153,12 @@ export default function RichTextEditor({
                             <MantineRichTextEditor.Unlink />
                         </MantineRichTextEditor.ControlsGroup>
 
-                        <TableControls editor={editor} disabled={disabled} />
+                        {/* Temporarily disabled table controls */}
+                        {/* <TableControls editor={editor} disabled={disabled} /> */}
                     </Group>
 
                     <Group gap="xs">
-                        <SaveIndicator isVisible={showSaveIndicator} />
+                        <AutoSaveBadge isVisible={showSaveIndicator} />
                         <MantineRichTextEditor.ControlsGroup>
                             <Tooltip label="Markdown Mode" position="bottom">
                                 <ActionIcon

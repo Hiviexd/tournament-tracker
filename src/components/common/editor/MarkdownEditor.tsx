@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Group, Text, Textarea, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import SaveIndicator from "./SaveIndicator";
+import AutoSaveBadge from "../badges/AutoSaveBadge";
 
 interface MarkdownEditorProps {
     value: string;
@@ -52,7 +52,7 @@ export default function MarkdownEditor({
                                 (guide)
                             </Link>
                         </Text>
-                        <SaveIndicator isVisible={showSaveIndicator} />
+                        <AutoSaveBadge isVisible={showSaveIndicator} />
                     </Group>
                     <Tooltip label="Rich Text Mode" position="bottom">
                         <ActionIcon
