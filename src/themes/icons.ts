@@ -39,7 +39,6 @@ import {
     faRobot,
     faPalette,
     faUndo,
-    faCaretDown,
     faUserTie,
     faCog,
     faExclamationCircle,
@@ -70,6 +69,8 @@ import {
     faFileCirclePlus,
     faTable,
     faImage,
+    faCaretDown,
+    faCaretUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -142,6 +143,8 @@ export default function loadIcons() {
         faBook,
         faFileCirclePlus,
         faTable,
-        faImage
+        faImage,
+        faCaretDown,
+        faCaretUp,
     );
 }
