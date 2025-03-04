@@ -6,8 +6,13 @@ import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
 import { Markdown } from "tiptap-markdown";
 import Placeholder from "@tiptap/extension-placeholder";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
 import { useEffect } from "react";
 import SaveIndicator from "./SaveIndicator";
+import TableControls from "./TableControls";
 
 interface RichTextEditorProps {
     value: string;
@@ -51,6 +56,14 @@ export default function RichTextEditor({
             Placeholder.configure({
                 placeholder,
             }),
+            Table.configure({
+                resizable: false,
+                allowTableNodeSelection: false,
+                lastColumnResizable: false,
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
         ],
         content: value,
         onUpdate: ({ editor }) => {
@@ -139,6 +152,8 @@ export default function RichTextEditor({
                             <MantineRichTextEditor.Link />
                             <MantineRichTextEditor.Unlink />
                         </MantineRichTextEditor.ControlsGroup>
+
+                        <TableControls editor={editor} disabled={disabled} />
                     </Group>
 
                     <Group gap="xs">

@@ -37,6 +37,7 @@ function MyComponent() {
 
 - **Rich Text Editing**: Full-featured rich text editor with formatting controls
 - **Markdown Support**: Toggle between rich text and markdown modes
+- **Table Support**: Create and edit tables with markdown support
 - **Autosave**: Optional autosave to localStorage with visual feedback
 - **Customizable**: Configurable height, placeholder, and more
 
@@ -44,4 +45,5 @@ function MyComponent() {
 
 - @mantine/core and @mantine/tiptap for UI components
 - TipTap for the rich text editor functionality
+- TipTap table extensions for table support
 - FontAwesome for icons

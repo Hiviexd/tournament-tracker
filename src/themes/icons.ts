@@ -68,6 +68,7 @@ import {
     faUsersGear,
     faBook,
     faFileCirclePlus,
+    faTable,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -139,5 +140,6 @@ export default function loadIcons() {
         faUsersGear,
         faBook,
         faFileCirclePlus,
+        faTable,
     );
 }
