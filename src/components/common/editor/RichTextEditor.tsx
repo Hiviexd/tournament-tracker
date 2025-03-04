@@ -119,6 +119,12 @@ export default function RichTextEditor({
                 toolbar: {
                     backgroundColor: "var(--mantine-color-primary-10)",
                     borderColor: "var(--mantine-color-primary-5)",
+                    padding: "8px",
+                    overflowX: "auto", // Allow horizontal scrolling if needed
+                },
+                controlsGroup: {
+                    flexShrink: 0, // Prevent control groups from shrinking
+                    margin: "2px", // Add some margin between groups
                 },
                 control: {
                     "&:hover": {
@@ -127,8 +133,17 @@ export default function RichTextEditor({
                 },
             }}>
             <MantineRichTextEditor.Toolbar sticky stickyOffset={0}>
-                <Group justify="space-between" wrap="nowrap" style={{ width: "100%" }}>
-                    <Group wrap="nowrap">
+                {/* Responsive container that allows wrapping on small screens */}
+                <Group gap="xs" style={{ width: "100%", flexWrap: "wrap" }}>
+                    {/* Left-aligned controls */}
+                    <Group
+                        gap="xs"
+                        style={{
+                            justifyContent: "flex-start",
+                            flexWrap: "wrap",
+                            flex: "1 1 auto",
+                            minWidth: "200px",
+                        }}>
                         <MantineRichTextEditor.ControlsGroup>
                             <MantineRichTextEditor.Bold />
                             <MantineRichTextEditor.Italic />
@@ -162,7 +177,19 @@ export default function RichTextEditor({
                         {/* <TableControls editor={editor} disabled={disabled} /> */}
                     </Group>
 
-                    <Group gap="xs">
+                    {/* Right-aligned controls */}
+                    <Group
+                        gap="xs"
+                        style={{
+                            marginLeft: "auto",
+                            marginRight: 0,
+                            alignSelf: "flex-end",
+                            "@media (max-width: 600px)": {
+                                marginLeft: 0,
+                                width: "100%",
+                                justifyContent: "flex-end",
+                            },
+                        }}>
                         <AutoSaveBadge isVisible={showSaveIndicator} />
                         <MantineRichTextEditor.ControlsGroup>
                             <Tooltip label="Markdown Mode" position="bottom">
