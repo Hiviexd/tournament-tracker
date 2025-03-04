@@ -60,9 +60,7 @@ export default function VotingDetailsPage() {
 
                     {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
 
-                    {(!voting.isActive || loggedInUser?.isAdmin) && (
-                        <VotingResults voting={voting} user={loggedInUser} />
-                    )}
+                    {!voting.isActive && <VotingResults voting={voting} user={loggedInUser} />}
 
                     <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
                 </Stack>
