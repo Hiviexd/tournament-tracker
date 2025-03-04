@@ -10,8 +10,10 @@ import Table from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
+import Image from "@tiptap/extension-image";
 import { useEffect } from "react";
 import AutoSaveBadge from "../badges/AutoSaveBadge";
+import ImageControls from "./ImageControls";
 // import TableControls from "./TableControls";
 
 interface RichTextEditorProps {
@@ -64,6 +66,7 @@ export default function RichTextEditor({
             TableRow,
             TableHeader,
             TableCell,
+            Image,
         ],
         content: value,
         onUpdate: ({ editor }) => {
@@ -152,6 +155,8 @@ export default function RichTextEditor({
                             <MantineRichTextEditor.Link />
                             <MantineRichTextEditor.Unlink />
                         </MantineRichTextEditor.ControlsGroup>
+
+                        <ImageControls editor={editor} disabled={disabled} />
 
                         {/* Temporarily disabled table controls */}
                         {/* <TableControls editor={editor} disabled={disabled} /> */}
