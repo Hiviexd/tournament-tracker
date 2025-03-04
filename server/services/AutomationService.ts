@@ -9,6 +9,10 @@ import VotingService from "./VotingService";
 import { styles } from "../helpers/consoleStyles";
 import helpers from "../helpers/index";
 import User from "../models/userModel";
+import LogService from "./LogService";
+import { IVoting } from "../../interfaces/Voting";
+import { ITicket } from "../../interfaces/Ticket";
+import { IUser } from "../../interfaces/User";
 
 class AutomationService {
     private checkOverdueVotingsJob: CronJob;
@@ -52,6 +56,7 @@ class AutomationService {
 
     private async checkOverdueVotings() {
         const activeVotings = await Voting.find({ isActive: true });
+        const overdueVotings: IVoting[] = [];
 
         for (const voting of activeVotings) {
             const deadline = moment(voting.deadline);
@@ -65,6 +70,8 @@ class AutomationService {
 
             if (hoursUntilDeadline <= 24 && !isOverdue) {
                 // Almost due (within 24h) but not overdue yet
+                overdueVotings.push(voting);
+
                 const minutesUntilDeadline = deadline.diff(now, "minutes");
                 const dueText =
                     hoursUntilDeadline > 0 ? `${hoursUntilDeadline} hours` : `${minutesUntilDeadline} minutes`;
@@ -89,6 +96,8 @@ class AutomationService {
                 ]);
             } else if (isOverdue) {
                 // Only send overdue notification if actually past deadline
+                overdueVotings.push(voting);
+
                 const overdueDuration = Math.abs(hoursUntilDeadline);
                 const overdueText =
                     overdueDuration >= 24 ? `${Math.floor(overdueDuration / 24)} days` : `${overdueDuration} hours`;
@@ -112,6 +121,15 @@ class AutomationService {
                     },
                 ]);
             }
+        }
+
+        if (overdueVotings.length > 0) {
+            await LogService.generateSystem(
+                `Sent reminders for overdue votes: ${overdueVotings
+                    .map((v) => `[**${v.title}**](${config.baseUrl}/votes/${v._id})`)
+                    .join(", ")}`,
+                "voting"
+            );
         }
     }
 
@@ -154,6 +172,11 @@ class AutomationService {
                     fields: [...fields],
                 },
             ]);
+
+            await LogService.generateSystem(
+                `Automatically concluded vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                "voting"
+            );
         }
     }
 
@@ -162,6 +185,8 @@ class AutomationService {
             .populate("messages")
             .populate("author", "username osuId")
             .populate("targetUser", "username osuId");
+
+        const staleTickets: ITicket[] = [];
 
         for (const ticket of activeTickets) {
             const lastResponse = moment(ticket.lastResponseAt);
@@ -180,10 +205,12 @@ class AutomationService {
 
             if (daysSinceLastResponse >= 10) {
                 // 10+ days - send with ping
+                staleTickets.push(ticket);
+
                 await DiscordService.sendRoleHighlightWebhook(roles, [
                     {
                         color: webhookColors.red,
-                        description: `[**${ticket.title}**](${ticketUrl}) has had no response in ${daysSinceLastResponse} days!`,
+                        description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
                         fields: [
                             { name: "Type", value: ticketType, inline: true },
                             {
@@ -201,10 +228,12 @@ class AutomationService {
                 ]);
             } else {
                 // 7-9 days - send without ping
+                staleTickets.push(ticket);
+
                 await DiscordService.sendWebhook([
                     {
                         color: webhookColors.orange,
-                        description: `[**${ticket.title}**](${ticketUrl}) has had no response in ${daysSinceLastResponse} days`,
+                        description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
                         fields: [
                             { name: "Type", value: ticketType, inline: true },
                             { name: "Author", value: ticket.author.username, inline: true },
@@ -218,9 +247,19 @@ class AutomationService {
                 ]);
             }
         }
+
+        if (staleTickets.length > 0) {
+            await LogService.generateSystem(
+                `Sent reminders for stale tickets: ${staleTickets
+                    .map((t) => `[**${t.title}**](${config.baseUrl}/tickets/${t._id})`)
+                    .join(", ")}`,
+                "ticket"
+            );
+        }
     }
 
     private async checkBadgeUpdates() {
+        const badgeUpdates: IUser[] = [];
         const activeCommitteeMembers = await User.find({
             groups: { $in: ["tc", "cc"] },
         });
@@ -247,6 +286,8 @@ class AutomationService {
             const years = committee === "tc" ? tcYears : ccYears;
             const commandString = helpers.generateBadgeCommand(user.osuId, years, user.badgeValue, committee);
 
+            badgeUpdates.push(user);
+
             await DiscordService.sendUserHighlightWebhook(usersToPing, [
                 {
                     color: webhookColors.orange,
@@ -259,6 +300,15 @@ class AutomationService {
                     ],
                 },
             ]);
+        }
+
+        if (badgeUpdates.length > 0) {
+            await LogService.generateSystem(
+                `Sent badge update requests for users: ${badgeUpdates
+                    .map((u) => `[**${u.username}**](${config.baseUrl}/users?id=${u.osuId})`)
+                    .join(", ")}`,
+                "user"
+            );
         }
     }
 }
