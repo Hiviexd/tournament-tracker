@@ -55,9 +55,13 @@
 
     blockquote {
         border-left: 3px solid var(--mantine-color-primary-6);
+        border-radius: 0;
         margin: 0.5rem 0;
-        padding-left: 1rem;
+        padding: 0.2rem 1rem;
         color: var(--mantine-color-gray-6);
+        font-style: inherit;
+        font-size: inherit;
+        background-color: inherit;
     }
 
     code {
