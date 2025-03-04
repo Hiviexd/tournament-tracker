@@ -41,8 +41,8 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }
 
     // Save to localStorage when debounced value changes
     useEffect(() => {
-        // Skip empty values or values that are exactly the same as last saved
-        if (!debouncedValue || debouncedValue === lastSavedValueRef.current) {
+        // Only skip if the value is exactly the same as last saved
+        if (debouncedValue === lastSavedValueRef.current) {
             return;
         }
 
