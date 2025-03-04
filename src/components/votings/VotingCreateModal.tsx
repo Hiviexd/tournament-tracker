@@ -6,6 +6,7 @@ import { UserGroup } from "../../../interfaces/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import helpers from "../../helpers";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 //Mantine
 import {
@@ -14,12 +15,12 @@ import {
     Stack,
     Select,
     MultiSelect,
-    Textarea,
     NumberInput,
     Button,
     Group,
     Pill,
     Text,
+    Box,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
@@ -27,6 +28,7 @@ import { useForm } from "@mantine/form";
 import UserSearch from "../common/UserSearch";
 import FileUploadInput from "../common/FileUploadInput";
 import OptionSearch from "../common/OptionSearch";
+import TextEditor from "../common/TextEditor";
 
 interface IProps {
     opened: boolean;
@@ -36,6 +38,7 @@ interface IProps {
 export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
     const { files, handleFileChange } = useFileUpload();
+    const autoSaveKey = "voting-create-description";
 
     const form = useForm({
         initialValues: {
@@ -84,7 +87,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         },
     });
 
-    const handleSubmit = form.onSubmit(async (values) => {
+    const handleSubmit = async (values) => {
         const formData = new FormData() as VotingFormData;
 
         // Handle arrays and single values differently
@@ -105,12 +108,16 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
         try {
             await createVotingMutation.mutateAsync(formData);
+
+            // Clear autosaved content after successful submission
+            clearAutoSavedValue(autoSaveKey);
+
             form.reset();
             onClose();
         } catch (error) {
-            console.error("Failed to create vote:", error);
+            console.error("Failed to create voting:", error);
         }
-    });
+    };
 
     const handleRemoveOption = (optionToRemove: string) => {
         form.setFieldValue(
@@ -177,8 +184,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     }, [form, form.values.type, setDefaultOptions]);
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Create New Vote" size="lg">
-            <form onSubmit={handleSubmit}>
+        <Modal opened={opened} onClose={onClose} title="Create New Vote" size="xl">
+            <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
                     <TextInput
                         label="Title"
@@ -187,16 +194,27 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("title")}
                     />
 
-                    <Textarea
-                        label="Description"
-                        placeholder="Enter vote description"
-                        withAsterisk
-                        minRows={3}
-                        maxRows={8}
-                        resize="vertical"
-                        autosize
-                        {...form.getInputProps("description")}
-                    />
+                    <Box>
+                        <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                Description<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                            </Box>
+                        </Box>
+                        <TextEditor
+                            value={form.values.description}
+                            onChange={(value) => form.setFieldValue("description", value)}
+                            placeholder="Enter vote description"
+                            minHeight={120}
+                            maxHeight={300}
+                            className={form.errors.description ? "error" : ""}
+                            autoSaveKey={autoSaveKey}
+                        />
+                        {form.errors.description && (
+                            <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                {form.errors.description}
+                            </Box>
+                        )}
+                    </Box>
 
                     <Select
                         label="Category"

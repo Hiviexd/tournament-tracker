@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "@mantine/form";
-import { Stack, Select, Textarea, TextInput, Card, Alert, Group, Button } from "@mantine/core";
+import { Stack, Select, TextInput, Card, Alert, Group, Button, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
 import MarkdownText from "../common/MarkdownText";
@@ -15,6 +15,8 @@ import FileUploadInput from "../common/FileUploadInput";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import SignInBanner from "../common/SignInBanner";
+import TextEditor from "../common/TextEditor";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -118,6 +120,10 @@ export default function ReportForm() {
 
         try {
             await createTicketMutation.mutateAsync(formData);
+
+            // Clear the autosaved text after successful submission
+            clearAutoSavedValue("report-form-message");
+
             navigate("/reports");
         } catch (error) {
             console.error("Failed to create report:", error);
@@ -200,17 +206,30 @@ You can report either:
                             </>
                         )}
 
-                        <Textarea
-                            label="Message"
-                            placeholder="Tell us about your issue"
-                            minRows={6}
-                            resize="vertical"
-                            autosize
-                            {...form.getInputProps("message")}
-                            withAsterisk
-                            disabled={!user}
-                            description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
-                        />
+                        <Box>
+                            <Box
+                                mb={5}
+                                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                    Message<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                </Box>
+                                <TextLengthIndicator length={form.values.message.length} maxLength={6000} />
+                            </Box>
+                            <TextEditor
+                                value={form.values.message}
+                                onChange={(value) => form.setFieldValue("message", value)}
+                                placeholder="Tell us about your issue"
+                                minHeight={200}
+                                className={form.errors.message ? "error" : ""}
+                                disabled={!user}
+                                autoSaveKey="report-form-message"
+                            />
+                            {form.errors.message && (
+                                <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                    {form.errors.message}
+                                </Box>
+                            )}
+                        </Box>
 
                         <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { Button, Card, Group, Modal, Stack, Textarea, Title, Container, Skeleton, Text } from "@mantine/core";
+import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticle";
@@ -8,6 +8,8 @@ import MarkdownText from "../components/common/MarkdownText";
 import EmptyState from "../components/common/EmptyState";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
+import TextEditor from "../components/common/TextEditor";
+import { clearAutoSavedValue } from "../hooks/useAutoSave";
 
 const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
     "/resources/official": "official-resources",
@@ -103,7 +105,11 @@ export default function ArticlePage() {
                                 Edit
                             </Button>
                             {user?.isAdmin && (
-                                <Button bg="danger" onClick={handleDelete} leftSection={<FontAwesomeIcon icon="trash" />} loading={deleteArticleMutation.isPending}>
+                                <Button
+                                    bg="danger"
+                                    onClick={handleDelete}
+                                    leftSection={<FontAwesomeIcon icon="trash" />}
+                                    loading={deleteArticleMutation.isPending}>
                                     Delete
                                 </Button>
                             )}
@@ -124,16 +130,22 @@ export default function ArticlePage() {
                     title="Edit Article"
                     size="xl">
                     <Stack gap="md">
-                        <Textarea
+                        <TextEditor
                             value={editContent}
-                            onChange={(e) => setEditContent(e.currentTarget.value)}
+                            onChange={setEditContent}
                             placeholder="Enter article content in Markdown..."
-                            minRows={10}
-                            autosize
+                            minHeight={300}
+                            autoSaveKey={`edit-article-${article?._id}`}
                         />
 
                         <Group justify="flex-end">
-                            <Button variant="subtle" onClick={() => setIsEditModalOpen(false)}>
+                            <Button
+                                variant="subtle"
+                                onClick={() => {
+                                    setIsEditModalOpen(false);
+                                    // Clear autosaved content when canceling
+                                    clearAutoSavedValue(`edit-article-${article?._id}`);
+                                }}>
                                 Cancel
                             </Button>
                             <Button onClick={handleSave} loading={isEditing}>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Stack, Textarea, Group, Button, Text } from "@mantine/core";
+import { Card, Stack, Group, Button, Text, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSendMessage } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
@@ -7,10 +7,10 @@ import { loggedInUserAtom } from "../../store/atoms";
 import { ITicket } from "../../../interfaces/Ticket";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { IMessageFormData } from "../../../interfaces/Message";
-import { useAutoSave } from "../../hooks/useAutoSave";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import TextLengthIndicator from "../common/TextLengthIndicator";
-import AutoSaveIndicator from "../common/AutoSaveIndicator";
 import FileUploadInput from "../common/FileUploadInput";
+import TextEditor from "../common/TextEditor";
 
 interface IProps {
     ticket: ITicket;
@@ -18,18 +18,11 @@ interface IProps {
 
 export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const {
-        value: content,
-        setValue: setContent,
-        clear: clearContent,
-        isSaved,
-    } = useAutoSave({
-        key: `ticket-message-${ticket.id}`,
-        debounceMs: 500,
-    });
+    const [content, setContent] = useState("");
     const [error, setError] = useState<string | null>(null);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
+    const autoSaveKey = `ticket-message-${ticket.id}`;
 
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
@@ -66,9 +59,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
 
         try {
             await createMessageMutation.mutateAsync(formData);
-            clearContent();
+            setContent("");
             setError(null);
             clearFiles();
+
+            // Clear the autosaved content
+            clearAutoSavedValue(autoSaveKey);
         } catch (err) {
             setError("Failed to send message. Please try again.");
         }
@@ -77,26 +73,32 @@ export default function TicketMessageForm({ ticket }: IProps) {
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="md">
-                <Textarea
-                    placeholder={
-                        !ticket.isActive && !user?.isCommittee
-                            ? "Cannot message closed tickets"
-                            : "Type your message..."
-                    }
-                    disabled={!ticket.isActive && !user?.isCommittee}
-                    minRows={3}
-                    resize="vertical"
-                    autosize
-                    value={content}
-                    onChange={(e) => handleContentChange(e.currentTarget.value)}
-                    error={error}
-                    description={
-                        <Group gap={4} justify="flex-start" align="center">
-                            <TextLengthIndicator length={content.length} maxLength={6000} />
-                            <AutoSaveIndicator isSaved={isSaved} />
-                        </Group>
-                    }
-                />
+                <Box>
+                    <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                            Message
+                        </Box>
+                        <TextLengthIndicator length={content.length} maxLength={6000} />
+                    </Box>
+                    <TextEditor
+                        value={content}
+                        onChange={handleContentChange}
+                        placeholder={
+                            !ticket.isActive && !user?.isCommittee
+                                ? "Cannot message closed tickets"
+                                : "Type your message..."
+                        }
+                        disabled={!ticket.isActive && !user?.isCommittee}
+                        minHeight={120}
+                        className={error ? "error" : ""}
+                        autoSaveKey={autoSaveKey}
+                    />
+                    {error && (
+                        <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                            {error}
+                        </Box>
+                    )}
+                </Box>
                 <FileUploadInput value={files} onChange={handleFileChange} />
                 <Group justify="end" align="center">
                     {user?.isCommittee && (
@@ -119,9 +121,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                             color="primary"
                             onClick={() => handleSubmit(false)}
                             loading={createMessageMutation.isPending}
-                            disabled={
-                                !!error || !content || !ticket.isActive
-                            }
+                            disabled={!!error || !content || !ticket.isActive}
                             leftSection={<FontAwesomeIcon icon="paper-plane" />}>
                             Send Message
                         </Button>

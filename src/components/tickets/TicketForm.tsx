@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { Stack, TextInput, Textarea, Select, Card, Alert, Group, Button } from "@mantine/core";
+import { Stack, TextInput, Select, Card, Alert, Group, Button, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicketFormValues } from "../../pages/TicketCreatePage";
 import MarkdownText from "../common/MarkdownText";
@@ -12,6 +12,8 @@ import FileUploadInput from "../common/FileUploadInput";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import SignInBanner from "../common/SignInBanner";
+import TextEditor from "../common/TextEditor";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
@@ -23,6 +25,7 @@ export default function TicketForm() {
     const createTicketMutation = useCreateTicket();
     const { files, handleFileChange } = useFileUpload();
     const [user] = useAtom(loggedInUserAtom);
+    const autoSaveKey = "ticket-create-form-message";
 
     const form = useForm<ITicketFormValues>({
         initialValues: {
@@ -67,6 +70,10 @@ export default function TicketForm() {
 
         try {
             await createTicketMutation.mutateAsync(formData);
+
+            // Clear the autosaved text after successful submission
+            clearAutoSavedValue(autoSaveKey);
+
             navigate("/tickets");
         } catch (error) {
             console.error("Failed to create ticket:", error);
@@ -110,17 +117,30 @@ Try searching for your issue in the [**Tickets listing**](/tickets) before creat
                             description={<TextLengthIndicator length={form.values.title.length} maxLength={80} />}
                         />
 
-                        <Textarea
-                            label="Message"
-                            placeholder="Enter your message"
-                            minRows={6}
-                            resize="vertical"
-                            autosize
-                            {...form.getInputProps("message")}
-                            withAsterisk
-                            disabled={!user}
-                            description={<TextLengthIndicator length={form.values.message.length} maxLength={6000} />}
-                        />
+                        <Box>
+                            <Box
+                                mb={5}
+                                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                    Message<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                </Box>
+                                <TextLengthIndicator length={form.values.message.length} maxLength={6000} />
+                            </Box>
+                            <TextEditor
+                                value={form.values.message}
+                                onChange={(value) => form.setFieldValue("message", value)}
+                                placeholder="Enter your message"
+                                minHeight={200}
+                                className={form.errors.message ? "error" : ""}
+                                disabled={!user}
+                                autoSaveKey={autoSaveKey}
+                            />
+                            {form.errors.message && (
+                                <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                    {form.errors.message}
+                                </Box>
+                            )}
+                        </Box>
 
                         <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
 

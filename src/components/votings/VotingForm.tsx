@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, Stack, Title, Textarea, Button, Group } from "@mantine/core";
+import { Card, Stack, Title, Button, Group, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
@@ -10,6 +10,8 @@ import ClassicVoteInput from "./votes/ClassicVoteInput";
 import BinaryVoteInput from "./votes/BinaryVoteInput";
 import VariableVoteInput from "./votes/VariableVoteInput";
 import TextLengthIndicator from "../common/TextLengthIndicator";
+import TextEditor from "../common/TextEditor";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
 
@@ -24,6 +26,7 @@ export default function VotingForm({ voting, user }: IProps) {
 
     const [comment, setComment] = useState(userVote?.comment ?? "");
     const [voteData, setVoteData] = useState<VoteType>(() => helpers.getInitialVoteData(voting, userVote));
+    const autoSaveKey = `voting-comment-${voting._id}`;
 
     const isCommentRequired = useMemo(() => {
         switch (voteData.type) {
@@ -48,6 +51,8 @@ export default function VotingForm({ voting, user }: IProps) {
             });
             if (!userVote && submitVoteMutation.isSuccess) {
                 setComment("");
+                // Clear autosaved comment after successful submission
+                clearAutoSavedValue(autoSaveKey);
             }
         } catch (error) {
             console.error("Failed to submit vote:", error);
@@ -99,23 +104,34 @@ export default function VotingForm({ voting, user }: IProps) {
 
                 {renderVoteInput()}
 
-                <Textarea
-                    label={`Comment${isCommentRequired ? " (Required for extreme votes)" : " (Optional)"}`}
-                    placeholder={
-                        isCommentRequired
-                            ? "Please explain your extreme vote (-5/-4 or 4/5)"
-                            : "Add a comment to your vote"
-                    }
-                    value={comment}
-                    onChange={(e) => setComment(e.currentTarget.value)}
-                    minRows={3}
-                    maxRows={8}
-                    mt="lg"
-                    autosize
-                    required={isCommentRequired}
-                    error={isCommentRequired && !comment.trim() ? "Comment is required for extreme votes" : null}
-                    description={<TextLengthIndicator length={comment.length} maxLength={6000} />}
-                />
+                <Box>
+                    <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                            Comment
+                            {isCommentRequired && <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>}
+                            {!isCommentRequired && " (Optional)"}
+                        </Box>
+                        <TextLengthIndicator length={comment.length} maxLength={6000} />
+                    </Box>
+                    <TextEditor
+                        value={comment}
+                        onChange={setComment}
+                        placeholder={
+                            isCommentRequired
+                                ? "Please explain your extreme vote (-5/-4 or 4/5)"
+                                : "Add a comment to your vote"
+                        }
+                        minHeight={120}
+                        maxHeight={300}
+                        className={isCommentRequired && !comment.trim() ? "error" : ""}
+                        autoSaveKey={autoSaveKey}
+                    />
+                    {isCommentRequired && !comment.trim() && (
+                        <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                            Comment is required for extreme votes
+                        </Box>
+                    )}
+                </Box>
 
                 <Group justify="flex-end">
                     <Button

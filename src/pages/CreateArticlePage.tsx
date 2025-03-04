@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { Card, Stack, TextInput, Textarea, Switch, Select, Button, Group, Alert, Title, Divider } from "@mantine/core";
+import { Card, Stack, TextInput, Switch, Select, Button, Group, Alert, Title, Divider, Box } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useCreateArticle } from "../hooks/useArticle";
 import MarkdownText from "../components/common/MarkdownText";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArticleType } from "@interfaces/Article";
+import TextEditor from "../components/common/TextEditor";
+import TextLengthIndicator from "../components/common/TextLengthIndicator";
+import { clearAutoSavedValue } from "../hooks/useAutoSave";
 
 export default function CreateArticlePage() {
     const navigate = useNavigate();
@@ -13,6 +16,7 @@ export default function CreateArticlePage() {
     const [title, setTitle] = useState("");
     const [isPublic, setIsPublic] = useState(false);
     const [type, setType] = useState<ArticleType>("documentation");
+    const autoSaveKey = "create-article-content";
 
     useEffect(() => {
         setIsPublic(type === "resource");
@@ -28,6 +32,9 @@ export default function CreateArticlePage() {
             },
             {
                 onSuccess: (data: any) => {
+                    // Clear autosaved content after successful submission
+                    clearAutoSavedValue(autoSaveKey);
+
                     if (type === "documentation") {
                         navigate(`/docs/${data.article.slug}`);
                     }
@@ -74,19 +81,27 @@ export default function CreateArticlePage() {
                         checked={isPublic}
                         disabled
                         description={
-                            type === "resource" ? "Resource articles are always public" : "Documentation is always private"
+                            type === "resource"
+                                ? "Resource articles are always public"
+                                : "Documentation is always private"
                         }
                     />
 
-                    <Textarea
-                        label="Content"
-                        value={content}
-                        onChange={(e) => setContent(e.currentTarget.value)}
-                        placeholder="Enter article content in Markdown..."
-                        minRows={10}
-                        autosize
-                        required
-                    />
+                    <Box>
+                        <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                Content<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                            </Box>
+                            <TextLengthIndicator length={content.length} maxLength={50000} />
+                        </Box>
+                        <TextEditor
+                            value={content}
+                            onChange={setContent}
+                            placeholder="Enter article content in Markdown..."
+                            minHeight={300}
+                            autoSaveKey={autoSaveKey}
+                        />
+                    </Box>
 
                     <Group justify="flex-end">
                         <Button onClick={handleSubmit} loading={isPending}>

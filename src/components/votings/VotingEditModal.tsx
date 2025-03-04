@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useUpdateVoting } from "../../hooks/useVotings";
 import { IVoting } from "../../../interfaces/Voting";
 import { VOTE_COLORS } from "../../constants";
+import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 // Mantine
 import {
@@ -16,10 +17,11 @@ import {
     ActionIcon,
     Text,
     Pill,
-    Textarea,
+    Box,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import TextEditor from "../common/TextEditor";
 
 interface IProps {
     voting: IVoting;
@@ -31,6 +33,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     const updateVotingMutation = useUpdateVoting(voting._id);
     const [newOption, setNewOption] = useState("");
     const hasVotes = voting.votes.length > 0;
+    const autoSaveKey = `voting-edit-description-${voting._id}`;
 
     const form = useForm({
         initialValues: {
@@ -41,11 +44,26 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             type: voting.type, // Add type to form values
         },
         validate: {
-            title: (value) => (!value ? "Title is required" : null),
-            description: (value) => (!value ? "Description is required" : null),
-            duration: (value) => (value < 1 ? "Duration must be at least 1 day" : null),
+            title: (value) => {
+                if (!value.trim()) return "Title is required";
+                if (value.length < 5) return "Title must be at least 5 characters";
+                if (value.length > 100) return "Title cannot exceed 100 characters";
+                return null;
+            },
+            description: (value) => {
+                if (!value.trim()) return "Description is required";
+                if (value.length < 10) return "Description must be at least 10 characters";
+                if (value.length > 2000) return "Description cannot exceed 2000 characters";
+                return null;
+            },
+            duration: (value) => {
+                if (!value) return "Duration is required";
+                if (value < 1) return "Duration must be at least 1 day";
+                if (value > 30) return "Duration cannot exceed 30 days";
+                return null;
+            },
             options: (value) => {
-                if (value.length < 2) return "At least two options are required";
+                if (value.length < 2) return "At least 2 options are required";
                 if (voting.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
                 }
@@ -55,8 +73,16 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     });
 
     const handleSubmit = async (values) => {
-        await updateVotingMutation.mutateAsync(values);
-        onClose();
+        try {
+            await updateVotingMutation.mutateAsync(values);
+
+            // Clear autosaved content after successful submission
+            clearAutoSavedValue(autoSaveKey);
+
+            onClose();
+        } catch (error) {
+            console.error("Failed to update voting:", error);
+        }
     };
 
     const handleAddOption = () => {
@@ -86,7 +112,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Edit Vote" size="lg">
+        <Modal opened={opened} onClose={onClose} title="Edit Vote" size="xl">
             <LoadingOverlay
                 visible={updateVotingMutation.isPending}
                 zIndex={1000}
@@ -101,16 +127,27 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                         {...form.getInputProps("title")}
                     />
 
-                    <Textarea
-                        label="Description"
-                        placeholder="Enter vote description"
-                        withAsterisk
-                        minRows={3}
-                        maxRows={8}
-                        resize="vertical"
-                        autosize
-                        {...form.getInputProps("description")}
-                    />
+                    <Box>
+                        <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                Description<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                            </Box>
+                        </Box>
+                        <TextEditor
+                            value={form.values.description}
+                            onChange={(value) => form.setFieldValue("description", value)}
+                            placeholder="Enter vote description"
+                            minHeight={120}
+                            maxHeight={300}
+                            className={form.errors.description ? "error" : ""}
+                            autoSaveKey={autoSaveKey}
+                        />
+                        {form.errors.description && (
+                            <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                {form.errors.description}
+                            </Box>
+                        )}
+                    </Box>
 
                     <NumberInput
                         label="Duration (days)"
