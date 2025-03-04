@@ -8,6 +8,13 @@ interface UseAutoSaveOptions {
     onSave?: (value: string) => void;
 }
 
+// Utility function to clear any autosaved value by key
+export function clearAutoSavedValue(key: string): void {
+    if (key) {
+        localStorage.removeItem(key);
+    }
+}
+
 export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }: UseAutoSaveOptions) {
     // Try to get saved value from localStorage, fallback to initialValue
     const [value, setValue] = useState(() => {
@@ -54,7 +61,7 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }
     // Clear saved value
     const clear = () => {
         setValue("");
-        localStorage.removeItem(key);
+        clearAutoSavedValue(key);
         setIsSaved(false);
         setIsTyping(false);
         lastSavedValueRef.current = null;
