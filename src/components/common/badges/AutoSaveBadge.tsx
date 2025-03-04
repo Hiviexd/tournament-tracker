@@ -16,7 +16,7 @@ export default function AutoSaveBadge({ isVisible, transitionDuration = 200 }: A
                 <Badge
                     size="sm"
                     variant="light"
-                    color="green"
+                    color="success"
                     style={{ ...styles }}
                     leftSection={<FontAwesomeIcon icon="floppy-disk" size="xs" />}>
                     Saved
