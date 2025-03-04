@@ -100,6 +100,20 @@ class TicketsController {
             req.body;
         const files = req.files as Express.Multer.File[];
 
+        // Rate limiting check - prevent creating multiple tickets/reports of the same type within an hour
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
+        const recentTicket = await Ticket.findOne({
+            author: author._id,
+            type,
+            createdAt: { $gte: oneHourAgo },
+        });
+
+        if (recentTicket) {
+            return res.json({
+                error: `You have already created a ${type} within the last hour. Please wait before creating another one.`,
+            });
+        }
+
         let targetUser: IUser;
 
         if (type === "ticket" && (title.length < 5 || title.length > 80))
@@ -284,7 +298,9 @@ class TicketsController {
                     },
                     content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
                         ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
-                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${ticket._id}).`,
+                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
+                        ticket._id
+                    }).`,
                 });
             }
         }
@@ -353,9 +369,9 @@ class TicketsController {
         // Logger
         await LogService.generate(
             user._id,
-            `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
-                config.baseUrl
-            }/${ticket.type}s/${ticket._id})`,
+            `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${
+                ticket.type
+            }s/${ticket._id})`,
             "ticket"
         );
 
