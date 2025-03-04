@@ -62,7 +62,7 @@ class UserService {
         }
 
         // Mark non-committee users in dev usergroup as admin
-        if (osuGroups.includes(11) && !user.isCommittee) {
+        if (osuGroups.includes(11) && !user.isCommittee && !user.isAdmin) {
             user.groups.push("admin");
             await user.save();
         }
