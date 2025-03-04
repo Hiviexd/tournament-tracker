@@ -40,10 +40,12 @@ export const VOTE_PRESETS = {
     userAddition: {
         type: "binary" as const,
         options: ["Endorse Member", "Protest Member"],
+        duration: 4,
     },
     tournamentBans: {
         type: "variable" as const,
         options: [...TOURNAMENT_OPTIONS],
+        duration: 3,
     },
 } as const;
 

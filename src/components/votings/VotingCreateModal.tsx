@@ -155,6 +155,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         if (selectedPreset) {
             form.setFieldValue("type", selectedPreset.type);
             form.setFieldValue("options", [...selectedPreset.options]);
+            form.setFieldValue("duration", selectedPreset.duration);
         }
     };
 
