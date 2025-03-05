@@ -51,8 +51,16 @@
     align-items: center;
     margin: 0 auto;
 
-    > a {
+    >a {
         display: flex;
+    }
+
+    .logo-image {
+        transition: transform 0.2s ease-in-out;
+
+        &:hover {
+            transform: scale(1.1);
+        }
     }
 
     @media (max-width: 62em) {
