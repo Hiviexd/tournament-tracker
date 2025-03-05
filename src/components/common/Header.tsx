@@ -26,7 +26,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                 <Group h="100%" px="xl">
                     <div className="nav-group">
                         <Link to="/">
-                            <Image src="/assets/logo-main.svg" alt="Logo" h={55} />
+                            <Image src="/assets/logo-main.svg" alt="Logo" h={40} />
                         </Link>
                         <Group visibleFrom="md">
                             {user && <MainNavigation user={user} />}
