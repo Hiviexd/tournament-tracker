@@ -108,9 +108,9 @@ export default function VotingListPage() {
     return (
         <Stack gap="md">
             {/* Only show filters and create button for committee members */}
-            {user?.isCommittee && (
-                <Stack gap="md">
-                    <VotingFilters values={searchInput} onChange={handleFilterChange} />
+            <Stack gap="md">
+                <VotingFilters user={user} values={searchInput} onChange={handleFilterChange} />
+                {user?.isCommittee && (
                     <Button
                         onClick={open}
                         leftSection={<FontAwesomeIcon icon="plus" />}
@@ -119,8 +119,8 @@ export default function VotingListPage() {
                         fullWidth>
                         New Vote
                     </Button>
-                </Stack>
-            )}
+                )}
+            </Stack>
 
             {/* Create voting modal */}
             <VotingCreateModal opened={opened} onClose={close} />

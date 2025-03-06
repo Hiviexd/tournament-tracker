@@ -1,6 +1,6 @@
 import { Card, Group, TextInput, Select, Stack, Checkbox } from "@mantine/core";
 import { VotingCategory } from "../../../interfaces/Voting";
-import { UserGroup } from "../../../interfaces/User";
+import { IUser, UserGroup } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface FilterValues {
@@ -12,11 +12,12 @@ interface FilterValues {
 }
 
 interface IProps {
+    user: IUser | null;
     values: FilterValues;
     onChange: (values: FilterValues) => void;
 }
 
-export default function VotingFilters({ values, onChange }: IProps) {
+export default function VotingFilters({ user, values, onChange }: IProps) {
     const categoryOptions = [
         { value: "discussion", label: "Discussions" },
         { value: "tournament", label: "Tournaments" },
@@ -73,21 +74,25 @@ export default function VotingFilters({ values, onChange }: IProps) {
                         style={{ flex: 1, minWidth: 200 }}
                         disabled={values.showNeedsAttention}
                     />
-                    <Select
-                        placeholder="Status"
-                        leftSection={<FontAwesomeIcon icon="rotate" />}
-                        value={values.status}
-                        onChange={(value) => handleChange("status", value)}
-                        data={statusOptions}
-                        style={{ flex: 1, minWidth: 200 }}
-                        disabled={values.showNeedsAttention}
-                    />
+                    {user?.isCommittee && (
+                        <Select
+                            placeholder="Status"
+                            leftSection={<FontAwesomeIcon icon="rotate" />}
+                            value={values.status}
+                            onChange={(value) => handleChange("status", value)}
+                            data={statusOptions}
+                            style={{ flex: 1, minWidth: 200 }}
+                            disabled={values.showNeedsAttention}
+                        />
+                    )}
                 </Group>
-                <Checkbox
-                    label="Only show votes that need my attention"
-                    checked={values.showNeedsAttention}
-                    onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
-                />
+                {user?.isCommittee && (
+                    <Checkbox
+                        label="Only show votes that need my attention"
+                        checked={values.showNeedsAttention}
+                        onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
+                    />
+                )}
             </Stack>
         </Card>
     );
