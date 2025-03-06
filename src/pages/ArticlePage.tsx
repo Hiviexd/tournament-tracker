@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text } from "@mantine/core";
+import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text, Tooltip } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticle";
@@ -98,9 +98,11 @@ export default function ArticlePage() {
                     )}
                     {user?.isCommittee && (
                         <>
-                            <Text fs="italic" size="xs" c="dimmed">
-                                Last edited: {moment(article.updatedAt).format("YYYY-MM-DD, HH:mm:ss")}
-                            </Text>
+                            <Tooltip label={moment(article.updatedAt).format("LLL")}>
+                                <Text fs="italic" size="xs" c="dimmed">
+                                    Last edited: {moment(article.updatedAt).fromNow()}
+                                </Text>
+                            </Tooltip>
                             <Button bg="info" onClick={handleEdit} leftSection={<FontAwesomeIcon icon="edit" />}>
                                 Edit
                             </Button>
