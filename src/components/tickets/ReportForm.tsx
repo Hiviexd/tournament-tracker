@@ -165,7 +165,10 @@ You can report either:
                             placeholder="Select report type"
                             data={[
                                 { value: "user", label: "User Report" },
-                                { value: "tournament", label: "Tournament Report" },
+                                {
+                                    value: "tournament",
+                                    label: form.values.assignedGroup === "cc" ? "Contest Report" : "Tournament Report",
+                                },
                             ]}
                             {...form.getInputProps("reportType")}
                             onChange={(value) => {
@@ -190,14 +193,14 @@ You can report either:
                         {reportType === "tournament" && (
                             <>
                                 <TextInput
-                                    label="Tournament Name"
-                                    placeholder="Enter tournament name"
+                                    label={form.values.assignedGroup === "cc" ? "Contest Name" : "Tournament Name"}
+                                    placeholder={form.values.assignedGroup === "cc" ? "Enter contest name" : "Enter tournament name"}
                                     {...form.getInputProps("targetTournamentName")}
                                     withAsterisk
                                     disabled={!user}
                                 />
                                 <TextInput
-                                    label="Tournament Forum URL"
+                                    label={form.values.assignedGroup === "cc" ? "Contest Forum URL" : "Tournament Forum URL"}
                                     placeholder="Enter forum URL"
                                     {...form.getInputProps("targetTournamentLink")}
                                     withAsterisk
