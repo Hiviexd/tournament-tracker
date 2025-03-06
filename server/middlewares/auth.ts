@@ -3,6 +3,12 @@ import helpers from "../helpers";
 import OsuApiService from "../services/OsuApiService";
 import { Request, Response, NextFunction } from "express";
 
+/**
+ * Unauthorized middleware
+ * @param req
+ * @param res
+ * @param next
+ */
 function unauthorize(req: Request, res: Response, next: NextFunction) {
     // Admin bypass
     const user = res.locals!.user || null;
@@ -17,6 +23,12 @@ function unauthorize(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+/**
+ * Check if user is logged in, and assign user to res.locals
+ * @param req
+ * @param res
+ * @param next
+ */
 async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
     const user = await User.findById(req.session.mongoId);
 
@@ -43,6 +55,12 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
+/**
+ * Check if user is part of a committee
+ * @param req
+ * @param res
+ * @param next
+ */
 function isCommittee(req: Request, res: Response, next: NextFunction) {
     const user = res.locals!.user;
     if (!user || !user.isCommittee) return unauthorize(req, res, next);
@@ -50,6 +68,12 @@ function isCommittee(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
+/**
+ * Check if user is admin
+ * @param req
+ * @param res
+ * @param next
+ */
 function isAdmin(req: Request, res: Response, next: NextFunction) {
     const user = res.locals!.user;
     if (!user || !user.isAdmin) return unauthorize(req, res, next);
