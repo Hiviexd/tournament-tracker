@@ -56,6 +56,10 @@ UserSchema.virtual("isAlumni").get(function (this: IUser) {
     return this.groups && this.groups.includes("alm");
 });
 
+UserSchema.virtual("isDev").get(function (this: IUser) {
+    return this.groups && this.groups.includes("dev");
+});
+
 UserSchema.virtual("tcDuration").get(function (this: IUser) {
     return getDuration(this, "tc");
 });

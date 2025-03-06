@@ -1,9 +1,9 @@
 import { IOsuCountry } from "./OsuApi";
 import { Document, Model, DocumentQuery } from "mongoose";
 
-export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm";
+export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm" | "dev";
 
-export type BadgedUserGroup = Exclude<UserGroup, "user" | "admin">;
+export type BadgedUserGroup = Exclude<UserGroup, "user" | "admin" | "dev">;
 
 export interface IUserHistory {
     date: Date;
@@ -45,6 +45,7 @@ export interface IUser extends Document {
     isTournamentCommittee: boolean;
     isContestCommittee: boolean;
     isAdmin: boolean;
+    isDev: boolean;
     isAlumni: boolean;
     isCommittee: boolean;
     tcDuration: number;
