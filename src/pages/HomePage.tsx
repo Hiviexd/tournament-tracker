@@ -33,7 +33,7 @@ const features: Feature[] = [
         icon: "paper-plane",
         title: "Tickets",
         description: "Create and browse through the compendium of tickets created by users",
-        link: "/tickets/create",
+        link: "/tickets",
     },
     {
         icon: "trophy",
