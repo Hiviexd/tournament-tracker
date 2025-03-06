@@ -22,11 +22,15 @@ function hasRequiredPermissions(user: IUser | null, permissions: string[]): bool
     // No user, only allow if no permissions are required
     if (!user) return !permissions.length;
 
-    // Admin bypass
-    if (user.isAdmin) return true;
+    // Admin/dev bypass
+    if (user.isAdmin || user.isDev) return true;
 
     // Check if user has the required permissions
-    if ((permissions.includes("admin") && !user.isAdmin) || (permissions.includes("committee") && !user.isCommittee))
+    if (
+        (permissions.includes("admin") && !user.isAdmin) ||
+        (permissions.includes("committee") && !user.isCommittee) ||
+        (permissions.includes("dev") && !user.isDev)
+    )
         return false;
 
     return true;

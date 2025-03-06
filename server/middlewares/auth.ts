@@ -12,7 +12,7 @@ import { Request, Response, NextFunction } from "express";
 function unauthorize(req: Request, res: Response, next: NextFunction) {
     // Admin bypass
     const user = res.locals!.user || null;
-    if (user && user.isAdmin) {
+    if (user && (user.isAdmin || user.isDev)) {
         return next();
     }
 
@@ -82,6 +82,19 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
 }
 
 /**
+ * Check if user is dev
+ * @param req
+ * @param res
+ * @param next
+ */
+function isDev(req: Request, res: Response, next: NextFunction) {
+    const user = res.locals!.user;
+    if (!user || !user.isDev) return unauthorize(req, res, next);
+
+    next();
+}
+
+/**
  * Optional authentication middleware
  * Allows logged-out users to access routes, but still sets res.locals for logged-in users
  * @param req
@@ -122,5 +135,6 @@ export default {
     isLoggedIn,
     isCommittee,
     isAdmin,
+    isDev,
     optionalAuth,
 };
