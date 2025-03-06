@@ -81,8 +81,46 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
+/**
+ * Optional authentication middleware
+ * Allows logged-out users to access routes, but still sets res.locals for logged-in users
+ * @param req
+ * @param res
+ * @param next
+ */
+async function optionalAuth(req: Request, res: Response, next: NextFunction) {
+    if (!req.session || !req.session.mongoId) {
+        return next();
+    }
+
+    const user = await User.findById(req.session.mongoId);
+
+    if (!user) {
+        return next();
+    }
+
+    // Refresh token if less than 2 hours left
+    if (req.session.expireDate && new Date() > new Date(req.session.expireDate - 2 * 3600 * 1000)) {
+        const response = await OsuApiService.refreshToken(req.session.refreshToken!);
+
+        if (!response || OsuApiService.isOsuResponseError(response)) {
+            req.session.destroy((error) => {
+                console.log(error);
+            });
+
+            return next();
+        }
+
+        helpers.setSession(req.session, response);
+    }
+
+    res.locals!.user = user;
+    next();
+}
+
 export default {
     isLoggedIn,
     isCommittee,
     isAdmin,
+    optionalAuth,
 };
