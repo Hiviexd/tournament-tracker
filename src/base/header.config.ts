@@ -33,7 +33,7 @@ export const routes: IRoute[] = [
         link: "/reports/create",
         links: [
             {
-                title: "Submit Report",
+                title: "Create Report",
                 link: "/reports/create",
                 icon: "flag",
                 permissions: ["user"],
@@ -53,7 +53,7 @@ export const routes: IRoute[] = [
         link: "/tickets/create",
         links: [
             {
-                title: "Submit Ticket",
+                title: "Create Ticket",
                 link: "/tickets/create",
                 icon: "paper-plane",
                 permissions: [],
