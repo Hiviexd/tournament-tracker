@@ -12,6 +12,7 @@ interface TextEditorProps {
     className?: string;
     disabled?: boolean;
     autoSaveKey?: string; // Optional key for autosaving
+    style?: React.CSSProperties;
 }
 
 /**
@@ -26,6 +27,7 @@ export default function TextEditor({
     className,
     disabled = false,
     autoSaveKey,
+    style,
 }: TextEditorProps) {
     // Use the editor preferences hook to get and set markdown mode
     const { isMarkdownMode, toggleMarkdownMode } = useEditorPreferences();
@@ -67,7 +69,14 @@ export default function TextEditor({
     const showSaveIndicator = isAutoSaveEnabled && autoSaveIsSaved && !autoSaveIsTyping;
 
     return (
-        <Box className={className}>
+        <Box
+            className={className}
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                ...style,
+            }}>
             {isMarkdownMode ? (
                 <MarkdownEditor
                     value={editorValue}

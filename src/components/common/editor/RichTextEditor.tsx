@@ -111,16 +111,22 @@ export default function RichTextEditor({
                     "--rte-active-color": "var(--mantine-color-primary-light)",
                     "--rte-toolbar-bg": "var(--mantine-color-primary-light-color)",
                     "--rte-radius": "var(--mantine-radius-sm)",
+                    display: "flex",
+                    flexDirection: "column",
                 },
                 content: {
-                    minHeight: minHeight - 40, // Subtract toolbar height
-                    ...(maxHeight ? { maxHeight: maxHeight - 40 } : {}),
+                    flex: "1 1 auto",
+                    minHeight: Math.max(minHeight - 100, 100), // Ensure minimum content height
+                    ...(maxHeight ? { maxHeight: maxHeight - 100 } : {}),
+                    overflowY: "auto",
+                    padding: "var(--rte-spacing-sm)",
                 },
                 toolbar: {
                     backgroundColor: "var(--mantine-color-primary-10)",
                     borderColor: "var(--mantine-color-primary-5)",
                     padding: "8px",
                     overflowX: "auto", // Allow horizontal scrolling if needed
+                    flexShrink: 0, // Prevent toolbar from shrinking
                 },
                 controlsGroup: {
                     flexShrink: 0, // Prevent control groups from shrinking
