@@ -29,7 +29,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                             <Image src="/assets/logo-main.svg?20250305" alt="Logo" h={35} className="logo-image" />
                         </Link>
                         <Group visibleFrom="md">
-                            {user && <MainNavigation user={user} />}
+                            <MainNavigation user={user} />
                             <UserMenu user={user} />
                         </Group>
                         <Burger opened={mobileHeaderOpened} onClick={mobileHeaderToggle} hiddenFrom="md" size="sm" />

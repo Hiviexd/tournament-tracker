@@ -40,9 +40,9 @@ class TicketsController {
         const { type, title, targetUser, targetTournament, assignedGroup, isActive, showOwn, page = 1 } = req.query;
 
         const query: any = {};
-        const user = res.locals!.user!;
+        const user = res.locals!.user;
 
-        if (type) query.type = type;
+        if (type) query.type = user ? type : "ticket";
         if (type === "ticket" && title) {
             query.title = new RegExp(title as string, "i");
         }
@@ -56,11 +56,11 @@ class TicketsController {
             }
         }
         if (assignedGroup) query.assignedGroup = assignedGroup;
-        if (showOwn === "true") query.author = user._id;
+        if (showOwn === "true") query.author = user?._id;
         if (isActive !== undefined) query.isActive = isActive === "true";
 
-        if (!user.isCommittee && !user.isAdmin) {
-            query.$or = [{ author: user._id }, { type: "ticket" }];
+        if (!user?.isCommittee && !user?.isAdmin) {
+            query.$or = [{ author: user?._id }, { type: "ticket" }];
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
@@ -82,10 +82,16 @@ class TicketsController {
 
     /** GET ticket */
     public async getTicket(req: Request, res: Response) {
-        const user = res.locals!.user!;
+        const user = res.locals!.user;
         const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
 
-        if (!ticket.isTicket && !user.isAdmin && !user.isCommittee && !ticket.author.equals(user._id)) {
+        // Case 1: If it's a report and user is not logged in, deny access
+        if (!ticket.isTicket && !user) {
+            return res.json({ error: "Not authorized to view this ticket" });
+        }
+
+        // Case 2: If it's a report, only allow access to admins, committee members, or the author
+        if (!ticket.isTicket && user && !(user.isAdmin || user.isCommittee || ticket.author.equals(user._id))) {
             return res.json({ error: "Not authorized to view this ticket" });
         }
 

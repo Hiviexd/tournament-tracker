@@ -8,7 +8,7 @@ import helpers from "../../../helpers";
 import { IUser } from "../../../../interfaces/User";
 
 interface IProps {
-    user: IUser;
+    user: IUser | null;
 }
 
 export default function MainNavigation({ user }: IProps) {
@@ -58,7 +58,7 @@ export default function MainNavigation({ user }: IProps) {
                                     <FontAwesomeIcon icon="caret-down" />
                                 ) : null
                             }
-                            component={route.link ? Link : "button"}
+                            component={route.link ? Link : undefined}
                             to={route.link || "#"}>
                             {route.title}
                         </Button>

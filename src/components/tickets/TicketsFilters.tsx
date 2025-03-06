@@ -77,11 +77,13 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 clearable
                             />
                         </SimpleGrid>
-                        <Checkbox
-                            label="Show only my tickets"
-                            checked={values.showOwn}
-                            onChange={(e) => handleChange("showOwn", e.currentTarget.checked)}
-                        />
+                        {user && (
+                            <Checkbox
+                                label="Show only my tickets"
+                                checked={values.showOwn}
+                                onChange={(e) => handleChange("showOwn", e.currentTarget.checked)}
+                            />
+                        )}
                     </>
                 ) : (
                     // Report Filters

@@ -4,38 +4,23 @@ import LogService from "../services/LogService";
 import config from "../../config.json";
 
 class ArticlesController {
-    /** GET public article by slug */
-    public async getPublicArticle(req: Request, res: Response) {
+    /** GET article by slug */
+    public async getArticle(req: Request, res: Response) {
         const { slug } = req.params;
+        const user = res.locals!.user;
 
-        const article = await Article.findOne({
+        const query: any = {
             slug: { $regex: new RegExp(`^${slug}$`, "i") },
-            isPublic: true,
-        });
+        };
+
+        if (!user?.isCommittee) {
+            query.isPublic = true;
+        }
+
+        const article = await Article.findOne(query);
 
         if (!article) {
             return res.json({ error: "Article not found" });
-        }
-
-        res.json(article);
-    }
-
-    /** GET private article by slug (requires auth) */
-    public async getPrivateArticle(req: Request, res: Response) {
-        const { slug } = req.params;
-        const user = res.locals!.user!;
-
-        const article = await Article.findOne({
-            slug: { $regex: new RegExp(`^${slug}$`, "i") },
-        });
-
-        if (!article) {
-            return res.json({ error: "Article not found" });
-        }
-
-        // Check if user can access private article
-        if (!article.isPublic && !user.isCommittee) {
-            return res.json({ error: "You don't have permission to view this article" });
         }
 
         res.json(article);

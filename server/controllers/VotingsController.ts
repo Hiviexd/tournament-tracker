@@ -38,14 +38,14 @@ class VotingsController {
     public async index(req: Request, res: Response) {
         const reqQuery = req.query as VotingListQuery;
         const dbQuery: VotingQueryParams = {};
-        const user = res.locals!.user!;
+        const user = res.locals!.user;
 
         if (reqQuery.title) dbQuery.title = new RegExp(reqQuery.title, "i");
         if (reqQuery.category) dbQuery.category = reqQuery.category;
         if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
 
         // Only show concluded AND public votes to non-committee members
-        if (!user.isCommittee) {
+        if (!user || !user.isCommittee) {
             dbQuery.isActive = false;
             dbQuery.isPublic = true;
         } else if (reqQuery.status) {
@@ -53,7 +53,7 @@ class VotingsController {
         }
 
         // Handle needs attention filter for committee members
-        if (reqQuery.showNeedsAttention === "true" && user.isCommittee) {
+        if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
             dbQuery.isActive = true;
             // Only show votes where:
             // 1. User hasn't voted yet
@@ -94,7 +94,7 @@ class VotingsController {
             .populate(DEFAULT_POPULATE);
 
         // Censor votings for non-committee members
-        if (!user.isCommittee) {
+        if (user && user.isCommittee) {
             votings = votings.map((voting) =>
                 VotingService.censorVotingForNonCommittee(voting)
             ) as unknown as IVoting[];
@@ -111,17 +111,17 @@ class VotingsController {
     /** GET a voting */
     public async getVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
-        const user = res.locals!.user!;
+        const user = res.locals!.user;
 
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         // Non-committee members can only view concluded public votes
-        if (!user.isCommittee && (voting.isActive || !voting.isPublic)) {
+        if ((!user || !user.isCommittee) && (voting.isActive || !voting.isPublic)) {
             return res.json({ error: "You can only view concluded public votes" });
         }
 
         // Censor voting for non-committee members
-        if (!user.isCommittee) {
+        if (!user || !user.isCommittee) {
             return res.json(VotingService.censorVotingForNonCommittee(voting));
         }
 

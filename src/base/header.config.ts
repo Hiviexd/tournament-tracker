@@ -24,16 +24,16 @@ export const routes: IRoute[] = [
     // },
     {
         title: "Votes",
-        permissions: ["user"],
+        permissions: [],
         link: "/votes",
     },
     {
         title: "Reports",
-        permissions: ["user"],
+        permissions: [],
         link: "/reports/create",
         links: [
             {
-                title: "Submit Report",
+                title: "Create Report",
                 link: "/reports/create",
                 icon: "flag",
                 permissions: ["user"],
@@ -49,27 +49,27 @@ export const routes: IRoute[] = [
 
     {
         title: "Tickets",
-        permissions: ["user"],
+        permissions: [],
         link: "/tickets/create",
         links: [
             {
-                title: "Submit Ticket",
+                title: "Create Ticket",
                 link: "/tickets/create",
                 icon: "paper-plane",
-                permissions: ["user"],
+                permissions: [],
             },
             {
                 title: "Tickets listing",
                 link: "/tickets",
                 icon: "mail-bulk",
-                permissions: ["user"],
+                permissions: [],
             },
         ],
     },
 
     {
         title: "Resources",
-        permissions: ["user"],
+        permissions: [],
         links: [
             {
                 title: "TC Documentation",
@@ -81,13 +81,13 @@ export const routes: IRoute[] = [
                 title: "Official Resources",
                 link: "/resources/official",
                 icon: "file-alt",
-                permissions: ["user"],
+                permissions: [],
             },
             {
                 title: "Community Resources",
                 link: "/resources/community",
                 icon: "users",
-                permissions: ["user"],
+                permissions: [],
             },
             {
                 title: "Create Article",

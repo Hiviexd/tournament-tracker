@@ -50,14 +50,14 @@ const routes: RouteConfig[] = [
         page: <VotingListPage />,
         title: "Votes Listing",
         icon: "poll-h",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/votes/:votingId",
         page: <VotingDetailsPage />,
         title: "Vote Details",
         icon: "poll-h",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/markdown",
@@ -92,7 +92,7 @@ const routes: RouteConfig[] = [
         page: <TicketsListPage />,
         title: "Tickets Listing",
         icon: "mail-bulk",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/reports",
@@ -120,7 +120,7 @@ const routes: RouteConfig[] = [
         page: <TicketDetailsPage />,
         title: "Ticket Details",
         icon: "paper-plane",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "/reports/:ticketId",
