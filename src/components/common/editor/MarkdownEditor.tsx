@@ -35,7 +35,7 @@ export default function MarkdownEditor({
         <>
             <Box
                 style={{
-                    padding: "10px 16px",
+                    padding: "10px 8px 10px 16px",
                     borderBottom: "1px solid var(--mantine-color-primary-5)",
                     borderTop: "1px solid var(--mantine-color-default-border)",
                     borderLeft: "1px solid var(--mantine-color-default-border)",
