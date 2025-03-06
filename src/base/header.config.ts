@@ -36,7 +36,7 @@ export const routes: IRoute[] = [
                 title: "Create Report",
                 link: "/reports/create",
                 icon: "flag",
-                permissions: ["user"],
+                permissions: [],
             },
             {
                 title: "Reports listing",
