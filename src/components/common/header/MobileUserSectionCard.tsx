@@ -1,7 +1,7 @@
-import { UnstyledButton, Group, Avatar, Stack, Text } from "@mantine/core";
+import { UnstyledButton, Group } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IUser } from "../../../../interfaces/User";
-import UserGroupBadge from "../badges/UserGroupBadge";
+import UserDisplay from "../UserDisplay";
 
 interface IProps {
     user: IUser;
@@ -13,7 +13,7 @@ export default function MobileUserSectionCard({ user, opened, onClick }: IProps)
     return (
         <UnstyledButton onClick={onClick}>
             <Group
-                p="xs"
+                p="md"
                 style={{
                     position: "relative",
                     overflow: "hidden",
@@ -37,14 +37,8 @@ export default function MobileUserSectionCard({ user, opened, onClick }: IProps)
 
                 {/* content */}
                 <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-                    <Group>
-                        <Avatar src={user.avatarUrl} size="md" />
-                        <Stack gap={2} style={{ flex: 1 }}>
-                            <Text size="sm" fw={500} c="white">
-                                {user.username}
-                            </Text>
-                            <UserGroupBadge user={user} />
-                        </Stack>
+                    <Group justify="space-between" align="center">
+                        <UserDisplay user={user} />
                         <FontAwesomeIcon
                             icon="caret-down"
                             style={{
