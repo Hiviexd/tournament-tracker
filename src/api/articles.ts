@@ -2,14 +2,8 @@ import axios from "axios";
 import { ArticleType } from "@interfaces/Article";
 
 export const getArticle = async (slug: string) => {
-    // Try public endpoint first
-    const publicResponse = await axios.get(`/api/articles/${slug}/public`);
-
-    if (publicResponse.data.error) {
-        const privateResponse = await axios.get(`/api/articles/${slug}/private`);
-        return privateResponse.data;
-    }
-    return publicResponse.data;
+    const response = await axios.get(`/api/articles/${slug}`);
+    return response.data;
 };
 
 export const getDocumentation = async () => {
