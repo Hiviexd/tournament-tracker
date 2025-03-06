@@ -21,6 +21,10 @@ interface RouteConfig {
     title: string;
     icon: string;
     permissions?: string[];
+    parent?: {
+        title: string;
+        path: string;
+    };
 }
 
 const routes: RouteConfig[] = [
@@ -58,6 +62,10 @@ const routes: RouteConfig[] = [
         title: "Vote Details",
         icon: "poll-h",
         permissions: [],
+        parent: {
+            title: "Votes",
+            path: "/votes",
+        },
     },
     {
         path: "/markdown",
@@ -121,6 +129,10 @@ const routes: RouteConfig[] = [
         title: "Ticket Details",
         icon: "paper-plane",
         permissions: [],
+        parent: {
+            title: "Tickets",
+            path: "/tickets",
+        },
     },
     {
         path: "/reports/:ticketId",
@@ -128,6 +140,10 @@ const routes: RouteConfig[] = [
         title: "Report Details",
         icon: "flag",
         permissions: ["user"],
+        parent: {
+            title: "Reports",
+            path: "/reports",
+        },
     },
     {
         path: "/docs",
@@ -139,9 +155,13 @@ const routes: RouteConfig[] = [
     {
         path: "/docs/:slug",
         page: <ArticlePage />,
-        title: "Documentation Article",
+        title: "Article",
         icon: "book",
         permissions: ["committee"],
+        parent: {
+            title: "Documentation",
+            path: "/docs",
+        },
     },
     {
         path: "/resources/official",

@@ -43,7 +43,7 @@ export default function AuthRouter() {
                 <Route
                     key={route.path}
                     path={route.path}
-                    element={<Layout title={route.title} icon={route.icon} page={route.page} />}
+                    element={<Layout title={route.title} icon={route.icon} page={route.page} parent={route.parent} />}
                 />
             ))}
         </Routes>

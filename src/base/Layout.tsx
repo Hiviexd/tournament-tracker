@@ -1,6 +1,7 @@
-import { AppShell, Container, Flex } from "@mantine/core";
+import { AppShell, Container, Flex, Breadcrumbs } from "@mantine/core";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { DEFAULT_HUE } from "../constants";
 import helpers from "../helpers";
 import "../sass/Layout.scss";
@@ -18,9 +19,10 @@ interface IPropTypes {
     page: JSX.Element;
     title?: string;
     icon?: string;
+    parent?: { title: string; path: string };
 }
 
-export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
+export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
 
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
@@ -73,7 +75,16 @@ export default function Layout({ page, title, icon = "trophy" }: IPropTypes) {
                         <Container fluid className="page-header">
                             <Flex align="center" gap="md">
                                 <FontAwesomeIcon icon={icon as IconProp} />
-                                <span>{title}</span>
+                                {title && (
+                                    <Breadcrumbs>
+                                        {parent && (
+                                            <Link to={parent.path} className="breadcrumb-link">
+                                                {parent.title}
+                                            </Link>
+                                        )}
+                                        <span>{title}</span>
+                                    </Breadcrumbs>
+                                )}
                             </Flex>
                         </Container>
                         {
