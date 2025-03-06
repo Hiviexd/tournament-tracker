@@ -7,7 +7,7 @@ import { IUser } from "../../../../interfaces/User";
 import ThemeCustomizeModal from "../modals/ThemeCustomizeModal";
 import SettingsModal from "../modals/SettingsModal";
 import LoginButton from "../LoginButton";
-
+import DebugModal from "../modals/DebugModal";
 interface IProps {
     user: IUser | null;
 }
@@ -17,6 +17,7 @@ export default function UserMenu({ user }: IProps) {
     const { hovered, ref } = useHover();
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
     const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
+    const [debugOpened, { open: openDebug, close: closeDebug }] = useDisclosure(false);
 
     if (!user) return <LoginButton size="sm" />;
 
@@ -24,6 +25,7 @@ export default function UserMenu({ user }: IProps) {
         <>
             <ThemeCustomizeModal opened={customizeOpened} onClose={closeCustomize} />
             <SettingsModal opened={settingsOpened} onClose={closeSettings} />
+            <DebugModal opened={debugOpened} onClose={closeDebug} />
 
             <Menu withArrow shadow="md" trigger="hover" opened={menuOpened} onChange={setMenuOpened}>
                 <Menu.Target>
@@ -52,6 +54,11 @@ export default function UserMenu({ user }: IProps) {
                     {user.isCommittee && (
                         <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
                             Settings
+                        </Menu.Item>
+                    )}
+                    {user.isDev && (
+                        <Menu.Item onClick={openDebug} leftSection={<FontAwesomeIcon icon="bug" />}>
+                            Debug
                         </Menu.Item>
                     )}
                     <Menu.Divider />

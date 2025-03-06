@@ -71,6 +71,7 @@ import {
     faImage,
     faCaretDown,
     faCaretUp,
+    faBug,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -146,5 +147,6 @@ export default function loadIcons() {
         faImage,
         faCaretDown,
         faCaretUp,
+        faBug,
     );
 }

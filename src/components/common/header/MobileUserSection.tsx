@@ -11,9 +11,10 @@ interface IProps {
     onClose: () => void;
     onOpenCustomize: () => void;
     onOpenSettings: () => void;
+    onOpenDebug: () => void;
 }
 
-export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSettings }: IProps) {
+export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSettings, onOpenDebug }: IProps) {
     const [opened, { toggle }] = useDisclosure(false);
     const [user] = useAtom(loggedInUserAtom);
 
@@ -25,6 +26,11 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
     const handleSettings = () => {
         onClose();
         onOpenSettings();
+    };
+
+    const handleDebug = () => {
+        onClose();
+        onOpenDebug();
     };
 
     if (!user) return <LoginButton />;
@@ -55,6 +61,15 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
                             <Group>
                                 <FontAwesomeIcon icon="cog" />
                                 <Text size="sm">Settings</Text>
+                            </Group>
+                        </UnstyledButton>
+                    )}
+
+                    {user.isDev && (
+                        <UnstyledButton onClick={handleDebug}>
+                            <Group>
+                                <FontAwesomeIcon icon="bug" />
+                                <Text size="sm">Debug</Text>
                             </Group>
                         </UnstyledButton>
                     )}
