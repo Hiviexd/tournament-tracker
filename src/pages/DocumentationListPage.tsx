@@ -61,6 +61,7 @@ export default function DocumentationListPage() {
                     <Card
                         shadow="sm"
                         p="lg"
+                        radius="md"
                         className="feature-card"
                         component={Link}
                         to={`/docs/${welcomeArticle.slug}`}>
