@@ -66,7 +66,11 @@ class TicketsController {
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         const [tickets, total] = await Promise.all([
-            Ticket.find(query).sort({ createdAt: -1 }).skip(skip).limit(DEFAULT_LIMIT).populate(DEFAULT_POPULATE),
+            Ticket.find(query)
+                .sort({ isActive: -1, createdAt: -1 })
+                .skip(skip)
+                .limit(DEFAULT_LIMIT)
+                .populate(DEFAULT_POPULATE),
             Ticket.countDocuments(query),
         ]);
 
