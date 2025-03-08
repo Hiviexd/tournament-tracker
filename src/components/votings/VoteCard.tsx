@@ -68,15 +68,19 @@ export default function VoteCard({ vote, options }: IProps) {
                                 const color = getScoreColor(score.score);
 
                                 return (
-                                    <Group key={score.optionIndex} wrap="nowrap">
-                                        <Text size="sm" w={120} truncate title={options[score.optionIndex]}>
+                                    <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
+                                        <Text
+                                            size="sm"
+                                            w={{ base: 500, sm: 200 }}
+                                            truncate
+                                            title={options[score.optionIndex]}>
                                             {options[score.optionIndex]}
                                         </Text>
                                         <Badge
                                             size="sm"
                                             variant="light"
                                             color={color}
-                                            w={40}
+                                            w={{ base: 60, sm: 40 }}
                                             style={{ textAlign: "center" }}>
                                             {score.score}
                                         </Badge>
@@ -99,14 +103,28 @@ export default function VoteCard({ vote, options }: IProps) {
                 borderLeft: `4px solid ${getVoteBorderColor()}`,
             }}>
             <Box>
-                <Box style={{ float: "right", marginLeft: "var(--mantine-spacing-md)" }}>{renderVoteData()}</Box>
-                <Box>
-                    <UserDisplay user={vote.author} />
-                    {vote.comment && (
-                        <Box mt="xs">
-                            <MarkdownText content={vote.comment} />
-                        </Box>
-                    )}
+                <Box display={{ base: "block", sm: "none" }}>
+                    <Stack gap="md">
+                        <UserDisplay user={vote.author} />
+                        {renderVoteData()}
+                        {vote.comment && (
+                            <Box>
+                                <MarkdownText content={vote.comment} />
+                            </Box>
+                        )}
+                    </Stack>
+                </Box>
+
+                <Box display={{ base: "none", sm: "block" }}>
+                    <Box style={{ float: "right", marginLeft: "var(--mantine-spacing-md)" }}>{renderVoteData()}</Box>
+                    <Box>
+                        <UserDisplay user={vote.author} />
+                        {vote.comment && (
+                            <Box mt="xs">
+                                <MarkdownText content={vote.comment} />
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
             </Box>
         </Card>
