@@ -252,10 +252,10 @@ class TicketsController {
         const files = req.files as Express.Multer.File[];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
-        const isTicketAuthor = ticket.author.id === user.id;
+        const senderIsTicketAuthor = ticket.author.id === user.id;
 
         // Authorization checks
-        if (!user.isCommittee && !isTicketAuthor) {
+        if (!user.isCommittee && !senderIsTicketAuthor) {
             return res.json({ error: "Not authorized to message this ticket" });
         }
 
@@ -267,25 +267,25 @@ class TicketsController {
             return res.json({ error: "Message must be between 10 and 6000 characters" });
         }
 
-        const message = new Message({
+        const newMessage = new Message({
             author: user._id,
             content,
-            isCommittee: isTicketAuthor ? false : user.isCommittee,
+            isCommittee: senderIsTicketAuthor ? false : user.isCommittee,
             isNote,
             attachments: [],
         });
 
         // Handle file uploads
-        message.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id, user._id);
+        newMessage.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id, user._id);
 
-        await message.save();
-        ticket.messages.push(message._id);
+        await newMessage.save();
+        ticket.messages.push(newMessage._id);
         await ticket.save();
 
         // osu! notification
         let osuNotification: boolean = false;
 
-        if (message.isCommittee && !isNote) {
+        if (newMessage.isCommittee && !isNote) {
             osuNotification = true;
 
             const uniqueUsers = new Set<number>();
@@ -330,18 +330,20 @@ class TicketsController {
             },
         ];
 
-        if (message.attachments?.length) {
-            fields.push(helpers.getAttachmentsField(message.attachments)!);
+        if (newMessage.attachments?.length) {
+            fields.push(helpers.getAttachmentsField(newMessage.attachments)!);
         }
 
-        // ping the committee members who sent messages in the ticket
+        // ping the committee members who sent messages in the ticket when the message is from the ticket author
         const committeeMembers = new Set<string>();
 
-        ticket.messages.forEach((msg) => {
-            if (msg?.author && !msg.isNote && msg.isCommittee) {
-                committeeMembers.add(msg.author.discordId || msg.author.username);
-            }
-        });
+        if (senderIsTicketAuthor) {
+            ticket.messages.forEach((msg) => {
+                if (msg?.author && !msg.isNote && msg.isCommittee) {
+                    committeeMembers.add(msg.author.discordId || msg.author.username);
+                }
+            });
+        }
 
         await DiscordService.sendUserHighlightWebhook(Array.from(committeeMembers), [
             {
