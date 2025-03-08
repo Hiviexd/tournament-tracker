@@ -146,6 +146,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const presetOptions = [
         { value: "userAddition", label: "User Addition" },
         { value: "tournamentBans", label: "Tournament Ban" },
+        { value: "badgeSupport", label: "Badge Support" },
+        { value: "topThreeBadgeSupport", label: "Top 3 Badge Support" },
     ];
 
     const handlePresetChange = (preset: string) => {
@@ -253,8 +255,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     )}
 
                     <MultiSelect
-                        label="Assigned Groups"
-                        placeholder="Select assigned groups"
+                        label="Assigned Group(s)"
+                        placeholder="Select assigned group(s)"
                         data={groupOptions}
                         withAsterisk
                         {...form.getInputProps("assignedGroups")}
@@ -286,7 +288,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>
-                            Options {form.values.type === "binary" && "(Must be exactly 2)"}
+                            Options {form.values.type === "binary" && "(must be exactly 2)"}
                         </Text>
                         {form.values.type && (
                             <Text size="xs" c="dimmed" fs="italic" mb="xs">
