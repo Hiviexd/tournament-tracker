@@ -88,7 +88,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                     }
                     : undefined
             }>
-            <Stack gap="md" justify="space-between">
+            <Stack gap="md" justify="space-between" h="100%">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap="xs">
                         <Text size="lg" fw={500}>
