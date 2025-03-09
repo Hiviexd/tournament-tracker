@@ -72,6 +72,7 @@ import {
     faCaretDown,
     faCaretUp,
     faBug,
+    faCheckToSlot,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -148,5 +149,6 @@ export default function loadIcons() {
         faCaretDown,
         faCaretUp,
         faBug,
+        faCheckToSlot,
     );
 }
