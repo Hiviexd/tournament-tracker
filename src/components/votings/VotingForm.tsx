@@ -101,7 +101,7 @@ export default function VotingForm({ voting, user }: IProps) {
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="lg">
-                <Group>
+                <Group gap="xs" align="baseline">
                     <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
                     {userHasVoted && (
                         <Badge size="sm" color="info" variant="light" leftSection={<FontAwesomeIcon icon="check-to-slot" />}>
