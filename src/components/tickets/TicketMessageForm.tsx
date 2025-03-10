@@ -20,6 +20,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [content, setContent] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const [submissionCount, setSubmissionCount] = useState(0);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
     const autoSaveKey = `ticket-message-${ticket.id}`;
@@ -65,12 +66,13 @@ export default function TicketMessageForm({ ticket }: IProps) {
 
         try {
             await createMessageMutation.mutateAsync(formData);
+            clearAutoSavedValue(autoSaveKey);
             setContent("");
             setError(null);
             clearFiles();
 
-            // Clear the autosaved content
-            clearAutoSavedValue(autoSaveKey);
+            // force a re-render of the TextEditor component to visually clear the content
+            setSubmissionCount((count) => count + 1);
         } catch (err) {
             setError("Failed to send message. Please try again.");
         }
@@ -87,6 +89,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                         <TextLengthIndicator length={content.length} maxLength={6000} />
                     </Box>
                     <TextEditor
+                        key={`${ticket.id}-${submissionCount}`}
                         value={content}
                         onChange={handleContentChange}
                         placeholder={getPlaceholder()}
