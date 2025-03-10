@@ -31,6 +31,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
         return null;
     };
 
+    const getPlaceholder = () => {
+        if (!ticket.isActive && !user?.isCommittee) return "Cannot message closed tickets";
+        if (!ticket.isActive && user?.isCommittee) return "Type your note...";
+        return "Type your message...";
+    };
+
     const handleContentChange = (value: string) => {
         setContent(value);
         if (error) setError(null);
@@ -83,11 +89,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                     <TextEditor
                         value={content}
                         onChange={handleContentChange}
-                        placeholder={
-                            !ticket.isActive && !user?.isCommittee
-                                ? "Cannot message closed tickets"
-                                : "Type your message..."
-                        }
+                        placeholder={getPlaceholder()}
                         disabled={!ticket.isActive && !user?.isCommittee}
                         minHeight={120}
                         className={error ? "error" : ""}
