@@ -276,18 +276,21 @@ class TicketsController {
         });
 
         // Handle file uploads
-        newMessage.attachments = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, ticket._id, user._id);
+        newMessage.attachments = await UploadService.handleFileUploads(
+            files,
+            FILE_UPLOAD_CATEGORY,
+            ticket._id,
+            user._id
+        );
 
         await newMessage.save();
         ticket.messages.push(newMessage._id);
         await ticket.save();
 
         // osu! notification
-        let osuNotification: boolean = false;
-
         if (newMessage.isCommittee && !isNote) {
-            osuNotification = true;
-
+            /**
+            * ? this used to include the committee members who sent messages in the ticket
             const uniqueUsers = new Set<number>();
 
             uniqueUsers.add(ticket.author.osuId);
@@ -298,21 +301,19 @@ class TicketsController {
             }
 
             const userIds = Array.from(uniqueUsers);
+            */
 
-            console.log(userIds);
-            if (userIds.length > 0) {
-                await OsuBotService.sendAnnouncement(userIds, {
-                    channel: {
-                        name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
-                        description: `Response regarding: ${ticket.title}`,
-                    },
-                    content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
-                        ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
-                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
-                        ticket._id
-                    }).`,
-                });
-            }
+            await OsuBotService.sendAnnouncement([ticket.author.osuId], {
+                channel: {
+                    name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
+                    description: `Response regarding: ${ticket.title}`,
+                },
+                content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
+                    ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
+                } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
+                    ticket._id
+                }).`,
+            });
         }
 
         // Logger
@@ -356,11 +357,7 @@ class TicketsController {
             },
         ]);
 
-        const response = osuNotification
-            ? "Sent! A copy of the osu! notification was sent to you for confirmation."
-            : isNote
-                ? "Added a note successfully!"
-                : "Message sent successfully!";
+        const response = isNote ? "Added a note successfully!" : "Message sent successfully!";
 
         res.json({ message: response });
     }
