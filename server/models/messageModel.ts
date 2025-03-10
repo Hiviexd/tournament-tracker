@@ -7,7 +7,8 @@ const MessageSchema = new Schema<IMessage>(
         content: { type: String, required: true },
         isCommittee: { type: Boolean, required: true, default: false },
         isNote: { type: Boolean, default: false },
-        attachments: [{ type: Schema.Types.ObjectId, ref: "Attachment" }]
+        attachments: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
+        event: { type: String, enum: ["close", "reopen"] },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

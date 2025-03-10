@@ -15,5 +15,6 @@ export interface IMessage extends Document {
     isCommittee: boolean;
     isNote?: boolean;
     attachments?: IAttachment[];
+    event?: "close" | "reopen";
     createdAt: Date;
 }

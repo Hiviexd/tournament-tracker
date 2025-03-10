@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert, Text } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text, ThemeIcon } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -6,6 +6,7 @@ import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import DateBadge from "../common/badges/DateBadge";
 import AttachmentDisplay from "../common/AttachmentDisplay";
+import UserLink from "../common/UserLink";
 
 interface IProps {
     ticket: ITicket;
@@ -63,7 +64,26 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <MessageContent />
             </Alert>
         );
-    } else if (!message.isNote)
+    } else if (message.event) {
+        const isClosing = message.event === "close";
+        return (
+            <Group gap="xs" align="center" mx="lg">
+                <ThemeIcon size="sm" radius="xl" color={isClosing ? "red" : "green"} variant="filled">
+                    <FontAwesomeIcon icon={isClosing ? "lock" : "lock-open"} size="xs" />
+                </ThemeIcon>
+                <Text size="sm" c="dimmed">
+                    <UserLink
+                        user={message.author}
+                        username={getUserDisplayProps().username}
+                        asText={!!getUserDisplayProps().username}
+                        c="white"
+                    />{" "}
+                    {isClosing ? "closed" : "reopened"} this {ticket.isTicket ? "ticket" : "report"}{" "}
+                    <DateBadge date={message.createdAt} staticColor />
+                </Text>
+            </Group>
+        );
+    } else if (!message.isNote) {
         return (
             <Card
                 shadow="sm"
@@ -75,4 +95,5 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <MessageContent />
             </Card>
         );
+    }
 }

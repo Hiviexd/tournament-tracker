@@ -368,6 +368,17 @@ class TicketsController {
         const ticket = await Ticket.findById(req.params.ticketId).orFail();
 
         ticket.isActive = !ticket.isActive;
+
+        const eventMessage = new Message({
+            author: user._id,
+            content: ticket.isActive ? "Ticket reopened" : "Ticket closed",
+            isCommittee: true,
+            event: ticket.isActive ? "reopen" : "close",
+        });
+
+        await eventMessage.save();
+        ticket.messages.push(eventMessage._id);
+
         await ticket.save();
 
         res.json({
