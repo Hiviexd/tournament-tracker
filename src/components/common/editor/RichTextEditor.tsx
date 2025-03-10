@@ -66,7 +66,10 @@ export default function RichTextEditor({
             TableRow,
             TableHeader,
             TableCell,
-            Image,
+            Image.configure({
+                inline: true,
+                allowBase64: true,
+            }),
         ],
         content: value,
         onUpdate: ({ editor }) => {

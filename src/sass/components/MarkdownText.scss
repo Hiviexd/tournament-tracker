@@ -51,7 +51,7 @@
         margin: 0.5rem;
     }
 
-    p>img:only-child {
+    p:only-child:has(> img:only-child) img {
         display: block;
         margin-left: auto;
         margin-right: auto;

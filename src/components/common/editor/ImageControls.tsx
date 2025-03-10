@@ -26,7 +26,7 @@ export default function ImageControls({ editor, disabled }: ImageControlsProps) 
                 .focus()
                 .setImage({ src: url, alt: alt || undefined })
                 .run();
-            editor.chain().focus().enter().run();
+
             setUrl("");
             setAlt("");
             setOpened(false);
