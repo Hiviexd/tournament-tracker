@@ -141,7 +141,7 @@ export default function RichTextEditor({
                     },
                 },
             }}>
-            <MantineRichTextEditor.Toolbar sticky stickyOffset={0}>
+            <MantineRichTextEditor.Toolbar sticky stickyOffset={60}>
                 {/* Responsive container that allows wrapping on small screens */}
                 <Group gap="xs" style={{ width: "100%", flexWrap: "wrap" }}>
                     {/* Left-aligned controls */}
