@@ -12,7 +12,7 @@ export default function AssetPreviewerPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get("tab") || "badges";
     const theme = useMantineTheme();
-    const isLargeScreen = useMediaQuery(`(min-width: ${theme.breakpoints.lg})`);
+    const isLargeScreen = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
     const [isMediaQueryReady, setIsMediaQueryReady] = useState(false);
 
     // Wait for media query to stabilize
