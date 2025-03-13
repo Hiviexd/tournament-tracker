@@ -10,7 +10,7 @@ usersRouter.get("/me", auth.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
 usersRouter.get("/:userInput", UsersController.getUser);
-usersRouter.get("/:userInput/osu", UsersController.getOsuUserInfo);
+usersRouter.get("/:userInput/osu", auth.isLoggedIn, UsersController.getOsuUserInfo);
 usersRouter.post(
     "/:userId/toggleReviewerStatus",
     auth.isLoggedIn,

@@ -25,6 +25,9 @@ import { useOsuUserInfo } from "../../hooks/useUsers";
 import { useBadgePreviewer, LocalBadge } from "../../hooks/useBadgePreviewer";
 import defaultBanner from "/assets/default-banner.jpg";
 import * as countryFlags from "country-flag-icons/react/3x2";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
+import SignInBanner from "../common/SignInBanner";
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -70,6 +73,7 @@ export default function BadgesTab() {
     const [userInput, setUserInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const { data: osuUser, isLoading } = useOsuUserInfo(searchQuery);
+    const [loggedInUser] = useAtom(loggedInUserAtom);
 
     // Use our custom badge manager hook
     const {
@@ -209,27 +213,33 @@ export default function BadgesTab() {
         return countryFlags[user.country.code as keyof typeof countryFlags];
     }, [user.country.code]);
 
-    return (
-        <Stack mt="xl">
-            {/* Search Section */}
+    // Render the search section based on login status
+    const renderSearchSection = () => {
+        return (
             <Card withBorder>
-                <Group grow align="flex-end">
+                <Group grow align="center">
                     <div>
-                        <TextInput
-                            label="Load osu! profile"
-                            placeholder="Enter username or osu! ID"
-                            value={userInput}
-                            onChange={(e) => setUserInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleLoadUser()}
-                        />
-                        <Button
-                            mt="sm"
-                            onClick={handleLoadUser}
-                            loading={isLoading}
-                            disabled={!userInput.trim()}
-                            fullWidth>
-                            Load User
-                        </Button>
+                        {!loggedInUser ? (
+                            <SignInBanner text="You need to sign in with your osu! account to load an osu! profile." hideLoginButton />
+                        ) : (
+                            <>
+                                <TextInput
+                                    label="Load osu! profile"
+                                    placeholder="Enter username or osu! ID"
+                                    value={userInput}
+                                    onChange={(e) => setUserInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleLoadUser()}
+                                />
+                                <Button
+                                    mt="sm"
+                                    onClick={handleLoadUser}
+                                    loading={isLoading}
+                                    disabled={!userInput.trim()}
+                                    fullWidth>
+                                    Load User
+                                </Button>
+                            </>
+                        )}
                     </div>
 
                     <Paper
@@ -280,6 +290,13 @@ export default function BadgesTab() {
                     </Paper>
                 </Group>
             </Card>
+        );
+    };
+
+    return (
+        <Stack mt="xl">
+            {/* Search Section */}
+            {renderSearchSection()}
 
             <Divider />
 
