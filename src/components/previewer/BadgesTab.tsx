@@ -6,7 +6,6 @@ import {
     Button,
     Group,
     Card,
-    Divider,
     Stack,
     Paper,
     Center,
@@ -299,11 +298,9 @@ export default function BadgesTab() {
     };
 
     return (
-        <Stack mt="xl">
+        <Stack mt="xl" gap="xl">
             {/* Search Section */}
             {renderSearchSection()}
-
-            <Divider />
 
             <div className="osu-profile">
                 {/* Banner Section */}
