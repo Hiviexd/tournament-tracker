@@ -46,12 +46,24 @@ export interface IOsuGroup {
     playmodes?: OsuGameMode[];
 }
 
+export interface IOsuBadge {
+    awarded_at: Date;
+    description: string;
+    image_url: string;
+    "image@2x_url": string;
+    url?: string;
+}
+
 export interface IOsuUser {
     id: number;
     username: string;
     country: IOsuCountry;
     cover: IOsuCover;
-    groups: IOsuGroup[];
+    avatar_url: string;
+    profile_colour?: string;
+    title?: string;
+    groups?: IOsuGroup[];
+    badges?: IOsuBadge[];
 }
 
 export interface IOsuAuthResponse {
@@ -69,4 +81,3 @@ export interface IOsuBotMessage {
     channel: IOsuMessageChannel;
     content: string;
 }
-
