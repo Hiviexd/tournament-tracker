@@ -23,7 +23,7 @@ import { useSearchParams } from "react-router-dom";
 import { IOsuUser } from "../../../interfaces/OsuApi";
 import { useOsuUserInfo } from "../../hooks/useUsers";
 import { useBadgePreviewer, LocalBadge } from "../../hooks/useBadgePreviewer";
-import defaultBanner from "/assets/default-banner.jpg";
+import defaultBanner from "/assets/default-bg.jpg";
 import * as countryFlags from "country-flag-icons/react/3x2";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
