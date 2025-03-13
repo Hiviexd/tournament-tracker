@@ -1,0 +1,157 @@
+# Tournament Tracker Project Context
+
+## Project Structure
+
+### Frontend Architecture
+
+#### Component Organization
+- Pages in `src/pages/` with `{Purpose}Page.tsx` naming
+- Feature-based components in `src/components/{feature}/`
+- Common components in `src/components/common/`
+- Consistent component exports using `export default function`
+- Components typically accept strongly-typed props interfaces
+
+#### Styles
+- Project should use Mantine UI whenever possible
+- All custom styles are in `src/sass/components/`
+- Custom styles should be named just like the component they are for, but with a `.scss` extension
+- Custom styles should be imported into `src/sass/app.scss`, instead of being imported into the component file
+
+#### State Management
+- Centralized state in `store/` using Jotai atoms
+- Centralized state should only be used for global state (i.e. loggedInUser)
+- Local state with React hooks
+- API state management with custom hooks
+- Use `useQuery` for API calls
+- Use `useMutation` for API mutations
+
+#### API Integration
+- Centralized API calls in `src/api/`
+- Consistent error handling with notifications
+- Type-safe request/response handling
+- File upload support with FormData
+
+#### Routing
+- React Router with protected routes
+- Route configuration in `routes.config.tsx`
+- Layout wrapper for consistent page structure
+
+### Backend Architecture
+
+#### Controller Pattern
+- RESTful endpoints
+- Consistent response format
+- Error handling middleware
+- Authentication checks
+- File upload processing
+
+#### Service Layer
+- Business logic separation
+- External service integration (Discord, osu!)
+- File handling
+- Logging services
+
+#### Database Models
+- Mongoose schemas with TypeScript interfaces
+- Virtual properties for computed fields
+- Consistent timestamp tracking
+- Reference relationships
+
+#### Middleware
+- Authentication/authorization
+- Request logging
+- File upload handling
+- SEO/crawler handling
+
+## Code Style Conventions
+
+### TypeScript Patterns
+- Interface-first development
+- Strong typing for all components/functions
+- Consistent interface naming (`I{Type}`)
+- Shared interfaces in `interfaces/` directory
+
+### Component Patterns
+- Functional components with TypeScript
+- Props interfaces defined above components
+- Consistent naming: `{Purpose}{Type}`
+- Mantine UI components with custom styling
+- Common layout patterns
+
+### API Patterns
+- Consistent endpoint structure
+- Type-safe request/response handling
+- Error handling with notifications
+- File upload support
+- Authentication handling
+
+### Form Handling
+- Mantine form components
+- File upload support
+- Validation patterns
+- Auto-save functionality
+- Loading states
+
+## Common Features
+
+### Authentication
+- osu! OAuth integration
+- Session management
+- Role-based access control
+- Committee-specific permissions
+
+### User Management
+- Committee roles (TC/CC)
+- Alumni status
+- Badge system
+- Activity tracking
+
+### File Handling
+- Multi-file upload support
+- File type validation
+- Size limitations
+- Storage management
+
+### Notifications
+- Success/error notifications
+- Notification messages are fed from the backend, and are handled via `handleMutationResponse(response)` in hooks
+- Discord webhook integration
+- System logging
+- User activity tracking
+
+## UI Components
+
+### Common Elements
+- Badge components with tooltips
+- Loading states
+- Error handling
+- Form layouts
+- Table displays
+
+### Layout
+- Consistent page structure
+- Responsive design
+- Navigation patterns
+- Header/footer components
+
+## Development Workflow
+
+### Feature Implementation
+1. Define interfaces
+2. Define database models
+3. Create API endpoints
+4. Implement backend logic
+5. Create frontend components
+6. Add routing
+7. Implement error handling
+8. Add logging/notifications when relevant
+
+### Console Commands
+- yarn must be used for dependencies
+
+### Testing Considerations
+- Type safety
+- Error scenarios
+- Permission checks
+- Loading states
+- Form validation
