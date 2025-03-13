@@ -146,7 +146,7 @@ You can report either:
                 />
             </Alert>
 
-            {!user && <SignInBanner />}
+            {!user && <SignInBanner text="You need to sign in with your osu! account to submit reports." />}
 
             <Card shadow="xs" padding="lg">
                 <form onSubmit={handleSubmit}>
