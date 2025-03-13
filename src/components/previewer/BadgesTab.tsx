@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faTimes } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -20,16 +20,11 @@ import { notifications } from "@mantine/notifications";
 import { useDropzone } from "react-dropzone";
 import moment from "moment";
 import { useSearchParams } from "react-router-dom";
-import { IOsuUser, IOsuBadge } from "../../../interfaces/OsuApi";
+import { IOsuUser } from "../../../interfaces/OsuApi";
 import { useOsuUserInfo } from "../../hooks/useUsers";
+import { useBadgePreviewer, LocalBadge } from "../../hooks/useBadgePreviewer";
 import defaultBanner from "/assets/default-banner.jpg";
 import * as countryFlags from "country-flag-icons/react/3x2";
-
-// Extend IOsuBadge to include a local ID for tracking
-interface LocalBadge extends IOsuBadge {
-    localId?: string;
-    dimensions?: { width: number; height: number };
-}
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -57,12 +52,14 @@ const DEFAULT_USER: LocalUser = {
             description: "Longstanding contribution to the Contest Committee - 1 Year",
             image_url: "https://assets.ppy.sh/profile-badges/tcomm-1y.png",
             "image@2x_url": "https://assets.ppy.sh/profile-badges/tcomm-1y@2x.png",
+            localId: "default-1",
         },
         {
             awarded_at: new Date("2024-02-01"),
             description: "Longstanding contribution to the Nomination Assessment Team - 2 Years",
             image_url: "https://assets.ppy.sh/profile-badges/NAT2y.png",
             "image@2x_url": "https://assets.ppy.sh/profile-badges/NAT2y@2x.png",
+            localId: "default-2",
         },
     ],
 };
@@ -73,39 +70,20 @@ export default function BadgesTab() {
     const [userInput, setUserInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const { data: osuUser, isLoading } = useOsuUserInfo(searchQuery);
-    const [isAddingBadge, setIsAddingBadge] = useState(false);
-    const [newBadge, setNewBadge] = useState<Partial<LocalBadge>>({
-        description: "",
-        awarded_at: new Date(),
-    });
-    const [localUrls, setLocalUrls] = useState<Map<string, string>>(new Map());
-    const [imageLoading, setImageLoading] = useState(false);
 
-    // Function to check image dimensions
-    const checkImageDimensions = useCallback((file: File): Promise<{ width: number; height: number }> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            const objectUrl = URL.createObjectURL(file);
-
-            img.onload = () => {
-                const dimensions = { width: img.width, height: img.height };
-                URL.revokeObjectURL(objectUrl);
-                resolve(dimensions);
-            };
-
-            img.onerror = () => {
-                URL.revokeObjectURL(objectUrl);
-                reject(new Error("Failed to load image"));
-            };
-
-            img.src = objectUrl;
-        });
-    }, []);
-
-    // Function to validate image dimensions
-    const isValidBadgeDimension = useCallback((width: number, height: number): boolean => {
-        return (width === 86 && height === 40) || (width === 172 && height === 80);
-    }, []);
+    // Use our custom badge manager hook
+    const {
+        isAddingBadge,
+        newBadge,
+        setNewBadge,
+        imageLoading,
+        processImageFile,
+        handleCloseModal,
+        addBadgeToUser,
+        deleteBadge,
+        cleanupUrls,
+        ensureBadgeIds,
+    } = useBadgePreviewer();
 
     // Handle file drop for badge
     const onDrop = useCallback(
@@ -113,40 +91,7 @@ export default function BadgesTab() {
             if (acceptedFiles.length > 0) {
                 const file = acceptedFiles[0];
                 if (file.type.startsWith("image/")) {
-                    setImageLoading(true);
-
-                    checkImageDimensions(file)
-                        .then((dimensions) => {
-                            if (isValidBadgeDimension(dimensions.width, dimensions.height)) {
-                                const url = URL.createObjectURL(file);
-                                const localId = `badge_${Math.random().toString(36).substring(7)}`;
-                                setLocalUrls((prev) => new Map(prev).set(localId, url));
-                                setNewBadge((prev) => ({
-                                    ...prev,
-                                    "image@2x_url": url,
-                                    image_url: url,
-                                    localId,
-                                    dimensions,
-                                }));
-                                setIsAddingBadge(true);
-                            } else {
-                                notifications.show({
-                                    title: "Invalid badge dimensions",
-                                    message: `Badge must be 86x40 or 172x80 pixels. Detected: ${dimensions.width}x${dimensions.height}`,
-                                    color: "red",
-                                });
-                            }
-                        })
-                        .catch((error) => {
-                            notifications.show({
-                                title: "Error processing image",
-                                message: error.message,
-                                color: "red",
-                            });
-                        })
-                        .finally(() => {
-                            setImageLoading(false);
-                        });
+                    processImageFile(file);
                 } else {
                     notifications.show({
                         title: "Invalid file type",
@@ -156,7 +101,7 @@ export default function BadgesTab() {
                 }
             }
         },
-        [checkImageDimensions, isValidBadgeDimension]
+        [processImageFile]
     );
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -182,40 +127,7 @@ export default function BadgesTab() {
                 if (item.type.startsWith("image/")) {
                     const file = item.getAsFile();
                     if (file) {
-                        setImageLoading(true);
-
-                        checkImageDimensions(file)
-                            .then((dimensions) => {
-                                if (isValidBadgeDimension(dimensions.width, dimensions.height)) {
-                                    const url = URL.createObjectURL(file);
-                                    const localId = `badge_${Math.random().toString(36).substring(7)}`;
-                                    setLocalUrls((prev) => new Map(prev).set(localId, url));
-                                    setNewBadge((prev) => ({
-                                        ...prev,
-                                        "image@2x_url": url,
-                                        image_url: url,
-                                        localId,
-                                        dimensions,
-                                    }));
-                                    setIsAddingBadge(true);
-                                } else {
-                                    notifications.show({
-                                        title: "Invalid badge dimensions",
-                                        message: `Badge must be 86x40 or 172x80 pixels. Detected: ${dimensions.width}x${dimensions.height}`,
-                                        color: "red",
-                                    });
-                                }
-                            })
-                            .catch((error) => {
-                                notifications.show({
-                                    title: "Error processing image",
-                                    message: error.message,
-                                    color: "red",
-                                });
-                            })
-                            .finally(() => {
-                                setImageLoading(false);
-                            });
+                        processImageFile(file);
                         break;
                     }
                 }
@@ -224,90 +136,78 @@ export default function BadgesTab() {
 
         window.addEventListener("paste", handlePaste);
         return () => window.removeEventListener("paste", handlePaste);
-    }, [searchParams, checkImageDimensions, isValidBadgeDimension]);
+    }, [searchParams, processImageFile]);
 
     // Clean up object URLs when component unmounts
     useEffect(() => {
         return () => {
-            localUrls.forEach((url) => {
-                URL.revokeObjectURL(url);
-            });
+            cleanupUrls();
         };
-    }, []);
+    }, [cleanupUrls]);
 
-    const handleLoadUser = () => {
+    const handleLoadUser = useCallback(() => {
         const trimmedInput = userInput.trim();
         if (trimmedInput) {
             setSearchQuery(trimmedInput);
         }
-    };
+    }, [userInput]);
 
-    const handleAddBadge = () => {
-        if (!newBadge.description || !newBadge["image@2x_url"]) {
-            notifications.show({
-                title: "Missing information",
-                message: "Please provide both an image and description for the badge",
-                color: "red",
-            });
-            return;
+    const handleAddBadge = useCallback(() => {
+        const updatedBadges = addBadgeToUser(user.badges);
+        if (updatedBadges) {
+            setUser((prev) => ({
+                ...prev,
+                badges: updatedBadges,
+            }));
         }
-
-        setUser((prev) => ({
-            ...prev,
-            badges: [...(prev.badges || []), newBadge as LocalBadge],
-        }));
-
-        // Reset form without revoking URL
-        setNewBadge({
-            description: "",
-            awarded_at: new Date(),
-        });
-        setIsAddingBadge(false);
-    };
+    }, [user.badges, addBadgeToUser]);
 
     // Update user when API data is received
     useEffect(() => {
         if (osuUser) {
             // Clean up any local URLs before setting new user
-            localUrls.forEach((url) => {
-                URL.revokeObjectURL(url);
-            });
-            setLocalUrls(new Map());
-            setUser(osuUser);
+            cleanupUrls();
+
+            // Add localId to any badges from the API that don't have one
+            const userWithLocalIds = {
+                ...osuUser,
+                badges: ensureBadgeIds(osuUser.badges),
+            };
+
+            setUser(userWithLocalIds);
             setUserInput("");
             setSearchQuery("");
         }
-    }, [osuUser]);
+    }, [osuUser, cleanupUrls, ensureBadgeIds]);
 
-    const handleDeleteBadge = useCallback((badgeToDelete: LocalBadge) => {
-        // If it's a local badge with a local URL, revoke it
-        if (
-            badgeToDelete.localId &&
-            badgeToDelete["image@2x_url"] &&
-            !badgeToDelete["image@2x_url"].startsWith("https://")
-        ) {
-            URL.revokeObjectURL(badgeToDelete["image@2x_url"]);
-            setLocalUrls((prev) => {
-                const newUrls = new Map(prev);
-                newUrls.delete(badgeToDelete.localId!);
-                return newUrls;
-            });
-        }
+    const handleDeleteBadge = useCallback(
+        (badgeToDelete: LocalBadge) => {
+            const updatedBadges = deleteBadge(badgeToDelete, user.badges);
+            setUser((prev) => ({
+                ...prev,
+                badges: updatedBadges,
+            }));
+        },
+        [user.badges, deleteBadge]
+    );
 
-        // Remove the badge from user's badges
-        setUser((prev) => ({
-            ...prev,
-            badges: prev.badges?.filter((badge) => badge !== badgeToDelete) || [],
-        }));
-    }, []);
-
-    const renderSupporterHearts = () => {
+    const renderSupporterHearts = useCallback(() => {
         return Array.from({ length: user.support_level || 0 }).map((_, index) => (
             <FontAwesomeIcon key={index} icon={faHeart} />
         ));
-    };
+    }, [user.support_level]);
 
-    const CountryFlag = countryFlags[user.country.code as keyof typeof countryFlags];
+    // Sort badges by awarded date (newest first)
+    const sortedBadges = useMemo(() => {
+        return user.badges
+            ? [...user.badges].sort((a, b) => new Date(b.awarded_at).getTime() - new Date(a.awarded_at).getTime())
+            : [];
+    }, [user.badges]);
+
+    // Get the country flag component
+    const CountryFlag = useMemo(() => {
+        return countryFlags[user.country.code as keyof typeof countryFlags];
+    }, [user.country.code]);
 
     return (
         <Stack mt="xl">
@@ -415,62 +315,47 @@ export default function BadgesTab() {
 
                 {/* Badges Section */}
                 <div className="profile-badges">
-                    {user.badges
-                        ?.sort((a, b) => new Date(b.awarded_at).getTime() - new Date(a.awarded_at).getTime())
-                        .map((badge, index) => (
-                            <Tooltip
-                                label={
-                                    <Stack gap={2}>
-                                        <Text size="sm">{badge.description}</Text>
-                                        <Text size="xs" c="#dcaec3">
-                                            {moment(badge.awarded_at).format("D MMMM YYYY")}
-                                        </Text>
-                                    </Stack>
-                                }
-                                key={index}
-                                multiline
-                                miw={100}
-                                maw={300}
-                                styles={{
-                                    tooltip: {
-                                        textAlign: "center",
-                                        border: "none",
-                                    },
-                                    arrow: {
-                                        border: "none",
-                                    },
-                                }}>
-                                <div className="badge-item">
-                                    <img
-                                        src={badge["image@2x_url"]}
-                                        alt={badge.description}
-                                        title={badge.description}
-                                    />
-                                    <div
-                                        className="badge-delete-overlay"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteBadge(badge);
-                                        }}>
-                                        <FontAwesomeIcon icon={faTimes} />
-                                    </div>
+                    {sortedBadges.map((badge) => (
+                        <Tooltip
+                            label={
+                                <Stack gap={2}>
+                                    <Text size="sm">{badge.description}</Text>
+                                    <Text size="xs" c="#dcaec3">
+                                        {moment(badge.awarded_at).format("D MMMM YYYY")}
+                                    </Text>
+                                </Stack>
+                            }
+                            key={badge.localId}
+                            multiline
+                            miw={100}
+                            maw={300}
+                            styles={{
+                                tooltip: {
+                                    textAlign: "center",
+                                    border: "none",
+                                },
+                                arrow: {
+                                    border: "none",
+                                },
+                            }}>
+                            <div className="badge-item">
+                                <img src={badge["image@2x_url"]} alt={badge.description} title={badge.description} />
+                                <div
+                                    className="badge-delete-overlay"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteBadge(badge);
+                                    }}>
+                                    <FontAwesomeIcon icon={faTimes} />
                                 </div>
-                            </Tooltip>
-                        ))}
+                            </div>
+                        </Tooltip>
+                    ))}
                 </div>
             </div>
 
             {/* Badge Add Modal */}
-            <Modal
-                opened={isAddingBadge}
-                onClose={() => {
-                    setIsAddingBadge(false);
-                    setNewBadge({
-                        description: "",
-                        awarded_at: new Date(),
-                    });
-                }}
-                title="Add New Badge">
+            <Modal opened={isAddingBadge} onClose={handleCloseModal} title="Add New Badge">
                 <Stack>
                     {newBadge["image@2x_url"] && (
                         <Stack align="center">
