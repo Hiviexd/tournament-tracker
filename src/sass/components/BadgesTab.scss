@@ -1,0 +1,147 @@
+.osu-profile {
+    width: 1000px;
+    margin: 0 auto;
+
+    .profile-banner {
+        width: 1000px;
+        height: 250px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 6px 6px 0 0;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .profile-info {
+        width: 1000px;
+        height: 95px;
+        margin: auto 0;
+        padding: 0 50px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background-color: #46393f;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, .75) !important;
+        font-family: "Torus", sans-serif;
+
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            margin-top: -40px;
+            border-radius: 40px;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .profile-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .username-container {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                line-height: normal;
+
+                .username {
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 400;
+                    color: #fff;
+                }
+
+                .supporter-badge {
+                    font-size: 0.75em;
+                    background-color: rgba(255, 102, 171);
+                    padding: 1px 9px;
+                    border-radius: 10px;
+                    color: #fff;
+                }
+            }
+
+            .user-title {
+                font-size: 16px;
+                line-height: 1;
+            }
+
+            .user-country {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                line-height: 1;
+                margin-top: 5px;
+
+                .country-flag {
+                    display: flex;
+                    align-items: center;
+                    width: auto;
+                    height: 20px;
+                    position: relative;
+
+                    svg {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 3px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(255, 255, 255, 0.25);
+                        border-radius: 3px;
+                        z-index: 2;
+                        pointer-events: none;
+                    }
+                }
+
+                .country-name {
+                    font-size: 14px;
+                    color: #fff;
+                }
+            }
+        }
+    }
+
+    .profile-badges {
+        width: 1000px;
+        margin: 0 auto;
+        padding: 10px 50px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        background-color: #382e32;
+        border-radius: 0 0 6px 6px;
+        box-shadow: inset 0 2px 3px -1px rgba(0, 0, 0, .25);
+
+        .badge-item {
+            width: 86px;
+            height: 40px;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+        }
+    }
+}

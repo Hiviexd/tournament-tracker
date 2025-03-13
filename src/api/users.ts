@@ -27,6 +27,11 @@ export const getUserById = async (id: string) => {
     return response.data;
 };
 
+export const getOsuUserInfo = async (userInput: string) => {
+    const response = await axios.get(`/api/users/${userInput}/osu`);
+    return response.data;
+};
+
 export const createUser = async (id: string) => {
     const response = await axios.post("/api/users/create", { userInput: id });
     return response.data;

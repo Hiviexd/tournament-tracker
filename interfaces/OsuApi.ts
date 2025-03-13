@@ -62,6 +62,7 @@ export interface IOsuUser {
     avatar_url: string;
     profile_colour?: string;
     title?: string;
+    support_level?: number;
     groups?: IOsuGroup[];
     badges?: IOsuBadge[];
 }
