@@ -1,4 +1,16 @@
-import { Container, Tabs, Alert, Text, useMantineTheme, Skeleton, Group, Card, Paper, Stack } from "@mantine/core";
+import {
+    Container,
+    Tabs,
+    Alert,
+    Text,
+    useMantineTheme,
+    Skeleton,
+    Group,
+    Card,
+    Paper,
+    Stack,
+    Center,
+} from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -100,7 +112,7 @@ export default function AssetPreviewerPage() {
                             </div>
                         </div>
                     </>
-                ) : (
+                ) : defaultTab === "news-banners" ? (
                     <>
                         {/* News banners skeleton */}
                         <Paper p="xl" mb="xl" style={{ border: "2px dashed #e9ecef" }}>
@@ -120,6 +132,22 @@ export default function AssetPreviewerPage() {
                             <Skeleton height={200} width={670} />
                         </Stack>
                     </>
+                ) : (
+                    <>
+                        {/* In-game banners skeleton */}
+                        <Card withBorder mb="xl">
+                            <Group grow>
+                                <Skeleton height={120} />
+                                <Skeleton height={120} />
+                            </Group>
+                            <Center mt="md">
+                                <Skeleton height={30} width={120} />
+                            </Center>
+                        </Card>
+
+                        <Skeleton height={240} width="100%" mb="sm" />
+                        <Skeleton height={16} width="50%" style={{ margin: "0 auto" }} />
+                    </>
                 )}
             </Container>
         );
@@ -131,9 +159,7 @@ export default function AssetPreviewerPage() {
                 <Tabs.List>
                     <Tabs.Tab value="badges">Badges</Tabs.Tab>
                     <Tabs.Tab value="news-banners">News Banners</Tabs.Tab>
-                    <Tabs.Tab value="in-game-banners" disabled>
-                        In-game Banners
-                    </Tabs.Tab>
+                    <Tabs.Tab value="in-game-banners">In-game Banners</Tabs.Tab>
                 </Tabs.List>
 
                 {!isLargeScreen && (
