@@ -147,7 +147,7 @@ export default function NewsBannersTab() {
                     <Button
                         size="sm"
                         variant="light"
-                        style={{ cursor: "pointer", zIndex: 1000 }}
+                        style={{ cursor: "default" }}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleReset();
