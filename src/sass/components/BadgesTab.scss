@@ -136,11 +136,33 @@
             width: 86px;
             height: 40px;
             overflow: hidden;
+            position: relative;
 
             img {
                 width: 100%;
                 height: 100%;
                 object-fit: contain;
+            }
+
+            .badge-delete-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 1;
+                }
+
+                svg {
+                    color: #fff;
+                    font-size: 16px;
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Text, Stack, Paper, Center } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
+import { useSearchParams } from "react-router-dom";
 import defaultBanner from "/assets/default-banner.jpg";
 
 interface BannerPreview {
@@ -9,6 +10,7 @@ interface BannerPreview {
     author: string;
     date: string;
     imageUrl: string;
+    isLocalImage?: boolean;
 }
 
 const DEFAULT_PREVIEW: BannerPreview = {
@@ -17,27 +19,42 @@ const DEFAULT_PREVIEW: BannerPreview = {
     author: "You & Me",
     date: "16 Dec 2024",
     imageUrl: defaultBanner,
+    isLocalImage: false,
 };
 
 export default function NewsBannersTab() {
+    const [searchParams] = useSearchParams();
     const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
+    const [currentUrl, setCurrentUrl] = useState<string | null>(null);
 
     // Handle file drop
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        if (acceptedFiles.length > 0) {
-            const file = acceptedFiles[0];
-            if (file.type.startsWith("image/")) {
-                const url = URL.createObjectURL(file);
-                setPreview((prev) => ({ ...prev, imageUrl: url }));
-            } else {
-                notifications.show({
-                    title: "Invalid file type",
-                    message: "Please upload an image file",
-                    color: "red",
-                });
+    const onDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            if (acceptedFiles.length > 0) {
+                const file = acceptedFiles[0];
+                if (file.type.startsWith("image/")) {
+                    // Clean up previous URL if it exists
+                    if (currentUrl) {
+                        URL.revokeObjectURL(currentUrl);
+                    }
+                    const url = URL.createObjectURL(file);
+                    setCurrentUrl(url);
+                    setPreview((prev) => ({
+                        ...prev,
+                        imageUrl: url,
+                        isLocalImage: true,
+                    }));
+                } else {
+                    notifications.show({
+                        title: "Invalid file type",
+                        message: "Please upload an image file",
+                        color: "red",
+                    });
+                }
             }
-        }
-    }, []);
+        },
+        [currentUrl]
+    );
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -50,6 +67,10 @@ export default function NewsBannersTab() {
     // Handle paste
     useEffect(() => {
         const handlePaste = (e: ClipboardEvent) => {
+            // Only process paste events when news-banners tab is active
+            const currentTab = searchParams.get("tab") || "badges";
+            if (currentTab !== "news-banners") return;
+
             const items = e.clipboardData?.items;
             if (!items) return;
 
@@ -57,8 +78,17 @@ export default function NewsBannersTab() {
                 if (item.type.startsWith("image/")) {
                     const file = item.getAsFile();
                     if (file) {
+                        // Clean up previous URL if it exists
+                        if (currentUrl) {
+                            URL.revokeObjectURL(currentUrl);
+                        }
                         const url = URL.createObjectURL(file);
-                        setPreview((prev) => ({ ...prev, imageUrl: url }));
+                        setCurrentUrl(url);
+                        setPreview((prev) => ({
+                            ...prev,
+                            imageUrl: url,
+                            isLocalImage: true,
+                        }));
                         break;
                     }
                 }
@@ -67,26 +97,26 @@ export default function NewsBannersTab() {
 
         window.addEventListener("paste", handlePaste);
         return () => window.removeEventListener("paste", handlePaste);
-    }, []);
+    }, [currentUrl, searchParams]);
 
-    // Clean up object URLs when component unmounts or preview changes
+    // Clean up object URLs when component unmounts
     useEffect(() => {
         return () => {
-            // Only revoke if it's not the default image
-            if (preview.imageUrl && !preview.imageUrl.startsWith("/assets/")) {
-                URL.revokeObjectURL(preview.imageUrl);
+            if (currentUrl) {
+                URL.revokeObjectURL(currentUrl);
             }
         };
-    }, [preview.imageUrl]);
+    }, []);
 
     // Reset to default image
     const handleReset = useCallback(() => {
-        // Clean up any existing object URL first
-        if (preview.imageUrl && !preview.imageUrl.startsWith("/assets/")) {
-            URL.revokeObjectURL(preview.imageUrl);
+        // Clean up current URL if it exists
+        if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+            setCurrentUrl(null);
         }
-        setPreview((prev) => ({ ...prev, imageUrl: DEFAULT_PREVIEW.imageUrl }));
-    }, [preview.imageUrl]);
+        setPreview(DEFAULT_PREVIEW);
+    }, [currentUrl]);
 
     return (
         <Stack gap="xl" className="news-banner-previewer">

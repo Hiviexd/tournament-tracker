@@ -9,7 +9,9 @@ export default function AssetPreviewerPage() {
     const defaultTab = searchParams.get("tab") || "badges";
 
     const handleTabChange = (value: string | null) => {
-        if (value) setSearchParams({ tab: value });
+        if (value) {
+            setSearchParams({ tab: value });
+        }
     };
 
     return (
@@ -18,7 +20,9 @@ export default function AssetPreviewerPage() {
                 <Tabs.List>
                     <Tabs.Tab value="badges">Badges</Tabs.Tab>
                     <Tabs.Tab value="news-banners">News Banners</Tabs.Tab>
-                    <Tabs.Tab value="in-game-banners" disabled>In-game Banners</Tabs.Tab>
+                    <Tabs.Tab value="in-game-banners" disabled>
+                        In-game Banners
+                    </Tabs.Tab>
                 </Tabs.List>
 
                 <Tabs.Panel value="badges">
