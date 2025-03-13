@@ -113,6 +113,11 @@ export const seoRoutes: SEORoute[] = [
             };
         },
     },
+    {
+        path: "/assets-previewer",
+        name: "Assets Previewer",
+        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website!",
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {
