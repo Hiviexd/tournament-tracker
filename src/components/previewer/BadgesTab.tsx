@@ -217,10 +217,13 @@ export default function BadgesTab() {
     const renderSearchSection = () => {
         return (
             <Card withBorder>
-                <Group grow align="center">
-                    <div>
+                <Group grow align="stretch">
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
                         {!loggedInUser ? (
-                            <SignInBanner text="You need to sign in with your osu! account to load an osu! profile." hideLoginButton />
+                            <SignInBanner
+                                text="You need to sign in with your osu! account to load an osu! profile."
+                                hideLoginButton
+                            />
                         ) : (
                             <>
                                 <TextInput
@@ -244,7 +247,6 @@ export default function BadgesTab() {
 
                     <Paper
                         {...getRootProps()}
-                        h={105}
                         className="dropzone"
                         style={{
                             border: `2px dashed var(--mantine-color-${isDragActive ? "primary" : "gray"}-4)`,
@@ -257,6 +259,9 @@ export default function BadgesTab() {
                             flexDirection: "column",
                             justifyContent: "center",
                             opacity: imageLoading ? 0.7 : 1,
+                            padding: "1rem",
+                            minHeight: "80px",
+                            height: "100%",
                         }}>
                         <input {...getInputProps()} />
                         {imageLoading ? (

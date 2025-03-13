@@ -9,12 +9,14 @@
 
     // Homepage logged in newspost
     .newspost {
+
         // Common styles
         .newspost-image {
             background-color: hsl(var(--hsl-b2));
             height: var(--height);
             width: 100%;
             overflow: hidden;
+            position: relative;
 
             img {
                 width: 100%;
@@ -28,6 +30,10 @@
             margin: 0;
             font-family: "Torus", sans-serif;
 
+            @media (max-width: 768px) {
+                font-size: 10px;
+            }
+
             strong {
                 font-weight: 600;
             }
@@ -37,8 +43,13 @@
         &.newspost-homepage {
             --width: 530px;
             --height: 130px;
-            width: var(--width);
-            min-width: var(--width);
+            width: 100%;
+            max-width: var(--width);
+            min-width: auto;
+
+            @media (max-width: 768px) {
+                --height: 100px;
+            }
 
             .newspost-homepage-inner {
                 background-color: hsl(255, 10%, 20%);
@@ -57,23 +68,42 @@
                 text-align: right;
                 width: 70px;
 
+                @media (max-width: 768px) {
+                    width: 50px;
+                    margin: 5px;
+                    padding-right: 5px;
+                }
+
                 .newspost-homepage-date-day {
                     font-family: "Torus", sans-serif;
                     font-size: 16px;
                     font-weight: 800;
                     margin: 0;
                     line-height: 1;
+
+                    @media (max-width: 768px) {
+                        font-size: 14px;
+                    }
                 }
 
                 .newspost-homepage-date-month {
                     font-family: "Torus", sans-serif;
                     font-size: 11px;
                     margin: 0;
+
+                    @media (max-width: 768px) {
+                        font-size: 10px;
+                    }
                 }
             }
 
             .newspost-homepage-texts {
                 margin-right: 10px;
+                flex: 1;
+
+                @media (max-width: 768px) {
+                    margin-right: 5px;
+                }
 
                 .newspost-homepage-title {
                     font-family: "Torus", sans-serif;
@@ -81,12 +111,22 @@
                     font-size: 16px;
                     font-weight: 700;
                     margin: 5px 0 10px;
+
+                    @media (max-width: 768px) {
+                        font-size: 14px;
+                        margin: 5px 0;
+                    }
                 }
 
                 .newspost-homepage-description {
                     font-size: 12px;
                     line-height: 1.35;
                     margin: 0 0 10px;
+
+                    @media (max-width: 768px) {
+                        font-size: 10px;
+                        margin: 0 0 5px;
+                    }
                 }
             }
         }
@@ -95,10 +135,15 @@
         &.newspost-listing {
             --width: 670px;
             --height: 160px;
-            width: var(--width);
-            min-width: var(--width);
+            width: 100%;
+            max-width: var(--width);
+            min-width: auto;
             border-radius: 6px;
             background-color: hsl(255, 10%, 20%);
+
+            @media (max-width: 768px) {
+                --height: 120px;
+            }
 
             .newspost-image {
                 border-radius: 6px;
@@ -107,27 +152,38 @@
             .newspost-listing-inner {
                 padding: 10px 15px;
 
+                @media (max-width: 768px) {
+                    padding: 8px 10px;
+                }
+
                 .newspost-listing-title {
                     font-family: "Torus", sans-serif;
                     font-size: 20px;
                     color: #fff;
                     font-weight: 600;
                     margin: 0;
+
+                    @media (max-width: 768px) {
+                        font-size: 16px;
+                    }
                 }
 
                 .newspost-listing-description {
                     font-size: 12px;
                     line-height: 1.4;
                     margin: 0;
+
+                    @media (max-width: 768px) {
+                        font-size: 10px;
+                    }
                 }
-
-
             }
         }
 
         // Homepage logged out (both sizes)
         &.newspost-loggedout {
-            width: 1000px;
+            width: 100%;
+            max-width: 1000px;
             height: auto;
             background-color: hsl(255, 10%, 20%);
             border-radius: 6px;
@@ -135,22 +191,46 @@
             min-width: 0;
 
             &.small {
-                width: 320px;
+                width: 100%;
+                max-width: 320px;
                 height: auto;
 
                 .newspost-image {
-                    width: 320px;
-                    height: 160px;
+                    width: 100%;
+                    height: 0;
+                    padding-bottom: 50%;
+                    /* Maintain aspect ratio (160px/320px = 50%) */
+                    position: relative;
+
+                    img {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                    }
                 }
             }
 
             .newspost-image {
                 height: 160px;
                 border-radius: 6px;
+
+                @media (max-width: 768px) {
+                    height: 120px;
+                }
+
+                @media (max-width: 480px) {
+                    height: 100px;
+                }
             }
 
             .newspost-loggedout-inner {
                 padding: 10px 15px;
+
+                @media (max-width: 768px) {
+                    padding: 8px 10px;
+                }
 
                 .newspost-loggedout-title {
                     line-height: 1;
@@ -159,6 +239,10 @@
                     color: #fff;
                     font-weight: 600;
                     margin: 0;
+
+                    @media (max-width: 768px) {
+                        font-size: 12px;
+                    }
                 }
             }
         }
@@ -167,11 +251,20 @@
         &.newspost-newspost {
             --width: 670px;
             --height: 200px;
-            width: var(--width);
-            min-width: var(--width);
+            width: 100%;
+            max-width: var(--width);
+            min-width: auto;
+
+            @media (max-width: 768px) {
+                --height: 150px;
+            }
 
             .newspost-newspost-inner {
                 margin-top: 20px;
+
+                @media (max-width: 768px) {
+                    margin-top: 10px;
+                }
 
                 .newspost-newspost-title {
                     font-family: "Torus", sans-serif;
@@ -180,12 +273,25 @@
                     font-weight: 600;
                     margin: 0;
                     line-height: 1;
+
+                    @media (max-width: 768px) {
+                        font-size: 24px;
+                    }
+
+                    @media (max-width: 480px) {
+                        font-size: 20px;
+                    }
                 }
 
                 .newspost-newspost-meta {
                     font-size: 14px;
                     margin: 0 0 10px;
                     font-family: "Torus", sans-serif;
+
+                    @media (max-width: 768px) {
+                        font-size: 12px;
+                        margin: 0 0 5px;
+                    }
 
                     strong {
                         font-weight: 700;
@@ -195,12 +301,21 @@
 
             .newspost-image {
                 margin: 20px 0;
+
+                @media (max-width: 768px) {
+                    margin: 10px 0;
+                }
             }
 
             .newspost-newspost-description {
                 font-size: 14px;
                 line-height: 1.6;
                 margin: 0;
+
+                @media (max-width: 768px) {
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
             }
         }
     }
