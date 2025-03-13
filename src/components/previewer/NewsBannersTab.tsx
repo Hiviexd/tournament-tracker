@@ -8,7 +8,7 @@ import defaultBanner from "/assets/default-banner.jpg";
 interface BannerPreview {
     description: string;
     author: string;
-    date: string;
+    date: { day: string; month: string; year: string };
     imageUrl: string;
     isLocalImage?: boolean;
 }
@@ -17,7 +17,7 @@ const DEFAULT_PREVIEW: BannerPreview = {
     description:
         "Long description text goes here. Reasonably long, two lines, gotta keep typing or else we'll have to make this even longer to unreasonable degrees!",
     author: "You & Me",
-    date: "16 Dec 2024",
+    date: { day: "13", month: "Mar", year: "2025" },
     imageUrl: defaultBanner,
     isLocalImage: false,
 };
@@ -166,11 +166,11 @@ export default function NewsBannersTab() {
                     </div>
                     <div className="newspost-homepage-inner">
                         <div className="newspost-homepage-date">
-                            <p className="newspost-homepage-date-day">16</p>
-                            <p className="newspost-homepage-date-month">Dec 2024</p>
+                            <p className="newspost-homepage-date-day">{preview.date.day}</p>
+                            <p className="newspost-homepage-date-month">{preview.date.month} {preview.date.year}</p>
                         </div>
                         <div className="newspost-homepage-texts">
-                            <p className="newspost-homepage-title">Newspost on homepage (logged in)</p>
+                            <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
                             <p className="newspost-homepage-description">{preview.description}</p>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ export default function NewsBannersTab() {
                         <img src={preview.imageUrl} alt="Preview" />
                     </div>
                     <div className="newspost-listing-inner">
-                        <p className="newspost-listing-title">Newspost on news history page</p>
+                        <p className="newspost-listing-title">Newspost in news history page</p>
                         <p className="newspost-listing-description">{preview.description}</p>
                         <p className="newspost-listing-meta">
                             by <strong>{preview.author}</strong>
@@ -196,7 +196,7 @@ export default function NewsBannersTab() {
                         <img src={preview.imageUrl} alt="Preview" />
                     </div>
                     <div className="newspost-loggedout-inner">
-                        <p className="newspost-loggedout-title">Small newspost on homepage (logged out)</p>
+                        <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
                         <p className="newspost-listing-meta">
                             by <strong>{preview.author}</strong>
                         </p>
@@ -209,7 +209,7 @@ export default function NewsBannersTab() {
                         <img src={preview.imageUrl} alt="Preview" />
                     </div>
                     <div className="newspost-loggedout-inner">
-                        <p className="newspost-loggedout-title">Large newspost on homepage (logged out)</p>
+                        <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
                         <p className="newspost-listing-meta">
                             by <strong>{preview.author}</strong>
                         </p>
@@ -222,7 +222,7 @@ export default function NewsBannersTab() {
                         <div className="newspost-image">
                             <img src={preview.imageUrl} alt="Preview" />
                         </div>
-                        <p className="newspost-newspost-title">Newspost on newspost page</p>
+                        <p className="newspost-newspost-title">Newspost in newspost page</p>
                         <p className="newspost-newspost-meta">
                             by <strong>{preview.author}</strong>
                         </p>
