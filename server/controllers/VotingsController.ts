@@ -360,13 +360,17 @@ class VotingsController {
             );
 
             // Discord
-            await DiscordService.sendWebhook([
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                    color: webhookColors.lightGreen,
-                },
-            ]);
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                        color: webhookColors.lightGreen,
+                    },
+                ],
+                undefined,
+                "silent"
+            );
         }
     }
 
@@ -404,9 +408,6 @@ class VotingsController {
                         fields,
                     },
                 ],
-                undefined,
-                undefined,
-                "main"
             );
         } else {
             // Voting resumed

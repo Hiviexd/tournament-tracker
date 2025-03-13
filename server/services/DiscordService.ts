@@ -33,10 +33,17 @@ class DiscordService {
      * * Sends a webhook
      * @param embeds Array of embed objects
      * @param message Optional essage to include with embed
+     * @param notification Optional notification type (defaults to `normal`)
      * @param threadId Optional ID of the thread to send the message to
      * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
      */
-    public async sendWebhook(embeds: IDiscordEmbed[], message?: string, threadId?: string, webhook?: string) {
+    public async sendWebhook(
+        embeds: IDiscordEmbed[],
+        message?: string,
+        notification?: "silent" | "normal",
+        threadId?: string,
+        webhook?: string
+    ) {
         const url = this.getWebhookLink(webhook, threadId);
 
         try {
@@ -45,6 +52,7 @@ class DiscordService {
                 avatar_url: config.discord.avatar_url,
                 embeds,
                 content: message || "",
+                flags: notification === "silent" ? 1 << 12 : undefined,
             });
             await helpers.delay(1000);
         } catch (error) {
