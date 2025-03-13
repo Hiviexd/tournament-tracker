@@ -222,7 +222,7 @@ export default function InGameBannersTab() {
                         width: "100%",
                         height: "100%",
                         backgroundImage: `url(${preview.backgroundUrl})`,
-                        backgroundPosition: "center top",
+                        backgroundPosition: "center bottom",
                         backgroundSize: "cover",
                     }}
                 />
