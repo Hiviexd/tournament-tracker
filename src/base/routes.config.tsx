@@ -14,7 +14,7 @@ import TicketDetailsPage from "../pages/TicketDetailsPage";
 import ArticlePage from "../pages/ArticlePage";
 import DocumentationListPage from "../pages/DocumentationListPage";
 import CreateArticlePage from "../pages/CreateArticlePage";
-import AssetPreviewerPage from "../pages/AssetPreviewerPage";
+import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
 
 interface RouteConfig {
     path: string;
@@ -187,8 +187,8 @@ const routes: RouteConfig[] = [
     },
     {
         path: "/assets-previewer",
-        page: <AssetPreviewerPage />,
-        title: "Asset Previewer",
+        page: <AssetsPreviewerPage />,
+        title: "Assets Previewer",
         icon: "images",
         permissions: [],
     },
