@@ -1,0 +1,47 @@
+.ingame-banner-previewer {
+    .dropzone {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+
+        @media (max-width: 768px) {
+            padding: 0.75rem !important;
+            min-height: 100px !important;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.5rem !important;
+            min-height: 80px !important;
+        }
+    }
+
+    .ingame-preview {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+        @media (max-width: 768px) {
+            height: 200px;
+        }
+
+        @media (max-width: 480px) {
+            height: 180px;
+        }
+
+        // Banner container
+        >div:last-child {
+            will-change: transform;
+
+            img {
+                will-change: transform;
+                backface-visibility: hidden; // Prevents flickering during animation
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+
+                &:hover {
+                    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+                }
+            }
+        }
+    }
+}

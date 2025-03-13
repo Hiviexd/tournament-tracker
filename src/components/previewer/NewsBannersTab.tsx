@@ -1,0 +1,236 @@
+import { useState, useCallback, useEffect } from "react";
+import { Text, Stack, Paper, Center, Button } from "@mantine/core";
+import { useDropzone } from "react-dropzone";
+import { notifications } from "@mantine/notifications";
+import { useSearchParams } from "react-router-dom";
+import defaultBanner from "/assets/default-banner.jpg";
+
+interface BannerPreview {
+    description: string;
+    author: string;
+    date: { day: string; month: string; year: string };
+    imageUrl: string;
+    isLocalImage?: boolean;
+}
+
+const DEFAULT_PREVIEW: BannerPreview = {
+    description:
+        "Long description text goes here. Reasonably long, two lines, gotta keep typing or else we'll have to make this even longer to unreasonable degrees!",
+    author: "You & Me",
+    date: { day: "13", month: "Mar", year: "2025" },
+    imageUrl: defaultBanner,
+    isLocalImage: false,
+};
+
+export default function NewsBannersTab() {
+    const [searchParams] = useSearchParams();
+    const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
+    const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+
+    // Handle file drop
+    const onDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            if (acceptedFiles.length > 0) {
+                const file = acceptedFiles[0];
+                if (file.type.startsWith("image/")) {
+                    // Clean up previous URL if it exists
+                    if (currentUrl) {
+                        URL.revokeObjectURL(currentUrl);
+                    }
+                    const url = URL.createObjectURL(file);
+                    setCurrentUrl(url);
+                    setPreview((prev) => ({
+                        ...prev,
+                        imageUrl: url,
+                        isLocalImage: true,
+                    }));
+                } else {
+                    notifications.show({
+                        title: "Invalid file type",
+                        message: "Please upload an image file",
+                        color: "red",
+                    });
+                }
+            }
+        },
+        [currentUrl]
+    );
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: {
+            "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+        },
+        maxFiles: 1,
+    });
+
+    // Handle paste
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            // Only process paste events when news-banners tab is active
+            const currentTab = searchParams.get("tab") || "badges";
+            if (currentTab !== "news-banners") return;
+
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (const item of Array.from(items)) {
+                if (item.type.startsWith("image/")) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        // Clean up previous URL if it exists
+                        if (currentUrl) {
+                            URL.revokeObjectURL(currentUrl);
+                        }
+                        const url = URL.createObjectURL(file);
+                        setCurrentUrl(url);
+                        setPreview((prev) => ({
+                            ...prev,
+                            imageUrl: url,
+                            isLocalImage: true,
+                        }));
+                        break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener("paste", handlePaste);
+        return () => window.removeEventListener("paste", handlePaste);
+    }, [currentUrl, searchParams]);
+
+    // Clean up object URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            if (currentUrl) {
+                URL.revokeObjectURL(currentUrl);
+            }
+        };
+    }, [currentUrl]);
+
+    // Reset to default image
+    const handleReset = useCallback(() => {
+        // Clean up current URL if it exists
+        if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+            setCurrentUrl(null);
+        }
+        setPreview(DEFAULT_PREVIEW);
+    }, [currentUrl]);
+
+    return (
+        <Stack gap="xl" className="news-banner-previewer">
+            {/* Drop zone */}
+            <Paper
+                {...getRootProps()}
+                my="xl"
+                p="xl"
+                className="dropzone"
+                style={{
+                    border: `2px dashed var(--mantine-color-${isDragActive ? "primary" : "gray"}-4)`,
+                    backgroundColor: isDragActive ? "var(--mantine-color-primary-light)" : "var(--mantine-color-body)",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                }}>
+                <input {...getInputProps()} />
+                <Center>
+                    <Text size="lg" c={isDragActive ? "primary" : "dimmed"}>
+                        {isDragActive ? "Drop the image here..." : "Drag an image here, or click to select one"}
+                    </Text>
+                </Center>
+                <Center mt={5}>
+                    <Text size="sm" c="dimmed">
+                        You can also paste (CTRL+V) an image anywhere on this page
+                    </Text>
+                </Center>
+                <Center mt={10}>
+                    <Button
+                        size="sm"
+                        variant="light"
+                        style={{ cursor: "default" }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleReset();
+                        }}>
+                        Reset to default banner
+                    </Button>
+                </Center>
+            </Paper>
+
+            {/* Preview section */}
+            <Stack gap="xl" align="center">
+                {/* Homepage logged in */}
+                <div className="newspost newspost-homepage">
+                    <div className="newspost-image">
+                        <img src={preview.imageUrl} alt="Preview" />
+                    </div>
+                    <div className="newspost-homepage-inner">
+                        <div className="newspost-homepage-date">
+                            <p className="newspost-homepage-date-day">{preview.date.day}</p>
+                            <p className="newspost-homepage-date-month">{preview.date.month} {preview.date.year}</p>
+                        </div>
+                        <div className="newspost-homepage-texts">
+                            <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
+                            <p className="newspost-homepage-description">{preview.description}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* News history page */}
+                <div className="newspost newspost-listing">
+                    <div className="newspost-image">
+                        <img src={preview.imageUrl} alt="Preview" />
+                    </div>
+                    <div className="newspost-listing-inner">
+                        <p className="newspost-listing-title">Newspost in news history page</p>
+                        <p className="newspost-listing-description">{preview.description}</p>
+                        <p className="newspost-listing-meta">
+                            by <strong>{preview.author}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Homepage logged out (small) */}
+                <div className="newspost newspost-loggedout small">
+                    <div className="newspost-image">
+                        <img src={preview.imageUrl} alt="Preview" />
+                    </div>
+                    <div className="newspost-loggedout-inner">
+                        <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
+                        <p className="newspost-listing-meta">
+                            by <strong>{preview.author}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Homepage logged out (large) */}
+                <div className="newspost newspost-loggedout">
+                    <div className="newspost-image">
+                        <img src={preview.imageUrl} alt="Preview" />
+                    </div>
+                    <div className="newspost-loggedout-inner">
+                        <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
+                        <p className="newspost-listing-meta">
+                            by <strong>{preview.author}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Newspost page */}
+                <div className="newspost newspost-newspost">
+                    <div className="newspost-newspost-inner">
+                        <div className="newspost-image">
+                            <img src={preview.imageUrl} alt="Preview" />
+                        </div>
+                        <p className="newspost-newspost-title">Newspost in newspost page</p>
+                        <p className="newspost-newspost-meta">
+                            by <strong>{preview.author}</strong>
+                        </p>
+                    </div>
+
+                    <p className="newspost-newspost-description">{preview.description}</p>
+                </div>
+            </Stack>
+        </Stack>
+    );
+}

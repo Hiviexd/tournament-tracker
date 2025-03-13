@@ -1,0 +1,225 @@
+.osu-profile {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+
+    .profile-banner {
+        width: 100%;
+        height: 0;
+        padding-bottom: 25%;
+        /* Maintain aspect ratio (250px/1000px = 25%) */
+        overflow: hidden;
+        position: relative;
+        border-radius: 6px 6px 0 0;
+
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .profile-info {
+        width: 100%;
+        min-height: 95px;
+        margin: auto 0;
+        padding: 0 5%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background-color: #46393f;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, .75) !important;
+        font-family: "Torus", sans-serif;
+
+        @media (max-width: 768px) {
+            gap: 10px;
+            padding: 10px 5%;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            margin-top: -40px;
+            border-radius: 40px;
+            overflow: hidden;
+
+            @media (max-width: 768px) {
+                width: 80px;
+                height: 80px;
+                margin-top: 0;
+                border-radius: 25px;
+            }
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .profile-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .username-container {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                line-height: normal;
+                flex-wrap: wrap;
+
+                .username {
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 400;
+                    color: #fff;
+
+                    @media (max-width: 768px) {
+                        font-size: 18px;
+                    }
+                }
+
+                .supporter-badge {
+                    font-size: 0.75em;
+                    background-color: rgba(255, 102, 171);
+                    padding: 1px 9px;
+                    border-radius: 10px;
+                    color: #fff;
+                }
+            }
+
+            .user-title {
+                font-size: 16px;
+                line-height: 1;
+
+                @media (max-width: 768px) {
+                    font-size: 14px;
+                }
+            }
+
+            .user-country {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                line-height: 1;
+                margin-top: 5px;
+
+                .country-flag {
+                    display: flex;
+                    align-items: center;
+                    width: auto;
+                    height: 20px;
+                    position: relative;
+
+                    @media (max-width: 768px) {
+                        height: 16px;
+                    }
+
+                    svg {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 3px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(255, 255, 255, 0.25);
+                        border-radius: 3px;
+                        z-index: 2;
+                        pointer-events: none;
+                    }
+                }
+
+                .country-name {
+                    font-size: 14px;
+                    color: #fff;
+
+                    @media (max-width: 768px) {
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+
+    .profile-badges {
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px 5%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        background-color: #382e32;
+        border-radius: 0 0 6px 6px;
+        box-shadow: inset 0 2px 3px -1px rgba(0, 0, 0, .25);
+
+        .badge-item {
+            width: 86px;
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+
+
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .badge-delete-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 1;
+                }
+
+                svg {
+                    color: #fff;
+                    font-size: 16px;
+                }
+            }
+        }
+    }
+}
+
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+
+    @media (max-width: 768px) {
+        padding: 0.75rem !important;
+        min-height: 70px !important;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.5rem !important;
+        min-height: 60px !important;
+    }
+}

@@ -14,6 +14,7 @@ import TicketDetailsPage from "../pages/TicketDetailsPage";
 import ArticlePage from "../pages/ArticlePage";
 import DocumentationListPage from "../pages/DocumentationListPage";
 import CreateArticlePage from "../pages/CreateArticlePage";
+import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
 
 interface RouteConfig {
     path: string;
@@ -183,6 +184,13 @@ const routes: RouteConfig[] = [
         title: "Create Article",
         icon: "file-circle-plus",
         permissions: ["admin"],
+    },
+    {
+        path: "/assets-previewer",
+        page: <AssetsPreviewerPage />,
+        title: "Assets Previewer",
+        icon: "images",
+        permissions: [],
     },
     {
         path: "*",

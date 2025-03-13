@@ -9,6 +9,7 @@ import {
     updateUserBadge,
     syncUser,
     updateDiscordId,
+    getOsuUserInfo,
 } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
@@ -51,6 +52,14 @@ export function useUser(id: string | null, options: { enabled?: boolean; retry?:
         queryFn: () => getUserById(id!),
         enabled: options.enabled ?? !!id,
         retry: options.retry ?? false,
+    });
+}
+
+export function useOsuUserInfo(userInput: string) {
+    return useQuery({
+        queryKey: ["osuUserInfo", userInput],
+        queryFn: () => getOsuUserInfo(userInput),
+        enabled: !!userInput,
     });
 }
 

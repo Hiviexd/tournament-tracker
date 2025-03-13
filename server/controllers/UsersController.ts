@@ -57,6 +57,19 @@ class UsersController {
         res.json(user);
     }
 
+    /** GET osu! user info */
+    public async getOsuUserInfo(req: Request, res: Response) {
+        const userInput = req.params.userInput;
+
+        const user = await OsuApiService.getUserInfo(req.session.accessToken!, userInput);
+
+        if (OsuApiService.isOsuResponseError(user)) {
+            return res.json({ error: "Failed to fetch user data from osu!" });
+        }
+
+        res.json(user);
+    }
+
     /** GET users in a committee */
     public async getCommittee(req: Request, res: Response) {
         const type = req.query.type;

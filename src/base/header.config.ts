@@ -90,6 +90,12 @@ export const routes: IRoute[] = [
                 permissions: [],
             },
             {
+                title: "Assets Previewer",
+                link: "/assets-previewer",
+                icon: "images",
+                permissions: [],
+            },
+            {
                 title: "Create Article",
                 link: "/articles/create",
                 icon: "file-circle-plus",
