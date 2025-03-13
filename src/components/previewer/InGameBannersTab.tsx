@@ -3,7 +3,7 @@ import { Box, Text } from "@mantine/core";
 export default function InGameBannersTab() {
     return (
         <Box p="md">
-            <Text>what are you doing here?</Text>
+            <Text>you're not supposed to be here... shoo!</Text>
         </Box>
     );
 }
