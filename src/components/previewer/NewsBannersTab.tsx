@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Text, Stack, Paper, Center } from "@mantine/core";
+import { Text, Stack, Paper, Center, Button } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "react-router-dom";
@@ -106,7 +106,7 @@ export default function NewsBannersTab() {
                 URL.revokeObjectURL(currentUrl);
             }
         };
-    }, []);
+    }, [currentUrl]);
 
     // Reset to default image
     const handleReset = useCallback(() => {
@@ -144,17 +144,16 @@ export default function NewsBannersTab() {
                     </Text>
                 </Center>
                 <Center mt={10}>
-                    <Text
-                        component="span"
+                    <Button
                         size="sm"
-                        c="primary"
-                        style={{ cursor: "pointer" }}
+                        variant="light"
+                        style={{ cursor: "pointer", zIndex: 1000 }}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleReset();
                         }}>
                         Reset to default banner
-                    </Text>
+                    </Button>
                 </Center>
             </Paper>
 
