@@ -1,8 +1,9 @@
-import { Container, Tabs, Alert, Text, useMantineTheme } from "@mantine/core";
+import { Container, Tabs, Alert, Text, useMantineTheme, Loader, Center } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 import NewsBannersTab from "../components/previewer/NewsBannersTab";
 import BadgesTab from "../components/previewer/BadgesTab";
 import InGameBannersTab from "../components/previewer/InGameBannersTab";
@@ -11,7 +12,18 @@ export default function AssetPreviewerPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get("tab") || "badges";
     const theme = useMantineTheme();
-    const isLargeScreen = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
+    const isLargeScreen = useMediaQuery(`(min-width: ${theme.breakpoints.lg})`);
+    const [isMediaQueryReady, setIsMediaQueryReady] = useState(false);
+
+    // Wait for media query to stabilize
+    useEffect(() => {
+        // Small delay to ensure media query is stable
+        const timer = setTimeout(() => {
+            setIsMediaQueryReady(true);
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleTabChange = (value: string | null) => {
         if (value) {
@@ -19,10 +31,21 @@ export default function AssetPreviewerPage() {
         }
     };
 
+    // Show loading state while media query is initializing
+    if (!isMediaQueryReady) {
+        return (
+            <Container size="md" py="xl">
+                <Center style={{ height: "200px" }}>
+                    <Loader size="md" />
+                </Center>
+            </Container>
+        );
+    }
+
     if (!isLargeScreen) {
         return (
             <Container size="md" py="xl">
-                <Alert color="danger" title="Screen too small" icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
+                <Alert color="red" title="Screen too small" icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
                     <Text>
                         The Asset Previewer tool requires a larger screen width to function properly. Please use a
                         device with a larger screen (desktop or tablet in landscape mode) to access this feature.
