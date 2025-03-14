@@ -43,8 +43,116 @@ export default function AssetPreviewerPage() {
         }
     };
 
-    // Show skeleton while media query is initializing
-    if (!isMediaQueryReady) {
+    const BadgeTabSkeleton = () => {
+        return (
+            <>
+                {/* Search section skeleton */}
+                <Card withBorder my="xl">
+                    <Group grow>
+                        <div>
+                            <Skeleton height={20} width="40%" mb="xs" />
+                            <Skeleton height={36} width="100%" mb="sm" />
+                            <Skeleton height={36} width="100%" />
+                        </div>
+                        <Paper p="md" style={{ border: "2px dashed #e9ecef" }}>
+                            <Stack align="center" gap="xs">
+                                <Skeleton height={16} width="80%" />
+                                <Skeleton height={12} width="60%" />
+                                <Skeleton height={12} width="70%" />
+                            </Stack>
+                        </Paper>
+                    </Group>
+                </Card>
+
+                {/* Profile skeleton */}
+                <div style={{ width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
+                    {/* Banner skeleton */}
+                    <Skeleton height={250} width="100%" radius="6px 6px 0 0" />
+
+                    {/* Profile info skeleton */}
+                    <div
+                        style={{
+                            padding: "0 5%",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "20px",
+                            backgroundColor: "#46393f",
+                            height: "95px",
+                        }}>
+                        <Skeleton height={120} width={120} radius={40} style={{ marginTop: "-40px" }} />
+                        <div style={{ flex: 1 }}>
+                            <Skeleton height={24} width="40%" mb="xs" />
+                            <Skeleton height={16} width="30%" mb="xs" />
+                            <Skeleton height={14} width="20%" />
+                        </div>
+                    </div>
+
+                    {/* Badges skeleton */}
+                    <div
+                        style={{
+                            padding: "10px 5%",
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "10px",
+                            backgroundColor: "#382e32",
+                            borderRadius: "0 0 6px 6px",
+                        }}>
+                        {Array(8)
+                            .fill(0)
+                            .map((_, i) => (
+                                <Skeleton key={i} height={40} width={86} />
+                            ))}
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    const NewsBannersTabSkeleton = () => {
+        return (
+            <>
+                {/* News banners skeleton */}
+                <Paper p="xl" mb="xl" style={{ border: "2px dashed #e9ecef" }}>
+                    <Stack align="center" gap="sm">
+                        <Skeleton height={20} width="60%" />
+                        <Skeleton height={16} width="80%" />
+                        <Skeleton height={16} width="40%" />
+                    </Stack>
+                </Paper>
+
+                {/* News posts skeletons */}
+                <Stack gap="xl" align="center">
+                    <Skeleton height={130} width={530} mb="sm" />
+                    <Skeleton height={160} width={670} mb="sm" />
+                    <Skeleton height={160} width={320} mb="sm" />
+                    <Skeleton height={160} width="100%" style={{ maxWidth: 1000 }} mb="sm" />
+                    <Skeleton height={200} width={670} />
+                </Stack>
+            </>
+        );
+    };
+
+    const InGameBannersTabSkeleton = () => {
+        return (
+            <>
+                {/* In-game banners skeleton */}
+                <Card withBorder mb="xl">
+                    <Group grow>
+                        <Skeleton height={120} />
+                        <Skeleton height={120} />
+                    </Group>
+                    <Center mt="md">
+                        <Skeleton height={30} width={120} />
+                    </Center>
+                </Card>
+
+                <Skeleton height={240} width="100%" mb="sm" />
+                <Skeleton height={16} width="50%" style={{ margin: "0 auto" }} />
+            </>
+        );
+    };
+
+    const LoadingState = () => {
         return (
             <Container size="xl">
                 {/* Tabs skeleton */}
@@ -52,105 +160,19 @@ export default function AssetPreviewerPage() {
 
                 {/* Content skeleton based on default tab */}
                 {defaultTab === "badges" ? (
-                    <>
-                        {/* Search section skeleton */}
-                        <Card withBorder mb="xl">
-                            <Group grow>
-                                <div>
-                                    <Skeleton height={20} width="40%" mb="xs" />
-                                    <Skeleton height={36} width="100%" mb="sm" />
-                                    <Skeleton height={36} width="100%" />
-                                </div>
-                                <Paper p="md" style={{ border: "2px dashed #e9ecef" }}>
-                                    <Stack align="center" gap="xs">
-                                        <Skeleton height={16} width="80%" />
-                                        <Skeleton height={12} width="60%" />
-                                        <Skeleton height={12} width="70%" />
-                                    </Stack>
-                                </Paper>
-                            </Group>
-                        </Card>
-
-                        {/* Profile skeleton */}
-                        <div style={{ width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
-                            {/* Banner skeleton */}
-                            <Skeleton height={250} width="100%" radius="6px 6px 0 0" />
-
-                            {/* Profile info skeleton */}
-                            <div
-                                style={{
-                                    padding: "0 5%",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "20px",
-                                    backgroundColor: "#46393f",
-                                    height: "95px",
-                                }}>
-                                <Skeleton height={120} width={120} radius={40} style={{ marginTop: "-40px" }} />
-                                <div style={{ flex: 1 }}>
-                                    <Skeleton height={24} width="40%" mb="xs" />
-                                    <Skeleton height={16} width="30%" mb="xs" />
-                                    <Skeleton height={14} width="20%" />
-                                </div>
-                            </div>
-
-                            {/* Badges skeleton */}
-                            <div
-                                style={{
-                                    padding: "10px 5%",
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: "10px",
-                                    backgroundColor: "#382e32",
-                                    borderRadius: "0 0 6px 6px",
-                                }}>
-                                {Array(8)
-                                    .fill(0)
-                                    .map((_, i) => (
-                                        <Skeleton key={i} height={40} width={86} />
-                                    ))}
-                            </div>
-                        </div>
-                    </>
+                    <BadgeTabSkeleton />
                 ) : defaultTab === "news-banners" ? (
-                    <>
-                        {/* News banners skeleton */}
-                        <Paper p="xl" mb="xl" style={{ border: "2px dashed #e9ecef" }}>
-                            <Stack align="center" gap="sm">
-                                <Skeleton height={20} width="60%" />
-                                <Skeleton height={16} width="80%" />
-                                <Skeleton height={16} width="40%" />
-                            </Stack>
-                        </Paper>
-
-                        {/* News posts skeletons */}
-                        <Stack gap="xl" align="center">
-                            <Skeleton height={130} width={530} mb="sm" />
-                            <Skeleton height={160} width={670} mb="sm" />
-                            <Skeleton height={160} width={320} mb="sm" />
-                            <Skeleton height={160} width="100%" style={{ maxWidth: 1000 }} mb="sm" />
-                            <Skeleton height={200} width={670} />
-                        </Stack>
-                    </>
+                    <NewsBannersTabSkeleton />
                 ) : (
-                    <>
-                        {/* In-game banners skeleton */}
-                        <Card withBorder mb="xl">
-                            <Group grow>
-                                <Skeleton height={120} />
-                                <Skeleton height={120} />
-                            </Group>
-                            <Center mt="md">
-                                <Skeleton height={30} width={120} />
-                            </Center>
-                        </Card>
-
-                        <Skeleton height={240} width="100%" mb="sm" />
-                        <Skeleton height={16} width="50%" style={{ margin: "0 auto" }} />
-                    </>
+                    <InGameBannersTabSkeleton />
                 )}
             </Container>
         );
+    };
+
+    // Show skeleton while media query is initializing
+    if (!isMediaQueryReady) {
+        return <LoadingState />;
     }
 
     return (
@@ -181,7 +203,7 @@ export default function AssetPreviewerPage() {
                 )}
 
                 <Tabs.Panel value="badges">
-                    <BadgesTab />
+                    <BadgesTab skeleton={<BadgeTabSkeleton />} />
                 </Tabs.Panel>
 
                 <Tabs.Panel value="news-banners">
