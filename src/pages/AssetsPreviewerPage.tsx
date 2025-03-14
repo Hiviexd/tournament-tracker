@@ -76,7 +76,8 @@ export default function AssetPreviewerPage() {
                             display: "flex",
                             alignItems: "center",
                             gap: "20px",
-                            backgroundColor: "#46393f",
+                            backgroundColor: "var(--mantine-color-primary-11)",
+                            filter: "brightness(1.3)",
                             height: "95px",
                         }}>
                         <Skeleton height={120} width={120} radius={40} style={{ marginTop: "-40px" }} />
@@ -94,7 +95,7 @@ export default function AssetPreviewerPage() {
                             display: "flex",
                             flexWrap: "wrap",
                             gap: "10px",
-                            backgroundColor: "#382e32",
+                            backgroundColor: "var(--mantine-color-primary-11)",
                             borderRadius: "0 0 6px 6px",
                         }}>
                         {Array(8)
