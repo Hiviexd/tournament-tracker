@@ -112,7 +112,7 @@ export default function AssetPreviewerPage() {
         return (
             <>
                 {/* News banners skeleton */}
-                <Paper p="xl" mb="xl" style={{ border: "2px dashed #e9ecef" }}>
+                <Paper p="xl" my="xl" style={{ border: "2px dashed #e9ecef" }}>
                     <Stack align="center" gap="sm">
                         <Skeleton height={20} width="60%" />
                         <Skeleton height={16} width="80%" />
@@ -136,7 +136,7 @@ export default function AssetPreviewerPage() {
         return (
             <>
                 {/* In-game banners skeleton */}
-                <Card withBorder mb="xl">
+                <Card withBorder my="xl">
                     <Group grow>
                         <Skeleton height={120} />
                         <Skeleton height={120} />
