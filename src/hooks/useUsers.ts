@@ -58,8 +58,17 @@ export function useUser(id: string | null, options: { enabled?: boolean; retry?:
 export function useOsuUserInfo(userInput: string) {
     return useQuery({
         queryKey: ["osuUserInfo", userInput],
-        queryFn: () => getOsuUserInfo(userInput),
+        queryFn: async () => {
+            const response = await getOsuUserInfo(userInput);
+
+            if (response && "error" in response) {
+                return handleMutationResponse(response);
+            }
+
+            return response;
+        },
         enabled: !!userInput,
+        retry: false,
     });
 }
 

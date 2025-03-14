@@ -32,47 +32,115 @@ interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
 }
 
-const DEFAULT_USER: LocalUser = {
-    id: 7562902,
-    username: "Hivie",
-    country: {
-        code: "TN",
-        name: "Tunisia",
-    },
-    cover: {
-        custom_url: defaultBanner,
-        url: defaultBanner,
-        id: 1,
-    },
-    avatar_url: "https://a.ppy.sh/14102976",
-    profile_colour: "#fa3703",
-    title: "osu!taiko Paragon",
-    support_level: 2,
-    badges: [
-        {
-            awarded_at: new Date("2024-03-01"),
-            description: "Longstanding contribution to the Contest Committee - 1 Year",
-            image_url: "https://assets.ppy.sh/profile-badges/tcomm-1y.png",
-            "image@2x_url": "https://assets.ppy.sh/profile-badges/tcomm-1y@2x.png",
-            localId: "default-1",
-        },
-        {
-            awarded_at: new Date("2024-02-01"),
-            description: "Longstanding contribution to the Nomination Assessment Team - 2 Years",
-            image_url: "https://assets.ppy.sh/profile-badges/NAT2y.png",
-            "image@2x_url": "https://assets.ppy.sh/profile-badges/NAT2y@2x.png",
-            localId: "default-2",
-        },
-    ],
-};
+interface IProps {
+    skeleton: React.ReactNode;
+}
 
-export default function BadgesTab() {
+export default function BadgesTab({ skeleton }: IProps) {
     const [searchParams] = useSearchParams();
-    const [user, setUser] = useState<LocalUser>(DEFAULT_USER);
     const [userInput, setUserInput] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const { data: osuUser, isLoading } = useOsuUserInfo(searchQuery);
     const [loggedInUser] = useAtom(loggedInUserAtom);
+    const [searchQuery, setSearchQuery] = useState(loggedInUser?.osuId.toString() || "");
+    const { data: osuUser, isLoading } = useOsuUserInfo(searchQuery);
+
+    const DEFAULT_USER: LocalUser = {
+        id: 3,
+        username: "BanchoBot",
+        country: {
+            code: "SH",
+            name: "Saint Helena",
+        },
+        cover: {
+            custom_url: defaultBanner,
+            url: defaultBanner,
+            id: 1,
+        },
+        avatar_url: "https://a.ppy.sh/3",
+        profile_colour: "#E45678",
+        title: "w00t p00t",
+        support_level: 3,
+        badges: [
+            {
+                awarded_at: new Date("2024-12-01"),
+                description: "osu! World Cup 2024 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2024-winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2024-winner@2x.png",
+                localId: "default-1",
+            },
+            {
+                awarded_at: new Date("2023-12-01"),
+                description: "osu! World Cup 2023 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2023-winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2023-winner@2x.png",
+                localId: "default-2",
+            },
+            {
+                awarded_at: new Date("2022-12-01"),
+                description: "osu! World Cup 2022 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2022-winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2022-winner@2x.png",
+                localId: "default-3",
+            },
+            {
+                awarded_at: new Date("2021-12-01"),
+                description: "osu! World Cup 2021 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/badge_owc2021_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/badge_owc2021_winner@2x.png",
+                localId: "default-4",
+            },
+            {
+                awarded_at: new Date("2020-12-01"),
+                description: "osu! World Cup 2020 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/badge_owc2020_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/badge_owc2020_winner@2x.png",
+                localId: "default-5",
+            },
+            {
+                awarded_at: new Date("2019-12-01"),
+                description: "osu! World Cup 2019 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2019_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2019_winner@2x.png",
+                localId: "default-6",
+            },
+            {
+                awarded_at: new Date("2018-12-01"),
+                description: "osu! World Cup 2018 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2018_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2018_winner@2x.png",
+                localId: "default-7",
+            },
+            {
+                awarded_at: new Date("2017-12-01"),
+                description: "osu! World Cup 2017 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/o_wc2017_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/o_wc2017_winner@2x.png",
+                localId: "default-8",
+            },
+            {
+                awarded_at: new Date("2016-12-01"),
+                description: "osu! World Cup 2016 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/o_wc2016_winner.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/o_wc2016_winner@2x.png",
+                localId: "default-9",
+            },
+            {
+                awarded_at: new Date("2015-12-01"),
+                description: "osu! World Cup 2015 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2015-1st.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2015-1st@2x.png",
+                localId: "default-10",
+            },
+            {
+                awarded_at: new Date("2014-12-01"),
+                description: "osu! World Cup 2014 Winner",
+                image_url: "https://assets.ppy.sh/profile-badges/owc2014-1st.png",
+                "image@2x_url": "https://assets.ppy.sh/profile-badges/owc2014-1st@2x.png",
+                localId: "default-11",
+            },
+        ],
+    };
+
+    const [user, setUser] = useState<LocalUser>(DEFAULT_USER);
 
     // Use our custom badge manager hook
     const {
@@ -297,6 +365,10 @@ export default function BadgesTab() {
         );
     };
 
+    if (isLoading) {
+        return skeleton;
+    }
+
     return (
         <Stack mt="xl" gap="xl">
             {/* Search Section */}
@@ -305,7 +377,7 @@ export default function BadgesTab() {
             <div className="osu-profile">
                 {/* Banner Section */}
                 <div className="profile-banner">
-                    <img src={user.cover.custom_url} alt="Profile Banner" />
+                    <img src={user.cover.url} alt="Profile Banner" />
                 </div>
 
                 {/* User Info Section */}
