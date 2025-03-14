@@ -82,9 +82,9 @@ export default function AssetPreviewerPage() {
                         }}>
                         <Skeleton height={120} width={120} radius={40} style={{ marginTop: "-40px" }} />
                         <div style={{ flex: 1 }}>
-                            <Skeleton height={24} width="40%" mb="xs" />
-                            <Skeleton height={16} width="30%" mb="xs" />
-                            <Skeleton height={14} width="20%" />
+                            <Skeleton height={24} width="20%" mb="xs" />
+                            <Skeleton height={16} width="25%" mb="xs" />
+                            <Skeleton height={14} width="10%" />
                         </div>
                     </div>
 
@@ -98,7 +98,7 @@ export default function AssetPreviewerPage() {
                             backgroundColor: "var(--mantine-color-primary-11)",
                             borderRadius: "0 0 6px 6px",
                         }}>
-                        {Array(8)
+                        {Array(9)
                             .fill(0)
                             .map((_, i) => (
                                 <Skeleton key={i} height={40} width={86} />
