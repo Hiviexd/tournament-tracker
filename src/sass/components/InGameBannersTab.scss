@@ -20,6 +20,8 @@
 
     .ingame-preview {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden !important;
 
         @media (max-width: 768px) {
             height: 200px;
@@ -30,13 +32,22 @@
         }
 
         // Banner container
-        >div:last-child {
+        .banner-container {
             will-change: transform;
+            line-height: 0;
+            font-size: 0;
+            vertical-align: bottom;
+            width: 1080px !important;
+            max-width: 1080px !important;
+            overflow: visible !important;
 
-            img {
+            img.banner-image {
                 will-change: transform;
-                backface-visibility: hidden; // Prevents flickering during animation
+                backface-visibility: hidden;
                 filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+                vertical-align: bottom;
+                line-height: 0;
+                max-width: 100%;
 
                 &:hover {
                     filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));

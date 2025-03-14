@@ -246,9 +246,15 @@ export default function InGameBannersTab() {
                         bottom: 0,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        maxWidth: "100%",
+                        width: "100vh",
+                        maxWidth: "100vh",
                         textAlign: "center",
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "flex-end",
+                        height: "120px",
+                        justifyContent: "center",
+                        pointerEvents: "auto",
                     }}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
@@ -258,14 +264,16 @@ export default function InGameBannersTab() {
                         alt="In-game banner"
                         style={{
                             maxWidth: "100%",
-                            maxHeight: "144px",
+                            maxHeight: "120px",
                             objectFit: "contain",
-                            transform: `scale(${isHovered ? 1.05 * 1.2 : 1.2})`,
+                            transform: `scale(${isHovered ? 1.05 * 1 : 1})`,
                             transformOrigin: "bottom center",
                             transition: isHovered
                                 ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
                                 : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
                             filter: isHovered ? "brightness(1.1)" : "brightness(1)",
+                            display: "block",
+                            marginBottom: 0,
                         }}
                         className="banner-image"
                     />
