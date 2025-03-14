@@ -64,7 +64,7 @@ class UsersController {
         const user = await OsuApiService.getUserInfo(req.session.accessToken!, userInput);
 
         if (OsuApiService.isOsuResponseError(user)) {
-            return res.json({ error: "Failed to fetch user data from osu!" });
+            return res.json({ error: "osu! user not found!" });
         }
 
         res.json(user);
