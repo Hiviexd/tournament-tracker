@@ -6,6 +6,13 @@
         justify-content: center;
     }
 
+    .banners-container {
+        background-color: #24222a;
+        padding: 40px 0;
+        border-radius: 8px;
+        width: 100%;
+    }
+
     // Date badge styling
     .newspost-date-badge {
         position: absolute;
@@ -268,14 +275,11 @@
 
         // Newspost page
         &.newspost-newspost {
-            --width: 710px;
+            --width: 670px;
             --height: 200px;
             width: 100%;
             max-width: var(--width);
             border-radius: 6px;
-            background-color: hsl(255, 10%, 20%);
-            box-shadow: 0 3px 3px rgba(0, 0, 0, .25);
-            padding: 0 20px 10px;
 
             @media (max-width: 768px) {
                 --height: 150px;

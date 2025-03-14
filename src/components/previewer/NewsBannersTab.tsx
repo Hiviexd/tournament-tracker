@@ -159,7 +159,7 @@ export default function NewsBannersTab() {
             </Paper>
 
             {/* Preview section */}
-            <Stack gap="xl" align="center">
+            <Stack gap="xl" align="center" className="banners-container">
                 {/* Homepage logged in */}
                 <div className="newspost newspost-homepage">
                     <div className="newspost-image">
