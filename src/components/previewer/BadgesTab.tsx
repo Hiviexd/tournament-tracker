@@ -387,7 +387,9 @@ export default function BadgesTab({ skeleton }: IProps) {
                     </div>
                     <div className="profile-details">
                         <div className="username-container">
-                            <h1 className="username">{user.username}</h1>
+                            <a className="username" href={`https://osu.ppy.sh/users/${user.id}`} target="_blank">
+                                {user.username}
+                            </a>
                             {!!user.support_level && <div className="supporter-badge">{renderSupporterHearts()}</div>}
                         </div>
                         {user.title && (
