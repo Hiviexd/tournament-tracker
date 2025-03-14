@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "react-router-dom";
 import defaultBanner from "/assets/default-banner.jpg";
+import moment from "moment";
 
 interface BannerPreview {
     description: string;
@@ -17,7 +18,7 @@ const DEFAULT_PREVIEW: BannerPreview = {
     description:
         "Long description text goes here. Reasonably long, two lines, gotta keep typing or else we'll have to make this even longer to unreasonable degrees!",
     author: "You & Me",
-    date: { day: "13", month: "Mar", year: "2025" },
+    date: { day: moment().format("DD"), month: moment().format("MMM"), year: moment().format("YYYY") },
     imageUrl: defaultBanner,
     isLocalImage: false,
 };
@@ -167,7 +168,9 @@ export default function NewsBannersTab() {
                     <div className="newspost-homepage-inner">
                         <div className="newspost-homepage-date">
                             <p className="newspost-homepage-date-day">{preview.date.day}</p>
-                            <p className="newspost-homepage-date-month">{preview.date.month} {preview.date.year}</p>
+                            <p className="newspost-homepage-date-month">
+                                {preview.date.month} {preview.date.year}
+                            </p>
                         </div>
                         <div className="newspost-homepage-texts">
                             <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
@@ -180,6 +183,9 @@ export default function NewsBannersTab() {
                 <div className="newspost newspost-listing">
                     <div className="newspost-image">
                         <img src={preview.imageUrl} alt="Preview" />
+                        <div className="newspost-date-badge">
+                            {preview.date.day} {preview.date.month} {preview.date.year}
+                        </div>
                     </div>
                     <div className="newspost-listing-inner">
                         <p className="newspost-listing-title">Newspost in news history page</p>
@@ -194,6 +200,9 @@ export default function NewsBannersTab() {
                 <div className="newspost newspost-loggedout small">
                     <div className="newspost-image">
                         <img src={preview.imageUrl} alt="Preview" />
+                        <div className="newspost-date-badge">
+                            {preview.date.day} {preview.date.month} {preview.date.year}
+                        </div>
                     </div>
                     <div className="newspost-loggedout-inner">
                         <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
@@ -207,6 +216,9 @@ export default function NewsBannersTab() {
                 <div className="newspost newspost-loggedout">
                     <div className="newspost-image">
                         <img src={preview.imageUrl} alt="Preview" />
+                        <div className="newspost-date-badge">
+                            {preview.date.day} {preview.date.month} {preview.date.year}
+                        </div>
                     </div>
                     <div className="newspost-loggedout-inner">
                         <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
@@ -221,6 +233,9 @@ export default function NewsBannersTab() {
                     <div className="newspost-newspost-inner">
                         <div className="newspost-image">
                             <img src={preview.imageUrl} alt="Preview" />
+                            <div className="newspost-date-badge">
+                                {preview.date.day} {preview.date.month} {preview.date.year}
+                            </div>
                         </div>
                         <p className="newspost-newspost-title">Newspost in newspost page</p>
                         <p className="newspost-newspost-meta">

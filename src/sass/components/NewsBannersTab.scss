@@ -6,6 +6,22 @@
         justify-content: center;
     }
 
+    // Date badge styling
+    .newspost-date-badge {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background-color: hsla(0, 10%, 10%, 0.5);
+        color: white;
+        padding: 6px 20px;
+        border-radius: 10000px;
+        font-family: "Torus", sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: center;
+        text-transform: uppercase;
+        line-height: 1;
+    }
 
     // Homepage logged in newspost
     .newspost {
@@ -46,6 +62,7 @@
             width: 100%;
             max-width: var(--width);
             min-width: auto;
+            box-shadow: 0 3px 3px rgba(0, 0, 0, .25);
 
             @media (max-width: 768px) {
                 --height: 100px;
@@ -140,6 +157,7 @@
             min-width: auto;
             border-radius: 6px;
             background-color: hsl(255, 10%, 20%);
+            box-shadow: 0 3px 3px rgba(0, 0, 0, .25);
 
             @media (max-width: 768px) {
                 --height: 120px;
@@ -189,6 +207,7 @@
             border-radius: 6px;
             color: #fff;
             min-width: 0;
+            box-shadow: 0 3px 3px rgba(0, 0, 0, .25);
 
             &.small {
                 width: 100%;
@@ -249,11 +268,14 @@
 
         // Newspost page
         &.newspost-newspost {
-            --width: 670px;
+            --width: 710px;
             --height: 200px;
             width: 100%;
             max-width: var(--width);
-            min-width: auto;
+            border-radius: 6px;
+            background-color: hsl(255, 10%, 20%);
+            box-shadow: 0 3px 3px rgba(0, 0, 0, .25);
+            padding: 0 20px 10px;
 
             @media (max-width: 768px) {
                 --height: 150px;
@@ -301,6 +323,7 @@
 
             .newspost-image {
                 margin: 20px 0;
+                border-radius: 6px;
 
                 @media (max-width: 768px) {
                     margin: 10px 0;
