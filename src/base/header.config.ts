@@ -95,12 +95,6 @@ export const routes: IRoute[] = [
                 icon: "images",
                 permissions: [],
             },
-            {
-                title: "Create Article",
-                link: "/articles/create",
-                icon: "file-circle-plus",
-                permissions: ["admin"],
-            },
         ],
     },
 
@@ -110,6 +104,12 @@ export const routes: IRoute[] = [
         links: [
             { title: "Users", link: "/users", icon: "users-gear", permissions: ["committee"] },
             { title: "Logs", link: "/logs", icon: "history", permissions: ["committee"] },
+            {
+                title: "Create Article",
+                link: "/articles/create",
+                icon: "file-circle-plus",
+                permissions: ["admin"],
+            },
         ],
     },
 ];
