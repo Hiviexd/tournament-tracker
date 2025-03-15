@@ -118,7 +118,7 @@ class TicketsController {
             createdAt: { $gte: oneHourAgo },
         });
 
-        if (recentTicket) {
+        if (recentTicket && !author.isCommittee) {
             return res.json({
                 error: `You have already created a ${type} within the last hour. Please wait before creating another one.`,
             });
@@ -237,6 +237,9 @@ class TicketsController {
                 title: embedTitle,
                 url: `${config.baseUrl}/${type}s/${ticket._id}`,
                 fields,
+                footer: {
+                    text: `ID: ${ticket._id}`,
+                },
             },
         ]);
 
