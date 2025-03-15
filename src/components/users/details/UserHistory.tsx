@@ -30,7 +30,7 @@ export default function UserHistory({ history }: IProps) {
                                 {entry.kind === "join" ? "Joined" : "Left"} {entry.group.toUpperCase()}
                             </Text>
                             <Text size="xs" c="dimmed">
-                                {moment(entry.date).format("LLL")}
+                                {moment(entry.date).format("LL")}
                             </Text>
                         </Timeline.Item>
                     ))}
