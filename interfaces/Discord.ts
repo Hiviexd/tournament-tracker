@@ -21,4 +21,8 @@ export interface IDiscordEmbed {
         url: string;
     };
     timestamp?: Date;
+    footer?: {
+        text: string;
+        icon_url?: string;
+    };
 }
