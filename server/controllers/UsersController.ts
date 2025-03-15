@@ -192,12 +192,14 @@ class UsersController {
         user.history.push(historyEntry);
         await user.save();
 
+        const groupName = group === "tc" ? "Tournament Committee" : "Contest Committee";
+
         // Logger
         await LogService.generate(
             req.session.mongoId!,
             `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
                 join ? "to" : "from"
-            } **${group.toUpperCase()}**`,
+            } the **${groupName}**`,
             "user"
         );
 
@@ -208,12 +210,12 @@ class UsersController {
                 color: join ? webhookColors.green : webhookColors.red,
                 description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
                     user.osuId
-                }) ${join ? "to" : "from"} **${group.toUpperCase()}**`,
+                }) ${join ? "to" : "from"} the **${groupName}**`,
             },
         ]);
 
         res.json({
-            message: `User ${join ? "added to" : "removed from"} ${group.toUpperCase()} successfully!`,
+            message: `User ${join ? "added to" : "removed from"} the **${groupName}** successfully!`,
             user,
         });
     }
