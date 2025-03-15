@@ -9,6 +9,7 @@ interface TextEditorProps {
     placeholder?: string;
     minHeight?: number;
     maxHeight?: number;
+    stickyOffset?: number;
     className?: string;
     disabled?: boolean;
     autoSaveKey?: string; // Optional key for autosaving
@@ -24,6 +25,7 @@ export default function TextEditor({
     placeholder = "Type your content here...",
     minHeight = 200,
     maxHeight,
+    stickyOffset = 0,
     className,
     disabled = false,
     autoSaveKey,
@@ -98,6 +100,7 @@ export default function TextEditor({
                     placeholder={placeholder}
                     minHeight={minHeight}
                     maxHeight={maxHeight}
+                    stickyOffset={stickyOffset}
                 />
             )}
         </Box>

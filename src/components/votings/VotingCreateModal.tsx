@@ -208,6 +208,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             onChange={(value) => form.setFieldValue("description", value)}
                             placeholder="Enter vote description"
                             minHeight={120}
+                            stickyOffset={60}
                             className={form.errors.description ? "error" : ""}
                             autoSaveKey={autoSaveKey}
                             style={{ flex: "1 1 auto", minHeight: 120 }}

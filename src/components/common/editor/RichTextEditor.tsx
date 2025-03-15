@@ -25,6 +25,7 @@ interface RichTextEditorProps {
     placeholder?: string;
     minHeight?: number;
     maxHeight?: number;
+    stickyOffset?: number;
 }
 
 /**
@@ -39,6 +40,7 @@ export default function RichTextEditor({
     placeholder = "Type your content here...",
     minHeight = 200,
     maxHeight,
+    stickyOffset = 0,
 }: RichTextEditorProps) {
     // Initialize the editor with all the extensions we need
     const editor = useEditor({
@@ -141,7 +143,7 @@ export default function RichTextEditor({
                     },
                 },
             }}>
-            <MantineRichTextEditor.Toolbar sticky stickyOffset={60}>
+            <MantineRichTextEditor.Toolbar sticky stickyOffset={stickyOffset}>
                 {/* Responsive container that allows wrapping on small screens */}
                 <Group gap="xs" style={{ width: "100%", flexWrap: "wrap" }}>
                     {/* Left-aligned controls */}

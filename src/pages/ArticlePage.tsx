@@ -135,8 +135,9 @@ export default function ArticlePage() {
                         <TextEditor
                             value={editContent}
                             onChange={setEditContent}
-                            placeholder="Enter article content in Markdown..."
+                            placeholder="Enter article content..."
                             minHeight={300}
+                            stickyOffset={60}
                             autoSaveKey={`edit-article-${article?._id}`}
                         />
 
