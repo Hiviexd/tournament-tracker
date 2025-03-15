@@ -21,7 +21,7 @@ export default function BadgeTracker({ user }: IProps) {
 
     return (
         <Stack gap="xs">
-            <Title order={4}>Badge & Duration</Title>
+            <Title order={4}>Duration</Title>
 
             {/* Duration Display */}
             {user.isCommittee || user.tcDuration > 0 || user.ccDuration > 0 ? (
