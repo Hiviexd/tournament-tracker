@@ -167,6 +167,35 @@ function generateBadgeCommand(osuId: number, years: number, badgeValue: number, 
     return command.trim();
 }
 
+/**
+ * OutBounce easing function - replicates osu!stable's OutBounce easing
+ * @param t Progress (0-1)
+ * @returns Eased value
+ */
+function easingOutBounce(t: number): number {
+    const n1 = 7.5625;
+    const d1 = 2.75;
+
+    if (t < 1 / d1) {
+        return n1 * t * t;
+    } else if (t < 2 / d1) {
+        return n1 * (t -= 1.5 / d1) * t + 0.75;
+    } else if (t < 2.5 / d1) {
+        return n1 * (t -= 2.25 / d1) * t + 0.9375;
+    } else {
+        return n1 * (t -= 2.625 / d1) * t + 0.984375;
+    }
+}
+
+/**
+ * OutCubic easing function - replicates osu!stable's OutCubic easing
+ * @param t Progress (0-1)
+ * @returns Eased value
+ */
+function easingOutCubic(t: number): number {
+    return 1 - Math.pow(1 - t, 3);
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
@@ -176,4 +205,6 @@ export default {
     getInitialVoteData,
     getYearsFromDays,
     generateBadgeCommand,
+    easingOutBounce,
+    easingOutCubic,
 };

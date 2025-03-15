@@ -1,8 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
-import { Text, Stack, Paper, Center, Group, Card, Button } from "@mantine/core";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { Text, Stack, Paper, Center, Group, Card, Button, Switch, Flex } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
-import defaultBackground from "/assets/default-bg.jpg";
+import defaultStableBackground from "/assets/default-bg-stable.jpg";
+import defaultLazerBackground from "/assets/default-bg-lazer.jpg";
+import helpers from "../../helpers";
 
 interface BannerPreview {
     bannerUrl: string;
@@ -11,18 +13,35 @@ interface BannerPreview {
     isLocalBackground: boolean;
 }
 
-const DEFAULT_PREVIEW: BannerPreview = {
-    bannerUrl: "https://assets.ppy.sh/main-menu/2025-spring-fanart-submissions@2x.png",
-    backgroundUrl: defaultBackground,
-    isLocalBanner: false,
-    isLocalBackground: false,
-};
-
 export default function InGameBannersTab() {
-    const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
     const [currentBannerUrl, setCurrentBannerUrl] = useState<string | null>(null);
     const [currentBackgroundUrl, setCurrentBackgroundUrl] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
+    const [isLazer, setIsLazer] = useState(false);
+    const bannerImageRef = useRef<HTMLImageElement>(null);
+    const animationRef = useRef<number | null>(null);
+
+    const DEFAULT_PREVIEW = useMemo(
+        () => ({
+            bannerUrl: "https://assets.ppy.sh/main-menu/2025-spring-fanart-submissions@2x.png",
+            backgroundUrl: isLazer ? defaultLazerBackground : defaultStableBackground,
+            isLocalBanner: false,
+            isLocalBackground: false,
+        }),
+        [isLazer]
+    );
+
+    const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
+
+    // Update background when mode changes
+    useEffect(() => {
+        if (!preview.isLocalBackground) {
+            setPreview((prev) => ({
+                ...prev,
+                backgroundUrl: isLazer ? defaultLazerBackground : defaultStableBackground,
+            }));
+        }
+    }, [isLazer, preview.isLocalBackground]);
 
     // Handle banner drop
     const onBannerDrop = useCallback(
@@ -98,7 +117,7 @@ export default function InGameBannersTab() {
         setCurrentBannerUrl(null);
         setCurrentBackgroundUrl(null);
         setPreview(DEFAULT_PREVIEW);
-    }, [cleanupUrls]);
+    }, [cleanupUrls, DEFAULT_PREVIEW]);
 
     // Clean up object URLs when component unmounts
     useEffect(() => {
@@ -133,13 +152,67 @@ export default function InGameBannersTab() {
         maxFiles: 1,
     });
 
+    // Stable animation
+    const animateStableBanner = useCallback((targetScale: number) => {
+        if (!bannerImageRef.current) return;
+
+        // Cancel any ongoing animation
+        if (animationRef.current !== null) {
+            cancelAnimationFrame(animationRef.current);
+        }
+
+        const startTime = performance.now();
+        const duration = 500;
+        const element = bannerImageRef.current;
+
+        // Get current scale from transform or default to 1
+        const currentTransform = element.style.transform;
+        const currentScaleMatch = currentTransform.match(/scale\(([0-9.]+)\)/);
+        const startScale = currentScaleMatch ? parseFloat(currentScaleMatch[1]) : 1;
+
+        // Use the easing functions from helpers
+        const easing =
+            targetScale > startScale
+                ? helpers.easingOutBounce
+                : helpers.easingOutCubic;
+
+        const animate = (time: number) => {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easing(progress);
+
+            const newScale = startScale + (targetScale - startScale) * easedProgress;
+            element.style.transform = `scale(${newScale})`;
+
+            if (progress < 1) {
+                animationRef.current = requestAnimationFrame(animate);
+            } else {
+                animationRef.current = null;
+            }
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
+    }, []);
+
     // Handle hover events
     const handleMouseEnter = useCallback(() => {
         setIsHovered(true);
-    }, []);
+
+        if (!isLazer && bannerImageRef.current) {
+            animateStableBanner(1.1);
+        }
+    }, [isLazer, animateStableBanner]);
 
     const handleMouseLeave = useCallback(() => {
         setIsHovered(false);
+
+        if (!isLazer && bannerImageRef.current) {
+            animateStableBanner(1.0);
+        }
+    }, [isLazer, animateStableBanner]);
+
+    const handleModeToggle = useCallback((checked: boolean) => {
+        setIsLazer(checked);
     }, []);
 
     return (
@@ -203,6 +276,22 @@ export default function InGameBannersTab() {
                 </Center>
             </Card>
 
+            {/* Mode Switch */}
+            <Flex justify="center" align="center" gap="md">
+                <Text size="sm" fw={!isLazer ? 600 : 400} c={!isLazer ? "primary" : "dimmed"}>
+                    osu!(stable)
+                </Text>
+                <Switch
+                    checked={isLazer}
+                    onChange={(event) => handleModeToggle(event.currentTarget.checked)}
+                    size="md"
+                    color="primary"
+                />
+                <Text size="sm" fw={isLazer ? 600 : 400} c={isLazer ? "primary" : "dimmed"}>
+                    osu!(lazer)
+                </Text>
+            </Flex>
+
             {/* Preview section */}
             <div
                 className="ingame-preview"
@@ -228,16 +317,18 @@ export default function InGameBannersTab() {
                 />
 
                 {/* Darkening Overlay */}
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "120px",
-                        background: "rgba(0, 0, 0, 0.36)",
-                    }}
-                />
+                {!isLazer && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "120px",
+                            background: "rgba(0, 0, 0, 0.36)",
+                        }}
+                    />
+                )}
 
                 {/* Banner Image */}
                 <div
@@ -258,33 +349,30 @@ export default function InGameBannersTab() {
                     }}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
-                    className="banner-container">
+                    className={`banner-container ${isLazer ? "lazer-mode" : "stable-mode"}`}>
                     <img
+                        ref={bannerImageRef}
                         src={preview.bannerUrl}
                         alt="In-game banner"
                         style={{
                             maxWidth: "100%",
                             maxHeight: "120px",
                             objectFit: "contain",
-                            transform: `scale(${isHovered ? 1.05 * 1 : 1})`,
+                            transform: isLazer ? `scale(${isHovered ? 1.05 : 1})` : undefined,
                             transformOrigin: "bottom center",
-                            transition: isHovered
-                                ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
-                                : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
-                            filter: isHovered ? "brightness(1.1)" : "brightness(1)",
+                            transition: isLazer
+                                ? isHovered
+                                    ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
+                                    : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)"
+                                : undefined,
+                            filter: isHovered && isLazer ? "brightness(1.1)" : "brightness(1)",
                             display: "block",
                             marginBottom: 0,
                         }}
-                        className="banner-image"
+                        className={`banner-image ${isLazer ? "lazer-mode" : "stable-mode"}`}
                     />
                 </div>
             </div>
-
-            <Center>
-                <Text size="xs" c="dimmed">
-                    This is how the banner will mostly look like in the osu! main menu
-                </Text>
-            </Center>
         </Stack>
     );
 }
