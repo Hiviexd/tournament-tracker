@@ -14,6 +14,7 @@ interface IProps {
 
 export default function NotVotedBadge({ voting, user, variant = "light" }: IProps) {
     const checkUserVoted = (): boolean => {
+        if (!voting.isActive) return true;
         if (!voting.votes || !user) return false;
 
         // First check if user is in any of the assigned groups
@@ -28,7 +29,7 @@ export default function NotVotedBadge({ voting, user, variant = "light" }: IProp
             }
         });
 
-        if (!isInAssignedGroups) return true; // Return true to prevent badge from showing
+        if (!isInAssignedGroups) return true;
         return voting.votes.some((vote) => vote.author && vote.author._id === user._id);
     };
 
