@@ -140,19 +140,18 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </Group>
                     </Group>
 
-                    <Group wrap="wrap" gap="xs">
-                        {(user?.isCommittee || voting.isActive) && (
+                    {user?.isCommittee && (
+                        <Group wrap="wrap" gap="xs">
                             <VoteCountBadge
                                 voteCount={voting.votes.length}
                                 totalVotes={voting.requiredVotes}
                                 variant="light"
                             />
-                        )}
-                        {voting.isActive && user?.isCommittee && (
-                            <DueDateBadge date={voting.deadline} variant="light" />
-                        )}
-                        {user?.isCommittee && <NotVotedBadge voting={voting} user={user} variant="light" />}
-                    </Group>
+
+                            {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
+                            <NotVotedBadge voting={voting} user={user} variant="light" />
+                        </Group>
+                    )}
 
                     {user?.isCommittee || voting.isActive ? (
                         <>
