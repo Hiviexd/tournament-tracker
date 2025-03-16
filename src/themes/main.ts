@@ -117,7 +117,7 @@ export const theme = createTheme({
             styles: {
                 tooltip: {
                     border: "1px solid var(--mantine-color-primary-6)",
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    boxShadow: "0 4px 4px rgba(0, 0, 0, 0.1)",
                     filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1))",
                 },
                 arrow: {
@@ -149,6 +149,11 @@ export const theme = createTheme({
         Card: {
             defaultProps: {
                 bg: "primary.11",
+            },
+            styles: {
+                root: {
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                },
             },
         },
     },
