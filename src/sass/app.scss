@@ -149,6 +149,13 @@
             text-decoration: none !important;
         }
     }
+
+    /* Tabs */
+    .mantine-Tabs-tab {
+        &:hover {
+            background-color: color-mix(in srgb, var(--mantine-color-primary-11) 60%, transparent);
+        }
+    }
 }
 
 /* Links */
