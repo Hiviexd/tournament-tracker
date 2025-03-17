@@ -56,6 +56,7 @@ export default function RichTextEditor({
             Markdown.configure({
                 html: false,
                 transformPastedText: true,
+                transformCopiedText: true,
             }),
             Placeholder.configure({
                 placeholder,
