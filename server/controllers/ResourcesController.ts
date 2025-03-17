@@ -92,7 +92,10 @@ class ResourcesController {
             // Log the creation
             await LogService.generate(user._id, `Created resource: **${title}**`, "resource");
 
-            return res.json(resource.populate(DEFAULT_POPULATE));
+            return res.json({
+                resource: resource.populate(DEFAULT_POPULATE),
+                message: "Resource created successfully!",
+            });
         } catch (error) {
             console.error(error);
             return res.json({ error: "Internal server error" });
@@ -132,7 +135,10 @@ class ResourcesController {
             // Log the edit
             await LogService.generate(user._id, `Edited resource: **${title}**`, "resource");
 
-            return res.json(resource.populate(DEFAULT_POPULATE));
+            return res.json({
+                resource: resource.populate(DEFAULT_POPULATE),
+                message: "Resource updated successfully!",
+            });
         } catch (error) {
             console.error(error);
             return res.json({ error: "Internal server error" });
