@@ -68,6 +68,7 @@ import tournamentsRouter from "./routers/tournamentsRouter";
 import ticketsRouter from "./routers/ticketsRouter";
 import articlesRouter from "./routers/articlesRouter";
 import devRouter from "./routers/devRouter";
+import resourcesRouter from "./routers/resourcesRouter";
 
 // setup api routes
 const apiRouter = express.Router();
@@ -80,6 +81,7 @@ apiRouter.use("/tournaments", tournamentsRouter);
 apiRouter.use("/tickets", ticketsRouter);
 apiRouter.use("/articles", articlesRouter);
 apiRouter.use("/dev", devRouter);
+apiRouter.use("/resources", resourcesRouter);
 
 app.use("/api", apiRouter);
 

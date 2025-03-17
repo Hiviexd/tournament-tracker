@@ -74,6 +74,7 @@ import {
     faBug,
     faCheckToSlot,
     faImages,
+    faWrench,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -152,5 +153,6 @@ export default function loadIcons() {
         faBug,
         faCheckToSlot,
         faImages,
+        faWrench,
     );
 }

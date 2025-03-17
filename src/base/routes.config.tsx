@@ -15,6 +15,7 @@ import ArticlePage from "../pages/ArticlePage";
 import DocumentationListPage from "../pages/DocumentationListPage";
 import CreateArticlePage from "../pages/CreateArticlePage";
 import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
+import ResourcesPage from "../pages/ResourcesPage";
 
 interface RouteConfig {
     path: string;
@@ -166,14 +167,14 @@ const routes: RouteConfig[] = [
     },
     {
         path: "/resources/official",
-        page: <ArticlePage />,
+        page: <ResourcesPage />,
         title: "Official Resources",
         icon: "file-alt",
         permissions: [],
     },
     {
         path: "/resources/community",
-        page: <ArticlePage />,
+        page: <ResourcesPage />,
         title: "Community Resources",
         icon: "users",
         permissions: [],
