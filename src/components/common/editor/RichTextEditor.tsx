@@ -196,7 +196,7 @@ export default function RichTextEditor({
                             marginLeft: "auto",
                             marginRight: 0,
                             alignSelf: "flex-end",
-                            "@media (max-width: 600px)": {
+                            "@media (maxWwidth: 600px)": {
                                 marginLeft: 0,
                                 width: "100%",
                                 justifyContent: "flex-end",
