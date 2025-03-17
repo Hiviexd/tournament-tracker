@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
+import ReactScan from "./base/ReactScan";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <StateProvider>
             <QueryClientProvider client={queryClient}>
                 <MantineProvider defaultColorScheme="dark" theme={theme}>
+                    <ReactScan />
                     <Notifications />
                     <Router>
                         <AuthRouter />
