@@ -1,11 +1,27 @@
 // Base
 import moment from "moment";
+import { useState } from "react";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic } from "../../hooks/useVotings";
 
 // Mantine
-import { Card, Stack, Group, Title, Text, Badge, Button, ActionIcon, Divider, Tooltip, Anchor } from "@mantine/core";
+import {
+    Card,
+    Stack,
+    Group,
+    Title,
+    Text,
+    Badge,
+    Button,
+    ActionIcon,
+    Divider,
+    Tooltip,
+    Anchor,
+    SegmentedControl,
+    Box,
+    MantineStyleProp,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -29,6 +45,7 @@ interface IProps {
 
 export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
+    const [descriptionType, setDescriptionType] = useState<"private" | "public">("private");
     const toggleStatusMutation = useToggleVotingStatus(voting._id);
     const togglePublicMutation = useToggleVotingPublic(voting._id);
     const deleteVotingMutation = useDeleteVoting();
@@ -55,6 +72,15 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         return "success";
     };
 
+    const getGradientStyle = (): MantineStyleProp => {
+        if (voting.isActive) {
+            return {
+                ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
+            };
+        }
+        return;
+    };
+
     const handleToggleStatus = async () => {
         if (!window.confirm("Are you sure you want to toggle the status of this voting?")) return;
         await toggleStatusMutation.mutateAsync();
@@ -75,6 +101,44 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         window.open(`https://osu.ppy.sh/users/${targetUser.osuId}`, "_blank");
     };
 
+    const renderDescription = () => {
+        if (user?.isCommittee) {
+            return (
+                <>
+                    <Group align="center">
+                        <Text fw={700}>Description</Text>
+                        <SegmentedControl
+                            size="xs"
+                            color="primary"
+                            value={descriptionType}
+                            onChange={(value) => setDescriptionType(value as "private" | "public")}
+                            data={[
+                                { label: "Private", value: "private" },
+                                { label: "Public", value: "public" },
+                            ]}
+                        />
+                    </Group>
+                    <Box mt="xs">
+                        {descriptionType === "private" ? (
+                            <MarkdownText content={voting.description} />
+                        ) : voting.publicDescription && voting.publicDescription.trim().length > 0 ? (
+                            <MarkdownText content={voting.publicDescription} />
+                        ) : (
+                            <Text size="sm" c="dimmed" fs="italic">
+                                No public description available.
+                            </Text>
+                        )}
+                    </Box>
+                </>
+            );
+        }
+
+        // For non-committee members, only show public description if it exists and is not empty
+        return voting.publicDescription && voting.publicDescription.trim().length > 0 ? (
+            <MarkdownText content={voting.publicDescription} />
+        ) : null;
+    };
+
     return (
         <>
             <Card
@@ -83,19 +147,13 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                 radius="md"
                 className="voting-info"
                 data-active={voting.isActive}
-                style={
-                    voting.isActive
-                        ? {
-                            ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
-                        }
-                        : undefined
-                }>
+                style={getGradientStyle()}>
                 <Stack gap="lg">
                     <Group justify="space-between" align="flex-start">
                         <Stack gap={4}>
                             <Group align="center" gap="xs">
                                 <Title order={2}>{voting.title}</Title>
-                                {voting.isActive && user?.isCommittee && (
+                                {user?.isCommittee && (
                                     <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
                                         <FontAwesomeIcon icon="edit" />
                                     </ActionIcon>
@@ -153,10 +211,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </Group>
                     )}
 
-                    {user?.isCommittee || voting.isActive ? (
+                    {user?.isCommittee ? (
                         <>
                             <Divider />
-                            <MarkdownText content={voting.description} />
+                            {renderDescription()}
                             <Divider />
                             {voting.targetUser && (
                                 <>
@@ -193,7 +251,17 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 </Stack>
                             )}
                         </>
-                    ) : null}
+                    ) : (
+                        <>
+                            {voting.publicDescription && voting.publicDescription.trim().length > 0 && (
+                                <>
+                                    <Divider />
+                                    {renderDescription()}
+                                    <Divider />
+                                </>
+                            )}
+                        </>
+                    )}
 
                     {user?.isCommittee && (
                         <Group>

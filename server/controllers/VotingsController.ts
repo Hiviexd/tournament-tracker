@@ -424,17 +424,14 @@ class VotingsController {
     /** POST update voting */
     public async updateVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
-        const { title, description, duration, options } = req.body;
+        const { title, description, duration, options, publicDescription } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
-
-        if (!voting.isActive) {
-            return res.json({ error: "Cannot edit inactive votes!" });
-        }
 
         voting.title = title;
         voting.description = description;
         voting.duration = duration;
+        voting.publicDescription = publicDescription;
 
         // only update options when there is no votes
         if (!voting.votes.length) voting.options = options;

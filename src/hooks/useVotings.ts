@@ -79,6 +79,7 @@ export function useUpdateVoting(votingId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
         },
     });
 }

@@ -62,6 +62,7 @@ export interface IVoting extends Document {
     createdAt: Date;
     updatedAt: Date;
     isPublic: boolean;
+    publicDescription?: string;
 
     // virtuals
     deadline: Date;

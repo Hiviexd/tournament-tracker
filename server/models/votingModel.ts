@@ -28,6 +28,7 @@ const VotingSchema = new Schema<IVoting>(
         requiredVotes: { type: Number, default: 1 },
         attachments: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         isPublic: { type: Boolean, default: false },
+        publicDescription: { type: String },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
