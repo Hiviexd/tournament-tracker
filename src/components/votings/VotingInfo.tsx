@@ -154,9 +154,11 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             <Group align="center" gap="xs">
                                 <Title order={2}>{voting.title}</Title>
                                 {user?.isCommittee && (
-                                    <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
-                                        <FontAwesomeIcon icon="edit" />
-                                    </ActionIcon>
+                                    <Tooltip label="Edit vote" position="right">
+                                        <ActionIcon variant="subtle" color="info" onClick={openEditModal}>
+                                            <FontAwesomeIcon icon="edit" />
+                                        </ActionIcon>
+                                    </Tooltip>
                                 )}
                             </Group>
                             <Text size="sm" c="dimmed">
