@@ -26,6 +26,7 @@ export default function ResourcesFilters({ values, onChange, onCreateClick }: IP
         { value: "tool", label: "Tool" },
         { value: "guide", label: "Guide" },
         { value: "spreadsheet", label: "Spreadsheet" },
+        { value: "article", label: "Article" },
     ] as const;
 
     const handleChange = (key: keyof FilterValues, value: any) => {

@@ -44,6 +44,7 @@ export default function ResourcesCreateModal({ opened, onClose, defaultType = "c
         { value: "guide", label: "Guide" },
         { value: "tool", label: "Tool" },
         { value: "spreadsheet", label: "Spreadsheet" },
+        { value: "article", label: "Article" },
     ] as const;
 
     const handleSubmit = async (values) => {

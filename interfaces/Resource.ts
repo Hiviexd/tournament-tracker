@@ -1,7 +1,7 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
 
-export type ResourceCategory = "discord" | "tool" | "guide" | "spreadsheet";
+export type ResourceCategory = "discord" | "tool" | "guide" | "spreadsheet" | "article";
 
 export type ResourceType = "official" | "community";
 

@@ -10,6 +10,7 @@ const CATEGORY_ICONS: Record<ResourceCategory, IconProp> = {
     tool: "wrench",
     guide: "book",
     spreadsheet: "table",
+    article: "newspaper",
 };
 
 interface IProps {

@@ -46,12 +46,13 @@ class ResourcesController {
                             categoryOrder: {
                                 $switch: {
                                     branches: [
-                                        { case: { $eq: ["$category", "discord"] }, then: 1 },
-                                        { case: { $eq: ["$category", "spreadsheet"] }, then: 2 },
-                                        { case: { $eq: ["$category", "tool"] }, then: 3 },
-                                        { case: { $eq: ["$category", "guide"] }, then: 4 },
+                                        { case: { $eq: ["$category", "article"] }, then: 1 },
+                                        { case: { $eq: ["$category", "discord"] }, then: 2 },
+                                        { case: { $eq: ["$category", "spreadsheet"] }, then: 3 },
+                                        { case: { $eq: ["$category", "tool"] }, then: 4 },
+                                        { case: { $eq: ["$category", "guide"] }, then: 5 },
                                     ],
-                                    default: 5,
+                                    default: 6,
                                 },
                             },
                         },
