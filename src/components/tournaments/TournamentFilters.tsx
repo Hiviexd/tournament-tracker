@@ -56,18 +56,18 @@ export default function TournamentFilters({ values, onChange }: IProps) {
             <Stack gap="md">
                 <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     <TextInput
-                        placeholder="Tournament name..."
+                        placeholder="Search by tournament name..."
                         leftSection={<FontAwesomeIcon icon="search" />}
                         value={values.name}
                         onChange={(e) => handleChange("name", e.currentTarget.value)}
                     />
                     <UserSearch
-                        placeholder="Tournament host..."
+                        placeholder="Search by tournament host..."
                         leftSection={<FontAwesomeIcon icon="user" />}
                         onChange={handleHostSelect}
                     />
                     <Select
-                        placeholder="Game mode"
+                        placeholder="Filter by game mode"
                         leftSection={<FontAwesomeIcon icon="gamepad" />}
                         value={values.mode}
                         onChange={(value) => handleChange("mode", value as GameMode)}
@@ -78,7 +78,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
 
                 <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                     <Select
-                        placeholder="Type"
+                        placeholder="Filter by type"
                         leftSection={<FontAwesomeIcon icon="trophy" />}
                         value={values.type}
                         onChange={(value) => handleChange("type", value as TournamentType)}
@@ -86,7 +86,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         clearable
                     />
                     <Select
-                        placeholder="Status"
+                        placeholder="Filter by status"
                         leftSection={<FontAwesomeIcon icon="list" />}
                         value={values.status}
                         onChange={(value) => handleChange("status", value as TournamentStatus)}
@@ -94,7 +94,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         clearable
                     />
                     <Select
-                        placeholder="State"
+                        placeholder="Filter by state"
                         leftSection={<FontAwesomeIcon icon="clock" />}
                         value={values.state}
                         onChange={(value) => handleChange("state", value)}

@@ -50,7 +50,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
                 />
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Select
-                        placeholder="Category"
+                        placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
                         onChange={(value) => handleChange("category", value as LogCategory)}
@@ -58,7 +58,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
                         clearable
                     />
                     <Select
-                        placeholder="Type"
+                        placeholder="Filter by type"
                         leftSection={<FontAwesomeIcon icon="list" />}
                         value={values.type}
                         onChange={(value) => handleChange("type", value)}

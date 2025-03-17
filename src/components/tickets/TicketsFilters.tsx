@@ -53,7 +53,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                     // Ticket Filters
                     <>
                         <TextInput
-                            placeholder="Ticket title..."
+                            placeholder="Search by title..."
                             leftSection={<FontAwesomeIcon icon="search" />}
                             value={values.title}
                             onChange={(e) => handleChange("title", e.currentTarget.value)}
@@ -61,7 +61,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         />
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <Select
-                                placeholder="Committee"
+                                placeholder="Filter by assigned committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
@@ -69,7 +69,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 clearable
                             />
                             <Select
-                                placeholder="Status"
+                                placeholder="Filter by status"
                                 leftSection={<FontAwesomeIcon icon="rotate" />}
                                 value={values.status}
                                 onChange={(value) => handleChange("status", value)}
@@ -90,13 +90,13 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                     <>
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <UserSearch
-                                placeholder="Reported user..."
+                                placeholder="Search by reported user..."
                                 leftSection={<FontAwesomeIcon icon="user" />}
                                 onChange={(user) => handleChange("targetUser", user?.osuId.toString() || "")}
                                 width="100%"
                             />
                             <TextInput
-                                placeholder="Tournament name..."
+                                placeholder="Search by tournament name..."
                                 leftSection={<FontAwesomeIcon icon="trophy" />}
                                 value={values.targetTournament}
                                 onChange={(e) => handleChange("targetTournament", e.currentTarget.value)}
@@ -104,7 +104,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         </SimpleGrid>
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <Select
-                                placeholder="Committee"
+                                placeholder="Filter by assigned committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
                                 onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
@@ -112,7 +112,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 clearable
                             />
                             <Select
-                                placeholder="Status"
+                                placeholder="Filter by status"
                                 leftSection={<FontAwesomeIcon icon="rotate" />}
                                 value={values.status}
                                 onChange={(value) => handleChange("status", value)}

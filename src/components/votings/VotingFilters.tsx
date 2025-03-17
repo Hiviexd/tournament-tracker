@@ -50,7 +50,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
         <Card shadow="sm" p="md">
             <Stack align="stretch" w="100%">
                 <TextInput
-                    placeholder="Vote title..."
+                    placeholder="Search by title..."
                     leftSection={<FontAwesomeIcon icon="search" />}
                     value={values.title}
                     onChange={(e) => handleChange("title", e.currentTarget.value)}
@@ -58,7 +58,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                 />
                 <Group>
                     <Select
-                        placeholder="Category"
+                        placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
                         onChange={(value) => handleChange("category", value as VotingCategory)}
@@ -66,7 +66,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                         style={{ flex: 1, minWidth: 200 }}
                     />
                     <Select
-                        placeholder="Assigned Group"
+                        placeholder="Filter by assigned group"
                         leftSection={<FontAwesomeIcon icon="user-group" />}
                         value={values.assignedGroup}
                         onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
@@ -76,7 +76,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                     />
                     {user?.isCommittee && (
                         <Select
-                            placeholder="Status"
+                            placeholder="Filter by status"
                             leftSection={<FontAwesomeIcon icon="rotate" />}
                             value={values.status}
                             onChange={(value) => handleChange("status", value)}
@@ -88,7 +88,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                 </Group>
                 {user?.isCommittee && (
                     <Checkbox
-                        label="Only show votes that need my attention"
+                        label="Show only votes that need my attention"
                         checked={values.showNeedsAttention}
                         onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
                     />
