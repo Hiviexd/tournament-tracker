@@ -14,6 +14,7 @@ import Image from "@tiptap/extension-image";
 import { useEffect } from "react";
 import AutoSaveBadge from "../badges/AutoSaveBadge";
 import ImageControls from "./ImageControls";
+import { Extension } from "@tiptap/core";
 // import TableControls from "./TableControls";
 
 interface RichTextEditorProps {
@@ -27,6 +28,19 @@ interface RichTextEditorProps {
     maxHeight?: number;
     stickyOffset?: number;
 }
+
+// Manually override the markdown serialization to prevent escaping brackets
+const NoEscapeMarkdown = Extension.create({
+    name: "noEscapeMarkdown",
+
+    onCreate() {
+        const originalGetMarkdown = this.editor.storage.markdown.getMarkdown;
+        this.editor.storage.markdown.getMarkdown = () => {
+            const content = originalGetMarkdown();
+            return content.replace(/\\([[\]])/g, "$1");
+        };
+    },
+});
 
 /**
  * Rich text editor component
@@ -58,6 +72,7 @@ export default function RichTextEditor({
                 transformPastedText: true,
                 transformCopiedText: true,
             }),
+            NoEscapeMarkdown,
             Placeholder.configure({
                 placeholder,
             }),
