@@ -25,6 +25,7 @@ export default function ResourcesFilters({ values, onChange, onCreateClick }: IP
         { value: "discord", label: "Discord Server" },
         { value: "tool", label: "Tool" },
         { value: "guide", label: "Guide" },
+        { value: "spreadsheet", label: "Spreadsheet" },
     ] as const;
 
     const handleChange = (key: keyof FilterValues, value: any) => {

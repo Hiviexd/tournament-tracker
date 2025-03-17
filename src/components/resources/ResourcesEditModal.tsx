@@ -59,6 +59,7 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
         { value: "discord", label: "Discord Server" },
         { value: "guide", label: "Guide" },
         { value: "tool", label: "Tool" },
+        { value: "spreadsheet", label: "Spreadsheet" },
     ] as const;
 
     const handleSubmit = async (values) => {

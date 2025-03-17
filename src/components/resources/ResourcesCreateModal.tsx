@@ -43,6 +43,7 @@ export default function ResourcesCreateModal({ opened, onClose, defaultType = "c
         { value: "discord", label: "Discord Server" },
         { value: "guide", label: "Guide" },
         { value: "tool", label: "Tool" },
+        { value: "spreadsheet", label: "Spreadsheet" },
     ] as const;
 
     const handleSubmit = async (values) => {

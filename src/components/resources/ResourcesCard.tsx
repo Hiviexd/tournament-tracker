@@ -9,6 +9,7 @@ const CATEGORY_ICONS: Record<ResourceCategory, IconProp> = {
     discord: ["fab", "discord"],
     tool: "wrench",
     guide: "book",
+    spreadsheet: "table",
 };
 
 interface IProps {
