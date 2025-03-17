@@ -39,12 +39,34 @@ class ResourcesController {
             const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
             const [resources, total] = await Promise.all([
-                Resource.find(query)
-                    .populate(DEFAULT_POPULATE)
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(DEFAULT_LIMIT)
-                    .lean(),
+                Resource.aggregate([
+                    { $match: query },
+                    {
+                        $addFields: {
+                            categoryOrder: {
+                                $switch: {
+                                    branches: [
+                                        { case: { $eq: ["$category", "discord"] }, then: 1 },
+                                        { case: { $eq: ["$category", "spreadsheet"] }, then: 2 },
+                                        { case: { $eq: ["$category", "tool"] }, then: 3 },
+                                        { case: { $eq: ["$category", "guide"] }, then: 4 },
+                                    ],
+                                    default: 5,
+                                },
+                            },
+                        },
+                    },
+                    { $sort: { categoryOrder: 1, createdAt: 1 } },
+                    { $skip: skip },
+                    { $limit: DEFAULT_LIMIT },
+                    // Remove the temporary sorting field
+                    { $project: { categoryOrder: 0 } },
+                ])
+                    .exec()
+                    .then((resources) =>
+                        // Populate after aggregation
+                        Resource.populate(resources, DEFAULT_POPULATE)
+                    ),
                 Resource.countDocuments(query),
             ]);
 
