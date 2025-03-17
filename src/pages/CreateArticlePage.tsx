@@ -74,6 +74,7 @@ export default function CreateArticlePage() {
                         error={!type && "Type is required"}
                         allowDeselect={false}
                         withAsterisk
+                        disabled
                     />
 
                     <Switch
