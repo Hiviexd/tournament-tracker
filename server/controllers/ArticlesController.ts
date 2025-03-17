@@ -13,7 +13,7 @@ class ArticlesController {
             slug: { $regex: new RegExp(`^${slug}$`, "i") },
         };
 
-        if (!user?.isCommittee) {
+        if (!user?.isCommittee && !user?.isAdmin) {
             query.isPublic = true;
         }
 
@@ -31,7 +31,7 @@ class ArticlesController {
         const user = res.locals!.user;
 
         // Only committee members can access documentation
-        if (!user?.isCommittee) {
+        if (!user?.isCommittee && !user?.isAdmin) {
             return res.json({ error: "You don't have permission to view this" });
         }
 
