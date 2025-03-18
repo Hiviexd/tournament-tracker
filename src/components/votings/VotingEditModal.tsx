@@ -55,12 +55,6 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             },
             description: (value) => {
                 if (!value.trim()) return "Description is required";
-                if (value.length < 10) return "Description must be at least 10 characters";
-                if (value.length > 6000) return "Description cannot exceed 6000 characters";
-                return null;
-            },
-            publicDescription: (value) => {
-                if (value.length > 6000) return "Public description cannot exceed 6000 characters";
                 return null;
             },
             duration: (value) => {
