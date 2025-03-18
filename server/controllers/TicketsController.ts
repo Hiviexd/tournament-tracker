@@ -449,7 +449,7 @@ class TicketsController {
                     {
                         author: DiscordService.defaultWebhookAuthor(req.session),
                         color: webhookColors.white,
-                        description: `Updated thread ID for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
+                        description: `Updated webhook location for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
                         fields: [
                             {
                                 name: "New Location",
