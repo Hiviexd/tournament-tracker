@@ -32,6 +32,7 @@ export default function UserCard({ user, onSelect, static: isStatic = false }: I
                     zIndex: 0,
                 }}
             />
+            <div className="user-card-tint" />
             <div className="user-card-content">
                 <UserDisplay user={user} />
             </div>
