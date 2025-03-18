@@ -194,14 +194,14 @@ You can report either:
                             <>
                                 <TextInput
                                     label={form.values.assignedGroup === "cc" ? "Contest Name" : "Tournament Name"}
-                                    placeholder={form.values.assignedGroup === "cc" ? "Enter contest name" : "Enter tournament name"}
+                                    placeholder={form.values.assignedGroup === "cc" ? "Enter contest name..." : "Enter tournament name..."}
                                     {...form.getInputProps("targetTournamentName")}
                                     withAsterisk
                                     disabled={!user}
                                 />
                                 <TextInput
                                     label={form.values.assignedGroup === "cc" ? "Contest Forum URL" : "Tournament Forum URL"}
-                                    placeholder="Enter forum URL"
+                                    placeholder="https://osu.ppy.sh/community/forums/topics/..."
                                     {...form.getInputProps("targetTournamentLink")}
                                     withAsterisk
                                     disabled={!user}

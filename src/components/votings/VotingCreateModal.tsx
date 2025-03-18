@@ -242,13 +242,13 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         <>
                             <TextInput
                                 label="Tournament Name"
-                                placeholder="Enter tournament name"
+                                placeholder="Enter tournament name..."
                                 {...form.getInputProps("targetTournamentName")}
                                 withAsterisk
                             />
                             <TextInput
                                 label="Tournament Forum URL"
-                                placeholder="Enter forum URL"
+                                placeholder="https://osu.ppy.sh/community/forums/topics/..."
                                 {...form.getInputProps("targetTournamentLink")}
                                 withAsterisk
                             />
