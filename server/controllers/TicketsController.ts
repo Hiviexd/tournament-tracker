@@ -129,8 +129,8 @@ class TicketsController {
         if (type === "ticket" && (title.length < 5 || title.length > 80))
             return res.json({ error: "Title must be between 5 and 80 characters" });
 
-        if (message.length < 10 || message.length > 6000)
-            return res.json({ error: "Message must be between 10 and 6000 characters" });
+        if (message.length < 10 || message.length > 8000)
+            return res.json({ error: "Message must be between 10 and 8000 characters" });
 
         // construct report title
         let constructedTitle: string = title ? title.trim() : "";
@@ -266,8 +266,8 @@ class TicketsController {
             return res.json({ error: "Not authorized to add notes" });
         }
 
-        if (content.length < 10 || content.length > 6000) {
-            return res.json({ error: "Message must be between 10 and 6000 characters" });
+        if (content.length < 10 || content.length > 8000) {
+            return res.json({ error: "Message must be between 10 and 8000 characters" });
         }
 
         const newMessage = new Message({

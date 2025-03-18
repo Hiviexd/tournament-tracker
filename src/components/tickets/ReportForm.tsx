@@ -45,7 +45,7 @@ export default function ReportForm() {
             message: (value) => {
                 if (!value || !value.trim()) return "Message is required";
                 if (value.length < 10) return "Message must be at least 10 characters";
-                if (value.length > 6000) return "Message cannot exceed 6000 characters";
+                if (value.length > 8000) return "Message cannot exceed 8000 characters";
                 return null;
             },
             assignedGroup: (value) => (!value ? "Committee selection is required" : null),
@@ -216,7 +216,7 @@ You can report either:
                                 <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
                                     Message<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
                                 </Box>
-                                <TextLengthIndicator length={form.values.message.length} maxLength={6000} />
+                                <TextLengthIndicator length={form.values.message.length} maxLength={8000} />
                             </Box>
                             <TextEditor
                                 value={form.values.message}

@@ -28,7 +28,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
         if (message.length < 10) return "Message must be at least 10 characters";
-        if (message.length > 6000) return "Message cannot exceed 6000 characters";
+        if (message.length > 8000) return "Message cannot exceed 8000 characters";
         return null;
     };
 
@@ -86,7 +86,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                         <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
                             Message
                         </Box>
-                        <TextLengthIndicator length={content.length} maxLength={6000} />
+                        <TextLengthIndicator length={content.length} maxLength={8000} />
                     </Box>
                     <TextEditor
                         key={`${ticket.id}-${submissionCount}`}
