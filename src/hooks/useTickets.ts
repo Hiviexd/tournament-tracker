@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleMutationResponse } from "../api/helpers";
 
 // API
-import { getTickets, getTicket, createTicket, sendMessage, toggleStatus } from "../api/tickets";
+import { getTickets, getTicket, createTicket, sendMessage, toggleStatus, updateThreadId } from "../api/tickets";
 
 // Types
 import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
@@ -60,6 +60,20 @@ export function useToggleStatus(ticketId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleStatus(ticketId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+        },
+    });
+}
+
+export function useUpdateThreadId(ticketId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (threadId: string) => {
+            const response = await updateThreadId(ticketId, threadId);
             return handleMutationResponse(response);
         },
         onSuccess: () => {

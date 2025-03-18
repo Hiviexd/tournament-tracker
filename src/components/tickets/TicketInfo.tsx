@@ -1,4 +1,17 @@
-import { Card, Group, Stack, Text, Badge, Tooltip, Title, Anchor, Button } from "@mantine/core";
+import {
+    Card,
+    Group,
+    Stack,
+    Text,
+    Badge,
+    Tooltip,
+    Title,
+    Anchor,
+    Button,
+    Input,
+    ActionIcon,
+    Divider,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "../../../interfaces/Ticket";
 import UserLink from "../common/UserLink";
@@ -6,10 +19,12 @@ import UserGroupBadge from "../common/badges/UserGroupBadge";
 import DateBadge from "../common/badges/DateBadge";
 import UserCard from "../common/UserCard";
 import { IUser } from "../../../interfaces/User";
-import { useToggleStatus } from "../../hooks/useTickets";
+import { useToggleStatus, useUpdateThreadId } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import moment from "moment";
+import { useState } from "react";
+import config from "../../../config.json";
 
 interface IProps {
     ticket: ITicket;
@@ -17,7 +32,11 @@ interface IProps {
 
 export default function TicketInfo({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+    const [threadId, setThreadId] = useState(ticket.threadId);
+    const [isUpdatingThreadId, setIsUpdatingThreadId] = useState(false);
+
     const toggleStatusMutation = useToggleStatus(ticket._id);
+    const updateThreadIdMutation = useUpdateThreadId(ticket._id);
 
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
@@ -29,13 +48,20 @@ export default function TicketInfo({ ticket }: IProps) {
     };
 
     const handleToggleStatus = async () => {
-        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`)) return;
+        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`))
+            return;
         await toggleStatusMutation.mutateAsync();
     };
 
     const handleUserCardClick = (targetUser: IUser) => {
         window.open(`https://osu.ppy.sh/users/${targetUser.osuId}`, "_blank");
     };
+
+    const handleUpdateThreadId = async () => {
+        await updateThreadIdMutation.mutateAsync(threadId ?? "");
+        setIsUpdatingThreadId(false);
+    };
+
     return (
         <Card
             shadow="sm"
@@ -88,15 +114,61 @@ export default function TicketInfo({ ticket }: IProps) {
                     </Text>
                 )}
                 {user?.isCommittee && (
-                    <Group>
-                        <Button
-                            onClick={handleToggleStatus}
-                            loading={toggleStatusMutation.isPending}
-                            color={ticket.isActive ? "danger" : "warning"}
-                            leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
-                            {ticket.isActive ? "Close" : "Reopen"}
-                        </Button>
-                    </Group>
+                    <Stack gap="xs">
+                        <Divider my="xs" />
+                        <Group gap="xs">
+                            <Text size="sm" fw={700}>
+                                Webhook Location:
+                            </Text>
+                            {isUpdatingThreadId ? (
+                                <Input
+                                    placeholder="Thread ID..."
+                                    size="xs"
+                                    value={threadId}
+                                    onChange={(e) => setThreadId(e.target.value)}
+                                />
+                            ) : (
+                                <Text size="sm">
+                                    {ticket.threadId ? (
+                                        <Anchor
+                                            href={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId}`}
+                                            target="_blank">
+                                            {ticket.threadId}
+                                        </Anchor>
+                                    ) : (
+                                        <Text c="dimmed">#t-committee</Text>
+                                    )}
+                                </Text>
+                            )}
+                            {isUpdatingThreadId ? (
+                                <ActionIcon
+                                    size="sm"
+                                    variant="subtle"
+                                    color="success"
+                                    onClick={handleUpdateThreadId}
+                                    loading={updateThreadIdMutation.isPending}>
+                                    <FontAwesomeIcon icon="floppy-disk" size="sm" />
+                                </ActionIcon>
+                            ) : (
+                                <ActionIcon
+                                    size="sm"
+                                    color="info"
+                                    variant="subtle"
+                                    onClick={() => setIsUpdatingThreadId(true)}>
+                                    <FontAwesomeIcon icon="pen-to-square" size="sm" />
+                                </ActionIcon>
+                            )}
+                        </Group>
+                        <Group gap="xs">
+                            <Button
+                                onClick={handleToggleStatus}
+                                loading={toggleStatusMutation.isPending}
+                                color={ticket.isActive ? "danger" : "warning"}
+                                leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
+                                {ticket.isActive ? "Close" : "Reopen"}
+                            </Button>
+                        </Group>
+                    </Stack>
                 )}
             </Stack>
         </Card>

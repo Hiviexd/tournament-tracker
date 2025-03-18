@@ -30,3 +30,8 @@ export const toggleStatus = async (ticketId: string) => {
     const response = await axios.post(`/api/tickets/${ticketId}/toggleStatus`);
     return response.data;
 };
+
+export const updateThreadId = async (ticketId: string, threadId: string) => {
+    const response = await axios.post(`/api/tickets/${ticketId}/updateThreadId`, { threadId });
+    return response.data;
+};

@@ -11,6 +11,7 @@ const TicketSchema = new Schema(
         isActive: { type: Boolean, required: true, default: true },
         targetUser: { type: Schema.Types.ObjectId, ref: "User" },
         targetTournament: { type: Schema.Types.ObjectId, ref: "Tournament" },
+        threadId: { type: String },
 
         // temporary until tournaments model is used
         targetTournamentName: { type: String },

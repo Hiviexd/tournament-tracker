@@ -22,11 +22,15 @@
         "webhooks": {
             "main": {
                 "id": "",
-                "token": ""
+                "token": "",
+                "channelId": "",
+                "serverId": ""
             },
             "dev": {
                 "id": "",
-                "token": ""
+                "token": "",
+                "channelId": "",
+                "serverId": ""
             }
         }
     },

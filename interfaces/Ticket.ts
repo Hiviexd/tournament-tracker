@@ -31,6 +31,7 @@ export interface ITicket extends Document {
     isActive: boolean;
     targetUser?: IUser;
     targetTournament?: ITournament;
+    threadId?: string;
     createdAt: Date;
     updatedAt: Date;
 

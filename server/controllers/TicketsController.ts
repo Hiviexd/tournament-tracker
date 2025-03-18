@@ -349,16 +349,21 @@ class TicketsController {
             });
         }
 
-        await DiscordService.sendUserHighlightWebhook(Array.from(committeeMembers), [
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
-                description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
-                    config.baseUrl
-                }/${ticket.type}s/${ticket._id})`,
-                fields,
-            },
-        ]);
+        await DiscordService.sendUserHighlightWebhook(
+            Array.from(committeeMembers),
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
+                    description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${
+                        ticket.title
+                    }**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
+                    fields,
+                },
+            ],
+            "",
+            ticket.threadId
+        );
 
         const response = isNote ? "Added a note successfully!" : "Message sent successfully!";
 
@@ -399,15 +404,69 @@ class TicketsController {
         );
 
         // Discord
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
-                description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
-                    config.baseUrl
-                }/${ticket.type}s/${ticket._id})`,
-            },
-        ]);
+        await DiscordService.sendWebhook(
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
+                    description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
+                        config.baseUrl
+                    }/${ticket.type}s/${ticket._id})`,
+                },
+            ],
+            "",
+            undefined,
+            ticket.threadId
+        );
+    }
+
+    /** POST update thread ID */
+    public async updateThreadId(req: Request, res: Response) {
+        const user = res.locals!.user!;
+        const { ticketId } = req.params;
+        const { threadId } = req.body;
+
+        const ticket = await Ticket.findById(ticketId).orFail();
+
+        if (threadId !== ticket.threadId) {
+            ticket.threadId = threadId;
+            await ticket.save();
+
+            res.json({ message: "Thread ID updated successfully!" });
+
+            // Logger
+            await LogService.generate(
+                user._id,
+                `Updated thread ID for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${
+                    ticket._id
+                }) to "${threadId ?? "t-committee"}"`,
+                "ticket"
+            );
+
+            // Discord
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: webhookColors.white,
+                        description: `Updated thread ID for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
+                        fields: [
+                            {
+                                name: "New Location",
+                                value: `<#${
+                                    threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId
+                                }>`,
+                            },
+                        ],
+                    },
+                ],
+                "",
+                undefined,
+                ticket.threadId
+            );
+        } else {
+            res.json({ message: "Thread ID is already up to date!" });
+        }
     }
 }
 
