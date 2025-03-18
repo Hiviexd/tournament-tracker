@@ -1,4 +1,4 @@
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import session from "express-session";
@@ -29,9 +29,19 @@ app.use(handleCrawlers as express.RequestHandler);
 
 // settings/middlewares
 app.use(logger);
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 app.use(cookieParser());
+
+// Handle payload too large error
+const payloadErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    if (err?.type === "entity.too.large") {
+        return res.status(413).json({ error: "Request entity too large" });
+    }
+    next(err);
+};
+
+app.use(payloadErrorHandler);
 
 // database
 mongoose.connect(config.connection, {
