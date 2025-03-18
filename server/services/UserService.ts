@@ -17,7 +17,7 @@ class UserService {
         const groups = ["user"];
         const coverUrl = userResponse.cover.url;
         const country = userResponse.country;
-        const osuGroups = userResponse.groups.map((group) => group.id);
+        const osuGroups = userResponse.groups?.map((group) => group.id);
 
         let user = existingUser;
 
@@ -62,7 +62,7 @@ class UserService {
         }
 
         // Mark non-committee users in dev usergroup as admin
-        if (osuGroups.includes(11) && !user.isCommittee && !user.isAdmin) {
+        if (osuGroups?.includes(11) && !user.isCommittee && !user.isAdmin) {
             user.groups.push("admin");
             await user.save();
         }

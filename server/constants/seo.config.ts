@@ -10,11 +10,11 @@ interface SEORoute {
     isDynamic?: boolean;
     model?: string;
     modelId?: string;
-    getMetadata?: (data: any) => Omit<SEOMetadata, "title">;
+    getMetadata?: (data: any) => SEOMetadata;
 }
 
 interface SEOMetadata {
-    title: string;
+    title?: string;
     description: string;
     image?: string;
     ogSiteName?: string;

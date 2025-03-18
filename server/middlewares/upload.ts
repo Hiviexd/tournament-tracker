@@ -27,7 +27,7 @@ export const uploadMiddleware = multer({
 }).array("files", 5);
 
 export const handleUpload = (req: Request, res: Response, next: NextFunction): void => {
-    uploadMiddleware(req, res, (err) => {
+    uploadMiddleware(req, res as any, (err) => {
         if (err instanceof multer.MulterError) {
             res.status(400).json({ error: `Upload error: ${err.message}` });
             return;
