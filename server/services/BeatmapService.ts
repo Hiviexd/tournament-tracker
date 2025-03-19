@@ -12,6 +12,7 @@ type FlaggedArtists = {
     [key: string]: FlaggedArtistData;
 };
 
+// Reference: https://github.com/hburn7/mappool-compliance-checker/blob/master/src/validator.py
 export default class BeatmapService {
     private static readonly PARTIAL_STATUS = "partial";
     private static readonly DISALLOWED_STATUS = "disallowed";
@@ -122,6 +123,8 @@ export default class BeatmapService {
      * @returns True if the tags contains banned sources
      */
     private static tagsContainsBannedSource(beatmapset: IBeatmapset): boolean {
+        // This was a check for descriptions, but I went with tags instead since the former
+        // introduces a ton of overhead from the osu! api side (having to re-fetch Beatmapset for every Beatmap).
         const tags = beatmapset.tags?.toLowerCase() || "";
         return bannedSources.some((source) => tags.includes(source.toLowerCase()));
     }
