@@ -1,13 +1,13 @@
 import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
 import helpers from "../helpers";
-import { IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
+import { IBeatmap, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
 
 export default class OsuApiService {
     static isOsuResponseError(
-        errorResponse: IOsuAuthResponse | IOsuUser | ErrorResponse
+        errorResponse: IOsuAuthResponse | IOsuUser | IBeatmap | ErrorResponse
     ): errorResponse is ErrorResponse {
         return (errorResponse as ErrorResponse).error !== undefined;
     }
@@ -79,12 +79,21 @@ export default class OsuApiService {
         return await this.executeRequest(options);
     }
 
-    static async getUserInfo(
-        token: string,
-        userInput: string | number
-    ): Promise<IOsuUser | ErrorResponse> {
+    static async getUserInfo(token: string, userInput: string | number): Promise<IOsuUser | ErrorResponse> {
         const options: AxiosRequestConfig = {
             url: `https://osu.ppy.sh/api/v2/users/${userInput}`,
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        };
+
+        return await this.executeRequest(options);
+    }
+
+    static async getBeatmap(beatmapId: string, token: string): Promise<IBeatmap | ErrorResponse> {
+        const options: AxiosRequestConfig = {
+            url: `https://osu.ppy.sh/api/v2/beatmaps/${beatmapId}`,
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
