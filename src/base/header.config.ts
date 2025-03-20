@@ -99,7 +99,7 @@ export const routes: IRoute[] = [
                 title: "Mappool Compliance",
                 link: "/mappool-compliance",
                 icon: "check-circle",
-                permissions: ["user"],
+                permissions: [],
             },
         ],
     },

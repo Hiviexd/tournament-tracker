@@ -199,7 +199,7 @@ const routes: RouteConfig[] = [
         page: <MappoolCompliancePage />,
         title: "Mappool Compliance",
         icon: "check-circle",
-        permissions: ["user"],
+        permissions: [],
     },
     {
         path: "*",
