@@ -53,7 +53,7 @@ export const seoRoutes: SEORoute[] = [
         model: "Voting",
         modelId: "votingId",
         getMetadata: (voting) => ({
-            description: `${_.capitalize(voting.category)} vote by ${voting.author.username}`,
+            description: `View this ${voting.isActive ? "active" : "concluded"} ${voting.category} vote.`,
         }),
     },
     {
@@ -116,7 +116,22 @@ export const seoRoutes: SEORoute[] = [
     {
         path: "/assets-previewer",
         name: "Assets Previewer",
-        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website!",
+        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website.",
+    },
+    {
+        path: "/resources/official",
+        name: "Official Resources",
+        description: "Access the official resources for tournaments.",
+    },
+    {
+        path: "/resources/community",
+        name: "Community Resources",
+        description: "Browse a compendium of tournament resources created by the community.",
+    },
+    {
+        path: "/mappool-compliance",
+        name: "Mappool Compliance",
+        description: "Verify if your mappool is compliant with the osu! content usage artist permissions.",
     },
 ];
 
