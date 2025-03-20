@@ -182,3 +182,8 @@ export interface IBeatmapCovers {
     slimcover: string;
     "slimcover@2x": string;
 }
+
+export interface IBeatmapResponse {
+    beatmaps: IBeatmap[];
+    error?: string;
+}

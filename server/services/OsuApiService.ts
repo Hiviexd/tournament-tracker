@@ -1,13 +1,13 @@
 import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
 import helpers from "../helpers";
-import { IBeatmap, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
+import { IBeatmap, IBeatmapResponse, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
 
 export default class OsuApiService {
     static isOsuResponseError(
-        errorResponse: IOsuAuthResponse | IOsuUser | IBeatmap | ErrorResponse
+        errorResponse: IOsuAuthResponse | IOsuUser | IBeatmap | IBeatmap[] | ErrorResponse
     ): errorResponse is ErrorResponse {
         return (errorResponse as ErrorResponse).error !== undefined;
     }
@@ -97,6 +97,20 @@ export default class OsuApiService {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
+            },
+        };
+
+        return await this.executeRequest(options);
+    }
+
+    // gets up to 50 beatmaps at a time, passed via an ids[] query parameter
+    static async getBeatmaps(beatmapIds: string[], token: string): Promise<IBeatmapResponse> {
+        const options: AxiosRequestConfig = {
+            url: `https://osu.ppy.sh/api/v2/beatmaps`,
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+                ids: beatmapIds,
             },
         };
 
