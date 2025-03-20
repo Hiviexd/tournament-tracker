@@ -15,3 +15,8 @@ export const updateResource = async (resourceId: string, resourceData: Partial<I
     const response = await axios.post(`/api/resources/${resourceId}/edit`, resourceData);
     return response.data;
 };
+
+export const deleteResource = async (resourceId: string) => {
+    const response = await axios.post(`/api/resources/${resourceId}/delete`);
+    return response.data;
+};

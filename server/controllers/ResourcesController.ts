@@ -167,6 +167,28 @@ class ResourcesController {
             return res.json({ error: "Internal server error" });
         }
     }
+
+    /** POST delete resource */
+    public async delete(req: Request, res: Response) {
+        try {
+            const user = res.locals!.user!;
+            const { id } = req.params;
+
+            const resource = await Resource.findById(id);
+            if (!resource) {
+                return res.json({ error: "Resource not found" });
+            }
+
+            await resource.delete();
+
+            await LogService.generate(user._id, `Deleted resource: **${resource.title}**`, "resource");
+
+            return res.json({ message: "Resource deleted successfully!" });
+        } catch (error) {
+            console.error(error);
+            return res.json({ error: "Internal server error" });
+        }
+    }
 }
 
 export default new ResourcesController();

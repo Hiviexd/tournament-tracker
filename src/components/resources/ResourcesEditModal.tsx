@@ -1,8 +1,8 @@
-import { Modal, TextInput, Select, Stack, Button, Textarea } from "@mantine/core";
+import { Modal, TextInput, Select, Stack, Button, Textarea, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IResource, ResourceCategory } from "../../../interfaces/Resource";
-import { useUpdateResource } from "../../hooks/useResources";
+import { useDeleteResource, useUpdateResource } from "../../hooks/useResources";
 import UserSearch from "../common/UserSearch";
 import { useEffect } from "react";
 
@@ -14,6 +14,7 @@ interface IProps {
 
 export default function ResourcesEditModal({ opened, onClose, resource }: IProps) {
     const updateResourceMutation = useUpdateResource(resource?._id || "");
+    const deleteResourceMutation = useDeleteResource(resource?._id || "");
 
     const form = useForm({
         initialValues: {
@@ -84,6 +85,17 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
         }
     };
 
+    const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this resource?")) {
+            try {
+                await deleteResourceMutation.mutateAsync();
+                onClose();
+            } catch (error) {
+                console.error("Failed to delete resource:", error);
+            }
+        }
+    };
+
     return (
         <Modal opened={opened} onClose={onClose} title="Edit Resource" size="lg">
             <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -116,12 +128,23 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
                         {...form.getInputProps("category")}
                     />
                     <TextInput withAsterisk label="Link" placeholder="https://..." {...form.getInputProps("link")} />
-                    <Button
-                        type="submit"
-                        loading={updateResourceMutation.isPending}
-                        leftSection={<FontAwesomeIcon icon="save" />}>
-                        Save Changes
-                    </Button>
+                    <Group justify="space-between">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            color="danger"
+                            leftSection={<FontAwesomeIcon icon="trash" />}
+                            onClick={handleDelete}
+                            loading={deleteResourceMutation.isPending}>
+                            Delete
+                        </Button>
+                        <Button
+                            type="submit"
+                            loading={updateResourceMutation.isPending}
+                            leftSection={<FontAwesomeIcon icon="save" />}>
+                            Save Changes
+                        </Button>
+                    </Group>
                 </Stack>
             </form>
         </Modal>
