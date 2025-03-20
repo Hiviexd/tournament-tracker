@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Divider } from "@mantine/core";
+import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Divider, Alert } from "@mantine/core";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ResourceCategory, ResourceType, IResource } from "../../interfaces/Resource";
@@ -11,6 +11,7 @@ import ResourcesCreateModal from "../components/resources/ResourcesCreateModal";
 import ResourcesEditModal from "../components/resources/ResourcesEditModal";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
+import MarkdownText from "../components/common/MarkdownText";
 
 interface FilterValues {
     search: string;
@@ -103,6 +104,13 @@ export default function ResourcesPage() {
 
     return (
         <Stack gap="md">
+            {type === "community" && (
+                <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
+                    <MarkdownText
+                        content={`If you want a resource to be added here, please contact a member of the Tournament Committee, or open [**a ticket**](/tickets/create).`}
+                    />
+                </Alert>
+            )}
             <ResourcesFilters values={searchInput} onChange={handleFilterChange} onCreateClick={openCreate} />
             <Divider />
 
