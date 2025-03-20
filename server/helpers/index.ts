@@ -1,4 +1,4 @@
-import { IOsuAuthResponse } from "../../interfaces/OsuApi";
+import { IOsuAuthResponse, IBeatmapWithNotes } from "../../interfaces/OsuApi";
 import moment from "moment";
 import { Session } from "express-session";
 import { IDiscordField } from "../../interfaces/Discord";
@@ -156,10 +156,10 @@ function generateBadgeCommand(osuId: number, years: number, badgeValue: number, 
 }
 
 /**
-     * Sanitizes user input string into a set of beatmap IDs
-     * @param input The input string to sanitize
-     * @returns A set of beatmap IDs
-     */
+ * Sanitizes user input string into a set of beatmap IDs
+ * @param input The input string to sanitize
+ * @returns A set of beatmap IDs
+ */
 function sanitizeBeatmapInput(input: string): Set<number> {
     const ids = new Set<number>();
 
@@ -196,6 +196,17 @@ function sanitizeBeatmapInput(input: string): Set<number> {
     return ids;
 }
 
+/**
+ * Sorts beatmaps by their status
+ * * Order: graveyard -> pending -> loved -> approved -> qualified -> ranked
+ * @param beatmaps Beatmaps to sort
+ * @returns Sorted beatmaps
+ */
+function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
+    const statusOrder = ["graveyard", "pending", "loved", "approved", "qualified", "ranked"];
+    return beatmaps.sort((a, b) => statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status));
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -212,4 +223,5 @@ export default {
     getYearsFromDays,
     generateBadgeCommand,
     sanitizeBeatmapInput,
+    sortBeatmapsByStatus,
 };

@@ -108,6 +108,10 @@ export interface IBeatmap {
     owners: IBeatmapOwner[];
 }
 
+export interface IBeatmapWithNotes extends IBeatmap {
+    notes?: string | null;
+}
+
 export interface IBeatmapOwner {
     id: number;
     username: string;

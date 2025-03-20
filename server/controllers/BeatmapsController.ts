@@ -2,12 +2,9 @@ import { Request, Response } from "express";
 import BeatmapService from "../services/BeatmapService";
 import OsuApiService from "../services/OsuApiService";
 import OsuBotService from "../services/OsuBotService";
-import { IBeatmap } from "../../interfaces/OsuApi";
+import { IBeatmap, IBeatmapWithNotes } from "../../interfaces/OsuApi";
 import helpers from "../helpers";
 
-interface IBeatmapWithNotes extends IBeatmap {
-    notes: string | null;
-}
 
 class BeatmapsController {
     /** POST check mappool compliance */
@@ -23,9 +20,9 @@ class BeatmapsController {
         }
 
         // Fetch and categorize all beatmaps
-        const allowed: IBeatmap[] = [];
-        const partial: IBeatmapWithNotes[] = [];
-        const disallowed: IBeatmap[] = [];
+        let allowed: IBeatmap[] = [];
+        let partial: IBeatmapWithNotes[] = [];
+        let disallowed: IBeatmap[] = [];
         const errors: string[] = [];
 
         const botToken = await OsuBotService.getPublicBotToken();
@@ -66,6 +63,11 @@ class BeatmapsController {
                 }
             }
         }
+
+        // sort beatmaps in each array by their status
+        allowed = helpers.sortBeatmapsByStatus(allowed);
+        partial = helpers.sortBeatmapsByStatus(partial);
+        disallowed = helpers.sortBeatmapsByStatus(disallowed);
 
         res.json({
             message: "Beatmaps checked successfully!",
