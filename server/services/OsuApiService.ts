@@ -6,9 +6,7 @@ import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
 
 export default class OsuApiService {
-    static isOsuResponseError(
-        errorResponse: IOsuAuthResponse | IOsuUser | IBeatmap | IBeatmap[] | ErrorResponse
-    ): errorResponse is ErrorResponse {
+    static isOsuResponseError<T>(errorResponse: T | ErrorResponse): errorResponse is ErrorResponse {
         return (errorResponse as ErrorResponse).error !== undefined;
     }
 
