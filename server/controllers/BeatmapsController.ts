@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import BeatmapService from "../services/BeatmapService";
 import OsuApiService from "../services/OsuApiService";
+import OsuBotService from "../services/OsuBotService";
 import { IBeatmap } from "../../interfaces/OsuApi";
 import helpers from "../helpers";
 
@@ -8,7 +9,6 @@ interface IBeatmapWithNotes extends IBeatmap {
     notes: string | null;
 }
 
-// TODO: use osu! bot credentials for the api request, remove auth middleware if so, add rate limiting
 class BeatmapsController {
     /** POST check mappool compliance */
     public async checkMappoolCompliance(req: Request, res: Response) {
@@ -28,10 +28,16 @@ class BeatmapsController {
         const disallowed: IBeatmap[] = [];
         const errors: string[] = [];
 
+        const botToken = await OsuBotService.getPublicBotToken();
+
+        if (OsuApiService.isOsuResponseError(botToken)) {
+            return res.json({ error: "Failed to get osu! API token" });
+        }
+
         // get beatmaps in batches of 50
         for (let i = 0; i < beatmapIds.size; i += 50) {
             const batch = Array.from(beatmapIds).slice(i, i + 50);
-            const beatmapsResponse = await OsuApiService.getBeatmaps(batch.map(String), req.session.accessToken!);
+            const beatmapsResponse = await OsuApiService.getBeatmaps(batch.map(String), botToken as string);
 
             await helpers.delay(500);
 
