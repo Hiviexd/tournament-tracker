@@ -63,7 +63,7 @@ const features: Feature[] = [
     {
         icon: "users",
         title: "Community Resources",
-        description: "Browse a compendium of community resources for tournaments",
+        description: "Browse a compendium of tournament resources created by the community",
         link: "/resources/community",
     },
 ];
