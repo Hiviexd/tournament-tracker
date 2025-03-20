@@ -16,6 +16,7 @@ import DocumentationListPage from "../pages/DocumentationListPage";
 import CreateArticlePage from "../pages/CreateArticlePage";
 import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
 import ResourcesPage from "../pages/ResourcesPage";
+import MappoolCompliancePage from "../pages/MappoolCompliancePage";
 
 interface RouteConfig {
     path: string;
@@ -191,6 +192,13 @@ const routes: RouteConfig[] = [
         page: <AssetsPreviewerPage />,
         title: "Assets Previewer",
         icon: "images",
+        permissions: [],
+    },
+    {
+        path: "/mappool-compliance",
+        page: <MappoolCompliancePage />,
+        title: "Mappool Compliance",
+        icon: "check-circle",
         permissions: [],
     },
     {

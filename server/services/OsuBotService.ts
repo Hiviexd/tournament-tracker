@@ -16,6 +16,15 @@ export default class OsuBotService extends OsuApiService {
         token: "",
     };
 
+    private static publicTokenInfo: TokenInfo = {
+        expiresAt: null,
+        token: "",
+    };
+
+    /**
+     * Gets a token for the bot with `delegate`, `chat.write`, and `chat.write_manage` scopes
+     * @returns The bot token
+     */
     private static async getBotToken(): Promise<string | ErrorResponse> {
         // Return existing token if it's still valid
         if (this.tokenInfo.expiresAt && this.tokenInfo.expiresAt > new Date()) {
@@ -48,15 +57,46 @@ export default class OsuBotService extends OsuApiService {
     }
 
     /**
+     * Gets a token for the bot with `public` scope
+     * @returns The bot token
+     */
+    public static async getPublicBotToken(): Promise<string | ErrorResponse> {
+        if (this.publicTokenInfo.expiresAt && this.publicTokenInfo.expiresAt > new Date()) {
+            return this.publicTokenInfo.token;
+        }
+
+        const options: AxiosRequestConfig = {
+            url: "https://osu.ppy.sh/oauth/token",
+            method: "POST",
+            data: {
+                grant_type: "client_credentials",
+                client_id: config.osuBot.id,
+                client_secret: config.osuBot.secret,
+                scope: "public",
+            },
+        };
+
+        const response = await this.executeRequest(options);
+
+        if (OsuApiService.isOsuResponseError(response)) {
+            return response;
+        }
+
+        this.publicTokenInfo = {
+            expiresAt: new Date(Date.now() + response.expires_in * 1000),
+            token: response.access_token,
+        };
+
+        return response.access_token;
+    }
+
+    /**
      * Sends an announcement to specified users through the osu! chat
      * @param userIds - Array of osu! user IDs to send the announcement to
      * @param message - The message object containing channel info and content
      * @returns true if successful, ErrorResponse if failed
      */
-    public static async sendAnnouncement(
-        userIds: number[],
-        message: IOsuBotMessage
-    ): Promise<true | ErrorResponse> {
+    public static async sendAnnouncement(userIds: number[], message: IOsuBotMessage): Promise<true | ErrorResponse> {
         const token = await this.getBotToken();
 
         if (typeof token !== "string") {

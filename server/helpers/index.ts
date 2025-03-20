@@ -1,4 +1,4 @@
-import { IOsuAuthResponse } from "../../interfaces/OsuApi";
+import { IOsuAuthResponse, IBeatmapWithNotes } from "../../interfaces/OsuApi";
 import moment from "moment";
 import { Session } from "express-session";
 import { IDiscordField } from "../../interfaces/Discord";
@@ -155,6 +155,58 @@ function generateBadgeCommand(osuId: number, years: number, badgeValue: number, 
     return command.trim();
 }
 
+/**
+ * Sanitizes user input string into a set of beatmap IDs
+ * @param input The input string to sanitize
+ * @returns A set of beatmap IDs
+ */
+function sanitizeBeatmapInput(input: string): Set<number> {
+    const ids = new Set<number>();
+
+    // Split the input by commas, spaces, tabs, or new lines
+    const parts = input
+        .replace(",", " ")
+        .replace("\t", " ")
+        .replace("\n", " ")
+        .replace("#osu", "")
+        .replace("#taiko", "")
+        .replace("#fruits", "")
+        .replace("#mania", "")
+        .split(" ")
+        .filter((part) => part.length > 0);
+
+    for (const part of parts) {
+        try {
+            // Try to convert each part to an integer
+            let processedPart = part;
+            if (part.includes("/")) {
+                processedPart = part.split("/").pop() || "";
+            }
+
+            const id = parseInt(processedPart);
+            if (!isNaN(id)) {
+                ids.add(id);
+            }
+        } catch {
+            // If any part is not an integer, return an empty set
+            return new Set();
+        }
+    }
+
+    return ids;
+}
+
+/**
+ * Sorts beatmaps by their status
+ * * Order: graveyard -> pending -> loved -> approved -> qualified -> ranked
+ * @param beatmaps Beatmaps to sort
+ * @returns Sorted beatmaps
+ */
+function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
+    const statusOrder = ["graveyard", "pending", "loved", "approved", "qualified", "ranked"];
+    return beatmaps.sort((a, b) => statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status));
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -170,4 +222,6 @@ export default {
     delay,
     getYearsFromDays,
     generateBadgeCommand,
+    sanitizeBeatmapInput,
+    sortBeatmapsByStatus,
 };
