@@ -42,6 +42,30 @@ const features: Feature[] = [
         link: "/tournaments",
         disabled: true,
     },
+    {
+        icon: "images",
+        title: "Assets Previewer",
+        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website",
+        link: "/assets-previewer",
+    },
+    {
+        icon: "check-circle",
+        title: "Mappool Compliance",
+        description: "Verify if your mappool is compliant with the osu! content usage artist permissions",
+        link: "/mappool-compliance",
+    },
+    {
+        icon: "file-alt",
+        title: "Official Resources",
+        description: "Access the official resources for tournaments",
+        link: "/resources/official",
+    },
+    {
+        icon: "users",
+        title: "Community Resources",
+        description: "Browse a compendium of community resources for tournaments",
+        link: "/resources/community",
+    },
 ];
 
 export default function HomePage() {
