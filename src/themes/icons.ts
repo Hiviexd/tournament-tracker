@@ -75,6 +75,13 @@ import {
     faCheckToSlot,
     faImages,
     faWrench,
+    faCheckCircle,
+    faTimesCircle,
+    faQuestionCircle,
+    faQuestion,
+    faHeart,
+    faCheckDouble,
+    faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -154,5 +161,12 @@ export default function loadIcons() {
         faCheckToSlot,
         faImages,
         faWrench,
+        faCheckCircle,
+        faTimesCircle,
+        faQuestionCircle,
+        faQuestion,
+        faHeart,
+        faCheckDouble,
+        faChevronUp,
     );
 }
