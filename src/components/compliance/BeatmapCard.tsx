@@ -66,8 +66,15 @@ export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps)
                 </Text>
 
                 {notes && (
-                    <Text size="sm" c="yellow" mt="xs" lineClamp={2}>
-                        Note: {notes}
+                    <Text size="sm" c="yellow" lineClamp={2}>
+                        <FontAwesomeIcon icon="circle-info" /> {notes}
+                    </Text>
+                )}
+
+                {["graveyard", "pending", "wip"].includes(beatmap.beatmapset.status) && (
+                    <Text size="sm" c="orange" lineClamp={2}>
+                        <FontAwesomeIcon icon="triangle-exclamation" /> Double check Graveyard/Pending beatmaps
+                        manually.
                     </Text>
                 )}
             </Stack>
