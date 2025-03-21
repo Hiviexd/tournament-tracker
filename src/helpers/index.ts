@@ -196,6 +196,15 @@ function easingOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
 }
 
+/**
+ * Appends a count to a word and pluralizes it if necessary
+ * @param count Count of the word
+ * @param word Word to append the count to
+ */
+function countToWord(count: number, word: string) {
+    return count === 1 ? `${count} ${word}` : `${count} ${word}s`;
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
@@ -207,4 +216,5 @@ export default {
     generateBadgeCommand,
     easingOutBounce,
     easingOutCubic,
+    countToWord,
 };
