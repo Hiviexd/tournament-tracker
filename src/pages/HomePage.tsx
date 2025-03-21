@@ -18,9 +18,16 @@ interface Feature {
 
 const features: Feature[] = [
     {
+        icon: "trophy",
+        title: "Official Support Status",
+        description: "View the official support status of ongoing tournaments",
+        link: "/tournaments",
+        disabled: true,
+    },
+    {
         icon: "poll-h",
         title: "Votes",
-        description: "View concluded committee votes that have been made public",
+        description: "Access concluded committee votes that have been made public",
         link: "/votes",
     },
     {
@@ -32,15 +39,8 @@ const features: Feature[] = [
     {
         icon: "paper-plane",
         title: "Tickets",
-        description: "Create and browse through the compendium of tickets created by users",
+        description: "Create and browse the compendium of tickets created by users",
         link: "/tickets",
-    },
-    {
-        icon: "trophy",
-        title: "Official Support Status",
-        description: "Browse and view the official support status of tournaments",
-        link: "/tournaments",
-        disabled: true,
     },
     {
         icon: "images",
