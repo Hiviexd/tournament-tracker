@@ -12,6 +12,7 @@ import {
     Popover,
     Mark,
     Highlight,
+    Alert,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,6 +21,7 @@ import { IBeatmap } from "../../interfaces/OsuApi";
 import BeatmapCard from "../components/compliance/BeatmapCard";
 import ResultSection from "../components/compliance/ResultSection";
 import MarkdownText from "../components/common/MarkdownText";
+import helpers from "../helpers";
 
 interface IBeatmapWithNotes extends IBeatmap {
     notes: string | null;
@@ -46,6 +48,37 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
     const handleSubmit = () => {
         if (!input.trim()) return;
         checkCompliance();
+    };
+
+    const statusAlert = (complianceData: ComplianceData) => {
+        if (complianceData.disallowed.length === 0 && complianceData.partial.length === 0) {
+            return (
+                <Alert
+                    color="success"
+                    icon={<FontAwesomeIcon icon="check-circle" />}
+                    title="No disallowed beatmaps found! 🥳"
+                />
+            );
+        }
+
+        return (
+            <Stack gap="sm">
+                {complianceData.disallowed.length > 0 && (
+                    <Alert
+                        color="danger"
+                        icon={<FontAwesomeIcon icon="times-circle" />}
+                        title={`Found ${helpers.countToWord(complianceData.disallowed.length, "disallowed beatmap")}!`}
+                    />
+                )}
+                {complianceData.partial.length > 0 && (
+                    <Alert
+                        color="warning"
+                        icon={<FontAwesomeIcon icon="exclamation-circle" />}
+                        title={`Found ${helpers.countToWord(complianceData.partial.length, "partially disallowed beatmap")}!`}
+                    />
+                )}
+            </Stack>
+        );
     };
 
     const LoadingState = () => (
@@ -124,6 +157,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
             ) : (
                 complianceData && (
                     <Stack gap="lg">
+                        {statusAlert(complianceData)}
                         {complianceData.errors.length > 0 && (
                             <ResultSection
                                 title="Failed to Check"
