@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 
 // components
 import Header from "../components/common/Header";
-import MobileHeader from "../components/common/header/MobileHeader";
+import MobileHeader from "../components/common/MobileHeader";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
