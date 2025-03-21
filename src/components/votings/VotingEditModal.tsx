@@ -147,7 +147,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                         />
                     )}
                     <Box>
-                        {voting.isActive ? (
+                        {voting.isActive && (
                             <>
                                 <Box
                                     mb={5}
@@ -172,37 +172,33 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                     </Box>
                                 )}
                             </>
-                        ) : (
-                            <>
-                                <Box mb={5} style={{ display: "flex", gap: 5, alignItems: "center" }}>
-                                    <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
-                                        Public Description
-                                    </Box>
-                                    <Button size="xs" variant="subtle" onClick={handleLoadPrivateDescription}>
-                                        Load private description
-                                    </Button>
-                                </Box>
-                                <Text size="xs" c="dimmed" mb="md">
-                                    This description will be shown to the public after the vote is concluded and
-                                    published.
-                                </Text>
-                                <TextEditor
-                                    key={editorKey}
-                                    value={form.values.publicDescription}
-                                    onChange={(value) => form.setFieldValue("publicDescription", value)}
-                                    placeholder="Enter public description"
-                                    minHeight={120}
-                                    stickyOffset={60}
-                                    className={form.errors.publicDescription ? "error" : ""}
-                                    autoSaveKey={publicDescriptionAutoSaveKey}
-                                    style={{ flex: "1 1 auto", minHeight: 120 }}
-                                />
-                                {form.errors.publicDescription && (
-                                    <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
-                                        {form.errors.publicDescription}
-                                    </Box>
-                                )}
-                            </>
+                        )}
+                        <Box mt={10} style={{ display: "flex", gap: 5, alignItems: "center" }}>
+                            <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                Public Description
+                            </Box>
+                            <Button size="xs" variant="subtle" onClick={handleLoadPrivateDescription}>
+                                Load private description
+                            </Button>
+                        </Box>
+                        <Text size="xs" c="dimmed" mb="md">
+                            This description will be shown to the public after the vote is concluded and published.
+                        </Text>
+                        <TextEditor
+                            key={editorKey}
+                            value={form.values.publicDescription}
+                            onChange={(value) => form.setFieldValue("publicDescription", value)}
+                            placeholder="Enter public description"
+                            minHeight={120}
+                            stickyOffset={60}
+                            className={form.errors.publicDescription ? "error" : ""}
+                            autoSaveKey={publicDescriptionAutoSaveKey}
+                            style={{ flex: "1 1 auto", minHeight: 120 }}
+                        />
+                        {form.errors.publicDescription && (
+                            <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                {form.errors.publicDescription}
+                            </Box>
                         )}
                     </Box>
 
