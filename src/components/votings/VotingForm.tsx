@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, Stack, Title, Button, Group, Box, Badge } from "@mantine/core";
+import { Card, Stack, Title, Button, Group, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
@@ -12,6 +12,7 @@ import VariableVoteInput from "./votes/VariableVoteInput";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
+import VoteStatusBanner from "../common/banners/VoteStatusBanner";
 
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
 
@@ -27,7 +28,6 @@ export default function VotingForm({ voting, user }: IProps) {
     const [comment, setComment] = useState(userVote?.comment ?? "");
     const [voteData, setVoteData] = useState<VoteType>(() => helpers.getInitialVoteData(voting, userVote));
     const autoSaveKey = `voting-comment-${voting._id}`;
-    const userHasVoted = voting.votes.some((vote) => vote.author && vote.author._id === user._id);
 
     const isCommentRequired = useMemo(() => {
         switch (voteData.type) {
@@ -101,13 +101,10 @@ export default function VotingForm({ voting, user }: IProps) {
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="lg">
+                <VoteStatusBanner voting={voting} user={user} />
+
                 <Group gap="xs" align="baseline">
                     <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
-                    {userHasVoted && (
-                        <Badge size="sm" color="info" variant="light" leftSection={<FontAwesomeIcon icon="check-to-slot" />}>
-                            Voted
-                        </Badge>
-                    )}
                 </Group>
 
                 {renderVoteInput()}
