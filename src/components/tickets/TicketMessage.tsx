@@ -60,7 +60,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                         </Menu.Target>
                         <Menu.Dropdown>
                             <Menu.Item leftSection={<FontAwesomeIcon icon="copy" />} onClick={handleCopyMessage}>
-                                Copy message
+                                Copy Message
                             </Menu.Item>
                         </Menu.Dropdown>
                     </Menu>
