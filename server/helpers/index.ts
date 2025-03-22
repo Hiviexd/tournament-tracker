@@ -3,6 +3,7 @@ import moment from "moment";
 import { Session } from "express-session";
 import { IDiscordField } from "../../interfaces/Discord";
 import { IAttachment } from "../../interfaces/Attachment";
+import { execSync } from "child_process";
 
 function setSession(session: Session, response: IOsuAuthResponse) {
     // set the cookie's maxAge to 7 days
@@ -207,6 +208,18 @@ function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
     return beatmaps.sort((a, b) => statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status));
 }
 
+/**
+ * Get the git hash of the current commit
+ * @returns The git hash of the current commit
+ */
+function getGitHash() {
+    try {
+        return execSync("git rev-parse HEAD").toString().trim();
+    } catch (error) {
+        return "unknown";
+    }
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -224,4 +237,5 @@ export default {
     generateBadgeCommand,
     sanitizeBeatmapInput,
     sortBeatmapsByStatus,
+    getGitHash,
 };

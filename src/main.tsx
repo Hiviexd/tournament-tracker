@@ -5,6 +5,7 @@ import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import ReactScan from "./base/ReactScan";
+import VersionChecker from "./base/VersionChecker";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                     <Router>
                         <AuthRouter />
                     </Router>
+                    <VersionChecker />
                 </MantineProvider>
             </QueryClientProvider>
         </StateProvider>

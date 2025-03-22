@@ -80,6 +80,7 @@ import articlesRouter from "./routers/articlesRouter";
 import devRouter from "./routers/devRouter";
 import resourcesRouter from "./routers/resourcesRouter";
 import beatmapsRouter from "./routers/beatmapsRouter";
+import versionRouter from "./routers/versionRouter";
 
 // setup api routes
 const apiRouter = express.Router();
@@ -94,6 +95,7 @@ apiRouter.use("/articles", articlesRouter);
 apiRouter.use("/dev", devRouter);
 apiRouter.use("/resources", resourcesRouter);
 apiRouter.use("/beatmaps", beatmapsRouter);
+apiRouter.use("/version", versionRouter);
 
 app.use("/api", apiRouter);
 
