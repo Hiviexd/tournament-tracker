@@ -82,6 +82,7 @@ import {
     faHeart,
     faCheckDouble,
     faChevronUp,
+    faEllipsisVertical,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -168,5 +169,6 @@ export default function loadIcons() {
         faHeart,
         faCheckDouble,
         faChevronUp,
+        faEllipsisVertical,
     );
 }

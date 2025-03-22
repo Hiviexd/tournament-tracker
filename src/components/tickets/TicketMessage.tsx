@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert, Text, ThemeIcon } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -7,6 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import DateBadge from "../common/badges/DateBadge";
 import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
+import { notifications } from "@mantine/notifications";
 
 interface IProps {
     ticket: ITicket;
@@ -15,6 +16,15 @@ interface IProps {
 }
 
 export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
+    const handleCopyMessage = () => {
+        navigator.clipboard.writeText(message.content);
+        notifications.show({
+            title: "Message Copied",
+            message: "Message copied to clipboard!",
+            color: "success",
+        });
+    };
+
     const getUserDisplayProps = () => {
         if (message.isCommittee && !showTrueAuthor) {
             return {
@@ -40,7 +50,21 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         <Stack gap="sm">
             <Group justify="space-between" align="center">
                 <UserDisplay {...getUserDisplayProps()} />
-                <DateBadge date={message.createdAt} staticColor />
+                <Group gap="xs">
+                    <DateBadge date={message.createdAt} staticColor />
+                    <Menu position="bottom-end" withArrow>
+                        <Menu.Target>
+                            <ActionIcon size="sm" variant="subtle">
+                                <FontAwesomeIcon icon="ellipsis-vertical" />
+                            </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Item leftSection={<FontAwesomeIcon icon="copy" />} onClick={handleCopyMessage}>
+                                Copy message
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
+                </Group>
             </Group>
             <MarkdownText content={message.content} />
             {message.attachments && message.attachments.length > 0 && (
