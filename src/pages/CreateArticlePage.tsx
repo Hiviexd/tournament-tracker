@@ -98,7 +98,7 @@ export default function CreateArticlePage() {
                         <TextEditor
                             value={content}
                             onChange={setContent}
-                            placeholder="Enter article content in Markdown..."
+                            placeholder="Enter article content..."
                             minHeight={300}
                             autoSaveKey={autoSaveKey}
                         />
