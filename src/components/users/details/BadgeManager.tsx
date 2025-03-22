@@ -37,7 +37,7 @@ export default function BadgeManager({ user, committee }: IProps) {
         navigator.clipboard.writeText(commandString);
         notifications.show({
             title: "Command Copied",
-            message: "Badge command copied to clipboard",
+            message: "Badge command copied to clipboard!",
             color: "success",
         });
     };
