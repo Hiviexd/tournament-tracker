@@ -31,7 +31,7 @@ export default function VersionChecker() {
                             </Button>
                         ),
                         autoClose: false,
-                        withCloseButton: true,
+                        withCloseButton: false,
                     });
                 }
             } catch (error) {
