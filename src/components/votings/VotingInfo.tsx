@@ -194,7 +194,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             {sortedGroups.map((group, index) => (
                                 <UserGroupBadge key={index} group={group} tooltip="top" />
                             ))}
-                            <Badge color={voting.isActive ? "success" : "danger"} variant="light">
+                            <Badge color={voting.isActive ? "success" : "gray"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}
                             </Badge>
                         </Group>
