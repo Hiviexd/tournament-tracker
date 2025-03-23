@@ -66,13 +66,17 @@ export default function VotingCard({ voting }: IPropTypes) {
             }>
             <Group justify="space-between" mb="xs">
                 <div>
+                    {/* Title */}
                     <Title order={4}>{voting.title}</Title>
+
                     <Text size="sm" c="dimmed">
+                        {/* User info */}
                         {(user?.isCommittee || voting.isActive) && voting.author && (
                             <>
                                 Created by <UserLink user={voting.author} /> •{" "}
                             </>
                         )}
+                        {/* Date info */}
                         {voting.isActive && (
                             <Tooltip label={moment(voting.createdAt).format("LLL")}>
                                 <span>{moment(voting.createdAt).fromNow()}</span>
@@ -86,13 +90,16 @@ export default function VotingCard({ voting }: IPropTypes) {
                     </Text>
                 </div>
             </Group>
+            {/* Badges */}
             <Group mt="md" justify="space-between">
                 <Group gap="xs">
+                    {/* Voting type */}
                     <Tooltip label={getVotingTypeInfo().text}>
                         <Badge color={getVotingTypeInfo().color} variant="filled">
                             <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
                         </Badge>
                     </Tooltip>
+                    {/* Public/Private */}
                     {!voting.isActive && (
                         <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>
                             <Badge color={voting.isPublic ? "blue" : "gray"} variant="light">
@@ -100,12 +107,15 @@ export default function VotingCard({ voting }: IPropTypes) {
                             </Badge>
                         </Tooltip>
                     )}
+                    {/* Groups */}
                     {sortedGroups.map((group, index) => (
                         <UserGroupBadge key={index} group={group} tooltip="top" />
                     ))}
-                    <Badge color={voting.isActive ? "success" : "danger"} variant="light">
+                    {/* Active/Concluded */}
+                    <Badge color={voting.isActive ? "success" : "gray"} variant="light">
                         {voting.isActive ? "Active" : "Concluded"}
                     </Badge>
+                    {/* Vote count */}
                     {(user?.isCommittee || voting.isActive) && (
                         <VoteCountBadge
                             voteCount={voting.votes.length}
@@ -116,7 +126,9 @@ export default function VotingCard({ voting }: IPropTypes) {
                 </Group>
 
                 <Group gap="xs">
+                    {/* Not voted badge */}
                     {user?.isCommittee && <NotVotedBadge voting={voting} user={user} variant="light" />}
+                    {/* Due date badge */}
                     {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
                 </Group>
             </Group>
