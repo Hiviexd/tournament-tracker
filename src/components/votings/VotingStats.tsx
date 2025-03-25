@@ -135,30 +135,36 @@ export default function VotingStats({ voting, onFilterChange, activeFilter }: IP
             (v): v is typeof v & { data: VariableVote } => v.data.type === "variable"
         );
 
-        return voting.options.map((option, index) => {
-            const scores = variableVotes.map((v) => v.data.scores.find((s) => s.optionIndex === index)?.score ?? 0);
-            const avgScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-            const color = getScoreColor(avgScore);
+        return (
+            <Stack gap="md">
+                <Text c="dimmed" size="sm" fw={500}>
+                    Total Votes: {totalVotes}
+                </Text>
+                {voting.options.map((option, index) => {
+                    const scores = variableVotes.map(
+                        (v) => v.data.scores.find((s) => s.optionIndex === index)?.score ?? 0
+                    );
+                    const avgScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                    const color = getScoreColor(avgScore);
 
-            return (
-                <Box key={index}>
-                    <Group justify="space-between" mb={4}>
-                        <Text size="sm" fw={500}>
-                            {option}
-                        </Text>
-                        <Group gap="xs">
-                            <Text size="sm" c={color}>
-                                {avgScore.toFixed(2)}
-                            </Text>
-                            <Text size="sm" c="dimmed">
-                                ({scores.length} votes)
-                            </Text>
-                        </Group>
-                    </Group>
-                    <Progress value={((avgScore + 5) / 10) * 100} color={color} size="lg" radius="xl" />
-                </Box>
-            );
-        });
+                    return (
+                        <Box key={index}>
+                            <Group justify="space-between" mb={4}>
+                                <Text size="sm" fw={500}>
+                                    {option}
+                                </Text>
+                                <Group gap="xs">
+                                    <Text size="sm" c={color}>
+                                        {avgScore.toFixed(2)}
+                                    </Text>
+                                </Group>
+                            </Group>
+                            <Progress value={((avgScore + 5) / 10) * 100} color={color} size="lg" radius="xl" />
+                        </Box>
+                    );
+                })}
+            </Stack>
+        );
     };
 
     return (
