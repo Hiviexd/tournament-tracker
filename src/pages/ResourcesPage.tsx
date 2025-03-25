@@ -28,6 +28,12 @@ export default function ResourcesPage() {
     const type = location.pathname.includes("/official") ? "official" : "community";
 
     const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
+
+    // Reset pagination when type changes
+    useEffect(() => {
+        setPage(1);
+    }, [type]);
+
     const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
     const [selectedResource, setSelectedResource] = useState<IResource | null>(null);
 

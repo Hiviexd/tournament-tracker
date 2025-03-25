@@ -35,10 +35,15 @@ export default function TicketsListPage() {
         showOwn: searchParams.get("showOwn") === "true",
     });
 
+    const [user] = useAtom(loggedInUserAtom);
+
+    // Reset pagination when type changes
+    useEffect(() => {
+        setPage(1);
+    }, [type]);
+
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
     const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
-
-    const [user] = useAtom(loggedInUserAtom);
 
     const handleFilterChange = (newFilters) => {
         setSearchInput(newFilters);
