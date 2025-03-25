@@ -126,6 +126,12 @@ export default function ResourcesPage() {
                 <EmptyState />
             ) : (
                 <Stack gap="md">
+                    {data.pagination.total > 1 && (
+                        <Group justify="center" my="xs">
+                            <Pagination value={page} onChange={setPage} total={data.pagination.total} />
+                        </Group>
+                    )}
+
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                         {data.resources.map((resource) => (
                             <ResourcesCard
@@ -137,7 +143,7 @@ export default function ResourcesPage() {
                     </SimpleGrid>
 
                     {data.pagination.total > 1 && (
-                        <Group justify="center" mt="xl">
+                        <Group justify="center" mt="xs">
                             <Pagination value={page} onChange={setPage} total={data.pagination.total} />
                         </Group>
                     )}
