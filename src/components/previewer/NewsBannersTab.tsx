@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
-import { Text, Stack, Paper, Center, Button } from "@mantine/core";
+import { Text, Stack, Paper, Center, Button, Modal, Group } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "react-router-dom";
 import defaultBanner from "/assets/default-banner.jpg";
 import moment from "moment";
+import { useDisclosure } from "@mantine/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface BannerPreview {
     description: string;
@@ -27,6 +29,7 @@ export default function NewsBannersTab() {
     const [searchParams] = useSearchParams();
     const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
     const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+    const [opened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
     // Handle file drop
     const onDrop = useCallback(
@@ -119,6 +122,107 @@ export default function NewsBannersTab() {
         setPreview(DEFAULT_PREVIEW);
     }, [currentUrl]);
 
+    const HomepageLoggedInBannerPreview = () => {
+        return (
+            <div className="newspost newspost-homepage">
+                <div className="newspost-image">
+                    <img src={preview.imageUrl} alt="Preview" />
+                </div>
+                <div className="newspost-homepage-inner">
+                    <div className="newspost-homepage-date">
+                        <p className="newspost-homepage-date-day">{preview.date.day}</p>
+                        <p className="newspost-homepage-date-month">
+                            {preview.date.month} {preview.date.year}
+                        </p>
+                    </div>
+                    <div className="newspost-homepage-texts">
+                        <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
+                        <p className="newspost-homepage-description">{preview.description}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const NewsHistoryPagePreview = () => {
+        return (
+            <div className="newspost newspost-listing">
+                <div className="newspost-image">
+                    <img src={preview.imageUrl} alt="Preview" />
+                    <div className="newspost-date-badge">
+                        {preview.date.day} {preview.date.month} {preview.date.year}
+                    </div>
+                </div>
+                <div className="newspost-listing-inner">
+                    <p className="newspost-listing-title">Newspost in news history page</p>
+                    <p className="newspost-listing-description">{preview.description}</p>
+                    <p className="newspost-listing-meta">
+                        by <strong>{preview.author}</strong>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const HomepageLoggedOutSmallBannerPreview = () => {
+        return (
+            <div className="newspost newspost-loggedout small">
+                <div className="newspost-image">
+                    <img src={preview.imageUrl} alt="Preview" />
+                    <div className="newspost-date-badge">
+                        {preview.date.day} {preview.date.month} {preview.date.year}
+                    </div>
+                </div>
+                <div className="newspost-loggedout-inner">
+                    <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
+                    <p className="newspost-listing-meta">
+                        by <strong>{preview.author}</strong>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const HomepageLoggedOutLargeBannerPreview = () => {
+        return (
+            <div className="newspost newspost-loggedout">
+                <div className="newspost-image">
+                    <img src={preview.imageUrl} alt="Preview" />
+                    <div className="newspost-date-badge">
+                        {preview.date.day} {preview.date.month} {preview.date.year}
+                    </div>
+                </div>
+                <div className="newspost-loggedout-inner">
+                    <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
+                    <p className="newspost-listing-meta">
+                        by <strong>{preview.author}</strong>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const NewsPagePreview = () => {
+        return (
+            <div className="newspost newspost-newspost">
+                <div className="newspost-newspost-inner">
+                    <div className="newspost-image">
+                        <img src={preview.imageUrl} alt="Preview" />
+                        <div className="newspost-date-badge">
+                            {preview.date.day} {preview.date.month} {preview.date.year}
+                        </div>
+                    </div>
+                    <p className="newspost-newspost-title">Newspost in newspost page</p>
+                    <p className="newspost-newspost-meta">
+                        by <strong>{preview.author}</strong>
+                    </p>
+                </div>
+
+                <p className="newspost-newspost-description">{preview.description}</p>
+            </div>
+        );
+    };
+
     return (
         <Stack gap="xl" className="news-banner-previewer">
             {/* Drop zone */}
@@ -144,16 +248,28 @@ export default function NewsBannersTab() {
                         You can also paste (CTRL+V) an image anywhere on this page
                     </Text>
                 </Center>
-                <Center mt={10}>
+                <Center mt={10} style={{ gap: "var(--mantine-spacing-sm)" }}>
                     <Button
                         size="sm"
                         variant="light"
                         style={{ cursor: "default" }}
+                        leftSection={<FontAwesomeIcon icon="arrows-rotate" />}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleReset();
                         }}>
                         Reset to default banner
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="light"
+                        style={{ cursor: "default" }}
+                        leftSection={<FontAwesomeIcon icon="image" />}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            openModal();
+                        }}>
+                        Show screenshot format
                     </Button>
                 </Center>
             </Paper>
@@ -161,91 +277,52 @@ export default function NewsBannersTab() {
             {/* Preview section */}
             <Stack gap="xl" align="center" className="banners-container">
                 {/* Homepage logged in */}
-                <div className="newspost newspost-homepage">
-                    <div className="newspost-image">
-                        <img src={preview.imageUrl} alt="Preview" />
-                    </div>
-                    <div className="newspost-homepage-inner">
-                        <div className="newspost-homepage-date">
-                            <p className="newspost-homepage-date-day">{preview.date.day}</p>
-                            <p className="newspost-homepage-date-month">
-                                {preview.date.month} {preview.date.year}
-                            </p>
-                        </div>
-                        <div className="newspost-homepage-texts">
-                            <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
-                            <p className="newspost-homepage-description">{preview.description}</p>
-                        </div>
-                    </div>
-                </div>
+                <HomepageLoggedInBannerPreview />
 
                 {/* News history page */}
-                <div className="newspost newspost-listing">
-                    <div className="newspost-image">
-                        <img src={preview.imageUrl} alt="Preview" />
-                        <div className="newspost-date-badge">
-                            {preview.date.day} {preview.date.month} {preview.date.year}
-                        </div>
-                    </div>
-                    <div className="newspost-listing-inner">
-                        <p className="newspost-listing-title">Newspost in news history page</p>
-                        <p className="newspost-listing-description">{preview.description}</p>
-                        <p className="newspost-listing-meta">
-                            by <strong>{preview.author}</strong>
-                        </p>
-                    </div>
-                </div>
+                <NewsHistoryPagePreview />
 
                 {/* Homepage logged out (small) */}
-                <div className="newspost newspost-loggedout small">
-                    <div className="newspost-image">
-                        <img src={preview.imageUrl} alt="Preview" />
-                        <div className="newspost-date-badge">
-                            {preview.date.day} {preview.date.month} {preview.date.year}
-                        </div>
-                    </div>
-                    <div className="newspost-loggedout-inner">
-                        <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
-                        <p className="newspost-listing-meta">
-                            by <strong>{preview.author}</strong>
-                        </p>
-                    </div>
-                </div>
+                <HomepageLoggedOutSmallBannerPreview />
 
                 {/* Homepage logged out (large) */}
-                <div className="newspost newspost-loggedout">
-                    <div className="newspost-image">
-                        <img src={preview.imageUrl} alt="Preview" />
-                        <div className="newspost-date-badge">
-                            {preview.date.day} {preview.date.month} {preview.date.year}
-                        </div>
-                    </div>
-                    <div className="newspost-loggedout-inner">
-                        <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
-                        <p className="newspost-listing-meta">
-                            by <strong>{preview.author}</strong>
-                        </p>
-                    </div>
-                </div>
+                <HomepageLoggedOutLargeBannerPreview />
 
                 {/* Newspost page */}
-                <div className="newspost newspost-newspost">
-                    <div className="newspost-newspost-inner">
-                        <div className="newspost-image">
-                            <img src={preview.imageUrl} alt="Preview" />
-                            <div className="newspost-date-badge">
-                                {preview.date.day} {preview.date.month} {preview.date.year}
-                            </div>
-                        </div>
-                        <p className="newspost-newspost-title">Newspost in newspost page</p>
-                        <p className="newspost-newspost-meta">
-                            by <strong>{preview.author}</strong>
-                        </p>
-                    </div>
-
-                    <p className="newspost-newspost-description">{preview.description}</p>
-                </div>
+                <NewsPagePreview />
             </Stack>
+
+            {/* Screenshot Modal */}
+            <Modal
+                opened={opened}
+                onClose={closeModal}
+                fullScreen
+                title="News Banner Previews - Screenshot Format"
+                styles={{
+                    content: {
+                        backgroundColor: "var(--mantine-color-body)",
+                    },
+                    header: {
+                        backgroundColor: "var(--mantine-color-body)",
+                        borderBottom: "1px solid var(--mantine-color-dark-4)",
+                        marginBottom: "var(--mantine-spacing-md)",
+                    },
+                    body: {
+                        padding: "var(--mantine-spacing-md)",
+                    },
+                }}>
+                <div className="news-banner-previewer">
+                    <div className="banners-container" style={{ padding: "20px" }}>
+                        <Group align="center" justify="center">
+                            <HomepageLoggedInBannerPreview />
+                            <HomepageLoggedOutSmallBannerPreview />
+                            <NewsHistoryPagePreview />
+                            <HomepageLoggedOutLargeBannerPreview />
+                            <NewsPagePreview />
+                        </Group>
+                    </div>
+                </div>
+            </Modal>
         </Stack>
     );
 }
