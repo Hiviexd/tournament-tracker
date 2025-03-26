@@ -146,7 +146,14 @@ const environmentStyled = process.env.NODE_ENV
     ? styles(process.env.NODE_ENV, ["yellow", "underline"])
     : styles("⚠ Unknown", ["orange", "underline"]);
 
+const mode =
+    process.env.AUTOMATION_DEBUG === "true" ? "Auto-start Automation Jobs" : process.env.MIGRATION === "true" ? "Run Migrations" : null;
+
 app.set("port", port);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import MigrationService from "./services/MigrationService";
+
 app.listen(port, () => {
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${styles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
@@ -154,10 +161,14 @@ app.listen(port, () => {
     console.log(
         `│   ${styles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(42 - environmentString.length)}│`
     );
+    if (mode) console.log(`│   ${styles("Mode:", ["dim"])} ${styles(mode, ["orange", "bold"])}${" ".repeat(49 - mode.length)}│`);
     console.log("└──────────────────────────────────────────────────────────┘");
 
     // Start automation service
     AutomationService.start();
+
+    // Run migrations by adding/uncommenting the needed migration and running `yarn dev-migration`
+    // MigrationService.migratePif2Votings();
 });
 
 export default app;
