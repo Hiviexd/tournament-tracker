@@ -83,8 +83,8 @@ export default function VotingCard({ voting }: IPropTypes) {
                             </Tooltip>
                         )}
                         {!voting.isActive && (
-                            <Tooltip label={moment(voting.updatedAt).format("LLL")}>
-                                <span>concluded {moment(voting.updatedAt).fromNow()}</span>
+                            <Tooltip label={moment(voting.concludedAt ?? voting.updatedAt).format("LLL")}>
+                                <span>concluded {moment(voting.concludedAt ?? voting.updatedAt).fromNow()}</span>
                             </Tooltip>
                         )}
                     </Text>

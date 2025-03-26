@@ -172,8 +172,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                         <span>{moment(voting.createdAt).fromNow()}</span>
                                     </Tooltip>
                                 ) : (
-                                    <Tooltip label={moment(voting.updatedAt).format("LLL")}>
-                                        <span>concluded {moment(voting.updatedAt).fromNow()}</span>
+                                    <Tooltip label={moment(voting.concludedAt ?? voting.updatedAt).format("LLL")}>
+                                        <span>
+                                            concluded {moment(voting.concludedAt ?? voting.updatedAt).fromNow()}
+                                        </span>
                                     </Tooltip>
                                 )}
                             </Text>

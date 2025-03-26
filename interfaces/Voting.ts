@@ -61,6 +61,7 @@ export interface IVoting extends Document {
     attachments: IAttachment[];
     createdAt: Date;
     updatedAt: Date;
+    concludedAt?: Date;
     isPublic: boolean;
     publicDescription?: string;
 

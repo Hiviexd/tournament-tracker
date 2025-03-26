@@ -380,6 +380,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         voting.isActive = !voting.isActive;
+        voting.concludedAt = voting.isActive ? undefined : new Date();
         await voting.save();
 
         res.json({

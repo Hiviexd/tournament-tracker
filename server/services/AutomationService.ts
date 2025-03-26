@@ -160,6 +160,7 @@ class AutomationService {
         for (const voting of concludableVotings) {
             // Conclude the voting
             voting.isActive = false;
+            voting.concludedAt = now.toDate();
             await voting.save();
 
             // Send Discord notification
