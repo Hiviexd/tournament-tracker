@@ -53,7 +53,7 @@ export const seoRoutes: SEORoute[] = [
         model: "Voting",
         modelId: "votingId",
         getMetadata: (voting) => ({
-            title: `${voting.isPublic ? voting.title + " - " : ""}Vote Details`,
+            title: `${voting.isPublic ? `${voting.title} - ` : ""}Vote Details`,
             description: `View this ${voting.isActive ? "active" : "concluded"} ${voting.category} vote.`,
         }),
     },
