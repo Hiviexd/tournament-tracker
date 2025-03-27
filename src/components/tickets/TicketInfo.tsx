@@ -84,7 +84,12 @@ export default function TicketInfo({ ticket }: IProps) {
                         </Text>
                         <Text size="sm" c="dimmed">
                             Created by <UserLink user={ticket.author} /> • Last updated{" "}
-                            <DateBadge date={ticket.lastResponseAt} />
+                            <DateBadge
+                                date={ticket.lastResponseAt}
+                                warningAge={7}
+                                dangerAge={10}
+                                staticColor={!ticket.isActive}
+                            />
                         </Text>
                     </Stack>
                     <Group gap="xs">
