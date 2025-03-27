@@ -90,7 +90,9 @@ export default function TicketForm() {
                 <MarkdownText
                     content={`Tickets and their conversations are visible to the public! This is to provide an archive for users to look through when researching a specific issue or topic.
 
-Try searching for your issue in the [**Tickets listing**](/tickets) before creating a new ticket!`}
+Try searching for your issue in the [**Tickets listing**](/tickets) before creating a new ticket!
+
+If you want to maintain your anonymity and/or confidentiality of the subject, please contact tournaments@ppy.sh instead.`}
                 />
             </Alert>
 
