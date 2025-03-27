@@ -164,21 +164,15 @@ function generateBadgeCommand(osuId: number, years: number, badgeValue: number, 
 function sanitizeBeatmapInput(input: string): Set<number> {
     const ids = new Set<number>();
 
-    // Split the input by commas, spaces, tabs, or new lines
-    const parts = input
-        .replace(",", " ")
-        .replace("\t", " ")
-        .replace("\n", " ")
-        .replace("#osu", "")
-        .replace("#taiko", "")
-        .replace("#fruits", "")
-        .replace("#mania", "")
-        .split(" ")
-        .filter((part) => part.length > 0);
+    // Remove mode-specific tags
+    const cleanInput = input.replace(/#(?:osu|taiko|fruits|mania)/g, "");
+
+    // Split by any combination of delimiters (newlines, commas, spaces, tabs)
+    const parts = cleanInput.split(/[\n,\s\t]+/).filter((part) => part.length > 0);
 
     for (const part of parts) {
         try {
-            // Try to convert each part to an integer
+            // Extract ID from URL or use the part directly
             let processedPart = part;
             if (part.includes("/")) {
                 processedPart = part.split("/").pop() || "";
@@ -189,8 +183,8 @@ function sanitizeBeatmapInput(input: string): Set<number> {
                 ids.add(id);
             }
         } catch {
-            // If any part is not an integer, return an empty set
-            return new Set();
+            // Skip invalid parts instead of returning empty set
+            continue;
         }
     }
 
