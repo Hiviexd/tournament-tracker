@@ -74,7 +74,7 @@ export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps)
                 {["graveyard", "pending", "wip"].includes(beatmap.beatmapset.status) && (
                     <Text size="sm" c="orange" lineClamp={2}>
                         <FontAwesomeIcon icon="triangle-exclamation" /> Graveyard/Pending beatmaps don't always have
-                        correct matadata.
+                        correct metadata.
                     </Text>
                 )}
             </Stack>
