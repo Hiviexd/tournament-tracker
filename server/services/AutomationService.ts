@@ -55,7 +55,13 @@ class AutomationService {
     }
 
     private async checkOverdueVotings() {
-        const activeVotings = await Voting.find({ isActive: true });
+        const activeVotings = await Voting.find({ isActive: true }).populate({
+            path: "votes",
+            populate: {
+                path: "author",
+                select: "username osuId discordId groups",
+            },
+        });
         const overdueVotings: IVoting[] = [];
 
         for (const voting of activeVotings) {
@@ -98,11 +104,25 @@ class AutomationService {
                 // Only send overdue notification if actually past deadline
                 overdueVotings.push(voting);
 
+                // Get all users in the assigned groups
+                const usersInAssignedGroups = await User.find({
+                    groups: { $in: voting.assignedGroups },
+                }).select("username osuId discordId groups");
+
+                // Get set of user IDs who have already voted
+                const votedUserIds = new Set(voting.votes.map((vote) => vote.author._id.toString()));
+
+                // Filter out users who have already voted
+                const missingVotes = usersInAssignedGroups.filter((user) => !votedUserIds.has(user._id.toString()));
+
+                // Get Discord IDs for pinging (fall back to username if no Discord ID)
+                const usersToPing = missingVotes.map((user) => user.discordId || user.username);
+
                 const overdueDuration = Math.abs(hoursUntilDeadline);
                 const overdueText =
                     overdueDuration >= 24 ? `${Math.floor(overdueDuration / 24)} days` : `${overdueDuration} hours`;
 
-                await DiscordService.sendRoleHighlightWebhook(roles, [
+                await DiscordService.sendUserHighlightWebhook(usersToPing, [
                     {
                         color: webhookColors.red,
                         description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is overdue by ${overdueText}!`,
