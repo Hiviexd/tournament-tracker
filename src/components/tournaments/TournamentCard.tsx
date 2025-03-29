@@ -1,15 +1,50 @@
-import { Card, Group, Stack, Title, Text, Badge, Tooltip } from "@mantine/core";
+import { Card, Group, Stack, Title, Badge, Tooltip } from "@mantine/core";
 import { Link } from "react-router-dom";
-import moment from "moment";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserDisplay from "../common/UserDisplay";
 import GameModeIcon from "../common/GameModeIcon";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentCard({ tournament }: IProps) {
+    const getTournamentTypeInfo = () => {
+        switch (tournament.type) {
+            case "tournament":
+                return { icon: "trophy", text: "Tournament", color: "orange" };
+            case "contest":
+                return { icon: "award", text: "Contest", color: "info" };
+            default:
+                return { icon: "question", text: "Unknown", color: "gray" };
+        }
+    };
+
+    const getTournamentStatusColor = () => {
+        switch (tournament.status) {
+            case "supportRequestReceived":
+                return "violet";
+            case "screeningOngoing":
+                return "indigo";
+            case "screeningConcluded":
+                return "info";
+            case "reviewOngoing":
+                return "yellow";
+            case "changesRequested":
+                return "orange";
+            case "badgeApproved":
+                return "success";
+            case "badgeRejected":
+                return "danger";
+            case "noBadgeRequested":
+                return "gray";
+            default:
+                return "gray";
+        }
+    };
+
     return (
         <Card
             shadow="sm"
@@ -22,7 +57,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     "--card-status-color": tournament.isActive
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)",
-                    "--banner-url": `url(${tournament.bannerUrl || "https://nats.are-la.me/29HdcgA.png"})`,
+                    "--banner-url": `url(${tournament.banner?.url || "https://nats.are-la.me/29HdcgA.png"})`,
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
@@ -32,30 +67,22 @@ export default function TournamentCard({ tournament }: IProps) {
                         <Title order={4}>{tournament.name}</Title>
                         <Group>
                             <UserDisplay user={tournament.host} />
-                            <Text size="sm" c="dimmed">
-                                •{" "}
-                                <Tooltip label={moment(tournament.createdAt).format("LLL")}>
-                                    <span>{moment(tournament.createdAt).fromNow()}</span>
-                                </Tooltip>
-                            </Text>
                         </Group>
                     </Stack>
                     <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
-                        {tournament.isActive ? "Active" : "Inactive"}
+                        {tournament.isActive ? "Active" : "Concluded"}
                     </Badge>
                 </Group>
 
-                <Group>
-                    <Badge color="primary" variant="light">
-                        {tournament.type}
-                    </Badge>
-                    <Tooltip label={tournament.modes.join(", ")}>
-                        <Badge variant="light">
-                            <GameModeIcon mode={tournament.modes} />
+                <Group gap="xs">
+                    <Tooltip label={getTournamentTypeInfo().text}>
+                        <Badge color={getTournamentTypeInfo().color} variant="filled">
+                            <FontAwesomeIcon icon={getTournamentTypeInfo().icon as IconProp} />
                         </Badge>
                     </Tooltip>
-                    <Badge color="warning" variant="light">
-                        {tournament.status}
+                    <GameModeIcon mode={tournament.modes} />
+                    <Badge color={getTournamentStatusColor()} variant="light">
+                        {tournament.statusString}
                     </Badge>
                 </Group>
             </Stack>
