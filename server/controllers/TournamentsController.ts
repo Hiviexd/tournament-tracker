@@ -37,17 +37,19 @@ const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -as
 class TournamentsController {
     /** GET tournament listing */
     public async index(req, res) {
-        const { name, mode, hostId, type, status, state, page = 1 } = req.query;
+        const { name, mode, host, type, status, state, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
+
+        console.log(host);
 
         if (name) query.name = new RegExp(name, "i");
         if (mode) query.modes = { $in: [mode] };
-        if (hostId && hostId.length) {
-            const hostUser = await User.findByUsernameOrOsuId(hostId);
-            query.host = hostUser || null;
+        if (host) {
+            const hostUser = await User.findByUsernameOrOsuId(host);
+            if (hostUser) query.host = hostUser._id;
         }
-        if (type) query.type = type;
-        if (status) query.status = status;
+        if (type) query.type = type as TournamentType;
+        if (status) query.status = status as TournamentStatus;
         if (state) query.isActive = state === "active";
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
