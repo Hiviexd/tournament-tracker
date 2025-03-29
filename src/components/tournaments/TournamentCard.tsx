@@ -49,6 +49,7 @@ export default function TournamentCard({ tournament }: IProps) {
         <Card
             shadow="sm"
             p="lg"
+            radius="md"
             className="tournament-card"
             component={Link}
             to={`/tournaments/${tournament._id}`}
