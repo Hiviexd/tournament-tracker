@@ -1,86 +1,90 @@
 {
-  "a_hisa": {
-    "status": "partial",
-    "notes": "Contact before uploading. Can be reached via email or Bandcamp."
-  },
-  "Akira Complex": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "HoneyComeBear": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "Jun Kuroda": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "Morimori Atsushi": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "Synthion": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "Yuyoyuppe": {
-    "status": "partial",
-    "notes": "Tracks from or themed around Touhou should not be uploaded or used."
-  },
-  "DJ'TEKINA//SOMETHING": {
-    "status": "partial",
-    "notes": "Tracks from or themed around Touhou should not be uploaded or used."
-  },
-  "Zekk": {
-    "status": "partial",
-    "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
-  },
-  "40mP": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "ak+q": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "DJMax": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Neowiz": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Draw the Emotional": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Enter Shikari": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "EZFG": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Hatsuki Yura": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Igorrr": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "kamome sano": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "Kozato": {
-    "status": "disallowed",
-    "notes": null
-  },
-  "NOMA": {
-    "status": "disallowed",
-    "notes": null
-  }
+    "a_hisa": {
+        "status": "partial",
+        "notes": "Contact before uploading. Can be reached via email or Bandcamp."
+    },
+    "ak+q": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "Akira Complex": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "HoneyComeBear": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "Jun Kuroda": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "Lusumi": {
+        "status": "partial",
+        "notes": "Do not use the track titled 'execution_program'."
+    },
+    "Morimori Atsushi": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "Synthion": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "Yuyoyuppe": {
+        "status": "partial",
+        "notes": "Tracks from or themed around Touhou should not be uploaded or used."
+    },
+    "DJ'TEKINA//SOMETHING": {
+        "status": "partial",
+        "notes": "Tracks from or themed around Touhou should not be uploaded or used."
+    },
+    "Zekk": {
+        "status": "partial",
+        "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
+    },
+    "40mP": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "DJMax": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Neowiz": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Draw the Emotional": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Enter Shikari": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "EZFG": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Hatsuki Yura": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Igorrr": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "kamome sano": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "Kozato": {
+        "status": "disallowed",
+        "notes": null
+    },
+    "NOMA": {
+        "status": "disallowed",
+        "notes": null
+    }
 }
