@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ITournament } from "../../interfaces/Tournament";
+import { TournamentFormData } from "../../interfaces/Tournament";
 
 export interface TournamentQueryParams {
     name?: string;
@@ -21,7 +21,7 @@ export const getTournament = async (tournamentId: string) => {
     return response.data;
 };
 
-export const createTournament = async (tournamentData: Partial<ITournament>) => {
+export const createTournament = async (tournamentData: TournamentFormData) => {
     const response = await axios.post("/api/tournaments/create", tournamentData);
     return response.data;
 };

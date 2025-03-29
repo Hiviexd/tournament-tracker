@@ -26,6 +26,13 @@ export interface TournamentQueryParams {
     isActive?: boolean;
     page?: number;
 }
+
+export interface ITournamentFormData extends FormData {
+    files?: File[];
+}
+
+export type TournamentFormData = Partial<ITournament> & ITournamentFormData;
+
 export interface ITournament extends Document {
     name: string;
     modes: GameMode[];

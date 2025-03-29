@@ -7,7 +7,7 @@ import {
     TournamentQueryParams,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
-import { ITournament } from "../../interfaces/Tournament";
+import { TournamentFormData } from "../../interfaces/Tournament";
 
 export function useTournaments(params?: TournamentQueryParams) {
     return useQuery({
@@ -27,7 +27,7 @@ export function useCreateTournament() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (tournamentData: Partial<ITournament>) => {
+        mutationFn: async (tournamentData: TournamentFormData) => {
             const response = await createTournament(tournamentData);
             return handleMutationResponse(response);
         },
