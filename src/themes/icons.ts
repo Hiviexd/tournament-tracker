@@ -85,6 +85,7 @@ import {
     faEllipsisVertical,
     faArrowsRotate,
     faAward,
+    faBoxArchive,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -174,5 +175,6 @@ export default function loadIcons() {
         faEllipsisVertical,
         faArrowsRotate,
         faAward,
+        faBoxArchive,
     );
 }
