@@ -47,10 +47,7 @@ export const BADGE_SUPPORT_OPTIONS = [
     "Approve badge",
 ] as const;
 
-export const TOP_THREE_BADGE_SUPPORT_OPTIONS = [
-    "Award top 3 badges",
-    "Only award winner badge",
-] as const;
+export const TOP_THREE_BADGE_SUPPORT_OPTIONS = ["Award top 3 badges", "Only award winner badge"] as const;
 
 export const VOTE_PRESETS = {
     userAddition: {
@@ -76,3 +73,48 @@ export const VOTE_PRESETS = {
 } as const;
 
 export const DEFAULT_HUE = "36";
+
+export const REVIEW_CHECKLIST = [
+    {
+        category: "Tournament format, theme & more",
+        items: [
+            "Max 2 iterations per year",
+            "Format is RO16 double elimination or larger",
+            "Theme is appropriate",
+            "Forum post contains report link",
+        ],
+    },
+    {
+        category: "Player signup criteria",
+        items: [
+            "Region restriction makes sense",
+            "Rank restriction falls within specified limits",
+            "No collection of personal information",
+            "No screened out players permitted",
+            "Any filtering or skillban process used is proper",
+        ],
+    },
+    {
+        category: "Player seeding",
+        items: [
+            "Method of seeding is documented when doing qualifiers",
+            "Seeding is reproducable and the method accurate and correct",
+            "Check for manual adjustments in player/team seeding",
+        ],
+    },
+    {
+        category: "Required publicly available information",
+        items: [
+            "Public and easily accessible up-to-date list of staff",
+            "Public and easily accessible list of matches with MP links",
+        ],
+    },
+    {
+        category: "Badge",
+        items: ["Badge is of acceptable quality", "Badge uses correct resolution (172x80)", "Characters in designs are permitted to use", "No sponsors present"],
+    },
+    {
+        category: "Tournament mappools",
+        items: ["Pools are publicly available", "Pools adhere to content usage permissions"],
+    },
+] as const;

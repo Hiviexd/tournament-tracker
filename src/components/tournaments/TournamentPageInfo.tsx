@@ -1,9 +1,23 @@
-import { Paper, Title, Stack, Group, Select, Text, Progress, Tooltip, ActionIcon, Button } from "@mantine/core";
+import {
+    Paper,
+    Title,
+    Stack,
+    Group,
+    Select,
+    Text,
+    Progress,
+    Tooltip,
+    ActionIcon,
+    Button,
+    TextInput,
+} from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import TournamentStatusBadge from "./TournamentStatusBadge";
-import UserDisplay from "@components/common/UserDisplay";
+import { useEditTournament } from "../../hooks/useTournaments";
+import moment from "moment";
 
 interface IProps {
     tournament: ITournament;
@@ -22,7 +36,17 @@ const STATUS_PROGRESSION: { [key in TournamentStatus]: { step: number; color: st
 
 export default function TournamentPageInfo({ tournament }: IProps) {
     const [isEditingStatus, setIsEditingStatus] = useState(false);
+    const [isEditingForumUrl, setIsEditingForumUrl] = useState(false);
+    const [isEditingStartDate, setIsEditingStartDate] = useState(false);
+    const [isEditingEndDate, setIsEditingEndDate] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatus>(tournament.status);
+    const [forumUrl, setForumUrl] = useState(tournament.forumUrl || "");
+    const [startDate, setStartDate] = useState<Date | null>(
+        tournament.startDate ? new Date(tournament.startDate) : null
+    );
+    const [endDate, setEndDate] = useState<Date | null>(tournament.endDate ? new Date(tournament.endDate) : null);
+
+    const editTournamentMutation = useEditTournament(tournament._id);
 
     const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
@@ -35,30 +59,36 @@ export default function TournamentPageInfo({ tournament }: IProps) {
         { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
 
-    // TODO: Implement status update mutation
-    const handleStatusSave = () => {
-        console.log("Update status to:", selectedStatus);
+    const handleStatusSave = async () => {
+        await editTournamentMutation.mutateAsync({ status: selectedStatus });
         setIsEditingStatus(false);
     };
 
-    // TODO: Implement date update mutations
-    const handleStartDateUpdate = () => {
-        console.log("Update start date");
+    const handleForumUrlSave = async () => {
+        await editTournamentMutation.mutateAsync({ forumUrl });
+        setIsEditingForumUrl(false);
     };
 
-    const handleEndDateUpdate = () => {
-        console.log("Update end date");
+    const handleStartDateSave = async () => {
+        if (startDate) {
+            await editTournamentMutation.mutateAsync({
+                startDate: startDate.toISOString() as unknown as Date,
+            });
+            setIsEditingStartDate(false);
+        }
     };
 
-    // TODO: Implement assign reviewers mutation
-    const handleAssignReviewers = () => {
-        console.log("Assign reviewers");
+    const handleEndDateSave = async () => {
+        if (endDate) {
+            await editTournamentMutation.mutateAsync({
+                endDate: endDate.toISOString() as unknown as Date,
+            });
+            setIsEditingEndDate(false);
+        }
     };
 
-    // TODO: Implement tournament state toggle mutation
-    const handleToggleState = () => {
-        console.log("Tournament:", tournament.assignedReviewers);
-        console.log("Toggle tournament state from", tournament.isActive, "to", !tournament.isActive);
+    const handleToggleState = async () => {
+        await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
     };
 
     const getProgressInfo = () => {
@@ -93,12 +123,13 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             onChange={(value) => setSelectedStatus(value as TournamentStatus)}
                                             data={statusOptions}
                                             allowDeselect={false}
-                                            style={{ width: "15em" }}
+                                            style={{ width: "20%" }}
                                         />
                                         <ActionIcon
                                             variant="subtle"
                                             onClick={handleStatusSave}
-                                            color="blue"
+                                            color="success"
+                                            loading={editTournamentMutation.isPending}
                                             title="Save">
                                             <FontAwesomeIcon icon="save" />
                                         </ActionIcon>
@@ -109,7 +140,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                         <ActionIcon
                                             variant="subtle"
                                             onClick={() => setIsEditingStatus(true)}
-                                            color="blue"
+                                            color="info"
                                             title="Update status">
                                             <FontAwesomeIcon icon="pen-to-square" />
                                         </ActionIcon>
@@ -134,20 +165,91 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                         </Stack>
                     </Group>
 
+                    <Stack gap={5}>
+                        <Text size="sm" fw={500}>
+                            Forum URL
+                        </Text>
+                        <Group gap="xs" align="end">
+                            {isEditingForumUrl ? (
+                                <>
+                                    <TextInput
+                                        value={forumUrl}
+                                        onChange={(event) => setForumUrl(event.currentTarget.value)}
+                                        placeholder="Enter forum URL..."
+                                        style={{ width: "40%" }}
+                                    />
+                                    <ActionIcon
+                                        variant="subtle"
+                                        onClick={handleForumUrlSave}
+                                        color="success"
+                                        title="Save"
+                                        disabled={!forumUrl.trim()}
+                                        loading={editTournamentMutation.isPending}>
+                                        <FontAwesomeIcon icon="save" />
+                                    </ActionIcon>
+                                </>
+                            ) : (
+                                <>
+                                    <Text>
+                                        {tournament.forumUrl ? (
+                                            <a href={tournament.forumUrl} target="_blank" rel="noopener noreferrer">
+                                                {tournament.forumUrl}
+                                            </a>
+                                        ) : (
+                                            <Text c="dimmed" fs="italic">
+                                                No forum URL set
+                                            </Text>
+                                        )}
+                                    </Text>
+                                    <ActionIcon
+                                        variant="subtle"
+                                        onClick={() => setIsEditingForumUrl(true)}
+                                        color="info"
+                                        title="Update forum URL">
+                                        <FontAwesomeIcon icon="pen-to-square" />
+                                    </ActionIcon>
+                                </>
+                            )}
+                        </Group>
+                    </Stack>
+
                     <Group align="flex-start">
                         <Stack gap={5} style={{ flex: 1 }}>
                             <Text size="sm" fw={500}>
                                 Start Date
                             </Text>
                             <Group>
-                                <Text>{tournament.startDate?.toLocaleString()}</Text>
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={handleStartDateUpdate}
-                                    color="blue"
-                                    title="Update start date">
-                                    <FontAwesomeIcon icon="pen-to-square" />
-                                </ActionIcon>
+                                {isEditingStartDate ? (
+                                    <>
+                                        <DateInput
+                                            value={startDate}
+                                            onChange={setStartDate}
+                                            placeholder="Select start date"
+                                            clearable
+                                            style={{ width: "60%" }}
+                                        />
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={handleStartDateSave}
+                                            color="success"
+                                            disabled={!startDate}
+                                            loading={editTournamentMutation.isPending}
+                                            title="Save">
+                                            <FontAwesomeIcon icon="save" />
+                                        </ActionIcon>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Text>{moment(tournament.startDate).format("YYYY-MM-DD")}</Text>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={() => setIsEditingStartDate(true)}
+                                            color="info"
+                                            title="Update start date">
+                                            <FontAwesomeIcon icon="pen-to-square" />
+                                        </ActionIcon>
+                                    </>
+                                )}
                             </Group>
                         </Stack>
 
@@ -156,49 +258,53 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                 End Date
                             </Text>
                             <Group>
-                                <Text>{tournament.endDate?.toLocaleString()}</Text>
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={handleEndDateUpdate}
-                                    color="blue"
-                                    title="Update end date">
-                                    <FontAwesomeIcon icon="pen-to-square" />
-                                </ActionIcon>
+                                {isEditingEndDate ? (
+                                    <>
+                                        <DateInput
+                                            value={endDate}
+                                            onChange={setEndDate}
+                                            placeholder="Select end date"
+                                            clearable
+                                            minDate={startDate || undefined}
+                                            style={{ width: "60%" }}
+                                        />
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={handleEndDateSave}
+                                            color="success"
+                                            disabled={!endDate}
+                                            loading={editTournamentMutation.isPending}
+                                            title="Save">
+                                            <FontAwesomeIcon icon="save" />
+                                        </ActionIcon>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Text>{moment(tournament.endDate).format("YYYY-MM-DD")}</Text>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={() => setIsEditingEndDate(true)}
+                                            color="info"
+                                            title="Update end date">
+                                            <FontAwesomeIcon icon="pen-to-square" />
+                                        </ActionIcon>
+                                    </>
+                                )}
                             </Group>
                         </Stack>
                     </Group>
 
-                    {tournament.assignedReviewers && tournament.assignedReviewers?.length && (
-                        <Stack gap="md">
-                            <Text size="sm" fw={500}>
-                                Assigned Reviewers
-                            </Text>
-                            <Group gap="xl">
-                                {tournament.assignedReviewers.map((reviewer) => (
-                                    <UserDisplay user={reviewer} />
-                                ))}
-                            </Group>
-                        </Stack>
-                    )}
                     <Stack gap={5}>
                         <Text size="sm" fw={500}>
                             Actions
                         </Text>
                         <Group>
-                            {tournament.status === "reviewOngoing" && !tournament.assignedReviewers?.length && (
-                                <Button
-                                    variant="filled"
-                                    color="info"
-                                    onClick={handleAssignReviewers}
-                                    leftSection={<FontAwesomeIcon icon="user-group" />}>
-                                    Assign Reviewers
-                                </Button>
-                            )}
                             <Button
                                 variant="filled"
                                 color={tournament.isActive ? "danger" : "warning"}
                                 onClick={handleToggleState}
-                                leftSection={<FontAwesomeIcon icon="box-archive" />}>
+                                leftSection={<FontAwesomeIcon icon="box-archive" />}
+                                loading={editTournamentMutation.isPending}>
                                 {tournament.isActive ? "Archive" : "Unarchive"}
                             </Button>
                         </Group>

@@ -1,6 +1,7 @@
+import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
-import { TournamentQueryParams, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
+import { TournamentQueryParams, TournamentType, TournamentStatus, GameMode } from "../../interfaces/Tournament";
 import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 import UploadService from "../services/UploadService";
@@ -36,16 +37,16 @@ const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -as
 
 class TournamentsController {
     /** GET tournament listing */
-    public async index(req, res) {
+    public async index(req: Request, res: Response) {
         const { name, mode, host, type, status, state, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
 
         console.log(host);
 
-        if (name) query.name = new RegExp(name, "i");
-        if (mode) query.modes = { $in: [mode] };
+        if (name) query.name = new RegExp(name as string, "i");
+        if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
-            const hostUser = await User.findByUsernameOrOsuId(host);
+            const hostUser = await User.findByUsernameOrOsuId(host as string);
             if (hostUser) query.host = hostUser._id;
         }
         if (type) query.type = type as TournamentType;
@@ -53,7 +54,7 @@ class TournamentsController {
         if (state) query.isActive = state === "active";
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
-        const isCommittee = res.locals.user.isCommittee;
+        const isCommittee = res.locals!.user!.isCommittee;
 
         const [tournaments, total] = await Promise.all([
             Tournament.find(query)
@@ -73,9 +74,9 @@ class TournamentsController {
     }
 
     /** GET tournament */
-    public async getTournament(req, res) {
+    public async getTournament(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
-        const isCommittee = res.locals.user.isCommittee;
+        const isCommittee = res.locals!.user!.isCommittee;
 
         const tournament = await Tournament.findById(tournamentId)
             .select(selectFields(isCommittee))
@@ -85,7 +86,7 @@ class TournamentsController {
     }
 
     /** POST create a tournament */
-    public async create(req, res) {
+    public async create(req: Request, res: Response) {
         const { name, hostId, modes, type, forumUrl, startDate, endDate } = req.body;
         const files = req.files as Express.Multer.File[];
 
@@ -104,14 +105,8 @@ class TournamentsController {
             endDate,
         });
 
-
         if (files?.length) {
-            const banner = await UploadService.handleFileUploads(
-                files,
-                FILE_UPLOAD_CATEGORY,
-                tournament._id,
-                host._id
-            );
+            const banner = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, tournament._id, host._id);
 
             tournament.banner = banner[0];
         }
@@ -124,7 +119,7 @@ class TournamentsController {
     }
 
     /** POST assign reviewers */
-    public async assignReviewers(req, res) {
+    public async assignReviewers(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
 
         const tournament = await Tournament.findById(tournamentId).orFail();
@@ -142,7 +137,29 @@ class TournamentsController {
 
         await tournament.save();
 
-        res.json(tournament);
+        res.json({ message: "Reviewers assigned successfully!" });
+
+        // TODO: logging and discord
+    }
+
+    /** POST edit tournament */
+    public async edit(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const { forumUrl, startDate, endDate, status, isActive } = req.body;
+
+        const tournament = await Tournament.findById(tournamentId).orFail();
+
+        if (forumUrl) tournament.forumUrl = forumUrl;
+        if (startDate) tournament.startDate = startDate;
+        if (endDate) tournament.endDate = endDate;
+        if (status) tournament.status = status;
+        if (isActive !== undefined) tournament.isActive = isActive;
+
+        await tournament.save();
+
+        res.json({ message: "Tournament updated successfully!" });
+
+        // TODO: logging
     }
 }
 

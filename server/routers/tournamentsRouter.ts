@@ -14,5 +14,7 @@ const tournamentUpload = createUploadMiddleware({
 tournamentsRouter.get("/", auth.isLoggedIn, auth.isAdmin, TournamentsController.index);
 tournamentsRouter.post("/create", auth.isLoggedIn, auth.isAdmin, tournamentUpload, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
+tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isAdmin, TournamentsController.edit);
+tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isAdmin, TournamentsController.assignReviewers);
 
 export default tournamentsRouter;

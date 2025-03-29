@@ -5,6 +5,8 @@ import {
     createTournament,
     // assignReviewers,
     TournamentQueryParams,
+    assignReviewers,
+    editTournament,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
@@ -37,18 +39,30 @@ export function useCreateTournament() {
     });
 }
 
-/*
 export function useAssignReviewers(tournamentId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async () => {
             const response = await assignReviewers(tournamentId);
-            return handleMutationResponse(response, "Reviewers assigned successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
         },
     });
 }
-*/
+
+export function useEditTournament(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (tournamentData: Partial<TournamentFormData>) => {
+            const response = await editTournament(tournamentId, tournamentData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
