@@ -39,11 +39,13 @@ export default function TournamentFilters({ values, onChange }: IProps) {
 
     const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
+        { value: "screeningOngoing", label: "Screening Ongoing" },
         { value: "screeningConcluded", label: "Screening Concluded" },
         { value: "reviewOngoing", label: "Review Ongoing" },
         { value: "changesRequested", label: "Changes Requested" },
         { value: "badgeApproved", label: "Badge Approved" },
         { value: "badgeRejected", label: "Badge Rejected" },
+        { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
 
     const activeOptions = [
