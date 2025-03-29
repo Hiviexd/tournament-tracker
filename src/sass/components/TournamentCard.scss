@@ -26,7 +26,7 @@
             position: absolute;
             inset: 0;
             z-index: 1;
-            background: linear-gradient(135deg, var(--mantine-color-primary-11) 30%, transparent 300%);
+            background: linear-gradient(90deg, var(--mantine-color-primary-11) 10%, transparent 200%);
         }
     }
 
@@ -40,6 +40,6 @@
         position: absolute;
         inset: 0;
         z-index: 1;
-        background: linear-gradient(90deg, var(--card-status-color) -60%, transparent 4rem);
+        background: linear-gradient(90deg, var(--card-status-color) -30rem, transparent 3rem);
     }
 }
