@@ -1,7 +1,12 @@
 [
-  {
-    "title": "Tits or get the fuck out!!",
-    "artist": "Morimori Atsushi",
-    "status": "allowed"
-  }
+    {
+        "title": "Tits or get the fuck out!!",
+        "artist": "Morimori Atsushi",
+        "status": "allowed"
+    },
+    {
+        "title": "execution_program",
+        "artist": "Lusumi",
+        "status": "disallowed"
+    }
 ]
