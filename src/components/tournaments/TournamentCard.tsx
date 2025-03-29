@@ -5,6 +5,7 @@ import UserDisplay from "../common/UserDisplay";
 import GameModeIcon from "../common/GameModeIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import TournamentStatusBadge from "./TournamentStatusBadge";
 
 interface IProps {
     tournament: ITournament;
@@ -22,29 +23,6 @@ export default function TournamentCard({ tournament }: IProps) {
         }
     };
 
-    const getTournamentStatusColor = () => {
-        switch (tournament.status) {
-            case "supportRequestReceived":
-                return "violet";
-            case "screeningOngoing":
-                return "indigo";
-            case "screeningConcluded":
-                return "info";
-            case "reviewOngoing":
-                return "yellow";
-            case "changesRequested":
-                return "orange";
-            case "badgeApproved":
-                return "success";
-            case "badgeRejected":
-                return "danger";
-            case "noBadgeRequested":
-                return "gray";
-            default:
-                return "gray";
-        }
-    };
-
     return (
         <Card
             shadow="sm"
@@ -58,7 +36,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     "--card-status-color": tournament.isActive
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)",
-                    "--banner-url": `url(${tournament.banner?.url || "https://nats.are-la.me/29HdcgA.png"})`,
+                    "--banner-url": `url(${tournament.bannerUrl})`,
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
@@ -82,9 +60,7 @@ export default function TournamentCard({ tournament }: IProps) {
                         </Badge>
                     </Tooltip>
                     <GameModeIcon mode={tournament.modes} />
-                    <Badge color={getTournamentStatusColor()} variant="light">
-                        {tournament.statusString}
-                    </Badge>
+                    <TournamentStatusBadge tournament={tournament} />
                 </Group>
             </Stack>
         </Card>
