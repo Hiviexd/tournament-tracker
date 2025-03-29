@@ -53,4 +53,5 @@ export interface ITournament extends Document {
     isTournament: boolean;
     isContest: boolean;
     statusString: string;
+    bannerUrl: string;
 }

@@ -33,6 +33,10 @@ TournamentSchema.virtual("statusString").get(function (this: ITournament) {
     return _.startCase(this.status);
 });
 
+TournamentSchema.virtual("bannerUrl").get(function (this: ITournament) {
+    return this.banner?.url || "https://nats.are-la.me/29HdcgA.png";
+});
+
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);
 
 export default Tournament;
