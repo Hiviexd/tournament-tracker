@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
+import _ from "lodash";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -12,8 +13,8 @@ const TournamentSchema = new Schema<ITournament>(
         type: { type: String, required: true },
         status: { type: String, required: true },
         isActive: { type: Boolean, default: true },
-        bannerUrl: { type: String },
-        badges: [{ type: String }],
+        banner: { type: Schema.Types.ObjectId, ref: "Attachment" },
+        badges: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
     },
@@ -26,6 +27,10 @@ TournamentSchema.virtual("isTournament").get(function (this: ITournament) {
 
 TournamentSchema.virtual("isContest").get(function (this: ITournament) {
     return this.type === "contest";
+});
+
+TournamentSchema.virtual("statusString").get(function (this: ITournament) {
+    return _.startCase(this.status);
 });
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);

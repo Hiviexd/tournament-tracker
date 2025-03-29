@@ -1,6 +1,7 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
 import { IVote } from "./Vote";
+import { IAttachment } from "./Attachment";
 
 export type TournamentType = "tournament" | "contest";
 
@@ -8,11 +9,13 @@ export type GameMode = "osu" | "taiko" | "catch" | "mania";
 
 export type TournamentStatus =
     | "supportRequestReceived"
+    | "screeningOngoing"
     | "screeningConcluded"
     | "reviewOngoing"
     | "changesRequested"
     | "badgeApproved"
-    | "badgeRejected";
+    | "badgeRejected"
+    | "noBadgeRequested";
 
 export interface TournamentQueryParams {
     name?: string | RegExp;
@@ -33,8 +36,8 @@ export interface ITournament extends Document {
     type: TournamentType;
     status: TournamentStatus;
     isActive: boolean;
-    bannerUrl?: string;
-    badges?: string[];
+    banner?: IAttachment;
+    badges?: IAttachment[];
     assignedReviewers?: IUser[];
     reviews?: IVote[];
     createdAt: Date;
@@ -42,4 +45,5 @@ export interface ITournament extends Document {
     // virtuals
     isTournament: boolean;
     isContest: boolean;
+    statusString: string;
 }

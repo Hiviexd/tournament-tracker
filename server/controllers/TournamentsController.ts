@@ -3,6 +3,7 @@ import UserService from "../services/UserService";
 import { TournamentQueryParams, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
 import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
+import UploadService from "../services/UploadService";
 
 const defaultPopulate = [
     {
@@ -23,7 +24,9 @@ const defaultPopulate = [
     },
 ];
 
-const defaultLimit = 20;
+const DEFAULT_LIMIT = 20;
+
+const FILE_UPLOAD_CATEGORY = "tournaments";
 
 const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -assignedReviewers");
 
@@ -43,7 +46,7 @@ class TournamentsController {
         if (status) query.status = status;
         if (state) query.isActive = state === "active";
 
-        const skip = (Number(page) - 1) * defaultLimit;
+        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
         const isCommittee = res.locals.user.isCommittee;
 
         const [tournaments, total] = await Promise.all([
@@ -51,7 +54,7 @@ class TournamentsController {
                 .select(selectFields(isCommittee))
                 .populate(defaultPopulate)
                 .skip(skip)
-                .limit(defaultLimit),
+                .limit(DEFAULT_LIMIT),
             Tournament.countDocuments(query),
         ]);
 
@@ -59,7 +62,7 @@ class TournamentsController {
             tournaments,
             total,
             page: Number(page),
-            pages: Math.ceil(total / defaultLimit),
+            pages: Math.ceil(total / DEFAULT_LIMIT),
         });
     }
 
@@ -77,7 +80,8 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req, res) {
-        const { name, hostId, modes, type, bannerUrl, forumUrl, startDate, endDate } = req.body;
+        const { name, hostId, modes, type, forumUrl, startDate, endDate } = req.body;
+        const files = req.files as Express.Multer.File[];
 
         const host = await User.findById(hostId).orFail();
 
@@ -89,11 +93,21 @@ class TournamentsController {
             modes,
             type,
             status,
-            bannerUrl,
             forumUrl,
             startDate,
             endDate,
         });
+
+        await tournament.save();
+
+        if (files?.length) {
+            tournament.banner = await UploadService.handleFileUploads(
+                files,
+                FILE_UPLOAD_CATEGORY,
+                tournament._id,
+                host._id
+            )[0];
+        }
 
         await tournament.save();
 
