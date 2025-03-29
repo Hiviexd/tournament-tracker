@@ -19,6 +19,10 @@
         "status": "partial",
         "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
     },
+    "Lusumi": {
+        "status": "partial",
+        "notes": "Do not use the track titled 'execution_program'."
+    },
     "Morimori Atsushi": {
         "status": "partial",
         "notes": "Do not use or upload tracks that are not available on the creator's Featured Artist listing."
