@@ -22,6 +22,10 @@ const defaultPopulate = [
             select: "username osuId",
         },
     },
+    {
+        path: "banner",
+        select: "url",
+    },
 ];
 
 const DEFAULT_LIMIT = 20;
@@ -98,15 +102,16 @@ class TournamentsController {
             endDate,
         });
 
-        await tournament.save();
 
         if (files?.length) {
-            tournament.banner = await UploadService.handleFileUploads(
+            const banner = await UploadService.handleFileUploads(
                 files,
                 FILE_UPLOAD_CATEGORY,
                 tournament._id,
                 host._id
-            )[0];
+            );
+
+            tournament.banner = banner[0];
         }
 
         await tournament.save();
