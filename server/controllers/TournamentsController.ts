@@ -8,18 +8,18 @@ import UploadService from "../services/UploadService";
 const defaultPopulate = [
     {
         path: "host",
-        select: "username osuId",
+        select: "username osuId groups",
     },
     {
         path: "assignedReviewers",
-        select: "username osuId",
+        select: "username osuId groups",
     },
     {
         path: "reviews",
         select: "content author vote",
         populate: {
             path: "author",
-            select: "username osuId",
+            select: "username osuId groups",
         },
     },
     {
