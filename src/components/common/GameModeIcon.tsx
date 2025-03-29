@@ -24,7 +24,7 @@ export default function GameModeIcon({ mode }: Props) {
         return (
             <Group gap={0} wrap="nowrap">
                 {mode.map((m) => (
-                    <Tooltip label={getModeName(m)}>
+                    <Tooltip key={m} label={getModeName(m)}>
                         <div key={m} className={`gamemode-icon ${m}`} />
                     </Tooltip>
                 ))}
@@ -33,8 +33,8 @@ export default function GameModeIcon({ mode }: Props) {
     }
 
     return (
-        <Tooltip label={getModeName(mode)}>
-            <div className={`gamemode-icon ${mode}`} />
+        <Tooltip key={mode} label={getModeName(mode)}>
+            <div key={mode} className={`gamemode-icon ${mode}`} />
         </Tooltip>
     );
 }
