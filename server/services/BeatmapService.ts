@@ -196,6 +196,10 @@ export default class BeatmapService {
      * @returns True if the beatmapset is disallowed
      */
     public static isDisallowed(beatmapset: IBeatmapset): boolean {
+        if (this.isDMCA(beatmapset)) {
+            return true;
+        }
+
         if (this.isOverride(beatmapset, "disallowed")) {
             return true;
         }
