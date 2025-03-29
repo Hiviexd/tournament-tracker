@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Stack, Group, Button, Card, Text, Pagination, Skeleton, SimpleGrid } from "@mantine/core";
+import { Stack, Group, Button, Card, Text, Pagination, Skeleton, SimpleGrid, Divider } from "@mantine/core";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -80,10 +80,12 @@ export default function TournamentListPage() {
                 variant="filled"
                 color="primary"
                 fullWidth>
-                Create New Tournament
+                New Tournament
             </Button>
 
             <TournamentCreateModal opened={opened} onClose={close} />
+
+            <Divider />
 
             {isLoading ? (
                 <LoadingState />
