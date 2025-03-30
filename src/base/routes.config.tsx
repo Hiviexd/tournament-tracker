@@ -96,8 +96,19 @@ const routes: RouteConfig[] = [
         path: "/tournaments",
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
-        icon: "users",
-        permissions: ["admin"],
+        icon: "trophy",
+        permissions: [],
+    },
+    {
+        path: "/tournaments/:tournamentId",
+        page: <TournamentDetailsPage />,
+        title: "Tournament Details",
+        icon: "trophy",
+        permissions: [],
+        parent: {
+            title: "Tournaments",
+            path: "/tournaments",
+        },
     },
     {
         path: "/tickets",
@@ -200,13 +211,6 @@ const routes: RouteConfig[] = [
         page: <MappoolCompliancePage />,
         title: "Mappool Compliance",
         icon: "check-circle",
-        permissions: [],
-    },
-    {
-        path: "/tournaments/:tournamentId",
-        page: <TournamentDetailsPage />,
-        title: "Tournament Details",
-        icon: "users",
         permissions: [],
     },
     {
