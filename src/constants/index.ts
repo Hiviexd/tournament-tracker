@@ -79,7 +79,8 @@ export const REVIEW_CHECKLIST = [
         category: "Tournament format, theme & more",
         items: [
             "Max 2 iterations per year",
-            "Format is RO16 double elimination or larger",
+            "Format is Ro16 double elimination or Ro32 single elimination or larger",
+            "(If LAN) Format is Ro8 double elimination or Ro16 single elimination or larger",
             "Theme is appropriate",
             "Forum post contains report link",
         ],
@@ -106,12 +107,17 @@ export const REVIEW_CHECKLIST = [
         category: "Required publicly available information",
         items: [
             "Public and easily accessible up-to-date list of staff",
-            "Public and easily accessible list of matches with MP links",
+            "Public and easily accessible list of matches with MP links (including qualifiers where applicable)",
         ],
     },
     {
         category: "Badge",
-        items: ["Badge is of acceptable quality", "Badge uses correct resolution (172x80)", "Characters in designs are permitted to use", "No sponsors present"],
+        items: [
+            "Badge is of acceptable quality",
+            "Badge uses correct resolution (172x80)",
+            "Characters in designs are permitted to use",
+            "No sponsors present",
+        ],
     },
     {
         category: "Tournament mappools",
