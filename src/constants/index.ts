@@ -74,53 +74,7 @@ export const VOTE_PRESETS = {
 
 export const DEFAULT_HUE = "36";
 
-export const REVIEW_CHECKLIST = [
-    {
-        category: "Tournament format, theme & more",
-        items: [
-            "Max 2 iterations per year",
-            "Format is Ro16 double elimination or Ro32 single elimination or larger",
-            "(If LAN) Format is Ro8 double elimination or Ro16 single elimination or larger",
-            "Theme is appropriate",
-            "Forum post contains report link",
-        ],
-    },
-    {
-        category: "Player signup criteria",
-        items: [
-            "Region restriction makes sense",
-            "Rank restriction falls within specified limits",
-            "No collection of personal information",
-            "No screened out players permitted",
-            "Any filtering or skillban process used is proper",
-        ],
-    },
-    {
-        category: "Player seeding",
-        items: [
-            "Method of seeding is documented when doing qualifiers",
-            "Seeding is reproducable and the method accurate and correct",
-            "Check for manual adjustments in player/team seeding",
-        ],
-    },
-    {
-        category: "Required publicly available information",
-        items: [
-            "Public and easily accessible up-to-date list of staff",
-            "Public and easily accessible list of matches with MP links (including qualifiers where applicable)",
-        ],
-    },
-    {
-        category: "Badge",
-        items: [
-            "Badge is of acceptable quality",
-            "Badge uses correct resolution (172x80)",
-            "Characters in designs are permitted to use",
-            "No sponsors present",
-        ],
-    },
-    {
-        category: "Tournament mappools",
-        items: ["Pools are publicly available", "Pools adhere to content usage permissions"],
-    },
-] as const;
+import checklist from "../../checklist.json";
+
+export const TC_REVIEW_CHECKLIST = checklist.tc;
+export const CC_REVIEW_CHECKLIST = checklist.cc;

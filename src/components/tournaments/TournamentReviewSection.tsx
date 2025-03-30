@@ -180,7 +180,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                     <Title order={4}>Reviews</Title>
                                     <Stack gap="md">
                                         {tournament.reviews.map((review) => (
-                                            <TournamentReviewCard key={review._id} review={review} />
+                                            <TournamentReviewCard key={review._id} tournament={tournament} review={review} />
                                         ))}
                                     </Stack>
                                 </>

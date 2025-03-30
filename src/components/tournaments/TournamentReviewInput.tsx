@@ -1,7 +1,7 @@
 import { Stack, Checkbox, Radio, Group, Button, Text } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { useState } from "react";
-import { REVIEW_CHECKLIST } from "../../constants";
+import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSubmitReview } from "../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../store/atoms";
@@ -19,6 +19,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const userReview = tournament.reviews?.find((review) => review.author._id === user?._id);
     const autoSaveKey = `tournament-review-${tournament._id}`;
+    const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
     // Initialize state with existing review data or defaults
     const [checkedState, setCheckedState] = useState<ChecklistState>(() => {

@@ -2,15 +2,19 @@ import { Card, Stack, Badge, Text, Box } from "@mantine/core";
 import { IReview } from "../../../interfaces/Review";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
-import { REVIEW_CHECKLIST } from "../../constants";
+import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ITournament } from "../../../interfaces/Tournament";
 
 interface IProps {
+    tournament: ITournament;
     review: IReview;
 }
 
-export default function TournamentReviewCard({ review }: IProps) {
+export default function TournamentReviewCard({ tournament, review }: IProps) {
+    const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
+
     const getVoteColor = () => {
         switch (review.vote) {
             case "approve":
