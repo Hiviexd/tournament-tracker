@@ -10,6 +10,7 @@ import {
     reassignReviewer,
     submitReview,
     uploadBadges,
+    downloadBadges,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
@@ -110,5 +111,11 @@ export function useUploadBadges(tournamentId: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
         },
+    });
+}
+
+export function useDownloadBadges(tournamentId: string) {
+    return useMutation({
+        mutationFn: () => downloadBadges(tournamentId),
     });
 }

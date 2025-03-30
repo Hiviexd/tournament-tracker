@@ -7,6 +7,8 @@ import User from "../models/userModel";
 import UploadService from "../services/UploadService";
 import Review from "../models/reviewModel";
 import sharp from "sharp";
+import archiver from "archiver";
+import axios from "axios";
 
 const defaultPopulate = [
     {
@@ -315,7 +317,7 @@ class TournamentsController {
 
                 if (metadata.width !== 172 || metadata.height !== 80) {
                     return res.json({
-                        error: `Invalid badge dimensions. Expected 172x80, got ${metadata.width}x${metadata.height}`,
+                        error: `Invalid badge dimensions in file ${file.originalname}. Expected 172x80, got ${metadata.width}x${metadata.height}`,
                     });
                 }
             } catch (error) {
@@ -338,6 +340,83 @@ class TournamentsController {
         await tournament.save();
 
         res.json({ message: "Badges uploaded successfully!" });
+    }
+
+    /** GET download badges */
+    public async downloadBadges(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+        const badges = tournament.badges;
+
+        if (!badges?.length) {
+            return res.json({ error: "No badges found" });
+        }
+
+        try {
+            // Create a zip file
+            const archive = archiver("zip", {
+                zlib: { level: 9 }, // Maximum compression
+            });
+
+            // Listen for all archive data to be written
+            archive.on("error", (err) => {
+                throw err;
+            });
+
+            // Set the headers for file download
+            res.setHeader("Content-Type", "application/zip");
+            res.setHeader("Content-Disposition", `attachment; filename=${tournament.name}-badges.zip`);
+
+            // Pipe archive data to the response
+            archive.pipe(res);
+
+            let badgeCount = 1;
+
+            // Process each badge
+            for (const badge of badges) {
+                try {
+                    // Download the badge image
+                    const response = await axios.get(badge.url, { responseType: "arraybuffer" });
+                    const buffer = Buffer.from(response.data);
+
+                    // Get file extension from URL
+                    const ext = badge.url.split(".").pop();
+                    let baseFilename = tournament.name.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+
+                    if (badgeCount > 1) {
+                        baseFilename = `${baseFilename}-${badgeCount}`;
+                    }
+
+                    // Add the 2x version (original 172x80)
+                    archive.append(buffer, { name: `${baseFilename}@2x.${ext}` });
+
+                    // Create and add the 1x version (86x40)
+                    const resizedBuffer = await sharp(buffer)
+                        .resize(86, 40, {
+                            fit: "fill",
+                            withoutEnlargement: true,
+                        })
+                        .toBuffer();
+
+                    archive.append(resizedBuffer, { name: `${baseFilename}.${ext}` });
+
+                    badgeCount++;
+                } catch (error) {
+                    console.error("Error processing badge:", error);
+                    throw new Error("Failed to process badges");
+                }
+            }
+
+            // Finalize the archive and wait for it to complete
+            await archive.finalize();
+        } catch (error) {
+            console.error("Error creating zip:", error);
+            // Only send error if headers haven't been sent
+            if (!res.headersSent) {
+                res.json({ error: "Failed to create badge archive" });
+            }
+        }
     }
 }
 

@@ -2,7 +2,7 @@ import { Stack, Group, Text, ActionIcon, Box, Image } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { useUploadBadges } from "../../../hooks/useTournaments";
+import { useUploadBadges, useDownloadBadges } from "../../../hooks/useTournaments";
 import FileUploadInput from "../../common/FileUploadInput";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 
@@ -13,7 +13,14 @@ interface IProps {
 export default function TournamentBadges({ tournament }: IProps) {
     const [isEditingBadges, setIsEditingBadges] = useState(false);
     const uploadBadgesMutation = useUploadBadges(tournament._id);
+    const downloadBadgesMutation = useDownloadBadges(tournament._id);
     const { files, handleFileChange, clearFiles } = useFileUpload();
+
+    const uploadOptions = {
+        maxFiles: 8,
+        maxSize: 5 * 1024 * 1024, // 5MB
+        allowedTypes: ["image/jpeg", "image/png"],
+    };
 
     const handleUploadBadges = async () => {
         try {
@@ -45,13 +52,25 @@ export default function TournamentBadges({ tournament }: IProps) {
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
                 ) : (
-                    <ActionIcon
-                        variant="subtle"
-                        onClick={() => setIsEditingBadges(true)}
-                        color="info"
-                        title="Upload badges">
-                        <FontAwesomeIcon icon="pen-to-square" />
-                    </ActionIcon>
+                    <Group gap={4}>
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => setIsEditingBadges(true)}
+                            color="info"
+                            title="Upload badges">
+                            <FontAwesomeIcon icon="pen-to-square" />
+                        </ActionIcon>
+                        {badges.length > 0 && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => downloadBadgesMutation.mutate()}
+                                color="success"
+                                loading={downloadBadgesMutation.isPending}
+                                title="Download badges">
+                                <FontAwesomeIcon icon="download" />
+                            </ActionIcon>
+                        )}
+                    </Group>
                 )}
             </Group>
 
@@ -67,18 +86,21 @@ export default function TournamentBadges({ tournament }: IProps) {
                                         alt={`Badge ${index + 1}`}
                                         w={86}
                                         h={40}
-                                        radius="sm"
+                                        radius="0"
                                     />
                                 ))}
                             </Group>
                         )}
-                        <Group align="end" style={{ width: "50%" }}>
+                        <Group align="end" w={{ base: "100%", xs: "50%" }}>
                             <Box style={{ flex: 1 }}>
                                 <FileUploadInput
                                     value={files}
                                     onChange={handleFileChange}
                                     label="Upload Badges"
                                     description="Badge dimensions must be 172x80 pixels"
+                                    placeholder="Up to 8 badges"
+                                    options={uploadOptions}
+                                    imagesOnly
                                 />
                             </Box>
                             <ActionIcon
@@ -86,6 +108,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 onClick={handleUploadBadges}
                                 color="success"
                                 title="Save"
+                                mb={5}
                                 disabled={!files.length}>
                                 <FontAwesomeIcon icon="save" />
                             </ActionIcon>
@@ -94,7 +117,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                 ) : badges.length > 0 ? (
                     <Group gap="xs">
                         {badges.map((badge, index) => (
-                            <Image key={index} src={badge.url} alt={`Badge ${index + 1}`} w={86} h={40} radius="sm" />
+                            <Image key={index} src={badge.url} alt={`Badge ${index + 1}`} w={86} h={40} radius="0" />
                         ))}
                     </Group>
                 ) : (
@@ -102,14 +125,14 @@ export default function TournamentBadges({ tournament }: IProps) {
                         w={86}
                         h={40}
                         style={{
-                            border: "1px solid var(--mantine-color-gray-3)",
                             borderRadius: "var(--mantine-radius-sm)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            backgroundColor: "var(--mantine-color-primary-10)",
                         }}>
                         <Text size="xs" c="dimmed">
-                            None
+                            None...
                         </Text>
                     </Box>
                 )}

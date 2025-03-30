@@ -61,3 +61,22 @@ export const uploadBadges = async (tournamentId: string, badgeFiles: File[]) => 
     });
     return response.data;
 };
+
+export const downloadBadges = async (tournamentId: string) => {
+    const response = await axios.get(`/api/tournaments/${tournamentId}/downloadBadges`, {
+        responseType: "blob",
+    });
+
+    // Create a download link and trigger it
+    const url = window.URL.createObjectURL(response.data);
+    const a = document.createElement("a");
+    a.href = url;
+    const filename = response.headers["content-disposition"]?.split("filename=")[1] || "badges.zip";
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    return response.data;
+};

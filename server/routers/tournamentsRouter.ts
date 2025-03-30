@@ -24,5 +24,6 @@ tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.i
 tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isAdmin, TournamentsController.reassignReviewer);
 tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isAdmin, TournamentsController.submitReview);
 tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isAdmin, tournamentBadgeUpload, TournamentsController.uploadBadges);
+tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isAdmin, TournamentsController.downloadBadges);
 
 export default tournamentsRouter;
