@@ -9,6 +9,7 @@ export interface TournamentQueryParams {
     type?: string;
     status?: string;
     state?: string;
+    showNeedsAttention?: boolean;
     page?: number;
 }
 

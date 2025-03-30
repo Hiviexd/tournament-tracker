@@ -46,8 +46,9 @@ const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -as
 class TournamentsController {
     /** GET tournament listing */
     public async index(req: Request, res: Response) {
-        const { name, mode, host, type, status, state, page = 1 } = req.query;
+        const { name, mode, host, type, status, state, showNeedsAttention, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
+        const user = res.locals!.user;
 
         if (name) query.name = new RegExp(name as string, "i");
         if (mode) query.modes = { $in: [mode as GameMode] };
@@ -58,6 +59,22 @@ class TournamentsController {
         if (type) query.type = type as TournamentType;
         if (status) query.status = status as TournamentStatus;
         if (state) query.isActive = state === "active";
+
+        if (showNeedsAttention === "true" && user && user.isCommittee) {
+            query.isActive = true;
+            // match tournaments where:
+            // 1. status is reviewOngoing or changesRequested
+            // 2. user is in assignedReviewers array
+            query.$and = [
+                {
+                    $or: [
+                        { status: "reviewOngoing" },
+                        { status: "changesRequested" },
+                    ],
+                },
+                { assignedReviewers: user._id },
+            ];
+        }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
         const isCommittee = res.locals!.user!.isCommittee;

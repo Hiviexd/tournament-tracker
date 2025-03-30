@@ -13,6 +13,8 @@ import TournamentFilters from "../components/tournaments/TournamentFilters";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import TournamentCreateModal from "../components/tournaments/TournamentCreateModal";
 import { useTournaments } from "../hooks/useTournaments";
+import { loggedInUserAtom } from "../store/atoms";
+import { useAtom } from "jotai";
 
 interface FilterValues {
     name: string;
@@ -21,9 +23,11 @@ interface FilterValues {
     type: TournamentType | "";
     status: TournamentStatus | "";
     state: string;
+    showNeedsAttention: boolean;
 }
 
 export default function TournamentListPage() {
+    const [user] = useAtom(loggedInUserAtom);
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [filters, setFilters] = useState<FilterValues>({
@@ -33,6 +37,7 @@ export default function TournamentListPage() {
         type: (searchParams.get("type") as TournamentType) || "",
         status: (searchParams.get("status") as TournamentStatus) || "",
         state: searchParams.get("state") || "",
+        showNeedsAttention: searchParams.get("showNeedsAttention") === "true" || false,
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedName] = useDebouncedValue(filters.name, 400);
@@ -45,6 +50,7 @@ export default function TournamentListPage() {
         type: filters.type,
         status: filters.status,
         state: filters.state,
+        showNeedsAttention: filters.showNeedsAttention,
         page,
     });
 
@@ -57,6 +63,7 @@ export default function TournamentListPage() {
         if (filters.type) params.set("type", filters.type);
         if (filters.status) params.set("status", filters.status);
         if (filters.state) params.set("state", filters.state);
+        if (filters.showNeedsAttention) params.set("needsAttention", filters.showNeedsAttention.toString());
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
     }, [
@@ -66,6 +73,7 @@ export default function TournamentListPage() {
         filters.type,
         filters.status,
         filters.state,
+        filters.showNeedsAttention,
         page,
         setSearchParams,
     ]);
@@ -74,14 +82,16 @@ export default function TournamentListPage() {
         <Stack gap="md">
             <TournamentFilters values={filters} onChange={setFilters} />
 
-            <Button
-                onClick={open}
-                leftSection={<FontAwesomeIcon icon="plus" />}
-                variant="filled"
-                color="primary"
-                fullWidth>
-                New Tournament
-            </Button>
+            {user?.isCommittee && (
+                <Button
+                    onClick={open}
+                    leftSection={<FontAwesomeIcon icon="plus" />}
+                    variant="filled"
+                    color="primary"
+                    fullWidth>
+                    New Tournament
+                </Button>
+            )}
 
             <TournamentCreateModal opened={opened} onClose={close} />
 

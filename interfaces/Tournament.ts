@@ -24,7 +24,11 @@ export interface TournamentQueryParams {
     type?: TournamentType;
     status?: TournamentStatus;
     isActive?: boolean;
+    showNeedsAttention?: boolean;
     page?: number;
+
+    // backend only
+    $and?: any[]; // For complex MongoDB queries
 }
 
 export interface ITournamentFormData extends FormData {

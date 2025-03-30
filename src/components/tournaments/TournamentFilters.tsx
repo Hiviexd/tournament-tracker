@@ -1,8 +1,10 @@
-import { Card, TextInput, Select, Stack, SimpleGrid } from "@mantine/core";
+import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     values: {
@@ -12,11 +14,13 @@ interface IProps {
         type: TournamentType | "";
         status: TournamentStatus | "";
         state: string;
+        showNeedsAttention: boolean;
     };
     onChange: (values: any) => void;
 }
 
 export default function TournamentFilters({ values, onChange }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const handleChange = (key: string, value: any) => {
         onChange({ ...values, [key]: value });
     };
@@ -103,6 +107,13 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         data={activeOptions}
                         clearable
                     />
+                    {user?.isCommittee && (
+                        <Checkbox
+                            label="Show only tournaments assigned to me"
+                            checked={values.showNeedsAttention}
+                            onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
+                        />
+                    )}
                 </SimpleGrid>
             </Stack>
         </Card>
