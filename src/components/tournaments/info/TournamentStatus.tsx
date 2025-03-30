@@ -28,7 +28,7 @@ export default function TournamentStatus({ tournament }: IProps) {
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
     const editTournamentMutation = useEditTournament(tournament._id);
 
-    const statusOptions = [
+    const fullStatusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
         { value: "screeningOngoing", label: "Screening Ongoing" },
         { value: "screeningConcluded", label: "Screening Concluded" },
@@ -38,6 +38,10 @@ export default function TournamentStatus({ tournament }: IProps) {
         { value: "badgeRejected", label: "Badge Rejected" },
         { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
+
+    const statusOptions = fullStatusOptions.filter(
+        (status) => status.value !== "screeningOngoing" && status.value !== "screeningConcluded"
+    );
 
     const handleStatusSave = async () => {
         if (confirm("Are you sure you want to update the status? This will notify the tournament host.")) {
@@ -74,7 +78,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                             title="Cancel">
                             <FontAwesomeIcon icon="xmark" />
                         </ActionIcon>
-                    ) : user?.isCommittee ? (
+                    ) : user?.isCommittee || user?.isAdmin ? (
                         <ActionIcon
                             variant="subtle"
                             onClick={() => setIsEditingStatus(true)}
@@ -86,13 +90,12 @@ export default function TournamentStatus({ tournament }: IProps) {
                 </Group>
 
                 {isEditingStatus ? (
-                    <Group gap="xs">
+                    <Group gap="xs" w={{ base: "100%", xs: "50%" }}>
                         <Select
                             value={selectedStatus}
                             onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
-                            data={statusOptions}
+                            data={user?.isAdmin ? fullStatusOptions : statusOptions}
                             allowDeselect={false}
-                            style={{ width: "20%" }}
                         />
                         <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
                             <FontAwesomeIcon icon="save" />
