@@ -6,6 +6,7 @@ import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 import UploadService from "../services/UploadService";
 import Review from "../models/reviewModel";
+import sharp from "sharp";
 
 const defaultPopulate = [
     {
@@ -26,6 +27,10 @@ const defaultPopulate = [
     },
     {
         path: "banner",
+        select: "url",
+    },
+    {
+        path: "badges",
         select: "url",
     },
 ];
@@ -90,6 +95,7 @@ class TournamentsController {
     public async create(req: Request, res: Response) {
         const { name, hostId, modes, type, forumUrl, startDate, endDate } = req.body;
         const files = req.files as Express.Multer.File[];
+        const currentUser = res.locals!.user!;
 
         const host = await User.findById(hostId).orFail();
 
@@ -107,7 +113,12 @@ class TournamentsController {
         });
 
         if (files?.length) {
-            const banner = await UploadService.handleFileUploads(files, FILE_UPLOAD_CATEGORY, tournament._id, host._id);
+            const banner = await UploadService.handleFileUploads(
+                files,
+                FILE_UPLOAD_CATEGORY,
+                tournament._id,
+                currentUser._id
+            );
 
             tournament.banner = banner[0];
         }
@@ -283,6 +294,50 @@ class TournamentsController {
         res.json({ message: "Review submitted successfully!" });
 
         // TODO: logging and discord
+    }
+
+    /** POST upload badges */
+    public async uploadBadges(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const files = req.files as Express.Multer.File[];
+        const currentUser = res.locals!.user!;
+
+        const tournament = await Tournament.findById(tournamentId).orFail();
+
+        if (!files?.length) {
+            return res.json({ error: "No files uploaded" });
+        }
+
+        // Check dimensions of each file before uploading
+        for (const file of files) {
+            try {
+                const metadata = await sharp(file.buffer).metadata();
+
+                if (metadata.width !== 172 || metadata.height !== 80) {
+                    return res.json({
+                        error: `Invalid badge dimensions. Expected 172x80, got ${metadata.width}x${metadata.height}`,
+                    });
+                }
+            } catch (error) {
+                return res.json({
+                    error: "Failed to process image. Please ensure it's a valid PNG or JPG file.",
+                });
+            }
+        }
+
+        const badges = await UploadService.handleFileUploads(
+            files,
+            FILE_UPLOAD_CATEGORY,
+            tournament._id,
+            currentUser._id
+        );
+
+        console.log(badges);
+        tournament.badges = badges;
+
+        await tournament.save();
+
+        res.json({ message: "Badges uploaded successfully!" });
     }
 }
 

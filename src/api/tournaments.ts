@@ -38,11 +38,26 @@ export const assignReviewers = async (tournamentId: string) => {
 };
 
 export const reassignReviewer = async (tournamentId: string, oldReviewerId: string, newReviewerId: string) => {
-    const response = await axios.post(`/api/tournaments/${tournamentId}/reassignReviewer`, { oldReviewerId, newReviewerId });
+    const response = await axios.post(`/api/tournaments/${tournamentId}/reassignReviewer`, {
+        oldReviewerId,
+        newReviewerId,
+    });
     return response.data;
 };
 
 export const submitReview = async (tournamentId: string, reviewData: Partial<IReview>) => {
     const response = await axios.post(`/api/tournaments/${tournamentId}/submitReview`, reviewData);
+    return response.data;
+};
+
+export const uploadBadges = async (tournamentId: string, badgeFiles: File[]) => {
+    const formData = new FormData();
+    badgeFiles.forEach((file) => formData.append("files", file));
+
+    const response = await axios.post(`/api/tournaments/${tournamentId}/uploadBadges`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
     return response.data;
 };

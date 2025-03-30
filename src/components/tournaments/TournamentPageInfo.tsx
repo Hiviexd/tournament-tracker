@@ -1,8 +1,7 @@
 import {
-    Title,
     Stack,
     Group,
-    Select,
+    Title,
     Text,
     Progress,
     Tooltip,
@@ -11,14 +10,19 @@ import {
     TextInput,
     Anchor,
     Card,
+    Box,
+    Select,
+    Image,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import TournamentStatusBadge from "./TournamentStatusBadge";
-import { useEditTournament } from "../../hooks/useTournaments";
+import { useEditTournament, useUploadBadges } from "../../hooks/useTournaments";
 import moment from "moment";
+import FileUploadInput from "../common/FileUploadInput";
+import { useFileUpload } from "../../hooks/useFileUpload";
 
 interface IProps {
     tournament: ITournament;
@@ -38,8 +42,8 @@ const STATUS_PROGRESSION: { [key in TournamentStatus]: { step: number; color: st
 export default function TournamentPageInfo({ tournament }: IProps) {
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [isEditingForumUrl, setIsEditingForumUrl] = useState(false);
-    const [isEditingStartDate, setIsEditingStartDate] = useState(false);
-    const [isEditingEndDate, setIsEditingEndDate] = useState(false);
+    const [isEditingDates, setIsEditingDates] = useState(false);
+    const [isEditingBadges, setIsEditingBadges] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatus>(tournament.status);
     const [forumUrl, setForumUrl] = useState(tournament.forumUrl || "");
     const [startDate, setStartDate] = useState<Date | null>(
@@ -48,6 +52,8 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     const [endDate, setEndDate] = useState<Date | null>(tournament.endDate ? new Date(tournament.endDate) : null);
 
     const editTournamentMutation = useEditTournament(tournament._id);
+    const uploadBadgesMutation = useUploadBadges(tournament._id);
+    const { files, handleFileChange, clearFiles } = useFileUpload();
 
     const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
@@ -77,7 +83,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
             await editTournamentMutation.mutateAsync({
                 startDate: startDate.toISOString() as unknown as Date,
             });
-            setIsEditingStartDate(false);
+            setIsEditingDates(false);
         }
     };
 
@@ -86,7 +92,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
             await editTournamentMutation.mutateAsync({
                 endDate: endDate.toISOString() as unknown as Date,
             });
-            setIsEditingEndDate(false);
+            setIsEditingDates(false);
         }
     };
 
@@ -108,6 +114,16 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     };
 
     const progressInfo = getProgressInfo();
+
+    const handleUploadBadges = async () => {
+        try {
+            await uploadBadgesMutation.mutateAsync(files);
+            setIsEditingBadges(false);
+            clearFiles();
+        } catch (error) {
+            console.error("Failed to upload badges:", error);
+        }
+    };
 
     return (
         <Card shadow="sm" p="lg" radius="md">
@@ -247,7 +263,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                 Start Date
                             </Text>
                             <Group>
-                                {isEditingStartDate ? (
+                                {isEditingDates ? (
                                     <>
                                         <DateInput
                                             value={startDate}
@@ -269,7 +285,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             <ActionIcon
                                                 variant="subtle"
                                                 onClick={() => {
-                                                    setIsEditingStartDate(false);
+                                                    setIsEditingDates(false);
                                                     setStartDate(
                                                         tournament.startDate ? new Date(tournament.startDate) : null
                                                     );
@@ -285,7 +301,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                         <Text size="sm">{moment(tournament.startDate).format("YYYY-MM-DD")}</Text>
                                         <ActionIcon
                                             variant="subtle"
-                                            onClick={() => setIsEditingStartDate(true)}
+                                            onClick={() => setIsEditingDates(true)}
                                             color="info"
                                             title="Update start date">
                                             <FontAwesomeIcon icon="pen-to-square" />
@@ -300,7 +316,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                 End Date
                             </Text>
                             <Group>
-                                {isEditingEndDate ? (
+                                {isEditingDates ? (
                                     <>
                                         <DateInput
                                             value={endDate}
@@ -323,7 +339,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             <ActionIcon
                                                 variant="subtle"
                                                 onClick={() => {
-                                                    setIsEditingEndDate(false);
+                                                    setIsEditingDates(false);
                                                     setEndDate(
                                                         tournament.endDate ? new Date(tournament.endDate) : null
                                                     );
@@ -339,7 +355,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                         <Text size="sm">{moment(tournament.endDate).format("YYYY-MM-DD")}</Text>
                                         <ActionIcon
                                             variant="subtle"
-                                            onClick={() => setIsEditingEndDate(true)}
+                                            onClick={() => setIsEditingDates(true)}
                                             color="info"
                                             title="Update end date">
                                             <FontAwesomeIcon icon="pen-to-square" />
@@ -360,6 +376,99 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                             {tournament.isActive ? "Archive" : "Unarchive"}
                         </Button>
                     </Group>
+                </Stack>
+
+                <Stack gap="xs">
+                    <Group align="center" gap="xs">
+                        <Title order={4}>Badges</Title>
+                        {!isEditingBadges ? (
+                            <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                onClick={() => setIsEditingBadges(true)}
+                                title="Edit badges">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        ) : (
+                            <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                onClick={() => {
+                                    setIsEditingBadges(false);
+                                    clearFiles();
+                                }}
+                                title="Done editing">
+                                <FontAwesomeIcon icon="xmark" />
+                            </ActionIcon>
+                        )}
+                    </Group>
+
+                    {isEditingBadges ? (
+                        <Stack gap="sm">
+                            <Group gap="md">
+                                {tournament.badges?.length ? (
+                                    tournament.badges.map((badge, index) => (
+                                        <Image key={index} src={badge.url} w={86} h={40} />
+                                    ))
+                                ) : (
+                                    <Box
+                                        w={86}
+                                        h={40}
+                                        bg="primary.10"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            borderRadius: "var(--mantine-radius-sm)",
+                                        }}>
+                                        <Text size="sm" c="dimmed">
+                                            None...
+                                        </Text>
+                                    </Box>
+                                )}
+                            </Group>
+
+                            <FileUploadInput
+                                value={files}
+                                onChange={handleFileChange}
+                                label="Upload Badges to replace current ones"
+                                description="Badge dimensions must be 172x80 pixels"
+                            />
+
+                            <Group justify="flex-end">
+                                <Button
+                                    onClick={handleUploadBadges}
+                                    loading={uploadBadgesMutation.isPending}
+                                    disabled={!files.length}
+                                    leftSection={<FontAwesomeIcon icon="upload" />}>
+                                    Upload Badges
+                                </Button>
+                            </Group>
+                        </Stack>
+                    ) : (
+                        <Group gap="md">
+                            {tournament.badges?.length ? (
+                                tournament.badges.map((badge, index) => (
+                                    <Image key={index} src={badge.url} w={86} h={40} />
+                                ))
+                            ) : (
+                                <Box
+                                    w={86}
+                                    h={40}
+                                    bg="primary.10"
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderRadius: "var(--mantine-radius-sm)",
+                                    }}>
+                                    <Text size="sm" c="dimmed">
+                                        None
+                                    </Text>
+                                </Box>
+                            )}
+                        </Group>
+                    )}
                 </Stack>
             </Stack>
         </Card>

@@ -9,6 +9,7 @@ import {
     editTournament,
     reassignReviewer,
     submitReview,
+    uploadBadges,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
@@ -90,6 +91,20 @@ export function useSubmitReview(tournamentId: string) {
     return useMutation({
         mutationFn: async (reviewData: Partial<IReview>) => {
             const response = await submitReview(tournamentId, reviewData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useUploadBadges(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (badgeFiles: File[]) => {
+            const response = await uploadBadges(tournamentId, badgeFiles);
             return handleMutationResponse(response);
         },
         onSuccess: () => {
