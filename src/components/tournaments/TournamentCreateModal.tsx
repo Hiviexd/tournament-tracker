@@ -16,6 +16,12 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
     const { files, handleFileChange } = useFileUpload();
 
+    const uploadOptions = {
+        maxFiles: 1,
+        maxSize: 5 * 1024 * 1024, // 5MB
+        allowedTypes: ["image/jpeg", "image/png"],
+    };
+
     const form = useForm({
         initialValues: {
             name: "",
@@ -154,7 +160,15 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         />
                     </Group>
 
-                    <FileUploadInput value={files} onChange={handleFileChange} label="Banner" />
+                    <FileUploadInput
+                        value={files}
+                        onChange={handleFileChange}
+                        label="Banner"
+                        description="Allowed types: jpg, png"
+                        placeholder="Up to 1 file, maximum of 5MB"
+                        options={uploadOptions}
+                        imagesOnly
+                    />
 
                     <Group justify="flex-end">
                         <Button variant="subtle" onClick={onClose}>
