@@ -10,6 +10,7 @@ import {
     ActionIcon,
     Button,
     TextInput,
+    Anchor,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
@@ -176,7 +177,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                         value={forumUrl}
                                         onChange={(event) => setForumUrl(event.currentTarget.value)}
                                         placeholder="Enter forum URL..."
-                                        style={{ width: "40%" }}
+                                        style={{ width: "36%", minWidth: "200px" }}
                                     />
                                     <ActionIcon
                                         variant="subtle"
@@ -192,9 +193,13 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                 <>
                                     <Text>
                                         {tournament.forumUrl ? (
-                                            <a href={tournament.forumUrl} target="_blank" rel="noopener noreferrer">
-                                                {tournament.forumUrl}
-                                            </a>
+                                            <Anchor
+                                                lineClamp={2}
+                                                href={tournament.forumUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                {tournament.forumUrl.split("/").pop()}
+                                            </Anchor>
                                         ) : (
                                             <Text c="dimmed" fs="italic">
                                                 No forum URL set
@@ -240,7 +245,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <Text>{moment(tournament.startDate).format("YYYY-MM-DD")}</Text>
+                                        <Text size="sm">{moment(tournament.startDate).format("YYYY-MM-DD")}</Text>
                                         <ActionIcon
                                             variant="subtle"
                                             onClick={() => setIsEditingStartDate(true)}
@@ -280,7 +285,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <Text>{moment(tournament.endDate).format("YYYY-MM-DD")}</Text>
+                                        <Text size="sm">{moment(tournament.endDate).format("YYYY-MM-DD")}</Text>
                                         <ActionIcon
                                             variant="subtle"
                                             onClick={() => setIsEditingEndDate(true)}
@@ -294,21 +299,16 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                         </Stack>
                     </Group>
 
-                    <Stack gap={5}>
-                        <Text size="sm" fw={500}>
-                            Actions
-                        </Text>
-                        <Group>
-                            <Button
-                                variant="filled"
-                                color={tournament.isActive ? "danger" : "warning"}
-                                onClick={handleToggleState}
-                                leftSection={<FontAwesomeIcon icon="box-archive" />}
-                                loading={editTournamentMutation.isPending}>
-                                {tournament.isActive ? "Archive" : "Unarchive"}
-                            </Button>
-                        </Group>
-                    </Stack>
+                    <Group gap="xs">
+                        <Button
+                            variant="filled"
+                            color={tournament.isActive ? "danger" : "warning"}
+                            onClick={handleToggleState}
+                            leftSection={<FontAwesomeIcon icon="box-archive" />}
+                            loading={editTournamentMutation.isPending}>
+                            {tournament.isActive ? "Archive" : "Unarchive"}
+                        </Button>
+                    </Group>
                 </Stack>
             </Stack>
         </Paper>
