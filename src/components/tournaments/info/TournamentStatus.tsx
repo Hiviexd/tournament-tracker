@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import TournamentStatusBadge from "../TournamentStatusBadge";
 import { useEditTournament } from "../../../hooks/useTournaments";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     tournament: ITournament;
@@ -21,6 +23,7 @@ const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color
 };
 
 export default function TournamentStatus({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
     const editTournamentMutation = useEditTournament(tournament._id);
@@ -71,7 +74,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                             title="Cancel">
                             <FontAwesomeIcon icon="xmark" />
                         </ActionIcon>
-                    ) : (
+                    ) : user?.isCommittee ? (
                         <ActionIcon
                             variant="subtle"
                             onClick={() => setIsEditingStatus(true)}
@@ -79,7 +82,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                             title="Update status">
                             <FontAwesomeIcon icon="pen-to-square" />
                         </ActionIcon>
-                    )}
+                    ) : null}
                 </Group>
 
                 {isEditingStatus ? (

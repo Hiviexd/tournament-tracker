@@ -3,12 +3,15 @@ import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useEditTournament } from "../../../hooks/useTournaments";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentForumUrl({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [isEditingForumUrl, setIsEditingForumUrl] = useState(false);
     const [forumUrl, setForumUrl] = useState(tournament.forumUrl || "");
     const editTournamentMutation = useEditTournament(tournament._id);
@@ -35,7 +38,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : (
+                ) : user?.isCommittee ? (
                     <ActionIcon
                         variant="subtle"
                         onClick={() => setIsEditingForumUrl(true)}
@@ -43,7 +46,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         title="Edit forum URL">
                         <FontAwesomeIcon icon="pen-to-square" />
                     </ActionIcon>
-                )}
+                ) : null}
             </Group>
 
             {isEditingForumUrl ? (

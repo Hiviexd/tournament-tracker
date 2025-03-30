@@ -5,12 +5,15 @@ import { useState } from "react";
 import { useUploadBadges, useDownloadBadges } from "../../../hooks/useTournaments";
 import FileUploadInput from "../../common/FileUploadInput";
 import { useFileUpload } from "../../../hooks/useFileUpload";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentBadges({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [isEditingBadges, setIsEditingBadges] = useState(false);
     const uploadBadgesMutation = useUploadBadges(tournament._id);
     const downloadBadgesMutation = useDownloadBadges(tournament._id);
@@ -51,7 +54,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : (
+                ) : user?.isCommittee ? (
                     <Group gap={4}>
                         <ActionIcon
                             variant="subtle"
@@ -71,7 +74,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                             </ActionIcon>
                         )}
                     </Group>
-                )}
+                ) : null}
             </Group>
 
             <Group gap="xs" align="start">

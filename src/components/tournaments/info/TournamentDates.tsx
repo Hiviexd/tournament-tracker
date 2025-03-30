@@ -5,12 +5,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import moment from "moment";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentDates({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [isEditingDates, setIsEditingDates] = useState(false);
     const [startDate, setStartDate] = useState<Date | null>(
         tournament.startDate ? new Date(tournament.startDate) : null
@@ -64,7 +67,7 @@ export default function TournamentDates({ tournament }: IProps) {
                     <ActionIcon variant="subtle" onClick={handleCancel} color="danger" title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : (
+                ) : user?.isCommittee ? (
                     <ActionIcon
                         variant="subtle"
                         onClick={() => setIsEditingDates(true)}
@@ -72,7 +75,7 @@ export default function TournamentDates({ tournament }: IProps) {
                         title="Edit dates">
                         <FontAwesomeIcon icon="pen-to-square" />
                     </ActionIcon>
-                )}
+                ) : null}
             </Group>
 
             {isEditingDates ? (
