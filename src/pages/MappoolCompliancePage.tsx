@@ -13,6 +13,7 @@ import {
     Mark,
     Highlight,
     Alert,
+    Title,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,7 +36,11 @@ interface ComplianceData {
     errors: string[];
 }
 
-export default function MappoolCompliancePage() {
+interface IProps {
+    header?: string;
+}
+
+export default function MappoolCompliancePage({ header }: IProps) {
     const [input, setInput] = useState("");
     const [opened, { close, open }] = useDisclosure(false);
     const { mutate: checkCompliance, isPending, data } = useMappoolCompliance(input);
@@ -113,6 +118,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
         <Stack gap="lg">
             <Card shadow="sm" p="lg">
                 <Stack gap="md">
+                    {header && <Title order={3}>{header}</Title>}
                     <MarkdownText content={infoText} />
                     <Text>
                         To use this tool, enter a list of{" "}

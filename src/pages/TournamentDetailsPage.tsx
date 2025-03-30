@@ -7,6 +7,7 @@ import { useTournament } from "../hooks/useTournaments";
 import EmptyState from "../components/common/EmptyState";
 import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
+import MappoolCompliancePage from "./MappoolCompliancePage";
 
 export default function TournamentDetailsPage() {
     const [user] = useAtom(loggedInUserAtom);
@@ -80,6 +81,9 @@ export default function TournamentDetailsPage() {
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} />
                         {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
+                        {user?.isCommittee && tournament.isTournament && (
+                            <MappoolCompliancePage header="Mappool Compliance Checker" />
+                        )}
                     </Stack>
                 )
             )}
