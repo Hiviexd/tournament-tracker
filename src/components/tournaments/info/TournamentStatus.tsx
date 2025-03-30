@@ -1,0 +1,119 @@
+import { Stack, Group, Text, Progress, Tooltip, ActionIcon, Select } from "@mantine/core";
+import { ITournament, TournamentStatus as TournamentStatusType } from "../../../../interfaces/Tournament";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
+import TournamentStatusBadge from "../TournamentStatusBadge";
+import { useEditTournament } from "../../../hooks/useTournaments";
+
+interface IProps {
+    tournament: ITournament;
+}
+
+const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color: string } } = {
+    supportRequestReceived: { step: 1, color: "violet" },
+    screeningOngoing: { step: 2, color: "indigo" },
+    screeningConcluded: { step: 3, color: "info" },
+    reviewOngoing: { step: 4, color: "yellow" },
+    changesRequested: { step: 5, color: "orange" },
+    badgeApproved: { step: 6, color: "success" },
+    badgeRejected: { step: 6, color: "danger" },
+    noBadgeRequested: { step: 6, color: "gray" },
+};
+
+export default function TournamentStatus({ tournament }: IProps) {
+    const [isEditingStatus, setIsEditingStatus] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
+    const editTournamentMutation = useEditTournament(tournament._id);
+
+    const statusOptions = [
+        { value: "supportRequestReceived", label: "Support Request Received" },
+        { value: "screeningOngoing", label: "Screening Ongoing" },
+        { value: "screeningConcluded", label: "Screening Concluded" },
+        { value: "reviewOngoing", label: "Review Ongoing" },
+        { value: "changesRequested", label: "Changes Requested" },
+        { value: "badgeApproved", label: "Badge Approved" },
+        { value: "badgeRejected", label: "Badge Rejected" },
+        { value: "noBadgeRequested", label: "No Badge Requested" },
+    ];
+
+    const handleStatusSave = async () => {
+        if (confirm("Are you sure you want to update the status? This will notify the tournament host.")) {
+            await editTournamentMutation.mutateAsync({ status: selectedStatus });
+            setIsEditingStatus(false);
+        }
+    };
+
+    const getProgressInfo = () => {
+        const currentStatus = STATUS_PROGRESSION[tournament.status];
+        const totalSteps = 6;
+        const progress = (currentStatus.step / totalSteps) * 100;
+
+        return {
+            progress,
+            color: currentStatus.color,
+        };
+    };
+
+    const progressInfo = getProgressInfo();
+
+    return (
+        <Group align="flex-start">
+            <Stack gap={5} style={{ flex: 1 }}>
+                <Text size="sm" fw={500}>
+                    Status
+                </Text>
+                <Group gap="xs">
+                    {isEditingStatus ? (
+                        <>
+                            <Select
+                                value={selectedStatus}
+                                onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
+                                data={statusOptions}
+                                allowDeselect={false}
+                                style={{ width: "20%" }}
+                            />
+                            <Group gap="xs">
+                                <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
+                                    <FontAwesomeIcon icon="save" />
+                                </ActionIcon>
+                                <ActionIcon
+                                    variant="subtle"
+                                    onClick={() => setIsEditingStatus(false)}
+                                    color="danger"
+                                    title="Cancel">
+                                    <FontAwesomeIcon icon="xmark" />
+                                </ActionIcon>
+                            </Group>
+                        </>
+                    ) : (
+                        <>
+                            <TournamentStatusBadge tournament={tournament} />
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setIsEditingStatus(true)}
+                                color="info"
+                                title="Update status">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        </>
+                    )}
+                </Group>
+                <Tooltip label={`Status: ${tournament.statusString}`}>
+                    <Progress
+                        value={progressInfo.progress}
+                        color={progressInfo.color}
+                        size="md"
+                        radius="xl"
+                        striped
+                        my="sm"
+                        animated={
+                            tournament.status !== "badgeApproved" &&
+                            tournament.status !== "badgeRejected" &&
+                            tournament.status !== "noBadgeRequested"
+                        }
+                    />
+                </Tooltip>
+            </Stack>
+        </Group>
+    );
+}
