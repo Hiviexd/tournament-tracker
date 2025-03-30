@@ -108,7 +108,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 onClick={handleUploadBadges}
                                 color="success"
                                 title="Save"
-                                mb={5}
+                                mb={4}
                                 disabled={!files.length}>
                                 <FontAwesomeIcon icon="save" />
                             </ActionIcon>

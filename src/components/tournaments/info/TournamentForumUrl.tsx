@@ -20,66 +20,62 @@ export default function TournamentForumUrl({ tournament }: IProps) {
 
     return (
         <Stack gap={5}>
-            <Text size="sm" fw={500}>
-                Forum URL
-            </Text>
             <Group gap="xs" align="center">
+                <Text size="sm" fw={500}>
+                    Forum Link
+                </Text>
                 {isEditingForumUrl ? (
-                    <>
-                        <TextInput
-                            value={forumUrl}
-                            onChange={(event) => setForumUrl(event.currentTarget.value)}
-                            placeholder="Enter forum URL..."
-                            style={{ width: "36%", minWidth: "200px" }}
-                        />
-                        <Group gap="xs">
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={handleForumUrlSave}
-                                color="success"
-                                title="Save"
-                                disabled={!forumUrl.trim()}>
-                                <FontAwesomeIcon icon="save" />
-                            </ActionIcon>
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={() => {
-                                    setIsEditingForumUrl(false);
-                                    setForumUrl(tournament.forumUrl || "");
-                                }}
-                                color="danger"
-                                title="Cancel">
-                                <FontAwesomeIcon icon="xmark" />
-                            </ActionIcon>
-                        </Group>
-                    </>
+                    <ActionIcon
+                        variant="subtle"
+                        onClick={() => {
+                            setIsEditingForumUrl(false);
+                            setForumUrl(tournament.forumUrl || "");
+                        }}
+                        color="danger"
+                        title="Cancel">
+                        <FontAwesomeIcon icon="xmark" />
+                    </ActionIcon>
                 ) : (
-                    <>
-                        <Box>
-                            {tournament.forumUrl ? (
-                                <Anchor
-                                    lineClamp={2}
-                                    href={tournament.forumUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer">
-                                    {tournament.forumUrl.split("/").pop()}
-                                </Anchor>
-                            ) : (
-                                <Text c="dimmed" fs="italic">
-                                    No forum URL set
-                                </Text>
-                            )}
-                        </Box>
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => setIsEditingForumUrl(true)}
-                            color="info"
-                            title="Edit forum URL">
-                            <FontAwesomeIcon icon="pen-to-square" />
-                        </ActionIcon>
-                    </>
+                    <ActionIcon
+                        variant="subtle"
+                        onClick={() => setIsEditingForumUrl(true)}
+                        color="info"
+                        title="Edit forum URL">
+                        <FontAwesomeIcon icon="pen-to-square" />
+                    </ActionIcon>
                 )}
             </Group>
+
+            {isEditingForumUrl ? (
+                <Group align="center" w={{ base: "100%", xs: "50%" }}>
+                    <TextInput
+                        value={forumUrl}
+                        onChange={(event) => setForumUrl(event.currentTarget.value)}
+                        placeholder="Enter forum URL..."
+                        style={{ flex: 1 }}
+                    />
+                    <ActionIcon
+                        variant="subtle"
+                        onClick={handleForumUrlSave}
+                        color="success"
+                        title="Save"
+                        disabled={!forumUrl.trim()}>
+                        <FontAwesomeIcon icon="save" />
+                    </ActionIcon>
+                </Group>
+            ) : (
+                <Box>
+                    {tournament.forumUrl ? (
+                        <Anchor lineClamp={2} href={tournament.forumUrl} target="_blank" rel="noopener noreferrer">
+                            {tournament.forumUrl.split("/").pop()}
+                        </Anchor>
+                    ) : (
+                        <Text c="dimmed" fs="italic">
+                            No forum URL set
+                        </Text>
+                    )}
+                </Box>
+            )}
         </Stack>
     );
 }

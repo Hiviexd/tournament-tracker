@@ -59,45 +59,46 @@ export default function TournamentStatus({ tournament }: IProps) {
     return (
         <Group align="flex-start">
             <Stack gap={5} style={{ flex: 1 }}>
-                <Text size="sm" fw={500}>
-                    Status
-                </Text>
-                <Group gap="xs">
+                <Group gap="xs" align="center">
+                    <Text size="sm" fw={500}>
+                        Status
+                    </Text>
                     {isEditingStatus ? (
-                        <>
-                            <Select
-                                value={selectedStatus}
-                                onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
-                                data={statusOptions}
-                                allowDeselect={false}
-                                style={{ width: "20%" }}
-                            />
-                            <Group gap="xs">
-                                <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
-                                    <FontAwesomeIcon icon="save" />
-                                </ActionIcon>
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={() => setIsEditingStatus(false)}
-                                    color="danger"
-                                    title="Cancel">
-                                    <FontAwesomeIcon icon="xmark" />
-                                </ActionIcon>
-                            </Group>
-                        </>
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => setIsEditingStatus(false)}
+                            color="danger"
+                            title="Cancel">
+                            <FontAwesomeIcon icon="xmark" />
+                        </ActionIcon>
                     ) : (
-                        <>
-                            <TournamentStatusBadge tournament={tournament} />
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={() => setIsEditingStatus(true)}
-                                color="info"
-                                title="Update status">
-                                <FontAwesomeIcon icon="pen-to-square" />
-                            </ActionIcon>
-                        </>
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => setIsEditingStatus(true)}
+                            color="info"
+                            title="Update status">
+                            <FontAwesomeIcon icon="pen-to-square" />
+                        </ActionIcon>
                     )}
                 </Group>
+
+                {isEditingStatus ? (
+                    <Group gap="xs">
+                        <Select
+                            value={selectedStatus}
+                            onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
+                            data={statusOptions}
+                            allowDeselect={false}
+                            style={{ width: "20%" }}
+                        />
+                        <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
+                            <FontAwesomeIcon icon="save" />
+                        </ActionIcon>
+                    </Group>
+                ) : (
+                    <TournamentStatusBadge tournament={tournament} />
+                )}
+
                 <Tooltip label={`Status: ${tournament.statusString}`}>
                     <Progress
                         value={progressInfo.progress}
