@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, TextInput } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -69,9 +69,9 @@ export default function TournamentForumUrl({ tournament }: IProps) {
             ) : (
                 <Box>
                     {tournament.forumUrl ? (
-                        <Anchor lineClamp={2} href={tournament.forumUrl} target="_blank" rel="noopener noreferrer">
-                            {tournament.forumUrl.split("/").pop()}
-                        </Anchor>
+                        <a href={tournament.forumUrl} target="_blank">
+                            {tournament.forumUrl}
+                        </a>
                     ) : (
                         <Text c="dimmed" fs="italic">
                             No forum URL set
