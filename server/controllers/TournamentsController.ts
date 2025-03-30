@@ -13,7 +13,7 @@ const defaultPopulate = [
     },
     {
         path: "assignedReviewers",
-        select: "username osuId groups",
+        select: "username osuId groups coverUrl",
     },
     {
         path: "reviews",
@@ -160,6 +160,68 @@ class TournamentsController {
         res.json({ message: "Tournament updated successfully!" });
 
         // TODO: logging
+    }
+
+    /** POST reassign reviewer */
+    public async reassignReviewer(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const { oldReviewerId, newReviewerId } = req.body;
+
+        if (!oldReviewerId || !newReviewerId) {
+            return res.json({ error: "Both old and new reviewer IDs are required" });
+        }
+
+        // Find tournament without populating first to check and get a proper reference
+        const tournament = await Tournament.findById(tournamentId).orFail();
+
+        if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
+            return res.json({ error: "Tournament has no assigned reviewers" });
+        }
+
+        // Check if old reviewer is actually assigned
+        const oldReviewerIndex = tournament.assignedReviewers.findIndex(
+            (reviewer) => reviewer.toString() === oldReviewerId
+        );
+
+        if (oldReviewerIndex === -1) {
+            return res.json({ error: "Old reviewer is not assigned to this tournament" });
+        }
+
+        // Get and validate new reviewer
+        const newReviewer = await User.findById(newReviewerId).orFail();
+
+        // Check if new reviewer has the correct group
+        const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
+            tournament: "tc",
+            contest: "cc",
+        };
+        const requiredGroup = reviewerTypeMap[tournament.type];
+        if (!newReviewer.groups.includes(requiredGroup)) {
+            return res.json({
+                error: `New reviewer must be a member of ${requiredGroup.toUpperCase()}`,
+            });
+        }
+
+        // Check if new reviewer is already assigned
+        if (tournament.assignedReviewers.some((reviewer) => reviewer.toString() === newReviewerId)) {
+            return res.json({ error: "New reviewer is already assigned to this tournament" });
+        }
+
+        // Instead of direct array manipulation, use mongoose's array update methods
+        // Create a new array with the updated reviewer
+        const updatedReviewers = [...tournament.assignedReviewers];
+        updatedReviewers[oldReviewerIndex] = newReviewerId;
+
+        // Update the tournament with the new array
+        await Tournament.findByIdAndUpdate(
+            tournamentId,
+            { assignedReviewers: updatedReviewers },
+            { new: true, runValidators: true }
+        );
+
+        res.json({ message: "Reviewer reassigned successfully!" });
+
+        // TODO: logging and discord
     }
 }
 

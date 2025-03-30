@@ -16,5 +16,6 @@ tournamentsRouter.post("/create", auth.isLoggedIn, auth.isAdmin, tournamentUploa
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
 tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isAdmin, TournamentsController.edit);
 tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isAdmin, TournamentsController.assignReviewers);
+tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isAdmin, TournamentsController.reassignReviewer);
 
 export default tournamentsRouter;

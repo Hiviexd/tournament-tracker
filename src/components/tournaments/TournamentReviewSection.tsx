@@ -1,17 +1,69 @@
-import { Paper, Title, Stack, Group, Text, Button, Divider } from "@mantine/core";
+import { Paper, Title, Stack, Group, Text, Button, Divider, Select, ActionIcon } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import UserDisplay from "@components/common/UserDisplay";
+import UserCard from "../common/UserCard";
 import TournamentReviewInput from "./TournamentReviewInput";
+import { useAssignReviewers, useReassignReviewer } from "../../hooks/useTournaments";
+import { useCommitteeUsers } from "../../hooks/useUsers";
+import { useState } from "react";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentReviewSection({ tournament }: IProps) {
-    // TODO: Implement assign reviewers mutation
-    const handleAssignReviewers = () => {
-        console.log("Assign reviewers");
+    const [user] = useAtom(loggedInUserAtom);
+
+    const [isEditingReviewer, setIsEditingReviewer] = useState<boolean>(false);
+    const [reviewer1, setReviewer1] = useState<string>("");
+    const [reviewer2, setReviewer2] = useState<string>("");
+
+    const assignReviewersMutation = useAssignReviewers(tournament._id);
+    const reassignReviewerMutation = useReassignReviewer(tournament._id);
+    const { data: committeeUsers } = useCommitteeUsers();
+
+    // Check if current user is a committee member and an assigned reviewer
+    const isUserAssignedReviewer =
+        user?.isCommittee && tournament.assignedReviewers?.some((reviewer) => reviewer._id === user._id);
+
+    const handleAssignReviewers = async () => {
+        await assignReviewersMutation.mutateAsync();
+    };
+
+    const handleReassignReviewer = async (oldReviewerId: string, newReviewerId: string, isFirst: boolean) => {
+        await reassignReviewerMutation.mutateAsync({
+            oldReviewerId,
+            newReviewerId,
+        });
+        if (isFirst) {
+            setReviewer1("");
+        } else {
+            setReviewer2("");
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditingReviewer(false);
+        setReviewer1("");
+        setReviewer2("");
+    };
+
+    const getCommitteeOptions = () => {
+        if (!committeeUsers) return [];
+
+        const reviewerGroup = tournament.type === "tournament" ? "tc" : "cc";
+
+        // Get the current reviewer IDs to exclude
+        const currentReviewerIds = tournament.assignedReviewers?.map((reviewer) => reviewer._id) || [];
+
+        return committeeUsers
+            .filter((user) => user.groups.includes(reviewerGroup) && !currentReviewerIds.includes(user._id))
+            .map((user) => ({
+                value: user._id,
+                label: user.username,
+            }));
     };
 
     if (tournament.status !== "reviewOngoing" && !tournament.assignedReviewers?.length) {
@@ -26,24 +78,118 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                 <Stack gap="md">
                     {tournament.assignedReviewers?.length ? (
                         <Stack gap="xs">
-                            <Text size="sm" fw={500}>
-                                Assigned Reviewers
-                            </Text>
-                            <Group gap="xl">
-                                {tournament.assignedReviewers.map((reviewer) => (
-                                    <UserDisplay key={reviewer._id} user={reviewer} />
-                                ))}
+                            <Group align="center" gap="xs">
+                                <Text size="sm" fw={500}>
+                                    Assigned Reviewers
+                                </Text>
+                                {!isEditingReviewer ? (
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="blue"
+                                        onClick={() => setIsEditingReviewer(true)}
+                                        title="Reassign reviewers">
+                                        <FontAwesomeIcon icon="pen-to-square" />
+                                    </ActionIcon>
+                                ) : (
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="danger"
+                                        onClick={handleCancelEdit}
+                                        title="Done editing">
+                                        <FontAwesomeIcon icon="xmark" />
+                                    </ActionIcon>
+                                )}
                             </Group>
-                            <Divider my="lg" />
 
-                            <Title order={4}>Review Input</Title>
-                            <TournamentReviewInput tournament={tournament} />
+                            {isEditingReviewer ? (
+                                <Stack gap="md">
+                                    <Group gap="xl">
+                                        {tournament.assignedReviewers.map((reviewer) => (
+                                            <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
+                                        ))}
+                                    </Group>
+
+                                    <Stack gap="xs">
+                                        <Group>
+                                            <Select
+                                                label="Reviewer 1"
+                                                key={tournament.assignedReviewers[0]._id}
+                                                placeholder="Select new reviewer"
+                                                data={getCommitteeOptions()}
+                                                value={reviewer1}
+                                                onChange={(value) => setReviewer1(value || "")}
+                                                allowDeselect={false}
+                                            />
+                                            <ActionIcon
+                                                variant="subtle"
+                                                color="success"
+                                                onClick={() =>
+                                                    handleReassignReviewer(
+                                                        tournament.assignedReviewers![0]._id,
+                                                        reviewer1,
+                                                        true
+                                                    )
+                                                }
+                                                disabled={!reviewer1}
+                                                loading={reassignReviewerMutation.isPending}
+                                                title="Replace first reviewer"
+                                                mt={24}>
+                                                <FontAwesomeIcon icon="save" />
+                                            </ActionIcon>
+                                        </Group>
+
+                                        <Group>
+                                            <Select
+                                                label="Reviewer 2"
+                                                key={tournament.assignedReviewers[1]._id}
+                                                placeholder="Select new reviewer"
+                                                data={getCommitteeOptions()}
+                                                value={reviewer2}
+                                                onChange={(value) => setReviewer2(value || "")}
+                                                allowDeselect={false}
+                                            />
+                                            <ActionIcon
+                                                variant="subtle"
+                                                color="success"
+                                                onClick={() =>
+                                                    handleReassignReviewer(
+                                                        tournament.assignedReviewers![1]._id,
+                                                        reviewer2,
+                                                        false
+                                                    )
+                                                }
+                                                disabled={!reviewer2}
+                                                loading={reassignReviewerMutation.isPending}
+                                                title="Replace second reviewer"
+                                                mt={24}>
+                                                <FontAwesomeIcon icon="save" />
+                                            </ActionIcon>
+                                        </Group>
+                                    </Stack>
+                                </Stack>
+                            ) : (
+                                <Group gap="xl">
+                                    {tournament.assignedReviewers.map((reviewer) => (
+                                        <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
+                                    ))}
+                                </Group>
+                            )}
+
+                            {isUserAssignedReviewer && (
+                                <>
+                                    <Divider my="lg" />
+
+                                    <Title order={4}>Review Input</Title>
+                                    <TournamentReviewInput tournament={tournament} />
+                                </>
+                            )}
                         </Stack>
                     ) : tournament.status === "reviewOngoing" ? (
                         <Button
                             variant="light"
                             color="info"
                             onClick={handleAssignReviewers}
+                            loading={assignReviewersMutation.isPending}
                             leftSection={<FontAwesomeIcon icon="user-group" />}>
                             Assign Reviewers
                         </Button>

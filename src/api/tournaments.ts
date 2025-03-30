@@ -35,3 +35,8 @@ export const assignReviewers = async (tournamentId: string) => {
     const response = await axios.post(`/api/tournaments/${tournamentId}/assignReviewers`);
     return response.data;
 };
+
+export const reassignReviewer = async (tournamentId: string, oldReviewerId: string, newReviewerId: string) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/reassignReviewer`, { oldReviewerId, newReviewerId });
+    return response.data;
+};
