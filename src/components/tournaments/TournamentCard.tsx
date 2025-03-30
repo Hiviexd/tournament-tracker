@@ -6,12 +6,16 @@ import GameModeIcon from "../common/GameModeIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import TournamentStatusBadge from "./TournamentStatusBadge";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
+import VoteCountBadge from "../common/badges/VoteCountBadge";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentCard({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const getTournamentTypeInfo = () => {
         switch (tournament.type) {
             case "tournament":
@@ -61,6 +65,14 @@ export default function TournamentCard({ tournament }: IProps) {
                     </Tooltip>
                     <GameModeIcon mode={tournament.modes} />
                     <TournamentStatusBadge tournament={tournament} />
+                    {user?.isCommittee && ["reviewOngoing", "changesRequested"].includes(tournament.status) && (
+                        <VoteCountBadge
+                            voteCount={tournament.reviews.length}
+                            totalVotes={2}
+                            textOverride="reviews"
+                            variant="light"
+                        />
+                    )}
                 </Group>
             </Stack>
         </Card>
