@@ -5,8 +5,11 @@ import TournamentPageInfo from "../components/tournaments/TournamentPageInfo";
 import TournamentReviewSection from "../components/tournaments/TournamentReviewSection";
 import { useTournament } from "../hooks/useTournaments";
 import EmptyState from "../components/common/EmptyState";
+import { loggedInUserAtom } from "../store/atoms";
+import { useAtom } from "jotai";
 
 export default function TournamentDetailsPage() {
+    const [user] = useAtom(loggedInUserAtom);
     const { tournamentId } = useParams();
     const { data: tournament, isLoading } = useTournament(tournamentId!);
 
@@ -76,7 +79,7 @@ export default function TournamentDetailsPage() {
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} />
-                        <TournamentReviewSection tournament={tournament} />
+                        {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
                     </Stack>
                 )
             )}

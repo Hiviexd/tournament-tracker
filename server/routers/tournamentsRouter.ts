@@ -17,5 +17,6 @@ tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController
 tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isAdmin, TournamentsController.edit);
 tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isAdmin, TournamentsController.assignReviewers);
 tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isAdmin, TournamentsController.reassignReviewer);
+tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isAdmin, TournamentsController.submitReview);
 
 export default tournamentsRouter;

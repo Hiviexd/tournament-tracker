@@ -1,8 +1,13 @@
-import { Stack, Checkbox, Textarea, Radio, Group, Button, Text } from "@mantine/core";
+import { Stack, Checkbox, Radio, Group, Button, Text } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { useState } from "react";
 import { REVIEW_CHECKLIST } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSubmitReview } from "../../hooks/useTournaments";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
+import TextEditor from "../common/TextEditor";
+import ReviewStatusBanner from "../common/banners/ReviewStatusBanner";
 
 interface IProps {
     tournament: ITournament;
@@ -11,61 +16,68 @@ interface IProps {
 type ChecklistState = Record<string, boolean>;
 
 export default function TournamentReviewInput({ tournament }: IProps) {
-    // Initialize state with all items set to false
+    const [user] = useAtom(loggedInUserAtom);
+    const userReview = tournament.reviews?.find((review) => review.author._id === user?._id);
+    const autoSaveKey = `tournament-review-${tournament._id}`;
+
+    // Initialize state with existing review data or defaults
     const [checkedState, setCheckedState] = useState<ChecklistState>(() => {
         const initialState: ChecklistState = {};
+
+        // First set all items to false
         for (const category of REVIEW_CHECKLIST) {
             for (const item of category.items) {
                 initialState[item] = false;
             }
         }
+
+        // Then populate with user's existing review data if available
+        if (userReview?.checklist) {
+            for (const item of userReview.checklist) {
+                initialState[item.item] = item.checked;
+            }
+        }
+
         return initialState;
     });
-    const [comment, setComment] = useState("");
-    const [decision, setDecision] = useState<"approve" | "changesRequested" | "deny" | null>(null);
 
-    // TODO: Implement review submission mutation
-    const handleSubmitReview = () => {
+    const [comment, setComment] = useState(userReview?.comment ?? "");
+    const [decision, setDecision] = useState<"approve" | "changesRequested" | "deny" | null>(userReview?.vote ?? null);
+
+    const submitReviewMutation = useSubmitReview(tournament._id);
+
+    const handleSubmitReview = async () => {
         const reviewData = {
             tournamentId: tournament._id,
-            checklist: Object.entries(checkedState).map(([item, isChecked]) => ({
+            checklist: Object.entries(checkedState).map(([item, checked]) => ({
                 item,
-                isChecked,
+                checked,
             })),
             comment,
-            decision,
+            vote: decision!,
         };
-        console.log("Submit review:", reviewData);
+
+        await submitReviewMutation.mutateAsync(reviewData);
     };
 
     const handleCheckboxChange = (item: string, checked: boolean) => {
-        setCheckedState((prev) => {
-            const newState = { ...prev };
-            newState[item] = checked;
-            return newState;
-        });
+        setCheckedState((prev) => ({
+            ...prev,
+            [item]: checked,
+        }));
     };
 
-    const isSubmitDisabled = !decision || !comment.trim() || Object.values(checkedState).every((v) => !v);
-
-    const getButtonColor = () => {
-        switch (decision) {
-            case "approve":
-                return "success";
-            case "deny":
-                return "danger";
-            case "changesRequested":
-                return "warning";
-            default:
-                return "blue";
-        }
-    };
+    const isSubmitDisabled = !decision || Object.values(checkedState).every((v) => !v);
 
     return (
         <Stack gap="md">
+            <ReviewStatusBanner tournament={tournament} user={user} />
+            <Text component="label" fw={500} size="sm">
+                Review Checklist
+            </Text>
             {REVIEW_CHECKLIST.map((category) => (
                 <Stack key={category.category} gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
+                    <Text fw={400} size="sm" c="dimmed">
                         {category.category}
                     </Text>
                     {category.items.map((item) => (
@@ -73,33 +85,37 @@ export default function TournamentReviewInput({ tournament }: IProps) {
                             key={item}
                             label={item}
                             ml="md"
-                            checked={checkedState[item] || false}
+                            checked={checkedState[item]}
                             onChange={(event) => handleCheckboxChange(item, event.currentTarget.checked)}
                         />
                     ))}
                 </Stack>
             ))}
 
-            <Textarea
-                label="Review Comments"
-                description="Please provide detailed feedback about your decision"
-                placeholder="Enter your review comments..."
-                value={comment}
-                onChange={(event) => setComment(event.currentTarget.value)}
-                minRows={3}
-                autosize
-                required
-            />
+            <Stack gap="xs" mt="md">
+                <Text component="label" fw={500} size="sm">
+                    Review Comments
+                </Text>
+                <TextEditor
+                    value={comment}
+                    onChange={setComment}
+                    placeholder="Enter your review comments..."
+                    minHeight={120}
+                    maxHeight={300}
+                    autoSaveKey={autoSaveKey}
+                />
+            </Stack>
 
             <Radio.Group
                 name="decision"
                 label="Decision"
+                my="md"
                 value={decision || ""}
                 onChange={(value) => setDecision(value as typeof decision)}
                 required>
                 <Group mt="xs">
                     <Radio value="approve" label="Approve" />
-                    <Radio value="changesRequested" label="Changes Requested" />
+                    <Radio value="changesRequested" label="Request Changes" />
                     <Radio value="deny" label="Deny" />
                 </Group>
             </Radio.Group>
@@ -108,9 +124,10 @@ export default function TournamentReviewInput({ tournament }: IProps) {
                 onClick={handleSubmitReview}
                 disabled={isSubmitDisabled}
                 variant="filled"
-                color={getButtonColor()}
-                leftSection={<FontAwesomeIcon icon="check" />}>
-                Submit Review
+                color={userReview ? "info" : "success"}
+                loading={submitReviewMutation.isPending}
+                leftSection={<FontAwesomeIcon icon={userReview ? "edit" : "check"} />}>
+                {userReview ? "Update Review" : "Submit Review"}
             </Button>
         </Stack>
     );

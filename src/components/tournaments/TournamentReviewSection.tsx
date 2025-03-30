@@ -1,8 +1,9 @@
-import { Paper, Title, Stack, Group, Text, Button, Divider, Select, ActionIcon } from "@mantine/core";
+import { Title, Stack, Group, Button, Divider, Select, ActionIcon, Card } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import UserCard from "../common/UserCard";
 import TournamentReviewInput from "./TournamentReviewInput";
+import TournamentReviewCard from "./TournamentReviewCard";
 import { useAssignReviewers, useReassignReviewer } from "../../hooks/useTournaments";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import { useState } from "react";
@@ -71,7 +72,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     }
 
     return (
-        <Paper radius="md" p="lg">
+        <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Title order={3}>Review Information</Title>
 
@@ -79,9 +80,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                     {tournament.assignedReviewers?.length ? (
                         <Stack gap="xs">
                             <Group align="center" gap="xs">
-                                <Text size="sm" fw={500}>
-                                    Assigned Reviewers
-                                </Text>
+                                <Title order={4}>Assigned Reviewers</Title>
                                 {!isEditingReviewer ? (
                                     <ActionIcon
                                         variant="subtle"
@@ -175,10 +174,21 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 </Group>
                             )}
 
-                            {isUserAssignedReviewer && (
+                            {tournament.reviews?.length > 0 && (
                                 <>
-                                    <Divider my="lg" />
+                                    <Divider my="sm" />
+                                    <Title order={4}>Reviews</Title>
+                                    <Stack gap="md">
+                                        {tournament.reviews.map((review) => (
+                                            <TournamentReviewCard key={review._id} review={review} />
+                                        ))}
+                                    </Stack>
+                                </>
+                            )}
 
+                            {isUserAssignedReviewer && tournament.isActive && (
+                                <>
+                                    <Divider my="sm" />
                                     <Title order={4}>Review Input</Title>
                                     <TournamentReviewInput tournament={tournament} />
                                 </>
@@ -196,6 +206,6 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                     ) : null}
                 </Stack>
             </Stack>
-        </Paper>
+        </Card>
     );
 }

@@ -27,7 +27,7 @@ export default function VoteStatusBanner({ voting, user }: IProps) {
 
     if (userHasVoted)
         return (
-            <Alert color="success" title="You have submitted a vote!" icon={<FontAwesomeIcon icon="check-to-slot" />} />
+            <Alert color="success" title="You have submitted a vote! 🥳" icon={<FontAwesomeIcon icon="check-to-slot" />} />
         );
 
     if (userNeedsToVote)

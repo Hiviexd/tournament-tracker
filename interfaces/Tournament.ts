@@ -1,7 +1,7 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
-import { IVote } from "./Vote";
 import { IAttachment } from "./Attachment";
+import { IReview } from "./Review";
 
 export type TournamentType = "tournament" | "contest";
 
@@ -46,7 +46,7 @@ export interface ITournament extends Document {
     banner?: IAttachment;
     badges?: IAttachment[];
     assignedReviewers?: IUser[];
-    reviews?: IVote[];
+    reviews: IReview[];
     createdAt: Date;
 
     // virtuals

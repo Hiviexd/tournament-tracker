@@ -1,5 +1,6 @@
 import axios from "axios";
 import { TournamentFormData } from "../../interfaces/Tournament";
+import { IReview } from "@interfaces/Review";
 
 export interface TournamentQueryParams {
     name?: string;
@@ -38,5 +39,10 @@ export const assignReviewers = async (tournamentId: string) => {
 
 export const reassignReviewer = async (tournamentId: string, oldReviewerId: string, newReviewerId: string) => {
     const response = await axios.post(`/api/tournaments/${tournamentId}/reassignReviewer`, { oldReviewerId, newReviewerId });
+    return response.data;
+};
+
+export const submitReview = async (tournamentId: string, reviewData: Partial<IReview>) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/submitReview`, reviewData);
     return response.data;
 };

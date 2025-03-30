@@ -5,6 +5,7 @@ import { TournamentQueryParams, TournamentType, TournamentStatus, GameMode } fro
 import { UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 import UploadService from "../services/UploadService";
+import Review from "../models/reviewModel";
 
 const defaultPopulate = [
     {
@@ -17,7 +18,7 @@ const defaultPopulate = [
     },
     {
         path: "reviews",
-        select: "content author vote",
+        select: "comment author vote checklist",
         populate: {
             path: "author",
             select: "username osuId groups",
@@ -219,7 +220,67 @@ class TournamentsController {
             { new: true, runValidators: true }
         );
 
+        // Update the users' bag
+        newReviewer.inBag = false;
+        await newReviewer.save();
+
+        const oldReviewer = await User.findById(oldReviewerId);
+        oldReviewer!.inBag = true;
+        await oldReviewer!.save();
+
         res.json({ message: "Reviewer reassigned successfully!" });
+
+        // TODO: logging and discord
+    }
+
+    /** POST submit review */
+    public async submitReview(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const { checklist, comment, vote } = req.body;
+
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+        if (!tournament.isActive) {
+            return res.json({ error: "Tournament is not active" });
+        }
+
+        if (!checklist || !checklist.length || !vote) {
+            return res.json({ error: "Missing required fields" });
+        }
+
+        if (vote !== "approve" && vote !== "changesRequested" && vote !== "deny") {
+            return res.json({ error: "Invalid vote" });
+        }
+
+        if (checklist.some((item) => item.checked === undefined)) {
+            return res.json({ error: "Invalid checklist" });
+        }
+
+        let review = tournament.reviews.find((review) => review.author.equals(res.locals!.user!._id));
+        let isNewReview = false;
+
+        if (!review) {
+            review = new Review({
+                author: res.locals!.user!,
+                comment,
+                vote,
+                checklist,
+            });
+            isNewReview = true;
+        } else {
+            review.comment = comment;
+            review.vote = vote;
+            review.checklist = checklist;
+        }
+
+        await review.save();
+
+        if (isNewReview) {
+            tournament.reviews.push(review);
+            await tournament.save();
+        }
+
+        res.json({ message: "Review submitted successfully!" });
 
         // TODO: logging and discord
     }

@@ -1,4 +1,4 @@
-import { Paper, Title, Group, Stack, Badge, Text } from "@mantine/core";
+import { Card, Title, Group, Stack, Badge, Text } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import GameModeIcon from "../common/GameModeIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,7 +23,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
     };
 
     return (
-        <Paper radius="md" p={0} className="tournament-header">
+        <Card shadow="sm" p="0" radius="md">
             <div
                 className="tournament-banner"
                 style={{
@@ -66,6 +66,6 @@ export default function TournamentPageHeader({ tournament }: IProps) {
                     </Text>
                 </Group>
             </Stack>
-        </Paper>
+        </Card>
     );
 }

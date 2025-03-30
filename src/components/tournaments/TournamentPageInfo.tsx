@@ -1,5 +1,4 @@
 import {
-    Paper,
     Title,
     Stack,
     Group,
@@ -11,6 +10,7 @@ import {
     Button,
     TextInput,
     Anchor,
+    Card,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
@@ -61,8 +61,10 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     ];
 
     const handleStatusSave = async () => {
-        await editTournamentMutation.mutateAsync({ status: selectedStatus });
-        setIsEditingStatus(false);
+        if (confirm("Are you sure you want to update the status? This will notify the tournament host.")) {
+            await editTournamentMutation.mutateAsync({ status: selectedStatus });
+            setIsEditingStatus(false);
+        }
     };
 
     const handleForumUrlSave = async () => {
@@ -89,7 +91,9 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     };
 
     const handleToggleState = async () => {
-        await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
+        if (confirm(`Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`)) {
+            await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
+        }
     };
 
     const getProgressInfo = () => {
@@ -106,7 +110,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     const progressInfo = getProgressInfo();
 
     return (
-        <Paper radius="md" p="lg">
+        <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Title order={3}>Tournament Information</Title>
 
@@ -126,14 +130,22 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             allowDeselect={false}
                                             style={{ width: "20%" }}
                                         />
-                                        <ActionIcon
-                                            variant="subtle"
-                                            onClick={handleStatusSave}
-                                            color="success"
-                                            loading={editTournamentMutation.isPending}
-                                            title="Save">
-                                            <FontAwesomeIcon icon="save" />
-                                        </ActionIcon>
+                                        <Group gap="xs">
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={handleStatusSave}
+                                                color="success"
+                                                title="Save">
+                                                <FontAwesomeIcon icon="save" />
+                                            </ActionIcon>
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={() => setIsEditingStatus(false)}
+                                                color="danger"
+                                                title="Cancel">
+                                                <FontAwesomeIcon icon="xmark" />
+                                            </ActionIcon>
+                                        </Group>
                                     </>
                                 ) : (
                                     <>
@@ -179,15 +191,26 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                         placeholder="Enter forum URL..."
                                         style={{ width: "36%", minWidth: "200px" }}
                                     />
-                                    <ActionIcon
-                                        variant="subtle"
-                                        onClick={handleForumUrlSave}
-                                        color="success"
-                                        title="Save"
-                                        disabled={!forumUrl.trim()}
-                                        loading={editTournamentMutation.isPending}>
-                                        <FontAwesomeIcon icon="save" />
-                                    </ActionIcon>
+                                    <Group gap="xs">
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={handleForumUrlSave}
+                                            color="success"
+                                            title="Save"
+                                            disabled={!forumUrl.trim()}>
+                                            <FontAwesomeIcon icon="save" />
+                                        </ActionIcon>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            onClick={() => {
+                                                setIsEditingForumUrl(false);
+                                                setForumUrl(tournament.forumUrl || "");
+                                            }}
+                                            color="danger"
+                                            title="Cancel">
+                                            <FontAwesomeIcon icon="xmark" />
+                                        </ActionIcon>
+                                    </Group>
                                 </>
                             ) : (
                                 <>
@@ -233,15 +256,29 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             clearable
                                             style={{ width: "60%" }}
                                         />
-                                        <ActionIcon
-                                            variant="subtle"
-                                            onClick={handleStartDateSave}
-                                            color="success"
-                                            disabled={!startDate}
-                                            loading={editTournamentMutation.isPending}
-                                            title="Save">
-                                            <FontAwesomeIcon icon="save" />
-                                        </ActionIcon>
+                                        <Group gap="xs">
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={handleStartDateSave}
+                                                color="success"
+                                                disabled={!startDate}
+                                                loading={editTournamentMutation.isPending}
+                                                title="Save">
+                                                <FontAwesomeIcon icon="save" />
+                                            </ActionIcon>
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={() => {
+                                                    setIsEditingStartDate(false);
+                                                    setStartDate(
+                                                        tournament.startDate ? new Date(tournament.startDate) : null
+                                                    );
+                                                }}
+                                                color="danger"
+                                                title="Cancel">
+                                                <FontAwesomeIcon icon="xmark" />
+                                            </ActionIcon>
+                                        </Group>
                                     </>
                                 ) : (
                                     <>
@@ -273,15 +310,29 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                             minDate={startDate || undefined}
                                             style={{ width: "60%" }}
                                         />
-                                        <ActionIcon
-                                            variant="subtle"
-                                            onClick={handleEndDateSave}
-                                            color="success"
-                                            disabled={!endDate}
-                                            loading={editTournamentMutation.isPending}
-                                            title="Save">
-                                            <FontAwesomeIcon icon="save" />
-                                        </ActionIcon>
+                                        <Group gap="xs">
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={handleEndDateSave}
+                                                color="success"
+                                                disabled={!endDate}
+                                                loading={editTournamentMutation.isPending}
+                                                title="Save">
+                                                <FontAwesomeIcon icon="save" />
+                                            </ActionIcon>
+                                            <ActionIcon
+                                                variant="subtle"
+                                                onClick={() => {
+                                                    setIsEditingEndDate(false);
+                                                    setEndDate(
+                                                        tournament.endDate ? new Date(tournament.endDate) : null
+                                                    );
+                                                }}
+                                                color="danger"
+                                                title="Cancel">
+                                                <FontAwesomeIcon icon="xmark" />
+                                            </ActionIcon>
+                                        </Group>
                                     </>
                                 ) : (
                                     <>
@@ -311,6 +362,6 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                     </Group>
                 </Stack>
             </Stack>
-        </Paper>
+        </Card>
     );
 }

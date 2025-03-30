@@ -8,9 +8,11 @@ import {
     assignReviewers,
     editTournament,
     reassignReviewer,
+    submitReview,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
+import { IReview } from "@interfaces/Review";
 
 export function useTournaments(params?: TournamentQueryParams) {
     return useQuery({
@@ -74,6 +76,20 @@ export function useReassignReviewer(tournamentId: string) {
     return useMutation({
         mutationFn: async ({ oldReviewerId, newReviewerId }: { oldReviewerId: string; newReviewerId: string }) => {
             const response = await reassignReviewer(tournamentId, oldReviewerId, newReviewerId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useSubmitReview(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (reviewData: Partial<IReview>) => {
+            const response = await submitReview(tournamentId, reviewData);
             return handleMutationResponse(response);
         },
         onSuccess: () => {

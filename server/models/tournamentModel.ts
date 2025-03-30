@@ -16,7 +16,7 @@ const TournamentSchema = new Schema<ITournament>(
         banner: { type: Schema.Types.ObjectId, ref: "Attachment" },
         badges: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
-        reviews: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
+        reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
