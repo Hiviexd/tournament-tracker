@@ -16,14 +16,14 @@ const tournamentBadgeUpload = createUploadMiddleware({
     allowedTypes: ["image/jpeg", "image/png"],
 });
 
-tournamentsRouter.get("/", auth.isLoggedIn, auth.isAdmin, TournamentsController.index);
-tournamentsRouter.post("/create", auth.isLoggedIn, auth.isAdmin, tournamentBannerUpload, TournamentsController.create);
+tournamentsRouter.get("/", auth.optionalAuth, TournamentsController.index);
+tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, tournamentBannerUpload, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
-tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isAdmin, TournamentsController.edit);
-tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isAdmin, TournamentsController.assignReviewers);
-tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isAdmin, TournamentsController.reassignReviewer);
-tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isAdmin, TournamentsController.submitReview);
-tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isAdmin, tournamentBadgeUpload, TournamentsController.uploadBadges);
-tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isAdmin, TournamentsController.downloadBadges);
+tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isCommittee, TournamentsController.edit);
+tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isCommittee, TournamentsController.assignReviewers);
+tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isCommittee, TournamentsController.reassignReviewer);
+tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isCommittee, TournamentsController.submitReview);
+tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isCommittee, tournamentBadgeUpload, TournamentsController.uploadBadges);
+tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
 
 export default tournamentsRouter;
