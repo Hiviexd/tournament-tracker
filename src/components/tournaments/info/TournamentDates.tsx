@@ -19,140 +19,95 @@ export default function TournamentDates({ tournament }: IProps) {
 
     const editTournamentMutation = useEditTournament(tournament._id);
 
-    const handleStartDateSave = async () => {
-        if (startDate) {
+    const handleSaveDates = async () => {
+        if (startDate && endDate) {
             await editTournamentMutation.mutateAsync({
                 startDate: startDate.toISOString() as unknown as Date,
-            });
-            setIsEditingDates(false);
-        }
-    };
-
-    const handleEndDateSave = async () => {
-        if (endDate) {
-            await editTournamentMutation.mutateAsync({
                 endDate: endDate.toISOString() as unknown as Date,
             });
             setIsEditingDates(false);
         }
     };
 
-    return (
-        <Group grow>
-            <Stack gap={5}>
-                <Text size="sm" fw={500}>
-                    Start Date
-                </Text>
-                <Group gap="xs" align="end">
-                    {isEditingDates ? (
-                        <>
-                            <DateInput
-                                value={startDate}
-                                onChange={setStartDate}
-                                placeholder="Select start date..."
-                                clearable
-                            />
-                            <Group gap="xs">
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={handleStartDateSave}
-                                    color="success"
-                                    title="Save"
-                                    disabled={!startDate}>
-                                    <FontAwesomeIcon icon="save" />
-                                </ActionIcon>
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={() => {
-                                        setIsEditingDates(false);
-                                        setStartDate(tournament.startDate ? new Date(tournament.startDate) : null);
-                                    }}
-                                    color="danger"
-                                    title="Cancel">
-                                    <FontAwesomeIcon icon="xmark" />
-                                </ActionIcon>
-                            </Group>
-                        </>
-                    ) : (
-                        <>
-                            <Box>
-                                {tournament.startDate ? (
-                                    <Text>{moment(tournament.startDate).format("MMMM D, YYYY")}</Text>
-                                ) : (
-                                    <Text c="dimmed" fs="italic">
-                                        No start date set
-                                    </Text>
-                                )}
-                            </Box>
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={() => setIsEditingDates(true)}
-                                color="info"
-                                title="Edit start date">
-                                <FontAwesomeIcon icon="pen-to-square" />
-                            </ActionIcon>
-                        </>
-                    )}
-                </Group>
-            </Stack>
+    const handleCancel = () => {
+        setIsEditingDates(false);
+        setStartDate(tournament.startDate ? new Date(tournament.startDate) : null);
+        setEndDate(tournament.endDate ? new Date(tournament.endDate) : null);
+    };
 
-            <Stack gap={5}>
-                <Text size="sm" fw={500}>
-                    End Date
+    const formatDateRange = () => {
+        if (!tournament.startDate && !tournament.endDate) {
+            return (
+                <Text c="dimmed" fs="italic">
+                    No dates set
                 </Text>
-                <Group gap="xs" align="end">
-                    {isEditingDates ? (
-                        <>
-                            <DateInput
-                                value={endDate}
-                                onChange={setEndDate}
-                                placeholder="Select end date..."
-                                clearable
-                                minDate={startDate || undefined}
-                            />
-                            <Group gap="xs">
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={handleEndDateSave}
-                                    color="success"
-                                    title="Save"
-                                    disabled={!endDate}>
-                                    <FontAwesomeIcon icon="save" />
-                                </ActionIcon>
-                                <ActionIcon
-                                    variant="subtle"
-                                    onClick={() => {
-                                        setIsEditingDates(false);
-                                        setEndDate(tournament.endDate ? new Date(tournament.endDate) : null);
-                                    }}
-                                    color="danger"
-                                    title="Cancel">
-                                    <FontAwesomeIcon icon="xmark" />
-                                </ActionIcon>
-                            </Group>
-                        </>
-                    ) : (
-                        <>
-                            <Box>
-                                {tournament.endDate ? (
-                                    <Text>{moment(tournament.endDate).format("MMMM D, YYYY")}</Text>
-                                ) : (
-                                    <Text c="dimmed" fs="italic">
-                                        No end date set
-                                    </Text>
-                                )}
-                            </Box>
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={() => setIsEditingDates(true)}
-                                color="info"
-                                title="Edit end date">
-                                <FontAwesomeIcon icon="pen-to-square" />
-                            </ActionIcon>
-                        </>
-                    )}
-                </Group>
-            </Stack>
-        </Group>
+            );
+        }
+
+        const start = tournament.startDate ? moment(tournament.startDate).format("MMMM D, YYYY") : "?";
+        const end = tournament.endDate ? moment(tournament.endDate).format("MMMM D, YYYY") : "?";
+
+        return (
+            <Text size="sm" fw={700}>
+                {start} — {end}
+            </Text>
+        );
+    };
+
+    return (
+        <Stack gap={5}>
+            <Group gap="xs" align="center">
+                <Text size="sm" fw={500}>
+                    Start & End Dates
+                </Text>
+                {isEditingDates ? (
+                    <ActionIcon variant="subtle" onClick={handleCancel} color="danger" title="Cancel">
+                        <FontAwesomeIcon icon="xmark" />
+                    </ActionIcon>
+                ) : (
+                    <ActionIcon
+                        variant="subtle"
+                        onClick={() => setIsEditingDates(true)}
+                        color="info"
+                        title="Edit dates">
+                        <FontAwesomeIcon icon="pen-to-square" />
+                    </ActionIcon>
+                )}
+            </Group>
+
+            {isEditingDates ? (
+                <Stack gap="xs">
+                    <Group align="end">
+                        <DateInput
+                            label="Start Date"
+                            value={startDate}
+                            onChange={setStartDate}
+                            placeholder="Select start date..."
+                            clearable
+                        />
+                        <DateInput
+                            label="End Date"
+                            value={endDate}
+                            onChange={setEndDate}
+                            placeholder="Select end date..."
+                            clearable
+                            minDate={startDate || undefined}
+                        />
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={handleSaveDates}
+                            color="success"
+                            title="Save"
+                            mb={4}
+                            disabled={!startDate || !endDate}
+                            loading={editTournamentMutation.isPending}>
+                            <FontAwesomeIcon icon="save" />
+                        </ActionIcon>
+                    </Group>
+                </Stack>
+            ) : (
+                <Box>{formatDateRange()}</Box>
+            )}
+        </Stack>
     );
 }
