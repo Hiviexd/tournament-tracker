@@ -16,7 +16,7 @@ export default function UserCard({ user, onSelect, static: isStatic = false }: I
             p="md"
             bg="primary.10"
             className={isStatic ? "user-card user-card-static" : "user-card"}
-            style={{ minWidth: 240 }}
+            style={{ minWidth: 240, cursor: isStatic ? "default" : "pointer" }}
             onClick={() => onSelect(user)}>
             <div
                 style={{
