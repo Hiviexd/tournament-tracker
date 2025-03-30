@@ -43,7 +43,7 @@ TournamentSchema.virtual("statusString").get(function (this: ITournament) {
 });
 
 TournamentSchema.virtual("bannerUrl").get(function (this: ITournament) {
-    return this.banner?.url || "https://nats.are-la.me/29HdcgA.png";
+    return this.banner?.url || "/assets/default-banner.jpg";
 });
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);
