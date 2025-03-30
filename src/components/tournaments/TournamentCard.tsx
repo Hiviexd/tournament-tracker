@@ -35,6 +35,7 @@ export default function TournamentCard({ tournament }: IProps) {
             className="tournament-card"
             component={Link}
             to={`/tournaments/${tournament._id}`}
+            data-active={tournament.isActive}
             style={
                 {
                     "--card-status-color": tournament.isActive
