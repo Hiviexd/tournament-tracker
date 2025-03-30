@@ -22,7 +22,6 @@ const features: Feature[] = [
         title: "Official Support Status",
         description: "View the official support status of ongoing tournaments",
         link: "/tournaments",
-        disabled: true,
     },
     {
         icon: "poll-h",
