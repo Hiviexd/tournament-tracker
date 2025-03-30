@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
 import _ from "lodash";
+import helpers from "../helpers";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -8,7 +9,15 @@ const TournamentSchema = new Schema<ITournament>(
         modes: [{ type: String, required: true }],
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
-        forumUrl: { type: String, required: true },
+        forumUrl: {
+            type: String,
+            required: true,
+            validate: {
+                validator: (value: string) => helpers.isOsuForumLink(value.trim()),
+                message:
+                    "Forum URL must be a valid osu! forum topic link (e.g., https://osu.ppy.sh/community/forums/topics/123456)",
+            },
+        },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
         status: { type: String, required: true },
