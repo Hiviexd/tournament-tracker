@@ -49,8 +49,6 @@ class TournamentsController {
         const { name, mode, host, type, status, state, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
 
-        console.log(host);
-
         if (name) query.name = new RegExp(name as string, "i");
         if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
@@ -65,11 +63,58 @@ class TournamentsController {
         const isCommittee = res.locals!.user!.isCommittee;
 
         const [tournaments, total] = await Promise.all([
-            Tournament.find(query)
-                .select(selectFields(isCommittee))
-                .populate(defaultPopulate)
-                .skip(skip)
-                .limit(DEFAULT_LIMIT),
+            Tournament.aggregate([
+                { $match: query },
+                {
+                    $addFields: {
+                        statusOrder: {
+                            $switch: {
+                                branches: [
+                                    {
+                                        case: {
+                                            $or: [
+                                                { $eq: ["$status", "noBadgeRequested"] },
+                                                { $eq: ["$status", "badgeRejected"] },
+                                                { $eq: ["$status", "badgeApproved"] },
+                                            ],
+                                        },
+                                        then: 1,
+                                    },
+                                    { case: { $eq: ["$status", "changesRequested"] }, then: 2 },
+                                    { case: { $eq: ["$status", "reviewOngoing"] }, then: 3 },
+                                    { case: { $eq: ["$status", "screeningConcluded"] }, then: 4 },
+                                    { case: { $eq: ["$status", "screeningOngoing"] }, then: 5 },
+                                    { case: { $eq: ["$status", "supportRequestReceived"] }, then: 6 },
+                                ],
+                                default: 7,
+                            },
+                        },
+                    },
+                },
+                {
+                    $sort: {
+                        isActive: -1,
+                        statusOrder: 1,
+                        createdAt: -1,
+                    },
+                },
+                { $skip: skip },
+                { $limit: DEFAULT_LIMIT },
+                { $project: { statusOrder: 0 } },
+            ])
+                .exec()
+                .then((tournaments) =>
+                    Tournament.populate(tournaments, [
+                        ...defaultPopulate,
+                        ...(isCommittee
+                            ? []
+                            : [
+                                { path: "reviews", select: false },
+                                { path: "assignedReviewers", select: false },
+                            ]),
+                    ])
+                )
+                .then((tournaments) => tournaments.map((t) => Tournament.hydrate(t).toJSON())),
             Tournament.countDocuments(query),
         ]);
 
