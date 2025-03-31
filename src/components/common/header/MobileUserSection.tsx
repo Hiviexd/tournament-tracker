@@ -3,7 +3,6 @@ import { useDisclosure } from "@mantine/hooks";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { Link } from "react-router-dom";
 import MobileUserSectionCard from "./MobileUserSectionCard";
 import LoginButton from "../LoginButton";
 
@@ -41,14 +40,6 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
 
             <Collapse in={opened}>
                 <Stack px="xs" pb="xs">
-                    {/* TODO: uncomment when tournaments are implemented */}
-                    {/* <UnstyledButton component={Link} to={`/tournaments?host=${user.osuId}`} onClick={onClose}>
-                        <Group>
-                            <FontAwesomeIcon icon="trophy" />
-                            <Text size="sm">Your Tournaments</Text>
-                        </Group>
-                    </UnstyledButton> */}
-
                     <UnstyledButton onClick={handleCustomize}>
                         <Group>
                             <FontAwesomeIcon icon="palette" />
