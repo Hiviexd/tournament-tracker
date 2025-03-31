@@ -16,8 +16,7 @@ export default function ReviewerStatusSetting() {
                     Reviewer Status
                 </Text>
                 <Text size="xs" c="dimmed">
-                    {/* Toggle your availability for reviewing tournaments */}
-                    This setting is currently unused, safe to ignore.
+                    Toggle your availability for reviewing tournaments
                 </Text>
                 {toggleReviewerMutation.error && (
                     <Text size="xs" c="red">
@@ -36,5 +35,3 @@ export default function ReviewerStatusSetting() {
         </Group>
     );
 }
-
-// TODO: possibly reuse this in user edit?
