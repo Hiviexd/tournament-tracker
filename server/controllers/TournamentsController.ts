@@ -17,7 +17,7 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import Message from "../models/messageModel";
-import OsuBotService from "../services/OsuBotService";
+// import OsuBotService from "../services/OsuBotService";
 import helpers from "../helpers";
 import { IDiscordField } from "@interfaces/Discord";
 
@@ -398,13 +398,15 @@ class TournamentsController {
                 message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
             }
 
-            await OsuBotService.sendAnnouncement([recipientId], {
+            console.log(recipientId,message);
+
+            /*await OsuBotService.sendAnnouncement([recipientId], {
                 channel: {
                     name: `Tournament Status Update`,
                     description: `Update regarding: ${tournament.name}`,
                 },
                 content: message,
-            });
+            });*/
 
             // Discord
             await DiscordService.sendWebhook(
