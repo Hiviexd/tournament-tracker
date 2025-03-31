@@ -62,13 +62,15 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                             title="Edit webhook location">
                             <FontAwesomeIcon icon="pen-to-square" />
                         </ActionIcon>
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={handleCopyThreadLink}
-                            color="success"
-                            title="Copy thread link">
-                            <FontAwesomeIcon icon="copy" />
-                        </ActionIcon>
+                        {tournament.threadId?.length && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={handleCopyThreadLink}
+                                color="success"
+                                title="Copy thread link">
+                                <FontAwesomeIcon icon="copy" />
+                            </ActionIcon>
+                        )}
                     </Group>
                 )}
             </Group>
