@@ -61,7 +61,12 @@ export default function TournamentReviewSection({ tournament }: IProps) {
         const currentReviewerIds = tournament.assignedReviewers?.map((reviewer) => reviewer._id) || [];
 
         return committeeUsers
-            .filter((user) => user.groups.includes(reviewerGroup) && !currentReviewerIds.includes(user._id))
+            .filter(
+                (user) =>
+                    user.groups.includes(reviewerGroup) &&
+                    !currentReviewerIds.includes(user._id) &&
+                    user.isActiveReviewer
+            )
             .map((user) => ({
                 value: user._id,
                 label: user.username,
@@ -181,7 +186,11 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                     <Title order={4}>Reviews</Title>
                                     <Stack gap="md">
                                         {tournament.reviews.map((review) => (
-                                            <TournamentReviewCard key={review._id} tournament={tournament} review={review} />
+                                            <TournamentReviewCard
+                                                key={review._id}
+                                                tournament={tournament}
+                                                review={review}
+                                            />
                                         ))}
                                     </Stack>
                                 </>
