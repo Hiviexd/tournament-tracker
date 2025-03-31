@@ -84,6 +84,12 @@ import {
     faChevronUp,
     faEllipsisVertical,
     faArrowsRotate,
+    faAward,
+    faBoxArchive,
+    faLink,
+    faCalendar,
+    faUserPen,
+    faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -172,5 +178,11 @@ export default function loadIcons() {
         faChevronUp,
         faEllipsisVertical,
         faArrowsRotate,
+        faAward,
+        faBoxArchive,
+        faLink,
+        faCalendar,
+        faUserPen,
+        faEnvelope,
     );
 }

@@ -1,14 +1,15 @@
-import { Card } from "@mantine/core";
+import { Card, Group, Tooltip, Badge } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import UserDisplay from "./UserDisplay";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface IProps {
     user: IUser;
     onSelect: (user: IUser) => void;
     static?: boolean;
+    showBadges?: boolean;
 }
 
-export default function UserCard({ user, onSelect, static: isStatic = false }: IProps) {
+export default function UserCard({ user, onSelect, static: isStatic = false, showBadges = false }: IProps) {
     return (
         <Card
             key={user._id}
@@ -16,7 +17,7 @@ export default function UserCard({ user, onSelect, static: isStatic = false }: I
             p="md"
             bg="primary.10"
             className={isStatic ? "user-card user-card-static" : "user-card"}
-            style={{ minWidth: 240 }}
+            style={{ minWidth: 240, cursor: isStatic ? "default" : "pointer" }}
             onClick={() => onSelect(user)}>
             <div
                 style={{
@@ -34,7 +35,41 @@ export default function UserCard({ user, onSelect, static: isStatic = false }: I
             />
             <div className="user-card-tint" />
             <div className="user-card-content">
-                <UserDisplay user={user} />
+                <Group gap="xs" justify="space-between">
+                    <UserDisplay user={user} />
+                    {user.isCommittee && showBadges && (
+                        <Group gap={2} flex={1} justify="flex-end">
+                            {!user.email && (
+                                <Tooltip label="No email">
+                                    <Badge variant="filled" color="primary.11" size="sm">
+                                        <FontAwesomeIcon icon="envelope" color="var(--mantine-color-danger-6)" />
+                                    </Badge>
+                                </Tooltip>
+                            )}
+                            {(!user.discordId || !user.discordId.length) && (
+                                <Tooltip label="No Discord ID">
+                                    <Badge variant="filled" color="primary.11" size="sm">
+                                        <FontAwesomeIcon icon="id-card" color="var(--mantine-color-danger-6)" />
+                                    </Badge>
+                                </Tooltip>
+                            )}
+                            {
+                                <Tooltip label={user.isActiveReviewer ? "Active Reviewer" : "Inactive Reviewer"}>
+                                    <Badge variant="filled" color="primary.11" size="sm">
+                                        <FontAwesomeIcon
+                                            icon="magnifying-glass"
+                                            color={
+                                                user.isActiveReviewer
+                                                    ? "var(--mantine-color-success-6)"
+                                                    : "var(--mantine-color-danger-6)"
+                                            }
+                                        />
+                                    </Badge>
+                                </Tooltip>
+                            }
+                        </Group>
+                    )}
+                </Group>
             </div>
         </Card>
     );

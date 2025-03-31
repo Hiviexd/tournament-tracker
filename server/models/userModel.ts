@@ -24,6 +24,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
             name: { type: String },
         },
         badgeValue: { type: Number, default: 0 },
+        email: { type: String },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

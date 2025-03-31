@@ -1,6 +1,7 @@
 import { CronJob } from "cron";
 import Voting from "../models/votingModel";
 import Ticket from "../models/ticketModel";
+import Tournament from "../models/tournamentModel";
 import moment from "moment";
 import config from "../../config.json";
 import DiscordService from "./DiscordService";
@@ -13,12 +14,14 @@ import LogService from "./LogService";
 import { IVoting } from "../../interfaces/Voting";
 import { ITicket } from "../../interfaces/Ticket";
 import { IUser } from "../../interfaces/User";
+import { ITournament } from "../../interfaces/Tournament";
 
 class AutomationService {
     private checkOverdueVotingsJob: CronJob;
     private checkConcludableVotingsJob: CronJob;
     private checkStaleTicketsJob: CronJob;
     private checkBadgeUpdatesJob: CronJob;
+    private checkOverdueReviewsJob: CronJob;
 
     constructor() {
         // Run every hour
@@ -32,6 +35,9 @@ class AutomationService {
 
         // Run at 12:00 UTC every day
         this.checkBadgeUpdatesJob = new CronJob("0 12 * * *", this.checkBadgeUpdates.bind(this));
+
+        // Run at 16:00 UTC every day
+        this.checkOverdueReviewsJob = new CronJob("0 16 * * *", this.checkOverdueReviews.bind(this));
     }
 
     public start() {
@@ -41,6 +47,7 @@ class AutomationService {
         this.checkOverdueVotingsJob.start();
         this.checkStaleTicketsJob.start();
         this.checkBadgeUpdatesJob.start();
+        this.checkOverdueReviewsJob.start();
 
         console.log(styles("✓ Automation service started!", ["green", "bold", "underline"]));
 
@@ -51,6 +58,7 @@ class AutomationService {
             this.checkOverdueVotings();
             this.checkStaleTickets();
             this.checkBadgeUpdates();
+            this.checkOverdueReviews();
         }
     }
 
@@ -329,6 +337,124 @@ class AutomationService {
                     .map((u) => `[**${u.username}**](${config.baseUrl}/users?id=${u.osuId})`)
                     .join(", ")}`,
                 "user"
+            );
+        }
+    }
+
+    private async checkOverdueReviews() {
+        // Get all active tournaments with reviewOngoing status
+        const activeTournaments = await Tournament.find({
+            isActive: true,
+            status: "reviewOngoing",
+            startedReviewAt: { $exists: true },
+        }).populate([
+            {
+                path: "assignedReviewers",
+                select: "username osuId discordId isActiveReviewer",
+            },
+            {
+                path: "reviews",
+                select: "author",
+                populate: {
+                    path: "author",
+                    select: "username osuId",
+                },
+            },
+        ]);
+
+        const overdueReviews: Array<{
+            tournament: ITournament;
+            daysSinceReview: number;
+            missingReviewers: IUser[];
+        }> = [];
+
+        for (const tournament of activeTournaments) {
+            // Skip if no startedReviewAt date
+            if (!tournament.startedReviewAt) continue;
+
+            const reviewStartDate = moment(tournament.startedReviewAt);
+            const now = moment();
+            const daysSinceReview = now.diff(reviewStartDate, "days");
+
+            // Skip if less than 7 days old
+            if (daysSinceReview < 7) continue;
+
+            // Skip if no assigned reviewers
+            if (!tournament.assignedReviewers?.length) continue;
+
+            // Get set of user IDs who have already reviewed
+            const reviewedUserIds = new Set(tournament.reviews?.map((review) => review.author._id.toString()) || []);
+
+            // Filter out users who have already reviewed
+            const missingReviewers = tournament.assignedReviewers.filter(
+                (reviewer) => !reviewedUserIds.has(reviewer._id.toString())
+            );
+
+            // Filter out users who have already reviewed and are inactive reviewers
+            const missingReviewersExcludingInactive = missingReviewers.filter((reviewer) => reviewer.isActiveReviewer);
+
+            if (missingReviewers.length === 0) continue;
+
+            // Get Discord IDs for pinging only active reviewers (fall back to username if no Discord ID)
+            const usersToPing = missingReviewersExcludingInactive.map((user) => user.discordId || user.username);
+
+            // Determine notification color based on days overdue
+            let color = webhookColors.lightOrange;
+            if (daysSinceReview >= 18) color = webhookColors.darkRed;
+            else if (daysSinceReview >= 15) color = webhookColors.red;
+            else if (daysSinceReview >= 12) color = webhookColors.lightRed;
+
+            // Only send notifications on specific days or if 18+ days old
+            if (
+                daysSinceReview === 7 ||
+                daysSinceReview === 12 ||
+                daysSinceReview === 15 ||
+                daysSinceReview === 17 ||
+                daysSinceReview >= 18
+            ) {
+                overdueReviews.push({ tournament, daysSinceReview, missingReviewers });
+
+                await DiscordService.sendUserHighlightWebhook(
+                    usersToPing,
+                    [
+                        {
+                            color,
+                            description: `Review for ${tournament.type} [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id}) has been ongoing for ${daysSinceReview} days!`,
+                            fields: [
+                                {
+                                    name: "Missing Reviews",
+                                    value: missingReviewers
+                                        .map(
+                                            (reviewer) =>
+                                                `[**${reviewer.username}**](${reviewer.osuProfileUrl})${
+                                                    reviewer.isActiveReviewer ? "" : " *(inactive)*"
+                                                }`
+                                        )
+                                        .join(", "),
+                                },
+                                {
+                                    name: "Review Started",
+                                    value: `${helpers.discordTimestamp(
+                                        tournament.startedReviewAt
+                                    )} (${helpers.discordTimestamp(tournament.startedReviewAt, "dateTime")})`,
+                                },
+                            ],
+                        },
+                    ],
+                    "",
+                    tournament.threadId
+                );
+            }
+        }
+
+        if (overdueReviews.length > 0) {
+            await LogService.generateSystem(
+                `Sent reminders for overdue reviews: ${overdueReviews
+                    .map(
+                        ({ tournament }) => `[**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                    )
+                    .join(", ")}`,
+                "tournament"
             );
         }
     }

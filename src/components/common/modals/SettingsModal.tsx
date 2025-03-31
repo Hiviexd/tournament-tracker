@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
 import DiscordIdSetting from "./settings/DiscordIdSetting";
+import EmailSetting from "./settings/EmailSetting";
 
 interface IProps {
     opened: boolean;
@@ -20,6 +21,8 @@ export default function SettingsModal({ opened, onClose }: IProps) {
                 <ReviewerStatusSetting />
                 <Divider />
                 <DiscordIdSetting />
+                <Divider />
+                <EmailSetting />
             </Stack>
         </Modal>
     );

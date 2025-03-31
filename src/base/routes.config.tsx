@@ -17,6 +17,7 @@ import CreateArticlePage from "../pages/CreateArticlePage";
 import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
 import ResourcesPage from "../pages/ResourcesPage";
 import MappoolCompliancePage from "../pages/MappoolCompliancePage";
+import TournamentDetailsPage from "../pages/TournamentDetailsPage";
 
 interface RouteConfig {
     path: string;
@@ -95,8 +96,19 @@ const routes: RouteConfig[] = [
         path: "/tournaments",
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
-        icon: "users",
-        permissions: ["admin"],
+        icon: "trophy",
+        permissions: [],
+    },
+    {
+        path: "/tournaments/:tournamentId",
+        page: <TournamentDetailsPage />,
+        title: "Tournament Details",
+        icon: "trophy",
+        permissions: [],
+        parent: {
+            title: "Tournaments",
+            path: "/tournaments",
+        },
     },
     {
         path: "/tickets",

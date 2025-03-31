@@ -30,7 +30,7 @@ export default function DiscordIdSetting() {
             </span>
             <Group align="center" gap="xs">
                 <TextInput
-                    placeholder="Enter your Discord ID"
+                    placeholder="Enter your Discord ID..."
                     value={discordId}
                     onChange={(e) => setDiscordId(e.target.value)}
                     style={{ flex: 1 }}

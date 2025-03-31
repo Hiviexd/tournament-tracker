@@ -7,6 +7,7 @@ import OsuApiService from "../services/OsuApiService";
 import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
+import Tournament from "../models/tournamentModel";
 
 class UsersController {
     /** GET logged in user */
@@ -18,6 +19,7 @@ class UsersController {
     /** GET users listing */
     public async index(req: Request, res: Response) {
         const reqQuery = req.query as UserListQuery;
+        const currentUser = res.locals!.user;
 
         let userInput = reqQuery.userInput;
 
@@ -41,12 +43,15 @@ class UsersController {
             users = await User.find({ username: { $regex: userInput, $options: "i" } });
         }
 
-        res.json(reqQuery.limit ? users.slice(0, parseInt(reqQuery.limit, 10)) : users);
+        const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser?.isCommittee || false));
+
+        res.json(reqQuery.limit ? sanitizedUsers.slice(0, parseInt(reqQuery.limit, 10)) : sanitizedUsers);
     }
 
     /** GET a user */
     public async getUser(req: Request, res: Response) {
         const userInput = req.params.userInput;
+        const currentUser = res.locals!.user;
 
         const user = await User.findByUsernameOrOsuId(userInput);
 
@@ -54,7 +59,9 @@ class UsersController {
             return res.json({ error: "User not found" });
         }
 
-        res.json(user);
+        const sanitizedUser = UserService.sanitizeUser(user, currentUser?.isCommittee || false);
+
+        res.json(sanitizedUser);
     }
 
     /** GET osu! user info */
@@ -74,6 +81,7 @@ class UsersController {
     public async getCommittee(req: Request, res: Response) {
         const type = req.query.type;
         const includeAlumni = req.query.includeAlumni === "true" || false;
+        const currentUser = res.locals!.user;
 
         let query;
 
@@ -90,7 +98,9 @@ class UsersController {
 
         const committee = await User.find(query).orFail();
 
-        res.json(committee);
+        const sanitizedCommittee = committee.map((user) => UserService.sanitizeUser(user, currentUser?.isCommittee || false));
+
+        res.json(sanitizedCommittee);
     }
 
     /** POST create a user */
@@ -306,6 +316,88 @@ class UsersController {
             message: `Updated Discord ID successfully!`,
             user,
         });
+    }
+
+    /** POST update user email */
+    public async updateEmail(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { email } = req.body;
+
+        const user = await User.findById(userId).orFail();
+
+        if (!helpers.validateEmail(email)) {
+            return res.json({ error: "Invalid email!" });
+        }
+
+        user.email = email;
+        await user.save();
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `Updated email for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${email}`,
+            "user"
+        );
+
+        res.json({
+            message: `Updated email successfully!`,
+            user,
+        });
+    }
+
+    /** GET review stats */
+    public async getReviewStats(req: Request, res: Response) {
+        const { userId } = req.params;
+        const user = await User.findById(userId).orFail();
+
+        // Get the date 90 days ago
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        // Find all tournaments where user is assigned as a reviewer
+        const tournaments = await Tournament.find({
+            assignedReviewers: user._id,
+        }).populate([
+            {
+                path: "reviews",
+                select: "author",
+                populate: {
+                    path: "author",
+                    select: "_id username",
+                },
+            },
+        ]);
+
+        // Calculate statistics
+        const stats = {
+            activeReviews: 0,
+            totalAssignedLast90Days: 0,
+            totalSubmittedLast90Days: 0,
+        };
+
+        for (const tournament of tournaments) {
+            // Skip if no startedReviewAt date
+            if (!tournament.startedReviewAt) continue;
+
+            const startedReviewDate = new Date(tournament.startedReviewAt);
+            const hasUserSubmittedReview = tournament.reviews?.some(
+                (review) => review.author._id.toString() === user._id.toString()
+            );
+
+            // Count active reviews
+            if (tournament.isActive) {
+                stats.activeReviews++;
+            }
+
+            // Count reviews in last 90 days
+            if (startedReviewDate >= ninetyDaysAgo) {
+                stats.totalAssignedLast90Days++;
+                if (hasUserSubmittedReview) {
+                    stats.totalSubmittedLast90Days++;
+                }
+            }
+        }
+
+        res.json(stats);
     }
 }
 

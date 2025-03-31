@@ -140,6 +140,7 @@ export default function VotingForm({ voting, user }: IProps) {
 
                 <Group justify="flex-end">
                     <Button
+                        color={userVote ? "info" : "success"}
                         onClick={handleSubmit}
                         loading={submitVoteMutation.isPending}
                         disabled={isCommentRequired && !comment.trim()}

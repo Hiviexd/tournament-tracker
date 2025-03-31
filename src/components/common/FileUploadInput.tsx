@@ -10,6 +10,7 @@ interface IProps {
     description?: string;
     placeholder?: string;
     options?: UseFileUploadOptions;
+    imagesOnly?: boolean;
     disabled?: boolean;
 }
 
@@ -20,19 +21,22 @@ export default function FileUploadInput({
     description = "Allowed types: jpg, png, zip, rar, txt",
     placeholder = "Up to 5 files, maximum of 5MB each",
     options,
+    imagesOnly = false,
     disabled = false,
 }: IProps) {
     const { files, handleFileChange } = useFileUpload(options);
 
-    const handleChange = (newFiles: File[]) => {
-        handleFileChange(newFiles);
-        onChange?.(newFiles);
+    const handleChange = (newFiles: File | File[] | null) => {
+        if (newFiles) {
+            handleFileChange(Array.isArray(newFiles) ? newFiles : [newFiles]);
+            onChange?.(Array.isArray(newFiles) ? newFiles : [newFiles]);
+        }
     };
 
     return (
         <FileInput
-            accept=".jpg,.png,.zip,.rar,.txt"
-            multiple
+            accept={imagesOnly ? ".jpg,.png" : ".jpg,.png,.zip,.rar,.txt"}
+            multiple={options?.maxFiles === 1 ? false : true}
             leftSection={<FontAwesomeIcon icon="upload" />}
             label={label}
             description={description}

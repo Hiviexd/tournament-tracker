@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
+import _ from "lodash";
+//// import helpers from "../helpers";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -7,15 +9,29 @@ const TournamentSchema = new Schema<ITournament>(
         modes: [{ type: String, required: true }],
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
-        forumUrl: { type: String, required: true },
+        forumUrl: {
+            type: String,
+            required: true,
+        },
+        threadId: { type: String },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
         status: { type: String, required: true },
         isActive: { type: Boolean, default: true },
-        bannerUrl: { type: String },
-        badges: [{ type: String }],
+        banner: { type: Schema.Types.ObjectId, ref: "Attachment" },
+        badges: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
-        reviews: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
+        reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
+        logs: [
+            {
+                user: { type: Schema.Types.ObjectId, ref: "User" },
+                action: { type: String, required: true },
+                icon: { type: String, default: "history" },
+                createdAt: { type: Date, default: Date.now },
+            },
+        ],
+        notes: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+        startedReviewAt: { type: Date },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -26,6 +42,14 @@ TournamentSchema.virtual("isTournament").get(function (this: ITournament) {
 
 TournamentSchema.virtual("isContest").get(function (this: ITournament) {
     return this.type === "contest";
+});
+
+TournamentSchema.virtual("statusString").get(function (this: ITournament) {
+    return _.startCase(this.status);
+});
+
+TournamentSchema.virtual("bannerUrl").get(function (this: ITournament) {
+    return this.banner?.url || "/assets/default-banner.jpg";
 });
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);

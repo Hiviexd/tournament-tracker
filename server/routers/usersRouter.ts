@@ -7,9 +7,9 @@ const usersRouter = express.Router();
 
 usersRouter.get("/", auth.isLoggedIn, UsersController.index);
 usersRouter.get("/me", auth.isLoggedIn, UsersController.getSelf);
-usersRouter.get("/getCommittee", UsersController.getCommittee);
+usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
-usersRouter.get("/:userInput", UsersController.getUser);
+usersRouter.get("/:userInput", auth.optionalAuth, UsersController.getUser);
 usersRouter.get("/:userInput/osu", auth.isLoggedIn, UsersController.getOsuUserInfo);
 usersRouter.post(
     "/:userId/toggleReviewerStatus",
@@ -21,5 +21,7 @@ usersRouter.post("/:userId/groupMove", auth.isLoggedIn, auth.isAdmin, UsersContr
 usersRouter.post("/:userId/updateBadge", auth.isLoggedIn, auth.isAdmin, UsersController.updateBadge);
 usersRouter.post("/:userId/sync", auth.isLoggedIn, auth.isCommittee, UsersController.syncUser);
 usersRouter.post("/:userId/updateDiscordId", auth.isLoggedIn, auth.isCommittee, UsersController.updateDiscordId);
+usersRouter.post("/:userId/updateEmail", auth.isLoggedIn, auth.isCommittee, UsersController.updateEmail);
+usersRouter.get("/:userId/reviewStats", auth.isLoggedIn, auth.isCommittee, UsersController.getReviewStats);
 
 export default usersRouter;

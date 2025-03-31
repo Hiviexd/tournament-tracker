@@ -10,6 +10,7 @@ import UserHistory from "./details/UserHistory";
 import UserGroupMoves from "./details/UserGroupMoves";
 import BadgeTracker from "./details/BadgeTracker";
 import UserStatus from "./details/UserStatus";
+import ReviewStats from "./details/ReviewStats";
 
 interface IProps {
     userId: string | null;
@@ -102,6 +103,8 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                     <UserHistory history={selectedUser.history} />
                     <Divider />
                     <BadgeTracker user={selectedUser} />
+                    <Divider />
+                    <ReviewStats user={selectedUser} />
 
                     {loggedInUser!.isAdmin && (
                         <Stack gap="xs">

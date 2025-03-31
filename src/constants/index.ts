@@ -47,10 +47,7 @@ export const BADGE_SUPPORT_OPTIONS = [
     "Approve badge",
 ] as const;
 
-export const TOP_THREE_BADGE_SUPPORT_OPTIONS = [
-    "Award top 3 badges",
-    "Only award winner badge",
-] as const;
+export const TOP_THREE_BADGE_SUPPORT_OPTIONS = ["Award top 3 badges", "Only award winner badge"] as const;
 
 export const VOTE_PRESETS = {
     userAddition: {
@@ -76,3 +73,8 @@ export const VOTE_PRESETS = {
 } as const;
 
 export const DEFAULT_HUE = "36";
+
+import checklist from "../../checklist.json";
+
+export const TC_REVIEW_CHECKLIST = checklist.tc;
+export const CC_REVIEW_CHECKLIST = checklist.cc;

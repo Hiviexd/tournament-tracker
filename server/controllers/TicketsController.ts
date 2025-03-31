@@ -306,7 +306,9 @@ class TicketsController {
             const userIds = Array.from(uniqueUsers);
             */
 
-            await OsuBotService.sendAnnouncement([ticket.author.osuId], {
+            const recipientId = process.env.NODE_ENV === "production" ? ticket.author.osuId : user.osuId;
+
+            await OsuBotService.sendAnnouncement([recipientId], {
                 channel: {
                     name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
                     description: `Response regarding: ${ticket.title}`,

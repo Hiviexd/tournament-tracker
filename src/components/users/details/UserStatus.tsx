@@ -53,6 +53,13 @@ export default function UserStatus({ user }: IProps) {
                 />
                 <Text size="sm">Discord ID: {user.discordId ?? "Not set!"}</Text>
             </Group>
+            <Group gap="xs">
+                <FontAwesomeIcon
+                    icon="envelope"
+                    color={user.email ? "var(--mantine-color-success-6)" : "var(--mantine-color-danger-6)"}
+                />
+                <Text size="sm">Email: {user.email ?? "Not set!"}</Text>
+            </Group>
         </Stack>
     );
 }

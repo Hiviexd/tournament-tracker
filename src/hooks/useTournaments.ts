@@ -3,11 +3,20 @@ import {
     getTournaments,
     getTournament,
     createTournament,
-    // assignReviewers,
     TournamentQueryParams,
+    assignReviewers,
+    editTournament,
+    reassignReviewer,
+    submitReview,
+    uploadBadges,
+    downloadBadges,
+    updateThreadId,
+    createNote,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
-import { ITournament } from "../../interfaces/Tournament";
+import { TournamentFormData } from "../../interfaces/Tournament";
+import { IReview } from "../../interfaces/Review";
+import { IMessageFormData } from "../../interfaces/Message";
 
 export function useTournaments(params?: TournamentQueryParams) {
     return useQuery({
@@ -27,7 +36,7 @@ export function useCreateTournament() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (tournamentData: Partial<ITournament>) => {
+        mutationFn: async (tournamentData: TournamentFormData) => {
             const response = await createTournament(tournamentData);
             return handleMutationResponse(response);
         },
@@ -37,18 +46,106 @@ export function useCreateTournament() {
     });
 }
 
-/*
 export function useAssignReviewers(tournamentId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async () => {
             const response = await assignReviewers(tournamentId);
-            return handleMutationResponse(response, "Reviewers assigned successfully");
+            return handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
         },
     });
 }
-*/
+
+export function useEditTournament(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (tournamentData: Partial<TournamentFormData>) => {
+            const response = await editTournament(tournamentId, tournamentData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useReassignReviewer(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ oldReviewerId, newReviewerId }: { oldReviewerId: string; newReviewerId: string }) => {
+            const response = await reassignReviewer(tournamentId, oldReviewerId, newReviewerId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useSubmitReview(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (reviewData: Partial<IReview>) => {
+            const response = await submitReview(tournamentId, reviewData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useUploadBadges(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (badgeFiles: File[]) => {
+            const response = await uploadBadges(tournamentId, badgeFiles);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useDownloadBadges(tournamentId: string) {
+    return useMutation({
+        mutationFn: () => downloadBadges(tournamentId),
+    });
+}
+
+export function useUpdateThreadId(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (threadId: string) => {
+            const response = await updateThreadId(tournamentId, threadId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useCreateNote(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (noteData: IMessageFormData) => {
+            const response = await createNote(tournamentId, noteData);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}

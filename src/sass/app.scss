@@ -157,6 +157,10 @@
             background-color: color-mix(in srgb, var(--mantine-color-primary-11) 60%, transparent);
         }
     }
+
+    .mantine-Badge-label {
+        line-height: normal;
+    }
 }
 
 /* Links */
