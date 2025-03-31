@@ -63,6 +63,7 @@ export interface ITournament extends Document {
     logs: ITournamentLog[];
     notes: IMessage[];
     createdAt: Date;
+    startedReviewAt?: Date;
 
     // virtuals
     isTournament: boolean;

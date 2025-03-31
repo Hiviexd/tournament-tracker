@@ -28,7 +28,7 @@ const defaultPopulate = [
     },
     {
         path: "assignedReviewers",
-        select: "username osuId groups coverUrl",
+        select: "username osuId groups coverUrl isActiveReviewer",
     },
     {
         path: "reviews",
@@ -324,12 +324,17 @@ class TournamentsController {
 
         const { forumUrl, startDate, endDate, status, isActive } = req.body;
 
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
-        if (status) tournament.status = status;
+        if (status) {
+            tournament.status = status;
+            if (status === "reviewOngoing") {
+                tournament.startedReviewAt = new Date();
+            }
+        }
         if (isActive !== undefined) tournament.isActive = isActive;
 
         await tournament.save();
@@ -369,7 +374,7 @@ class TournamentsController {
             await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
 
             // osu! message
-            const recipientId = process.env.NODE_ENV === "production" ? tournament.host.osuId : currentUser.osuId;
+            const recipientId = process.env.NODE_ENV === "development" ? tournament.host.osuId : currentUser.osuId;
 
             let message = `The official support status of your tournament **${
                 tournament.name
@@ -620,7 +625,9 @@ class TournamentsController {
             [
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `${isNewReview ? "Submitted" : "Updated"} a review for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    description: `${isNewReview ? "Submitted" : "Updated"} a review for ${tournament.type}: [**${
+                        tournament.name
+                    }**](${config.baseUrl}/tournaments/${tournament._id})`,
                     color: isNewReview ? webhookColors.lightGreen : webhookColors.lightBlue,
                     fields: [
                         {
