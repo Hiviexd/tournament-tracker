@@ -234,6 +234,10 @@ function formatGameMode(mode: string) {
     }
 }
 
+function validateEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -253,4 +257,5 @@ export default {
     sortBeatmapsByStatus,
     getGitHash,
     formatGameMode,
+    validateEmail,
 };

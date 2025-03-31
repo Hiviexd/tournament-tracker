@@ -38,6 +38,7 @@ export interface IUser extends Document {
     coverUrl?: string;
     country?: IOsuCountry;
     badgeValue: number;
+    email?: string;
 
     // virtuals
     avatarUrl: string;

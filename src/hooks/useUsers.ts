@@ -11,6 +11,7 @@ import {
     updateDiscordId,
     getOsuUserInfo,
     getReviewStats,
+    updateEmail,
 } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
@@ -188,6 +189,30 @@ export function useUpdateDiscordId(userId: string) {
         },
     });
 }
+
+export function useUpdateEmail(userId: string) {
+    const queryClient = useQueryClient();
+    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
+
+    return useMutation({
+        mutationFn: async (email: string) => {
+            const response = await updateEmail(userId, email);
+            return handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+
+            // Update loggedInUser when relevant
+            if (loggedInUser?._id === userId) {
+                queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+                const res = data as { message: string; user: IUser };
+                setLoggedInUser(res.user as IUser);
+            }
+        },
+    });
+}
+
 
 export function useReviewStats(userId: string) {
     return useQuery({

@@ -122,6 +122,18 @@ class UserService {
 
         return selectedUsers;
     }
+
+    /**
+     * * Sanitize user data based on user permissions
+     * * Removes email from non-committee users
+     */
+    public sanitizeUser(user: IUser, isCommittee: boolean): IUser {
+        if (!isCommittee) {
+            user.email = undefined;
+        }
+
+        return user;
+    }
 }
 
 export default new UserService();

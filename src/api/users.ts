@@ -67,6 +67,11 @@ export const updateDiscordId = async (userId: string, discordId: string) => {
     return response.data;
 };
 
+export const updateEmail = async (userId: string, email: string) => {
+    const response = await axios.post(`/api/users/${userId}/updateEmail`, { email });
+    return response.data;
+};
+
 export const getReviewStats = async (userId: string) => {
     const response = await axios.get(`/api/users/${userId}/reviewStats`);
     return response.data;
