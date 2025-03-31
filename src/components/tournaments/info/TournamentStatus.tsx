@@ -79,13 +79,15 @@ export default function TournamentStatus({ tournament }: IProps) {
                             <FontAwesomeIcon icon="xmark" />
                         </ActionIcon>
                     ) : user?.isCommittee || user?.isAdmin ? (
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => setIsEditingStatus(true)}
-                            color="info"
-                            title="Update status">
-                            <FontAwesomeIcon icon="pen-to-square" />
-                        </ActionIcon>
+                        tournament.isActive && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setIsEditingStatus(true)}
+                                color="info"
+                                title="Update status">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        )
                     ) : null}
                 </Group>
 

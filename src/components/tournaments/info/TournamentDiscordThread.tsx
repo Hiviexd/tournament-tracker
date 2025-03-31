@@ -55,13 +55,15 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                     </ActionIcon>
                 ) : (
                     <Group gap={4}>
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => setIsEditingThreadId(true)}
-                            color="info"
-                            title="Edit webhook location">
-                            <FontAwesomeIcon icon="pen-to-square" />
-                        </ActionIcon>
+                        {tournament.isActive && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setIsEditingThreadId(true)}
+                                color="info"
+                                title="Edit webhook location">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        )}
                         {tournament.threadId?.length && (
                             <ActionIcon
                                 variant="subtle"

@@ -39,13 +39,15 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
                 ) : user?.isCommittee ? (
-                    <ActionIcon
-                        variant="subtle"
-                        onClick={() => setIsEditingForumUrl(true)}
-                        color="info"
-                        title="Edit forum URL">
-                        <FontAwesomeIcon icon="pen-to-square" />
-                    </ActionIcon>
+                    tournament.isActive && (
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => setIsEditingForumUrl(true)}
+                            color="info"
+                            title="Edit forum URL">
+                            <FontAwesomeIcon icon="pen-to-square" />
+                        </ActionIcon>
+                    )
                 ) : null}
             </Group>
 

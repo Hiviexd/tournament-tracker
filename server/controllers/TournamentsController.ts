@@ -326,6 +326,10 @@ class TournamentsController {
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
+        if (!tournament.isActive && isActive === undefined) {
+            return res.json({ error: "Cannot edit archived tournament!" });
+        }
+
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;

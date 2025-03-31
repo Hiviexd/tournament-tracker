@@ -68,13 +68,15 @@ export default function TournamentDates({ tournament }: IProps) {
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
                 ) : user?.isCommittee ? (
-                    <ActionIcon
-                        variant="subtle"
-                        onClick={() => setIsEditingDates(true)}
-                        color="info"
-                        title="Edit dates">
-                        <FontAwesomeIcon icon="pen-to-square" />
-                    </ActionIcon>
+                    tournament.isActive && (
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => setIsEditingDates(true)}
+                            color="info"
+                            title="Edit dates">
+                            <FontAwesomeIcon icon="pen-to-square" />
+                        </ActionIcon>
+                    )
                 ) : null}
             </Group>
 

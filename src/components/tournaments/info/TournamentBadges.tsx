@@ -73,13 +73,15 @@ export default function TournamentBadges({ tournament }: IProps) {
                     </ActionIcon>
                 ) : user?.isCommittee ? (
                     <Group gap={4}>
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => setIsEditingBadges(true)}
-                            color="info"
-                            title="Upload badges">
-                            <FontAwesomeIcon icon="pen-to-square" />
-                        </ActionIcon>
+                        {tournament.isActive && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setIsEditingBadges(true)}
+                                color="info"
+                                title="Upload badges">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        )}
                         {badges.length > 0 && (
                             <ActionIcon
                                 variant="subtle"
