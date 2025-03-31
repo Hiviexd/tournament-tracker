@@ -21,5 +21,6 @@ usersRouter.post("/:userId/groupMove", auth.isLoggedIn, auth.isAdmin, UsersContr
 usersRouter.post("/:userId/updateBadge", auth.isLoggedIn, auth.isAdmin, UsersController.updateBadge);
 usersRouter.post("/:userId/sync", auth.isLoggedIn, auth.isCommittee, UsersController.syncUser);
 usersRouter.post("/:userId/updateDiscordId", auth.isLoggedIn, auth.isCommittee, UsersController.updateDiscordId);
+usersRouter.get("/:userId/reviewStats", auth.isLoggedIn, auth.isCommittee, UsersController.getReviewStats);
 
 export default usersRouter;

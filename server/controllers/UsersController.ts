@@ -7,6 +7,7 @@ import OsuApiService from "../services/OsuApiService";
 import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
+import Tournament from "../models/tournamentModel";
 
 class UsersController {
     /** GET logged in user */
@@ -306,6 +307,62 @@ class UsersController {
             message: `Updated Discord ID successfully!`,
             user,
         });
+    }
+
+    /** GET review stats */
+    public async getReviewStats(req: Request, res: Response) {
+        const { userId } = req.params;
+        const user = await User.findById(userId).orFail();
+
+        // Get the date 90 days ago
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        // Find all tournaments where user is assigned as a reviewer
+        const tournaments = await Tournament.find({
+            assignedReviewers: user._id,
+        }).populate([
+            {
+                path: "reviews",
+                select: "author",
+                populate: {
+                    path: "author",
+                    select: "_id username",
+                },
+            },
+        ]);
+
+        // Calculate statistics
+        const stats = {
+            activeReviews: 0,
+            totalAssignedLast90Days: 0,
+            totalSubmittedLast90Days: 0,
+        };
+
+        for (const tournament of tournaments) {
+            // Skip if no startedReviewAt date
+            if (!tournament.startedReviewAt) continue;
+
+            const startedReviewDate = new Date(tournament.startedReviewAt);
+            const hasUserSubmittedReview = tournament.reviews?.some(
+                (review) => review.author._id.toString() === user._id.toString()
+            );
+
+            // Count active reviews
+            if (tournament.isActive) {
+                stats.activeReviews++;
+            }
+
+            // Count reviews in last 90 days
+            if (startedReviewDate >= ninetyDaysAgo) {
+                stats.totalAssignedLast90Days++;
+                if (hasUserSubmittedReview) {
+                    stats.totalSubmittedLast90Days++;
+                }
+            }
+        }
+
+        res.json(stats);
     }
 }
 

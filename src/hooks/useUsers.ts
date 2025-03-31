@@ -10,6 +10,7 @@ import {
     syncUser,
     updateDiscordId,
     getOsuUserInfo,
+    getReviewStats,
 } from "../api/users";
 import { handleMutationResponse } from "../api/helpers";
 import { useAtom } from "jotai";
@@ -185,5 +186,13 @@ export function useUpdateDiscordId(userId: string) {
                 setLoggedInUser(res.user as IUser);
             }
         },
+    });
+}
+
+export function useReviewStats(userId: string) {
+    return useQuery({
+        queryKey: ["reviewStats", userId],
+        queryFn: () => getReviewStats(userId),
+        enabled: !!userId,
     });
 }

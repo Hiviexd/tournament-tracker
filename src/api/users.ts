@@ -66,3 +66,8 @@ export const updateDiscordId = async (userId: string, discordId: string) => {
     const response = await axios.post(`/api/users/${userId}/updateDiscordId`, { discordId });
     return response.data;
 };
+
+export const getReviewStats = async (userId: string) => {
+    const response = await axios.get(`/api/users/${userId}/reviewStats`);
+    return response.data;
+};
