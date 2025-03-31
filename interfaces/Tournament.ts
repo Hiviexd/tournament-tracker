@@ -37,6 +37,13 @@ export interface ITournamentFormData extends FormData {
 
 export type TournamentFormData = Partial<ITournament> & ITournamentFormData;
 
+export interface ITournamentLog {
+    user: IUser;
+    action: string;
+    icon?: string;
+    createdAt: Date;
+}
+
 export interface ITournament extends Document {
     name: string;
     modes: GameMode[];
@@ -51,6 +58,7 @@ export interface ITournament extends Document {
     badges?: IAttachment[];
     assignedReviewers?: IUser[];
     reviews: IReview[];
+    logs: ITournamentLog[];
     createdAt: Date;
 
     // virtuals

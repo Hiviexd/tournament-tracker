@@ -43,6 +43,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
         } else {
             setReviewer2("");
         }
+        setIsEditingReviewer(false);
     };
 
     const handleCancelEdit = () => {

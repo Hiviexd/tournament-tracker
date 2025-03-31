@@ -9,6 +9,10 @@ import Review from "../models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
+import TournamentService from "../services/TournamentService";
+import LogService from "../services/LogService";
+import _ from "lodash";
+import moment from "moment";
 
 const defaultPopulate = [
     {
@@ -34,6 +38,14 @@ const defaultPopulate = [
     {
         path: "badges",
         select: "url",
+    },
+    {
+        path: "logs",
+        select: "user action createdAt",
+        populate: {
+            path: "user",
+            select: "username osuId groups",
+        },
     },
 ];
 
@@ -67,10 +79,7 @@ class TournamentsController {
             // 2. user is in assignedReviewers array
             query.$and = [
                 {
-                    $or: [
-                        { status: "reviewOngoing" },
-                        { status: "changesRequested" },
-                    ],
+                    $or: [{ status: "reviewOngoing" }, { status: "changesRequested" }],
                 },
                 { assignedReviewers: user._id },
             ];
@@ -78,6 +87,11 @@ class TournamentsController {
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
         const isCommittee = res.locals!.user!.isCommittee;
+
+        const populationFilter = [
+            { path: "reviews", select: false },
+            { path: "assignedReviewers", select: false },
+        ];
 
         const [tournaments, total] = await Promise.all([
             Tournament.aggregate([
@@ -121,15 +135,7 @@ class TournamentsController {
             ])
                 .exec()
                 .then((tournaments) =>
-                    Tournament.populate(tournaments, [
-                        ...defaultPopulate,
-                        ...(isCommittee
-                            ? []
-                            : [
-                                { path: "reviews", select: false },
-                                { path: "assignedReviewers", select: false },
-                            ]),
-                    ])
+                    Tournament.populate(tournaments, [...defaultPopulate, ...(isCommittee ? [] : populationFilter)])
                 )
                 .then((tournaments) => tournaments.map((t) => Tournament.hydrate(t).toJSON())),
             Tournament.countDocuments(query),
@@ -197,6 +203,7 @@ class TournamentsController {
     /** POST assign reviewers */
     public async assignReviewers(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
 
         const tournament = await Tournament.findById(tournamentId).orFail();
 
@@ -215,12 +222,24 @@ class TournamentsController {
 
         res.json({ message: "Reviewers assigned successfully!" });
 
-        // TODO: logging and discord
+        // logging
+        await TournamentService.addLog(
+            tournament,
+            currentUser,
+            `Assigned reviewers: ${reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", ")}`,
+            "users"
+        );
+
+        await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**`, "tournament");
+
+        // TODO: discord
     }
 
     /** POST edit tournament */
     public async edit(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+
         const { forumUrl, startDate, endDate, status, isActive } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).orFail();
@@ -235,12 +254,53 @@ class TournamentsController {
 
         res.json({ message: "Tournament updated successfully!" });
 
-        // TODO: logging
+        // logging
+        if (forumUrl) {
+            await TournamentService.addLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
+            await LogService.generate(currentUser._id, `Updated forum URL for **${tournament.name}**`, "tournament");
+        }
+
+        if (startDate && endDate) {
+            await TournamentService.addLog(
+                tournament,
+                currentUser,
+                `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format("YYYY-MM-DD")}**`,
+                "calendar"
+            );
+            await LogService.generate(
+                currentUser._id,
+                `Updated start and end date for **${tournament.name}**`,
+                "tournament"
+            );
+        }
+
+        if (status) {
+            await TournamentService.addLog(tournament, currentUser, `Updated status to **${_.startCase(status)}**`, "flag");
+            await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
+        }
+
+        if (isActive !== undefined) {
+            await TournamentService.addLog(
+                tournament,
+                currentUser,
+                `${isActive ? "Unarchived" : "Archived"} tournament`,
+                "archive"
+            );
+            await LogService.generate(
+                currentUser._id,
+                `Updated active status for **${tournament.name}**`,
+                "tournament"
+            );
+        }
+
+        // TODO: discord for status and active
     }
 
     /** POST reassign reviewer */
     public async reassignReviewer(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+
         const { oldReviewerId, newReviewerId } = req.body;
 
         if (!oldReviewerId || !newReviewerId) {
@@ -305,12 +365,24 @@ class TournamentsController {
 
         res.json({ message: "Reviewer reassigned successfully!" });
 
-        // TODO: logging and discord
+        // logging
+        await TournamentService.addLog(
+            tournament,
+            currentUser,
+            `Reassigned reviewer from [**${oldReviewer?.username}**](${oldReviewer?.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
+            "user-pen"
+        );
+
+        await LogService.generate(currentUser._id, `Reassigned reviewer for **${tournament.name}**`, "tournament");
+
+        // TODO: discord
     }
 
     /** POST submit review */
     public async submitReview(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+
         const { checklist, comment, vote } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
@@ -357,7 +429,13 @@ class TournamentsController {
 
         res.json({ message: "Review submitted successfully!" });
 
-        // TODO: logging and discord
+        // logging
+        if (!isNewReview) {
+            await TournamentService.addLog(tournament, currentUser, `Submitted review`, "check-to-slot");
+            await LogService.generate(currentUser._id, `Submitted review for **${tournament.name}**`, "tournament");
+        }
+
+        // TODO: discord
     }
 
     /** POST upload badges */
@@ -402,6 +480,10 @@ class TournamentsController {
         await tournament.save();
 
         res.json({ message: "Badges uploaded successfully!" });
+
+        // logging
+        await TournamentService.addLog(tournament, currentUser, `Uploaded badges`, "image");
+        await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
     }
 
     /** GET download badges */

@@ -86,6 +86,9 @@ import {
     faArrowsRotate,
     faAward,
     faBoxArchive,
+    faLink,
+    faCalendar,
+    faUserPen,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -176,5 +179,8 @@ export default function loadIcons() {
         faArrowsRotate,
         faAward,
         faBoxArchive,
+        faLink,
+        faCalendar,
+        faUserPen,
     );
 }

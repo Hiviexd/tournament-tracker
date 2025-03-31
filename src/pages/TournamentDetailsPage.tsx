@@ -3,6 +3,7 @@ import { Container, Stack, Card, Skeleton, Group } from "@mantine/core";
 import TournamentPageHeader from "../components/tournaments/TournamentPageHeader";
 import TournamentPageInfo from "../components/tournaments/TournamentPageInfo";
 import TournamentReviewSection from "../components/tournaments/TournamentReviewSection";
+import TournamentLogs from "../components/tournaments/TournamentLogs";
 import { useTournament } from "../hooks/useTournaments";
 import EmptyState from "../components/common/EmptyState";
 import { loggedInUserAtom } from "../store/atoms";
@@ -80,6 +81,7 @@ export default function TournamentDetailsPage() {
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} />
+                        {user?.isCommittee && <TournamentLogs tournament={tournament} />}
                         {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
                         {user?.isCommittee && tournament.isTournament && (
                             <MappoolCompliancePage header="Mappool Compliance Checker" />

@@ -26,6 +26,14 @@ const TournamentSchema = new Schema<ITournament>(
         badges: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
+        logs: [
+            {
+                user: { type: Schema.Types.ObjectId, ref: "User" },
+                action: { type: String, required: true },
+                icon: { type: String, default: "history" },
+                createdAt: { type: Date, default: Date.now },
+            },
+        ],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
