@@ -81,7 +81,7 @@ export default function TournamentDetailsPage() {
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} />
-                        {user?.isCommittee && <TournamentLogs tournament={tournament} />}
+                        {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
                         {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
                         {user?.isCommittee && tournament.isTournament && (
                             <MappoolCompliancePage header="Mappool Compliance Checker" />
