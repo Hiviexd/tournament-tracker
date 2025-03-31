@@ -378,7 +378,7 @@ class TournamentsController {
             await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
 
             // osu! message
-            const recipientId = process.env.NODE_ENV === "development" ? tournament.host.osuId : currentUser.osuId;
+            const recipientId = process.env.NODE_ENV === "production" ? tournament.host.osuId : currentUser.osuId;
 
             let message = `The official support status of your tournament **${
                 tournament.name
