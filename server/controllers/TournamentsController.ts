@@ -296,7 +296,8 @@ class TournamentsController {
         await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**`, "tournament");
 
         // Discord
-        const usersToPing = reviewers.map((r) => r.discordId || r.username);
+        //const usersToPing = reviewers.map((r) => r.discordId || r.username);
+        const usersToPing = [];
         await DiscordService.sendUserHighlightWebhook(
             usersToPing,
             [
@@ -542,8 +543,8 @@ class TournamentsController {
 
         // Discord
         const usersToPing = [
-            oldReviewer.discordId || oldReviewer.username,
-            newReviewer.discordId || newReviewer.username,
+            // oldReviewer.discordId || oldReviewer.username,
+            // newReviewer.discordId || newReviewer.username,
         ];
         await DiscordService.sendUserHighlightWebhook(
             usersToPing,
