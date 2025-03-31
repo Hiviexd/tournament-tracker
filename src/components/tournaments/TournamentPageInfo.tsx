@@ -6,6 +6,7 @@ import TournamentStatus from "./info/TournamentStatus";
 import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
+import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 
@@ -42,6 +43,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                 <Stack gap="md">
                     <TournamentStatus tournament={tournament} />
                     <TournamentForumUrl tournament={tournament} />
+                    {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
                     <TournamentDates tournament={tournament} />
                     <TournamentBadges tournament={tournament} />
                 </Stack>

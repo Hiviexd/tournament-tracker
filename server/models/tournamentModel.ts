@@ -18,6 +18,7 @@ const TournamentSchema = new Schema<ITournament>(
                     "Forum URL must be a valid osu! forum topic link (e.g., https://osu.ppy.sh/community/forums/topics/123456)",
             },
         },
+        threadId: { type: String },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
         status: { type: String, required: true },

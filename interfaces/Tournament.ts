@@ -50,6 +50,7 @@ export interface ITournament extends Document {
     startDate: Date | null;
     endDate: Date | null;
     forumUrl: string;
+    threadId?: string;
     host: IUser;
     type: TournamentType;
     status: TournamentStatus;

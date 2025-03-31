@@ -81,3 +81,8 @@ export const downloadBadges = async (tournamentId: string) => {
 
     return response.data;
 };
+
+export const updateThreadId = async (tournamentId: string, threadId: string) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/updateThreadId`, { threadId });
+    return response.data;
+};

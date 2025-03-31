@@ -11,6 +11,7 @@ import {
     submitReview,
     uploadBadges,
     downloadBadges,
+    updateThreadId,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
@@ -117,5 +118,19 @@ export function useUploadBadges(tournamentId: string) {
 export function useDownloadBadges(tournamentId: string) {
     return useMutation({
         mutationFn: () => downloadBadges(tournamentId),
+    });
+}
+
+export function useUpdateThreadId(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (threadId: string) => {
+            const response = await updateThreadId(tournamentId, threadId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
     });
 }

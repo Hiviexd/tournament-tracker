@@ -13,6 +13,9 @@ import TournamentService from "../services/TournamentService";
 import LogService from "../services/LogService";
 import _ from "lodash";
 import moment from "moment";
+import DiscordService from "../services/DiscordService";
+import webhookColors from "../constants/webhookColors";
+import config from "../../config.json";
 
 const defaultPopulate = [
     {
@@ -264,7 +267,9 @@ class TournamentsController {
             await TournamentService.addLog(
                 tournament,
                 currentUser,
-                `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format("YYYY-MM-DD")}**`,
+                `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
+                    "YYYY-MM-DD"
+                )}**`,
                 "calendar"
             );
             await LogService.generate(
@@ -275,7 +280,12 @@ class TournamentsController {
         }
 
         if (status) {
-            await TournamentService.addLog(tournament, currentUser, `Updated status to **${_.startCase(status)}**`, "flag");
+            await TournamentService.addLog(
+                tournament,
+                currentUser,
+                `Updated status to **${_.startCase(status)}**`,
+                "flag"
+            );
             await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
         }
 
@@ -560,6 +570,60 @@ class TournamentsController {
             if (!res.headersSent) {
                 res.json({ error: "Failed to create badge archive" });
             }
+        }
+    }
+
+    /** POST update thread ID */
+    public async updateThreadId(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+
+        const { threadId } = req.body;
+
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+        if (threadId !== tournament.threadId) {
+            tournament.threadId = threadId;
+            await tournament.save();
+
+            res.json({ message: "Thread ID updated successfully!" });
+
+            // logging
+            await TournamentService.addLog(
+                tournament,
+                currentUser,
+                `Updated Discord thread ID: **${threadId && threadId.length ? threadId : "#t-committee"}**`,
+                "link"
+            );
+            await LogService.generate(
+                currentUser._id,
+                `Updated Discord thread ID for **${tournament.name}**`,
+                "tournament"
+            );
+
+            // discord
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: webhookColors.white,
+                        description: `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                        fields: [
+                            {
+                                name: "New Location",
+                                value: `<#${
+                                    threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId
+                                }>`,
+                            },
+                        ],
+                    },
+                ],
+                "",
+                undefined,
+                tournament.threadId
+            );
+        } else {
+            res.json({ message: "Thread ID is already set!" });
         }
     }
 }
