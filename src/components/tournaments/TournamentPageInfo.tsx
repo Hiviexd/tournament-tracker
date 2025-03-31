@@ -14,8 +14,8 @@ interface IProps {
 }
 
 export default function TournamentPageInfo({ tournament }: IProps) {
-    const editTournamentMutation = useEditTournament(tournament._id);
     const [user] = useAtom(loggedInUserAtom);
+    const editTournamentMutation = useEditTournament(tournament._id);
 
     const handleToggleState = async () => {
         if (confirm(`Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`)) {
