@@ -159,7 +159,7 @@ function EmptyState({ hasError }: { hasError: boolean }) {
             <Text size="sm" c="dimmed">
                 {hasError
                     ? "Try refreshing the page"
-                    : "Try adjusting your filters or create a new tournament"}
+                    : "Try adjusting your filters"}
             </Text>
         </Stack>
     );
