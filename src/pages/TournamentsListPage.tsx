@@ -3,12 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Stack, Group, Button, Card, Text, Pagination, Skeleton, SimpleGrid, Divider } from "@mantine/core";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    ITournament,
-    GameMode,
-    TournamentType,
-    TournamentStatus,
-} from "../../interfaces/Tournament";
+import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
 import TournamentFilters from "../components/tournaments/TournamentFilters";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import TournamentCreateModal from "../components/tournaments/TournamentCreateModal";
@@ -32,7 +27,7 @@ export default function TournamentListPage() {
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [filters, setFilters] = useState<FilterValues>({
         name: searchParams.get("name") || "",
-        mode: searchParams.get("mode") as GameMode || "",
+        mode: (searchParams.get("mode") as GameMode) || "",
         host: searchParams.get("host") || "",
         type: (searchParams.get("type") as TournamentType) || "",
         status: (searchParams.get("status") as TournamentStatus) || "",
@@ -109,13 +104,7 @@ export default function TournamentListPage() {
                         ))}
                     </SimpleGrid>
                     {data.pages > 1 && (
-                        <Pagination
-                            value={page}
-                            onChange={setPage}
-                            total={data.pages}
-                            color="primary"
-                            mt="sm"
-                        />
+                        <Pagination value={page} onChange={setPage} total={data.pages} color="primary" mt="sm" />
                     )}
                 </Stack>
             )}
@@ -125,27 +114,37 @@ export default function TournamentListPage() {
 
 function LoadingState() {
     return (
-        <Stack gap="md">
-            {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg">
-                    <Stack gap="md">
-                        <Group justify="space-between">
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+            {[1, 2, 3, 4].map((i) => (
+                <Card
+                    key={i}
+                    shadow="sm"
+                    p={0}
+                    radius="md"
+                    className="tournament-card"
+                    style={{ "--banner-url": "none" } as React.CSSProperties}>
+                    <Stack gap="md" p="lg" className="tournament-card-content">
+                        <Group justify="space-between" align="flex-start">
                             <Stack gap="xs">
-                                <Skeleton height={24} width="60%" />
-                                <Skeleton height={16} width="40%" />
+                                <Skeleton height={24} width={200} /> {/* Title */}
+                                <Group gap="xs" my="sm">
+                                    <Skeleton circle height={30} width={30} /> {/* Avatar */}
+                                    <Skeleton height={16} width={120} /> {/* Host */}
+                                </Group>
                             </Stack>
-                            <Skeleton height={32} width={100} />
+                            <Skeleton height={20} width={80} radius="xl" /> {/* Active/Concluded Badge */}
                         </Group>
-                        <Group>
-                            <Skeleton height={24} width={80} radius="xl" />
-                            <Skeleton height={24} width={100} radius="xl" />
-                            <Skeleton height={24} width={90} radius="xl" />
+
+                        <Group gap="xs">
+                            <Skeleton height={20} width={28} radius="xl" /> {/* Type Badge */}
+                            <Skeleton height={20} width={28} radius="xl" /> {/* Mode Badge */}
+                            <Skeleton height={20} width={100} radius="xl" /> {/* Status Badge */}
+                            <Skeleton height={20} width={80} radius="xl" /> {/* Vote Count Badge */}
                         </Group>
                     </Stack>
                 </Card>
             ))}
-            <Skeleton height={36} width={200} mx="auto" />
-        </Stack>
+        </SimpleGrid>
     );
 }
 
@@ -157,9 +156,7 @@ function EmptyState({ hasError }: { hasError: boolean }) {
                 {hasError ? "Error loading tournaments" : "No tournaments found"}
             </Text>
             <Text size="sm" c="dimmed">
-                {hasError
-                    ? "Try refreshing the page"
-                    : "Try adjusting your filters"}
+                {hasError ? "Try refreshing the page" : "Try adjusting your filters"}
             </Text>
         </Stack>
     );
