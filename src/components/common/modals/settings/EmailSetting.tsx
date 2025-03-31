@@ -25,7 +25,7 @@ export default function EmailSetting() {
                     Email
                 </Text>
                 <Text size="xs" c="dimmed">
-                    Your email for Google Drive access (ping a TC member after setting this)
+                    For Google Drive access (ping a TC member if you don't have access)
                 </Text>
             </span>
             <Group align="center" gap="xs">
