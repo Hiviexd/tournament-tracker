@@ -20,7 +20,7 @@ export default function TournamentLogs({ tournament }: IProps) {
                 <Stack gap="md">
                     <Title order={3}>Logs</Title>
                     <Text c="dimmed" fs="italic" size="sm">
-                        No logs available
+                        No logs available...
                     </Text>
                 </Stack>
             </Card>

@@ -16,6 +16,7 @@ import moment from "moment";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
+import Message from "../models/messageModel";
 
 const defaultPopulate = [
     {
@@ -50,13 +51,27 @@ const defaultPopulate = [
             select: "username osuId groups",
         },
     },
+    {
+        path: "notes",
+        select: "content author isNote attachments createdAt",
+        populate: [
+            {
+                path: "author",
+                select: "username osuId groups",
+            },
+            {
+                path: "attachments",
+                select: "originalName url size type",
+            },
+        ],
+    },
 ];
 
 const DEFAULT_LIMIT = 20;
 
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
-const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -assignedReviewers");
+const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -assignedReviewers -notes -logs");
 
 class TournamentsController {
     /** GET tournament listing */
@@ -94,6 +109,8 @@ class TournamentsController {
         const populationFilter = [
             { path: "reviews", select: false },
             { path: "assignedReviewers", select: false },
+            { path: "notes", select: false },
+            { path: "logs", select: false },
         ];
 
         const [tournaments, total] = await Promise.all([
@@ -440,7 +457,7 @@ class TournamentsController {
         res.json({ message: "Review submitted successfully!" });
 
         // logging
-        if (!isNewReview) {
+        if (isNewReview) {
             await TournamentService.addLog(tournament, currentUser, `Submitted review`, "check-to-slot");
             await LogService.generate(currentUser._id, `Submitted review for **${tournament.name}**`, "tournament");
         }
@@ -625,6 +642,41 @@ class TournamentsController {
         } else {
             res.json({ message: "Thread ID is already set!" });
         }
+    }
+
+    /** POST create note */
+    public async createNote(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+        const files = req.files as Express.Multer.File[];
+
+        const { content } = req.body;
+
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+        const note = new Message({
+            author: currentUser,
+            content,
+            isCommittee: true,
+            isNote: true,
+        });
+
+        // Handle file uploads
+        if (files?.length) {
+            note.attachments = await UploadService.handleFileUploads(
+                files,
+                FILE_UPLOAD_CATEGORY,
+                tournament._id,
+                currentUser._id
+            );
+        }
+
+        await note.save();
+
+        tournament.notes.push(note);
+        await tournament.save();
+
+        res.json({ message: "Note created successfully!" });
     }
 }
 

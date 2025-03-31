@@ -35,6 +35,7 @@ const TournamentSchema = new Schema<ITournament>(
                 createdAt: { type: Date, default: Date.now },
             },
         ],
+        notes: [{ type: Schema.Types.ObjectId, ref: "Message" }],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

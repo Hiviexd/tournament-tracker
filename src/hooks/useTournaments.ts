@@ -3,7 +3,6 @@ import {
     getTournaments,
     getTournament,
     createTournament,
-    // assignReviewers,
     TournamentQueryParams,
     assignReviewers,
     editTournament,
@@ -12,10 +11,12 @@ import {
     uploadBadges,
     downloadBadges,
     updateThreadId,
+    createNote,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
-import { IReview } from "@interfaces/Review";
+import { IReview } from "../../interfaces/Review";
+import { IMessageFormData } from "../../interfaces/Message";
 
 export function useTournaments(params?: TournamentQueryParams) {
     return useQuery({
@@ -127,6 +128,20 @@ export function useUpdateThreadId(tournamentId: string) {
     return useMutation({
         mutationFn: async (threadId: string) => {
             const response = await updateThreadId(tournamentId, threadId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useCreateNote(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (noteData: IMessageFormData) => {
+            const response = await createNote(tournamentId, noteData);
             return handleMutationResponse(response);
         },
         onSuccess: () => {

@@ -2,7 +2,7 @@
 import express from "express";
 import TournamentsController from "../controllers/TournamentsController";
 import auth from "../middlewares/auth";
-import { createUploadMiddleware } from "../middlewares/upload";
+import { createUploadMiddleware, handleUpload } from "../middlewares/upload";
 
 const tournamentsRouter = express.Router();
 
@@ -26,5 +26,6 @@ tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isCo
 tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isCommittee, tournamentBadgeUpload, TournamentsController.uploadBadges);
 tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
 tournamentsRouter.post("/:tournamentId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TournamentsController.updateThreadId);
+tournamentsRouter.post("/:tournamentId/createNote", auth.isLoggedIn, auth.isCommittee, handleUpload, TournamentsController.createNote);
 
 export default tournamentsRouter;

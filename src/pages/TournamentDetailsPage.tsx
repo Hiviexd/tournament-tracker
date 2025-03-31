@@ -4,6 +4,7 @@ import TournamentPageHeader from "../components/tournaments/TournamentPageHeader
 import TournamentPageInfo from "../components/tournaments/TournamentPageInfo";
 import TournamentReviewSection from "../components/tournaments/TournamentReviewSection";
 import TournamentLogs from "../components/tournaments/TournamentLogs";
+import TournamentNotes from "../components/tournaments/TournamentNotes";
 import { useTournament } from "../hooks/useTournaments";
 import EmptyState from "../components/common/EmptyState";
 import { loggedInUserAtom } from "../store/atoms";
@@ -81,6 +82,7 @@ export default function TournamentDetailsPage() {
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} />
+                        {(user?.isCommittee || user?.isAdmin) && <TournamentNotes tournament={tournament} />}
                         {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
                         {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
                         {user?.isCommittee && tournament.isTournament && (

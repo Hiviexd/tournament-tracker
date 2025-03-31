@@ -1,6 +1,7 @@
 import axios from "axios";
 import { TournamentFormData } from "../../interfaces/Tournament";
 import { IReview } from "@interfaces/Review";
+import { IMessageFormData } from "../../interfaces/Message";
 
 export interface TournamentQueryParams {
     name?: string;
@@ -84,5 +85,10 @@ export const downloadBadges = async (tournamentId: string) => {
 
 export const updateThreadId = async (tournamentId: string, threadId: string) => {
     const response = await axios.post(`/api/tournaments/${tournamentId}/updateThreadId`, { threadId });
+    return response.data;
+};
+
+export const createNote = async (tournamentId: string, noteData: IMessageFormData) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/createNote`, noteData);
     return response.data;
 };

@@ -10,7 +10,7 @@ import UserLink from "../common/UserLink";
 import { notifications } from "@mantine/notifications";
 
 interface IProps {
-    ticket: ITicket;
+    ticket?: ITicket;
     message: IMessage;
     showTrueAuthor: boolean;
 }
@@ -28,9 +28,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
     const getUserDisplayProps = () => {
         if (message.isCommittee && !showTrueAuthor) {
             return {
-                username: ticket.assignedGroup === "tc" ? "Tournament Committee" : "Contest Committee",
+                username: ticket?.assignedGroup === "tc" ? "Tournament Committee" : "Contest Committee",
                 avatarUrl: "/assets/logo-512.png",
-                group: ticket.assignedGroup,
+                group: ticket?.assignedGroup,
             };
         }
         return {
@@ -40,8 +40,8 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
 
     const getBorderColor = (theme: any) => {
         if (message.isCommittee) {
-            if (ticket.assignedGroup === "tc") return theme.colors.warning[6];
-            if (ticket.assignedGroup === "cc") return theme.colors.info[6];
+            if (ticket?.assignedGroup === "tc") return theme.colors.warning[6];
+            if (ticket?.assignedGroup === "cc") return theme.colors.info[6];
         }
         return theme.colors.primary[6];
     };
@@ -88,7 +88,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <MessageContent />
             </Alert>
         );
-    } else if (message.event) {
+    } else if (message.event && ticket) {
         const isClosing = message.event === "close";
         return (
             <Group gap="xs" align="center" mx="lg">
