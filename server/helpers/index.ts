@@ -214,6 +214,26 @@ function getGitHash() {
     }
 }
 
+/**
+ * Formats a game mode string
+ * @param mode Game mode to format
+ * @returns Formatted game mode
+ */
+function formatGameMode(mode: string) {
+    switch (mode) {
+        case "osu":
+            return "osu!";
+        case "taiko":
+            return "osu!taiko";
+        case "catch":
+            return "osu!catch";
+        case "mania":
+            return "osu!mania";
+        default:
+            return mode;
+    }
+}
+
 export default {
     setSession,
     escapeUsername,
@@ -232,4 +252,5 @@ export default {
     sanitizeBeatmapInput,
     sortBeatmapsByStatus,
     getGitHash,
+    formatGameMode,
 };
