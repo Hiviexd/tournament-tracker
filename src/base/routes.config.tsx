@@ -97,14 +97,14 @@ const routes: RouteConfig[] = [
         page: <TournamentsListPage />,
         title: "Tournaments Listing",
         icon: "trophy",
-        permissions: [],
+        permissions: ["admin"],
     },
     {
         path: "/tournaments/:tournamentId",
         page: <TournamentDetailsPage />,
         title: "Tournament Details",
         icon: "trophy",
-        permissions: [],
+        permissions: ["admin"],
         parent: {
             title: "Tournaments",
             path: "/tournaments",
