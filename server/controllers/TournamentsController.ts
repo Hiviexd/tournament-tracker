@@ -17,6 +17,9 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import Message from "../models/messageModel";
+import OsuBotService from "../services/OsuBotService";
+import helpers from "../helpers";
+import { IDiscordField } from "@interfaces/Discord";
 
 const defaultPopulate = [
     {
@@ -217,7 +220,47 @@ class TournamentsController {
 
         res.json({ message: "Tournament created successfully!", tournament });
 
-        // TODO: logging and discord
+        // logging
+        await LogService.generate(currentUser._id, `Created tournament: **${tournament.name}**`, "tournament");
+
+        // Discord
+        await DiscordService.sendWebhook([
+            {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.darkGreen,
+                description: `Created new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                fields: [
+                    {
+                        name: "Host",
+                        value: `[**${host.username}**](${host.osuProfileUrl})`,
+                        inline: true,
+                    },
+
+                    {
+                        name: "Start Date",
+                        value: moment(tournament.startDate).format("YYYY-MM-DD"),
+                        inline: true,
+                    },
+                    {
+                        name: "End Date",
+                        value: moment(tournament.endDate).format("YYYY-MM-DD"),
+                        inline: true,
+                    },
+                    {
+                        name: "Game Mode",
+                        value: tournament.modes.map((mode) => helpers.formatGameMode(mode)).join(", "),
+                        inline: true,
+                    },
+                    {
+                        name: "Forum URL",
+                        value: tournament.forumUrl,
+                    },
+                ],
+                image: {
+                    url: tournament.banner?.url || "",
+                },
+            },
+        ]);
     }
 
     /** POST assign reviewers */
@@ -252,7 +295,26 @@ class TournamentsController {
 
         await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**`, "tournament");
 
-        // TODO: discord
+        // Discord
+        const usersToPing = reviewers.map((r) => r.discordId || r.username);
+        await DiscordService.sendUserHighlightWebhook(
+            usersToPing,
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.orange,
+                    description: `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    fields: [
+                        {
+                            name: "Reviewers",
+                            value: reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", "),
+                        },
+                    ],
+                },
+            ],
+            "",
+            tournament.threadId
+        );
     }
 
     /** POST edit tournament */
@@ -297,6 +359,7 @@ class TournamentsController {
         }
 
         if (status) {
+            // logging
             await TournamentService.addLog(
                 tournament,
                 currentUser,
@@ -304,9 +367,59 @@ class TournamentsController {
                 "flag"
             );
             await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
+
+            // osu! message
+            const recipientId = process.env.NODE_ENV === "production" ? tournament.host.osuId : currentUser.osuId;
+
+            let message = `The official support status of your tournament **${
+                tournament.name
+            }** has been updated to **${_.startCase(
+                status
+            )}**.\n\n[View your tournament in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
+                tournament._id
+            }).`;
+
+            if (status === "screeningConcluded") {
+                message += `\n\nPlease check your email for more information about potentially screened-out players.`;
+            } else if (status === "changesRequested") {
+                message += `\n\nPlease check your email for more information about the changes requested.`;
+            } else if (status === "badgeApproved") {
+                message += `\n\nCongratulations! Your tournament has been approved for badge support! You will receive an email with more information soon.`;
+            } else if (status === "badgeRejected") {
+                message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
+            }
+
+            await OsuBotService.sendAnnouncement([recipientId], {
+                channel: {
+                    name: `Tournament Status Update`,
+                    description: `Update regarding: ${tournament.name}`,
+                },
+                content: message,
+            });
+
+            // Discord
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: webhookColors.darkOrange,
+                        description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                        fields: [
+                            {
+                                name: "New Status",
+                                value: `**${_.startCase(status)}**`,
+                            },
+                        ],
+                    },
+                ],
+                "",
+                undefined,
+                tournament.threadId
+            );
         }
 
         if (isActive !== undefined) {
+            // logging
             await TournamentService.addLog(
                 tournament,
                 currentUser,
@@ -318,9 +431,23 @@ class TournamentsController {
                 `Updated active status for **${tournament.name}**`,
                 "tournament"
             );
-        }
 
-        // TODO: discord for status and active
+            // Discord
+            await DiscordService.sendWebhook(
+                [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: isActive ? webhookColors.gray : webhookColors.black,
+                        description: `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${
+                            tournament.name
+                        }**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    },
+                ],
+                "",
+                undefined,
+                tournament.threadId
+            );
+        }
     }
 
     /** POST reassign reviewer */
@@ -386,9 +513,9 @@ class TournamentsController {
         newReviewer.inBag = false;
         await newReviewer.save();
 
-        const oldReviewer = await User.findById(oldReviewerId);
-        oldReviewer!.inBag = true;
-        await oldReviewer!.save();
+        const oldReviewer = await User.findById(oldReviewerId).orFail();
+        oldReviewer.inBag = true;
+        await oldReviewer.save();
 
         res.json({ message: "Reviewer reassigned successfully!" });
 
@@ -396,13 +523,39 @@ class TournamentsController {
         await TournamentService.addLog(
             tournament,
             currentUser,
-            `Reassigned reviewer from [**${oldReviewer?.username}**](${oldReviewer?.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
+            `Reassigned reviewer from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
             "user-pen"
         );
 
         await LogService.generate(currentUser._id, `Reassigned reviewer for **${tournament.name}**`, "tournament");
 
-        // TODO: discord
+        // Discord
+        const usersToPing = [
+            oldReviewer.discordId || oldReviewer.username,
+            newReviewer.discordId || newReviewer.username,
+        ];
+        await DiscordService.sendUserHighlightWebhook(
+            usersToPing,
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.lightOrange,
+                    description: `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    fields: [
+                        {
+                            name: "Old Reviewer",
+                            value: `[**${oldReviewer.username}**](${oldReviewer.osuProfileUrl})`,
+                        },
+                        {
+                            name: "New Reviewer",
+                            value: `[**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
+                        },
+                    ],
+                },
+            ],
+            "",
+            tournament.threadId
+        );
     }
 
     /** POST submit review */
@@ -456,13 +609,31 @@ class TournamentsController {
 
         res.json({ message: "Review submitted successfully!" });
 
-        // logging
         if (isNewReview) {
+            // logging
             await TournamentService.addLog(tournament, currentUser, `Submitted review`, "check-to-slot");
             await LogService.generate(currentUser._id, `Submitted review for **${tournament.name}**`, "tournament");
         }
 
-        // TODO: discord
+        // Discord
+        await DiscordService.sendWebhook(
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    description: `${isNewReview ? "Submitted" : "Updated"} a review for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    color: isNewReview ? webhookColors.lightGreen : webhookColors.lightBlue,
+                    fields: [
+                        {
+                            name: "Decision",
+                            value: `**${_.startCase(vote)}**`,
+                        },
+                    ],
+                },
+            ],
+            undefined,
+            "silent",
+            tournament.threadId
+        );
     }
 
     /** POST upload badges */
@@ -677,6 +848,35 @@ class TournamentsController {
         await tournament.save();
 
         res.json({ message: "Note created successfully!" });
+
+        // logging
+        await TournamentService.addLog(tournament, currentUser, `Created note`, "note");
+        await LogService.generate(currentUser._id, `Created note for **${tournament.name}**`, "tournament");
+
+        // Discord
+        const fields: IDiscordField[] = [
+            {
+                name: "Note",
+                value: helpers.shorten(content, 512),
+            },
+        ];
+
+        if (note.attachments?.length) {
+            fields.push(helpers.getAttachmentsField(note.attachments)!);
+        }
+        await DiscordService.sendWebhook(
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    description: `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                    color: webhookColors.blue,
+                    fields,
+                },
+            ],
+            "",
+            undefined,
+            tournament.threadId
+        );
     }
 }
 
