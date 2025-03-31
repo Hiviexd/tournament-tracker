@@ -5,6 +5,7 @@ import UserCard from "../common/UserCard";
 
 interface IProps {
     onSelect: (user: IUser) => void;
+    showBadges?: boolean;
 }
 
 interface ISectionProps {
@@ -12,7 +13,7 @@ interface ISectionProps {
     users: IUser[];
 }
 
-export default function CommitteeSection({ onSelect }: IProps) {
+export default function CommitteeSection({ onSelect, showBadges = false }: IProps) {
     const { data: users = [], isLoading } = useCommitteeUsers({
         includeAlumni: true,
     });
@@ -26,12 +27,7 @@ export default function CommitteeSection({ onSelect }: IProps) {
                         <Divider />
                         <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
                             {[...Array(4)].map((_, cardIndex) => (
-                                <Card
-                                    key={cardIndex}
-                                    bg="primary.10"
-                                    shadow="sm"
-                                    p="md"
-                                    style={{ minWidth: 240 }}>
+                                <Card key={cardIndex} bg="primary.10" shadow="sm" p="md" style={{ minWidth: 240 }}>
                                     <Group>
                                         <Skeleton radius="md" height={40} width={40} />
                                         <Stack gap={8}>
@@ -51,7 +47,7 @@ export default function CommitteeSection({ onSelect }: IProps) {
     const UserGrid = ({ users }: { users: IUser[] }) => (
         <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
             {users.map((user) => (
-                <UserCard key={user._id} user={user} onSelect={onSelect} />
+                <UserCard key={user._id} user={user} onSelect={onSelect} showBadges={showBadges} />
             ))}
         </SimpleGrid>
     );
@@ -59,9 +55,7 @@ export default function CommitteeSection({ onSelect }: IProps) {
     const CommitteeSection = ({ title, users }: ISectionProps) => {
         if (users.length === 0) return null;
 
-        const sortedUsers = [...users].sort((a, b) =>
-            a.username.toLowerCase().localeCompare(b.username.toLowerCase())
-        );
+        const sortedUsers = [...users].sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
 
         return (
             <Card shadow="sm" p="md">

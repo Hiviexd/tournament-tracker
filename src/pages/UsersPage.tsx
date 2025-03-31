@@ -31,7 +31,7 @@ export default function UsersPage() {
                 <UserSearch label="Load or create user" width="100%" onChange={handleUserSelect} allowUserCreation />
             </Card>
             <Divider />
-            <CommitteeSection onSelect={handleUserSelect} />
+            <CommitteeSection onSelect={handleUserSelect} showBadges />
         </Stack>
     );
 }
