@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, Image } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, Image, Popover } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -11,6 +11,23 @@ import { useAtom } from "jotai";
 interface IProps {
     tournament: ITournament;
 }
+
+const BadgeImage = ({ badge, index }: { badge: { url: string }; index: number }) => {
+    const [opened, setOpened] = useState(false);
+
+    return (
+        <Popover opened={opened} position="top" shadow="md">
+            <Popover.Target>
+                <Box onMouseEnter={() => setOpened(true)} onMouseLeave={() => setOpened(false)}>
+                    <Image src={badge.url} alt={`Badge ${index + 1}`} w={86} h={40} radius="0" />
+                </Box>
+            </Popover.Target>
+            <Popover.Dropdown p={0} style={{ border: "none" }}>
+                <Image src={badge.url} alt={`Badge ${index + 1} (full size)`} w={172} h={80} radius="0" />
+            </Popover.Dropdown>
+        </Popover>
+    );
+};
 
 export default function TournamentBadges({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
@@ -83,14 +100,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                         {badges.length > 0 && (
                             <Group gap="xs">
                                 {badges.map((badge, index) => (
-                                    <Image
-                                        key={index}
-                                        src={badge.url}
-                                        alt={`Badge ${index + 1}`}
-                                        w={86}
-                                        h={40}
-                                        radius="0"
-                                    />
+                                    <BadgeImage key={index} badge={badge} index={index} />
                                 ))}
                             </Group>
                         )}
@@ -120,7 +130,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                 ) : badges.length > 0 ? (
                     <Group gap="xs">
                         {badges.map((badge, index) => (
-                            <Image key={index} src={badge.url} alt={`Badge ${index + 1}`} w={86} h={40} radius="0" />
+                            <BadgeImage key={index} badge={badge} index={index} />
                         ))}
                     </Group>
                 ) : (
