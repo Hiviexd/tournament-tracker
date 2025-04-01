@@ -40,7 +40,7 @@ export default function TournamentStatus({ tournament }: IProps) {
     ];
 
     const handleStatusSave = async () => {
-        if (confirm("Are you sure you want to update the status? This will notify the tournament host.")) {
+        if (confirm("Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!")) {
             await editTournamentMutation.mutateAsync({ status: selectedStatus });
             setIsEditingStatus(false);
         }
