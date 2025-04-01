@@ -54,7 +54,7 @@ export default function TournamentCard({ tournament }: IProps) {
                         </Group>
                     </Stack>
                     <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
-                        {tournament.isActive ? "Active" : "Concluded"}
+                        {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
                 </Group>
 

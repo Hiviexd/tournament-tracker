@@ -54,7 +54,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
 
     const activeOptions = [
         { value: "active", label: "Active" },
-        { value: "concluded", label: "Concluded" },
+        { value: "concluded", label: "Archived" },
     ];
 
     return (
