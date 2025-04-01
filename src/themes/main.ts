@@ -170,5 +170,16 @@ export const theme = createTheme({
                 },
             },
         },
+        Select: {
+            defaultProps: {
+                withScrollArea: false,
+            },
+            styles: {
+                dropdown: {
+                    maxHeight: 200,
+                    overflowY: "auto",
+                },
+            },
+        },
     },
 });
