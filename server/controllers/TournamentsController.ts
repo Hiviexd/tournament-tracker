@@ -571,10 +571,12 @@ class TournamentsController {
                         {
                             name: "Old Reviewer",
                             value: `[**${oldReviewer.username}**](${oldReviewer.osuProfileUrl})`,
+                            inline: true,
                         },
                         {
                             name: "New Reviewer",
                             value: `[**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
+                            inline: true,
                         },
                     ],
                 },
