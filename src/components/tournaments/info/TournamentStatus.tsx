@@ -113,13 +113,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                         color={progressInfo.color}
                         size="md"
                         radius="xl"
-                        striped
                         my="sm"
-                        animated={
-                            tournament.status !== "badgeApproved" &&
-                            tournament.status !== "badgeRejected" &&
-                            tournament.status !== "noBadgeRequested"
-                        }
                     />
                 </Tooltip>
             </Stack>
