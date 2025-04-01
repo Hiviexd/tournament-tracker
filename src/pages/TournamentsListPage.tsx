@@ -73,6 +73,19 @@ export default function TournamentListPage() {
         setSearchParams,
     ]);
 
+    // Reset pagination when debounced values or other filter values change
+    useEffect(() => {
+        setPage(1);
+    }, [
+        debouncedName,
+        debouncedHost,
+        filters.mode,
+        filters.type,
+        filters.status,
+        filters.state,
+        filters.showNeedsAttention,
+    ]);
+
     return (
         <Stack gap="md">
             <TournamentFilters values={filters} onChange={setFilters} />
