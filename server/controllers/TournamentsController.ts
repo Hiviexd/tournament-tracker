@@ -194,10 +194,19 @@ class TournamentsController {
 
         const status: TournamentStatus = "supportRequestReceived";
 
+        if (forumUrl && !helpers.isOsuForumLink(forumUrl)) {
+            return res.json({ error: "Invalid osu! forum URL format" });
+        }
+
+        const sortedModes = modes.sort((a, b) => {
+            const order = ["osu", "taiko", "catch", "mania"];
+            return order.indexOf(a) - order.indexOf(b);
+        });
+
         const tournament = new Tournament({
             name,
             host,
-            modes,
+            modes: sortedModes,
             type,
             status,
             forumUrl,
@@ -221,15 +230,15 @@ class TournamentsController {
         res.json({ message: "Tournament created successfully!", tournament });
 
         // logging
-        await LogService.generate(currentUser._id, `Created tournament: **${tournament.name}**`, "tournament");
-        await TournamentService.addLog(tournament, currentUser, `Created tournament`, "trophy");
+        await LogService.generate(currentUser._id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
+        await TournamentService.addLog(tournament, currentUser, `Created ${tournament.type}`, tournament.isTournament ? "trophy" : "award");
 
         // Discord
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
                 color: webhookColors.darkGreen,
-                description: `Created new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                description: `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 fields: [
                     {
                         name: "Host",
@@ -254,7 +263,7 @@ class TournamentsController {
                     },
                     {
                         name: "Forum URL",
-                        value: tournament.forumUrl,
+                        value: tournament.forumUrl ?? "*None*",
                     },
                 ],
                 image: {
