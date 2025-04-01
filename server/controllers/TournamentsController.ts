@@ -399,7 +399,7 @@ class TournamentsController {
                 message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
             }
 
-            console.log(recipientId,message);
+            console.log(recipientId, message);
 
             /*await OsuBotService.sendAnnouncement([recipientId], {
                 channel: {
@@ -410,24 +410,38 @@ class TournamentsController {
             });*/
 
             // Discord
-            await DiscordService.sendWebhook(
-                [
-                    {
-                        author: DiscordService.defaultWebhookAuthor(req.session),
-                        color: webhookColors.darkOrange,
-                        description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-                        fields: [
-                            {
-                                name: "New Status",
-                                value: `**${_.startCase(status)}**`,
-                            },
-                        ],
-                    },
-                ],
-                "",
-                undefined,
-                tournament.threadId
-            );
+            // Exclude review ongoing status to avoid dupe embeds with the assign users one
+            if (status !== "reviewOngoing") {
+                let embedColor = webhookColors.darkOrange;
+
+                // Change color based on status
+                if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
+                if (status === "screeningOngoing") embedColor = webhookColors.darkBlue;
+                if (status === "screeningConcluded") embedColor = webhookColors.blue;
+                if (status === "changesRequested") embedColor = webhookColors.yellow;
+                if (status === "badgeApproved") embedColor = webhookColors.lightGreen;
+                if (status === "badgeRejected") embedColor = webhookColors.lightRed;
+                if (status === "noBadgeRequested") embedColor = webhookColors.gray;
+
+                await DiscordService.sendWebhook(
+                    [
+                        {
+                            author: DiscordService.defaultWebhookAuthor(req.session),
+                            color: embedColor,
+                            description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                            fields: [
+                                {
+                                    name: "New Status",
+                                    value: `**${_.startCase(status)}**`,
+                                },
+                            ],
+                        },
+                    ],
+                    "",
+                    undefined,
+                    tournament.threadId
+                );
+            }
         }
 
         if (isActive !== undefined) {
