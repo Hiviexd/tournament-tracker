@@ -152,7 +152,7 @@ export default function TicketsListPage() {
                     </SimpleGrid>
 
                     {data.pages > 1 && (
-                        <Group justify="center" mt="xl">
+                        <Group justify="center" mt="xs">
                             <Pagination value={page} onChange={setPage} total={data.pages} />
                         </Group>
                     )}

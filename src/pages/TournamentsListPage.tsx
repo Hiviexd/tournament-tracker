@@ -104,7 +104,9 @@ export default function TournamentListPage() {
                         ))}
                     </SimpleGrid>
                     {data.pages > 1 && (
-                        <Pagination value={page} onChange={setPage} total={data.pages} color="primary" mt="sm" />
+                        <Group justify="center" mt="xs">
+                            <Pagination value={page} onChange={setPage} total={data.pages} color="primary" mt="sm" />
+                        </Group>
                     )}
                 </Stack>
             )}
