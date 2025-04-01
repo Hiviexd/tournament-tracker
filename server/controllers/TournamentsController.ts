@@ -198,15 +198,11 @@ class TournamentsController {
             return res.json({ error: "Invalid osu! forum URL format" });
         }
 
-        const sortedModes = modes.sort((a, b) => {
-            const order = ["osu", "taiko", "catch", "mania"];
-            return order.indexOf(a) - order.indexOf(b);
-        });
 
         const tournament = new Tournament({
             name,
             host,
-            modes: sortedModes,
+            modes,
             type,
             status,
             forumUrl,
@@ -242,7 +238,7 @@ class TournamentsController {
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.darkGreen,
+                color: webhookColors.green,
                 description: `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 fields: [
                     {
