@@ -217,7 +217,7 @@ class UsersController {
         await DiscordService.sendWebhook([
             {
                 author: DiscordService.defaultWebhookAuthor(req.session),
-                color: join ? webhookColors.green : webhookColors.red,
+                color: join ? webhookColors.lightGreen : webhookColors.lightRed,
                 description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
                     user.osuId
                 }) ${join ? "to" : "from"} the **${groupName}**`,
