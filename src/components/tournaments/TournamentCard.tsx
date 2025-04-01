@@ -45,18 +45,17 @@ export default function TournamentCard({ tournament }: IProps) {
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
-            <Stack gap="md" className="tournament-card-content">
-                <Group justify="space-between" align="flex-start">
-                    <Stack gap="xs">
-                        <Title order={4}>{tournament.name}</Title>
-                        <Group>
-                            <UserDisplay user={tournament.host} />
-                        </Group>
-                    </Stack>
+            <Stack gap="md" className="tournament-card-content" justify="space-between" h="100%">
+                <Group justify="space-between" align="center">
+                    <Title order={4}>{tournament.name}</Title>
                     <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
                         {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
                 </Group>
+
+                <UserDisplay user={tournament.host} />
+
+                {/* badges */}
 
                 <Group gap="xs">
                     <Tooltip label={getTournamentTypeInfo().text}>
