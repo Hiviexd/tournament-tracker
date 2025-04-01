@@ -19,10 +19,7 @@ const TournamentSchema = new Schema<ITournament>(
             set: helpers.setDateToNoon,
             get: (date: Date) => date,
         },
-        forumUrl: {
-            type: String,
-            required: true,
-        },
+        forumUrl: { type: String },
         threadId: { type: String },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
