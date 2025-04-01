@@ -1,14 +1,24 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
 import _ from "lodash";
-//// import helpers from "../helpers";
+import helpers from "../helpers";
 
 const TournamentSchema = new Schema<ITournament>(
     {
         name: { type: String, required: true },
         modes: [{ type: String, required: true }],
-        startDate: { type: Date, required: true },
-        endDate: { type: Date, required: true },
+        startDate: {
+            type: Date,
+            required: true,
+            set: helpers.setDateToNoon,
+            get: (date: Date) => date,
+        },
+        endDate: {
+            type: Date,
+            required: true,
+            set: helpers.setDateToNoon,
+            get: (date: Date) => date,
+        },
         forumUrl: {
             type: String,
             required: true,
@@ -33,7 +43,11 @@ const TournamentSchema = new Schema<ITournament>(
         notes: [{ type: Schema.Types.ObjectId, ref: "Message" }],
         startedReviewAt: { type: Date },
     },
-    { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+    {
+        timestamps: true,
+        toJSON: { virtuals: true, getters: true },
+        toObject: { virtuals: true, getters: true },
+    }
 );
 
 TournamentSchema.virtual("isTournament").get(function (this: ITournament) {
