@@ -5,7 +5,7 @@ import auth from "../middlewares/auth";
 
 const usersRouter = express.Router();
 
-usersRouter.get("/", auth.isLoggedIn, UsersController.index);
+usersRouter.get("/", auth.optionalAuth, UsersController.index);
 usersRouter.get("/me", auth.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
