@@ -17,7 +17,7 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import Message from "../models/messageModel";
-// import OsuBotService from "../services/OsuBotService";
+import OsuBotService from "../services/OsuBotService";
 import helpers from "../helpers";
 import { IDiscordField } from "@interfaces/Discord";
 
@@ -107,7 +107,7 @@ class TournamentsController {
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
-        const isCommittee = res.locals!.user!.isCommittee;
+        const isCommittee = res.locals!.user?.isCommittee ?? false;
 
         const populationFilter = [
             { path: "reviews", select: false },
@@ -175,7 +175,7 @@ class TournamentsController {
     /** GET tournament */
     public async getTournament(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
-        const isCommittee = res.locals!.user!.isCommittee;
+        const isCommittee = res.locals!.user?.isCommittee ?? false;
 
         const tournament = await Tournament.findById(tournamentId)
             .select(selectFields(isCommittee))
@@ -307,8 +307,8 @@ class TournamentsController {
         await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**`, "tournament");
 
         // Discord
-        //const usersToPing = reviewers.map((r) => r.discordId || r.username);
-        const usersToPing = [];
+        const usersToPing = reviewers.map((r) => r.discordId || r.username);
+
         await DiscordService.sendUserHighlightWebhook(
             usersToPing,
             [
@@ -410,15 +410,13 @@ class TournamentsController {
                 message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
             }
 
-            console.log(recipientId, message);
-
-            /*await OsuBotService.sendAnnouncement([recipientId], {
+            await OsuBotService.sendAnnouncement([recipientId], {
                 channel: {
                     name: `Tournament Status Update`,
                     description: `Update regarding: ${tournament.name}`,
                 },
                 content: message,
-            });*/
+            });
 
             // Discord
             // Exclude review ongoing status to avoid dupe embeds with the assign users one
@@ -568,8 +566,8 @@ class TournamentsController {
 
         // Discord
         const usersToPing = [
-            // oldReviewer.discordId || oldReviewer.username,
-            // newReviewer.discordId || newReviewer.username,
+            oldReviewer.discordId || oldReviewer.username,
+            newReviewer.discordId || newReviewer.username,
         ];
         await DiscordService.sendUserHighlightWebhook(
             usersToPing,
