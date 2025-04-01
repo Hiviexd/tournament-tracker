@@ -9,6 +9,7 @@ import TournamentForumUrl from "./info/TournamentForumUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import _ from "lodash";
 
 interface IProps {
     tournament: ITournament;
@@ -28,7 +29,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
         <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Group justify="space-between" align="center">
-                    <Title order={3}>Tournament Information</Title>
+                    <Title order={3}>{_.capitalize(tournament.type)} Information</Title>
                     {user?.isAdmin && (
                         <Button
                             variant="filled"
