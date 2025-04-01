@@ -19,7 +19,7 @@ export const routes: IRoute[] = [
     },
     {
         title: "Tournaments",
-        permissions: ["committee"],
+        permissions: [],
         link: "/tournaments",
     },
     {
