@@ -169,6 +169,7 @@ app.listen(port, () => {
 
     // Run migrations by adding/uncommenting the needed migration and running `yarn dev-migration`
     // MigrationService.migratePif2Votings();
+    // MigrationService.migrateTournamentsFromCsv();
 });
 
 export default app;
