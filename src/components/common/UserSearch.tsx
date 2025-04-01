@@ -31,7 +31,7 @@ export default function UserSearch({
     disabled = false,
 }: IProps) {
     const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedValue] = useDebouncedValue(search, 400);
+    const [debouncedSearch] = useDebouncedValue(search, 400);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const { data: users = [], isLoading } = useUsers(debouncedSearch, 5);
     const createUserMutation = useCreateUser();
@@ -43,7 +43,6 @@ export default function UserSearch({
 
     const handleChange = (value: string) => {
         setSearch(value);
-        setDebouncedValue(value);
         combobox.updateSelectedOptionIndex();
     };
 
@@ -100,8 +99,8 @@ export default function UserSearch({
                             leftSection={leftSection}
                             error={error}
                             rightSection={isLoaderVisible ? <Loader size="xs" /> : <Combobox.Chevron />}
-                            onClick={combobox.openDropdown}
-                            onFocus={combobox.openDropdown}
+                            onClick={() => combobox.openDropdown()}
+                            onFocus={() => combobox.openDropdown()}
                             onChange={(e) => handleChange(e.currentTarget.value)}
                             value={search}
                             placeholder={placeholder}
