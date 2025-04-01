@@ -37,7 +37,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
             <Stack gap="md" p="lg">
                 <Group justify="space-between" align="center">
                     <Stack gap={5}>
-                        <Title order={2} style={{ lineHeight: 0 }}>
+                        <Title order={2}>
                             {tournament.name}
                         </Title>
                     </Stack>
