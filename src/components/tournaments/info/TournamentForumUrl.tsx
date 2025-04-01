@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
+import helpers from "../../../helpers";
+import { notifications } from "@mantine/notifications";
 
 interface IProps {
     tournament: ITournament;
@@ -17,6 +19,15 @@ export default function TournamentForumUrl({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament._id);
 
     const handleForumUrlSave = async () => {
+        if (!helpers.isOsuForumLink(forumUrl)) {
+            notifications.show({
+                title: "Invalid URL",
+                message: "Please enter a valid osu! forum URL",
+                color: "red",
+            });
+            return;
+        }
+
         await editTournamentMutation.mutateAsync({ forumUrl });
         setIsEditingForumUrl(false);
     };
