@@ -21,9 +21,15 @@ export default function GameModeIcon({ mode }: Props) {
     }
 
     if (Array.isArray(mode)) {
+        // order modes, osu -> taiko -> catch -> mania
+        const orderedModes = mode.sort((a: GameMode, b: GameMode) => {
+            const order = ["osu", "taiko", "catch", "mania"];
+            return order.indexOf(a) - order.indexOf(b);
+        });
+
         return (
             <Group gap={0} wrap="nowrap">
-                {mode.map((m) => (
+                {orderedModes.map((m) => (
                     <Tooltip key={m} label={getModeName(m)}>
                         <div key={m} className={`gamemode-icon ${m}`} />
                     </Tooltip>
