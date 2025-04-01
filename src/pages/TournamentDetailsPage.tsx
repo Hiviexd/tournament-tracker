@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Container, Stack, Card, Skeleton, Group } from "@mantine/core";
+import { Stack, Card, Skeleton, Group } from "@mantine/core";
 import TournamentPageHeader from "../components/tournaments/TournamentPageHeader";
 import TournamentPageInfo from "../components/tournaments/TournamentPageInfo";
 import TournamentReviewSection from "../components/tournaments/TournamentReviewSection";
@@ -67,7 +67,7 @@ export default function TournamentDetailsPage() {
     }
 
     return (
-        <Container size="xl">
+        <>
             {isLoading ? (
                 <LoadingState />
             ) : tournament?.error ? (
@@ -91,6 +91,6 @@ export default function TournamentDetailsPage() {
                     </Stack>
                 )
             )}
-        </Container>
+        </>
     );
 }
