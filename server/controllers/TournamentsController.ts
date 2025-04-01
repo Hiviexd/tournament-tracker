@@ -231,7 +231,12 @@ class TournamentsController {
 
         // logging
         await LogService.generate(currentUser._id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
-        await TournamentService.addLog(tournament, currentUser, `Created ${tournament.type}`, tournament.isTournament ? "trophy" : "award");
+        await TournamentService.addLog(
+            tournament,
+            currentUser,
+            `Created ${tournament.type}`,
+            tournament.isTournament ? "trophy" : "award"
+        );
 
         // Discord
         await DiscordService.sendWebhook([
@@ -442,7 +447,7 @@ class TournamentsController {
                             fields: [
                                 {
                                     name: "New Status",
-                                    value: `**${_.startCase(status)}**`,
+                                    value: `${_.startCase(status)}`,
                                 },
                             ],
                         },
@@ -654,18 +659,41 @@ class TournamentsController {
         }
 
         // Discord
+        let color = webhookColors.lightBlue;
+        if (vote === "changesRequested") color = webhookColors.yellow;
+        if (vote === "deny") color = webhookColors.lightRed;
+        if (vote === "approve") color = webhookColors.lightGreen;
+
+        let emoji = "❔";
+        if (vote === "changesRequested") emoji = "🔄";
+        if (vote === "deny") emoji = "❌";
+        if (vote === "approve") emoji = "✅";
+
+        // get count of false checklist items, iterate through the review.checklist and count the checked: false items
+        const falseCount = review.checklist.filter((item) => !item.checked).length;
+
         await DiscordService.sendWebhook(
             [
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `${isNewReview ? "Submitted" : "Updated"} a review for ${tournament.type}: [**${
+                    description: `${isNewReview ? "Submitted a" : "Updated their"} review for ${tournament.type}: [**${
                         tournament.name
                     }**](${config.baseUrl}/tournaments/${tournament._id})`,
-                    color: isNewReview ? webhookColors.lightGreen : webhookColors.lightBlue,
+                    color,
                     fields: [
                         {
                             name: "Decision",
-                            value: `**${_.startCase(vote)}**`,
+                            value: `${emoji} ${_.startCase(vote)}`,
+                            inline: true,
+                        },
+                        {
+                            name: "Checklist Issues",
+                            value: `${falseCount > 0 ? "⚠️" : "🎉"} ${falseCount}`,
+                            inline: true,
+                        },
+                        {
+                            name: "Comment",
+                            value: helpers.shorten(comment, 512),
                         },
                     ],
                 },
