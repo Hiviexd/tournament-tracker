@@ -28,20 +28,16 @@ export default function TournamentStatus({ tournament }: IProps) {
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
     const editTournamentMutation = useEditTournament(tournament._id);
 
-    const fullStatusOptions = [
+    const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
-        { value: "screeningOngoing", label: "Screening Ongoing" },
-        { value: "screeningConcluded", label: "Screening Concluded" },
+        { value: "screeningOngoing", label: "Screening Ongoing", disabled: !user?.isAdmin },
+        { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
         { value: "reviewOngoing", label: "Review Ongoing" },
         { value: "changesRequested", label: "Changes Requested" },
         { value: "badgeApproved", label: "Badge Approved" },
         { value: "badgeRejected", label: "Badge Rejected" },
         { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
-
-    const statusOptions = fullStatusOptions.filter(
-        (status) => status.value !== "screeningOngoing" && status.value !== "screeningConcluded"
-    );
 
     const handleStatusSave = async () => {
         if (confirm("Are you sure you want to update the status? This will notify the tournament host.")) {
@@ -96,7 +92,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                         <Select
                             value={selectedStatus}
                             onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
-                            data={user?.isAdmin ? fullStatusOptions : statusOptions}
+                            data={statusOptions}
                             allowDeselect={false}
                         />
                         <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
