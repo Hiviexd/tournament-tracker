@@ -222,6 +222,7 @@ class TournamentsController {
 
         // logging
         await LogService.generate(currentUser._id, `Created tournament: **${tournament.name}**`, "tournament");
+        await TournamentService.addLog(tournament, currentUser, `Created tournament`, "trophy");
 
         // Discord
         await DiscordService.sendWebhook([
@@ -884,7 +885,7 @@ class TournamentsController {
         res.json({ message: "Note created successfully!" });
 
         // logging
-        await TournamentService.addLog(tournament, currentUser, `Created note`, "note");
+        await TournamentService.addLog(tournament, currentUser, `Created note`, "sticky-note");
         await LogService.generate(currentUser._id, `Created note for **${tournament.name}**`, "tournament");
 
         // Discord
