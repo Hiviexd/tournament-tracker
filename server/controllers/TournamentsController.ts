@@ -780,9 +780,13 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { threadId } = req.body;
+        let threadId = req.body.threadId;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+        if (threadId.includes("https://discord.com/channels/")) {
+            threadId = threadId.split("/").pop();
+        }
 
         if (threadId !== tournament.threadId) {
             tournament.threadId = threadId;
