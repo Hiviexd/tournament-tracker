@@ -234,8 +234,24 @@ function formatGameMode(mode: string) {
     }
 }
 
+/**
+ * Validates an email address
+ * @param email Email address to validate
+ * @returns `true` if the email is valid, `false` otherwise
+ */
 function validateEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/**
+ * Sets a date to noon UTC
+ * @param date Date to set
+ * @returns Date set to noon UTC
+ */
+function setDateToNoon(date: string | Date): Date {
+    const d = new Date(date);
+    d.setUTCHours(12, 0, 0, 0);
+    return d;
 }
 
 export default {
@@ -258,4 +274,5 @@ export default {
     getGitHash,
     formatGameMode,
     validateEmail,
+    setDateToNoon,
 };
