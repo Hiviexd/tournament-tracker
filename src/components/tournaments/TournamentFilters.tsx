@@ -14,7 +14,7 @@ interface IProps {
         type: TournamentType | "";
         status: TournamentStatus | "";
         state: string;
-        showNeedsAttention: boolean;
+        showAllAssignedReviews: boolean;
     };
     onChange: (values: any) => void;
 }
@@ -109,9 +109,9 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     />
                     {user?.isCommittee && (
                         <Checkbox
-                            label="Show only tournaments assigned to me"
-                            checked={values.showNeedsAttention}
-                            onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
+                            label="Show your all-time assigned reviews"
+                            checked={values.showAllAssignedReviews}
+                            onChange={(e) => handleChange("showAllAssignedReviews", e.currentTarget.checked)}
                         />
                     )}
                 </SimpleGrid>

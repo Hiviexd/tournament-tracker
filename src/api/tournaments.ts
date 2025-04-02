@@ -10,7 +10,7 @@ export interface TournamentQueryParams {
     type?: string;
     status?: string;
     state?: string;
-    showNeedsAttention?: boolean;
+    showAllAssignedReviews?: boolean;
     page?: number;
 }
 

@@ -18,7 +18,7 @@ interface FilterValues {
     type: TournamentType | "";
     status: TournamentStatus | "";
     state: string;
-    showNeedsAttention: boolean;
+    showAllAssignedReviews: boolean;
 }
 
 export default function TournamentListPage() {
@@ -32,7 +32,7 @@ export default function TournamentListPage() {
         type: (searchParams.get("type") as TournamentType) || "",
         status: (searchParams.get("status") as TournamentStatus) || "",
         state: searchParams.get("state") || "",
-        showNeedsAttention: searchParams.get("showNeedsAttention") === "true" || false,
+        showAllAssignedReviews: searchParams.get("showAllAssignedReviews") === "true" || false,
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedName] = useDebouncedValue(filters.name, 400);
@@ -45,7 +45,7 @@ export default function TournamentListPage() {
         type: filters.type,
         status: filters.status,
         state: filters.state,
-        showNeedsAttention: filters.showNeedsAttention,
+        showAllAssignedReviews: filters.showAllAssignedReviews,
         page,
     });
 
@@ -58,7 +58,7 @@ export default function TournamentListPage() {
         if (filters.type) params.set("type", filters.type);
         if (filters.status) params.set("status", filters.status);
         if (filters.state) params.set("state", filters.state);
-        if (filters.showNeedsAttention) params.set("needsAttention", filters.showNeedsAttention.toString());
+        if (filters.showAllAssignedReviews) params.set("showAllAssignedReviews", filters.showAllAssignedReviews.toString());
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
     }, [
@@ -68,7 +68,7 @@ export default function TournamentListPage() {
         filters.type,
         filters.status,
         filters.state,
-        filters.showNeedsAttention,
+        filters.showAllAssignedReviews,
         page,
         setSearchParams,
     ]);
@@ -83,7 +83,7 @@ export default function TournamentListPage() {
         filters.type,
         filters.status,
         filters.state,
-        filters.showNeedsAttention,
+        filters.showAllAssignedReviews,
     ]);
 
     return (
