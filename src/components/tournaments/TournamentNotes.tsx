@@ -72,7 +72,12 @@ export default function TournamentNotes({ tournament }: IProps) {
         <Card shadow="sm" p="lg">
             <Stack gap="xl">
                 <Group justify="space-between" align="center">
-                    <Title order={3}>Notes</Title>
+                    <Group gap="7" align="baseline">
+                        <Title order={3}>Notes</Title>
+                        <Title order={4} c="dimmed">
+                            ({tournament.notes.length})
+                        </Title>
+                    </Group>
                     <Button
                         variant="subtle"
                         onClick={toggle}
