@@ -34,7 +34,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
         });
     };
 
-    if (!user?.isCommittee) return null;
+    if (!user?.isCommittee && !user?.isAdmin) return null;
 
     return (
         <Stack gap={5}>
