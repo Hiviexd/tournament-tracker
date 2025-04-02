@@ -88,7 +88,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                             </Anchor>
                         </Text>
                     ) : (
-                        <Text c="dimmed" fs="italic">
+                        <Text size="sm" c="dimmed" fs="italic">
                             No forum URL set
                         </Text>
                     )}
