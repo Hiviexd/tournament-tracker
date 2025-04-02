@@ -33,7 +33,7 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
 
             <Table.Td>
                 {user.email ? (
-                    <Group gap="xs">
+                    <Group gap={4}>
                         <ActionIcon variant="subtle" color="success" onClick={() => handleCopyEmail(user.email)}>
                             <FontAwesomeIcon icon="copy" />
                         </ActionIcon>
