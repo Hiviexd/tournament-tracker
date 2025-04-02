@@ -75,7 +75,7 @@ const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -as
 class TournamentsController {
     /** GET tournament listing */
     public async index(req: Request, res: Response) {
-        const { name, mode, host, type, status, state, showNeedsAttention, page = 1 } = req.query;
+        const { name, mode, host, type, status, state, showAllAssignedReviews, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
         const user = res.locals!.user;
 
@@ -89,17 +89,8 @@ class TournamentsController {
         if (status) query.status = status as TournamentStatus;
         if (state) query.isActive = state === "active";
 
-        if (showNeedsAttention === "true" && user && user.isCommittee) {
-            query.isActive = true;
-            // match tournaments where:
-            // 1. status is reviewOngoing or changesRequested
-            // 2. user is in assignedReviewers array
-            query.$and = [
-                {
-                    $or: [{ status: "reviewOngoing" }, { status: "changesRequested" }],
-                },
-                { assignedReviewers: user._id },
-            ];
+        if (showAllAssignedReviews === "true" && user && user.isCommittee) {
+            query.$and = [{ assignedReviewers: user._id }];
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
@@ -117,6 +108,25 @@ class TournamentsController {
                 { $match: query },
                 {
                     $addFields: {
+                        // Add a field to check if tournament needs user's review
+                        needsUserReview: {
+                            $cond: {
+                                if: {
+                                    $and: [
+                                        // User exists and is assigned
+                                        { $in: [user?._id, { $ifNull: ["$assignedReviewers", []] }] },
+                                        // Status is reviewOngoing or changesRequested
+                                        {
+                                            $in: ["$status", ["reviewOngoing", "changesRequested"]],
+                                        },
+                                        // Tournament is active
+                                        { $eq: ["$isActive", true] },
+                                    ],
+                                },
+                                then: true,
+                                else: false,
+                            },
+                        },
                         statusOrder: {
                             $switch: {
                                 branches: [
@@ -143,14 +153,15 @@ class TournamentsController {
                 },
                 {
                     $sort: {
-                        isActive: -1,
-                        statusOrder: 1,
-                        createdAt: -1,
+                        needsUserReview: -1, // Sort by needs review first
+                        isActive: -1, // Then by active status
+                        statusOrder: 1, // Then by status order
+                        createdAt: -1, // Finally by creation date
                     },
                 },
                 { $skip: skip },
                 { $limit: DEFAULT_LIMIT },
-                { $project: { statusOrder: 0 } },
+                { $project: { statusOrder: 0, needsUserReview: 0 } }, // Remove helper fields
             ])
                 .exec()
                 .then((tournaments) =>
@@ -321,7 +332,8 @@ class TournamentsController {
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        if (!tournament.isActive && isActive === undefined) {
+        // only allow editing banners if tournament is inactive
+        if (!tournament.isActive && isActive === undefined && !bannerUrl) {
             return res.json({ error: "Cannot edit archived tournament!" });
         }
 
