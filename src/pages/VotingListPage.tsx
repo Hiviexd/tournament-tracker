@@ -28,6 +28,7 @@ export default function VotingListPage() {
         assignedGroup: (searchParams.get("group") as UserGroup) || "",
         status: searchParams.get("status") || "",
         showNeedsAttention: searchParams.get("needsAttention") === "true",
+        visibility: searchParams.get("visibility") || "",
     });
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
@@ -45,6 +46,7 @@ export default function VotingListPage() {
         assignedGroup: searchInput.assignedGroup,
         status: searchInput.status,
         showNeedsAttention: searchInput.showNeedsAttention,
+        visibility: searchInput.visibility,
         page,
     });
 
@@ -63,6 +65,7 @@ export default function VotingListPage() {
         if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
         if (searchInput.status) params.set("status", searchInput.status);
         if (searchInput.showNeedsAttention) params.set("needsAttention", "true");
+        if (searchInput.visibility) params.set("visibility", searchInput.visibility);
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params, { replace: true });
     }, [
@@ -71,6 +74,7 @@ export default function VotingListPage() {
         searchInput.assignedGroup,
         searchInput.status,
         searchInput.showNeedsAttention,
+        searchInput.visibility,
         page,
         setSearchParams,
     ]);

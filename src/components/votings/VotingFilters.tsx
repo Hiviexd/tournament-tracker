@@ -9,6 +9,7 @@ interface FilterValues {
     assignedGroup: UserGroup;
     status: string;
     showNeedsAttention: boolean;
+    visibility: string;
 }
 
 interface IProps {
@@ -32,6 +33,11 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
     const statusOptions = [
         { value: "active", label: "Active" },
         { value: "concluded", label: "Concluded" },
+    ];
+
+    const visibilityOptions = [
+        { value: "public", label: "Public" },
+        { value: "private", label: "Private" },
     ];
 
     const handleChange = (key: keyof FilterValues, value: any) => {
@@ -64,6 +70,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                         onChange={(value) => handleChange("category", value as VotingCategory)}
                         data={categoryOptions}
                         style={{ flex: 1, minWidth: 200 }}
+                        clearable
                     />
                     <Select
                         placeholder="Filter by assigned group"
@@ -73,6 +80,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                         data={assignedGroupOptions}
                         style={{ flex: 1, minWidth: 200 }}
                         disabled={values.showNeedsAttention}
+                        clearable
                     />
                     {user?.isCommittee && (
                         <Select
@@ -83,6 +91,18 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                             data={statusOptions}
                             style={{ flex: 1, minWidth: 200 }}
                             disabled={values.showNeedsAttention}
+                            clearable
+                        />
+                    )}
+                    {user?.isCommittee && (
+                        <Select
+                            placeholder="Filter by visibility"
+                            leftSection={<FontAwesomeIcon icon="eye" />}
+                            value={values.visibility}
+                            onChange={(value) => handleChange("visibility", value)}
+                            data={visibilityOptions}
+                            style={{ flex: 1, minWidth: 200 }}
+                            clearable
                         />
                     )}
                 </Group>

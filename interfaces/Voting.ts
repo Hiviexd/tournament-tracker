@@ -21,6 +21,7 @@ export interface VotingQueryParams {
     status?: string;
     showNeedsAttention?: boolean;
     page?: number;
+    visibility?: string;
 
     // backend only
     assignedGroups?: { $in: UserGroup[] };
@@ -35,6 +36,7 @@ export interface VotingListQuery {
     status?: string;
     showNeedsAttention?: string;
     page?: number;
+    visibility?: string;
 }
 
 export interface IVotingFormData extends FormData {

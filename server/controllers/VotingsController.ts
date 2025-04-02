@@ -43,13 +43,13 @@ class VotingsController {
         if (reqQuery.title) dbQuery.title = new RegExp(reqQuery.title, "i");
         if (reqQuery.category) dbQuery.category = reqQuery.category;
         if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
+        if (reqQuery.visibility) dbQuery.isPublic = reqQuery.visibility === "public";
+        if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
 
         // Only show concluded AND public votes to non-committee members
         if (!user || !user.isCommittee) {
             dbQuery.isActive = false;
             dbQuery.isPublic = true;
-        } else if (reqQuery.status) {
-            dbQuery.isActive = reqQuery.status === "active";
         }
 
         // Handle needs attention filter for committee members
