@@ -205,6 +205,19 @@ function countToWord(count: number, word: string) {
     return count === 1 ? `${count} ${word}` : `${count} ${word}s`;
 }
 
+/**
+ * Checks if a URL is valid
+ * @param url URL to check
+ */
+function isValidUrl(url: string): boolean {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
@@ -217,4 +230,5 @@ export default {
     easingOutBounce,
     easingOutCubic,
     countToWord,
+    isValidUrl,
 };
