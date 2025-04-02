@@ -10,12 +10,15 @@ interface IProps {
 }
 
 export default function ReviewStatusBadge({ tournament, user, variant = "light" }: IProps) {
-    const needsReview = (): boolean => {
+    const isAssigned = (): boolean => {
         if (!user || !tournament.assignedReviewers) return false;
+        return tournament.assignedReviewers.some((reviewer) => reviewer._id === user._id);
+    };
 
-        // Check if user is assigned to this tournament
-        const isAssigned = tournament.assignedReviewers.some((reviewer) => reviewer._id === user._id);
-        if (!isAssigned) return false;
+    const needsReview = (): boolean => {
+        if (!user) return false;
+
+        if (!isAssigned()) return false;
 
         // Check if tournament is in review state
         if (tournament.status !== "reviewOngoing" && tournament.status !== "changesRequested") return false;
@@ -25,11 +28,12 @@ export default function ReviewStatusBadge({ tournament, user, variant = "light" 
         return !hasSubmittedReview;
     };
 
-    if (!needsReview()) return null;
+    if (!isAssigned()) return null;
 
     return (
-        <Badge color="orange" variant={variant}>
-            <FontAwesomeIcon icon="exclamation-triangle" /> Needs your review
+        <Badge color={needsReview() ? "orange" : "info"} variant={variant}>
+            <FontAwesomeIcon icon={needsReview() ? "exclamation-triangle" : "check-to-slot"} />{" "}
+            {needsReview() ? "Needs your review" : "Review submitted"}
         </Badge>
     );
 }
