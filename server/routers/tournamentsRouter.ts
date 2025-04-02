@@ -14,7 +14,7 @@ const tournamentBadgeUpload = createUploadMiddleware({
 tournamentsRouter.get("/", auth.optionalAuth, TournamentsController.index);
 tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
-tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isCommittee, TournamentsController.edit);
+tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, TournamentsController.edit);
 tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isCommittee, TournamentsController.assignReviewers);
 tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isCommittee, TournamentsController.reassignReviewer);
 tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isCommittee, TournamentsController.submitReview);

@@ -337,6 +337,16 @@ class TournamentsController {
             return res.json({ error: "Cannot edit archived tournament!" });
         }
 
+        // allow hosts to only edit banner
+        let actioner = currentUser;
+        if (!actioner.isCommittee && tournament.host.equals(currentUser)) {
+            actioner = tournament.host;
+
+            if (forumUrl || startDate || endDate || status || isActive) {
+                return res.json({ error: "Hosts can only edit banner!" });
+            }
+        }
+
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
@@ -373,6 +383,11 @@ class TournamentsController {
                 `Updated start and end date for **${tournament.name}**`,
                 "tournament"
             );
+        }
+
+        if (bannerUrl) {
+            await TournamentService.addLog(tournament, actioner, `Updated banner`, "image");
+            await LogService.generate(actioner._id, `Updated banner for **${tournament.name}**`, "tournament");
         }
 
         if (status) {
@@ -683,7 +698,7 @@ class TournamentsController {
                         },
                         {
                             name: "Comment",
-                            value: helpers.shorten(comment, 512),
+                            value: comment.trim().length > 0 ? helpers.shorten(comment, 512) : "*No comment provided...*",
                         },
                     ],
                 },
