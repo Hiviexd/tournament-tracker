@@ -1,4 +1,4 @@
-import { Stack, Group, Title, Button, Card } from "@mantine/core";
+import { Stack, Group, Title, Button, Card, SimpleGrid } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEditTournament } from "../../hooks/useTournaments";
@@ -7,6 +7,7 @@ import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
+import TournamentBanner from "./info/TournamentBanner";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
@@ -41,11 +42,15 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                     )}
                 </Group>
 
-                <Stack gap="md">
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TournamentStatus tournament={tournament} />
+                    <TournamentBanner tournament={tournament} />
+                    <TournamentDates tournament={tournament} />
                     <TournamentForumUrl tournament={tournament} />
                     {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
-                    <TournamentDates tournament={tournament} />
+                </SimpleGrid>
+
+                <Stack gap="md">
                     <TournamentBadges tournament={tournament} />
                 </Stack>
             </Stack>

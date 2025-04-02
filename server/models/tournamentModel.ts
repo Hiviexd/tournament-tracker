@@ -20,12 +20,12 @@ const TournamentSchema = new Schema<ITournament>(
             get: (date: Date) => date,
         },
         forumUrl: { type: String },
+        bannerUrl: { type: String },
         threadId: { type: String },
         host: { type: Schema.Types.ObjectId, ref: "User", required: true },
         type: { type: String, required: true },
         status: { type: String, required: true },
         isActive: { type: Boolean, default: true },
-        banner: { type: Schema.Types.ObjectId, ref: "Attachment" },
         badges: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         assignedReviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
@@ -57,10 +57,6 @@ TournamentSchema.virtual("isContest").get(function (this: ITournament) {
 
 TournamentSchema.virtual("statusString").get(function (this: ITournament) {
     return _.startCase(this.status);
-});
-
-TournamentSchema.virtual("bannerUrl").get(function (this: ITournament) {
-    return this.banner?.url || "/assets/default-banner.jpg";
 });
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);

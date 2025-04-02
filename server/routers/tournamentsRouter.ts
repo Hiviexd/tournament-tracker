@@ -6,18 +6,13 @@ import { createUploadMiddleware, handleUpload } from "../middlewares/upload";
 
 const tournamentsRouter = express.Router();
 
-const tournamentBannerUpload = createUploadMiddleware({
-    maxFiles: 1,
-    allowedTypes: ["image/jpeg", "image/png"],
-});
-
 const tournamentBadgeUpload = createUploadMiddleware({
     maxFiles: 8,
     allowedTypes: ["image/jpeg", "image/png"],
 });
 
 tournamentsRouter.get("/", auth.optionalAuth, TournamentsController.index);
-tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, tournamentBannerUpload, TournamentsController.create);
+tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
 tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, auth.isCommittee, TournamentsController.edit);
 tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isCommittee, TournamentsController.assignReviewers);

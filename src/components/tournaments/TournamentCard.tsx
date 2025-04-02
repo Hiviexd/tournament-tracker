@@ -6,6 +6,7 @@ import GameModeIcon from "../common/GameModeIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import TournamentStatusBadge from "./TournamentStatusBadge";
+import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
@@ -41,7 +42,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     "--card-status-color": tournament.isActive
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)",
-                    "--banner-url": `url(${tournament.bannerUrl})`,
+                    "--banner-url": `url(${tournament.bannerUrl || "/assets/default-banner.jpg"})`,
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
@@ -73,6 +74,7 @@ export default function TournamentCard({ tournament }: IProps) {
                             variant="light"
                         />
                     )}
+                    <ReviewStatusBadge tournament={tournament} user={user} />
                 </Group>
             </Stack>
         </Card>

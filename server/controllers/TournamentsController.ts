@@ -39,10 +39,6 @@ const defaultPopulate = [
         },
     },
     {
-        path: "banner",
-        select: "url",
-    },
-    {
         path: "badges",
         select: "url",
     },
@@ -186,8 +182,7 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostId, modes, type, forumUrl, startDate, endDate } = req.body;
-        const files = req.files as Express.Multer.File[];
+        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl } = req.body;
         const currentUser = res.locals!.user!;
 
         const host = await User.findById(hostId).orFail();
@@ -198,7 +193,6 @@ class TournamentsController {
             return res.json({ error: "Invalid osu! forum URL format" });
         }
 
-
         const tournament = new Tournament({
             name,
             host,
@@ -208,18 +202,8 @@ class TournamentsController {
             forumUrl,
             startDate,
             endDate,
+            bannerUrl,
         });
-
-        if (files?.length) {
-            const banner = await UploadService.handleFileUploads(
-                files,
-                FILE_UPLOAD_CATEGORY,
-                tournament._id,
-                currentUser._id
-            );
-
-            tournament.banner = banner[0];
-        }
 
         await tournament.save();
 
@@ -246,7 +230,6 @@ class TournamentsController {
                         value: `[**${host.username}**](${host.osuProfileUrl})`,
                         inline: true,
                     },
-
                     {
                         name: "Start Date",
                         value: moment(tournament.startDate).format("YYYY-MM-DD"),
@@ -268,7 +251,7 @@ class TournamentsController {
                     },
                 ],
                 image: {
-                    url: tournament.banner?.url || "",
+                    url: tournament.bannerUrl || "",
                 },
             },
         ]);
@@ -334,7 +317,7 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { forumUrl, startDate, endDate, status, isActive } = req.body;
+        const { forumUrl, startDate, endDate, status, isActive, bannerUrl } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
@@ -352,6 +335,7 @@ class TournamentsController {
             }
         }
         if (isActive !== undefined) tournament.isActive = isActive;
+        if (bannerUrl) tournament.bannerUrl = bannerUrl;
 
         await tournament.save();
 

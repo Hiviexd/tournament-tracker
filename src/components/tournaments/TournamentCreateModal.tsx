@@ -2,10 +2,8 @@ import { useCreateTournament } from "../../hooks/useTournaments";
 import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
-import { GameMode, TournamentType, TournamentStatus, TournamentFormData } from "../../../interfaces/Tournament";
+import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
 import UserSearch from "../common/UserSearch";
-import FileUploadInput from "../common/FileUploadInput";
-import { useFileUpload } from "../../hooks/useFileUpload";
 import helpers from "../../helpers";
 
 interface IProps {
@@ -15,13 +13,6 @@ interface IProps {
 
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
-    const { files, handleFileChange } = useFileUpload();
-
-    const uploadOptions = {
-        maxFiles: 1,
-        maxSize: 5 * 1024 * 1024, // 5MB
-        allowedTypes: ["image/jpeg", "image/png"],
-    };
 
     const form = useForm({
         initialValues: {
@@ -55,29 +46,8 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
     });
 
     const handleSubmit = async (values) => {
-        const formData = new FormData() as TournamentFormData;
-
-        // Handle arrays and single values differently
-        Object.entries(values).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && value !== "") {
-                if (Array.isArray(value)) {
-                    // For arrays like modes
-                    value.forEach((item) => formData.append(key, item));
-                } else if (value instanceof Date) {
-                    // Handle Date objects
-                    formData.append(key, value.toISOString());
-                } else {
-                    // For single values
-                    formData.append(key, value.toString());
-                }
-            }
-        });
-
-        // Add files
-        files.forEach((file) => formData.append("files", file));
-
         try {
-            await createTournamentMutation.mutateAsync(formData);
+            await createTournamentMutation.mutateAsync(values);
             form.reset();
             onClose();
         } catch (error) {
@@ -144,6 +114,12 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("forumUrl")}
                     />
 
+                    <TextInput
+                        label="Banner URL"
+                        placeholder="Enter banner image URL"
+                        {...form.getInputProps("bannerUrl")}
+                    />
+
                     <Group grow>
                         <DateInput
                             label="Start Date"
@@ -161,16 +137,6 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                             {...form.getInputProps("endDate")}
                         />
                     </Group>
-
-                    <FileUploadInput
-                        value={files}
-                        onChange={handleFileChange}
-                        label="Banner"
-                        description="Allowed types: jpg, png"
-                        placeholder="Up to 1 file, maximum of 5MB"
-                        options={uploadOptions}
-                        imagesOnly
-                    />
 
                     <Group justify="flex-end">
                         <Button variant="subtle" onClick={onClose}>

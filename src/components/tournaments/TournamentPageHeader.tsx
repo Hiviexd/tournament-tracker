@@ -27,7 +27,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
             <div
                 className="tournament-banner"
                 style={{
-                    backgroundImage: `url(${tournament.bannerUrl})`,
+                    backgroundImage: `url(${tournament.bannerUrl || "/assets/default-banner.jpg"})`,
                     height: "200px",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
