@@ -32,7 +32,7 @@ export default function LogsTable({ logs }: IProps) {
                                 </Table.Td>
                                 <Table.Td p={0}>{log.isSystemLog && <FontAwesomeIcon icon="robot" />}</Table.Td>
                                 <Table.Td>
-                                    <Text truncate>{log.user?.username || "System"}</Text>
+                                    <Text size="sm" truncate>{log.user?.username || "System"}</Text>
                                 </Table.Td>
                                 <Table.Td>
                                     <Text size="sm" tt="capitalize">
