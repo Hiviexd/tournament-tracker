@@ -32,7 +32,7 @@ export default function TournamentStatus({ tournament }: IProps) {
         { value: "supportRequestReceived", label: "Support Request Received" },
         { value: "screeningOngoing", label: "Screening Ongoing", disabled: !user?.isAdmin },
         { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
-        { value: "reviewOngoing", label: "Review Ongoing" },
+        { value: "reviewOngoing", label: "Under Review" },
         { value: "changesRequested", label: "Changes Requested" },
         { value: "badgeApproved", label: "Badge Approved" },
         { value: "badgeRejected", label: "Badge Rejected" },
