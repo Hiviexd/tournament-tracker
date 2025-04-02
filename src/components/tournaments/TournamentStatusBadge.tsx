@@ -31,9 +31,10 @@ const getTournamentStatusColor = (status: TournamentStatus): string => {
 };
 
 export default function TournamentStatusBadge({ tournament, variant = "light", size }: IProps) {
+    const statusString = tournament.status === "reviewOngoing" ? "Under Review" : tournament.statusString;
     return (
         <Badge color={getTournamentStatusColor(tournament.status)} variant={variant} size={size}>
-            {tournament.statusString || tournament.status}
+            {statusString || tournament.status}
         </Badge>
     );
 }
