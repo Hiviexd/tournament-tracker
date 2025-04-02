@@ -14,14 +14,16 @@ interface Feature {
     description: string;
     link: string;
     disabled?: boolean;
+    new?: boolean;
 }
 
 const features: Feature[] = [
     {
         icon: "trophy",
         title: "Official Support Status",
-        description: "View the official support status of ongoing tournaments",
+        description: "Track the official support status of ongoing tournaments",
         link: "/tournaments",
+        new: true,
     },
     {
         icon: "poll-h",
@@ -32,19 +34,19 @@ const features: Feature[] = [
     {
         icon: "flag",
         title: "Tournament Reports",
-        description: "Submit and track your tournament reports",
+        description: "Submit and view your tournament reports",
         link: "/reports/create",
     },
     {
         icon: "paper-plane",
         title: "Tickets",
-        description: "Create and browse the compendium of tickets created by users",
+        description: "Create and browse the collection of tickets created by users",
         link: "/tickets",
     },
     {
         icon: "images",
         title: "Assets Previewer",
-        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website",
+        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website/client",
         link: "/assets-previewer",
     },
     {
@@ -87,6 +89,11 @@ export default function HomePage() {
                     {feature.disabled && (
                         <Badge size="sm" variant="light">
                             Coming Soon
+                        </Badge>
+                    )}
+                    {feature.new && (
+                        <Badge size="sm" variant="light" className="pulse">
+                            New Feature!
                         </Badge>
                     )}
                 </Group>
