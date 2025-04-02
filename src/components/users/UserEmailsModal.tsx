@@ -1,7 +1,8 @@
-import { Modal, Stack, Text, Table } from "@mantine/core";
+import { Modal, Stack, Text, Table, ActionIcon, Group } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { notifications } from "@mantine/notifications";
 interface IProps {
     opened: boolean;
     onClose: () => void;
@@ -14,6 +15,15 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
         return a.username.localeCompare(b.username);
     });
 
+    const handleCopyEmail = (email: string | undefined) => {
+        if (!email) return;
+        navigator.clipboard.writeText(email);
+        notifications.show({
+            title: "Email Copied",
+            message: "Email copied to clipboard!",
+            color: "success",
+        });
+    };
 
     const rows = sortedUsers?.map((user) => (
         <Table.Tr key={user._id}>
@@ -23,7 +33,12 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
 
             <Table.Td>
                 {user.email ? (
-                    <Text size="sm">{user.email}</Text>
+                    <Group gap="xs">
+                        <ActionIcon variant="subtle" color="success" onClick={() => handleCopyEmail(user.email)}>
+                            <FontAwesomeIcon icon="copy" />
+                        </ActionIcon>
+                        <Text size="sm">{user.email}</Text>
+                    </Group>
                 ) : (
                     <Text fs="italic" c="dimmed" size="sm">
                         No email provided
