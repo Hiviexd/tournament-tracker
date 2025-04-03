@@ -424,9 +424,13 @@ class TicketsController {
     public async updateThreadId(req: Request, res: Response) {
         const user = res.locals!.user!;
         const { ticketId } = req.params;
-        const { threadId } = req.body;
+        let threadId = req.body.threadId;
 
         const ticket = await Ticket.findById(ticketId).orFail();
+
+        if (threadId.includes("https://discord.com/channels/")) {
+            threadId = threadId.split("/").pop();
+        }
 
         if (threadId !== ticket.threadId) {
             ticket.threadId = threadId;
@@ -465,7 +469,7 @@ class TicketsController {
                 ticket.threadId
             );
         } else {
-            res.json({ message: "Thread ID is already up to date!" });
+            res.json({ message: "Thread ID is already set!" });
         }
     }
 }
