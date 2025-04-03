@@ -93,7 +93,6 @@ class ResourcesController {
 
             // Validate required fields
             if (!title || !description || !category || !type || !link) {
-                console.log(title, description, category, type, link);
                 return res.json({ error: "Missing required fields" });
             }
 

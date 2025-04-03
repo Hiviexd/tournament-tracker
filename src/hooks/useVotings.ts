@@ -103,7 +103,6 @@ export function useToggleVotingPublic(votingId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            console.log("toggleVotingPublic", votingId);
             const response = await toggleVotingPublic(votingId);
             return handleMutationResponse(response);
         },
