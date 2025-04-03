@@ -47,9 +47,11 @@ export default function TournamentCard({ tournament }: IProps) {
             }>
             <div className="tournament-card-banner" />
             <Stack gap="md" className="tournament-card-content" justify="space-between" h="100%">
-                <Group justify="space-between" align="center">
-                    <Title order={4}>{tournament.name}</Title>
-                    <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
+                <Group justify="space-between" align="flex-start" wrap="nowrap">
+                    <Title order={4} style={{ wordBreak: "break-word", flex: 1 }}>
+                        {tournament.name}
+                    </Title>
+                    <Badge color={tournament.isActive ? "success" : "danger"} variant="light" style={{ flexShrink: 0 }}>
                         {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
                 </Group>
@@ -57,7 +59,6 @@ export default function TournamentCard({ tournament }: IProps) {
                 <UserDisplay user={tournament.host} />
 
                 {/* badges */}
-
                 <Group gap="xs">
                     <Tooltip label={getTournamentTypeInfo().text}>
                         <Badge color={getTournamentTypeInfo().color} variant="filled">
