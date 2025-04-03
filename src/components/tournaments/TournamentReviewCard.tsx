@@ -6,6 +6,7 @@ import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITournament } from "../../../interfaces/Tournament";
+import helpers from "../../helpers";
 
 interface IProps {
     tournament: ITournament;
@@ -69,7 +70,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                             <Text fw={500} size="sm" c={uncheckedItems.length === 0 ? "success" : "danger"}>
                                 {uncheckedItems.length === 0
                                     ? "No issues with checklist!"
-                                    : `Found ${uncheckedItems.length} issues with checklist:`}
+                                    : `Found ${helpers.countToWord(uncheckedItems.length, "issue")} with checklist:`}
                             </Text>
                             {uncheckedItems.length > 0 && (
                                 <Box ml="md">
@@ -107,7 +108,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                                 )} {" "}
                                 {uncheckedItems.length === 0
                                     ? "No issues with checklist!"
-                                    : `Found ${uncheckedItems.length} issues with checklist:`}
+                                    : `Found ${helpers.countToWord(uncheckedItems.length, "issue")} with checklist:`}
                             </Text>
                             {uncheckedItems.length > 0 && (
                                 <Box ml="md">
