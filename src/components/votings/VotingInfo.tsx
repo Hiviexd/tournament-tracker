@@ -92,7 +92,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this voting?")) return;
+        if (!window.confirm("Are you sure you want to delete this voting? This action is irreversible.")) return;
         await deleteVotingMutation.mutateAsync(voting._id);
         onNavigateBack();
     };
