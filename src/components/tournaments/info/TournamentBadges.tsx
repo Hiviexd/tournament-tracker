@@ -7,6 +7,8 @@ import FileUploadInput from "../../common/FileUploadInput";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
+import config from "../../../../config.json";
+import { IAttachment } from "../../../../interfaces/Attachment";
 
 interface IProps {
     tournament: ITournament;
@@ -35,6 +37,11 @@ export default function TournamentBadges({ tournament }: IProps) {
     const uploadBadgesMutation = useUploadBadges(tournament._id);
     const downloadBadgesMutation = useDownloadBadges(tournament._id);
     const { files, handleFileChange, clearFiles } = useFileUpload();
+
+    // check if none of the badges have file size 0
+    const validateBadges = (badges: IAttachment[]) => {
+        return badges.every((badge) => badge.url.includes(config.r2.baseUrl));
+    };
 
     const uploadOptions = {
         maxFiles: 8,
@@ -82,7 +89,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 <FontAwesomeIcon icon="pen-to-square" />
                             </ActionIcon>
                         )}
-                        {badges.length > 0 && (
+                        {badges.length > 0 && validateBadges(badges) && (
                             <ActionIcon
                                 variant="subtle"
                                 onClick={() => downloadBadgesMutation.mutate()}
