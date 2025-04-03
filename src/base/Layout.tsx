@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 // components
 import Header from "../components/common/Header";
 import MobileHeader from "../components/common/MobileHeader";
+import Footer from "./Footer";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -93,6 +94,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                             </Container>
                         }
                     </div>
+                    <Footer />
                 </AppShell.Main>
             </AppShell>
         </>
