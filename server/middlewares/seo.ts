@@ -87,7 +87,19 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
         if (matchResult && typeof matchResult !== "boolean") {
             const id = matchResult.params[route.modelId];
             const Model = modelMap[route.model] as Model<any>;
-            const data = await Model.findById(id).populate("author", "username").lean();
+
+            let defaultPopulate = {};
+            if (route.model === "Tournament") {
+                defaultPopulate = { path: "host", select: "username" };
+            }
+            if (route.model === "Voting") {
+                defaultPopulate = { path: "author", select: "username" };
+            }
+            if (route.model === "Ticket") {
+                defaultPopulate = { path: "author", select: "username" };
+            }
+
+            const data = await Model.findById(id).populate(defaultPopulate).lean();
             if (data && route.getMetadata) {
                 const customMetadata = route.getMetadata(data);
 
