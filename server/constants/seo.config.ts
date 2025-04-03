@@ -1,4 +1,4 @@
-// import TournamentModel from "../models/tournamentModel";
+import TournamentModel from "../models/tournamentModel";
 import VotingModel from "../models/votingModel";
 import TicketModel from "../models/ticketModel";
 import _ from "lodash";
@@ -25,22 +25,22 @@ export const seoRoutes: SEORoute[] = [
         path: "/",
         name: "Home",
     },
-    // {
-    //     path: "/tournaments",
-    //     name: "Tournaments Listing",
-    //     description: "Browse the compendium of osu! tournaments and contests",
-    // },
-    // {
-    //     path: "/tournaments/:tournamentId",
-    //     name: "Tournament Details",
-    //     isDynamic: true,
-    //     model: "Tournament",
-    //     modelId: "tournamentId",
-    //     getMetadata: (tournament) => ({
-    //         description: `${_.capitalize(tournament.type)} hosted by ${tournament.host.username}`,
-    //         image: tournament.bannerUrl,
-    //     }),
-    // },
+    {
+        path: "/tournaments",
+        name: "Tournaments Listing",
+        description: "Browse the compendium of osu! tournaments and contests",
+    },
+    {
+        path: "/tournaments/:tournamentId",
+        name: "Tournament Details",
+        isDynamic: true,
+        model: "Tournament",
+        modelId: "tournamentId",
+        getMetadata: (tournament) => ({
+            description: `${_.capitalize(tournament.type)} hosted by ${tournament.host.username}`,
+            image: tournament.bannerUrl,
+        }),
+    },
     {
         path: "/votes",
         name: "Votes Listing",
@@ -145,6 +145,7 @@ export const defaultMetadata: SEOMetadata = {
 export const modelMap = {
     Voting: VotingModel,
     Ticket: TicketModel,
+    Tournament: TournamentModel,
 };
 
 export type { SEORoute, SEOMetadata };
