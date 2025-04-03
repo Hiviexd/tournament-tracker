@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor, FocusTrap } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -51,12 +51,14 @@ export default function TournamentBanner({ tournament }: IProps) {
 
             {isEditingBannerUrl ? (
                 <Group align="center" w={{ base: "100%", xs: "50%" }}>
-                    <TextInput
-                        value={bannerUrl}
-                        onChange={(event) => setBannerUrl(event.currentTarget.value)}
-                        placeholder="Enter banner URL..."
-                        style={{ flex: 1 }}
-                    />
+                    <FocusTrap active={isEditingBannerUrl}>
+                        <TextInput
+                            value={bannerUrl}
+                            onChange={(event) => setBannerUrl(event.currentTarget.value)}
+                            placeholder="Enter banner URL..."
+                            style={{ flex: 1 }}
+                        />
+                    </FocusTrap>
                     <ActionIcon
                         variant="subtle"
                         onClick={handleBannerUrlSave}

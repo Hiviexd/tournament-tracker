@@ -11,6 +11,7 @@ import {
     Input,
     ActionIcon,
     Divider,
+    FocusTrap,
 } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -123,15 +124,17 @@ export default function TicketInfo({ ticket }: IProps) {
                         <Divider my="xs" />
                         <Group gap="xs">
                             <Text size="sm" fw={700}>
-                                Webhook Location:
+                                Discord Thread ID:
                             </Text>
                             {isUpdatingThreadId ? (
-                                <Input
-                                    placeholder="Thread ID..."
-                                    size="xs"
-                                    value={threadId}
-                                    onChange={(e) => setThreadId(e.target.value)}
-                                />
+                                <FocusTrap active={isUpdatingThreadId}>
+                                    <Input
+                                        placeholder="Thread ID..."
+                                        size="xs"
+                                        value={threadId}
+                                        onChange={(e) => setThreadId(e.target.value)}
+                                    />
+                                </FocusTrap>
                             ) : (
                                 <Text size="sm">
                                     {ticket.threadId ? (
@@ -146,14 +149,23 @@ export default function TicketInfo({ ticket }: IProps) {
                                 </Text>
                             )}
                             {isUpdatingThreadId ? (
-                                <ActionIcon
-                                    size="sm"
-                                    variant="subtle"
-                                    color="success"
-                                    onClick={handleUpdateThreadId}
-                                    loading={updateThreadIdMutation.isPending}>
-                                    <FontAwesomeIcon icon="floppy-disk" size="sm" />
-                                </ActionIcon>
+                                <Group gap={4}>
+                                    <ActionIcon
+                                        size="sm"
+                                        variant="subtle"
+                                        color="success"
+                                        onClick={handleUpdateThreadId}
+                                        loading={updateThreadIdMutation.isPending}>
+                                        <FontAwesomeIcon icon="floppy-disk" size="sm" />
+                                    </ActionIcon>
+                                    <ActionIcon
+                                        size="sm"
+                                        variant="subtle"
+                                        color="danger"
+                                        onClick={() => setIsUpdatingThreadId(false)}>
+                                        <FontAwesomeIcon icon="xmark" size="sm" />
+                                    </ActionIcon>
+                                </Group>
                             ) : (
                                 <ActionIcon
                                     size="sm"

@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor, FocusTrap } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -64,12 +64,14 @@ export default function TournamentForumUrl({ tournament }: IProps) {
 
             {isEditingForumUrl ? (
                 <Group align="center" w={{ base: "100%", xs: "50%" }}>
-                    <TextInput
-                        value={forumUrl}
-                        onChange={(event) => setForumUrl(event.currentTarget.value)}
-                        placeholder="Enter forum URL..."
-                        style={{ flex: 1 }}
-                    />
+                    <FocusTrap active={isEditingForumUrl}>
+                        <TextInput
+                            value={forumUrl}
+                            onChange={(event) => setForumUrl(event.currentTarget.value)}
+                            placeholder="Enter forum URL..."
+                            style={{ flex: 1 }}
+                        />
+                    </FocusTrap>
                     <ActionIcon
                         variant="subtle"
                         onClick={handleForumUrlSave}
