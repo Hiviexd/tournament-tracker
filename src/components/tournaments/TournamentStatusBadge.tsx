@@ -17,6 +17,8 @@ const getTournamentStatusColor = (status: TournamentStatus): string => {
             return "info";
         case "reviewOngoing":
             return "yellow";
+        case "onHold":
+            return "pink";
         case "changesRequested":
             return "orange";
         case "badgeApproved":

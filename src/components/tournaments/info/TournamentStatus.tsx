@@ -16,10 +16,11 @@ const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color
     screeningOngoing: { step: 2, color: "indigo" },
     screeningConcluded: { step: 3, color: "info" },
     reviewOngoing: { step: 4, color: "yellow" },
-    changesRequested: { step: 5, color: "orange" },
-    badgeApproved: { step: 6, color: "success" },
-    badgeRejected: { step: 6, color: "danger" },
-    noBadgeRequested: { step: 6, color: "gray" },
+    onHold: { step: 5, color: "pink" },
+    changesRequested: { step: 6, color: "orange" },
+    badgeApproved: { step: 7, color: "success" },
+    badgeRejected: { step: 7, color: "danger" },
+    noBadgeRequested: { step: 7, color: "gray" },
 };
 
 export default function TournamentStatus({ tournament }: IProps) {
@@ -33,6 +34,7 @@ export default function TournamentStatus({ tournament }: IProps) {
         { value: "screeningOngoing", label: "Screening Ongoing", disabled: !user?.isAdmin },
         { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
         { value: "reviewOngoing", label: "Under Review" },
+        { value: "onHold", label: "On Hold" },
         { value: "changesRequested", label: "Changes Requested" },
         { value: "badgeApproved", label: "Badge Approved" },
         { value: "badgeRejected", label: "Badge Rejected" },
@@ -40,7 +42,11 @@ export default function TournamentStatus({ tournament }: IProps) {
     ];
 
     const handleStatusSave = async () => {
-        if (confirm("Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!")) {
+        let message = "Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!";
+        if (selectedStatus === "onHold" || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
+            message = "Are you sure you want to update the status? This will NOT send an osu! notification.";
+        }
+        if (confirm(message)) {
             await editTournamentMutation.mutateAsync({ status: selectedStatus });
             setIsEditingStatus(false);
         }

@@ -347,10 +347,18 @@ class TournamentsController {
             }
         }
 
+        let shouldSendOsuMessage = true;
+
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
         if (status) {
+            if (status === "onHold" || status === "screeningOngoing") {
+                shouldSendOsuMessage = false;
+            }
+            if (status === "reviewOngoing" && tournament.status === "onHold") {
+                shouldSendOsuMessage = false;
+            }
             tournament.status = status;
             if (status === "reviewOngoing") {
                 tournament.startedReviewAt = new Date();
@@ -421,13 +429,15 @@ class TournamentsController {
                 message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
             }
 
-            await OsuBotService.sendAnnouncement([recipientId], {
-                channel: {
-                    name: `Tournament Status Update`,
-                    description: `Update regarding: ${tournament.name}`,
-                },
-                content: message,
-            });
+            if (shouldSendOsuMessage) {
+                await OsuBotService.sendAnnouncement([recipientId], {
+                    channel: {
+                        name: `Tournament Status Update`,
+                        description: `Update regarding: ${tournament.name}`,
+                    },
+                    content: message,
+                });
+            }
 
             // Discord
             // Exclude review ongoing status to avoid dupe embeds with the assign users one
@@ -439,6 +449,7 @@ class TournamentsController {
                 if (status === "screeningOngoing") embedColor = webhookColors.darkBlue;
                 if (status === "screeningConcluded") embedColor = webhookColors.blue;
                 if (status === "changesRequested") embedColor = webhookColors.yellow;
+                if (status === "onHold") embedColor = webhookColors.darkPink;
                 if (status === "badgeApproved") embedColor = webhookColors.lightGreen;
                 if (status === "badgeRejected") embedColor = webhookColors.lightRed;
                 if (status === "noBadgeRequested") embedColor = webhookColors.gray;

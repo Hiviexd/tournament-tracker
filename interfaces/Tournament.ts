@@ -14,6 +14,7 @@ export type TournamentStatus =
     | "screeningConcluded"
     | "reviewOngoing"
     | "changesRequested"
+    | "onHold"
     | "badgeApproved"
     | "badgeRejected"
     | "noBadgeRequested";

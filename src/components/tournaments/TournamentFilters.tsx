@@ -46,6 +46,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         { value: "screeningOngoing", label: "Screening Ongoing" },
         { value: "screeningConcluded", label: "Screening Concluded" },
         { value: "reviewOngoing", label: "Under Review" },
+        { value: "onHold", label: "On Hold" },
         { value: "changesRequested", label: "Changes Requested" },
         { value: "badgeApproved", label: "Badge Approved" },
         { value: "badgeRejected", label: "Badge Rejected" },
