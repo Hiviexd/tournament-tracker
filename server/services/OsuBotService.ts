@@ -94,13 +94,27 @@ export default class OsuBotService extends OsuApiService {
      * Sends an announcement to specified users through the osu! chat
      * @param userIds - Array of osu! user IDs to send the announcement to
      * @param message - The message object containing channel info and content
+     * @param fallbackId - The osu! user ID to send the announcement to if in dev environment
      * @returns true if successful, ErrorResponse if failed
      */
-    public static async sendAnnouncement(userIds: number[], message: IOsuBotMessage): Promise<true | ErrorResponse> {
+    public static async sendAnnouncement(userIds: number[], message: IOsuBotMessage, fallbackId?: number): Promise<true | ErrorResponse> {
         const token = await this.getBotToken();
 
         if (typeof token !== "string") {
             return token;
+        }
+
+        const finalUserIds: number[] = [];
+
+        // Prevent sending announcements to actual users in dev env
+        if (process.env.NODE_ENV === "production") {
+            finalUserIds.push(...userIds);
+        } else if (fallbackId) {
+            console.log("Development environment detected, sending osu! announcement to fallback ID: " + fallbackId);
+            finalUserIds.push(fallbackId);
+        } else {
+            console.log("Development environment detected, but no fallback ID provided. Skipping osu! announcement.");
+            return { error: "No user IDs provided" } as ErrorResponse;
         }
 
         // Add delay to prevent rate limiting
@@ -116,7 +130,7 @@ export default class OsuBotService extends OsuApiService {
             data: {
                 channel: message.channel,
                 message: message.content,
-                target_ids: userIds,
+                target_ids: finalUserIds,
                 type: "ANNOUNCE",
             },
         };

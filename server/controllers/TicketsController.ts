@@ -248,21 +248,21 @@ class TicketsController {
 
     /** POST send message in ticket */
     public async sendMessage(req: Request, res: Response) {
-        const user = res.locals!.user!;
+        const currentUser = res.locals!.user!;
         const { ticketId } = req.params;
         const { content } = req.body;
         const isNote = req.body.isNote === "true" || req.body.isNote === false;
         const files = req.files as Express.Multer.File[];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
-        const senderIsTicketAuthor = ticket.author.id === user.id;
+        const senderIsTicketAuthor = ticket.author.id === currentUser.id;
 
         // Authorization checks
-        if (!user.isCommittee && !senderIsTicketAuthor) {
+        if (!currentUser.isCommittee && !senderIsTicketAuthor) {
             return res.json({ error: "Not authorized to message this ticket" });
         }
 
-        if (isNote && !user.isCommittee) {
+        if (isNote && !currentUser.isCommittee) {
             return res.json({ error: "Not authorized to add notes" });
         }
 
@@ -271,9 +271,9 @@ class TicketsController {
         }
 
         const newMessage = new Message({
-            author: user._id,
+            author: currentUser._id,
             content,
-            isCommittee: senderIsTicketAuthor ? false : user.isCommittee,
+            isCommittee: senderIsTicketAuthor ? false : currentUser.isCommittee,
             isNote,
             attachments: [],
         });
@@ -283,7 +283,7 @@ class TicketsController {
             files,
             FILE_UPLOAD_CATEGORY,
             ticket._id,
-            user._id
+            currentUser._id
         );
 
         await newMessage.save();
@@ -306,9 +306,7 @@ class TicketsController {
             const userIds = Array.from(uniqueUsers);
             */
 
-            const recipientId = process.env.NODE_ENV === "production" ? ticket.author.osuId : user.osuId;
-
-            await OsuBotService.sendAnnouncement([recipientId], {
+            await OsuBotService.sendAnnouncement([ticket.author.osuId], {
                 channel: {
                     name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
                     description: `Response regarding: ${ticket.title}`,
@@ -318,12 +316,12 @@ class TicketsController {
                 } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
                     ticket._id
                 }).`,
-            });
+            }, currentUser.osuId);
         }
 
         // Logger
         await LogService.generate(
-            user._id,
+            currentUser._id,
             `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket"
         );

@@ -409,8 +409,6 @@ class TournamentsController {
             await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
 
             // osu! message
-            const recipientId = process.env.NODE_ENV === "production" ? tournament.host.osuId : currentUser.osuId;
-
             let message = `The official support status of your tournament **${
                 tournament.name
             }** has been updated to **${_.startCase(
@@ -430,13 +428,13 @@ class TournamentsController {
             }
 
             if (shouldSendOsuMessage) {
-                await OsuBotService.sendAnnouncement([recipientId], {
+                await OsuBotService.sendAnnouncement([tournament.host.osuId], {
                     channel: {
                         name: `Tournament Status Update`,
                         description: `Update regarding: ${tournament.name}`,
                     },
                     content: message,
-                });
+                }, currentUser.osuId);
             }
 
             // Discord
