@@ -54,7 +54,7 @@ export default function TournamentStatus({ tournament }: IProps) {
 
     const getProgressInfo = () => {
         const currentStatus = STATUS_PROGRESSION[tournament.status];
-        const totalSteps = 6;
+        const totalSteps = 7;
         const progress = (currentStatus.step / totalSteps) * 100;
 
         return {
