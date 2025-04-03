@@ -22,5 +22,6 @@ tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isCo
 tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
 tournamentsRouter.post("/:tournamentId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TournamentsController.updateThreadId);
 tournamentsRouter.post("/:tournamentId/createNote", auth.isLoggedIn, auth.isCommittee, handleUpload, TournamentsController.createNote);
+tournamentsRouter.post("/:tournamentId/delete", auth.isLoggedIn, auth.isAdmin, TournamentsController.delete);
 
 export default tournamentsRouter;

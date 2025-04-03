@@ -92,3 +92,8 @@ export const createNote = async (tournamentId: string, noteData: IMessageFormDat
     const response = await axios.post(`/api/tournaments/${tournamentId}/createNote`, noteData);
     return response.data;
 };
+
+export const deleteTournament = async (tournamentId: string) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/delete`);
+    return response.data;
+};

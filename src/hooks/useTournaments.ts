@@ -12,6 +12,7 @@ import {
     downloadBadges,
     updateThreadId,
     createNote,
+    deleteTournament,
 } from "../api/tournaments";
 import { handleMutationResponse } from "../api/helpers";
 import { TournamentFormData } from "../../interfaces/Tournament";
@@ -146,6 +147,20 @@ export function useCreateNote(tournamentId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useDeleteTournament(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await deleteTournament(tournamentId);
+            return handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournaments"] });
         },
     });
 }

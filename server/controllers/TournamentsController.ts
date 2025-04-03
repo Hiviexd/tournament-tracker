@@ -719,7 +719,8 @@ class TournamentsController {
                         },
                         {
                             name: "Comment",
-                            value: comment.trim().length > 0 ? helpers.shorten(comment, 512) : "*No comment provided...*",
+                            value:
+                                comment.trim().length > 0 ? helpers.shorten(comment, 512) : "*No comment provided...*",
                         },
                     ],
                 },
@@ -974,6 +975,21 @@ class TournamentsController {
             undefined,
             tournament.threadId
         );
+    }
+
+    /** POST delete tournament */
+    public async delete(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+
+        const tournament = await Tournament.findById(tournamentId).orFail();
+
+        if (tournament.status !== "supportRequestReceived") {
+            return res.json({ error: "Cannot delete tournament that is not in support request received status!" });
+        }
+
+        await Tournament.findByIdAndDelete(tournamentId);
+
+        res.json({ message: "Tournament deleted successfully!" });
     }
 }
 

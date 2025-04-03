@@ -1,7 +1,7 @@
 import { Stack, Group, Title, Button, Card, SimpleGrid } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEditTournament } from "../../hooks/useTournaments";
+import { useDeleteTournament, useEditTournament } from "../../hooks/useTournaments";
 import TournamentStatus from "./info/TournamentStatus";
 import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
@@ -12,6 +12,7 @@ import TournamentWinners from "./info/TournamentWinners";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
+import { useNavigate } from "react-router";
 
 interface IProps {
     tournament: ITournament;
@@ -20,10 +21,19 @@ interface IProps {
 export default function TournamentPageInfo({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const editTournamentMutation = useEditTournament(tournament._id);
+    const deleteTournamentMutation = useDeleteTournament(tournament._id);
+    const navigate = useNavigate();
 
     const handleToggleState = async () => {
         if (confirm(`Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`)) {
             await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
+        }
+    };
+
+    const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this tournament? This action is irreversible.")) {
+            await deleteTournamentMutation.mutateAsync();
+            navigate("/tournaments");
         }
     };
 
@@ -33,13 +43,26 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                 <Group justify="space-between" align="center">
                     <Title order={3}>{_.capitalize(tournament.type)} Information</Title>
                     {user?.isAdmin && (
-                        <Button
-                            variant="filled"
-                            color={tournament.isActive ? "danger" : "warning"}
-                            onClick={handleToggleState}
-                            leftSection={<FontAwesomeIcon icon={tournament.isActive ? "archive" : "box-archive"} />}>
-                            {tournament.isActive ? "Archive" : "Unarchive"}
-                        </Button>
+                        <Group gap="xs">
+                            {tournament.status === "supportRequestReceived" && (
+                                <Button
+                                    variant="filled"
+                                    color="danger"
+                                    onClick={handleDelete}
+                                    leftSection={<FontAwesomeIcon icon="trash" />}>
+                                    Delete
+                                </Button>
+                            )}
+                            <Button
+                                variant="filled"
+                                color="warning"
+                                onClick={handleToggleState}
+                                leftSection={
+                                    <FontAwesomeIcon icon={tournament.isActive ? "archive" : "box-archive"} />
+                                }>
+                                {tournament.isActive ? "Archive" : "Unarchive"}
+                            </Button>
+                        </Group>
                     )}
                 </Group>
 
