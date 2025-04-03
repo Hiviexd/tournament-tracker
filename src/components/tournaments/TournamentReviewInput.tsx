@@ -76,6 +76,9 @@ export default function TournamentReviewInput({ tournament }: IProps) {
             <Text component="label" fw={500} size="sm">
                 Review Checklist
             </Text>
+            <Text size="xs" c="dimmed">
+                If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
+            </Text>
             {REVIEW_CHECKLIST.map((category) => (
                 <Stack key={category.category} gap="xs">
                     <Text fw={400} size="sm" c="dimmed">
