@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { Combobox, InputBase, Loader, Stack, ActionIcon, Text, useCombobox } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useUsers, useCreateUser } from "../../hooks/useUsers";
@@ -19,17 +19,24 @@ interface IProps {
     disabled?: boolean;
 }
 
-export default function UserSearch({
-    onChange,
-    label,
-    placeholder = "Search by username or osu! ID...",
-    leftSection,
-    error,
-    required,
-    width = "100%",
-    allowUserCreation = false,
-    disabled = false,
-}: IProps) {
+export interface UserSearchRef {
+    clearSelection: () => void;
+}
+
+export default forwardRef<UserSearchRef, IProps>(function UserSearch(
+    {
+        onChange,
+        label,
+        placeholder = "Search by username or osu! ID...",
+        leftSection,
+        error,
+        required,
+        width = "100%",
+        allowUserCreation = false,
+        disabled = false,
+    }: IProps,
+    ref
+) {
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -40,6 +47,10 @@ export default function UserSearch({
     const isSearchComplete = search === debouncedSearch && !isLoading;
     const isLoaderVisible = isLoading || createUserMutation.isPending;
     const shouldShowDropdown = search && !isLoaderVisible && (isLoading || users.length > 0 || isSearchComplete);
+
+    useImperativeHandle(ref, () => ({
+        clearSelection: () => handleSelect(null),
+    }));
 
     const handleChange = (value: string) => {
         setSearch(value);
@@ -65,7 +76,7 @@ export default function UserSearch({
     };
 
     return (
-        <Stack gap={2}>
+        <Stack gap={2} style={{ width }}>
             {label && (
                 <Text size="sm" fw={500}>
                     {label} {required && <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>}
@@ -74,7 +85,6 @@ export default function UserSearch({
 
             {selectedUser ? (
                 <InputBase
-                    w={width}
                     component="button"
                     type="button"
                     pointer
@@ -95,7 +105,6 @@ export default function UserSearch({
                     }}>
                     <Combobox.Target>
                         <InputBase
-                            w={width}
                             leftSection={leftSection}
                             error={error}
                             rightSection={isLoaderVisible ? <Loader size="xs" /> : <Combobox.Chevron />}
@@ -130,4 +139,4 @@ export default function UserSearch({
             )}
         </Stack>
     );
-}
+});
