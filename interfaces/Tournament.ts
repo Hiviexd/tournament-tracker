@@ -63,6 +63,7 @@ export interface ITournament extends Document {
     reviews: IReview[];
     logs: ITournamentLog[];
     notes: IMessage[];
+    winners?: IUser[];
     createdAt: Date;
     startedReviewAt?: Date;
 

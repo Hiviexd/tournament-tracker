@@ -64,6 +64,10 @@ const defaultPopulate = [
             },
         ],
     },
+    {
+        path: "winners",
+        select: "username osuId groups",
+    },
 ];
 
 const DEFAULT_LIMIT = 20;
@@ -329,7 +333,7 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { forumUrl, startDate, endDate, status, isActive, bannerUrl } = req.body;
+        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
@@ -345,7 +349,7 @@ class TournamentsController {
         if (!actioner.isCommittee && tournament.host.equals(currentUser)) {
             actioner = tournament.host;
 
-            if (forumUrl || startDate || endDate || status || isActive) {
+            if (forumUrl || startDate || endDate || status || isActive || winners) {
                 return res.json({ error: "Hosts can only edit banner!" });
             }
         }
@@ -369,6 +373,7 @@ class TournamentsController {
         }
         if (isActive !== undefined) tournament.isActive = isActive;
         if (bannerUrl) tournament.bannerUrl = bannerUrl;
+        if (winners) tournament.winners = winners;
 
         await tournament.save();
 

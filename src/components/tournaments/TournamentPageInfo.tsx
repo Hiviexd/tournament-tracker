@@ -8,6 +8,7 @@ import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import TournamentBanner from "./info/TournamentBanner";
+import TournamentWinners from "./info/TournamentWinners";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
@@ -48,6 +49,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                     <TournamentDates tournament={tournament} />
                     <TournamentForumUrl tournament={tournament} />
                     {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
+                    <TournamentWinners tournament={tournament} />
                 </SimpleGrid>
 
                 <Stack gap="md">
