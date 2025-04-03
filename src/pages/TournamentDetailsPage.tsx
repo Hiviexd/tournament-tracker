@@ -55,22 +55,11 @@ export default function TournamentDetailsPage() {
         </Stack>
     );
 
-    if (!tournamentId) {
-        return (
-            <EmptyState
-                icon="trophy"
-                title="Tournament not found..."
-                returnLink="/tournaments"
-                returnText="Return to tournaments list"
-            />
-        );
-    }
-
     return (
         <>
             {isLoading ? (
                 <LoadingState />
-            ) : tournament?.error ? (
+            ) : !tournament || tournament.error ? (
                 <EmptyState
                     icon="trophy"
                     title="Tournament not found..."
