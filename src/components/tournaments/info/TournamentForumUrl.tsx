@@ -70,6 +70,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                             onChange={(event) => setForumUrl(event.currentTarget.value)}
                             placeholder="Enter forum URL..."
                             style={{ flex: 1 }}
+                            onFocus={(event) => event.target.select()}
                         />
                     </FocusTrap>
                     <ActionIcon

@@ -84,6 +84,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                             onChange={(event) => setThreadId(event.currentTarget.value)}
                             placeholder="Enter thread ID..."
                             style={{ flex: 1 }}
+                            onFocus={(event) => event.target.select()}
                         />
                     </FocusTrap>
                     <ActionIcon

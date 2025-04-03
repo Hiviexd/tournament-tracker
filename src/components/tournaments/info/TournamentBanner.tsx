@@ -57,6 +57,7 @@ export default function TournamentBanner({ tournament }: IProps) {
                             onChange={(event) => setBannerUrl(event.currentTarget.value)}
                             placeholder="Enter banner URL..."
                             style={{ flex: 1 }}
+                            onFocus={(event) => event.target.select()}
                         />
                     </FocusTrap>
                     <ActionIcon

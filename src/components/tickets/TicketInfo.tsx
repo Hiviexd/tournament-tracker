@@ -133,6 +133,7 @@ export default function TicketInfo({ ticket }: IProps) {
                                         size="xs"
                                         value={threadId}
                                         onChange={(e) => setThreadId(e.target.value)}
+                                        onFocus={(event) => event.target.select()}
                                     />
                                 </FocusTrap>
                             ) : (
