@@ -37,6 +37,8 @@ export default function UserCard({ user, onSelect, static: isStatic = false, sho
             <div className="user-card-content">
                 <Group gap="xs" justify="space-between">
                     <UserDisplay user={user} />
+
+                    {/* warning badges */}
                     {user.isCommittee && showBadges && (
                         <Group gap={2} flex={1} justify="flex-end">
                             {!user.email && (
@@ -53,20 +55,16 @@ export default function UserCard({ user, onSelect, static: isStatic = false, sho
                                     </Badge>
                                 </Tooltip>
                             )}
-                            {
-                                <Tooltip label={user.isActiveReviewer ? "Active Reviewer" : "Inactive Reviewer"}>
+                            {!user.isActiveReviewer && (
+                                <Tooltip label="Inactive Reviewer">
                                     <Badge variant="filled" color="primary.11" size="sm">
                                         <FontAwesomeIcon
                                             icon="magnifying-glass"
-                                            color={
-                                                user.isActiveReviewer
-                                                    ? "var(--mantine-color-success-6)"
-                                                    : "var(--mantine-color-danger-6)"
-                                            }
+                                            color="var(--mantine-color-danger-6)"
                                         />
                                     </Badge>
                                 </Tooltip>
-                            }
+                            )}
                         </Group>
                     )}
                 </Group>
