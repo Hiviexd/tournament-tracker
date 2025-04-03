@@ -1,5 +1,5 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
-import { Combobox, InputBase, Loader, Stack, ActionIcon, Text, useCombobox } from "@mantine/core";
+import { useState, forwardRef, useImperativeHandle, useRef } from "react";
+import { Combobox, InputBase, Loader, Stack, ActionIcon, Text, useCombobox, FocusTrap } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useUsers, useCreateUser } from "../../hooks/useUsers";
 import { IUser } from "../../../interfaces/User";
@@ -17,6 +17,7 @@ interface IProps {
     width?: string;
     allowUserCreation?: boolean;
     disabled?: boolean;
+    onEnterWhenSelected?: () => void;
 }
 
 export interface UserSearchRef {
@@ -34,6 +35,7 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
         width = "100%",
         allowUserCreation = false,
         disabled = false,
+        onEnterWhenSelected,
     }: IProps,
     ref
 ) {
@@ -43,6 +45,8 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
     const { data: users = [], isLoading } = useUsers(debouncedSearch, 5);
     const createUserMutation = useCreateUser();
     const combobox = useCombobox();
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const isSearchComplete = search === debouncedSearch && !isLoading;
     const isLoaderVisible = isLoading || createUserMutation.isPending;
@@ -54,14 +58,12 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
 
     const handleChange = (value: string) => {
         setSearch(value);
-        combobox.updateSelectedOptionIndex();
     };
 
     const handleSelect = (user: IUser | null) => {
         setSelectedUser(user);
+        onChange?.(user);
         setSearch("");
-        onChange(user);
-        combobox.closeDropdown();
     };
 
     const handleCreateUser = async () => {
@@ -84,18 +86,28 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
             )}
 
             {selectedUser ? (
-                <InputBase
-                    component="button"
-                    type="button"
-                    pointer
-                    rightSection={
-                        <ActionIcon size="sm" variant="subtle" color="gray" onClick={() => handleSelect(null)}>
-                            <FontAwesomeIcon icon="times" />
-                        </ActionIcon>
-                    }
-                    error={error}>
-                    <UserOption username={selectedUser.username} avatarUrl={selectedUser.avatarUrl} />
-                </InputBase>
+                <FocusTrap active>
+                    <InputBase
+                        component="button"
+                        type="button"
+                        pointer
+                        rightSection={
+                            <ActionIcon size="sm" variant="subtle" color="gray" onClick={() => handleSelect(null)}>
+                                <FontAwesomeIcon icon="times" />
+                            </ActionIcon>
+                        }
+                        error={error}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                onEnterWhenSelected?.();
+                            }
+                        }}
+                        disabled={disabled}
+                        ref={buttonRef}>
+                        <UserOption username={selectedUser.username} avatarUrl={selectedUser.avatarUrl} />
+                    </InputBase>
+                </FocusTrap>
             ) : (
                 <Combobox
                     store={combobox}
@@ -105,12 +117,19 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
                     }}>
                     <Combobox.Target>
                         <InputBase
+                            ref={inputRef}
                             leftSection={leftSection}
                             error={error}
                             rightSection={isLoaderVisible ? <Loader size="xs" /> : <Combobox.Chevron />}
                             onClick={() => combobox.openDropdown()}
                             onFocus={() => combobox.openDropdown()}
                             onChange={(e) => handleChange(e.currentTarget.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && users.length > 0) {
+                                    e.preventDefault();
+                                    handleSelect(users[0]);
+                                }
+                            }}
                             value={search}
                             placeholder={placeholder}
                             disabled={disabled}
