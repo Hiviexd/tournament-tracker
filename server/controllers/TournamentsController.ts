@@ -333,6 +333,8 @@ class TournamentsController {
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
+        const oldStatus = tournament.status;
+
         // only allow editing banners if tournament is inactive
         if (!tournament.isActive && isActive === undefined && !bannerUrl) {
             return res.json({ error: "Cannot edit archived tournament!" });
@@ -429,19 +431,23 @@ class TournamentsController {
             }
 
             if (shouldSendOsuMessage) {
-                await OsuBotService.sendAnnouncement([tournament.host.osuId], {
-                    channel: {
-                        name: `Tournament Status Update`,
-                        description: `Update regarding: ${tournament.name}`,
+                await OsuBotService.sendAnnouncement(
+                    [tournament.host.osuId],
+                    {
+                        channel: {
+                            name: `Tournament Status Update`,
+                            description: `Update regarding: ${tournament.name}`,
+                        },
+                        content: message,
                     },
-                    content: message,
-                }, currentUser.osuId);
+                    currentUser.osuId
+                );
             }
 
             // Discord
             // Exclude review ongoing status to avoid dupe embeds with the assign users one
-            if (status !== "reviewOngoing") {
-                let embedColor = webhookColors.darkOrange;
+            if (status !== "reviewOngoing" || (status === "reviewOngoing" && oldStatus === "onHold")) {
+                let embedColor = webhookColors.orange;
 
                 // Change color based on status
                 if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
@@ -755,7 +761,6 @@ class TournamentsController {
             currentUser._id
         );
 
-        console.log(badges);
         tournament.badges = badges;
 
         await tournament.save();
