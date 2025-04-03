@@ -16,6 +16,7 @@ export default function NoResultsOption({ search, onAdd, isLoading, allowUserCre
             </Text>
             {allowUserCreation && (
                 <Button
+                    style={{ flexShrink: 0 }}
                     variant="light"
                     size="xs"
                     onClick={onAdd}
