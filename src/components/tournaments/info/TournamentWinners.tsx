@@ -27,11 +27,17 @@ export default function TournamentWinners({ tournament }: IProps) {
         setIsEditing(false);
     };
 
-    const handleAddWinner = () => {
-        if (selectedUser && !winners.some((w) => w._id === selectedUser._id)) {
-            setWinners([...winners, selectedUser]);
+    const handleAddWinner = (winner: IUser) => {
+        if (!winners.some((w) => w._id === winner._id)) {
+            setWinners([...winners, winner]);
             setSelectedUser(null);
             userSearchRef.current?.clearSelection();
+        } else {
+            notifications.show({
+                title: "User already in list",
+                message: "This user is already in the list of winners",
+                color: "red",
+            });
         }
     };
 
@@ -48,8 +54,6 @@ export default function TournamentWinners({ tournament }: IProps) {
             color: "success",
         });
     };
-
-    console.log(winners);
 
     return (
         <Stack gap={5}>
@@ -127,13 +131,27 @@ export default function TournamentWinners({ tournament }: IProps) {
                         <UserSearch
                             ref={userSearchRef}
                             onChange={setSelectedUser}
+                            onEnterWhenSelected={() => {
+                                if (selectedUser) {
+                                    handleAddWinner(selectedUser);
+                                }
+                            }}
                             placeholder="Search for a user to add..."
                             allowUserCreation
                             width="50%"
                         />
                         <ActionIcon
                             variant="subtle"
-                            onClick={handleAddWinner}
+                            onClick={() => {
+                                if (selectedUser) {
+                                    handleAddWinner(selectedUser);
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && selectedUser) {
+                                    handleAddWinner(selectedUser);
+                                }
+                            }}
                             color="success"
                             disabled={!selectedUser}
                             title="Add winner">
