@@ -323,7 +323,7 @@ class TournamentsController {
                     ],
                 },
             ],
-            "",
+            "New Tournament Review",
             tournament.threadId
         );
     }
@@ -622,7 +622,7 @@ class TournamentsController {
                     ],
                 },
             ],
-            "",
+            "Tournament Review Reassignment",
             tournament.threadId
         );
     }

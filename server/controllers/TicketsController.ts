@@ -241,7 +241,7 @@ class TicketsController {
                     text: `ID: ${ticket._id}`,
                 },
             },
-        ]);
+        ], `New ${_.capitalize(type)}`);
 
         res.json({ message: `${_.capitalize(type)} created successfully!`, ticket });
     }

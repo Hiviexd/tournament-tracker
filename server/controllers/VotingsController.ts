@@ -258,7 +258,7 @@ class VotingsController {
                 color: webhookColors.lightYellow,
                 fields,
             },
-        ]);
+        ], "New Vote");
     }
 
     /** POST submit vote */

@@ -147,7 +147,7 @@ class AutomationService {
                             },
                         ],
                     },
-                ]);
+                ], "Overdue Vote");
             }
         }
 
@@ -254,7 +254,7 @@ class AutomationService {
                             },
                         ],
                     },
-                ]);
+                ], "Stale Ticket");
             } else {
                 // 7-9 days - send without ping
                 staleTickets.push(ticket);
@@ -441,7 +441,7 @@ class AutomationService {
                             ],
                         },
                     ],
-                    "",
+                    "Overdue Tournament Review",
                     tournament.threadId
                 );
             }
