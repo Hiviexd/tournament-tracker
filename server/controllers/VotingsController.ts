@@ -141,6 +141,7 @@ class VotingsController {
             targetTournamentName,
             targetTournamentLink,
             type,
+            allowNeutralVotes,
         } = req.body;
         const files = req.files as Express.Multer.File[];
 
@@ -160,6 +161,7 @@ class VotingsController {
             type,
             options,
             requiredVotes,
+            allowNeutralVotes,
         });
 
         if (category === "user") {
@@ -251,14 +253,18 @@ class VotingsController {
             fields.push(helpers.getAttachmentsField(voting.attachments)!);
         }
 
-        await DiscordService.sendRoleHighlightWebhook(roles, [
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                color: webhookColors.lightYellow,
-                fields,
-            },
-        ], "New Vote");
+        await DiscordService.sendRoleHighlightWebhook(
+            roles,
+            [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                    color: webhookColors.lightYellow,
+                    fields,
+                },
+            ],
+            "New Vote"
+        );
     }
 
     /** POST submit vote */
@@ -306,6 +312,9 @@ class VotingsController {
                 if (typeof data.score !== "number" || data.score < -5 || data.score > 5) {
                     return res.json({ error: "Invalid score (must be between -5 and 5)" });
                 }
+                if (!voting.allowNeutralVotes && data.score === 0) {
+                    return res.json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                }
                 break;
             case "variable":
                 if (
@@ -320,6 +329,9 @@ class VotingsController {
                     )
                 ) {
                     return res.json({ error: "Invalid scores" });
+                }
+                if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
+                    return res.json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
                 }
                 break;
         }
@@ -400,16 +412,14 @@ class VotingsController {
         if (!voting.isActive) {
             const fields = VotingService.generateVotingResults(voting);
 
-            await DiscordService.sendWebhook(
-                [
-                    {
-                        author: DiscordService.defaultWebhookAuthor(req.session),
-                        color: webhookColors.darkYellow,
-                        description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                        fields,
-                    },
-                ],
-            );
+            await DiscordService.sendWebhook([
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.darkYellow,
+                    description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                    fields,
+                },
+            ]);
         } else {
             // Voting resumed
             await DiscordService.sendWebhook([
@@ -425,7 +435,7 @@ class VotingsController {
     /** POST update voting */
     public async updateVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
-        const { title, description, duration, options, publicDescription } = req.body;
+        const { title, description, duration, options, publicDescription, allowNeutralVotes } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
 
@@ -433,6 +443,7 @@ class VotingsController {
         voting.description = description;
         voting.duration = duration;
         voting.publicDescription = publicDescription;
+        voting.allowNeutralVotes = allowNeutralVotes;
 
         // only update options when there is no votes
         if (!voting.votes.length) voting.options = options;

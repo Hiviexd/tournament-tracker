@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, Stack, Title, Button, Group, Box } from "@mantine/core";
+import { Card, Stack, Title, Button, Group, Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
@@ -15,6 +15,16 @@ import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import VoteStatusBanner from "../common/banners/VoteStatusBanner";
 
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
+const hasNeutralVote = (voteData: VoteType): boolean => {
+    switch (voteData.type) {
+        case "binary":
+            return voteData.score === 0;
+        case "variable":
+            return voteData.scores.some((s) => s.score === 0);
+        default:
+            return false;
+    }
+};
 
 interface IProps {
     voting: IVoting;
@@ -40,8 +50,20 @@ export default function VotingForm({ voting, user }: IProps) {
         }
     }, [voteData]);
 
-    const handleSubmit = async () => {
+    const isSubmitDisabled = useMemo(() => {
         if (isCommentRequired && !comment.trim()) {
+            return true;
+        }
+
+        if (!voting.allowNeutralVotes && (voting.type === "binary" || voting.type === "variable")) {
+            return hasNeutralVote(voteData);
+        }
+
+        return false;
+    }, [isCommentRequired, comment, voting.allowNeutralVotes, voting.type, voteData]);
+
+    const handleSubmit = async () => {
+        if (isSubmitDisabled) {
             return; // Button will be disabled, but extra safety check
         }
 
@@ -139,11 +161,16 @@ export default function VotingForm({ voting, user }: IProps) {
                 </Box>
 
                 <Group justify="flex-end">
+                    {!voting.allowNeutralVotes && hasNeutralVote(voteData) && (
+                        <Text size="xs" c="danger">
+                            Neutral (0 score) votes are not allowed
+                        </Text>
+                    )}
                     <Button
                         color={userVote ? "info" : "success"}
                         onClick={handleSubmit}
                         loading={submitVoteMutation.isPending}
-                        disabled={isCommentRequired && !comment.trim()}
+                        disabled={isSubmitDisabled}
                         leftSection={<FontAwesomeIcon icon={userVote ? "edit" : "check"} />}>
                         {userVote ? "Update Vote" : "Submit Vote"}
                     </Button>

@@ -21,6 +21,7 @@ import {
     Pill,
     Text,
     Box,
+    Checkbox,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
@@ -49,6 +50,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             duration: 3,
             type: "classic" as VotingType,
             options: ["Agree", "Disagree"],
+            allowNeutralVotes: false,
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
@@ -278,6 +280,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         withAsterisk
                         {...form.getInputProps("type")}
                     />
+
+                    {(form.values.type === "binary" || form.values.type === "variable") && (
+                        <Checkbox label="Allow neutral (0 score) votes" {...form.getInputProps("allowNeutralVotes")} />
+                    )}
 
                     <Select
                         label="Vote Preset"

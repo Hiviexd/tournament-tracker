@@ -30,6 +30,7 @@ const VotingSchema = new Schema<IVoting>(
         isPublic: { type: Boolean, default: false },
         publicDescription: { type: String },
         concludedAt: { type: Date },
+        allowNeutralVotes: { type: Boolean, default: true },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

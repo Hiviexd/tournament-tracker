@@ -13,11 +13,11 @@ import {
     NumberInput,
     Button,
     Group,
-    LoadingOverlay,
     ActionIcon,
     Text,
     Pill,
     Box,
+    Checkbox,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -44,7 +44,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             publicDescription: voting.publicDescription || "",
             duration: voting.duration,
             options: [...voting.options],
-            type: voting.type, // Add type to form values
+            type: voting.type,
+            allowNeutralVotes: voting.allowNeutralVotes,
         },
         validate: {
             title: (value) => {
@@ -131,11 +132,6 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
 
     return (
         <Modal opened={opened} onClose={onClose} title="Edit Vote" size="xl">
-            <LoadingOverlay
-                visible={updateVotingMutation.isPending}
-                zIndex={1000}
-                overlayProps={{ radius: "sm", blur: 2 }}
-            />
             <form onSubmit={form.onSubmit(handleSubmit)} style={{ position: "relative" }}>
                 <Stack gap="md">
                     {voting.isActive && (
@@ -273,6 +269,14 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 )}
                             </Stack>
                         </>
+                    )}
+
+                    {(form.values.type === "binary" || form.values.type === "variable") && (
+                        <Checkbox
+                            label="Allow neutral (0 score) votes"
+                            checked={form.values.allowNeutralVotes}
+                            onChange={(event) => form.setFieldValue("allowNeutralVotes", event.currentTarget.checked)}
+                        />
                     )}
 
                     <Group justify="flex-end" mt="md">
