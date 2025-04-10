@@ -323,7 +323,7 @@ class TournamentsController {
                     ],
                 },
             ],
-            "New Tournament Review",
+            `New ${_.capitalize(tournament.type)} Review`,
             tournament.threadId
         );
     }
