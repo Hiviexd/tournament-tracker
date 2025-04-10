@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
 import { TournamentQueryParams, TournamentType, TournamentStatus, GameMode } from "../../interfaces/Tournament";
-import { UserGroup } from "../../interfaces/User";
+import { IUser, UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 import UploadService from "../services/UploadService";
 import Review from "../models/reviewModel";
@@ -287,7 +287,14 @@ class TournamentsController {
 
         const assignedReviewersType = reviewerTypeMap[tournament.type];
 
-        const reviewers = await UserService.assignReviewers(assignedReviewersType);
+        let reviewers: IUser[] = [];
+
+        if (assignedReviewersType === "cc") {
+            // assign all of CC
+            reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
+        } else {
+            reviewers = await UserService.assignReviewers(assignedReviewersType);
+        }
 
         tournament.assignedReviewers = reviewers;
 
