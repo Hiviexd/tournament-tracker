@@ -130,24 +130,28 @@ class AutomationService {
                 const overdueText =
                     overdueDuration >= 24 ? `${Math.floor(overdueDuration / 24)} days` : `${overdueDuration} hours`;
 
-                await DiscordService.sendUserHighlightWebhook(usersToPing, [
-                    {
-                        color: webhookColors.red,
-                        description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is overdue by ${overdueText}!`,
-                        fields: [
-                            { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
-                            { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
-                            {
-                                name: "Deadline",
-                                value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
-                                    voting.deadline,
-                                    "dateTime"
-                                )})`,
-                                inline: false,
-                            },
-                        ],
-                    },
-                ], "Overdue Vote");
+                await DiscordService.sendUserHighlightWebhook(
+                    usersToPing,
+                    [
+                        {
+                            color: webhookColors.red,
+                            description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is overdue by ${overdueText}!`,
+                            fields: [
+                                { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
+                                { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
+                                {
+                                    name: "Deadline",
+                                    value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+                                        voting.deadline,
+                                        "dateTime"
+                                    )})`,
+                                    inline: false,
+                                },
+                            ],
+                        },
+                    ],
+                    "Overdue Vote"
+                );
             }
         }
 
@@ -236,44 +240,54 @@ class AutomationService {
                 // 10+ days - send with ping
                 staleTickets.push(ticket);
 
-                await DiscordService.sendRoleHighlightWebhook(roles, [
-                    {
-                        color: webhookColors.red,
-                        description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
-                        fields: [
-                            { name: "Type", value: ticketType, inline: true },
-                            {
-                                name: "Author",
-                                value: `[**${ticket.author.username}**](${ticket.author.osuProfileUrl})`,
-                                inline: true,
-                            },
-                            {
-                                name: "Last Response",
-                                value: helpers.discordTimestamp(ticket.lastResponseAt),
-                                inline: false,
-                            },
-                        ],
-                    },
-                ], "Stale Ticket");
+                await DiscordService.sendRoleHighlightWebhook(
+                    roles,
+                    [
+                        {
+                            color: webhookColors.red,
+                            description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
+                            fields: [
+                                { name: "Type", value: ticketType, inline: true },
+                                {
+                                    name: "Author",
+                                    value: `[**${ticket.author.username}**](${ticket.author.osuProfileUrl})`,
+                                    inline: true,
+                                },
+                                {
+                                    name: "Last Response",
+                                    value: helpers.discordTimestamp(ticket.lastResponseAt),
+                                    inline: false,
+                                },
+                            ],
+                        },
+                    ],
+                    "Stale Ticket",
+                    ticket.threadId
+                );
             } else {
                 // 7-9 days - send without ping
                 staleTickets.push(ticket);
 
-                await DiscordService.sendWebhook([
-                    {
-                        color: webhookColors.orange,
-                        description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
-                        fields: [
-                            { name: "Type", value: ticketType, inline: true },
-                            { name: "Author", value: ticket.author.username, inline: true },
-                            {
-                                name: "Last Response",
-                                value: helpers.discordTimestamp(ticket.lastResponseAt),
-                                inline: false,
-                            },
-                        ],
-                    },
-                ]);
+                await DiscordService.sendWebhook(
+                    [
+                        {
+                            color: webhookColors.orange,
+                            description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
+                            fields: [
+                                { name: "Type", value: ticketType, inline: true },
+                                { name: "Author", value: ticket.author.username, inline: true },
+                                {
+                                    name: "Last Response",
+                                    value: helpers.discordTimestamp(ticket.lastResponseAt),
+                                    inline: false,
+                                },
+                            ],
+                        },
+                    ],
+                    "",
+                    undefined,
+                    ticket.threadId
+                );
             }
         }
 

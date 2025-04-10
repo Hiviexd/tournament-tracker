@@ -70,7 +70,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     {user?.isCommittee && ["reviewOngoing", "changesRequested"].includes(tournament.status) && (
                         <VoteCountBadge
                             voteCount={tournament.reviews.length}
-                            totalVotes={2}
+                            totalVotes={tournament.assignedReviewers?.length || 2}
                             textOverride="reviews"
                             variant="light"
                         />
