@@ -87,7 +87,7 @@ class DiscordService {
                 username: config.discord.username,
                 avatar_url: config.discord.avatar_url,
                 embeds,
-                content: `${pings} ${message || ""}`,
+                content: `${pings.trim()} ${message || ""}`,
             });
             await helpers.delay(1000);
         } catch (error) {
@@ -122,7 +122,7 @@ class DiscordService {
                 username: config.discord.username,
                 avatar_url: config.discord.avatar_url,
                 embeds,
-                content: `${pings} ${message || ""}`,
+                content: `${pings.trim()} ${message || ""}`,
             });
             await helpers.delay(1000);
         } catch (error) {
