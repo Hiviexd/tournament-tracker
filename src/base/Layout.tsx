@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import Header from "../components/common/Header";
 import MobileHeader from "../components/common/MobileHeader";
 import Footer from "./Footer";
+import ScrollToTopButton from "../components/common/ScrollToTopButton";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -96,6 +97,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                     </div>
                     <Footer />
                 </AppShell.Main>
+                <ScrollToTopButton />
             </AppShell>
         </>
     );

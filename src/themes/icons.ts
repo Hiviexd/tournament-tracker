@@ -90,6 +90,7 @@ import {
     faCalendar,
     faUserPen,
     faEnvelope,
+    faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -184,5 +185,6 @@ export default function loadIcons() {
         faCalendar,
         faUserPen,
         faEnvelope,
+        faArrowUp,
     );
 }
