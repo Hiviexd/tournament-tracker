@@ -358,6 +358,8 @@ class VotingsController {
             );
 
             // Discord
+            // ! Disabled per team request
+            /*
             await DiscordService.sendWebhook(
                 [
                     {
@@ -369,6 +371,7 @@ class VotingsController {
                 undefined,
                 "silent"
             );
+            */
         }
     }
 

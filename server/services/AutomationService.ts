@@ -17,7 +17,7 @@ import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
 
 class AutomationService {
-    private checkOverdueVotingsJob: CronJob;
+    private checkVotingsJob: CronJob;
     private checkConcludableVotingsJob: CronJob;
     private checkStaleTicketsJob: CronJob;
     private checkBadgeUpdatesJob: CronJob;
@@ -28,7 +28,7 @@ class AutomationService {
         this.checkConcludableVotingsJob = new CronJob("0 * * * *", this.checkConcludableVotings.bind(this));
 
         // Run at 17:00 UTC every day
-        this.checkOverdueVotingsJob = new CronJob("0 17 * * *", this.checkOverdueVotings.bind(this));
+        this.checkVotingsJob = new CronJob("0 17 * * *", this.checkVotings.bind(this));
 
         // Run at 18:00 UTC every day
         this.checkStaleTicketsJob = new CronJob("0 18 * * *", this.checkStaleTickets.bind(this));
@@ -44,7 +44,7 @@ class AutomationService {
         if (!config.automation) return;
 
         this.checkConcludableVotingsJob.start();
-        this.checkOverdueVotingsJob.start();
+        this.checkVotingsJob.start();
         this.checkStaleTicketsJob.start();
         this.checkBadgeUpdatesJob.start();
         this.checkOverdueReviewsJob.start();
@@ -55,14 +55,14 @@ class AutomationService {
         if (process.env.AUTOMATION_DEBUG === "true") {
             console.log(styles("Running automation checks immediately...", ["yellow", "bold"]));
             this.checkConcludableVotings();
-            this.checkOverdueVotings();
+            this.checkVotings();
             this.checkStaleTickets();
             this.checkBadgeUpdates();
             this.checkOverdueReviews();
         }
     }
 
-    private async checkOverdueVotings() {
+    private async checkVotings() {
         const activeVotings = await Voting.find({ isActive: true }).populate({
             path: "votes",
             populate: {
@@ -70,7 +70,7 @@ class AutomationService {
                 select: "username osuId discordId groups",
             },
         });
-        const overdueVotings: IVoting[] = [];
+        const votingsToNotify: IVoting[] = [];
 
         for (const voting of activeVotings) {
             const deadline = moment(voting.deadline);
@@ -82,9 +82,23 @@ class AutomationService {
             if (voting.assignedGroups.includes("tc")) roles.push("tournament");
             if (voting.assignedGroups.includes("cc")) roles.push("contest");
 
+            // Get all users in the assigned groups
+            const usersInAssignedGroups = await User.find({
+                groups: { $in: voting.assignedGroups },
+            }).select("username osuId discordId groups");
+
+            // Get set of user IDs who have already voted
+            const votedUserIds = new Set(voting.votes.map((vote) => vote.author._id.toString()));
+
+            // Filter out users who have already voted
+            const missingVotes = usersInAssignedGroups.filter((user) => !votedUserIds.has(user._id.toString()));
+
+            // Get Discord IDs for pinging (fall back to username if no Discord ID)
+            const usersToPing = missingVotes.map((user) => user.discordId || user.username);
+
             if (hoursUntilDeadline <= 24 && !isOverdue) {
                 // Almost due (within 24h) but not overdue yet
-                overdueVotings.push(voting);
+                votingsToNotify.push(voting);
 
                 const minutesUntilDeadline = deadline.diff(now, "minutes");
                 const dueText =
@@ -105,26 +119,20 @@ class AutomationService {
                                 )})`,
                                 inline: false,
                             },
+                            {
+                                name: "Missing Voters",
+                                value:
+                                    missingVotes
+                                        .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
+                                        .join(", ") || "None",
+                                inline: false,
+                            },
                         ],
                     },
                 ]);
             } else if (isOverdue) {
                 // Only send overdue notification if actually past deadline
-                overdueVotings.push(voting);
-
-                // Get all users in the assigned groups
-                const usersInAssignedGroups = await User.find({
-                    groups: { $in: voting.assignedGroups },
-                }).select("username osuId discordId groups");
-
-                // Get set of user IDs who have already voted
-                const votedUserIds = new Set(voting.votes.map((vote) => vote.author._id.toString()));
-
-                // Filter out users who have already voted
-                const missingVotes = usersInAssignedGroups.filter((user) => !votedUserIds.has(user._id.toString()));
-
-                // Get Discord IDs for pinging (fall back to username if no Discord ID)
-                const usersToPing = missingVotes.map((user) => user.discordId || user.username);
+                votingsToNotify.push(voting);
 
                 const overdueDuration = Math.abs(hoursUntilDeadline);
                 const overdueText =
@@ -147,17 +155,53 @@ class AutomationService {
                                     )})`,
                                     inline: false,
                                 },
+                                {
+                                    name: "Missing Voters",
+                                    value:
+                                        missingVotes
+                                            .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
+                                            .join(", ") || "None",
+                                    inline: false,
+                                },
                             ],
                         },
                     ],
                     "Overdue Vote"
                 );
+            } else {
+                // Not overdue and not due soon - just send a regular update
+                await DiscordService.sendWebhook([
+                    {
+                        color: webhookColors.lightGreen,
+                        description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is still active!`,
+                        fields: [
+                            { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
+                            { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
+                            {
+                                name: "Deadline",
+                                value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+                                    voting.deadline,
+                                    "dateTime"
+                                )})`,
+                                inline: false,
+                            },
+                            {
+                                name: "Missing Voters",
+                                value:
+                                    missingVotes
+                                        .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
+                                        .join(", ") || "*None*",
+                                inline: false,
+                            },
+                        ],
+                    },
+                ]);
             }
         }
 
-        if (overdueVotings.length > 0) {
+        if (votingsToNotify.length > 0) {
             await LogService.generateSystem(
-                `Sent reminders for overdue votes: ${overdueVotings
+                `Sent reminders for votes: ${votingsToNotify
                     .map((v) => `[**${v.title}**](${config.baseUrl}/votes/${v._id})`)
                     .join(", ")}`,
                 "voting"
