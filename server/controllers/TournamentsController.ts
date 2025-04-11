@@ -362,18 +362,21 @@ class TournamentsController {
         }
 
         let shouldSendOsuMessage = true;
+        const excludedStatusesOsu = ["supportRequestReceived", "screeningOngoing", "screeningConcluded", "onHold"];
 
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
         if (status) {
-            if (status === "onHold" || status === "screeningOngoing") {
+            if (excludedStatusesOsu.includes(status)) {
                 shouldSendOsuMessage = false;
             }
             if (status === "reviewOngoing" && tournament.status === "onHold") {
                 shouldSendOsuMessage = false;
             }
+
             tournament.status = status;
+
             if (status === "reviewOngoing") {
                 tournament.startedReviewAt = new Date();
             }
@@ -457,8 +460,14 @@ class TournamentsController {
             }
 
             // Discord
-            // Exclude review ongoing status to avoid dupe embeds with the assign users one
-            if (status !== "reviewOngoing" || (status === "reviewOngoing" && oldStatus === "onHold")) {
+            const excludedStatusesDiscord = [
+                "supportRequestReceived",
+                "screeningOngoing",
+                "screeningConcluded",
+                "reviewOngoing",
+            ];
+
+            if (!excludedStatusesDiscord.includes(status) || (status === "reviewOngoing" && oldStatus === "onHold")) {
                 let embedColor = webhookColors.orange;
 
                 // Change color based on status

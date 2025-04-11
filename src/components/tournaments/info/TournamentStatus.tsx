@@ -41,9 +41,11 @@ export default function TournamentStatus({ tournament }: IProps) {
         { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
 
+    const excludedStatusesOsu = ["supportRequestReceived", "screeningOngoing", "screeningConcluded", "onHold"];
+
     const handleStatusSave = async () => {
         let message = "Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!";
-        if (selectedStatus === "onHold" || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
+        if (excludedStatusesOsu.includes(selectedStatus) || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
             message = "Are you sure you want to update the status? This will NOT send an osu! notification.";
         }
         if (confirm(message)) {
