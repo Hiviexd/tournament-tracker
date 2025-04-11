@@ -55,29 +55,10 @@ class VotingsController {
         // Handle needs attention filter for committee members
         if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
             dbQuery.isActive = true;
-            // Only show votes where:
-            // 1. User hasn't voted yet
-            // 2. User is in one of the assigned groups
-            dbQuery.$and = [
-                {
-                    votes: {
-                        $not: {
-                            $elemMatch: {
-                                author: req.session.mongoId,
-                            },
-                        },
-                    },
-                },
-                {
-                    $or: [
-                        {
-                            $and: [{ assignedGroups: "tc" }, { $expr: { $eq: [user.isTournamentCommittee, true] } }],
-                        },
-                        {
-                            $and: [{ assignedGroups: "cc" }, { $expr: { $eq: [user.isContestCommittee, true] } }],
-                        },
-                    ],
-                },
+            // First find votings where user is in assigned groups
+            dbQuery.$or = [
+                { assignedGroups: "tc", $expr: { $eq: [user.isTournamentCommittee, true] } },
+                { assignedGroups: "cc", $expr: { $eq: [user.isContestCommittee, true] } },
             ];
         }
 
@@ -92,6 +73,11 @@ class VotingsController {
             .limit(DEFAULT_LIMIT)
             .sort({ createdAt: -1 })
             .populate(DEFAULT_POPULATE);
+
+        // Filter out votings where user has already voted if needs attention is true
+        if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
+            votings = votings.filter((voting) => !voting.votes.some((vote) => vote.author._id.equals(user._id)));
+        }
 
         // Censor votings for non-committee members
         if (!user || !user.isCommittee) {
