@@ -3,7 +3,7 @@ import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
-import MarkdownText from "../common/MarkdownText";
+
 interface IProps {
     opened: boolean;
     onClose: () => void;
@@ -69,7 +69,7 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
             ) : (
                 <Stack gap="md">
                     <Text size="sm" c="dimmed">
-                        <MarkdownText content="This serves purely as a tracker for [TC Google Drive](https://drive.google.com/drive/u/0/folders/1wtDirh70HGK-jtDEL8DdRkp8KSyEOBYb) access." />
+                        This serves purely as a tracker for TC Google Drive access.
                     </Text>
                     <Table>
                         <Table.Thead>
