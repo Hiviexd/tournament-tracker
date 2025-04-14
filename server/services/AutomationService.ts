@@ -82,9 +82,10 @@ class AutomationService {
             if (voting.assignedGroups.includes("tc")) roles.push("tournament");
             if (voting.assignedGroups.includes("cc")) roles.push("contest");
 
-            // Get all users in the assigned groups
+            // Get all active users in the assigned groups
             const usersInAssignedGroups = await User.find({
                 groups: { $in: voting.assignedGroups },
+                isActiveReviewer: true,
             }).select("username osuId discordId groups");
 
             // Get set of user IDs who have already voted

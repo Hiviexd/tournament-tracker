@@ -134,7 +134,11 @@ class VotingsController {
         const author = res.locals!.user!;
         let targetUser: IUser;
 
-        const assignedUsersCount = await User.countDocuments({ groups: { $in: assignedGroups } });
+        // Count only active reviewers in assigned groups
+        const assignedUsersCount = await User.countDocuments({
+            groups: { $in: assignedGroups },
+            isActiveReviewer: true,
+        });
         const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         const voting = new Voting({

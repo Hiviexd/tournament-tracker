@@ -141,7 +141,7 @@ class UsersController {
 
         await LogService.generate(
             req.session.mongoId!,
-            `Toggled reviewer status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
+            `Toggled activity status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
             "user"
         );
 
@@ -156,7 +156,7 @@ class UsersController {
         ]);
 
         res.json({
-            message: `Set reviewer status as ${user.isActiveReviewer ? "active" : "inactive"} successfully!`,
+            message: `Set activity status as ${user.isActiveReviewer ? "active" : "inactive"}!`,
             user,
         });
     }
