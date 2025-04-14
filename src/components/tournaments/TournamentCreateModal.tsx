@@ -90,7 +90,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                     <UserSearch
                         label="Host"
                         onChange={(user) => form.setFieldValue("hostId", user?.id || "")}
-                        error={form.errors.host}
+                        error={form.errors.hostId}
                         required
                         allowUserCreation
                     />
