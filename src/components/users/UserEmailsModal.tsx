@@ -3,6 +3,7 @@ import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
+import MarkdownText from "../common/MarkdownText";
 interface IProps {
     opened: boolean;
     onClose: () => void;
@@ -59,15 +60,18 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
                     fontWeight: 600,
                 },
             }}>
-            <Stack gap="md">
-                {isLoading ? (
-                    <Text>Loading...</Text>
-                ) : !committeeUsers?.length ? (
-                    <Text fs="italic" c="dimmed">
-                        No committee members found
+            {isLoading ? (
+                <Text>Loading...</Text>
+            ) : !committeeUsers?.length ? (
+                <Text fs="italic" c="dimmed">
+                    No committee members found
+                </Text>
+            ) : (
+                <Stack gap="md">
+                    <Text size="sm" c="dimmed">
+                        <MarkdownText content="This serves purely as a tracker for [TC Google Drive](https://drive.google.com/drive/u/0/folders/1wtDirh70HGK-jtDEL8DdRkp8KSyEOBYb) access." />
                     </Text>
-                ) : (
-                    <Table highlightOnHover>
+                    <Table>
                         <Table.Thead>
                             <Table.Tr>
                                 <Table.Th>User</Table.Th>
@@ -76,8 +80,8 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
                         </Table.Thead>
                         <Table.Tbody>{rows}</Table.Tbody>
                     </Table>
-                )}
-            </Stack>
+                </Stack>
+            )}
         </Modal>
     );
 }
