@@ -1,6 +1,6 @@
 import { Box } from "@mantine/core";
 import { useAutoSave } from "../../hooks/useAutoSave";
-import { useEditorPreferences } from "../../hooks/useEditorPreferences";
+import { useLocalPreference } from "../../hooks/useLocalPreferences";
 import { MarkdownEditor, RichTextEditor } from "./editor";
 
 interface TextEditorProps {
@@ -31,8 +31,8 @@ export default function TextEditor({
     autoSaveKey,
     style,
 }: TextEditorProps) {
-    // Use the editor preferences hook to get and set markdown mode
-    const { isMarkdownMode, toggleMarkdownMode } = useEditorPreferences();
+    // Use the local preference hook directly for markdown mode
+    const [isMarkdownMode, setIsMarkdownMode] = useLocalPreference("editor_markdown_mode", false);
 
     // Setup autosave
     const isAutoSaveEnabled = !!autoSaveKey;
@@ -83,7 +83,7 @@ export default function TextEditor({
                 <MarkdownEditor
                     value={editorValue}
                     onChange={handleMarkdownChange}
-                    onSwitchToRichText={toggleMarkdownMode}
+                    onSwitchToRichText={() => setIsMarkdownMode(false)}
                     showSaveIndicator={showSaveIndicator}
                     disabled={disabled}
                     placeholder={placeholder}
@@ -94,7 +94,7 @@ export default function TextEditor({
                 <RichTextEditor
                     value={editorValue}
                     onChange={handleChange}
-                    onSwitchToMarkdown={toggleMarkdownMode}
+                    onSwitchToMarkdown={() => setIsMarkdownMode(true)}
                     showSaveIndicator={showSaveIndicator}
                     disabled={disabled}
                     placeholder={placeholder}
