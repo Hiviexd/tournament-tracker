@@ -11,8 +11,6 @@ const getTournamentStatusColor = (status: TournamentStatus): string => {
     switch (status) {
         case "supportRequestReceived":
             return "violet";
-        case "screeningOngoing":
-            return "indigo";
         case "screeningConcluded":
             return "info";
         case "reviewOngoing":

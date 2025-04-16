@@ -10,7 +10,6 @@ export type GameMode = "osu" | "taiko" | "catch" | "mania";
 
 export type TournamentStatus =
     | "supportRequestReceived"
-    | "screeningOngoing"
     | "screeningConcluded"
     | "reviewOngoing"
     | "changesRequested"

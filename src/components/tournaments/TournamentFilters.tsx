@@ -53,7 +53,6 @@ export default function TournamentFilters({ values, onChange }: IProps) {
 
     const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
-        { value: "screeningOngoing", label: "Screening Ongoing" },
         { value: "screeningConcluded", label: "Screening Concluded" },
         { value: "reviewOngoing", label: "Under Review" },
         { value: "onHold", label: "On Hold" },

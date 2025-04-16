@@ -148,7 +148,6 @@ class TournamentsController {
                                     { case: { $eq: ["$status", "onHold"] }, then: 3 },
                                     { case: { $eq: ["$status", "reviewOngoing"] }, then: 4 },
                                     { case: { $eq: ["$status", "screeningConcluded"] }, then: 5 },
-                                    { case: { $eq: ["$status", "screeningOngoing"] }, then: 6 },
                                     { case: { $eq: ["$status", "supportRequestReceived"] }, then: 6 },
                                 ],
                                 default: 7,
@@ -362,7 +361,7 @@ class TournamentsController {
         }
 
         let shouldSendOsuMessage = true;
-        const excludedStatusesOsu = ["supportRequestReceived", "screeningOngoing", "screeningConcluded", "onHold"];
+        const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (startDate) tournament.startDate = startDate;
@@ -462,7 +461,6 @@ class TournamentsController {
             // Discord
             const excludedStatusesDiscord = [
                 "supportRequestReceived",
-                "screeningOngoing",
                 "screeningConcluded",
                 "reviewOngoing",
             ];
@@ -472,7 +470,6 @@ class TournamentsController {
 
                 // Change color based on status
                 if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
-                if (status === "screeningOngoing") embedColor = webhookColors.darkBlue;
                 if (status === "screeningConcluded") embedColor = webhookColors.blue;
                 if (status === "changesRequested") embedColor = webhookColors.yellow;
                 if (status === "onHold") embedColor = webhookColors.darkPink;

@@ -13,14 +13,13 @@ interface IProps {
 
 const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color: string } } = {
     supportRequestReceived: { step: 1, color: "violet" },
-    screeningOngoing: { step: 2, color: "indigo" },
-    screeningConcluded: { step: 3, color: "info" },
-    reviewOngoing: { step: 4, color: "yellow" },
-    onHold: { step: 5, color: "pink" },
-    changesRequested: { step: 6, color: "orange" },
-    badgeApproved: { step: 7, color: "success" },
-    badgeRejected: { step: 7, color: "danger" },
-    noBadgeRequested: { step: 7, color: "gray" },
+    screeningConcluded: { step: 2, color: "info" },
+    reviewOngoing: { step: 3, color: "yellow" },
+    onHold: { step: 4, color: "pink" },
+    changesRequested: { step: 5, color: "orange" },
+    badgeApproved: { step: 6, color: "success" },
+    badgeRejected: { step: 6, color: "danger" },
+    noBadgeRequested: { step: 6, color: "gray" },
 };
 
 export default function TournamentStatus({ tournament }: IProps) {
@@ -31,7 +30,6 @@ export default function TournamentStatus({ tournament }: IProps) {
 
     const statusOptions = [
         { value: "supportRequestReceived", label: "Support Request Received" },
-        { value: "screeningOngoing", label: "Screening Ongoing", disabled: !user?.isAdmin },
         { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
         { value: "reviewOngoing", label: "Under Review" },
         { value: "onHold", label: "On Hold" },
@@ -41,7 +39,7 @@ export default function TournamentStatus({ tournament }: IProps) {
         { value: "noBadgeRequested", label: "No Badge Requested" },
     ];
 
-    const excludedStatusesOsu = ["supportRequestReceived", "screeningOngoing", "screeningConcluded", "onHold"];
+    const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
     const handleStatusSave = async () => {
         let message = "Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!";
@@ -56,7 +54,7 @@ export default function TournamentStatus({ tournament }: IProps) {
 
     const getProgressInfo = () => {
         const currentStatus = STATUS_PROGRESSION[tournament.status];
-        const totalSteps = 7;
+        const totalSteps = 6;
         const progress = (currentStatus.step / totalSteps) * 100;
 
         return {
