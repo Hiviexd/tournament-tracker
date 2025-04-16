@@ -108,8 +108,7 @@ export default function TournamentTable({ tournaments }: IProps) {
                                                     <Tooltip label="Copy Discord thread link">
                                                         <ActionIcon
                                                             variant="subtle"
-                                                            onClick={() => handleCopyThreadLink(tournament.threadId!)}
-                                                            color="success">
+                                                            onClick={() => handleCopyThreadLink(tournament.threadId!)}>
                                                             <FontAwesomeIcon icon="copy" />
                                                         </ActionIcon>
                                                     </Tooltip>
