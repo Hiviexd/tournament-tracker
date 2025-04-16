@@ -1,4 +1,4 @@
-import { Table, Group, Badge, Text, Tooltip, ScrollArea, Card } from "@mantine/core";
+import { Table, Group, Badge, Text, Tooltip, ScrollArea, Card, ActionIcon } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
@@ -10,6 +10,8 @@ import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
+import { notifications } from "@mantine/notifications";
+import config from "../../../config.json";
 
 interface IProps {
     tournaments: ITournament[];
@@ -29,6 +31,17 @@ export default function TournamentTable({ tournaments }: IProps) {
         }
     };
 
+    const handleCopyThreadLink = (threadId: string) => {
+        navigator.clipboard.writeText(
+            `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`
+        );
+        notifications.show({
+            title: "Thread Link Copied",
+            message: "Thread link copied to clipboard!",
+            color: "success",
+        });
+    };
+
     return (
         <Card shadow="sm" p="lg">
             <ScrollArea>
@@ -41,6 +54,7 @@ export default function TournamentTable({ tournaments }: IProps) {
                             <Table.Th>Host</Table.Th>
                             <Table.Th>Status</Table.Th>
                             <Table.Th>State</Table.Th>
+                            {user?.isCommittee && <Table.Th ta="center">Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -86,6 +100,25 @@ export default function TournamentTable({ tournaments }: IProps) {
                                             {tournament.isActive ? "Active" : "Archived"}
                                         </Badge>
                                     </Table.Td>
+
+                                    {user?.isCommittee && (
+                                        <Table.Td ta="center">
+                                            {tournament.threadId ? (
+                                                <Group gap={4} justify="center">
+                                                    <Tooltip label="Copy Discord thread link">
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            onClick={() => handleCopyThreadLink(tournament.threadId!)}
+                                                            color="success">
+                                                            <FontAwesomeIcon icon="copy" />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+                                                </Group>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </Table.Td>
+                                    )}
                                 </Table.Tr>
                             );
                         })}
