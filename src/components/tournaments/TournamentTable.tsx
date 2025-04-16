@@ -48,9 +48,9 @@ export default function TournamentTable({ tournaments }: IProps) {
                 <Table miw={{ base: 1200, md: 800 }}>
                     <Table.Thead>
                         <Table.Tr>
-                            <Table.Th>Name</Table.Th>
                             <Table.Th>Type</Table.Th>
                             <Table.Th>Mode</Table.Th>
+                            <Table.Th>Name</Table.Th>
                             <Table.Th>Host</Table.Th>
                             <Table.Th>Status</Table.Th>
                             <Table.Th>State</Table.Th>
@@ -63,14 +63,6 @@ export default function TournamentTable({ tournaments }: IProps) {
                             return (
                                 <Table.Tr key={tournament._id}>
                                     <Table.Td>
-                                        <Text fw={500} truncate>
-                                            <Link to={`/tournaments/${tournament._id}`}>
-                                                {_.truncate(tournament.name, { length: 45 })}
-                                            </Link>
-                                        </Text>
-                                    </Table.Td>
-
-                                    <Table.Td>
                                         <Group gap="xs">
                                             <Tooltip label={typeInfo.text}>
                                                 <Badge color={typeInfo.color} variant="filled">
@@ -82,6 +74,14 @@ export default function TournamentTable({ tournaments }: IProps) {
 
                                     <Table.Td>
                                         <GameModeIcon mode={tournament.modes} />
+                                    </Table.Td>
+
+                                    <Table.Td>
+                                        <Text fw={500} truncate>
+                                            <Link to={`/tournaments/${tournament._id}`}>
+                                                {_.truncate(tournament.name, { length: 45 })}
+                                            </Link>
+                                        </Text>
                                     </Table.Td>
 
                                     <Table.Td>

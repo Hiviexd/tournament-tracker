@@ -77,10 +77,10 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                 <Table>
                     <Table.Thead>
                         <Table.Tr>
-                            <Table.Th>Name</Table.Th>
-                            <Table.Th>Host</Table.Th>
                             <Table.Th>Type</Table.Th>
                             <Table.Th>Mode</Table.Th>
+                            <Table.Th>Name</Table.Th>
+                            <Table.Th>Host</Table.Th>
                             <Table.Th>Status</Table.Th>
                             <Table.Th>State</Table.Th>
                             <Table.Th>Thread</Table.Th>
@@ -90,16 +90,16 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                         {Array.from({ length: 10 }).map((_, i) => (
                             <Table.Tr key={i}>
                                 <Table.Td>
+                                    <Skeleton height={20} width={40} />
+                                </Table.Td>
+                                <Table.Td>
+                                    <Skeleton height={20} width={40} />
+                                </Table.Td>
+                                <Table.Td>
                                     <Skeleton height={20} width={200} />
                                 </Table.Td>
                                 <Table.Td>
                                     <Skeleton height={20} width={120} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={80} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={80} />
                                 </Table.Td>
                                 <Table.Td>
                                     <Skeleton height={20} width={100} />
