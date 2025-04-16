@@ -83,6 +83,7 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                             <Table.Th>Mode</Table.Th>
                             <Table.Th>Status</Table.Th>
                             <Table.Th>State</Table.Th>
+                            <Table.Th>Thread</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -105,6 +106,11 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                                 </Table.Td>
                                 <Table.Td>
                                     <Skeleton height={20} width={80} />
+                                </Table.Td>
+                                <Table.Td ta="center">
+                                    <Group justify="center">
+                                        <Skeleton height={20} width={20} />
+                                    </Group>
                                 </Table.Td>
                             </Table.Tr>
                         ))}
