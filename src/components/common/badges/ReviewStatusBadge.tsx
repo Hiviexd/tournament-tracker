@@ -31,7 +31,7 @@ export default function ReviewStatusBadge({ tournament, user, variant = "light" 
     if (!isAssigned()) return null;
 
     return (
-        <Badge color={needsReview() ? "orange" : "info"} variant={variant}>
+        <Badge color={needsReview() ? "orange" : "info"} variant={variant} className={needsReview() ? "pulse" : ""}>
             <FontAwesomeIcon icon={needsReview() ? "exclamation-triangle" : "check-to-slot"} />{" "}
             {needsReview() ? "Needs your review" : "Review submitted"}
         </Badge>
