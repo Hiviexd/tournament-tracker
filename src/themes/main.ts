@@ -181,5 +181,12 @@ export const theme = createTheme({
                 },
             },
         },
+        SegmentedControl: {
+            styles: {
+                root: {
+                    backgroundColor: "var(--mantine-color-primary-10)",
+                },
+            },
+        },
     },
 });
