@@ -1,10 +1,11 @@
-import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox } from "@mantine/core";
+import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox, Group, SegmentedControl, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
-import { loggedInUserAtom } from "../../store/atoms";
+import { loggedInUserAtom, tournamentViewModeAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import { useLocalPreference } from "../../hooks/useLocalPreferences";
 
 interface IProps {
     values: {
@@ -21,12 +22,21 @@ interface IProps {
 
 export default function TournamentFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+    const [viewMode, setViewMode] = useLocalPreference("tournamentViewMode", "cards");
+    const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
+
     const handleChange = (key: string, value: any) => {
         onChange({ ...values, [key]: value });
     };
 
     const handleHostSelect = (user: IUser | null) => {
         handleChange("host", user ? user.osuId.toString() : "");
+    };
+
+    const handleViewModeChange = (value: string) => {
+        const newMode = value as "cards" | "table";
+        setViewMode(newMode);
+        setGlobalViewMode(newMode);
     };
 
     const modeOptions = [
@@ -108,14 +118,28 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         data={activeOptions}
                         clearable
                     />
-                    {user?.isCommittee && (
-                        <Checkbox
-                            label="Show your all-time assigned reviews"
-                            checked={values.showAllAssignedReviews}
-                            onChange={(e) => handleChange("showAllAssignedReviews", e.currentTarget.checked)}
-                        />
-                    )}
                 </SimpleGrid>
+
+                <Group justify="space-between" align="center">
+                    <Box>
+                        {user?.isCommittee && (
+                            <Checkbox
+                                label="Show your all-time assigned reviews"
+                                checked={values.showAllAssignedReviews}
+                                onChange={(e) => handleChange("showAllAssignedReviews", e.currentTarget.checked)}
+                            />
+                        )}
+                    </Box>
+                    <SegmentedControl
+                        color="primary"
+                        value={viewMode}
+                        onChange={handleViewModeChange}
+                        data={[
+                            { label: "Cards", value: "cards" },
+                            { label: "Table", value: "table" },
+                        ]}
+                    />
+                </Group>
             </Stack>
         </Card>
     );
