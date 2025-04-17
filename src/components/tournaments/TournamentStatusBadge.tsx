@@ -24,7 +24,7 @@ const getTournamentStatusColor = (status: TournamentStatus): string => {
         case "badgeRejected":
             return "danger";
         case "noBadgeRequested":
-            return "gray";
+            return "gray.6";
         default:
             return "gray";
     }

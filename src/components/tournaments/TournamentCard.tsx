@@ -51,7 +51,7 @@ export default function TournamentCard({ tournament }: IProps) {
                     <Title order={4} style={{ wordBreak: "break-word", flex: 1 }}>
                         {tournament.name}
                     </Title>
-                    <Badge color={tournament.isActive ? "success" : "danger"} variant="light" style={{ flexShrink: 0 }}>
+                    <Badge color={tournament.isActive ? "success" : "gray"} variant="light" style={{ flexShrink: 0 }}>
                         {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
                 </Group>

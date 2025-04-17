@@ -41,7 +41,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
                             {tournament.name}
                         </Title>
                     </Stack>
-                    <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
+                    <Badge color={tournament.isActive ? "success" : "gray"} variant="light">
                         {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
                 </Group>

@@ -85,7 +85,7 @@ export default function TournamentTable({ tournaments }: IProps) {
                                     </Table.Td>
 
                                     <Table.Td>
-                                        <Badge color={tournament.isActive ? "success" : "danger"} variant="light">
+                                        <Badge color={tournament.isActive ? "success" : "gray"} variant="light">
                                             {tournament.isActive ? "Active" : "Archived"}
                                         </Badge>
                                     </Table.Td>
