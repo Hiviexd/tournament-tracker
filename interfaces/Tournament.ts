@@ -63,6 +63,7 @@ export interface ITournament extends Document {
     logs: ITournamentLog[];
     notes: IMessage[];
     winners?: IUser[];
+    enchantUrl?: string;
     createdAt: Date;
     startedReviewAt?: Date;
 

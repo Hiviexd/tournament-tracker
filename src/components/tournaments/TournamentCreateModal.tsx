@@ -82,7 +82,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                 <Stack gap="md">
                     <TextInput
                         label="Tournament Name"
-                        placeholder="Enter tournament name"
+                        placeholder="Enter tournament name..."
                         {...form.getInputProps("name")}
                         withAsterisk
                     />
@@ -113,14 +113,20 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
 
                     <TextInput
                         label="Forum URL"
-                        placeholder="Enter forum post URL"
+                        placeholder="Enter forum post URL..."
                         {...form.getInputProps("forumUrl")}
                     />
 
                     <TextInput
                         label="Banner URL"
-                        placeholder="Enter banner image URL"
+                        placeholder="Enter banner image URL..."
                         {...form.getInputProps("bannerUrl")}
+                    />
+
+                    <TextInput
+                        label="Enchant URL"
+                        placeholder="Enter enchant ticket URL..."
+                        {...form.getInputProps("enchantUrl")}
                     />
 
                     <Group grow>

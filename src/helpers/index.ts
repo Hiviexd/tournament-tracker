@@ -218,6 +218,14 @@ function isValidUrl(url: string): boolean {
     }
 }
 
+/**
+ * Checks if a link is an enchant ticket link
+ * @param link Link to check
+ */
+function isEnchantTicketLink(link: string): boolean {
+    return /^https:\/\/osu\.enchant\.com\/spa\/inbox\/ticket\/[^/]+$/.test(link);
+}
+
 export default {
     httpIsValid,
     hasRequiredPermissions,
@@ -231,4 +239,5 @@ export default {
     easingOutCubic,
     countToWord,
     isValidUrl,
+    isEnchantTicketLink,
 };

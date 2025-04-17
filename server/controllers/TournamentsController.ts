@@ -75,7 +75,7 @@ const DEFAULT_LIMIT = 20;
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
 const selectFields = (isCommittee: boolean) =>
-    isCommittee ? "" : "-reviews -assignedReviewers -notes -logs -threadId";
+    isCommittee ? "" : "-reviews -assignedReviewers -notes -logs -threadId -enchantUrl";
 
 class TournamentsController {
     /** GET tournament listing */
@@ -166,6 +166,7 @@ class TournamentsController {
                         assignedReviewers: 0,
                         notes: 0,
                         logs: 0,
+                        enchantUrl: 0,
                     },
                 },
             ])
@@ -208,7 +209,7 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl } = req.body;
+        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl } = req.body;
         const currentUser = res.locals!.user!;
 
         const host = await User.findById(hostId).orFail();
@@ -217,6 +218,10 @@ class TournamentsController {
 
         if (forumUrl && !helpers.isOsuForumLink(forumUrl)) {
             return res.json({ error: "Invalid osu! forum URL format" });
+        }
+
+        if (enchantUrl && !helpers.isEnchantTicketLink(enchantUrl)) {
+            return res.json({ error: "Invalid Enchant ticket URL format" });
         }
 
         const tournament = new Tournament({
@@ -229,6 +234,7 @@ class TournamentsController {
             startDate,
             endDate,
             bannerUrl,
+            enchantUrl,
         });
 
         await tournament.save();
@@ -273,7 +279,7 @@ class TournamentsController {
                     },
                     {
                         name: "Forum URL",
-                        value: tournament.forumUrl ?? "*None*",
+                        value: tournament.forumUrl.length ? tournament.forumUrl : "*None*",
                     },
                 ],
                 image: {
@@ -350,7 +356,7 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners } = req.body;
+        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners, enchantUrl } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
@@ -375,6 +381,7 @@ class TournamentsController {
         const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
         if (forumUrl) tournament.forumUrl = forumUrl;
+        if (enchantUrl) tournament.enchantUrl = enchantUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
         if (status) {
@@ -403,6 +410,17 @@ class TournamentsController {
         if (forumUrl) {
             await TournamentService.addLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
             await LogService.generate(currentUser._id, `Updated forum URL for **${tournament.name}**`, "tournament");
+        }
+
+        if (enchantUrl) {
+            await TournamentService.addLog(
+                tournament,
+                currentUser,
+                `Updated Enchant ticket URL: **${enchantUrl}**`,
+                "link"
+            );
+            await LogService.generate(currentUser._id, `Updated Enchant ticket URL for **${tournament.name}**`, "tournament"
+            );
         }
 
         if (startDate && endDate) {

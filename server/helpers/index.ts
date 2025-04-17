@@ -78,11 +78,18 @@ function isNumeric(str: string): boolean {
 
 /**
  * Checks if a link is an osu! forum topic link
- *
  * @param {string} link
  */
 function isOsuForumLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+}
+
+/**
+ * Checks if a link is an enchant ticket link
+ * @param {string} link
+ */
+function isEnchantTicketLink(link: string): boolean {
+    return /^https:\/\/osu\.enchant\.com\/spa\/inbox\/ticket\/[^/]+$/.test(link);
 }
 
 /**
@@ -263,6 +270,7 @@ export default {
     isValidMongoId,
     isNumeric,
     isOsuForumLink,
+    isEnchantTicketLink,
     truncateFilename,
     getAttachmentsField,
     validateOsuProfileLink,

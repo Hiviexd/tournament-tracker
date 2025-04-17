@@ -6,6 +6,7 @@ import TournamentStatus from "./info/TournamentStatus";
 import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
+import TournamentEnchantUrl from "./info/TournamentEnchantUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import TournamentBanner from "./info/TournamentBanner";
 import TournamentWinners from "./info/TournamentWinners";
@@ -71,6 +72,7 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                     <TournamentBanner tournament={tournament} />
                     <TournamentDates tournament={tournament} />
                     <TournamentForumUrl tournament={tournament} />
+                    {(user?.isCommittee || user?.isAdmin) && <TournamentEnchantUrl tournament={tournament} />}
                     {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
                     <TournamentWinners tournament={tournament} />
                 </SimpleGrid>
