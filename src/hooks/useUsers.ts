@@ -13,7 +13,7 @@ import {
     getReviewStats,
     updateEmail,
 } from "../api/users";
-import { handleMutationResponse } from "../api/helpers";
+import utils from "../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
 import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interfaces/User";
@@ -32,7 +32,7 @@ export function useCreateUser() {
     return useMutation({
         mutationFn: async (userData: any) => {
             const response = await createUser(userData);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -64,7 +64,7 @@ export function useOsuUserInfo(userInput: string) {
             const response = await getOsuUserInfo(userInput);
 
             if (response && "error" in response) {
-                return handleMutationResponse(response);
+                return utils.handleMutationResponse(response);
             }
 
             return response;
@@ -81,7 +81,7 @@ export function useToggleReviewerStatus(userId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleReviewerStatus(userId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
@@ -104,7 +104,7 @@ export function useUpdateUserGroups(userId: string) {
     return useMutation({
         mutationFn: async (data: UpdateUserGroupsRequest) => {
             const response = await updateUserGroup(data);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             // Invalidate relevant queries
@@ -128,7 +128,7 @@ export function useUpdateUserBadge(userId: string) {
     return useMutation({
         mutationFn: async (data: UpdateBadgeRequest) => {
             const response = await updateUserBadge(data);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -151,7 +151,7 @@ export function useSyncUser(userId: string) {
     return useMutation({
         mutationFn: async (userId: string) => {
             const response = await syncUser(userId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             // Invalidate all relevant queries
@@ -174,7 +174,7 @@ export function useUpdateDiscordId(userId: string) {
     return useMutation({
         mutationFn: async (discordId: string) => {
             const response = await updateDiscordId(userId, discordId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
@@ -197,7 +197,7 @@ export function useUpdateEmail(userId: string) {
     return useMutation({
         mutationFn: async (email: string) => {
             const response = await updateEmail(userId, email);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });

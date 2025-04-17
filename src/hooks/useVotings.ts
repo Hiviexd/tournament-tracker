@@ -9,7 +9,7 @@ import {
     deleteVoting,
     toggleVotingPublic,
 } from "../api/votings";
-import { handleMutationResponse } from "../api/helpers";
+import utils from "../../utils";
 import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
 import { type VoteType } from "../../interfaces/Vote";
 
@@ -33,7 +33,7 @@ export function useCreateVoting() {
     return useMutation({
         mutationFn: async (votingData: VotingFormData) => {
             const response = await createVoting(votingData);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });
@@ -47,7 +47,7 @@ export function useSubmitVote(votingId: string) {
     return useMutation({
         mutationFn: async (voteData: { data: VoteType; comment?: string }) => {
             const response = await submitVote(votingId, voteData);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -61,7 +61,7 @@ export function useToggleVotingStatus(votingId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleVotingStatus(votingId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -75,7 +75,7 @@ export function useUpdateVoting(votingId: string) {
     return useMutation({
         mutationFn: async (votingData: Partial<IVoting>) => {
             const response = await updateVoting(votingId, votingData);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
@@ -90,7 +90,7 @@ export function useDeleteVoting() {
     return useMutation({
         mutationFn: async (votingId: string) => {
             const response = await deleteVoting(votingId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });
@@ -104,7 +104,7 @@ export function useToggleVotingPublic(votingId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleVotingPublic(votingId);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });

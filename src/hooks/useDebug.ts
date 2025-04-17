@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession, updateSession, UpdateSessionBody } from "../api/debug";
-import { handleMutationResponse } from "../api/helpers";
+import utils from "../../utils";
+
 export function useSession() {
     return useQuery({
         queryKey: ["session"],
@@ -14,7 +15,7 @@ export function useUpdateSession(data: UpdateSessionBody) {
     return useMutation({
         mutationFn: async () => {
             const response = await updateSession(data);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["session"] });

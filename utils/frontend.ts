@@ -1,6 +1,38 @@
 import { IUser } from "../interfaces/User";
 import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
+import { notifications } from "@mantine/notifications";
+
+export interface ApiResponse<T = any> {
+    data?: T;
+    message?: string;
+    error?: string;
+}
+
+/**
+ * Handle a mutation response and emit a notification
+ * @param response The response from the mutation
+ * @returns The data from the response
+ */
+export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
+    const successMessage = response.message || "Action successful!";
+    if (response.error) {
+        notifications.show({
+            title: "Error",
+            message: response.error,
+            color: "red",
+        });
+        throw new Error(response.error);
+    }
+
+    notifications.show({
+        title: "Success",
+        message: successMessage,
+        color: "green",
+    });
+
+    return response.data || response as unknown as T;
+};
 
 /**
  * Check if a http request is valid (doesn't contain an error)

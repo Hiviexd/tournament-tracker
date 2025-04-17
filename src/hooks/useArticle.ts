@@ -7,7 +7,7 @@ import {
     type CreateArticleData,
     deleteArticle,
 } from "../api/articles";
-import { handleMutationResponse } from "../api/helpers";
+import utils from "../../utils";
 
 export function useArticle(slug: string) {
     return useQuery({
@@ -29,7 +29,7 @@ export function useCreateArticle() {
     return useMutation({
         mutationFn: async (data: CreateArticleData) => {
             const response = await createArticle(data);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["documentation"] });
@@ -43,7 +43,7 @@ export function useEditArticle(slug: string) {
     return useMutation({
         mutationFn: async (content: string) => {
             const response = await editArticle(slug, content);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["article", slug] });
@@ -57,7 +57,7 @@ export function useDeleteArticle(slug: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await deleteArticle(slug);
-            return handleMutationResponse(response);
+            return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["article", slug] });
