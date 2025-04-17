@@ -22,7 +22,7 @@ interface IProps {
 
 export default function TournamentFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const [viewMode, setViewMode] = useLocalPreference("tournamentViewMode", "cards");
+    const [viewMode, setViewMode] = useLocalPreference("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
 
     const handleChange = (key: string, value: any) => {
