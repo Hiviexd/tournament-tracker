@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
-import { TournamentQueryParams, TournamentType, TournamentStatus, GameMode } from "../../interfaces/Tournament";
+import { TournamentQueryParams, TournamentType, TournamentStatus, GameMode, ITournament } from "../../interfaces/Tournament";
 import { IUser, UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
 import UploadService from "../services/UploadService";
@@ -74,7 +74,8 @@ const DEFAULT_LIMIT = 20;
 
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
-const selectFields = (isCommittee: boolean) => (isCommittee ? "" : "-reviews -assignedReviewers -notes -logs");
+const selectFields = (isCommittee: boolean) =>
+    isCommittee ? "" : "-reviews -assignedReviewers -notes -logs -threadId";
 
 class TournamentsController {
     /** GET tournament listing */
@@ -98,14 +99,6 @@ class TournamentsController {
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
-        const isCommittee = res.locals!.user?.isCommittee ?? false;
-
-        const populationFilter = [
-            { path: "reviews", select: false },
-            { path: "assignedReviewers", select: false },
-            { path: "notes", select: false },
-            { path: "logs", select: false },
-        ];
 
         const [tournaments, total] = await Promise.all([
             Tournament.aggregate([
@@ -165,13 +158,31 @@ class TournamentsController {
                 },
                 { $skip: skip },
                 { $limit: DEFAULT_LIMIT },
-                { $project: { statusOrder: 0, needsUserReview: 0 } }, // Remove helper fields
+                {
+                    $project: {
+                        statusOrder: 0,
+                        needsUserReview: 0,
+                        reviews: 0,
+                        assignedReviewers: 0,
+                        notes: 0,
+                        logs: 0,
+                    },
+                },
             ])
                 .exec()
-                .then((tournaments) =>
-                    Tournament.populate(tournaments, [...defaultPopulate, ...(isCommittee ? [] : populationFilter)])
+                .then((tournaments: ITournament[]) =>
+                    Tournament.populate(tournaments, [
+                        {
+                            path: "host",
+                            select: "username osuId groups",
+                        },
+                        {
+                            path: "winners",
+                            select: "username osuId groups",
+                        },
+                    ])
                 )
-                .then((tournaments) => tournaments.map((t) => Tournament.hydrate(t).toJSON())),
+                .then((tournaments: ITournament[]) => tournaments.map((t) => Tournament.hydrate(t).toJSON())),
             Tournament.countDocuments(query),
         ]);
 
@@ -459,11 +470,7 @@ class TournamentsController {
             }
 
             // Discord
-            const excludedStatusesDiscord = [
-                "supportRequestReceived",
-                "screeningConcluded",
-                "reviewOngoing",
-            ];
+            const excludedStatusesDiscord = ["supportRequestReceived", "screeningConcluded", "reviewOngoing"];
 
             if (!excludedStatusesDiscord.includes(status) || (status === "reviewOngoing" && oldStatus === "onHold")) {
                 let embedColor = webhookColors.orange;
