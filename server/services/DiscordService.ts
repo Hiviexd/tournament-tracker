@@ -56,7 +56,7 @@ class DiscordService {
             });
             await utils.delay(1000);
         } catch (error) {
-            await this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook, threadId);
         }
     }
 
@@ -91,7 +91,7 @@ class DiscordService {
             });
             await utils.delay(1000);
         } catch (error) {
-            await this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook, threadId);
         }
     }
 
@@ -126,14 +126,15 @@ class DiscordService {
             });
             await utils.delay(1000);
         } catch (error) {
-            await this.sendErrorWebhook(error, { message, embeds }, webhook);
+            await this.sendErrorWebhook(error, { message, embeds }, webhook, threadId);
         }
     }
 
     private async sendErrorWebhook(
         error: any,
         embedInfo: { message?: string; embeds: IDiscordEmbed[] },
-        webhookType?: string
+        webhookType?: string,
+        threadId?: string
     ) {
         const url = this.getWebhookLink("dev");
         const { message, embeds } = embedInfo;
@@ -154,8 +155,20 @@ class DiscordService {
                 value: `\`${webhookType || "main"}\``,
             },
             {
+                name: "thread",
+                value: `\`${threadId || "none"}\``,
+            },
+            {
                 name: "message",
                 value: utils.shorten(`\`\`\`${message}\`\`\``, 1024),
+            },
+            {
+                name: "code",
+                value: utils.shorten(`\`\`\`${error.code}\`\`\``, 1024),
+            },
+            {
+                name: "data",
+                value: utils.shorten(`\`\`\`${JSON.stringify(error.response?.data?.message, null, 2)}\`\`\``, 1024),
             },
             {
                 name: "embeds",
