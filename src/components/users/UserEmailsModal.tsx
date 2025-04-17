@@ -2,7 +2,7 @@ import { Modal, Stack, Text, Table, ActionIcon, Group } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { notifications } from "@mantine/notifications";
+import utils from "../../../utils";
 
 interface IProps {
     opened: boolean;
@@ -17,13 +17,8 @@ export default function UserEmailsModal({ opened, onClose }: IProps) {
     });
 
     const handleCopyEmail = (email: string | undefined) => {
-        if (!email) return;
-        navigator.clipboard.writeText(email);
-        notifications.show({
-            title: "Email Copied",
-            message: "Email copied to clipboard!",
-            color: "success",
-        });
+        if (!email || !email.length) return;
+        utils.copyToClipboard(email);
     };
 
     const rows = sortedUsers?.map((user) => (

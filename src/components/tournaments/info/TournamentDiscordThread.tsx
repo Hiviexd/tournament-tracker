@@ -6,7 +6,7 @@ import { useUpdateThreadId } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import config from "../../../../config.json";
-import { notifications } from "@mantine/notifications";
+import utils from "../../../../utils";
 
 interface IProps {
     tournament: ITournament;
@@ -21,17 +21,6 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
     const handleUpdateThreadId = async () => {
         await updateThreadIdMutation.mutateAsync(threadId ?? "");
         setIsEditingThreadId(false);
-    };
-
-    const handleCopyThreadLink = () => {
-        navigator.clipboard.writeText(
-            `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
-        );
-        notifications.show({
-            title: "Thread Link Copied",
-            message: "Thread link copied to clipboard!",
-            color: "success",
-        });
     };
 
     if (!user?.isCommittee && !user?.isAdmin) return null;
@@ -67,7 +56,11 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                         {tournament.threadId?.length && (
                             <ActionIcon
                                 variant="subtle"
-                                onClick={handleCopyThreadLink}
+                                onClick={() =>
+                                    utils.copyToClipboard(
+                                        `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
+                                    )
+                                }
                                 color="success"
                                 title="Copy thread link">
                                 <FontAwesomeIcon icon="copy" />

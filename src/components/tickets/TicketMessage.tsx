@@ -7,7 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import DateBadge from "../common/badges/DateBadge";
 import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
-import { notifications } from "@mantine/notifications";
+import utils from "../../../utils";
 
 interface IProps {
     ticket?: ITicket;
@@ -16,15 +16,6 @@ interface IProps {
 }
 
 export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
-    const handleCopyMessage = () => {
-        navigator.clipboard.writeText(message.content);
-        notifications.show({
-            title: "Message Copied",
-            message: "Message copied to clipboard!",
-            color: "success",
-        });
-    };
-
     const getUserDisplayProps = () => {
         if (message.isCommittee && !showTrueAuthor) {
             return {
@@ -59,7 +50,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                             </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item leftSection={<FontAwesomeIcon icon="copy" />} onClick={handleCopyMessage}>
+                            <Menu.Item leftSection={<FontAwesomeIcon icon="copy" />} onClick={() => utils.copyToClipboard(message.content)}>
                                 Copy Message
                             </Menu.Item>
                         </Menu.Dropdown>

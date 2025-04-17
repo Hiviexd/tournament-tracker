@@ -35,6 +35,19 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
 };
 
 /**
+ * Copy text to clipboard and emit a notification
+ * @param text The text to copy
+ */
+export const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    notifications.show({
+        title: "Success",
+        message: "Copied to clipboard!",
+        color: "success",
+    });
+};
+
+/**
  * Check if a http request is valid (doesn't contain an error)
  */
 export function httpIsValid(response) {

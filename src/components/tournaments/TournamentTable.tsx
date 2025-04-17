@@ -10,8 +10,8 @@ import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
-import { notifications } from "@mantine/notifications";
 import config from "../../../config.json";
+import utils from "../../../utils";
 
 interface IProps {
     tournaments: ITournament[];
@@ -29,17 +29,6 @@ export default function TournamentTable({ tournaments }: IProps) {
             default:
                 return { icon: "question", text: "Unknown", color: "gray" };
         }
-    };
-
-    const handleCopyThreadLink = (threadId: string) => {
-        navigator.clipboard.writeText(
-            `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`
-        );
-        notifications.show({
-            title: "Thread Link Copied",
-            message: "Thread link copied to clipboard!",
-            color: "success",
-        });
     };
 
     return (
@@ -108,7 +97,11 @@ export default function TournamentTable({ tournaments }: IProps) {
                                                     <Tooltip label="Copy Discord thread link">
                                                         <ActionIcon
                                                             variant="subtle"
-                                                            onClick={() => handleCopyThreadLink(tournament.threadId!)}>
+                                                            onClick={() =>
+                                                                utils.copyToClipboard(
+                                                                    `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
+                                                                )
+                                                            }>
                                                             <FontAwesomeIcon icon="copy" />
                                                         </ActionIcon>
                                                     </Tooltip>

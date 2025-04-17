@@ -9,6 +9,7 @@ import UserSearch, { UserSearchRef } from "../../common/UserSearch";
 import UserLink from "../../common/UserLink";
 import { notifications } from "@mantine/notifications";
 import { useEditTournament } from "../../../hooks/useTournaments";
+import utils from "../../../../utils";
 
 interface IProps {
     tournament: ITournament;
@@ -47,12 +48,7 @@ export default function TournamentWinners({ tournament }: IProps) {
 
     const handleCopyAllUserIds = () => {
         const userIds = winners.map((winner) => winner.osuId).join(",");
-        navigator.clipboard.writeText(userIds);
-        notifications.show({
-            title: "User IDs copied",
-            message: "All winner IDs copied to clipboard",
-            color: "success",
-        });
+        utils.copyToClipboard(userIds);
     };
 
     return (

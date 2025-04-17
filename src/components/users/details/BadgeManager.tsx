@@ -3,7 +3,6 @@ import { Group, Stack, Text, ActionIcon, Image, Card, Button } from "@mantine/co
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IUser } from "../../../../interfaces/User";
 import { useUpdateUserBadge } from "../../../hooks/useUsers";
-import { notifications } from "@mantine/notifications";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import utils from "../../../../utils";
@@ -33,13 +32,7 @@ export default function BadgeManager({ user, committee }: IProps) {
 
     const handleCopyCommand = () => {
         const commandString = utils.generateBadgeCommand(user.osuId, eligibleBadgeYears, user.badgeValue, committee);
-
-        navigator.clipboard.writeText(commandString);
-        notifications.show({
-            title: "Command Copied",
-            message: "Badge command copied to clipboard!",
-            color: "success",
-        });
+        utils.copyToClipboard(commandString);
     };
 
     const NoBadgeCard = () => (
