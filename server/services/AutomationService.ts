@@ -7,8 +7,7 @@ import config from "../../config.json";
 import DiscordService from "./DiscordService";
 import webhookColors from "../constants/webhookColors";
 import VotingService from "./VotingService";
-import { styles } from "../helpers/consoleStyles";
-import helpers from "../helpers/index";
+import utils from "../../utils";
 import User from "../models/userModel";
 import LogService from "./LogService";
 import { IVoting } from "../../interfaces/Voting";
@@ -49,11 +48,11 @@ class AutomationService {
         this.checkBadgeUpdatesJob.start();
         this.checkOverdueReviewsJob.start();
 
-        console.log(styles("✓ Automation service started!", ["green", "bold", "underline"]));
+        console.log(utils.consoleStyles("✓ Automation service started!", ["green", "bold", "underline"]));
 
         // Run immediately for testing
         if (process.env.AUTOMATION_DEBUG === "true") {
-            console.log(styles("Running automation checks immediately...", ["yellow", "bold"]));
+            console.log(utils.consoleStyles("Running automation checks immediately...", ["yellow", "bold"]));
             this.checkConcludableVotings();
             this.checkVotings();
             this.checkStaleTickets();
@@ -114,7 +113,7 @@ class AutomationService {
                             { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
                             {
                                 name: "Deadline",
-                                value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+                                value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
                                     voting.deadline,
                                     "dateTime"
                                 )})`,
@@ -150,7 +149,7 @@ class AutomationService {
                                 { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
                                 {
                                     name: "Deadline",
-                                    value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+                                    value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
                                         voting.deadline,
                                         "dateTime"
                                     )})`,
@@ -180,7 +179,7 @@ class AutomationService {
                             { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
                             {
                                 name: "Deadline",
-                                value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+                                value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
                                     voting.deadline,
                                     "dateTime"
                                 )})`,
@@ -300,7 +299,7 @@ class AutomationService {
                                 },
                                 {
                                     name: "Last Response",
-                                    value: helpers.discordTimestamp(ticket.lastResponseAt),
+                                    value: utils.discordTimestamp(ticket.lastResponseAt),
                                     inline: false,
                                 },
                             ],
@@ -323,7 +322,7 @@ class AutomationService {
                                 { name: "Author", value: ticket.author.username, inline: true },
                                 {
                                     name: "Last Response",
-                                    value: helpers.discordTimestamp(ticket.lastResponseAt),
+                                    value: utils.discordTimestamp(ticket.lastResponseAt),
                                     inline: false,
                                 },
                             ],
@@ -363,8 +362,8 @@ class AutomationService {
         const usersToPing = [hivie.discordId, chillier.discordId];
 
         for (const user of activeCommitteeMembers) {
-            const tcYears = helpers.getYearsFromDays(user.tcDuration);
-            const ccYears = helpers.getYearsFromDays(user.ccDuration);
+            const tcYears = utils.getYearsFromDays(user.tcDuration);
+            const ccYears = utils.getYearsFromDays(user.ccDuration);
 
             // Skip if badge is up to date
             if (user.groups.includes("tc") && user.badgeValue === tcYears) continue;
@@ -372,7 +371,7 @@ class AutomationService {
 
             const committee = user.groups.includes("tc") ? "tc" : "cc";
             const years = committee === "tc" ? tcYears : ccYears;
-            const commandString = helpers.generateBadgeCommand(user.osuId, years, user.badgeValue, committee);
+            const commandString = utils.generateBadgeCommand(user.osuId, years, user.badgeValue, committee);
 
             badgeUpdates.push(user);
 
@@ -493,9 +492,9 @@ class AutomationService {
                                 },
                                 {
                                     name: "Review Started",
-                                    value: `${helpers.discordTimestamp(
+                                    value: `${utils.discordTimestamp(
                                         tournament.startedReviewAt
-                                    )} (${helpers.discordTimestamp(tournament.startedReviewAt, "dateTime")})`,
+                                    )} (${utils.discordTimestamp(tournament.startedReviewAt, "dateTime")})`,
                                 },
                             ],
                         },

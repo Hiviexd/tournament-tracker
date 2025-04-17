@@ -1,6 +1,6 @@
 import { createTheme, MantineColorsTuple } from "@mantine/core";
 import { generateColors } from "@mantine/colors-generator";
-import helpers from "../helpers";
+import utils from "../../utils";
 import { DEFAULT_HUE } from "../constants";
 
 const danger: MantineColorsTuple = [
@@ -59,13 +59,13 @@ const hue = parseInt(localStorage.getItem("hue") || DEFAULT_HUE, 10);
 const isGreyscale = localStorage.getItem("greyscale") === "true";
 
 const generateTheme = (hue: number, isGreyscale: boolean) => {
-    const primaryHexColor = isGreyscale ? "#000000" : helpers.hslToHex(hue, 0.5, 0.5);
+    const primaryHexColor = isGreyscale ? "#000000" : utils.hslToHex(hue, 0.5, 0.5);
 
     const theme = generateColors(primaryHexColor) as unknown as string[];
 
     // append the hsl(X, 10%, 15%) and hsl(X, 10%, 10%) versions manually
-    const dark = isGreyscale ? "#262626" : helpers.hslToHex(hue, 0.1, 0.15);
-    const darker = isGreyscale ? "#1a1a1a" : helpers.hslToHex(hue, 0.1, 0.1);
+    const dark = isGreyscale ? "#262626" : utils.hslToHex(hue, 0.1, 0.15);
+    const darker = isGreyscale ? "#1a1a1a" : utils.hslToHex(hue, 0.1, 0.1);
     theme.push(dark);
     theme.push(darker);
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
-import helpers from "../../../helpers";
+import utils from "../../../../utils";
 import { notifications } from "@mantine/notifications";
 
 interface IProps {
@@ -19,7 +19,7 @@ export default function TournamentEnchantUrl({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament._id);
 
     const handleEnchantUrlSave = async () => {
-        if (!helpers.isEnchantTicketLink(enchantUrl)) {
+        if (!utils.isEnchantTicketLink(enchantUrl)) {
             notifications.show({
                 title: "Invalid URL",
                 message: "Please enter a valid Enchant ticket URL",

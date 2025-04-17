@@ -22,7 +22,7 @@ import { IBeatmap } from "../../interfaces/OsuApi";
 import BeatmapCard from "../components/compliance/BeatmapCard";
 import ResultSection from "../components/compliance/ResultSection";
 import MarkdownText from "../components/common/MarkdownText";
-import helpers from "../helpers";
+import utils from "../../utils";
 
 interface IBeatmapWithNotes extends IBeatmap {
     notes: string | null;
@@ -72,14 +72,14 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                     <Alert
                         color="danger"
                         icon={<FontAwesomeIcon icon="times-circle" />}
-                        title={`Found ${helpers.countToWord(complianceData.disallowed.length, "disallowed beatmap")}!`}
+                        title={`Found ${utils.countToWord(complianceData.disallowed.length, "disallowed beatmap")}!`}
                     />
                 )}
                 {complianceData.partial.length > 0 && (
                     <Alert
                         color="warning"
                         icon={<FontAwesomeIcon icon="exclamation-circle" />}
-                        title={`Found ${helpers.countToWord(complianceData.partial.length, "partially disallowed beatmap")}!`}
+                        title={`Found ${utils.countToWord(complianceData.partial.length, "partially disallowed beatmap")}!`}
                     />
                 )}
             </Stack>

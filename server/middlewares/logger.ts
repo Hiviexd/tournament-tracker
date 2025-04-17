@@ -1,6 +1,7 @@
 import morgan from "morgan";
 import moment from "moment";
-import { styles, type StyleName } from "../helpers/consoleStyles";
+import utils from "../../utils";
+import { StyleName } from "../../utils/backend";
 
 morgan.token("time", () => moment().format("HH:mm:ss.SSS"));
 
@@ -9,7 +10,7 @@ morgan.token("status-colored", (req, res) => {
     const style: StyleName[] =
         status >= 500 ? ["red"] : status >= 400 ? ["yellow"] : status >= 300 ? ["cyan"] : ["green"];
 
-    return styles(status.toString(), style);
+    return utils.consoleStyles(status.toString(), style);
 });
 
 morgan.token("method-colored", (req) => {
@@ -25,11 +26,11 @@ morgan.token("method-colored", (req) => {
                         ? ["red"]
                         : ["dim"];
 
-    return styles(method, style);
+    return utils.consoleStyles(method, style);
 });
 
 export const logger = morgan(
-    `${styles(":time", ["dim"])} -- :method-colored ${styles(":url", ["yellow", "bold"])} :status-colored ${styles(
+    `${utils.consoleStyles(":time", ["dim"])} -- :method-colored ${utils.consoleStyles(":url", ["yellow", "bold"])} :status-colored ${utils.consoleStyles(
         ":response-time ms",
         ["magenta"]
     )}`

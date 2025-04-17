@@ -6,7 +6,7 @@ import useLoggedInUser from "../hooks/useLoggedInUser";
 import routes from "./routes.config";
 import Layout from "./Layout";
 import Loading from "../components/common/Loading";
-import helpers from "../helpers";
+import utils from "../../utils";
 
 export default function AuthRouter() {
     const { data: user, isLoading } = useLoggedInUser();
@@ -34,7 +34,7 @@ export default function AuthRouter() {
 
     // Filter routes based on user permissions
     const authorizedRoutes = routes.filter(
-        (route) => !route.permissions?.length || helpers.hasRequiredPermissions(loggedInUser, route.permissions)
+        (route) => !route.permissions?.length || utils.hasRequiredPermissions(loggedInUser, route.permissions)
     );
 
     return (

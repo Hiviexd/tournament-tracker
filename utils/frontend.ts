@@ -1,12 +1,11 @@
-import { IUser } from "@interfaces/User";
-import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "@interfaces/Vote";
-import { IVoting } from "@interfaces/Voting";
-import moment from "moment";
+import { IUser } from "../interfaces/User";
+import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "../interfaces/Vote";
+import { IVoting } from "../interfaces/Voting";
 
 /**
  * Check if a http request is valid (doesn't contain an error)
  */
-function httpIsValid(response) {
+export function httpIsValid(response) {
     return response && response.error === undefined;
 }
 
@@ -15,7 +14,7 @@ function httpIsValid(response) {
  * @param user The user object
  * @param permissions Array of permissions required to view the component
  */
-function hasRequiredPermissions(user: IUser | null, permissions: string[]): boolean {
+export function hasRequiredPermissions(user: IUser | null, permissions: string[]): boolean {
     // No permissions required
     if (!permissions.length) return true;
 
@@ -39,7 +38,7 @@ function hasRequiredPermissions(user: IUser | null, permissions: string[]): bool
 /**
  * Convert a hex color to HSL
  */
-function hexToHsl(hex: string): [number, number, number] {
+export function hexToHsl(hex: string): [number, number, number] {
     // Remove # if present
     hex = hex.replace("#", "");
 
@@ -84,7 +83,7 @@ function hexToHsl(hex: string): [number, number, number] {
  * @param s Saturation (between 0 and 1)
  * @param l Lightness (between 0 and 1)
  */
-function hslToHex(h: number, s: number, l: number): string {
+export function hslToHex(h: number, s: number, l: number): string {
     h /= 360;
 
     let r, g, b;
@@ -117,16 +116,7 @@ function hslToHex(h: number, s: number, l: number): string {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-/**
- * Checks if a link is an osu! forum topic link
- *
- * @param {string} link
- */
-function isOsuForumLink(link: string): boolean {
-    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
-}
-
-function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType {
+export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType {
     if (userVote) {
         return userVote.data;
     }
@@ -148,31 +138,11 @@ function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType {
 }
 
 /**
- * Get the number of years from a number of days
- * @param days Number of days
- */
-function getYearsFromDays(days: number) {
-    const duration = moment.duration(days, "days");
-    return Math.floor(duration.asYears());
-}
-
-function generateBadgeCommand(osuId: number, years: number, badgeValue: number, committee: string) {
-    const description = `Longstanding contribution to the ${committee === "tc" ? "Tournament" : "Contest"} Committee`;
-    const wikiLink = "https://osu.ppy.sh/wiki/en/People/Tournament_Committee";
-    const durationString = years > 1 ? `${years} years` : "1 year";
-    const replaceOption = badgeValue > 0 ? `--replace tcomm-${badgeValue}y.png` : "";
-
-    const command = `.add-badge ${osuId} tcomm-${years}y.png "${description} - ${durationString}" ${wikiLink} ${replaceOption}`;
-
-    return command.trim();
-}
-
-/**
  * OutBounce easing function - replicates osu!stable's OutBounce easing
  * @param t Progress (0-1)
  * @returns Eased value
  */
-function easingOutBounce(t: number): number {
+export function easingOutBounce(t: number): number {
     const n1 = 7.5625;
     const d1 = 2.75;
 
@@ -192,52 +162,6 @@ function easingOutBounce(t: number): number {
  * @param t Progress (0-1)
  * @returns Eased value
  */
-function easingOutCubic(t: number): number {
+export function easingOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
 }
-
-/**
- * Appends a count to a word and pluralizes it if necessary
- * @param count Count of the word
- * @param word Word to append the count to
- */
-function countToWord(count: number, word: string) {
-    return count === 1 ? `${count} ${word}` : `${count} ${word}s`;
-}
-
-/**
- * Checks if a URL is valid
- * @param url URL to check
- */
-function isValidUrl(url: string): boolean {
-    try {
-        new URL(url);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-/**
- * Checks if a link is an enchant ticket link
- * @param link Link to check
- */
-function isEnchantTicketLink(link: string): boolean {
-    return /^https:\/\/osu\.enchant\.com\/spa\/inbox\/ticket\/[^/]+$/.test(link);
-}
-
-export default {
-    httpIsValid,
-    hasRequiredPermissions,
-    hexToHsl,
-    hslToHex,
-    isOsuForumLink,
-    getInitialVoteData,
-    getYearsFromDays,
-    generateBadgeCommand,
-    easingOutBounce,
-    easingOutCubic,
-    countToWord,
-    isValidUrl,
-    isEnchantTicketLink,
-};

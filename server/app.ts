@@ -7,7 +7,7 @@ import config from "../config.json";
 import "express-async-errors";
 import { logger } from "./middlewares/logger";
 import path from "path";
-import { styles } from "./helpers/consoleStyles";
+import utils from "../utils";
 import AutomationService from "./services/AutomationService";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
@@ -52,9 +52,12 @@ mongoose.connect(config.connection, {
 });
 const database = mongoose.connection;
 
-database.on("error", console.error.bind(console, styles("✗ Database connection error", ["red", "underline"])));
+database.on(
+    "error",
+    console.error.bind(console, utils.consoleStyles("✗ Database connection error", ["red", "underline"]))
+);
 database.once("open", function () {
-    console.log(styles("✓ Database connected", ["green", "bold", "underline"]));
+    console.log(utils.consoleStyles("✓ Database connected", ["green", "bold", "underline"]));
 });
 
 app.use(
@@ -143,11 +146,15 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || "3000";
 const environmentString = process.env.NODE_ENV || "⚠ Unknown";
 const environmentStyled = process.env.NODE_ENV
-    ? styles(process.env.NODE_ENV, ["yellow", "underline"])
-    : styles("⚠ Unknown", ["orange", "underline"]);
+    ? utils.consoleStyles(process.env.NODE_ENV, ["yellow", "underline"])
+    : utils.consoleStyles("⚠ Unknown", ["orange", "underline"]);
 
 const mode =
-    process.env.AUTOMATION_DEBUG === "true" ? "Auto-start Automation Jobs" : process.env.MIGRATION === "true" ? "Run Migrations" : null;
+    process.env.AUTOMATION_DEBUG === "true"
+        ? "Auto-start Automation Jobs"
+        : process.env.MIGRATION === "true"
+            ? "Run Migrations"
+            : null;
 
 app.set("port", port);
 
@@ -156,12 +163,23 @@ import MigrationService from "./services/MigrationService";
 
 app.listen(port, () => {
     console.log("┌──────────────────────────────────────────────────────────┐");
-    console.log(`│ ${styles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
-    console.log(`│   ${styles("Port:", ["dim"])} ${styles(port, ["cyan"])}${" ".repeat(49 - port.length)}│`);
+    console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
     console.log(
-        `│   ${styles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(42 - environmentString.length)}│`
+        `│   ${utils.consoleStyles("Port:", ["dim"])} ${utils.consoleStyles(port, ["cyan"])}${" ".repeat(
+            49 - port.length
+        )}│`
     );
-    if (mode) console.log(`│   ${styles("Mode:", ["dim"])} ${styles(mode, ["orange", "bold"])}${" ".repeat(49 - mode.length)}│`);
+    console.log(
+        `│   ${utils.consoleStyles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(
+            42 - environmentString.length
+        )}│`
+    );
+    if (mode)
+        console.log(
+            `│   ${utils.consoleStyles("Mode:", ["dim"])} ${utils.consoleStyles(mode, ["orange", "bold"])}${" ".repeat(
+                49 - mode.length
+            )}│`
+        );
     console.log("└──────────────────────────────────────────────────────────┘");
 
     // Start automation service

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useCallback, useState, useEffect } from "react";
 import { routes } from "../../../base/header.config";
-import helpers from "../../../helpers";
+import utils from "../../../../utils";
 import { IUser } from "../../../../interfaces/User";
 
 interface IProps {
@@ -38,11 +38,11 @@ export default function MainNavigation({ user }: IProps) {
     }, [getSelectedRoute]);
 
     const visibleRoutes = routes
-        .filter((route) => helpers.hasRequiredPermissions(user, route.permissions))
+        .filter((route) => utils.hasRequiredPermissions(user, route.permissions))
         .map((route) => ({
             ...route,
             links: route.links?.filter((link) =>
-                helpers.hasRequiredPermissions(user, link.permissions)
+                utils.hasRequiredPermissions(user, link.permissions)
             ),
         }));
 

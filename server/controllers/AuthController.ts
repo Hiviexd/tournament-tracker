@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import config from "../../config.json";
 import OsuApiService from "../services/OsuApiService";
-import helpers from "../helpers";
+import utils from "../../utils";
 import UserService from "../services/UserService";
 import User from "../models/userModel";
 import { Request, Response } from "express";
@@ -20,9 +20,7 @@ class AuthController {
         res.redirect(
             `https://osu.ppy.sh/oauth/authorize?response_type=code&client_id=${
                 config.osuApp.id
-            }&redirect_uri=${encodeURIComponent(
-                config.osuApp.redirect
-            )}&state=${hashedState}&scope=public+identify`
+            }&redirect_uri=${encodeURIComponent(config.osuApp.redirect)}&state=${hashedState}&scope=public+identify`
         );
     }
 
@@ -53,7 +51,7 @@ class AuthController {
             return res.status(500).redirect("/error");
         }
 
-        helpers.setSession(req.session, tokenResponse);
+        utils.setSession(req.session, tokenResponse);
         const userResponse = await OsuApiService.getLoggedInUserInfo(req.session.accessToken!);
 
         if (OsuApiService.isOsuResponseError(userResponse)) {

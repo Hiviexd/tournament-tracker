@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import defaultStableBackground from "/assets/default-bg-stable.jpg";
 import defaultLazerBackground from "/assets/default-bg-lazer.jpg";
-import helpers from "../../helpers";
+import utils from "../../../utils";
 
 interface BannerPreview {
     bannerUrl: string;
@@ -170,11 +170,11 @@ export default function InGameBannersTab() {
         const currentScaleMatch = currentTransform.match(/scale\(([0-9.]+)\)/);
         const startScale = currentScaleMatch ? parseFloat(currentScaleMatch[1]) : 1;
 
-        // Use the easing functions from helpers
+        // Use the easing functions from utils
         const easing =
             targetScale > startScale
-                ? helpers.easingOutBounce
-                : helpers.easingOutCubic;
+                ? utils.easingOutBounce
+                : utils.easingOutCubic;
 
         const animate = (time: number) => {
             const elapsed = time - startTime;

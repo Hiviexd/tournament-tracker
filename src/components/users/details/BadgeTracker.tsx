@@ -2,7 +2,7 @@ import { Group, Stack, Text, Title } from "@mantine/core";
 import { IUser } from "../../../../interfaces/User";
 import UserGroupBadge from "../../common/badges/UserGroupBadge";
 import BadgeManager from "./BadgeManager";
-import helpers from "../../../helpers";
+import utils from "../../../../utils";
 
 interface IProps {
     user: IUser;
@@ -10,7 +10,7 @@ interface IProps {
 
 export default function BadgeTracker({ user }: IProps) {
     const formatDuration = (days: number) => {
-        const years = helpers.getYearsFromDays(days);
+        const years = utils.getYearsFromDays(days);
         const yearsDisplay = years > 0 ? (years > 1 ? `${years} years,` : "1 year,") : "";
 
         const remainingDays = Math.round(days % 365);

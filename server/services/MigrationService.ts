@@ -7,7 +7,7 @@ import csv from "csv-parse";
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
 import User from "../models/userModel";
-import { styles } from "../helpers/consoleStyles";
+import utils from "../../utils";
 
 // tournament migration imports
 import Attachment from "../models/attachmentModel";
@@ -31,7 +31,7 @@ const CC_REVIEW_CHECKLIST = checklist.cc;
 class MigrationService {
     public async migratePif2Votings() {
         if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
-        console.log(`${styles("⚠  Migrating pif2 votings", ["orange", "bold", "underline"])}`);
+        console.log(utils.consoleStyles("⚠  Migrating pif2 votings", ["orange", "bold", "underline"]));
 
         const votings = [] as IPif2Voting[];
 
@@ -108,7 +108,7 @@ class MigrationService {
 
     public async migrateTournamentsFromCsv() {
         if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
-        console.log(`${styles("⚠  Migrating tournaments from CSV", ["orange", "bold", "underline"])}`);
+        console.log(utils.consoleStyles("⚠  Migrating tournaments from CSV", ["orange", "bold", "underline"]));
 
         const csvFilePath = path.join(__dirname, "../constants/tournaments.csv");
 

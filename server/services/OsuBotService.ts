@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import { IOsuBotMessage } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
-import helpers from "../helpers";
+import utils from "../../utils";
 import OsuApiService from "./OsuApiService";
 
 interface TokenInfo {
@@ -118,7 +118,7 @@ export default class OsuBotService extends OsuApiService {
         }
 
         // Add delay to prevent rate limiting
-        await helpers.delay(500);
+        await utils.delay(500);
 
         const options: AxiosRequestConfig = {
             url: "https://osu.ppy.sh/api/v2/chat/channels/",

@@ -8,7 +8,7 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import LogService from "../services/LogService";
-import helpers from "../helpers";
+import utils from "../../utils";
 import { Request, Response } from "express";
 import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";
@@ -174,7 +174,7 @@ class VotingsController {
             if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
                 return res.json({ error: "Tournament name must be between 5 and 120 characters" });
 
-            if (!helpers.isOsuForumLink(sanitizedTournamentLink))
+            if (!utils.isOsuForumLink(sanitizedTournamentLink))
                 return res.json({ error: "Invalid tournament forum link" });
 
             voting.targetTournamentName = sanitizedTournamentName;
@@ -214,7 +214,7 @@ class VotingsController {
 
         fields.push({
             name: "Deadline",
-            value: `${helpers.discordTimestamp(voting.deadline)} (${helpers.discordTimestamp(
+            value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
                 voting.deadline,
                 "dateTime"
             )})`,
@@ -236,11 +236,11 @@ class VotingsController {
 
         fields.push({
             name: "Description",
-            value: helpers.shorten(voting.description, 1024),
+            value: utils.shorten(voting.description, 1024),
         });
 
         if (voting.attachments?.length) {
-            fields.push(helpers.getAttachmentsField(voting.attachments)!);
+            fields.push(utils.getAttachmentsField(voting.attachments)!);
         }
 
         await DiscordService.sendRoleHighlightWebhook(

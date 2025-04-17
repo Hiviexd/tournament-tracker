@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "../../config.json";
 import { IDiscordEmbed, IDiscordAuthor } from "../../interfaces/Discord";
-import helpers from "../helpers";
+import utils from "../../utils";
 import webhookColors from "../constants/webhookColors";
 import { Session } from "express-session";
 
@@ -54,7 +54,7 @@ class DiscordService {
                 content: message || "",
                 flags: notification === "silent" ? 1 << 12 : undefined,
             });
-            await helpers.delay(1000);
+            await utils.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
@@ -89,7 +89,7 @@ class DiscordService {
                 embeds,
                 content: `${pings.trim()} ${message || ""}`,
             });
-            await helpers.delay(1000);
+            await utils.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
@@ -124,7 +124,7 @@ class DiscordService {
                 embeds,
                 content: `${pings.trim()} ${message || ""}`,
             });
-            await helpers.delay(1000);
+            await utils.delay(1000);
         } catch (error) {
             await this.sendErrorWebhook(error, { message, embeds }, webhook);
         }
@@ -155,11 +155,11 @@ class DiscordService {
             },
             {
                 name: "message",
-                value: helpers.shorten(`\`\`\`${message}\`\`\``, 1024),
+                value: utils.shorten(`\`\`\`${message}\`\`\``, 1024),
             },
             {
                 name: "embeds",
-                value: helpers.shorten(`\`\`\`${JSON.stringify(embeds, null, 2)}\`\`\``, 1024),
+                value: utils.shorten(`\`\`\`${JSON.stringify(embeds, null, 2)}\`\`\``, 1024),
             },
         ];
 
@@ -168,7 +168,7 @@ class DiscordService {
                 author: webhookAuthor,
                 color: webhookColors.red,
                 title: "❌ Embed error",
-                description: "```" + helpers.shorten(error.stack, 2000) + "```",
+                description: "```" + utils.shorten(error.stack, 2000) + "```",
                 fields,
                 timestamp: new Date(),
             },

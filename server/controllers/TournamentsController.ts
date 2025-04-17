@@ -18,7 +18,7 @@ import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import Message from "../models/messageModel";
 import OsuBotService from "../services/OsuBotService";
-import helpers from "../helpers";
+import utils from "../../utils";
 import { IDiscordField } from "@interfaces/Discord";
 
 const defaultPopulate = [
@@ -216,11 +216,11 @@ class TournamentsController {
 
         const status: TournamentStatus = "supportRequestReceived";
 
-        if (forumUrl && !helpers.isOsuForumLink(forumUrl)) {
+        if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
             return res.json({ error: "Invalid osu! forum URL format" });
         }
 
-        if (enchantUrl && !helpers.isEnchantTicketLink(enchantUrl)) {
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
             return res.json({ error: "Invalid Enchant ticket URL format" });
         }
 
@@ -274,7 +274,7 @@ class TournamentsController {
                     },
                     {
                         name: "Game Mode",
-                        value: tournament.modes.map((mode) => helpers.formatGameMode(mode)).join(", "),
+                        value: tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "),
                         inline: true,
                     },
                     {
@@ -758,7 +758,7 @@ class TournamentsController {
                         {
                             name: "Comment",
                             value:
-                                comment.trim().length > 0 ? helpers.shorten(comment, 512) : "*No comment provided...*",
+                                comment.trim().length > 0 ? utils.shorten(comment, 512) : "*No comment provided...*",
                         },
                     ],
                 },
@@ -993,12 +993,12 @@ class TournamentsController {
         const fields: IDiscordField[] = [
             {
                 name: "Note",
-                value: helpers.shorten(content, 512),
+                value: utils.shorten(content, 512),
             },
         ];
 
         if (note.attachments?.length) {
-            fields.push(helpers.getAttachmentsField(note.attachments)!);
+            fields.push(utils.getAttachmentsField(note.attachments)!);
         }
         await DiscordService.sendWebhook(
             [

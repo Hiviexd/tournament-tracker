@@ -3,7 +3,7 @@ import BeatmapService from "../services/BeatmapService";
 import OsuApiService from "../services/OsuApiService";
 import OsuBotService from "../services/OsuBotService";
 import { IBeatmap, IBeatmapWithNotes } from "../../interfaces/OsuApi";
-import helpers from "../helpers";
+import utils from "../../utils";
 
 
 class BeatmapsController {
@@ -14,7 +14,7 @@ class BeatmapsController {
             return res.json({ error: "Invalid input" });
         }
 
-        const beatmapIds = helpers.sanitizeBeatmapInput(input);
+        const beatmapIds = utils.sanitizeBeatmapInput(input);
         if (beatmapIds.size === 0) {
             return res.json({ error: "No valid beatmap IDs found" });
         }
@@ -36,7 +36,7 @@ class BeatmapsController {
             const batch = Array.from(beatmapIds).slice(i, i + 50);
             const beatmapsResponse = await OsuApiService.getBeatmaps(batch.map(String), botToken as string);
 
-            await helpers.delay(500);
+            await utils.delay(500);
 
             const beatmaps = beatmapsResponse.beatmaps;
 
@@ -65,9 +65,9 @@ class BeatmapsController {
         }
 
         // sort beatmaps in each array by their status
-        allowed = helpers.sortBeatmapsByStatus(allowed);
-        partial = helpers.sortBeatmapsByStatus(partial);
-        disallowed = helpers.sortBeatmapsByStatus(disallowed);
+        allowed = utils.sortBeatmapsByStatus(allowed);
+        partial = utils.sortBeatmapsByStatus(partial);
+        disallowed = utils.sortBeatmapsByStatus(disallowed);
 
         res.json({
             message: "Beatmaps checked successfully!",

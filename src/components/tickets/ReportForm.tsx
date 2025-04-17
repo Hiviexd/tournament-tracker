@@ -7,7 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import UserSearch from "../common/UserSearch";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
-import helpers from "../../helpers";
+import utils from "../../../utils";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { type TicketFormData } from "../../../interfaces/Ticket";
 import TextLengthIndicator from "../common/TextLengthIndicator";
@@ -62,7 +62,7 @@ export default function ReportForm() {
             targetTournamentLink: (value) => {
                 if (reportType === "tournament") {
                     if (!value) return "Forum URL is required";
-                    if (!helpers.isOsuForumLink(value)) return "Invalid osu! forum URL format";
+                    if (!utils.isOsuForumLink(value)) return "Invalid osu! forum URL format";
                 }
                 return null;
             },

@@ -5,7 +5,7 @@ import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import { useSubmitVote } from "../../hooks/useVotings";
 import { VoteType, ClassicVote, BinaryVote, VariableVote } from "../../../interfaces/Vote";
-import helpers from "../../helpers";
+import utils from "../../../utils";
 import ClassicVoteInput from "./votes/ClassicVoteInput";
 import BinaryVoteInput from "./votes/BinaryVoteInput";
 import VariableVoteInput from "./votes/VariableVoteInput";
@@ -36,7 +36,7 @@ export default function VotingForm({ voting, user }: IProps) {
     const userVote = voting.votes.find((vote) => vote.author._id === user._id);
 
     const [comment, setComment] = useState(userVote?.comment ?? "");
-    const [voteData, setVoteData] = useState<VoteType>(() => helpers.getInitialVoteData(voting, userVote));
+    const [voteData, setVoteData] = useState<VoteType>(() => utils.getInitialVoteData(voting, userVote));
     const autoSaveKey = `voting-comment-${voting._id}`;
 
     const isCommentRequired = useMemo(() => {

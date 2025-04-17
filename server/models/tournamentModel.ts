@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
 import _ from "lodash";
-import helpers from "../helpers";
+import utils from "../../utils";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -10,13 +10,13 @@ const TournamentSchema = new Schema<ITournament>(
         startDate: {
             type: Date,
             required: true,
-            set: helpers.setDateToNoon,
+            set: utils.setDateToNoon,
             get: (date: Date) => date,
         },
         endDate: {
             type: Date,
             required: true,
-            set: helpers.setDateToNoon,
+            set: utils.setDateToNoon,
             get: (date: Date) => date,
         },
         forumUrl: { type: String },

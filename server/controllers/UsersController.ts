@@ -1,6 +1,6 @@
 import { IUser, UserListQuery } from "../../interfaces/User";
 import User from "../models/userModel";
-import helpers from "../helpers";
+import utils from "../../utils";
 import UserService from "../services/UserService";
 import DiscordService from "../services/DiscordService";
 import OsuApiService from "../services/OsuApiService";
@@ -23,8 +23,8 @@ class UsersController {
 
         let userInput = reqQuery.userInput;
 
-        if (userInput && helpers.validateOsuProfileLink(userInput)) {
-            userInput = helpers.validateOsuProfileLink(userInput)!;
+        if (userInput && utils.validateOsuProfileLink(userInput)) {
+            userInput = utils.validateOsuProfileLink(userInput)!;
         }
 
         if (!userInput) {
@@ -33,10 +33,10 @@ class UsersController {
 
         let users: IUser[] = [];
 
-        if (helpers.isValidMongoId(userInput)) {
+        if (utils.isValidMongoId(userInput)) {
             const user = await User.findById(userInput);
             if (user) users.push(user);
-        } else if (helpers.isNumeric(userInput)) {
+        } else if (utils.isNumeric(userInput)) {
             const user = await User.findOne({ osuId: parseInt(userInput, 10) });
             if (user) users.push(user);
         } else {
@@ -325,7 +325,7 @@ class UsersController {
 
         const user = await User.findById(userId).orFail();
 
-        if (!helpers.validateEmail(email)) {
+        if (!utils.validateEmail(email)) {
             return res.json({ error: "Invalid email!" });
         }
 

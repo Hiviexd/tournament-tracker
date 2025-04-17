@@ -5,7 +5,7 @@ import { routes } from "../../../base/header.config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import helpers from "../../../helpers";
+import utils from "../../../../utils";
 import { useState } from "react";
 import { IRoute } from "../../../base/header.config";
 
@@ -21,11 +21,11 @@ export default function MobileNavigation({ onClose }: IProps) {
 
     // Use same visible routes logic as Header component
     const visibleRoutes = routes
-        .filter((route) => helpers.hasRequiredPermissions(user, route.permissions))
+        .filter((route) => utils.hasRequiredPermissions(user, route.permissions))
         .map((route) => ({
             ...route,
             links: route.links?.filter((link) =>
-                helpers.hasRequiredPermissions(user, link.permissions)
+                utils.hasRequiredPermissions(user, link.permissions)
             ),
         }));
 

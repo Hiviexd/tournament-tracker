@@ -6,7 +6,7 @@ import { useUpdateUserBadge } from "../../../hooks/useUsers";
 import { notifications } from "@mantine/notifications";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
-import helpers from "../../../helpers";
+import utils from "../../../../utils";
 
 interface IProps {
     user: IUser;
@@ -18,7 +18,7 @@ export default function BadgeManager({ user, committee }: IProps) {
     const updateBadgeMutation = useUpdateUserBadge(user._id || "");
 
     const isValidBadge = user.badgeValue > 0 && user.badgeValue <= 10;
-    const eligibleBadgeYears = helpers.getYearsFromDays(committee === "tc" ? user.tcDuration : user.ccDuration);
+    const eligibleBadgeYears = utils.getYearsFromDays(committee === "tc" ? user.tcDuration : user.ccDuration);
 
     const handleBadgeUpdate = async (increment: boolean) => {
         try {
@@ -32,7 +32,7 @@ export default function BadgeManager({ user, committee }: IProps) {
     };
 
     const handleCopyCommand = () => {
-        const commandString = helpers.generateBadgeCommand(user.osuId, eligibleBadgeYears, user.badgeValue, committee);
+        const commandString = utils.generateBadgeCommand(user.osuId, eligibleBadgeYears, user.badgeValue, committee);
 
         navigator.clipboard.writeText(commandString);
         notifications.show({

@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
-import helpers from "../helpers";
+import utils from "../../utils";
 import { IBeatmap, IBeatmapResponse, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
@@ -18,9 +18,9 @@ export default class OsuApiService {
                 return res.data;
             }
 
-            return helpers.defaultErrorMessage;
+            return utils.defaultErrorMessage;
         } catch (error) {
-            return helpers.defaultErrorMessage;
+            return utils.defaultErrorMessage;
         }
     }
 

@@ -8,7 +8,7 @@ import { IDiscordField } from "../../interfaces/Discord";
 import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
-import helpers from "../helpers";
+import utils from "../../utils";
 import TicketService from "../services/TicketService";
 import _ from "lodash";
 import UploadService from "../services/UploadService";
@@ -166,7 +166,7 @@ class TicketsController {
                         error: "Tournament name must be between 5 and 120 characters",
                     });
 
-                if (!helpers.isOsuForumLink(sanitizedTournamentLink))
+                if (!utils.isOsuForumLink(sanitizedTournamentLink))
                     return res.json({ error: "Invalid tournament forum link" });
 
                 ticket.targetTournamentName = sanitizedTournamentName;
@@ -222,10 +222,10 @@ class TicketsController {
             }
         }
 
-        fields.push({ name: "Message", value: helpers.shorten(message, 512) });
+        fields.push({ name: "Message", value: utils.shorten(message, 512) });
 
         if (initialMessage.attachments?.length) {
-            fields.push(helpers.getAttachmentsField(initialMessage.attachments)!);
+            fields.push(utils.getAttachmentsField(initialMessage.attachments)!);
         }
 
         const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
@@ -330,12 +330,12 @@ class TicketsController {
         const fields: IDiscordField[] = [
             {
                 name: isNote ? "Note" : "Message",
-                value: helpers.shorten(content, 512),
+                value: utils.shorten(content, 512),
             },
         ];
 
         if (newMessage.attachments?.length) {
-            fields.push(helpers.getAttachmentsField(newMessage.attachments)!);
+            fields.push(utils.getAttachmentsField(newMessage.attachments)!);
         }
 
         // ping the committee members who sent messages in the ticket when the message is from the ticket author

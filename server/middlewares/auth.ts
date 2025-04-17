@@ -1,5 +1,5 @@
 import User from "../models/userModel";
-import helpers from "../helpers";
+import utils from "../../utils";
 import OsuApiService from "../services/OsuApiService";
 import { Request, Response, NextFunction } from "express";
 
@@ -48,7 +48,7 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
             return res.redirect("/");
         }
 
-        helpers.setSession(req.session, response);
+        utils.setSession(req.session, response);
     }
 
     res.locals!.user = user;
@@ -124,7 +124,7 @@ async function optionalAuth(req: Request, res: Response, next: NextFunction) {
             return next();
         }
 
-        helpers.setSession(req.session, response);
+        utils.setSession(req.session, response);
     }
 
     res.locals!.user = user;

@@ -3,7 +3,7 @@ import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { DEFAULT_HUE } from "../constants";
-import helpers from "../helpers";
+import utils from "../../utils";
 import "../sass/Layout.scss";
 import { useState, useEffect } from "react";
 
@@ -36,7 +36,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
         if (isGreyscale) {
             return "#656565";
         }
-        return helpers.hslToHex(hue, 0.9, 0.3);
+        return utils.hslToHex(hue, 0.9, 0.3);
     };
 
     const [themeColor, setThemeColor] = useState(getThemeColor());

@@ -5,7 +5,7 @@ import { VotingCategory, type VotingFormData, VotingType } from "../../../interf
 import { UserGroup } from "../../../interfaces/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
-import helpers from "../../helpers";
+import utils from "../../../utils";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 //Mantine
@@ -82,7 +82,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             targetTournamentLink: (value, values) => {
                 if (values.category === "tournament") {
                     if (!value) return "Forum URL is required";
-                    if (!helpers.isOsuForumLink(value)) return "Invalid osu! forum URL format";
+                    if (!utils.isOsuForumLink(value)) return "Invalid osu! forum URL format";
                 }
                 return null;
             },

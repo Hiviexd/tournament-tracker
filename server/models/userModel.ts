@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
 import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
-import helpers from "../helpers";
+import utils from "../../utils";
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
@@ -74,7 +74,7 @@ UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, userInp
 
     if (isNaN(osuId)) {
         return this.findOne({
-            username: new RegExp("^" + helpers.escapeUsername(userInput as string) + "$", "i"),
+            username: new RegExp("^" + utils.escapeUsername(userInput as string) + "$", "i"),
         });
     } else {
         return this.findOne({ osuId });
