@@ -273,10 +273,6 @@ class AutomationService {
             // Skip if less than 7 days old
             if (daysSinceLastResponse < 7) continue;
 
-            const roles: string[] = [];
-            if (ticket.assignedGroup === "tc") roles.push("tournament");
-            if (ticket.assignedGroup === "cc") roles.push("contest");
-
             const ticketType = ticket.type === "report" ? "Report" : "Ticket";
             const ticketUrl = `${config.baseUrl}/tickets/${ticket._id}`;
 
@@ -284,8 +280,17 @@ class AutomationService {
                 // 10+ days - send with ping
                 staleTickets.push(ticket);
 
-                await DiscordService.sendRoleHighlightWebhook(
-                    roles,
+                // ping the committee members who sent messages in the ticket
+                const usersToPing = new Set<string>();
+
+                ticket.messages.forEach((message) => {
+                    if (message.author.isCommittee) {
+                        usersToPing.add(message.author.discordId || message.author.username);
+                    }
+                });
+
+                await DiscordService.sendUserHighlightWebhook(
+                    Array.from(usersToPing),
                     [
                         {
                             color: webhookColors.red,
