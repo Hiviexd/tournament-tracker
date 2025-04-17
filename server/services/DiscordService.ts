@@ -1,6 +1,12 @@
 import axios from "axios";
 import config from "../../config.json";
-import { IDiscordEmbed, IDiscordAuthor } from "../../interfaces/Discord";
+import {
+    IDiscordEmbed,
+    IDiscordAuthor,
+    ISendWebhookParams,
+    IUserHighlightWebhookParams,
+    IRoleHighlightWebhookParams,
+} from "../../interfaces/Discord";
 import utils from "../../utils";
 import webhookColors from "../constants/webhookColors";
 import { Session } from "express-session";
@@ -31,19 +37,15 @@ class DiscordService {
 
     /**
      * * Sends a webhook
-     * @param embeds Array of embed objects
-     * @param message Optional essage to include with embed
-     * @param notification Optional notification type (defaults to `normal`)
-     * @param threadId Optional ID of the thread to send the message to
-     * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
+     * @param params Webhook parameters
+     * @param params.embeds Array of embeds to send
+     * @param params.message Message to send (optional)
+     * @param params.notification Notification type (silent or normal) (optional)
+     * @param params.threadId Thread ID (optional)
+     * @param params.webhook Webhook name (optional)
      */
-    public async sendWebhook(
-        embeds: IDiscordEmbed[],
-        message?: string,
-        notification?: "silent" | "normal",
-        threadId?: string,
-        webhook?: string
-    ) {
+    public async sendWebhook(params: ISendWebhookParams) {
+        const { embeds, message, notification, threadId, webhook } = params;
         const url = this.getWebhookLink(webhook, threadId);
 
         try {
@@ -62,19 +64,15 @@ class DiscordService {
 
     /**
      * * Sends a webhook with user pings
-     * @param users Array of Discord user IDs to ping
-     * @param embeds Array of embed objects
-     * @param message Optional essage to include with embed
-     * @param threadId Optional ID of the thread to send the message to
-     * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
+     * @param params Webhook parameters with users to ping
+     * @param params.users Array of users to ping
+     * @param params.embeds Array of embeds to send
+     * @param params.message Message to send (optional)
+     * @param params.threadId Thread ID (optional)
+     * @param params.webhook Webhook name (optional)
      */
-    public async sendUserHighlightWebhook(
-        users: string[],
-        embeds: IDiscordEmbed[],
-        message?: string,
-        threadId?: string,
-        webhook?: string
-    ) {
+    public async sendUserHighlightWebhook(params: IUserHighlightWebhookParams) {
+        const { users, embeds, message, threadId, webhook } = params;
         const url = this.getWebhookLink(webhook, threadId);
         let pings = "";
 
@@ -97,19 +95,15 @@ class DiscordService {
 
     /**
      * * Sends a webhook with role pings
-     * @param roles Array of role types to ping
-     * @param embeds Array of embed objects
-     * @param message Optional essage to include with embed
-     * @param threadId Optional ID of the thread to send the message to
-     * @param webhook Optional destination of the webhook (defaults to `mainWebhook`)
+     * @param params Webhook parameters with roles to ping
+     * @param params.roles Array of roles to ping
+     * @param params.embeds Array of embeds to send
+     * @param params.message Message to send (optional)
+     * @param params.threadId Thread ID (optional)
+     * @param params.webhook Webhook name (optional)
      */
-    public async sendRoleHighlightWebhook(
-        roles: string[],
-        embeds: IDiscordEmbed[],
-        message?: string,
-        threadId?: string,
-        webhook?: string
-    ) {
+    public async sendRoleHighlightWebhook(params: IRoleHighlightWebhookParams) {
+        const { roles, embeds, message, threadId, webhook } = params;
         const url = this.getWebhookLink(webhook, threadId);
         let pings = "";
 

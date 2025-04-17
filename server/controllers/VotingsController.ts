@@ -243,18 +243,18 @@ class VotingsController {
             fields.push(utils.getAttachmentsField(voting.attachments)!);
         }
 
-        await DiscordService.sendRoleHighlightWebhook(
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+            color: webhookColors.lightYellow,
+            fields,
+        };
+
+        await DiscordService.sendRoleHighlightWebhook({
             roles,
-            [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                    color: webhookColors.lightYellow,
-                    fields,
-                },
-            ],
-            "New Vote"
-        );
+            embeds: [embed],
+            message: "New Vote",
+        });
     }
 
     /** POST submit vote */
@@ -405,23 +405,27 @@ class VotingsController {
         if (!voting.isActive) {
             const fields = VotingService.generateVotingResults(voting);
 
-            await DiscordService.sendWebhook([
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.darkYellow,
-                    description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                    fields,
-                },
-            ]);
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.darkYellow,
+                description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                fields,
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+            });
         } else {
             // Voting resumed
-            await DiscordService.sendWebhook([
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    description: `Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                    color: webhookColors.yellow,
-                },
-            ]);
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                description: `Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+                color: webhookColors.yellow,
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+            });
         }
     }
 
@@ -484,13 +488,15 @@ class VotingsController {
         );
 
         // Discord
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                color: webhookColors.darkRed,
-            },
-        ]);
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            description: `Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+            color: webhookColors.darkRed,
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [embed],
+        });
     }
 
     /** POST toggle voting public */
@@ -519,15 +525,17 @@ class VotingsController {
         );
 
         // Discord
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
-                    voting.isPublic ? "available for **public** viewing" : "private"
-                }`,
-                color: voting.isPublic ? webhookColors.lightPurple : webhookColors.darkPurple,
-            },
-        ]);
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            description: `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
+                voting.isPublic ? "available for **public** viewing" : "private"
+            }`,
+            color: voting.isPublic ? webhookColors.lightPurple : webhookColors.darkPurple,
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [embed],
+        });
     }
 }
 

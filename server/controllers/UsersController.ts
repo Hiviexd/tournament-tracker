@@ -98,7 +98,9 @@ class UsersController {
 
         const committee = await User.find(query).orFail();
 
-        const sanitizedCommittee = committee.map((user) => UserService.sanitizeUser(user, currentUser?.isCommittee || false));
+        const sanitizedCommittee = committee.map((user) =>
+            UserService.sanitizeUser(user, currentUser?.isCommittee || false)
+        );
 
         res.json(sanitizedCommittee);
     }
@@ -113,19 +115,16 @@ class UsersController {
             return res.json({ error: "User not found" });
         }
 
-        await DiscordService.sendWebhook(
-            [
+        await DiscordService.sendWebhook({
+            embeds: [
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
                     color: webhookColors.blue,
                     description: `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`,
                 },
             ],
-            undefined,
-            undefined,
-            undefined,
-            "dev"
-        );
+            webhook: "dev",
+        });
 
         res.json({ message: "User created successfully!", user });
     }
@@ -145,15 +144,17 @@ class UsersController {
             "user"
         );
 
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.orange,
-                description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
-                    user.isActiveReviewer ? "active" : "inactive"
-                }** reviewer`,
-            },
-        ]);
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.orange,
+                    description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
+                        user.isActiveReviewer ? "active" : "inactive"
+                    }** reviewer`,
+                },
+            ],
+        });
 
         res.json({
             message: `Set activity status as ${user.isActiveReviewer ? "active" : "inactive"}!`,
@@ -214,15 +215,17 @@ class UsersController {
         );
 
         // Discord webhook
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: join ? webhookColors.lightGreen : webhookColors.lightRed,
-                description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
-                    user.osuId
-                }) ${join ? "to" : "from"} the **${groupName}**`,
-            },
-        ]);
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: join ? webhookColors.lightGreen : webhookColors.lightRed,
+                    description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
+                        user.osuId
+                    }) ${join ? "to" : "from"} the **${groupName}**`,
+                },
+            ],
+        });
 
         res.json({
             message: `User ${join ? "added to" : "removed from"} the **${groupName}** successfully!`,
@@ -259,13 +262,15 @@ class UsersController {
         );
 
         // Discord webhook notification
-        await DiscordService.sendWebhook([
-            {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.orange,
-                description: `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
-            },
-        ]);
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.orange,
+                    description: `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
+                },
+            ],
+        });
 
         return res.json({
             message: `Badge level updated to ${user.badgeValue}`,

@@ -104,32 +104,34 @@ class AutomationService {
                 const dueText =
                     hoursUntilDeadline > 0 ? `${hoursUntilDeadline} hours` : `${minutesUntilDeadline} minutes`;
 
-                await DiscordService.sendWebhook([
-                    {
-                        color: webhookColors.lightRed,
-                        description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is due in ${dueText}!`,
-                        fields: [
-                            { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
-                            { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
-                            {
-                                name: "Deadline",
-                                value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
-                                    voting.deadline,
-                                    "dateTime"
-                                )})`,
-                                inline: false,
-                            },
-                            {
-                                name: "Missing Voters",
-                                value:
-                                    missingVotes
-                                        .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
-                                        .join(", ") || "None",
-                                inline: false,
-                            },
-                        ],
-                    },
-                ]);
+                await DiscordService.sendWebhook({
+                    embeds: [
+                        {
+                            color: webhookColors.lightRed,
+                            description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is due in ${dueText}!`,
+                            fields: [
+                                { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
+                                { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
+                                {
+                                    name: "Deadline",
+                                    value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
+                                        voting.deadline,
+                                        "dateTime"
+                                    )})`,
+                                    inline: false,
+                                },
+                                {
+                                    name: "Missing Voters",
+                                    value:
+                                        missingVotes
+                                            .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
+                                            .join(", ") || "None",
+                                    inline: false,
+                                },
+                            ],
+                        },
+                    ],
+                });
             } else if (isOverdue) {
                 // Only send overdue notification if actually past deadline
                 votingsToNotify.push(voting);
@@ -138,9 +140,9 @@ class AutomationService {
                 const overdueText =
                     overdueDuration >= 24 ? `${Math.floor(overdueDuration / 24)} days` : `${overdueDuration} hours`;
 
-                await DiscordService.sendUserHighlightWebhook(
-                    usersToPing,
-                    [
+                await DiscordService.sendUserHighlightWebhook({
+                    users: usersToPing,
+                    embeds: [
                         {
                             color: webhookColors.red,
                             description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is overdue by ${overdueText}!`,
@@ -166,36 +168,38 @@ class AutomationService {
                             ],
                         },
                     ],
-                    "Overdue Vote"
-                );
+                    message: "Overdue Vote",
+                });
             } else {
                 // Not overdue and not due soon - just send a regular update
-                await DiscordService.sendWebhook([
-                    {
-                        color: webhookColors.lightGreen,
-                        description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is still active!`,
-                        fields: [
-                            { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
-                            { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
-                            {
-                                name: "Deadline",
-                                value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
-                                    voting.deadline,
-                                    "dateTime"
-                                )})`,
-                                inline: false,
-                            },
-                            {
-                                name: "Missing Voters",
-                                value:
-                                    missingVotes
-                                        .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
-                                        .join(", ") || "*None*",
-                                inline: false,
-                            },
-                        ],
-                    },
-                ]);
+                await DiscordService.sendWebhook({
+                    embeds: [
+                        {
+                            color: webhookColors.lightGreen,
+                            description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote is still active!`,
+                            fields: [
+                                { name: "Current Votes", value: voting.votes.length.toString(), inline: true },
+                                { name: "Required Votes", value: voting.requiredVotes.toString(), inline: true },
+                                {
+                                    name: "Deadline",
+                                    value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
+                                        voting.deadline,
+                                        "dateTime"
+                                    )})`,
+                                    inline: false,
+                                },
+                                {
+                                    name: "Missing Voters",
+                                    value:
+                                        missingVotes
+                                            .map((user) => `[**${user.username}**](${user.osuProfileUrl})`)
+                                            .join(", ") || "*None*",
+                                    inline: false,
+                                },
+                            ],
+                        },
+                    ],
+                });
             }
         }
 
@@ -242,13 +246,15 @@ class AutomationService {
             // Send Discord notification
             const fields = VotingService.generateVotingResults(voting);
 
-            await DiscordService.sendWebhook([
-                {
-                    color: webhookColors.darkYellow,
-                    description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote has been automatically concluded!`,
-                    fields: [...fields],
-                },
-            ]);
+            await DiscordService.sendWebhook({
+                embeds: [
+                    {
+                        color: webhookColors.darkYellow,
+                        description: `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) vote has been automatically concluded!`,
+                        fields: [...fields],
+                    },
+                ],
+            });
 
             await LogService.generateSystem(
                 `Automatically concluded vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
@@ -289,9 +295,9 @@ class AutomationService {
                     }
                 });
 
-                await DiscordService.sendUserHighlightWebhook(
-                    Array.from(usersToPing),
-                    [
+                await DiscordService.sendUserHighlightWebhook({
+                    users: Array.from(usersToPing),
+                    embeds: [
                         {
                             color: webhookColors.red,
                             description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
@@ -310,15 +316,15 @@ class AutomationService {
                             ],
                         },
                     ],
-                    "Stale Ticket",
-                    ticket.threadId
-                );
+                    message: "Stale Ticket",
+                    threadId: ticket.threadId,
+                });
             } else {
                 // 7-9 days - send without ping
                 staleTickets.push(ticket);
 
-                await DiscordService.sendWebhook(
-                    [
+                await DiscordService.sendWebhook({
+                    embeds: [
                         {
                             color: webhookColors.orange,
                             description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
@@ -333,10 +339,8 @@ class AutomationService {
                             ],
                         },
                     ],
-                    "",
-                    undefined,
-                    ticket.threadId
-                );
+                    threadId: ticket.threadId,
+                });
             }
         }
 
@@ -380,18 +384,21 @@ class AutomationService {
 
             badgeUpdates.push(user);
 
-            await DiscordService.sendUserHighlightWebhook(usersToPing, [
-                {
-                    color: webhookColors.orange,
-                    description: `[**${user.username}**](${config.baseUrl}/users?id=${user.osuId}) needs a badge update!`,
-                    fields: [
-                        { name: "Current Badge", value: user.badgeValue.toString(), inline: true },
-                        { name: "Eligible Years", value: years.toString(), inline: true },
-                        { name: "Team", value: committee.toUpperCase(), inline: true },
-                        { name: "Command", value: `\`\`\`${commandString}\`\`\``, inline: false },
-                    ],
-                },
-            ]);
+            await DiscordService.sendUserHighlightWebhook({
+                users: usersToPing,
+                embeds: [
+                    {
+                        color: webhookColors.orange,
+                        description: `[**${user.username}**](${config.baseUrl}/users?id=${user.osuId}) needs a badge update!`,
+                        fields: [
+                            { name: "Current Badge", value: user.badgeValue.toString(), inline: true },
+                            { name: "Eligible Years", value: years.toString(), inline: true },
+                            { name: "Team", value: committee.toUpperCase(), inline: true },
+                            { name: "Command", value: `\`\`\`${commandString}\`\`\``, inline: false },
+                        ],
+                    },
+                ],
+            });
         }
 
         if (badgeUpdates.length > 0) {
@@ -477,9 +484,9 @@ class AutomationService {
             ) {
                 overdueReviews.push({ tournament, daysSinceReview, missingReviewers });
 
-                await DiscordService.sendUserHighlightWebhook(
-                    usersToPing,
-                    [
+                await DiscordService.sendUserHighlightWebhook({
+                    users: usersToPing,
+                    embeds: [
                         {
                             color,
                             description: `Review for ${tournament.type} [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id}) has been ongoing for ${daysSinceReview} days!`,
@@ -504,9 +511,9 @@ class AutomationService {
                             ],
                         },
                     ],
-                    "Overdue Tournament Review",
-                    tournament.threadId
-                );
+                    message: "Overdue Tournament Review",
+                    threadId: tournament.threadId,
+                });
             }
         }
 

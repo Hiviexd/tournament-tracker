@@ -26,3 +26,22 @@ export interface IDiscordEmbed {
         icon_url?: string;
     };
 }
+
+interface IBaseWebhookParams {
+    embeds: IDiscordEmbed[];
+    message?: string;
+    threadId?: string;
+    webhook?: string;
+}
+
+export interface ISendWebhookParams extends IBaseWebhookParams {
+    notification?: "silent" | "normal";
+}
+
+export interface IUserHighlightWebhookParams extends IBaseWebhookParams {
+    users: string[];
+}
+
+export interface IRoleHighlightWebhookParams extends IBaseWebhookParams {
+    roles: string[];
+}
