@@ -70,7 +70,7 @@ const defaultPopulate = [
     },
 ];
 
-const DEFAULT_LIMIT = 20;
+const DEFAULT_LIMIT = 30;
 
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
