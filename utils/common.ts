@@ -103,6 +103,6 @@ export function formatGameMode(mode: string) {
  * @param email Email address to validate
  * @returns `true` if the email is valid, `false` otherwise
  */
-export function validateEmail(email: string): boolean {
+export function isValidEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

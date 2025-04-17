@@ -7,4 +7,3 @@ export default {
     ...frontend,
     ...backend,
 };
-

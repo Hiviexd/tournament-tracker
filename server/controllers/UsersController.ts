@@ -325,7 +325,7 @@ class UsersController {
 
         const user = await User.findById(userId).orFail();
 
-        if (!utils.validateEmail(email)) {
+        if (!utils.isValidEmail(email)) {
             return res.json({ error: "Invalid email!" });
         }
 
