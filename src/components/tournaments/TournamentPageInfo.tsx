@@ -26,7 +26,12 @@ export default function TournamentPageInfo({ tournament }: IProps) {
     const navigate = useNavigate();
 
     const handleToggleState = async () => {
-        if (confirm(`Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`)) {
+        let message = `Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`;
+        if (tournament.isActive) {
+            message += "\n\nPlease ensure that the conclusion email is sent before archiving.";
+        }
+
+        if (confirm(message)) {
             await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
         }
     };

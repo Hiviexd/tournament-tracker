@@ -42,10 +42,16 @@ export default function TournamentStatus({ tournament }: IProps) {
     const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
     const handleStatusSave = async () => {
-        let message = "Are you sure you want to update the status? This will notify the tournament host.\n\nIf this depends on an email (i.e. changes requested), please make sure that's sent first!";
-        if (excludedStatusesOsu.includes(selectedStatus) || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
-            message = "Are you sure you want to update the status? This will NOT send an osu! notification.";
+        let message = "Are you sure you want to update the status?\n\nThis will notify the tournament host.";
+
+        if (selectedStatus === "changesRequested") {
+            message += "\n\nIf this depends on an email (i.e. requesting changes), please make sure that's sent first!";
         }
+
+        if (excludedStatusesOsu.includes(selectedStatus) || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
+            message = "Are you sure you want to update the status?\n\nThis will NOT send an osu! notification.";
+        }
+
         if (confirm(message)) {
             await editTournamentMutation.mutateAsync({ status: selectedStatus });
             setIsEditingStatus(false);
