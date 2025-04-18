@@ -98,7 +98,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         </Group>
                         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                             {[1, 2, 3].map((j) => (
-                                <Card key={j} shadow="sm" p="md">
+                                <Card key={j} shadow="sm" p="md" bg="primary.10">
                                     <Stack gap="xs">
                                         <Skeleton height={20} width="80%" />
                                         <Skeleton height={16} width="60%" />
