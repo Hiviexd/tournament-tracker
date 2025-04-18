@@ -23,6 +23,7 @@ import TournamentCreateModal from "../components/tournaments/TournamentCreateMod
 import { useTournaments } from "../hooks/useTournaments";
 import { loggedInUserAtom, tournamentViewModeAtom } from "../store/atoms";
 import { useAtom } from "jotai";
+import { IUser } from "../../interfaces/User";
 
 interface FilterValues {
     name: string;
@@ -34,7 +35,7 @@ interface FilterValues {
     showAllAssignedReviews: boolean;
 }
 
-function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
+function LoadingState({ viewMode, user }: { viewMode: "cards" | "table"; user: IUser | null }) {
     if (viewMode === "cards") {
         return (
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -83,7 +84,7 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                             <Table.Th>Host</Table.Th>
                             <Table.Th>Status</Table.Th>
                             <Table.Th>State</Table.Th>
-                            <Table.Th>Thread</Table.Th>
+                            {user && user.isCommittee && <Table.Th>Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -107,11 +108,13 @@ function LoadingState({ viewMode }: { viewMode: "cards" | "table" }) {
                                 <Table.Td>
                                     <Skeleton height={20} width={80} />
                                 </Table.Td>
-                                <Table.Td ta="center">
-                                    <Group justify="center">
-                                        <Skeleton height={20} width={20} />
-                                    </Group>
-                                </Table.Td>
+                                {user && user.isCommittee && (
+                                    <Table.Td ta="center">
+                                        <Group justify="center">
+                                            <Skeleton height={20} width={20} />
+                                        </Group>
+                                    </Table.Td>
+                                )}
                             </Table.Tr>
                         ))}
                     </Table.Tbody>
@@ -208,7 +211,7 @@ export default function TournamentListPage() {
             <Divider />
 
             {isLoading ? (
-                <LoadingState viewMode={viewMode} />
+                <LoadingState viewMode={viewMode} user={user} />
             ) : !data || data.tournaments.length === 0 ? (
                 <EmptyState hasError={false} />
             ) : (
