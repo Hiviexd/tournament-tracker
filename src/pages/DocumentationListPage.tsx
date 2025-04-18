@@ -2,7 +2,6 @@ import { Card, SimpleGrid, Stack, Text, Title, Container, Skeleton } from "@mant
 import { Link } from "react-router-dom";
 import { useDocumentation } from "../hooks/useArticle";
 import EmptyState from "../components/common/EmptyState";
-import "../sass/components/FeatureCard.scss";
 
 export default function DocumentationListPage() {
     const { data: articles, isLoading, isError } = useDocumentation();

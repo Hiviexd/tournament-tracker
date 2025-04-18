@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { DEFAULT_HUE } from "../constants";
 import utils from "../../utils";
-import "../sass/Layout.scss";
 import { useState, useEffect } from "react";
 
 // components

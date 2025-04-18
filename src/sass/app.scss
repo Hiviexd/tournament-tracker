@@ -1,19 +1,26 @@
 /* Components */
 
-@import "components/MarkdownText.scss";
-@import "components/VotingInfo.scss";
-@import "components/VotingCard.scss";
-@import "components/UserCard.scss";
-@import "components/TournamentCard.scss";
-@import "components/GameModeIcon.scss";
-@import "components/TicketCard.scss";
-@import "components/TicketInfo.scss";
-@import "components/AttachmentDisplay.scss";
-@import "components/FeatureCard.scss";
-@import "components/NewsBannersTab.scss";
-@import "components/BadgesTab.scss";
-@import "components/InGameBannersTab.scss";
-@import "components/BeatmapCard.scss";
+@import "Layout.scss";
+
+@import "components/common/MarkdownText.scss";
+@import "components/common/UserCard.scss";
+@import "components/common/GameModeIcon.scss";
+@import "components/common/AttachmentDisplay.scss";
+@import "components/common/FeatureCard.scss";
+
+@import "components/votings/VotingInfo.scss";
+@import "components/votings/VotingCard.scss";
+
+@import "components/tournaments/TournamentCard.scss";
+
+@import "components/tickets/TicketCard.scss";
+@import "components/tickets/TicketInfo.scss";
+
+@import "components/previewer/NewsBannersTab.scss";
+@import "components/previewer/BadgesTab.scss";
+@import "components/previewer/InGameBannersTab.scss";
+
+@import "components/compliance/BeatmapCard.scss";
 
 /* Fonts */
 
