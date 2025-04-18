@@ -537,6 +537,42 @@ class VotingsController {
             embeds: [embed],
         });
     }
+
+    /** POST delete all votes from a voting */
+    public async clearVotes(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+
+        const voting = await Voting.findById(votingId).orFail();
+
+        if (!voting.isActive) {
+            return res.json({ error: "Cannot handle concluded votes!" });
+        }
+
+        voting.votes = [];
+        await voting.save();
+
+        res.json({
+            message: "Votes cleared successfully!",
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+            "voting"
+        );
+
+        // Discord
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            description: `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+            color: webhookColors.red,
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [embed],
+        });
+    }
 }
 
 export default new VotingsController();

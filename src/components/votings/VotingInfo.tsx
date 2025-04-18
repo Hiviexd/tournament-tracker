@@ -3,7 +3,7 @@ import moment from "moment";
 import { useState } from "react";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
-import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic } from "../../hooks/useVotings";
+import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic, useClearVotes } from "../../hooks/useVotings";
 
 // Mantine
 import {
@@ -48,7 +48,8 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [descriptionType, setDescriptionType] = useState<"private" | "public">("private");
     const toggleStatusMutation = useToggleVotingStatus(voting._id);
     const togglePublicMutation = useToggleVotingPublic(voting._id);
-    const deleteVotingMutation = useDeleteVoting();
+    const deleteVotingMutation = useDeleteVoting(voting._id);
+    const clearVotesMutation = useClearVotes(voting._id);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
@@ -82,19 +83,29 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     };
 
     const handleToggleStatus = async () => {
-        if (!window.confirm("Are you sure you want to toggle the status of this voting?")) return;
+        if (!window.confirm("Are you sure you want to toggle the status of this vote?")) return;
         await toggleStatusMutation.mutateAsync();
     };
 
     const handleTogglePublic = async () => {
-        if (!window.confirm("Are you sure you want to toggle the publicity of this voting?")) return;
+        if (!window.confirm("Are you sure you want to toggle the publicity of this vote?")) return;
         await togglePublicMutation.mutateAsync();
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this voting? This action is irreversible.")) return;
-        await deleteVotingMutation.mutateAsync(voting._id);
+        if (!window.confirm("Are you sure you want to delete this vote? This action is irreversible.")) return;
+        await deleteVotingMutation.mutateAsync();
         onNavigateBack();
+    };
+
+    const handleClearVotes = async () => {
+        if (
+            !window.confirm(
+                "Are you sure you want to clear all votes from this voting?\n\nOnly use this if you know what you're doing (i.e. deleting a non-fresh vote)."
+            )
+        )
+            return;
+        await clearVotesMutation.mutateAsync();
     };
 
     const handleUserCardClick = (targetUser: IUser) => {
@@ -295,6 +306,15 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     loading={deleteVotingMutation.isPending}
                                     leftSection={<FontAwesomeIcon icon="trash" />}>
                                     Delete
+                                </Button>
+                            )}
+                            {user?.isAdmin && voting.isActive && voting.votes.length && (
+                                <Button
+                                    variant="outline"
+                                    color="danger"
+                                    onClick={handleClearVotes}
+                                    leftSection={<FontAwesomeIcon icon="trash" />}>
+                                    Clear Votes
                                 </Button>
                             )}
                         </Group>

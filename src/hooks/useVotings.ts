@@ -8,6 +8,7 @@ import {
     updateVoting,
     deleteVoting,
     toggleVotingPublic,
+    clearVotes,
 } from "../api/votings";
 import utils from "../../utils";
 import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
@@ -84,11 +85,11 @@ export function useUpdateVoting(votingId: string) {
     });
 }
 
-export function useDeleteVoting() {
+export function useDeleteVoting(votingId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (votingId: string) => {
+        mutationFn: async () => {
             const response = await deleteVoting(votingId);
             return utils.handleMutationResponse(response);
         },
@@ -104,6 +105,21 @@ export function useToggleVotingPublic(votingId: string) {
     return useMutation({
         mutationFn: async () => {
             const response = await toggleVotingPublic(votingId);
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+        },
+    });
+}
+
+export function useClearVotes(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await clearVotes(votingId);
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
