@@ -1,5 +1,6 @@
 import { ITournament } from "@interfaces/Tournament";
 import { IUser } from "@interfaces/User";
+import { LeanDocument } from "mongoose";
 
 class TournamentService {
     /**
@@ -17,6 +18,28 @@ class TournamentService {
         });
 
         await tournament.save();
+    }
+
+    /**
+     * Sanitizes tournament data based on user permissions
+     * Removes sensitive fields from non-committee users
+     */
+    public sanitizeTournament(
+        tournament: LeanDocument<ITournament>,
+        user: IUser | undefined
+    ): LeanDocument<ITournament> {
+        if (!user || !user.isCommittee) {
+            const sanitized = { ...tournament };
+            sanitized.reviews = [];
+            sanitized.assignedReviewers = [];
+            sanitized.threadId = undefined;
+            sanitized.enchantUrl = undefined;
+            sanitized.notes = [];
+            sanitized.logs = [];
+            return sanitized;
+        }
+
+        return tournament;
     }
 }
 

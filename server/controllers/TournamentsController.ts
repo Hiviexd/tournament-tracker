@@ -168,28 +168,14 @@ class TournamentsController {
                     $project: {
                         statusOrder: 0,
                         needsUserReview: 0,
-                        reviews: 0,
-                        assignedReviewers: 0,
-                        notes: 0,
-                        logs: 0,
-                        enchantUrl: 0,
                     },
                 },
             ])
                 .exec()
+                .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
-                    Tournament.populate(tournaments, [
-                        {
-                            path: "host",
-                            select: "username osuId groups",
-                        },
-                        {
-                            path: "winners",
-                            select: "username osuId groups",
-                        },
-                    ])
-                )
-                .then((tournaments: ITournament[]) => tournaments.map((t) => Tournament.hydrate(t).toJSON())),
+                    tournaments.map((t) => TournamentService.sanitizeTournament(Tournament.hydrate(t).toJSON(), user))
+                ),
             Tournament.countDocuments(query),
         ]);
 
