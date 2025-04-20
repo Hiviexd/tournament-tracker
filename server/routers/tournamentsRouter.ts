@@ -19,7 +19,7 @@ tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.i
 tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isCommittee, TournamentsController.reassignReviewer);
 tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isCommittee, TournamentsController.submitReview);
 tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isCommittee, tournamentBadgeUpload, TournamentsController.uploadBadges);
-tournamentsRouter.get("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
+tournamentsRouter.post("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
 tournamentsRouter.post("/:tournamentId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TournamentsController.updateThreadId);
 tournamentsRouter.post("/:tournamentId/createNote", auth.isLoggedIn, auth.isCommittee, handleUpload, TournamentsController.createNote);
 tournamentsRouter.post("/:tournamentId/delete", auth.isLoggedIn, auth.isAdmin, TournamentsController.delete);

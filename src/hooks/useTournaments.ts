@@ -119,7 +119,7 @@ export function useUploadBadges(tournamentId: string) {
 
 export function useDownloadBadges(tournamentId: string) {
     return useMutation({
-        mutationFn: () => downloadBadges(tournamentId),
+        mutationFn: (filenames?: { badgeId: string; filename: string }[]) => downloadBadges(tournamentId, filenames),
     });
 }
 

@@ -64,8 +64,8 @@ export const uploadBadges = async (tournamentId: string, badgeFiles: File[]) => 
     return response.data;
 };
 
-export const downloadBadges = async (tournamentId: string) => {
-    const response = await axios.get(`/api/tournaments/${tournamentId}/downloadBadges`, {
+export const downloadBadges = async (tournamentId: string, filenames?: { badgeId: string; filename: string }[]) => {
+    const response = await axios.post(`/api/tournaments/${tournamentId}/downloadBadges`, filenames, {
         responseType: "blob",
     });
 

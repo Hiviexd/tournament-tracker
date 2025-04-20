@@ -807,10 +807,11 @@ class TournamentsController {
         await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
     }
 
-    /** GET download badges */
+    /** POST download badges */
     public async downloadBadges(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const customFilenames = req.body as { badgeId: string; filename: string }[];
 
         const badges = tournament.badges;
 
@@ -831,27 +832,44 @@ class TournamentsController {
 
             // Set the headers for file download
             res.setHeader("Content-Type", "application/zip");
-            res.setHeader("Content-Disposition", `attachment; filename=${tournament.name}-badges.zip`);
+            res.setHeader("Content-Disposition", `attachment; filename=${tournament.name} Badges.zip`);
 
             // Pipe archive data to the response
             archive.pipe(res);
 
-            let badgeCount = 1;
+            // Group filenames by badge ID to handle duplicates
+            const badgeFilenames = new Map<string, string[]>();
+            customFilenames?.forEach(({ badgeId, filename }) => {
+                if (!badgeFilenames.has(badgeId)) {
+                    badgeFilenames.set(badgeId, []);
+                }
+                badgeFilenames.get(badgeId)!.push(filename);
+            });
+
+            // Track processed badge IDs to avoid duplicates
+            const processedBadgeIds = new Set<string>();
 
             // Process each badge
             for (const badge of badges) {
                 try {
+                    // Skip if we've already processed this badge
+                    if (processedBadgeIds.has(badge._id.toString())) {
+                        continue;
+                    }
+                    processedBadgeIds.add(badge._id.toString());
+
                     // Download the badge image
                     const response = await axios.get(badge.url, { responseType: "arraybuffer" });
                     const buffer = Buffer.from(response.data);
 
                     // Get file extension from URL
                     const ext = badge.url.split(".").pop();
-                    let baseFilename = tournament.name.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+                    const filenames = badgeFilenames.get(badge._id.toString()) || [
+                        tournament.name.replace(/[^a-z0-9]/gi, "-").toLowerCase(),
+                    ];
 
-                    if (badgeCount > 1) {
-                        baseFilename = `${baseFilename}-${badgeCount}`;
-                    }
+                    // Use the first filename for this badge
+                    const baseFilename = filenames[0];
 
                     // Add the 2x version (original 172x80)
                     archive.append(buffer, { name: `${baseFilename}@2x.${ext}` });
@@ -865,8 +883,6 @@ class TournamentsController {
                         .toBuffer();
 
                     archive.append(resizedBuffer, { name: `${baseFilename}.${ext}` });
-
-                    badgeCount++;
                 } catch (error) {
                     console.error("Error processing badge:", error);
                     throw new Error("Failed to process badges");

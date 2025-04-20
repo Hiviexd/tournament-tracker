@@ -2,13 +2,15 @@ import { Stack, Group, Text, ActionIcon, Box, Image, Popover } from "@mantine/co
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { useUploadBadges, useDownloadBadges } from "../../../hooks/useTournaments";
+import { useUploadBadges } from "../../../hooks/useTournaments";
 import FileUploadInput from "../../common/FileUploadInput";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import config from "../../../../config.json";
 import { IAttachment } from "../../../../interfaces/Attachment";
+import { useDisclosure } from "@mantine/hooks";
+import TournamentAwardsManager from "./TournamentAwardsManager";
 
 interface IProps {
     tournament: ITournament;
@@ -35,8 +37,8 @@ export default function TournamentBadges({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingBadges, setIsEditingBadges] = useState(false);
     const uploadBadgesMutation = useUploadBadges(tournament._id);
-    const downloadBadgesMutation = useDownloadBadges(tournament._id);
     const { files, handleFileChange, clearFiles } = useFileUpload();
+    const [awardsManagerOpened, { toggle: toggleAwardsManager }] = useDisclosure(false);
 
     // check if none of the badges have file size 0
     const validateBadges = (badges: IAttachment[]) => {
@@ -63,6 +65,11 @@ export default function TournamentBadges({ tournament }: IProps) {
 
     return (
         <Stack gap={5}>
+            <TournamentAwardsManager
+                opened={awardsManagerOpened}
+                onClose={toggleAwardsManager}
+                tournament={tournament}
+            />
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500}>
                     Badges
@@ -92,11 +99,10 @@ export default function TournamentBadges({ tournament }: IProps) {
                         {badges.length > 0 && validateBadges(badges) && (
                             <ActionIcon
                                 variant="subtle"
-                                onClick={() => downloadBadgesMutation.mutate()}
                                 color="success"
-                                loading={downloadBadgesMutation.isPending}
-                                title="Download badges">
-                                <FontAwesomeIcon icon="download" />
+                                onClick={toggleAwardsManager}
+                                title="Open awards manager">
+                                <FontAwesomeIcon icon="award" />
                             </ActionIcon>
                         )}
                     </Group>
