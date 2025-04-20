@@ -281,7 +281,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     {user?.isCommittee && (
                         <Group>
                             <Button
-                                variant="filled"
+                                variant={voting.isActive ? "filled" : "outline"}
                                 color="warning"
                                 onClick={handleToggleStatus}
                                 loading={toggleStatusMutation.isPending}

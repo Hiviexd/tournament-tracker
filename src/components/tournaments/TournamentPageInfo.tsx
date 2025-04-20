@@ -60,12 +60,10 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                                 </Button>
                             )}
                             <Button
-                                variant="filled"
+                                variant={tournament.isActive ? "filled" : "outline"}
                                 color="warning"
                                 onClick={handleToggleState}
-                                leftSection={
-                                    <FontAwesomeIcon icon={tournament.isActive ? "archive" : "box-archive"} />
-                                }>
+                                leftSection={<FontAwesomeIcon icon="box-archive" />}>
                                 {tournament.isActive ? "Archive" : "Unarchive"}
                             </Button>
                         </Group>

@@ -181,7 +181,8 @@ export default function TicketInfo({ ticket }: IProps) {
                             <Button
                                 onClick={handleToggleStatus}
                                 loading={toggleStatusMutation.isPending}
-                                color={ticket.isActive ? "danger" : "warning"}
+                                color="warning"
+                                variant={ticket.isActive ? "filled" : "outline"}
                                 leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
                                 {ticket.isActive ? "Close" : "Reopen"}
                             </Button>
