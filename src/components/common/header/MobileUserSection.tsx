@@ -72,7 +72,7 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
                         }}>
                         <Group>
                             <FontAwesomeIcon icon="sign-out-alt" color="var(--mantine-color-danger-5)" />
-                            <Text size="sm" c="danger">
+                            <Text size="sm" c="danger.5">
                                 Log Out
                             </Text>
                         </Group>
