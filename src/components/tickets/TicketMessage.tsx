@@ -41,7 +41,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         <Stack gap="sm">
             <Group justify="space-between" align="center">
                 <UserDisplay {...getUserDisplayProps()} />
-                <Group gap="xs">
+                <Group gap="xs" ml={ {base: "auto", xs: "0"}}>
                     <DateBadge date={message.createdAt} staticColor />
                     <Menu position="bottom-end" withArrow>
                         <Menu.Target>
@@ -50,7 +50,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                             </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item leftSection={<FontAwesomeIcon icon="copy" />} onClick={() => utils.copyToClipboard(message.content)}>
+                            <Menu.Item
+                                leftSection={<FontAwesomeIcon icon="copy" />}
+                                onClick={() => utils.copyToClipboard(message.content)}>
                                 Copy Message
                             </Menu.Item>
                         </Menu.Dropdown>
