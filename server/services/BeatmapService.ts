@@ -168,12 +168,12 @@ export default class BeatmapService {
             return true;
         }
 
-        if (this.tagsContainsBannedSource(beatmapset)) {
-            return true;
-        }
-
         if (this.isAllowed(beatmapset)) {
             return false;
+        }
+
+        if (this.tagsContainsBannedSource(beatmapset)) {
+            return true;
         }
 
         const artist = beatmapset.artist;
@@ -204,12 +204,12 @@ export default class BeatmapService {
             return true;
         }
 
-        if (this.isBannedSource(beatmapset)) {
-            return true;
-        }
-
         if (this.isAllowed(beatmapset)) {
             return false;
+        }
+
+        if (this.isBannedSource(beatmapset)) {
+            return true;
         }
 
         const artist = beatmapset.artist;
