@@ -72,10 +72,11 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
         });
     }
 
+    // handle 404
     if (!route) {
         return {
             ...defaultMetadata,
-            url: `${baseUrl}${path}`,
+            url: baseUrl,
         };
     }
 
@@ -106,7 +107,7 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
                 if (!customMetadata) {
                     return {
                         ...defaultMetadata,
-                        url: `${baseUrl}${path}`,
+                        url: baseUrl,
                     };
                 }
 
