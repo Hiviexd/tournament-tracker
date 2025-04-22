@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 
 // Mantine
-import { Stack, Card, Skeleton } from "@mantine/core";
+import { Stack, Card, Skeleton, Group, Divider } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 // Components
@@ -24,21 +24,70 @@ export default function VotingDetailsPage() {
     const [editModalOpened, { close: closeEditModal }] = useDisclosure(false);
 
     const LoadingState = () => (
-        <Stack gap="md">
-            <Card shadow="sm" p="lg">
-                <Skeleton height={24} width="60%" mb="xs" />
-                <Skeleton height={16} width="20%" mb="lg" />
-                <Skeleton height={16} width="50%" mb="xs" />
-                <Skeleton height={16} width="40%" mb="xs" />
-                <Skeleton height={16} width="20%" />
+        <Stack gap="lg">
+            {/* VotingInfo Skeleton */}
+            <Card shadow="sm" p="lg" radius="md">
+                <Stack gap="lg">
+                    <Group justify="space-between" align="flex-start">
+                        <Stack gap={4}>
+                            <Group align="center" gap="xs">
+                                <Skeleton height={32} width={200} />
+                                <Skeleton height={24} width={24} circle />
+                            </Group>
+                            <Skeleton height={16} width={300} />
+                        </Stack>
+                        <Group gap="xs">
+                            <Skeleton height={24} width={80} />
+                            <Skeleton height={24} width={80} />
+                            <Skeleton height={24} width={80} />
+                        </Group>
+                    </Group>
+
+                    <Group wrap="wrap" gap="xs">
+                        <Skeleton height={24} width={120} />
+                        <Skeleton height={24} width={120} />
+                        <Skeleton height={24} width={120} />
+                    </Group>
+
+                    <Divider />
+                    <Stack gap="xs">
+                        <Skeleton height={20} width={100} />
+                        <Skeleton height={100} width="100%" />
+                    </Stack>
+                </Stack>
             </Card>
 
-            <Card shadow="sm" p="lg">
-                <Skeleton height={24} width="20%" mb="lg" />
-                <Skeleton height={16} width="15%" mb="xs" />
-                <Skeleton height={16} width="15%" mb="xs" />
-                <Skeleton height={16} width="15%" mb="lg" />
-                <Skeleton height={24} width="40%" />
+            {/* VotingForm Skeleton */}
+            <Card shadow="sm" p="lg" radius="md">
+                <Stack gap="lg">
+                    <Skeleton height={24} width={150} />
+                    <Skeleton height={200} width="100%" />
+                    <Stack gap="xs">
+                        <Skeleton height={20} width={100} />
+                        <Skeleton height={120} width="100%" />
+                    </Stack>
+                    <Group justify="flex-end">
+                        <Skeleton height={36} width={120} />
+                    </Group>
+                </Stack>
+            </Card>
+
+            {/* VotingResults Skeleton */}
+            <Card shadow="sm" p="lg" radius="md">
+                <Stack gap="lg">
+                    <Skeleton height={28} width={100} />
+                    <Skeleton height={200} width="100%" />
+                    <Divider />
+                    <Group justify="space-between" align="center">
+                        <Skeleton height={20} width={150} />
+                        <Skeleton height={36} width={120} />
+                    </Group>
+                    <Stack gap="md">
+                        {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} height={100} width="100%" />
+                        ))}
+                    </Stack>
+                </Stack>
             </Card>
         </Stack>
     );
@@ -60,9 +109,7 @@ export default function VotingDetailsPage() {
 
                     {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
 
-                    {(!voting.isActive || loggedInUser?.isDev) && (
-                        <VotingResults voting={voting} user={loggedInUser} />
-                    )}
+                    {(!voting.isActive || loggedInUser?.isDev) && <VotingResults voting={voting} user={loggedInUser} />}
 
                     <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
                 </Stack>
