@@ -5,6 +5,7 @@ import MobileNavigation from "./header/MobileNavigation";
 import ThemeCustomizeModal from "./modals/ThemeCustomizeModal";
 import SettingsModal from "./modals/SettingsModal";
 import DebugModal from "./modals/DebugModal";
+
 interface IProps {
     opened: boolean;
     onClose: () => void;
