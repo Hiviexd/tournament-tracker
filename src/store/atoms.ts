@@ -11,4 +11,6 @@ export const loggedInUserAtom = atom<IUser | null>(null);
 export const selectedUserAtom = atom<IUser | null>(null);
 
 /* UI */
-export const tournamentViewModeAtom = atom<"cards" | "table">(getSavedPreference("tournaments_view_mode", "cards"));
+export const tournamentViewModeAtom = atom<"cards" | "table" | "review">(
+    getSavedPreference("tournaments_view_mode", "cards")
+);

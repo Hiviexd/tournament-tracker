@@ -24,6 +24,7 @@ import { useTournaments } from "../hooks/useTournaments";
 import { loggedInUserAtom, tournamentViewModeAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { IUser } from "../../interfaces/User";
+import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoard";
 
 interface FilterValues {
     name: string;
@@ -35,7 +36,7 @@ interface FilterValues {
     showAllAssignedReviews: boolean;
 }
 
-function LoadingState({ viewMode, user }: { viewMode: "cards" | "table"; user: IUser | null }) {
+function LoadingState({ viewMode, user }: { viewMode: "cards" | "table" | "review"; user: IUser | null }) {
     if (viewMode === "cards") {
         return (
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -60,8 +61,6 @@ function LoadingState({ viewMode, user }: { viewMode: "cards" | "table"; user: I
                             </Group>
 
                             <Group gap="xs">
-                                <Skeleton height={20} width={28} radius="xl" /> {/* Type Badge */}
-                                <Skeleton height={20} width={28} radius="xl" /> {/* Mode Badge */}
                                 <Skeleton height={20} width={100} radius="xl" /> {/* Status Badge */}
                                 <Skeleton height={20} width={80} radius="xl" /> {/* Vote Count Badge */}
                             </Group>
@@ -78,36 +77,66 @@ function LoadingState({ viewMode, user }: { viewMode: "cards" | "table"; user: I
                 <Table>
                     <Table.Thead>
                         <Table.Tr>
-                            <Table.Th>Type</Table.Th>
-                            <Table.Th>Mode</Table.Th>
-                            <Table.Th>Name</Table.Th>
-                            <Table.Th>Host</Table.Th>
-                            <Table.Th>Status</Table.Th>
-                            <Table.Th>State</Table.Th>
+                            {viewMode === "review" ? (
+                                <>
+                                    <Table.Th>Tournament Name</Table.Th>
+                                    <Table.Th>Reviewer 1</Table.Th>
+                                    <Table.Th>Reviewer 2</Table.Th>
+                                    <Table.Th>Review Start Date</Table.Th>
+                                </>
+                            ) : (
+                                <>
+                                    <Table.Th>Type</Table.Th>
+                                    <Table.Th>Mode</Table.Th>
+                                    <Table.Th>Name</Table.Th>
+                                    <Table.Th>Host</Table.Th>
+                                    <Table.Th>Status</Table.Th>
+                                    <Table.Th>State</Table.Th>
+                                </>
+                            )}
                             {user && user.isCommittee && <Table.Th>Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
                         {Array.from({ length: 10 }).map((_, i) => (
                             <Table.Tr key={i}>
-                                <Table.Td>
-                                    <Skeleton height={20} width={40} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={40} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={200} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={120} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={100} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={80} />
-                                </Table.Td>
+                                {viewMode === "review" ? (
+                                    <>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={200} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={120} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={120} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={100} />
+                                        </Table.Td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={40} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={40} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={200} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={120} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={100} />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <Skeleton height={20} width={80} />
+                                        </Table.Td>
+                                    </>
+                                )}
                                 {user && user.isCommittee && (
                                     <Table.Td ta="center">
                                         <Group justify="center">
@@ -128,7 +157,7 @@ export default function TournamentListPage() {
     const [user] = useAtom(loggedInUserAtom);
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
-    const [viewMode] = useAtom(tournamentViewModeAtom);
+    const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
     const [filters, setFilters] = useState<FilterValues>({
         name: searchParams.get("name") || "",
         mode: (searchParams.get("mode") as GameMode) || "",
@@ -146,8 +175,8 @@ export default function TournamentListPage() {
         name: debouncedName,
         mode: filters.mode,
         host: debouncedHost,
-        type: filters.type,
-        status: filters.status,
+        type: viewMode === "review" ? "tournament" : filters.type,
+        status: viewMode === "review" ? "reviewOngoing" : filters.status,
         state: filters.state,
         showAllAssignedReviews: filters.showAllAssignedReviews,
         page,
@@ -191,6 +220,13 @@ export default function TournamentListPage() {
         filters.showAllAssignedReviews,
     ]);
 
+    // Reset view mode to table if user is not in committee and current mode is review
+    useEffect(() => {
+        if (viewMode === "review" && !user?.isCommittee) {
+            setViewMode("table");
+        }
+    }, [viewMode, user?.isCommittee, setViewMode]);
+
     return (
         <Stack gap="md">
             <TournamentFilters values={filters} onChange={setFilters} />
@@ -216,14 +252,16 @@ export default function TournamentListPage() {
                 <EmptyState hasError={false} />
             ) : (
                 <Stack gap="md">
-                    {viewMode === "cards" ? (
+                    {viewMode === "review" ? (
+                        <TournamentReviewBoard tournaments={data.tournaments} />
+                    ) : viewMode === "table" ? (
+                        <TournamentTable tournaments={data.tournaments} />
+                    ) : (
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                             {data.tournaments.map((tournament: ITournament) => (
                                 <TournamentCard key={tournament._id} tournament={tournament} />
                             ))}
                         </SimpleGrid>
-                    ) : (
-                        <TournamentTable tournaments={data.tournaments} />
                     )}
                     {data.pages > 1 && (
                         <Group justify="center" mt="xs">

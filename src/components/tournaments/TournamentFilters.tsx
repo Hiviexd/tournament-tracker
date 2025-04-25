@@ -22,7 +22,7 @@ interface IProps {
 
 export default function TournamentFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const [viewMode, setViewMode] = useLocalPreference("tournaments_view_mode", "cards");
+    const [viewMode, setViewMode] = useLocalPreference<"cards" | "table" | "review">("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
 
     const handleChange = (key: string, value: any) => {
@@ -34,7 +34,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     };
 
     const handleViewModeChange = (value: string) => {
-        const newMode = value as "cards" | "table";
+        const newMode = value as "cards" | "table" | "review";
         setViewMode(newMode);
         setGlobalViewMode(newMode);
     };
@@ -100,6 +100,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("type", value as TournamentType)}
                         data={typeOptions}
                         clearable
+                        disabled={viewMode === "review"}
                     />
                     <Select
                         placeholder="Filter by status"
@@ -108,6 +109,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("status", value as TournamentStatus)}
                         data={statusOptions}
                         clearable
+                        disabled={viewMode === "review"}
                     />
                     <Select
                         placeholder="Filter by state"
@@ -131,11 +133,13 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     </Box>
                     <SegmentedControl
                         color="primary"
+                        withItemsBorders={false}
                         value={viewMode}
                         onChange={handleViewModeChange}
                         data={[
                             { label: "Cards", value: "cards" },
                             { label: "Table", value: "table" },
+                            ...(user?.isCommittee ? [{ label: "Review Board", value: "review" }] : []),
                         ]}
                     />
                 </Group>
