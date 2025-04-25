@@ -100,7 +100,7 @@ class UserService {
             groups: { $in: [type] },
             isActiveReviewer: true,
             inBag: true,
-        }).orFail();
+        });
 
         // get count of total users in groups
         const totalUsersCount = await User.countDocuments({
