@@ -13,4 +13,6 @@ export interface IReview extends Document {
     comment: string;
     vote: ReviewVoteType;
     checklist: IReviewChecklistItem[];
+    createdAt?: Date;
+    updatedAt?: Date;
 }

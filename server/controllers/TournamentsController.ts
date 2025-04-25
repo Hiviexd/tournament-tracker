@@ -38,7 +38,7 @@ const defaultPopulate = [
     },
     {
         path: "reviews",
-        select: "comment author vote checklist",
+        select: "comment author vote checklist createdAt updatedAt",
         populate: {
             path: "author",
             select: "username osuId groups",
