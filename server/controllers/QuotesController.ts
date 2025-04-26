@@ -5,7 +5,7 @@ import User from "../models/userModel";
 class QuotesController {
     /** GET a random quote */
     public async getRandomQuote(_: Request, res: Response) {
-        const quotes = await Quote.find().populate("author", "username osuId");
+        const quotes = await Quote.find().populate("author", "username osuId").select("-addedBy");
 
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
@@ -14,7 +14,10 @@ class QuotesController {
 
     /** GET all quotes */
     public async getAllQuotes(_: Request, res: Response) {
-        const quotes = await Quote.find().populate("author", "username osuId").sort({ createdAt: -1 });
+        const quotes = await Quote.find()
+            .populate("author", "username osuId")
+            .populate("addedBy", "username osuId")
+            .sort({ createdAt: -1 });
         res.json(quotes);
     }
 
@@ -22,6 +25,7 @@ class QuotesController {
     public async createQuote(req: Request, res: Response) {
         const { authorId, quote, creationDate } = req.body;
         let createdAt = new Date();
+        const currentUser = res.locals!.user!;
 
         if (!authorId) {
             return res.json({ error: "Author is required" });
@@ -41,7 +45,7 @@ class QuotesController {
             return res.json({ error: "Author not found" });
         }
 
-        const newQuote = await Quote.create({ author, quote, createdAt });
+        const newQuote = await Quote.create({ author, quote, addedBy: currentUser._id, createdAt });
         res.json(newQuote);
     }
 }

@@ -60,6 +60,7 @@ export default function QuotesPage() {
                             <Table.Th>Author</Table.Th>
                             <Table.Th>Quote</Table.Th>
                             <Table.Th>Creation Date</Table.Th>
+                            <Table.Th>Added By</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -73,6 +74,11 @@ export default function QuotesPage() {
                                 <Table.Td>{quote.quote}</Table.Td>
                                 <Table.Td>
                                     <DateBadge date={new Date(quote.createdAt)} staticColor />
+                                </Table.Td>
+                                <Table.Td>
+                                    <Group>
+                                        <UserLink user={quote.addedBy} size="sm" />
+                                    </Group>
                                 </Table.Td>
                             </Table.Tr>
                         ))}
