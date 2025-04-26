@@ -18,6 +18,7 @@ import AssetsPreviewerPage from "../pages/AssetsPreviewerPage";
 import ResourcesPage from "../pages/ResourcesPage";
 import MappoolCompliancePage from "../pages/MappoolCompliancePage";
 import TournamentDetailsPage from "../pages/TournamentDetailsPage";
+import QuotesPage from "../pages/QuotesPage";
 
 interface RouteConfig {
     path: string;
@@ -212,6 +213,13 @@ const routes: RouteConfig[] = [
         title: "Mappool Compliance",
         icon: "check-circle",
         permissions: [],
+    },
+    {
+        path: "/quotes",
+        page: <QuotesPage />,
+        title: "Quotes",
+        icon: "quote-left",
+        permissions: ["committee"],
     },
     {
         path: "*",

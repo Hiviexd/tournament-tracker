@@ -7,6 +7,8 @@ import LoginButton from "../components/common/LoginButton";
 import CommitteeSection from "../components/users/CommitteeSection";
 import { IUser } from "@interfaces/User";
 import { Link } from "react-router-dom";
+import { useRandomQuote } from "../hooks/useQuotes";
+import moment from "moment";
 
 interface Feature {
     icon: IconProp;
@@ -71,6 +73,7 @@ const features: Feature[] = [
 
 export default function HomePage() {
     const [user] = useAtom(loggedInUserAtom);
+    const { data: quote } = useRandomQuote();
 
     const handleUserSelect = (user: IUser) => {
         window.open(user.osuProfileUrl, "_blank");
@@ -159,6 +162,12 @@ export default function HomePage() {
                     <Title order={2} ta="center">
                         Meet the Committee
                     </Title>
+                    <Text size="sm" ta="center">
+                        Here's some wisdom from one of them:
+                        <Text size="sm" c="dimmed" ta="center" maw={400} mx="auto">
+                            {quote?.quote} — {quote?.author?.username}, {moment(quote?.createdAt).format("YYYY")}
+                        </Text>
+                    </Text>
                     <CommitteeSection onSelect={handleUserSelect} />
                 </Stack>
             </Stack>
