@@ -8,7 +8,7 @@ export const useVersion = () => {
         // Disable caching
         gcTime: 0,
         // Check for updates in the background
-        refetchInterval: 60 * 1000, // Every minute
+        refetchInterval: 2 * 60 * 1000, // Every 2 minutes
         refetchIntervalInBackground: true,
         // Don't show stale data while refetching
         staleTime: 0,
