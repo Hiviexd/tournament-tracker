@@ -134,6 +134,11 @@ export const seoRoutes: SEORoute[] = [
         name: "Mappool Compliance",
         description: "Verify if your mappool is compliant with the osu! content usage artist permissions.",
     },
+    {
+        path: "/quotes",
+        name: "Quotes",
+        description: "Manage the home page committee quotes.",
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {
