@@ -7,6 +7,8 @@ import { Model } from "mongoose";
 const CRAWLER_USER_AGENTS = ["discord"];
 
 export async function handleCrawlers(req: Request, res: Response, next: NextFunction) {
+    if (req.path.startsWith("/assets/")) return next();
+
     const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
     const isCrawler = CRAWLER_USER_AGENTS.some((crawler) => userAgent.includes(crawler));
 
