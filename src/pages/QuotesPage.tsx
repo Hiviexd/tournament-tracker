@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, TextInput, Button, Table, Group, Paper } from "@mantine/core";
+import { Stack, TextInput, Button, Table, Group, Card, ScrollArea } from "@mantine/core";
 import { useAllQuotes, useCreateQuote } from "../hooks/useQuotes";
 import UserSearch from "../components/common/UserSearch";
 import { IUser } from "../../interfaces/User";
@@ -31,7 +31,7 @@ export default function QuotesPage() {
 
     return (
         <Stack p="md">
-            <Paper p="md" withBorder>
+            <Card shadow="sm" p="md">
                 <form onSubmit={handleSubmit}>
                     <Stack>
                         <UserSearch label="Author" onChange={setSelectedUser} required />
@@ -51,40 +51,42 @@ export default function QuotesPage() {
                         </Button>
                     </Stack>
                 </form>
-            </Paper>
+            </Card>
 
-            <Paper p="md" withBorder>
-                <Table>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>Author</Table.Th>
-                            <Table.Th>Quote</Table.Th>
-                            <Table.Th>Creation Date</Table.Th>
-                            <Table.Th>Added By</Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                        {quotes.map((quote) => (
-                            <Table.Tr key={quote._id}>
-                                <Table.Td>
-                                    <Group>
-                                        <UserLink user={quote.author} size="sm" />
-                                    </Group>
-                                </Table.Td>
-                                <Table.Td>{quote.quote}</Table.Td>
-                                <Table.Td>
-                                    <DateBadge date={new Date(quote.createdAt)} staticColor />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Group>
-                                        <UserLink user={quote.addedBy} size="sm" />
-                                    </Group>
-                                </Table.Td>
+            <Card shadow="sm" p="md">
+                <ScrollArea>
+                    <Table miw={{ base: 1200, md: 800 }}>
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Author</Table.Th>
+                                <Table.Th>Quote</Table.Th>
+                                <Table.Th>Creation Date</Table.Th>
+                                <Table.Th>Added By</Table.Th>
                             </Table.Tr>
-                        ))}
-                    </Table.Tbody>
-                </Table>
-            </Paper>
+                        </Table.Thead>
+                        <Table.Tbody>
+                            {quotes.map((quote) => (
+                                <Table.Tr key={quote._id}>
+                                    <Table.Td>
+                                        <Group>
+                                            <UserLink user={quote.author} size="sm" />
+                                        </Group>
+                                    </Table.Td>
+                                    <Table.Td>{quote.quote}</Table.Td>
+                                    <Table.Td>
+                                        <DateBadge date={new Date(quote.createdAt)} staticColor />
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <Group>
+                                            <UserLink user={quote.addedBy} size="sm" />
+                                        </Group>
+                                    </Table.Td>
+                                </Table.Tr>
+                            ))}
+                        </Table.Tbody>
+                    </Table>
+                </ScrollArea>
+            </Card>
         </Stack>
     );
 }
