@@ -235,7 +235,7 @@ class TournamentsController {
 
         // logging
         await LogService.generate(currentUser._id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
-        await TournamentService.addLog(
+        await TournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Created ${tournament.type}`,
@@ -313,7 +313,7 @@ class TournamentsController {
         res.json({ message: "Reviewers assigned successfully!" });
 
         // logging
-        await TournamentService.addLog(
+        await TournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Assigned reviewers: ${reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", ")}`,
@@ -402,12 +402,17 @@ class TournamentsController {
 
         // logging
         if (forumUrl) {
-            await TournamentService.addLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated forum URL: **${forumUrl}**`,
+                "link"
+            );
             await LogService.generate(currentUser._id, `Updated forum URL for **${tournament.name}**`, "tournament");
         }
 
         if (enchantUrl) {
-            await TournamentService.addLog(
+            await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Updated Enchant ticket URL: **${enchantUrl}**`,
@@ -421,7 +426,7 @@ class TournamentsController {
         }
 
         if (startDate && endDate) {
-            await TournamentService.addLog(
+            await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
@@ -437,13 +442,13 @@ class TournamentsController {
         }
 
         if (bannerUrl) {
-            await TournamentService.addLog(tournament, actioner, `Updated banner`, "image");
+            await TournamentService.addTournamentLog(tournament, actioner, `Updated banner`, "image");
             await LogService.generate(actioner._id, `Updated banner for **${tournament.name}**`, "tournament");
         }
 
         if (status) {
             // logging
-            await TournamentService.addLog(
+            await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Updated status to **${_.startCase(status)}**`,
@@ -520,7 +525,7 @@ class TournamentsController {
 
         if (isActive !== undefined) {
             // logging
-            await TournamentService.addLog(
+            await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `${isActive ? "Unarchived" : "Archived"} tournament`,
@@ -618,7 +623,7 @@ class TournamentsController {
         res.json({ message: "Reviewer reassigned successfully!" });
 
         // logging
-        await TournamentService.addLog(
+        await TournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Reassigned reviewer from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
@@ -711,7 +716,7 @@ class TournamentsController {
 
         if (isNewReview) {
             // logging
-            await TournamentService.addLog(tournament, currentUser, `Submitted review`, "check-to-slot");
+            await TournamentService.addTournamentLog(tournament, currentUser, `Submitted review`, "check-to-slot");
             await LogService.generate(currentUser._id, `Submitted review for **${tournament.name}**`, "tournament");
         }
 
@@ -803,7 +808,7 @@ class TournamentsController {
         res.json({ message: "Badges uploaded successfully!" });
 
         // logging
-        await TournamentService.addLog(tournament, currentUser, `Uploaded badges`, "image");
+        await TournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
         await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
     }
 
@@ -920,7 +925,7 @@ class TournamentsController {
             res.json({ message: "Thread ID updated successfully!" });
 
             // logging
-            await TournamentService.addLog(
+            await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Updated Discord thread ID: **${threadId && threadId.length ? threadId : "#t-committee"}**`,
@@ -989,7 +994,7 @@ class TournamentsController {
         res.json({ message: "Note created successfully!" });
 
         // logging
-        await TournamentService.addLog(tournament, currentUser, `Created note`, "sticky-note");
+        await TournamentService.addTournamentLog(tournament, currentUser, `Created note`, "sticky-note");
         await LogService.generate(currentUser._id, `Created note for **${tournament.name}**`, "tournament");
 
         // Discord

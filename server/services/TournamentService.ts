@@ -9,7 +9,7 @@ class TournamentService {
      * @param user - The user who performed the action
      * @param action - The action to add to the log
      */
-    public async addLog(tournament: ITournament, user: IUser, action: string, icon: string = "history") {
+    public async addTournamentLog(tournament: ITournament, user: IUser, action: string, icon: string = "history") {
         tournament.logs.push({
             user,
             action,
