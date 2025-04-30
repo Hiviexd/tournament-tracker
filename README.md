@@ -1,6 +1,6 @@
 # Tournament Tracker
 
-[![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker)
+[![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker) ![GitHub last commit](https://img.shields.io/github/last-commit/Hiviexd/tournament-tracker) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Hiviexd/tournament-tracker/deploy-production.yml) ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m798812390-8b85ac6ef54622c9cfbd1301)
 
 The one-stop shop for all official osu! tournament correspondence and information!
 
