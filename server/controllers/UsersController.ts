@@ -385,7 +385,7 @@ class UsersController {
 
             const startedReviewDate = new Date(tournament.startedReviewAt);
             const hasUserSubmittedReview = tournament.reviews?.some(
-                (review) => review.author._id.toString() === user._id.toString()
+                (review) => review.author?._id.toString() === user._id.toString()
             );
 
             // Count active reviews
