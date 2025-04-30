@@ -279,6 +279,11 @@ class AutomationService {
             // Skip if less than 7 days old
             if (daysSinceLastResponse < 7) continue;
 
+            // Skip if last non-note message is from committee
+            const messages = ticket.messages.filter((message) => !message.isNote);
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage.isCommittee) continue;
+
             const ticketType = ticket.type === "report" ? "Report" : "Ticket";
             const ticketUrl = `${config.baseUrl}/tickets/${ticket._id}`;
 
@@ -453,7 +458,7 @@ class AutomationService {
             if (!tournament.assignedReviewers?.length) continue;
 
             // Get set of user IDs who have already reviewed
-            const reviewedUserIds = new Set(tournament.reviews?.map((review) => review.author._id.toString()) || []);
+            const reviewedUserIds = new Set(tournament.reviews?.map((review) => review.author?._id.toString()) || []);
 
             // Filter out users who have already reviewed
             const missingReviewers = tournament.assignedReviewers.filter(
