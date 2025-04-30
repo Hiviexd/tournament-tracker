@@ -73,7 +73,7 @@ export default function TournamentDetailsPage() {
                         <TournamentPageInfo tournament={tournament} />
                         {(user?.isCommittee || user?.isAdmin) && <TournamentNotes tournament={tournament} />}
                         {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
-                        {user?.isCommittee && <TournamentReviewSection tournament={tournament} />}
+                        <TournamentReviewSection tournament={tournament} />
                         {user?.isCommittee && tournament.isTournament && (
                             <MappoolCompliancePage header="Mappool Compliance Checker" />
                         )}

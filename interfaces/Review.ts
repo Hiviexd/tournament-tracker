@@ -9,7 +9,7 @@ export interface IReviewChecklistItem {
 }
 
 export interface IReview extends Document {
-    author: IUser;
+    author?: IUser;
     comment: string;
     vote: ReviewVoteType;
     checklist: IReviewChecklistItem[];

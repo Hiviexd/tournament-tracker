@@ -7,6 +7,9 @@ import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITournament } from "../../../interfaces/Tournament";
 import utils from "../../../utils";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
+import { UserGroup } from "../../../interfaces/User";
 
 interface IProps {
     tournament: ITournament;
@@ -14,6 +17,7 @@ interface IProps {
 }
 
 export default function TournamentReviewCard({ tournament, review }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
     const getVoteColor = () => {
@@ -47,6 +51,19 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
         return uncheckedItems;
     };
 
+    const getUserDisplayProps = () => {
+        if (!user?.isCommittee) {
+            return {
+                username: "Reviewer",
+                avatarUrl: "/assets/logo-512.png",
+                group: (tournament.isTournament ? "tc" : "cc") as UserGroup,
+            };
+        }
+        return {
+            user: review.author,
+        };
+    };
+
     const uncheckedItems = getUncheckedItems();
 
     return (
@@ -62,7 +79,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                 {/* Mobile layout */}
                 <Box display={{ base: "block", sm: "none" }}>
                     <Stack gap="md">
-                        <UserDisplay user={review.author} />
+                        <UserDisplay {...getUserDisplayProps()} />
                         <Badge size="lg" variant="light" color={getVoteColor()}>
                             {_.startCase(review.vote)}
                         </Badge>
@@ -98,14 +115,14 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                         </Badge>
                     </Box>
                     <Box>
-                        <UserDisplay user={review.author} />
+                        <UserDisplay {...getUserDisplayProps()} />
                         <Stack gap="xs" mt="xs">
                             <Text fw={500} size="sm" c={uncheckedItems.length === 0 ? "success" : "danger"}>
                                 {uncheckedItems.length === 0 ? (
                                     <FontAwesomeIcon icon="check" />
                                 ) : (
                                     <FontAwesomeIcon icon="exclamation-triangle" />
-                                )} {" "}
+                                )}{" "}
                                 {uncheckedItems.length === 0
                                     ? "No issues with checklist!"
                                     : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`}

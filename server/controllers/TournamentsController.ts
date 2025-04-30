@@ -81,7 +81,7 @@ const DEFAULT_LIMIT = 30;
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
 const selectFields = (isCommittee: boolean) =>
-    isCommittee ? "" : "-reviews -assignedReviewers -notes -logs -threadId -enchantUrl";
+    isCommittee ? "" : "-assignedReviewers -notes -logs -threadId -enchantUrl";
 
 class TournamentsController {
     /** GET tournament listing */
@@ -174,7 +174,9 @@ class TournamentsController {
                 .exec()
                 .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
-                    tournaments.map((t) => TournamentService.sanitizeTournament(Tournament.hydrate(t).toJSON(), user))
+                    tournaments.map((t) =>
+                        TournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user)
+                    )
                 ),
             Tournament.countDocuments(query),
         ]);
@@ -192,9 +194,13 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const isCommittee = res.locals!.user?.isCommittee ?? false;
 
-        const tournament = await Tournament.findById(tournamentId)
+        let tournament = await Tournament.findById(tournamentId)
             .select(selectFields(isCommittee))
             .populate(defaultPopulate);
+
+        if (tournament) {
+            tournament = TournamentService.censorTournamentReviews(tournament, res.locals!.user);
+        }
 
         res.json(tournament);
     }
@@ -468,7 +474,7 @@ class TournamentsController {
             if (status === "screeningConcluded") {
                 message += `\n\nPlease check your email for more information about potentially screened-out players.`;
             } else if (status === "changesRequested") {
-                message += `\n\nPlease check your email for more information about the changes requested.`;
+                message += `\n\nPlease check your email for more information about the changes requested, or visit the [Tournament Tracker](${config.baseUrl}/tournaments/${tournament._id}) for a brief overview of the changes.`;
             } else if (status === "badgeApproved") {
                 message += `\n\nCongratulations! Your tournament has been approved for badge support! You will receive an email with more information soon.`;
             } else if (status === "badgeRejected") {
@@ -688,7 +694,7 @@ class TournamentsController {
             return res.json({ error: "Invalid checklist" });
         }
 
-        let review = tournament.reviews.find((review) => review.author.equals(res.locals!.user!._id));
+        let review = tournament.reviews.find((review) => review.author!.equals(res.locals!.user!._id));
         let isNewReview = false;
 
         if (!review) {

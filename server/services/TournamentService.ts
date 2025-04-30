@@ -1,6 +1,7 @@
 import { ITournament } from "@interfaces/Tournament";
 import { IUser } from "@interfaces/User";
 import { LeanDocument } from "mongoose";
+import { IReview } from "@interfaces/Review";
 
 class TournamentService {
     /**
@@ -21,10 +22,10 @@ class TournamentService {
     }
 
     /**
-     * Sanitizes tournament data based on user permissions
+     * Sanitizes tournament listing data based on user permissions
      * Removes sensitive fields from non-committee users
      */
-    public sanitizeTournament(
+    public sanitizeTournamentListing(
         tournament: LeanDocument<ITournament>,
         user: IUser | undefined
     ): LeanDocument<ITournament> {
@@ -37,6 +38,29 @@ class TournamentService {
             sanitized.notes = [];
             sanitized.logs = [];
             return sanitized;
+        }
+
+        return tournament;
+    }
+
+    /**
+     * Censors reviews from non-committee users
+     */
+    public censorTournamentReviews(tournament: ITournament, user: IUser | undefined) {
+        if (!user || !user.isCommittee) {
+            // outright clear the reviews array if the user is not the tournament host, or if the status is not changesRequested
+            if (!user || !tournament.host._id.equals(user._id) || tournament.status !== "changesRequested") {
+                tournament.reviews = [];
+            } else {
+                // Censor reviews
+                if (tournament.reviews) {
+                    tournament.reviews.forEach((review: IReview) => {
+                        review.author = undefined;
+                        review.comment = "";
+                        review.vote = "changesRequested";
+                    });
+                }
+            }
         }
 
         return tournament;

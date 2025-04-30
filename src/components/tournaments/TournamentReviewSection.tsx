@@ -29,6 +29,9 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     const isUserAssignedReviewer =
         user?.isCommittee && tournament.assignedReviewers?.some((reviewer) => reviewer._id === user._id);
 
+    // Check if current user is the tournament host
+    const isUserHost = user?._id === tournament.host._id;
+
     const handleAssignReviewers = async () => {
         await assignReviewersMutation.mutateAsync();
     };
@@ -73,7 +76,17 @@ export default function TournamentReviewSection({ tournament }: IProps) {
             }));
     };
 
-    if (tournament.status !== "reviewOngoing" && !tournament.assignedReviewers?.length) {
+    // Only show the section if:
+    // 1. User is committee member and tournament is in reviewOngoing, OR
+    // 2. Tournament has reviews and user is committee, OR
+    // 3. Tournament status is changesRequested and user is either committee or host
+    if (
+        !(
+            (user?.isCommittee && tournament.status === "reviewOngoing") ||
+            (tournament.reviews?.length > 0 && user?.isCommittee) ||
+            (tournament.status === "changesRequested" && (user?.isCommittee || isUserHost))
+        )
+    ) {
         return null;
     }
 
@@ -83,29 +96,33 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                 <Title order={3}>Review Information</Title>
 
                 <Stack gap="md">
+                    {/* Assigned reviewers section */}
                     {tournament.assignedReviewers?.length ? (
                         <Stack gap="xs">
-                            <Group align="center" gap="xs">
-                                <Title order={4}>Assigned Reviewers</Title>
-                                {!isEditingReviewer ? (
-                                    <ActionIcon
-                                        variant="subtle"
-                                        color="blue"
-                                        onClick={() => setIsEditingReviewer(true)}
-                                        title="Reassign reviewers">
-                                        <FontAwesomeIcon icon="pen-to-square" />
-                                    </ActionIcon>
-                                ) : (
-                                    <ActionIcon
-                                        variant="subtle"
-                                        color="danger"
-                                        onClick={handleCancelEdit}
-                                        title="Done editing">
-                                        <FontAwesomeIcon icon="xmark" />
-                                    </ActionIcon>
-                                )}
-                            </Group>
+                            {user?.isCommittee && (
+                                <Group align="center" gap="xs">
+                                    <Title order={4}>Assigned Reviewers</Title>
+                                    {!isEditingReviewer ? (
+                                        <ActionIcon
+                                            variant="subtle"
+                                            color="blue"
+                                            onClick={() => setIsEditingReviewer(true)}
+                                            title="Reassign reviewers">
+                                            <FontAwesomeIcon icon="pen-to-square" />
+                                        </ActionIcon>
+                                    ) : (
+                                        <ActionIcon
+                                            variant="subtle"
+                                            color="danger"
+                                            onClick={handleCancelEdit}
+                                            title="Done editing">
+                                            <FontAwesomeIcon icon="xmark" />
+                                        </ActionIcon>
+                                    )}
+                                </Group>
+                            )}
 
+                            {/* Editing reviewer section */}
                             {isEditingReviewer ? (
                                 <Stack gap="md">
                                     <Group gap="xl">
@@ -174,6 +191,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 </Stack>
                             ) : (
                                 <Group gap="xl">
+                                    {/* Reviewer Display */}
                                     {tournament.assignedReviewers.map((reviewer) => (
                                         <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
                                     ))}
@@ -196,6 +214,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 </>
                             )}
 
+                            {/* Review input section */}
                             {isUserAssignedReviewer && tournament.isActive && (
                                 <>
                                     <Divider my="sm" />
@@ -204,7 +223,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 </>
                             )}
                         </Stack>
-                    ) : tournament.status === "reviewOngoing" ? (
+                    ) : user?.isCommittee && tournament.status === "reviewOngoing" ? (
                         <Button
                             variant="light"
                             color="info"
@@ -214,6 +233,17 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                             Assign Reviewers
                         </Button>
                     ) : null}
+
+                    {tournament.reviews?.length > 0 && !tournament.assignedReviewers?.length && (
+                        <>
+                            <Title order={4}>Reviews</Title>
+                            <Stack gap="md">
+                                {tournament.reviews.map((review) => (
+                                    <TournamentReviewCard key={review._id} tournament={tournament} review={review} />
+                                ))}
+                            </Stack>
+                        </>
+                    )}
                 </Stack>
             </Stack>
         </Card>
