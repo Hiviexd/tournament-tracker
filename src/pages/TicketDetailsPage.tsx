@@ -7,6 +7,7 @@ import TicketInfo from "../components/tickets/TicketInfo";
 import TicketMessages from "../components/tickets/TicketMessages";
 import TicketMessageForm from "../components/tickets/TicketMessageForm";
 import EmptyState from "../components/common/EmptyState";
+import { useDocumentTitle } from "@mantine/hooks";
 
 export default function TicketDetailsPage() {
     const { ticketId } = useParams();
@@ -15,6 +16,10 @@ export default function TicketDetailsPage() {
     const { data: ticket, isLoading } = useTicket(ticketId!);
 
     const isReportRoute = location.pathname.includes("/reports/");
+
+    const type = isReportRoute ? "Report" : "Ticket";
+
+    useDocumentTitle(ticket?.title ? `${ticket.title} | ${type} Details` : `${type} Details | Tournament Tracker`);
 
     // Handle route mismatch after data is loaded
     if (ticket && !ticket.error) {

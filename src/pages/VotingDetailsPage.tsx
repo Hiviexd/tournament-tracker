@@ -7,7 +7,8 @@ import { loggedInUserAtom } from "../store/atoms";
 
 // Mantine
 import { Stack, Card, Skeleton, Group, Divider } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
+
 
 // Components
 import VotingEditModal from "../components/votings/VotingEditModal";
@@ -22,6 +23,8 @@ export default function VotingDetailsPage() {
     const [loggedInUser] = useAtom(loggedInUserAtom);
     const { data: voting, isLoading } = useVoting(votingId!);
     const [editModalOpened, { close: closeEditModal }] = useDisclosure(false);
+
+    useDocumentTitle(voting?.title ? `${voting.title} | Vote Details` : "Vote Details | Tournament Tracker");
 
     const LoadingState = () => (
         <Stack gap="lg">

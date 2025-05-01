@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
 import TextEditor from "../components/common/TextEditor";
 import { clearAutoSavedValue } from "../hooks/useAutoSave";
+import { useDocumentTitle } from "@mantine/hooks";
 
 const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
     "/resources/official": "official-resources",
@@ -28,6 +29,8 @@ export default function ArticlePage() {
     const deleteArticleMutation = useDeleteArticle(articleSlug!);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editContent, setEditContent] = useState("");
+
+    useDocumentTitle(article?.title ? `${article.title} | Article` : "Article | Tournament Tracker");
 
     // disable the title if the article is in the predefined slugs
     const isPredefined = Object.keys(PREDEFINED_ARTICLE_SLUGS).includes(location.pathname);

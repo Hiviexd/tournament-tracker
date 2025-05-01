@@ -10,11 +10,14 @@ import EmptyState from "../components/common/EmptyState";
 import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import MappoolCompliancePage from "./MappoolCompliancePage";
+import { useDocumentTitle } from "@mantine/hooks";
 
 export default function TournamentDetailsPage() {
     const [user] = useAtom(loggedInUserAtom);
     const { tournamentId } = useParams();
     const { data: tournament, isLoading } = useTournament(tournamentId!);
+
+    useDocumentTitle(tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker");
 
     const LoadingState = () => (
         <Stack gap="md">
