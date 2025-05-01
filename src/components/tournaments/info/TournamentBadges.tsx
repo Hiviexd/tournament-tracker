@@ -96,11 +96,12 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 <FontAwesomeIcon icon="pen-to-square" />
                             </ActionIcon>
                         )}
-                        {badges.length > 0 && validateBadges(badges) && (
+                        {badges.length > 0 && (
                             <ActionIcon
                                 variant="subtle"
                                 color="success"
                                 onClick={toggleAwardsManager}
+                                disabled={!validateBadges(badges)}
                                 title="Open awards manager">
                                 <FontAwesomeIcon icon="award" />
                             </ActionIcon>
@@ -108,6 +109,12 @@ export default function TournamentBadges({ tournament }: IProps) {
                     </Group>
                 ) : null}
             </Group>
+
+            {user?.isCommittee && badges.length > 0 && !validateBadges(badges) && (
+                <Text size="xs" c="warning">
+                    <FontAwesomeIcon icon="exclamation-triangle" /> Badges need to be re-uploaded to enable the awards manager
+                </Text>
+            )}
 
             <Group gap="xs" align="start">
                 {isEditingBadges ? (
