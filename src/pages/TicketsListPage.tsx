@@ -90,7 +90,7 @@ export default function TicketsListPage() {
 
     const LoadingState = () => (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-            {[1, 2, 3].map((i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
                 <Card
                     key={i}
                     shadow="sm"
