@@ -17,7 +17,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
         const reviewer = tournament.assignedReviewers?.[reviewerIndex];
         if (!reviewer) return null;
 
-        const review = tournament.reviews.find((r) => r.author._id === reviewer._id);
+        const review = tournament.reviews.find((r) => r.author?._id === reviewer._id);
         if (!review) {
             return (
                 <Group gap="xs">
@@ -35,7 +35,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
                     <FontAwesomeIcon icon="check-circle" />
                 </Text>
                 <UserLink user={reviewer} fw={500} />
-                {review.createdAt && <DateBadge date={review.createdAt} />}
+                {review.createdAt && <DateBadge date={review.createdAt} staticColor />}
             </Group>
         );
     };
