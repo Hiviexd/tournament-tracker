@@ -17,7 +17,7 @@ function unauthorize(req: Request, res: Response, next: NextFunction) {
     }
 
     if (req.accepts(["html", "json"]) === "json") {
-        res.json({ error: "Unauthorized, login first" });
+        res.status(401).json({ error: "Unauthorized, login first" });
     } else {
         res.redirect("/");
     }

@@ -16,7 +16,7 @@ export default function AuthRouter() {
     // Handle initial auth check
     useEffect(() => {
         if (!isLoading) {
-            if (user) {
+            if (user && !user?.error) {
                 setLoggedInUser(user);
             } else {
                 setLoggedInUser(null);
