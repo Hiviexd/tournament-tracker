@@ -85,7 +85,7 @@ export default function TextEditor({
         if (toolbar && badgeRef.current && !toolbar.contains(badgeRef.current)) {
             toolbar.insertBefore(badgeRef.current, toolbar.firstChild);
         }
-    }, [showSaveIndicator]);
+    });
 
     return (
         <div id={editorDomId.current}>
