@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { Text, Stack, Paper, Center, Group, Card, Button, Switch, Flex } from "@mantine/core";
+import { Text, Stack, Paper, Center, Group, Card, Button, Flex, SegmentedControl } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import defaultStableBackground from "/assets/default-bg-stable.jpg";
@@ -171,10 +171,7 @@ export default function InGameBannersTab() {
         const startScale = currentScaleMatch ? parseFloat(currentScaleMatch[1]) : 1;
 
         // Use the easing functions from utils
-        const easing =
-            targetScale > startScale
-                ? utils.easingOutBounce
-                : utils.easingOutCubic;
+        const easing = targetScale > startScale ? utils.easingOutBounce : utils.easingOutCubic;
 
         const animate = (time: number) => {
             const elapsed = time - startTime;
@@ -210,10 +207,6 @@ export default function InGameBannersTab() {
             animateStableBanner(1.0);
         }
     }, [isLazer, animateStableBanner]);
-
-    const handleModeToggle = useCallback((checked: boolean) => {
-        setIsLazer(checked);
-    }, []);
 
     return (
         <Stack gap="xl" className="ingame-banner-previewer" mt="xl">
@@ -278,18 +271,23 @@ export default function InGameBannersTab() {
 
             {/* Mode Switch */}
             <Flex justify="center" align="center" gap="md">
-                <Text size="sm" fw={!isLazer ? 600 : 400} c={!isLazer ? "primary" : "dimmed"}>
-                    osu!(stable)
-                </Text>
-                <Switch
-                    checked={isLazer}
-                    onChange={(event) => handleModeToggle(event.currentTarget.checked)}
-                    size="md"
+                <SegmentedControl
                     color="primary"
+                    withItemsBorders={false}
+                    value={isLazer ? "lazer" : "stable"}
+                    onChange={(value) => setIsLazer(value === "lazer")}
+                    data={[
+                        { label: "osu!(stable)", value: "stable" },
+                        { label: "osu!(lazer)", value: "lazer" },
+                    ]}
+                    styles={{
+                        root: {
+                            backgroundColor: "var(--mantine-color-primary-11)",
+                            border: "1px solid var(--mantine-color-default-border)",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        },
+                    }}
                 />
-                <Text size="sm" fw={isLazer ? 600 : 400} c={isLazer ? "primary" : "dimmed"}>
-                    osu!(lazer)
-                </Text>
             </Flex>
 
             {/* Preview section */}
