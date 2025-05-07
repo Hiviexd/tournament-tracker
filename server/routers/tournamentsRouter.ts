@@ -14,14 +14,51 @@ const tournamentBadgeUpload = createUploadMiddleware({
 tournamentsRouter.get("/", auth.optionalAuth, TournamentsController.index);
 tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
-tournamentsRouter.post("/:tournamentId/edit", auth.isLoggedIn, TournamentsController.edit);
-tournamentsRouter.post("/:tournamentId/assignReviewers", auth.isLoggedIn, auth.isCommittee, TournamentsController.assignReviewers);
-tournamentsRouter.post("/:tournamentId/reassignReviewer", auth.isLoggedIn, auth.isCommittee, TournamentsController.reassignReviewer);
-tournamentsRouter.post("/:tournamentId/submitReview", auth.isLoggedIn, auth.isCommittee, TournamentsController.submitReview);
-tournamentsRouter.post("/:tournamentId/uploadBadges", auth.isLoggedIn, auth.isCommittee, tournamentBadgeUpload, TournamentsController.uploadBadges);
-tournamentsRouter.post("/:tournamentId/downloadBadges", auth.isLoggedIn, auth.isCommittee, TournamentsController.downloadBadges);
-tournamentsRouter.post("/:tournamentId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TournamentsController.updateThreadId);
-tournamentsRouter.post("/:tournamentId/createNote", auth.isLoggedIn, auth.isCommittee, handleUpload, TournamentsController.createNote);
-tournamentsRouter.post("/:tournamentId/delete", auth.isLoggedIn, auth.isAdmin, TournamentsController.delete);
+tournamentsRouter.put("/:tournamentId/edit", auth.isLoggedIn, TournamentsController.edit);
+tournamentsRouter.patch(
+    "/:tournamentId/assignReviewers",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.assignReviewers
+);
+tournamentsRouter.patch(
+    "/:tournamentId/reassignReviewer",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.reassignReviewer
+);
+tournamentsRouter.patch(
+    "/:tournamentId/submitReview",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.submitReview
+);
+tournamentsRouter.post(
+    "/:tournamentId/uploadBadges",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    tournamentBadgeUpload,
+    TournamentsController.uploadBadges
+);
+tournamentsRouter.post(
+    "/:tournamentId/downloadBadges",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.downloadBadges
+);
+tournamentsRouter.patch(
+    "/:tournamentId/updateThreadId",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.updateThreadId
+);
+tournamentsRouter.post(
+    "/:tournamentId/createNote",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    handleUpload,
+    TournamentsController.createNote
+);
+tournamentsRouter.delete("/:tournamentId/delete", auth.isLoggedIn, auth.isAdmin, TournamentsController.delete);
 
 export default tournamentsRouter;

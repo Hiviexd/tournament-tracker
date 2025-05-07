@@ -2,7 +2,7 @@ import { IUser } from "../interfaces/User";
 import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
 import { notifications } from "@mantine/notifications";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
 export interface ApiResponse<T = any> {
     data?: T;
@@ -232,6 +232,7 @@ export type ApiCallParams = {
     data?: any;
     params?: any;
     headers?: any;
+    responseType?: string;
 };
 
 /**
@@ -246,17 +247,23 @@ export const apiCall = async <T = any>({
     data,
     params,
     headers,
-}: ApiCallParams): Promise<T | ApiResponse<T>> => {
+    responseType,
+}: ApiCallParams): Promise<T | ApiResponse<T> | any> => {
     try {
         const config: any = { headers };
+
         if (params) config.params = params;
-        let response: AxiosResponse<T, any>;
+        if (responseType) config.responseType = responseType;
+
+        let response: any;
+
         if (method === "get" || method === "delete") {
             response = await axios[method](url, config);
         } else {
             response = await axios[method](url, data, config);
         }
-        return response.data;
+
+        return responseType ? response : response.data;
     } catch (error: any) {
         return handleApiError(error);
     }
