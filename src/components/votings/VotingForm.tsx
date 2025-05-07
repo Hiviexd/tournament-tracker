@@ -146,7 +146,7 @@ export default function VotingForm({ voting, user }: IProps) {
                         placeholder={
                             isCommentRequired
                                 ? "Please explain your extreme vote (-5/-4 or 4/5)"
-                                : "Add a comment to your vote"
+                                : "Add a comment to your vote..."
                         }
                         minHeight={120}
                         maxHeight={300}

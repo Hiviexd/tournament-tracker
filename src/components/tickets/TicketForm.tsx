@@ -131,7 +131,7 @@ If you want to maintain your anonymity and/or confidentiality of the subject, pl
                             <TextEditor
                                 value={form.values.message}
                                 onChange={(value) => form.setFieldValue("message", value)}
-                                placeholder="Enter your message"
+                                placeholder="Enter your message..."
                                 minHeight={200}
                                 className={form.errors.message ? "error" : ""}
                                 disabled={!user}

@@ -140,8 +140,8 @@ export default function ArticlePage() {
                             onChange={setEditContent}
                             placeholder="Enter article content..."
                             minHeight={300}
-                            stickyOffset={60}
                             autoSaveKey={`edit-article-${article?._id}`}
+                            allowHtml={article.type === "documentation" && !article.isPublic}
                         />
 
                         <Group justify="flex-end">

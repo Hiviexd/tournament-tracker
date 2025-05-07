@@ -221,7 +221,7 @@ You can report either:
                             <TextEditor
                                 value={form.values.message}
                                 onChange={(value) => form.setFieldValue("message", value)}
-                                placeholder="Tell us about your issue"
+                                placeholder="Tell us about your issue..."
                                 minHeight={200}
                                 className={form.errors.message ? "error" : ""}
                                 disabled={!user}

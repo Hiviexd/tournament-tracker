@@ -1,40 +1,42 @@
-import { Box } from "@mantine/core";
+import { useEffect, useRef } from "react";
+import MdEditor, { Plugins } from "react-markdown-editor-lite";
+import MarkdownText from "./MarkdownText";
 import { useAutoSave } from "../../hooks/useAutoSave";
-import { useLocalPreference } from "../../hooks/useLocalPreferences";
-import { MarkdownEditor, RichTextEditor } from "./editor";
+import "react-markdown-editor-lite/lib/index.css";
+import AutoSaveBadge from "./badges/AutoSaveBadge";
+import MarkdownGuidePlugin from "./editor/MarkdownGuidePlugin";
 
-interface TextEditorProps {
+function getEditorDomId(autoSaveKey?: string) {
+    if (autoSaveKey) return `editor-${autoSaveKey}`;
+    // fallback: random id
+    return `editor-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+interface IProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
     minHeight?: number;
     maxHeight?: number;
-    stickyOffset?: number;
     className?: string;
     disabled?: boolean;
-    autoSaveKey?: string; // Optional key for autosaving
+    autoSaveKey?: string;
     style?: React.CSSProperties;
+    allowHtml?: boolean;
 }
 
-/**
- * TextEditor component that provides a rich text editor with markdown support and optional autosave
- */
 export default function TextEditor({
     value,
     onChange,
     placeholder = "Type your content here...",
     minHeight = 200,
-    maxHeight,
-    stickyOffset = 0,
+    maxHeight = 600,
     className,
     disabled = false,
     autoSaveKey,
     style,
-}: TextEditorProps) {
-    // Use the local preference hook directly for markdown mode
-    const [isMarkdownMode, setIsMarkdownMode] = useLocalPreference("editor_markdown_mode", false);
-
-    // Setup autosave
+    allowHtml = false,
+}: IProps) {
     const isAutoSaveEnabled = !!autoSaveKey;
     const {
         value: autoSavedValue,
@@ -44,65 +46,80 @@ export default function TextEditor({
     } = useAutoSave({
         key: autoSaveKey || "temp-editor-key",
         initialValue: value,
-        onSave: () => {
-            // This callback is optional - we're already calling onChange
-            // when the editor content changes
-        },
     });
 
-    // Use autosaved value if available, otherwise use the provided value
     const editorValue = isAutoSaveEnabled ? autoSavedValue : value;
 
-    // Handle content changes
-    const handleChange = (newValue: string) => {
+    const handleChange = (content: { text: string }) => {
         if (isAutoSaveEnabled) {
-            setAutoSavedValue(newValue);
+            setAutoSavedValue(content.text);
         }
-        onChange(newValue);
+        onChange(content.text);
     };
 
-    // Handle markdown text changes
-    const handleMarkdownChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newValue = e.target.value;
-        handleChange(newValue);
-    };
+    // Disable plugins
+    MdEditor.unuse(Plugins.FontUnderline);
+    MdEditor.unuse(Plugins.FullScreen);
+
+    // Auto resize plugin
+    MdEditor.use(Plugins.AutoResize, {
+        min: minHeight,
+        max: maxHeight,
+    });
+
+    // Markdown guide plugin
+    MdEditor.use(MarkdownGuidePlugin);
 
     // Show save indicator when content is saved and not typing
     const showSaveIndicator = isAutoSaveEnabled && autoSaveIsSaved && !autoSaveIsTyping;
 
+    // Generate a unique id for this editor instance
+    const editorDomId = useRef(getEditorDomId(autoSaveKey));
+
+    // Add autosave badge via DOM injection, scoped to this editor instance
+    const badgeRef = useRef<HTMLSpanElement>(null);
+    useEffect(() => {
+        const toolbar = document.querySelector(
+            `#${editorDomId.current} .rc-md-navigation .navigation-nav.right .button-wrap`
+        );
+        if (toolbar && badgeRef.current && !toolbar.contains(badgeRef.current)) {
+            toolbar.insertBefore(badgeRef.current, toolbar.firstChild);
+        }
+    }, [showSaveIndicator]);
+
     return (
-        <Box
-            className={className}
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                ...style,
-            }}>
-            {isMarkdownMode ? (
-                <MarkdownEditor
-                    value={editorValue}
-                    onChange={handleMarkdownChange}
-                    onSwitchToRichText={() => setIsMarkdownMode(false)}
-                    showSaveIndicator={showSaveIndicator}
-                    disabled={disabled}
-                    placeholder={placeholder}
-                    minHeight={minHeight}
-                    maxHeight={maxHeight}
-                />
-            ) : (
-                <RichTextEditor
-                    value={editorValue}
-                    onChange={handleChange}
-                    onSwitchToMarkdown={() => setIsMarkdownMode(true)}
-                    showSaveIndicator={showSaveIndicator}
-                    disabled={disabled}
-                    placeholder={placeholder}
-                    minHeight={minHeight}
-                    maxHeight={maxHeight}
-                    stickyOffset={stickyOffset}
-                />
-            )}
-        </Box>
+        <div id={editorDomId.current}>
+            <span ref={badgeRef}>
+                <AutoSaveBadge isVisible={showSaveIndicator} />
+            </span>
+
+            <MdEditor
+                value={editorValue}
+                style={{
+                    minHeight,
+                    ...(maxHeight ? { maxHeight } : {}),
+                    ...style,
+                }}
+                className={className}
+                htmlClass="markdown-content"
+                renderHTML={(text) => <MarkdownText content={text} allowHtml={allowHtml} />}
+                onChange={handleChange}
+                placeholder={placeholder}
+                readOnly={disabled}
+                view={{
+                    menu: true,
+                    md: true,
+                    html: false,
+                }}
+                canView={{
+                    menu: true,
+                    md: true,
+                    html: true,
+                    both: true,
+                    fullScreen: false,
+                    hideMenu: false,
+                }}
+            />
+        </div>
     );
 }

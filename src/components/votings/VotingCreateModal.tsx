@@ -208,12 +208,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         <TextEditor
                             value={form.values.description}
                             onChange={(value) => form.setFieldValue("description", value)}
-                            placeholder="Enter vote description"
-                            minHeight={120}
-                            stickyOffset={60}
                             className={form.errors.description ? "error" : ""}
                             autoSaveKey={autoSaveKey}
-                            style={{ flex: "1 1 auto", minHeight: 120 }}
                         />
                         {form.errors.description && (
                             <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>

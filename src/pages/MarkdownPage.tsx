@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Card, Stack, Textarea } from "@mantine/core";
+import { Card, Stack } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import MarkdownText from "../components/common/MarkdownText";
+import TextEditor from "../components/common/TextEditor";
 
 export default function MarkdownPage() {
     const initialText = `# Main Title
@@ -70,16 +71,15 @@ const user: User = {
     return (
         <Stack gap="lg">
             <Card shadow="sm" p="lg">
-                <MarkdownText content="This website supports [Markdown](https://www.markdownguide.org/basic-syntax/) formatting. Here's a playground to test out all available features:" />
-                <Textarea
-                    value={text}
-                    onChange={(e) => setText(e.currentTarget.value)}
-                    placeholder="Enter markdown text..."
-                    minRows={4}
-                    maxRows={12}
-                    autosize
-                    mt="sm"
-                />
+                <Stack gap="md">
+                    <MarkdownText content="This website supports [Markdown](https://www.markdownguide.org/basic-syntax/) formatting. Here's a playground to test out all available features:" />
+                    <TextEditor
+                        value={text}
+                        onChange={(value) => setText(value)}
+                        placeholder="Enter markdown text..."
+
+                    />
+                </Stack>
             </Card>
 
             <Card shadow="sm" p="lg">
