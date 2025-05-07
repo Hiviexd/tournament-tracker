@@ -42,7 +42,7 @@ jobs:
                   title: "🚀 Deployment Started"
                   description: |
                       Starting deployment to production environment...
-                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
+                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Manual deploy' }}`
                   color: 0x008cff
 
             - name: Verify Dependencies
