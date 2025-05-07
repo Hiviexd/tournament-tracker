@@ -1,25 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    getArticle,
-    getDocumentation,
-    createArticle,
-    editArticle,
-    type CreateArticleData,
-    deleteArticle,
-} from "../api/articles";
 import utils from "../../utils";
 
 export function useArticle(slug: string) {
     return useQuery({
         queryKey: ["article", slug],
-        queryFn: () => getArticle(slug),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: `/api/articles/${slug}`,
+            }),
     });
 }
 
 export function useDocumentation() {
     return useQuery({
         queryKey: ["documentation"],
-        queryFn: () => getDocumentation(),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/articles/documentation",
+            }),
     });
 }
 
@@ -27,8 +27,12 @@ export function useCreateArticle() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (data: CreateArticleData) => {
-            const response = await createArticle(data);
+        mutationFn: async (data: any) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/articles/create",
+                data,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -42,7 +46,11 @@ export function useEditArticle(slug: string) {
 
     return useMutation({
         mutationFn: async (content: string) => {
-            const response = await editArticle(slug, content);
+            const response = await utils.apiCall({
+                method: "put",
+                url: `/api/articles/${slug}/edit`,
+                data: { content },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -56,7 +64,10 @@ export function useDeleteArticle(slug: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await deleteArticle(slug);
+            const response = await utils.apiCall({
+                method: "delete",
+                url: `/api/articles/${slug}/delete`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
