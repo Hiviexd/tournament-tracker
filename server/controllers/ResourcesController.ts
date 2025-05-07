@@ -80,7 +80,7 @@ class ResourcesController {
             });
         } catch (error) {
             console.error(error);
-            return res.json({ error: "Internal server error" });
+            return res.status(500).json({ error: "Internal server error" });
         }
     }
 
@@ -93,7 +93,7 @@ class ResourcesController {
 
             // Validate required fields
             if (!title || !description || !category || !type || !link) {
-                return res.json({ error: "Missing required fields" });
+                return res.status(400).json({ error: "Missing required fields" });
             }
 
             // Create new resource
@@ -120,7 +120,7 @@ class ResourcesController {
             });
         } catch (error) {
             console.error(error);
-            return res.json({ error: "Internal server error" });
+            return res.status(500).json({ error: "Internal server error" });
         }
     }
 
@@ -134,12 +134,12 @@ class ResourcesController {
             // Find the resource
             const resource = await Resource.findById(id).populate(DEFAULT_POPULATE);
             if (!resource) {
-                return res.json({ error: "Resource not found" });
+                return res.status(404).json({ error: "Resource not found" });
             }
 
             // Validate required fields
             if (!title || !description || !category || !link) {
-                return res.json({ error: "Missing required fields" });
+                return res.status(400).json({ error: "Missing required fields" });
             }
 
             // Update the resource
@@ -163,7 +163,7 @@ class ResourcesController {
             });
         } catch (error) {
             console.error(error);
-            return res.json({ error: "Internal server error" });
+            return res.status(500).json({ error: "Internal server error" });
         }
     }
 
@@ -175,7 +175,7 @@ class ResourcesController {
 
             const resource = await Resource.findById(id);
             if (!resource) {
-                return res.json({ error: "Resource not found" });
+                return res.status(404).json({ error: "Resource not found" });
             }
 
             await resource.delete();
@@ -185,7 +185,7 @@ class ResourcesController {
             return res.json({ message: "Resource deleted successfully!" });
         } catch (error) {
             console.error(error);
-            return res.json({ error: "Internal server error" });
+            return res.status(500).json({ error: "Internal server error" });
         }
     }
 }
