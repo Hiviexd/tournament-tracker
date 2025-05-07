@@ -5,18 +5,17 @@ import OsuBotService from "../services/OsuBotService";
 import { IBeatmap, IBeatmapWithNotes } from "../../interfaces/OsuApi";
 import utils from "../../utils";
 
-
 class BeatmapsController {
     /** POST check mappool compliance */
     public async checkMappoolCompliance(req: Request, res: Response) {
         const input = req.body.input;
         if (!input || typeof input !== "string") {
-            return res.json({ error: "Invalid input" });
+            return res.status(400).json({ error: "Invalid input" });
         }
 
         const beatmapIds = utils.sanitizeBeatmapInput(input);
         if (beatmapIds.size === 0) {
-            return res.json({ error: "No valid beatmap IDs found" });
+            return res.status(400).json({ error: "No valid beatmap IDs found" });
         }
 
         // Fetch and categorize all beatmaps
@@ -28,7 +27,7 @@ class BeatmapsController {
         const botToken = await OsuBotService.getPublicBotToken();
 
         if (OsuApiService.isOsuResponseError(botToken)) {
-            return res.json({ error: "Failed to get osu! API token" });
+            return res.status(500).json({ error: "Failed to get osu! API token" });
         }
 
         // get beatmaps in batches of 50
