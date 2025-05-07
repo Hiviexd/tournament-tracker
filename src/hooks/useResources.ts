@@ -1,12 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getResources, createResource, updateResource, deleteResource } from "../api/resources";
 import utils from "../../utils";
 import { IResource, type ResourceQueryParams } from "../../interfaces/Resource";
 
 export function useResources(params?: ResourceQueryParams) {
     return useQuery({
         queryKey: ["resources", params],
-        queryFn: () => getResources(params),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/resources",
+                params,
+            }),
     });
 }
 
@@ -14,8 +18,12 @@ export function useCreateResource() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (resourceData: Partial<IResource> ) => {
-            const response = await createResource(resourceData);
+        mutationFn: async (resourceData: Partial<IResource>) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/resources/create",
+                data: resourceData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -29,7 +37,11 @@ export function useUpdateResource(resourceId: string) {
 
     return useMutation({
         mutationFn: async (resourceData: Partial<IResource>) => {
-            const response = await updateResource(resourceId, resourceData);
+            const response = await utils.apiCall({
+                method: "put",
+                url: `/api/resources/${resourceId}/edit`,
+                data: resourceData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -43,7 +55,10 @@ export function useDeleteResource(resourceId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await deleteResource(resourceId);
+            const response = await utils.apiCall({
+                method: "delete",
+                url: `/api/resources/${resourceId}/delete`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {

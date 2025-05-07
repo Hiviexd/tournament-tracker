@@ -1,14 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { getVersion } from "../api/version";
+import utils from "../../utils";
 
 export const useVersion = () => {
     return useQuery({
         queryKey: ["version"],
-        queryFn: getVersion,
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/version",
+            }),
         // Disable caching
         gcTime: 0,
         // Check for updates in the background
-        refetchInterval: 2 * 60 * 1000, // Every 2 minutes
+        refetchInterval: 3 * 60 * 1000, // Every 3 minutes
         refetchIntervalInBackground: true,
         // Don't show stale data while refetching
         staleTime: 0,

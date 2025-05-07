@@ -215,11 +215,11 @@ class TournamentsController {
         const status: TournamentStatus = "supportRequestReceived";
 
         if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
-            return res.json({ error: "Invalid osu! forum URL format" });
+            return res.status(400).json({ error: "Invalid osu! forum URL format" });
         }
 
         if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
-            return res.json({ error: "Invalid Enchant ticket URL format" });
+            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
         }
 
         const tournament = new Tournament({
@@ -364,7 +364,7 @@ class TournamentsController {
 
         // only allow editing banners if tournament is inactive
         if (!tournament.isActive && isActive === undefined && !bannerUrl) {
-            return res.json({ error: "Cannot edit archived tournament!" });
+            return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
         // allow hosts to only edit banner
@@ -373,7 +373,7 @@ class TournamentsController {
             actioner = tournament.host;
 
             if (forumUrl || startDate || endDate || status || isActive || winners) {
-                return res.json({ error: "Hosts can only edit banner!" });
+                return res.status(403).json({ error: "Hosts can only edit banner!" });
             }
         }
 
@@ -567,14 +567,14 @@ class TournamentsController {
         const { oldReviewerId, newReviewerId } = req.body;
 
         if (!oldReviewerId || !newReviewerId) {
-            return res.json({ error: "Both old and new reviewer IDs are required" });
+            return res.status(400).json({ error: "Both old and new reviewer IDs are required" });
         }
 
         // Find tournament without populating first to check and get a proper reference
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
-            return res.json({ error: "Tournament has no assigned reviewers" });
+            return res.status(400).json({ error: "Tournament has no assigned reviewers" });
         }
 
         // Check if old reviewer is actually assigned
@@ -583,7 +583,7 @@ class TournamentsController {
         );
 
         if (oldReviewerIndex === -1) {
-            return res.json({ error: "Old reviewer is not assigned to this tournament" });
+            return res.status(400).json({ error: "Old reviewer is not assigned to this tournament" });
         }
 
         // Get and validate new reviewer
@@ -596,14 +596,14 @@ class TournamentsController {
         };
         const requiredGroup = reviewerTypeMap[tournament.type];
         if (!newReviewer.groups.includes(requiredGroup)) {
-            return res.json({
+            return res.status(400).json({
                 error: `New reviewer must be a member of ${requiredGroup.toUpperCase()}`,
             });
         }
 
         // Check if new reviewer is already assigned
         if (tournament.assignedReviewers.some((reviewer) => reviewer.toString() === newReviewerId)) {
-            return res.json({ error: "New reviewer is already assigned to this tournament" });
+            return res.status(400).json({ error: "New reviewer is already assigned to this tournament" });
         }
 
         // Instead of direct array manipulation, use mongoose's array update methods
@@ -679,19 +679,19 @@ class TournamentsController {
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!tournament.isActive) {
-            return res.json({ error: "Tournament is not active" });
+            return res.status(400).json({ error: "Tournament is not active" });
         }
 
         if (!checklist || !checklist.length || !vote) {
-            return res.json({ error: "Missing required fields" });
+            return res.status(400).json({ error: "Missing required fields" });
         }
 
         if (vote !== "approve" && vote !== "changesRequested" && vote !== "deny") {
-            return res.json({ error: "Invalid vote" });
+            return res.status(400).json({ error: "Invalid vote" });
         }
 
         if (checklist.some((item) => item.checked === undefined)) {
-            return res.json({ error: "Invalid checklist" });
+            return res.status(400).json({ error: "Invalid checklist" });
         }
 
         let review = tournament.reviews.find((review) => review.author!.equals(res.locals!.user!._id));
@@ -780,7 +780,7 @@ class TournamentsController {
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (!files?.length) {
-            return res.json({ error: "No files uploaded" });
+            return res.status(400).json({ error: "No files uploaded" });
         }
 
         // Check dimensions of each file before uploading
@@ -789,12 +789,12 @@ class TournamentsController {
                 const metadata = await sharp(file.buffer).metadata();
 
                 if (metadata.width !== 172 || metadata.height !== 80) {
-                    return res.json({
+                    return res.status(400).json({
                         error: `Invalid badge dimensions in file ${file.originalname}. Expected 172x80, got ${metadata.width}x${metadata.height}`,
                     });
                 }
             } catch (error) {
-                return res.json({
+                return res.status(400).json({
                     error: "Failed to process image. Please ensure it's a valid PNG or JPG file.",
                 });
             }
@@ -827,7 +827,7 @@ class TournamentsController {
         const badges = tournament.badges;
 
         if (!badges?.length) {
-            return res.json({ error: "No badges found" });
+            return res.status(404).json({ error: "No badges found" });
         }
 
         try {
@@ -906,7 +906,7 @@ class TournamentsController {
             console.error("Error creating zip:", error);
             // Only send error if headers haven't been sent
             if (!res.headersSent) {
-                res.json({ error: "Failed to create badge archive" });
+                res.status(500).json({ error: "Failed to create badge archive" });
             }
         }
     }
@@ -1034,7 +1034,9 @@ class TournamentsController {
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (tournament.status !== "supportRequestReceived") {
-            return res.json({ error: "Cannot delete tournament that is not in support request received status!" });
+            return res
+                .status(400)
+                .json({ error: "Cannot delete tournament that isn't in support request received status!" });
         }
 
         await Tournament.findByIdAndDelete(tournamentId);

@@ -2,11 +2,13 @@ import { IUser } from "../interfaces/User";
 import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
 import { notifications } from "@mantine/notifications";
+import axios from "axios";
 
 export interface ApiResponse<T = any> {
     data?: T;
     message?: string;
     error?: string;
+    status?: number;
 }
 
 /**
@@ -18,7 +20,7 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
     const successMessage = response.message || "Action successful!";
     if (response.error) {
         notifications.show({
-            title: "Error",
+            title: response.status ? `Error (${response.status})` : "Error",
             message: response.error,
             color: "red",
         });
@@ -31,7 +33,7 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
         color: "green",
     });
 
-    return response.data || response as unknown as T;
+    return response.data || (response as unknown as T);
 };
 
 /**
@@ -210,3 +212,59 @@ export function easingOutBounce(t: number): number {
 export function easingOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
 }
+
+/**
+ * Handle an API error
+ * @param error The error object
+ * @returns The error object
+ */
+export const handleApiError = (error: any) => {
+    return {
+        error: error.response?.data?.error || error.response?.data?.message || error.message || "Unknown error",
+        status: error.response?.status || 500,
+        message: error.response?.data?.message,
+    };
+};
+
+export type ApiCallParams = {
+    method: "get" | "post" | "put" | "patch" | "delete";
+    url: string;
+    data?: any;
+    params?: any;
+    headers?: any;
+    responseType?: string;
+};
+
+/**
+ * API call handler
+ * @example
+ *   const result = await apiCall<IVoting[]>({ method: "get", url: "/api/votes" });
+ *   // result is IVoting[] | ApiResponse<IVoting[]>
+ */
+export const apiCall = async <T = any>({
+    method,
+    url,
+    data,
+    params,
+    headers,
+    responseType,
+}: ApiCallParams): Promise<T | ApiResponse<T> | any> => {
+    try {
+        const config: any = { headers };
+
+        if (params) config.params = params;
+        if (responseType) config.responseType = responseType;
+
+        let response: any;
+
+        if (method === "get" || method === "delete") {
+            response = await axios[method](url, config);
+        } else {
+            response = await axios[method](url, data, config);
+        }
+
+        return responseType ? response : response.data;
+    } catch (error: any) {
+        return handleApiError(error);
+    }
+};

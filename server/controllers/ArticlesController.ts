@@ -20,7 +20,7 @@ class ArticlesController {
         const article = await Article.findOne(query);
 
         if (!article) {
-            return res.json({ error: "Article not found" });
+            return res.status(404).json({ error: "Article not found" });
         }
 
         res.json(article);
@@ -32,7 +32,7 @@ class ArticlesController {
 
         // Only committee members can access documentation
         if (!user?.isCommittee && !user?.isAdmin) {
-            return res.json({ error: "You don't have permission to view this" });
+            return res.status(403).json({ error: "You don't have permission to view this" });
         }
 
         //sort by title alphabetically
@@ -43,6 +43,10 @@ class ArticlesController {
     /** POST create article */
     public async createArticle(req: Request, res: Response) {
         const { title, content, type, isPublic } = req.body;
+
+        if (!title || !content || !type) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
 
         const article = new Article({
             title,
@@ -73,7 +77,14 @@ class ArticlesController {
 
         const article = await Article.findOne({
             slug: { $regex: new RegExp(`^${slug}$`, "i") },
-        }).orFail();
+        });
+        if (!article) {
+            return res.status(404).json({ error: "Article not found" });
+        }
+
+        if (!content) {
+            return res.status(400).json({ error: "Missing content" });
+        }
 
         article.content = content;
 
@@ -96,7 +107,10 @@ class ArticlesController {
     public async deleteArticle(req: Request, res: Response) {
         const { slug } = req.params;
 
-        const article = await Article.findOne({ slug: { $regex: new RegExp(`^${slug}$`, "i") } }).orFail();
+        const article = await Article.findOne({ slug: { $regex: new RegExp(`^${slug}$`, "i") } });
+        if (!article) {
+            return res.status(404).json({ error: "Article not found" });
+        }
 
         await article.remove();
 

@@ -28,21 +28,20 @@ class QuotesController {
         const currentUser = res.locals!.user!;
 
         if (!authorId) {
-            return res.json({ error: "Author is required" });
+            return res.status(400).json({ error: "Author is required" });
         }
 
         if (!quote) {
-            return res.json({ error: "Quote is required" });
+            return res.status(400).json({ error: "Quote is required" });
         }
 
         if (creationDate) {
             createdAt = new Date(creationDate);
         }
 
-        const author = await User.findById(authorId).orFail();
-
+        const author = await User.findById(authorId);
         if (!author) {
-            return res.json({ error: "Author not found" });
+            return res.status(404).json({ error: "Author not found" });
         }
 
         const newQuote = await Quote.create({ author, quote, addedBy: currentUser._id, createdAt });

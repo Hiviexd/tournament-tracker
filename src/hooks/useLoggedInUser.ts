@@ -1,9 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { getLoggedInUser } from "../api/users";
+import utils from "../../utils";
 
 export default function useLoggedInUser() {
     return useQuery({
         queryKey: ["loggedInUser"],
-        queryFn: getLoggedInUser,
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/users/me",
+            }),
     });
 }

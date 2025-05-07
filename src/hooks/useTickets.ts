@@ -2,9 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
 
-// API
-import { getTickets, getTicket, createTicket, sendMessage, toggleStatus, updateThreadId } from "../api/tickets";
-
 // Types
 import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
 import { IMessageFormData } from "../../interfaces/Message";
@@ -12,14 +9,23 @@ import { IMessageFormData } from "../../interfaces/Message";
 export function useTickets(params?: TicketQueryParams) {
     return useQuery({
         queryKey: ["tickets", params],
-        queryFn: () => getTickets(params),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/tickets",
+                params,
+            }),
     });
 }
 
 export function useTicket(ticketId: string) {
     return useQuery({
         queryKey: ["ticket", ticketId],
-        queryFn: () => getTicket(ticketId),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: `/api/tickets/${ticketId}`,
+            }),
     });
 }
 
@@ -28,7 +34,12 @@ export function useCreateTicket() {
 
     return useMutation({
         mutationFn: async (ticketData: TicketFormData) => {
-            const response = await createTicket(ticketData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/tickets/create",
+                data: ticketData,
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -45,7 +56,11 @@ export function useSendMessage(ticketId: string) {
 
     return useMutation({
         mutationFn: async (messageData: IMessageFormData) => {
-            const response = await sendMessage(ticketId, messageData);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tickets/${ticketId}/sendMessage`,
+                data: messageData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -59,7 +74,10 @@ export function useToggleStatus(ticketId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await toggleStatus(ticketId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tickets/${ticketId}/toggleStatus`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -73,7 +91,11 @@ export function useUpdateThreadId(ticketId: string) {
 
     return useMutation({
         mutationFn: async (threadId: string) => {
-            const response = await updateThreadId(ticketId, threadId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tickets/${ticketId}/updateThreadId`,
+                data: { threadId },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {

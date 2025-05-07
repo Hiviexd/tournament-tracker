@@ -1,35 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    getTournaments,
-    getTournament,
-    createTournament,
-    TournamentQueryParams,
-    assignReviewers,
-    editTournament,
-    reassignReviewer,
-    submitReview,
-    uploadBadges,
-    downloadBadges,
-    updateThreadId,
-    createNote,
-    deleteTournament,
-} from "../api/tournaments";
 import utils from "../../utils";
 import { TournamentFormData } from "../../interfaces/Tournament";
 import { IReview } from "../../interfaces/Review";
 import { IMessageFormData } from "../../interfaces/Message";
 
-export function useTournaments(params?: TournamentQueryParams) {
+export function useTournaments(params?: any) {
     return useQuery({
         queryKey: ["tournaments", params],
-        queryFn: () => getTournaments(params),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/tournaments",
+                params,
+            }),
     });
 }
 
 export function useTournament(tournamentId: string) {
     return useQuery({
         queryKey: ["tournament", tournamentId],
-        queryFn: () => getTournament(tournamentId),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: `/api/tournaments/${tournamentId}`,
+            }),
     });
 }
 
@@ -38,7 +32,11 @@ export function useCreateTournament() {
 
     return useMutation({
         mutationFn: async (tournamentData: TournamentFormData) => {
-            const response = await createTournament(tournamentData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/tournaments/create",
+                data: tournamentData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -52,7 +50,10 @@ export function useAssignReviewers(tournamentId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await assignReviewers(tournamentId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/assignReviewers`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -66,7 +67,11 @@ export function useEditTournament(tournamentId: string) {
 
     return useMutation({
         mutationFn: async (tournamentData: Partial<TournamentFormData>) => {
-            const response = await editTournament(tournamentId, tournamentData);
+            const response = await utils.apiCall({
+                method: "put",
+                url: `/api/tournaments/${tournamentId}/edit`,
+                data: tournamentData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -80,7 +85,11 @@ export function useReassignReviewer(tournamentId: string) {
 
     return useMutation({
         mutationFn: async ({ oldReviewerId, newReviewerId }: { oldReviewerId: string; newReviewerId: string }) => {
-            const response = await reassignReviewer(tournamentId, oldReviewerId, newReviewerId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/reassignReviewer`,
+                data: { oldReviewerId, newReviewerId },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -94,7 +103,11 @@ export function useSubmitReview(tournamentId: string) {
 
     return useMutation({
         mutationFn: async (reviewData: Partial<IReview>) => {
-            const response = await submitReview(tournamentId, reviewData);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/submitReview`,
+                data: reviewData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -108,7 +121,14 @@ export function useUploadBadges(tournamentId: string) {
 
     return useMutation({
         mutationFn: async (badgeFiles: File[]) => {
-            const response = await uploadBadges(tournamentId, badgeFiles);
+            const formData = new FormData();
+            badgeFiles.forEach((file) => formData.append("files", file));
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/tournaments/${tournamentId}/uploadBadges`,
+                data: formData,
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -119,7 +139,27 @@ export function useUploadBadges(tournamentId: string) {
 
 export function useDownloadBadges(tournamentId: string) {
     return useMutation({
-        mutationFn: (filenames?: { badgeId: string; filename: string }[]) => downloadBadges(tournamentId, filenames),
+        mutationFn: async (filenames?: { badgeId: string; filename: string }[]) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/tournaments/${tournamentId}/downloadBadges`,
+                data: filenames,
+                responseType: "blob",
+            });
+
+            // Create a download link and trigger it
+            const url = window.URL.createObjectURL(response.data);
+            const a = document.createElement("a");
+            a.href = url;
+            const filename = response.headers["content-disposition"]?.split("filename=")[1] || "badges.zip";
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            return response.data;
+        },
     });
 }
 
@@ -128,7 +168,11 @@ export function useUpdateThreadId(tournamentId: string) {
 
     return useMutation({
         mutationFn: async (threadId: string) => {
-            const response = await updateThreadId(tournamentId, threadId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/updateThreadId`,
+                data: { threadId },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -142,7 +186,11 @@ export function useCreateNote(tournamentId: string) {
 
     return useMutation({
         mutationFn: async (noteData: IMessageFormData) => {
-            const response = await createNote(tournamentId, noteData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/tournaments/${tournamentId}/createNote`,
+                data: noteData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -156,7 +204,10 @@ export function useDeleteTournament(tournamentId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await deleteTournament(tournamentId);
+            const response = await utils.apiCall({
+                method: "delete",
+                url: `/api/tournaments/${tournamentId}/delete`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {

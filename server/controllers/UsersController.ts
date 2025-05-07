@@ -28,7 +28,7 @@ class UsersController {
         }
 
         if (!userInput) {
-            return res.json([]);
+            return res.status(400).json([]);
         }
 
         let users: IUser[] = [];
@@ -56,7 +56,7 @@ class UsersController {
         const user = await User.findByUsernameOrOsuId(userInput);
 
         if (!user) {
-            return res.json({ error: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
 
         const sanitizedUser = UserService.sanitizeUser(user, currentUser?.isCommittee || false);
@@ -71,7 +71,7 @@ class UsersController {
         const user = await OsuApiService.getUserInfo(req.session.accessToken!, userInput);
 
         if (OsuApiService.isOsuResponseError(user)) {
-            return res.json({ error: "osu! user not found!" });
+            return res.status(404).json({ error: "osu! user not found!" });
         }
 
         res.json(user);
@@ -112,7 +112,7 @@ class UsersController {
         const user = await UserService.findOrCreateUser(req.session.accessToken!, userInput);
 
         if (!user) {
-            return res.json({ error: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
 
         await DiscordService.sendWebhook({
@@ -169,7 +169,7 @@ class UsersController {
 
         // Validate input
         if (!["tc", "cc"].includes(group)) {
-            return res.json({ error: "Invalid group" });
+            return res.status(400).json({ error: "Invalid group" });
         }
 
         const user = await User.findById(userId).orFail();
@@ -247,7 +247,7 @@ class UsersController {
         } else if (!increment && user.badgeValue > 0) {
             user.badgeValue--;
         } else {
-            return res.json({
+            return res.status(400).json({
                 error: increment ? "Badge value cannot exceed 10" : "Badge value cannot be less than 0",
             });
         }
@@ -286,7 +286,7 @@ class UsersController {
         const userResponse = await OsuApiService.getUserInfo(req.session.accessToken!, user.osuId);
 
         if (OsuApiService.isOsuResponseError(userResponse)) {
-            return res.json({ error: "Failed to fetch user data from osu!" });
+            return res.status(502).json({ error: "Failed to fetch user data from osu!" });
         }
 
         const updatedUser = await UserService.createOrUpdateUser(userResponse, user);
@@ -305,7 +305,7 @@ class UsersController {
         const user = await User.findById(userId).orFail();
 
         if (Number.isNaN(Number(discordId))) {
-            return res.json({ error: "Invalid Discord ID!" });
+            return res.status(400).json({ error: "Invalid Discord ID!" });
         }
 
         user.discordId = discordId;
@@ -331,7 +331,7 @@ class UsersController {
         const user = await User.findById(userId).orFail();
 
         if (!utils.isValidEmail(email)) {
-            return res.json({ error: "Invalid email!" });
+            return res.status(400).json({ error: "Invalid email!" });
         }
 
         user.email = email;
