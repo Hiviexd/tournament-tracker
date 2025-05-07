@@ -37,11 +37,11 @@ The one-stop shop for all official osu! tournament correspondence and informatio
 
 This project has a few public API endpoints, feel free to use them within reasonable limits.
 
-- `/api/tournaments` — queries the tournament listing
-- `/api/tournaments/:id` — gets a specific [tournament](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Voting.ts#L49-L80) via its ID
-- `/api/votes` — queries the public votes listing
-- `/api/votes/:id` — gets a specific public [vote](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Voting.ts#L49-L80) via its ID
-- `/api/tickets` — queries the tickets listing
-- `/api/tickets/:id` — gets a specific [ticket](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Voting.ts#L49-L80) via its ID
+- `GET` `/api/tournaments` — queries the tournament listing
+- `GET` `/api/tournaments/:id` — gets a specific [tournament](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Tournament.ts) via its ID
+- `GET` `/api/votes` — queries the public votes listing
+- `GET` `/api/votes/:id` — gets a specific public [vote](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Voting.ts) via its ID
+- `GET` `/api/tickets` — queries the tickets listing
+- `GET` `/api/tickets/:id` — gets a specific [ticket](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Ticket.ts) via its ID
 
-Again, please use these with moderation. If you need other API functionalities (i.e. more routes, websockets, etc.), reach out to [me](https://osu.ppy.sh/users/14102976) and we'll figure something out.
+Again, please use these with moderation. If you need other API functionalities (i.e. more routes, websockets, etc.), contact [me](https://osu.ppy.sh/users/14102976) and we'll figure something out.
