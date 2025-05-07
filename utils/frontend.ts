@@ -50,13 +50,6 @@ export const copyToClipboard = (text: string) => {
 };
 
 /**
- * Check if a http request is valid (doesn't contain an error)
- */
-export function httpIsValid(response) {
-    return response && response.error === undefined;
-}
-
-/**
  * Check if the user has the required permissions to view a component
  * @param user The user object
  * @param permissions Array of permissions required to view the component
@@ -188,6 +181,7 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
  * OutBounce easing function - replicates osu!stable's OutBounce easing
  * @param t Progress (0-1)
  * @returns Eased value
+ * @see https://easings.net/#easeOutBounce
  */
 export function easingOutBounce(t: number): number {
     const n1 = 7.5625;
@@ -208,6 +202,7 @@ export function easingOutBounce(t: number): number {
  * OutCubic easing function - replicates osu!stable's OutCubic easing
  * @param t Progress (0-1)
  * @returns Eased value
+ * @see https://easings.net/#easeOutCubic
  */
 export function easingOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
