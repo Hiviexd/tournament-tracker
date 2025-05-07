@@ -1,18 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    searchUsers,
-    createUser,
-    getCommitteeUsers,
-    getUserById,
-    toggleReviewerStatus,
-    updateUserGroup,
-    updateUserBadge,
-    syncUser,
-    updateDiscordId,
-    getOsuUserInfo,
-    getReviewStats,
-    updateEmail,
-} from "../api/users";
 import utils from "../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
@@ -21,7 +7,12 @@ import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interf
 export function useUsers(search: string, limit?: number) {
     return useQuery({
         queryKey: ["users", search, limit],
-        queryFn: () => searchUsers(search, limit),
+        queryFn: () =>
+            utils.apiCall<IUser[]>({
+                method: "get",
+                url: "/api/users",
+                params: { userInput: search, limit },
+            }),
         enabled: !!search,
     });
 }
@@ -31,7 +22,11 @@ export function useCreateUser() {
 
     return useMutation({
         mutationFn: async (userData: any) => {
-            const response = await createUser(userData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/users/create",
+                data: userData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -43,7 +38,12 @@ export function useCreateUser() {
 export function useCommitteeUsers(options: { enabled?: boolean; includeAlumni?: boolean } = {}) {
     return useQuery({
         queryKey: ["committeeUsers", options.includeAlumni],
-        queryFn: () => getCommitteeUsers(options.includeAlumni),
+        queryFn: () =>
+            utils.apiCall<IUser[]>({
+                method: "get",
+                url: "/api/users/getCommittee",
+                params: { includeAlumni: options.includeAlumni },
+            }),
         enabled: options.enabled ?? true,
     });
 }
@@ -51,7 +51,11 @@ export function useCommitteeUsers(options: { enabled?: boolean; includeAlumni?: 
 export function useUser(id: string | null, options: { enabled?: boolean; retry?: boolean } = {}) {
     return useQuery({
         queryKey: ["user", id],
-        queryFn: () => getUserById(id!),
+        queryFn: () =>
+            utils.apiCall<IUser>({
+                method: "get",
+                url: `/api/users/${id}`,
+            }),
         enabled: options.enabled ?? !!id,
         retry: options.retry ?? false,
     });
@@ -61,12 +65,13 @@ export function useOsuUserInfo(userInput: string) {
     return useQuery({
         queryKey: ["osuUserInfo", userInput],
         queryFn: async () => {
-            const response = await getOsuUserInfo(userInput);
-
+            const response = await utils.apiCall({
+                method: "get",
+                url: `/api/users/${userInput}/osu`,
+            });
             if (response && "error" in response) {
                 return utils.handleMutationResponse(response);
             }
-
             return response;
         },
         enabled: !!userInput,
@@ -80,14 +85,15 @@ export function useToggleReviewerStatus(userId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await toggleReviewerStatus(userId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/toggleReviewerStatus`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-
-            // Update loggedInUser when relevant
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
@@ -103,16 +109,17 @@ export function useUpdateUserGroups(userId: string) {
 
     return useMutation({
         mutationFn: async (data: UpdateUserGroupsRequest) => {
-            const response = await updateUserGroup(data);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/groupMove`,
+                data: { group: data.group, join: data.join },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
-            // Invalidate relevant queries
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["logs"] });
-
-            // Update selectedUser if it matches
             if (selectedUser?._id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
@@ -127,15 +134,17 @@ export function useUpdateUserBadge(userId: string) {
 
     return useMutation({
         mutationFn: async (data: UpdateBadgeRequest) => {
-            const response = await updateUserBadge(data);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/updateBadge`,
+                data: { increment: data.increment },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["logs"] });
-
-            // Update selectedUser if it matches
             if (selectedUser?._id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
@@ -149,16 +158,16 @@ export function useSyncUser(userId: string) {
     const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
 
     return useMutation({
-        mutationFn: async (userId: string) => {
-            const response = await syncUser(userId);
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/sync`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
-            // Invalidate all relevant queries
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-
-            // Update selectedUser if it matches
             if (selectedUser?._id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
@@ -173,14 +182,16 @@ export function useUpdateDiscordId(userId: string) {
 
     return useMutation({
         mutationFn: async (discordId: string) => {
-            const response = await updateDiscordId(userId, discordId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/updateDiscordId`,
+                data: { discordId },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-
-            // Update loggedInUser when relevant
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
@@ -196,14 +207,16 @@ export function useUpdateEmail(userId: string) {
 
     return useMutation({
         mutationFn: async (email: string) => {
-            const response = await updateEmail(userId, email);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/updateEmail`,
+                data: { email },
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-
-            // Update loggedInUser when relevant
             if (loggedInUser?._id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
@@ -213,11 +226,14 @@ export function useUpdateEmail(userId: string) {
     });
 }
 
-
 export function useReviewStats(userId: string) {
     return useQuery({
         queryKey: ["reviewStats", userId],
-        queryFn: () => getReviewStats(userId),
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: `/api/users/${userId}/reviewStats`,
+            }),
         enabled: !!userId,
     });
 }
