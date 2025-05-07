@@ -6,7 +6,7 @@ export const beatmapCheckLimiter = rateLimit({
     message: {
         error: "Too many requests, please try again after 5 seconds",
     },
-    statusCode: 200, // TODO: change to 429 when frontend can handle non-200 status codes
+    statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
 });
