@@ -148,6 +148,7 @@ If you want to maintain your anonymity and/or confidentiality of the subject, pl
 
                         <Group justify="flex-end" mt="md">
                             <Button
+                                fullWidth
                                 type="submit"
                                 leftSection={<FontAwesomeIcon icon="paper-plane" />}
                                 loading={createTicketMutation.isPending}

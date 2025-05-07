@@ -238,6 +238,7 @@ You can report either:
 
                         <Group justify="flex-end" mt="md">
                             <Button
+                                fullWidth
                                 type="submit"
                                 leftSection={<FontAwesomeIcon icon="flag" />}
                                 loading={createTicketMutation.isPending}
