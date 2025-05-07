@@ -11,9 +11,24 @@ on:
         branches: [main]
 
 jobs:
-    deploy:
+    check-deploy:
         runs-on: ubuntu-latest
-        if: always()
+        outputs:
+            skip: ${{ steps.skip_check.outputs.skip }}
+        steps:
+            - name: Check for --no-deploy flag
+              id: skip_check
+              run: |
+                  echo "Commit message: ${{ github.event.head_commit.message }}"
+                  if [[ "${{ github.event.head_commit.message }}" == *"--no-deploy"* ]]; then
+                    echo "skip=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "skip=false" >> $GITHUB_OUTPUT
+
+    deploy:
+        needs: check-deploy
+        if: needs.check-deploy.outputs.skip == 'false'
+        runs-on: ubuntu-latest
         environment: production
 
         steps:
@@ -116,19 +131,28 @@ jobs:
                       exit 0
 
     notify:
-        needs: deploy
+        needs: [check-deploy, deploy]
         runs-on: ubuntu-latest
         if: always()
         steps:
             - name: Send Discord Notification
               uses: sarisia/actions-status-discord@v1
-              if: always()
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   noprefix: true
-                  title: ${{ needs.deploy.result == 'success' && '✅ Deployment Successful' || '❌ Deployment Failed' }}
-                  description: |
-                      - Status: `${{ needs.deploy.result }}`
-                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy' }}`
-                  color: ${{ needs.deploy.result == 'success' && '0x1df27d' || '0xff5050' }}
-                  content: ${{ needs.deploy.result != 'success' && '⚠️ deploy failed! <@341321481390784512>' || '' }}
+                  title: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true' && '⏭️ Deployment Skipped' ||
+                          (needs.deploy.result == 'success' && '✅ Deployment Successful') ||
+                          '❌ Deployment Failed' }}
+                  description: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true'
+                          && 'Deployment was skipped due to `--no-deploy` flag in commit message.'
+                          || format('- Status: `{0}`\n- Reason: `{1}`',
+                              needs.deploy.result,
+                              github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy') }}
+                  color: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true' && '0xffff00' ||
+                          (needs.deploy.result == 'success' && '0x1df27d') || '0xff5050' }}
+                  content: >-
+                      ${{ needs.deploy.result != 'success' && needs.check-deploy.outputs.skip != 'true'
+                          && '⚠️ deploy failed! <@341321481390784512>' || '' }}
