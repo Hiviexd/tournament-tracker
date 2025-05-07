@@ -91,12 +91,12 @@ class TicketsController {
 
         // Case 1: If it's a report and user is not logged in, deny access
         if (!ticket.isTicket && !user) {
-            return res.json({ error: "Not authorized to view this ticket" });
+            return res.status(403).json({ error: "Not authorized to view this ticket" });
         }
 
         // Case 2: If it's a report, only allow access to admins, committee members, or the author
         if (!ticket.isTicket && user && !(user.isAdmin || user.isCommittee || ticket.author.equals(user._id))) {
-            return res.json({ error: "Not authorized to view this ticket" });
+            return res.status(403).json({ error: "Not authorized to view this ticket" });
         }
 
         const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
@@ -119,7 +119,7 @@ class TicketsController {
         });
 
         if (recentTicket && !author.isCommittee) {
-            return res.json({
+            return res.status(429).json({
                 error: `You have already created a ${type} within the last hour. Please wait before creating another one.`,
             });
         }
@@ -127,10 +127,10 @@ class TicketsController {
         let targetUser: IUser;
 
         if (type === "ticket" && (title.length < 5 || title.length > 80))
-            return res.json({ error: "Title must be between 5 and 80 characters" });
+            return res.status(400).json({ error: "Title must be between 5 and 80 characters" });
 
         if (message.length < 10 || message.length > 8000)
-            return res.json({ error: "Message must be between 10 and 8000 characters" });
+            return res.status(400).json({ error: "Message must be between 10 and 8000 characters" });
 
         // construct report title
         let constructedTitle: string = title ? title.trim() : "";
@@ -155,19 +155,19 @@ class TicketsController {
                 ticket.targetUser = targetUser;
             } else {
                 if (!targetTournamentName || !targetTournamentLink) {
-                    return res.json({ error: "Missing target tournament details" });
+                    return res.status(400).json({ error: "Missing target tournament details" });
                 }
 
                 const sanitizedTournamentName: string = targetTournamentName.trim();
                 const sanitizedTournamentLink: string = targetTournamentLink.trim();
 
                 if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
-                    return res.json({
+                    return res.status(400).json({
                         error: "Tournament name must be between 5 and 120 characters",
                     });
 
                 if (!utils.isOsuForumLink(sanitizedTournamentLink))
-                    return res.json({ error: "Invalid tournament forum link" });
+                    return res.status(400).json({ error: "Invalid tournament forum link" });
 
                 ticket.targetTournamentName = sanitizedTournamentName;
                 ticket.targetTournamentLink = sanitizedTournamentLink;
@@ -263,15 +263,15 @@ class TicketsController {
 
         // Authorization checks
         if (!currentUser.isCommittee && !senderIsTicketAuthor) {
-            return res.json({ error: "Not authorized to message this ticket" });
+            return res.status(403).json({ error: "Not authorized to message this ticket" });
         }
 
         if (isNote && !currentUser.isCommittee) {
-            return res.json({ error: "Not authorized to add notes" });
+            return res.status(403).json({ error: "Not authorized to add notes" });
         }
 
         if (content.length < 10 || content.length > 8000) {
-            return res.json({ error: "Message must be between 10 and 8000 characters" });
+            return res.status(400).json({ error: "Message must be between 10 and 8000 characters" });
         }
 
         const newMessage = new Message({

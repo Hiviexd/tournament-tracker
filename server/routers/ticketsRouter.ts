@@ -9,8 +9,8 @@ const router = Router();
 router.get("/", auth.optionalAuth, TicketsController.index);
 router.post("/create", auth.isLoggedIn, handleUpload, TicketsController.create);
 router.get("/:ticketId", auth.optionalAuth, TicketsController.getTicket);
-router.post("/:ticketId/sendMessage", auth.isLoggedIn, handleUpload, TicketsController.sendMessage);
-router.post("/:ticketId/toggleStatus", auth.isLoggedIn, auth.isCommittee, TicketsController.toggleStatus);
-router.post("/:ticketId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TicketsController.updateThreadId);
+router.patch("/:ticketId/sendMessage", auth.isLoggedIn, handleUpload, TicketsController.sendMessage);
+router.patch("/:ticketId/toggleStatus", auth.isLoggedIn, auth.isCommittee, TicketsController.toggleStatus);
+router.patch("/:ticketId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TicketsController.updateThreadId);
 
 export default router;
