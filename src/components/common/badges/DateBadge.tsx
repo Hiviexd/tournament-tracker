@@ -1,4 +1,4 @@
-import { Badge, Tooltip } from "@mantine/core";
+import { Badge, Tooltip, type BadgeVariant } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
 
@@ -7,7 +7,7 @@ interface IDateBadgeProps {
     staticColor?: boolean;
     warningAge?: number; // Days before warning color
     dangerAge?: number; // Days before danger color
-    variant?: "light" | "filled";
+    variant?: BadgeVariant;
 }
 
 export default function DateBadge({
