@@ -103,7 +103,7 @@ class VotingsController {
 
         // Non-committee members can only view concluded public votes
         if ((!user || !user.isCommittee) && (voting.isActive || !voting.isPublic)) {
-            return res.json({ error: "You can only view concluded public votes" });
+            return res.status(403).json({ error: "You can only view concluded public votes" });
         }
 
         // Censor voting for non-committee members
@@ -156,7 +156,7 @@ class VotingsController {
 
         if (category === "user") {
             if (!targetUserId) {
-                return res.json({ error: "Missing target user ID" });
+                return res.status(400).json({ error: "Missing target user ID" });
             }
 
             targetUser = await User.findById(targetUserId).orFail();
@@ -165,17 +165,17 @@ class VotingsController {
 
         if (category === "tournament") {
             if (!targetTournamentName || !targetTournamentLink) {
-                return res.json({ error: "Missing target tournament details" });
+                return res.status(400).json({ error: "Missing target tournament details" });
             }
 
             const sanitizedTournamentName = targetTournamentName.trim();
             const sanitizedTournamentLink = targetTournamentLink.trim();
 
             if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
-                return res.json({ error: "Tournament name must be between 5 and 120 characters" });
+                return res.status(400).json({ error: "Tournament name must be between 5 and 120 characters" });
 
             if (!utils.isOsuForumLink(sanitizedTournamentLink))
-                return res.json({ error: "Invalid tournament forum link" });
+                return res.status(400).json({ error: "Invalid tournament forum link" });
 
             voting.targetTournamentName = sanitizedTournamentName;
             voting.targetTournamentLink = sanitizedTournamentLink;
@@ -266,12 +266,12 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         if (!voting.isActive) {
-            return res.json({ message: "Vote is not active" });
+            return res.status(400).json({ message: "Vote is not active" });
         }
 
         // Validate vote based on voting type
         if (data.type !== voting.type) {
-            return res.json({ error: "Vote type does not match voting type" });
+            return res.status(400).json({ error: "Vote type does not match voting type" });
         }
 
         const isExtremeVote = (value: number) => Math.abs(value) >= 4;
@@ -288,22 +288,24 @@ class VotingsController {
         }
 
         if (requiresComment && (!comment || comment.trim().length === 0)) {
-            return res.json({ error: "Comment is required for extreme votes (-5/-4 or 4/5)" });
+            return res.status(400).json({ error: "Comment is required for extreme votes (-5/-4 or 4/5)" });
         }
 
         // Validate vote data based on type
         switch (data.type) {
             case "classic":
                 if (typeof data.option !== "number" || data.option >= voting.options.length) {
-                    return res.json({ error: "Invalid option index" });
+                    return res.status(400).json({ error: "Invalid option index" });
                 }
                 break;
             case "binary":
                 if (typeof data.score !== "number" || data.score < -5 || data.score > 5) {
-                    return res.json({ error: "Invalid score (must be between -5 and 5)" });
+                    return res.status(400).json({ error: "Invalid score (must be between -5 and 5)" });
                 }
                 if (!voting.allowNeutralVotes && data.score === 0) {
-                    return res.json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                    return res
+                        .status(400)
+                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
                 }
                 break;
             case "variable":
@@ -318,10 +320,12 @@ class VotingsController {
                             s.score <= 5
                     )
                 ) {
-                    return res.json({ error: "Invalid scores" });
+                    return res.status(400).json({ error: "Invalid scores" });
                 }
                 if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
-                    return res.json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                    return res
+                        .status(400)
+                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
                 }
                 break;
         }
@@ -467,11 +471,11 @@ class VotingsController {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.json({ error: "Cannot delete concluded votes!" });
+            return res.status(400).json({ error: "Cannot delete concluded votes!" });
         }
 
         if (voting.votes.length) {
-            return res.json({ error: "Cannot delete voting with votes!" });
+            return res.status(400).json({ error: "Cannot delete voting with votes!" });
         }
 
         await voting.remove();
@@ -505,7 +509,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).orFail();
 
         if (voting.isActive) {
-            return res.json({ error: "Cannot change publicity of active votes" });
+            return res.status(400).json({ error: "Cannot change publicity of active votes" });
         }
 
         voting.isPublic = !voting.isPublic;
@@ -545,7 +549,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.json({ error: "Cannot handle concluded votes!" });
+            return res.status(400).json({ error: "Cannot handle concluded votes!" });
         }
 
         voting.votes = [];

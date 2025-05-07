@@ -1,15 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    getVotings,
-    getVoting,
-    createVoting,
-    submitVote,
-    toggleVotingStatus,
-    updateVoting,
-    deleteVoting,
-    toggleVotingPublic,
-    clearVotes,
-} from "../api/votings";
 import utils from "../../utils";
 import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
 import { type VoteType } from "../../interfaces/Vote";
@@ -17,14 +6,28 @@ import { type VoteType } from "../../interfaces/Vote";
 export function useVotings(params?: VotingQueryParams) {
     return useQuery({
         queryKey: ["votings", params],
-        queryFn: () => getVotings(params),
+        queryFn: () =>
+            utils.apiCall<{
+                votings: IVoting[];
+                total: number;
+                page: number;
+                pages: number;
+            }>({
+                method: "get",
+                url: "/api/votes",
+                params,
+            }),
     });
 }
 
 export function useVoting(votingId: string) {
     return useQuery({
         queryKey: ["voting", votingId],
-        queryFn: () => getVoting(votingId),
+        queryFn: () =>
+            utils.apiCall<IVoting>({
+                method: "get",
+                url: `/api/votes/${votingId}`,
+            }),
     });
 }
 
@@ -33,7 +36,11 @@ export function useCreateVoting() {
 
     return useMutation({
         mutationFn: async (votingData: VotingFormData) => {
-            const response = await createVoting(votingData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: "/api/votes/create",
+                data: votingData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -47,7 +54,11 @@ export function useSubmitVote(votingId: string) {
 
     return useMutation({
         mutationFn: async (voteData: { data: VoteType; comment?: string }) => {
-            const response = await submitVote(votingId, voteData);
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/votes/${votingId}/submitVote`,
+                data: voteData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -61,7 +72,10 @@ export function useToggleVotingStatus(votingId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await toggleVotingStatus(votingId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/votes/${votingId}/toggleStatus`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -75,7 +89,11 @@ export function useUpdateVoting(votingId: string) {
 
     return useMutation({
         mutationFn: async (votingData: Partial<IVoting>) => {
-            const response = await updateVoting(votingId, votingData);
+            const response = await utils.apiCall({
+                method: "put",
+                url: `/api/votes/${votingId}/update`,
+                data: votingData,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -90,7 +108,10 @@ export function useDeleteVoting(votingId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await deleteVoting(votingId);
+            const response = await utils.apiCall({
+                method: "delete",
+                url: `/api/votes/${votingId}/delete`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -104,7 +125,10 @@ export function useToggleVotingPublic(votingId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await toggleVotingPublic(votingId);
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/votes/${votingId}/togglePublic`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
@@ -119,7 +143,10 @@ export function useClearVotes(votingId: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await clearVotes(votingId);
+            const response = await utils.apiCall({
+                method: "delete",
+                url: `/api/votes/${votingId}/clearVotes`,
+            });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
