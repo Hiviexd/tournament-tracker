@@ -33,6 +33,10 @@ The one-stop shop for all official osu! tournament correspondence and informatio
 - Run `yarn dev`, the project will be served in `http://localhost:8088`
 - If you need automation jobs to run when the project starts, use `yarn dev-automation` instead
 
+### References
+
+- [DeepWiki Overview](https://deepwiki.com/Hiviexd/tournament-tracker)
+
 ## API
 
 This project has a few public API endpoints, feel free to use them within reasonable limits.
