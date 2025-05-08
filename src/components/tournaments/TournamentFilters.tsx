@@ -52,14 +52,29 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     ];
 
     const statusOptions = [
-        { value: "supportRequestReceived", label: "Support Request Received" },
-        { value: "screeningConcluded", label: "Screening Concluded" },
-        { value: "reviewOngoing", label: "Under Review" },
-        { value: "onHold", label: "On Hold" },
-        { value: "changesRequested", label: "Changes Requested" },
-        { value: "badgeApproved", label: "Badge Approved" },
-        { value: "badgeRejected", label: "Badge Rejected" },
-        { value: "noBadgeRequested", label: "No Badge Requested" },
+        {
+            group: "Initial Request",
+            items: [
+                { value: "supportRequestReceived", label: "Support Request Received" },
+                { value: "screeningConcluded", label: "Screening Concluded" },
+            ],
+        },
+        {
+            group: "Review Process",
+            items: [
+                { value: "reviewOngoing", label: "Under Review" },
+                { value: "onHold", label: "On Hold" },
+                { value: "changesRequested", label: "Changes Requested" },
+            ],
+        },
+        {
+            group: "Consensus",
+            items: [
+                { value: "badgeApproved", label: "Badge Approved" },
+                { value: "badgeRejected", label: "Badge Rejected" },
+                { value: "noBadgeRequested", label: "No Badge Requested" },
+            ],
+        },
     ];
 
     const activeOptions = [
