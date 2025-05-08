@@ -7,6 +7,7 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import config from "../../../../config.json";
 import utils from "../../../../utils";
+import AlertText from "../../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -98,9 +99,10 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                             {tournament.threadId}
                         </Anchor>
                     ) : (
-                        <Text c="danger" fs="italic">
-                            Not set! Make sure to set it to the thread where the tournament is being discussed.
-                        </Text>
+                        <AlertText
+                            type="warning"
+                            text="Not set! Make sure to set it to the thread where the tournament is being discussed."
+                        />
                     )}
                 </Text>
             )}

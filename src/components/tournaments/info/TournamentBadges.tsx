@@ -11,6 +11,7 @@ import config from "../../../../config.json";
 import { IAttachment } from "../../../../interfaces/Attachment";
 import { useDisclosure } from "@mantine/hooks";
 import TournamentAwardsManager from "./TournamentAwardsManager";
+import AlertText from "../../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -113,9 +114,7 @@ export default function TournamentBadges({ tournament }: IProps) {
             </Group>
 
             {user?.isCommittee && badges.length > 0 && !validateBadges(badges) && (
-                <Text size="xs" c="warning">
-                    <FontAwesomeIcon icon="exclamation-triangle" /> Badges need to be re-uploaded to enable the awards manager
-                </Text>
+                <AlertText size="xs" type="warning" text="Badges need to be re-uploaded to enable the awards manager" />
             )}
 
             <Group gap="xs" align="start">

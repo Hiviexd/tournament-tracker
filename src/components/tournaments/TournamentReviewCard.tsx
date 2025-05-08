@@ -4,12 +4,12 @@ import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import _ from "lodash";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITournament } from "../../../interfaces/Tournament";
 import utils from "../../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import { UserGroup } from "../../../interfaces/User";
+import AlertText from "../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -27,9 +27,9 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
             case "deny":
                 return "danger";
             case "changesRequested":
-                return "warning";
+                return "orange";
             default:
-                return "blue";
+                return "primary";
         }
     };
 
@@ -84,17 +84,20 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                             {_.startCase(review.vote)}
                         </Badge>
                         <Stack gap="xs">
-                            <Text fw={500} size="sm" c={uncheckedItems.length === 0 ? "success" : "danger"}>
-                                {uncheckedItems.length === 0
-                                    ? "No issues with checklist!"
-                                    : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`}
-                            </Text>
+                            <AlertText
+                                text={
+                                    uncheckedItems.length === 0
+                                        ? "No issues with checklist!"
+                                        : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`
+                                }
+                                type={uncheckedItems.length === 0 ? "success" : "danger"}
+                                icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
+                                size="sm"
+                            />
                             {uncheckedItems.length > 0 && (
                                 <Box ml="md">
                                     {uncheckedItems.map((item, index) => (
-                                        <Text key={index} size="sm" c="danger">
-                                            • {item}
-                                        </Text>
+                                        <AlertText key={index} text={item} type="danger" size="sm" />
                                     ))}
                                 </Box>
                             )}
@@ -117,22 +120,20 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                     <Box>
                         <UserDisplay {...getUserDisplayProps()} />
                         <Stack gap="xs" mt="xs">
-                            <Text fw={500} size="sm" c={uncheckedItems.length === 0 ? "success" : "danger"}>
-                                {uncheckedItems.length === 0 ? (
-                                    <FontAwesomeIcon icon="check" />
-                                ) : (
-                                    <FontAwesomeIcon icon="exclamation-triangle" />
-                                )}{" "}
-                                {uncheckedItems.length === 0
-                                    ? "No issues with checklist!"
-                                    : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`}
-                            </Text>
+                            <AlertText
+                                text={
+                                    uncheckedItems.length === 0
+                                        ? "No issues with checklist!"
+                                        : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`
+                                }
+                                type={uncheckedItems.length === 0 ? "success" : "danger"}
+                                icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
+                                size="sm"
+                            />
                             {uncheckedItems.length > 0 && (
                                 <Box ml="md">
                                     {uncheckedItems.map((item, index) => (
-                                        <Text key={index} size="sm" c="danger">
-                                            <FontAwesomeIcon icon="circle-xmark" /> {item}
-                                        </Text>
+                                        <AlertText key={index} text={item} type="danger" size="sm" />
                                     ))}
                                 </Box>
                             )}
