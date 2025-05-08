@@ -124,12 +124,12 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         To use this tool, enter a list of{" "}
                         <Popover middlewares={{ flip: true, shift: true, inline: true }} position="top" opened={opened}>
                             <Popover.Target>
-                                <Mark onMouseEnter={open} onMouseLeave={close}>
+                                <Mark color="primary" onMouseEnter={open} onMouseLeave={close}>
                                     beatmap
                                 </Mark>
                             </Popover.Target>
                             <Popover.Dropdown>
-                                <Highlight highlight="1234567" color="success" size="sm">
+                                <Highlight highlight="1234567" color="success" size="sm" className="pulse">
                                     https://osu.ppy.sh/beatmaps/7654321#osu/1234567
                                 </Highlight>
                             </Popover.Dropdown>
