@@ -173,6 +173,7 @@ export const theme = createTheme({
         Select: {
             defaultProps: {
                 withScrollArea: false,
+                comboboxProps: { transitionProps: { transition: "fade", duration: 150 } },
             },
             styles: {
                 dropdown: {
