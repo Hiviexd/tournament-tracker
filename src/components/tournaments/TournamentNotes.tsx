@@ -72,37 +72,31 @@ export default function TournamentNotes({ tournament }: IProps) {
         <Card shadow="sm" p="lg">
             <Stack gap="xl">
                 <Group justify="space-between" align="center">
-                    <Group gap="7" align="baseline">
-                        <Title order={3}>Notes</Title>
-                        <Title order={4} c="dimmed">
-                            ({tournament.notes.length})
-                        </Title>
-                    </Group>
+                    <Title order={3}>Notes</Title>
                     <Button
                         variant="subtle"
                         onClick={toggle}
                         rightSection={<FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />}>
-                        {opened ? "Hide Notes" : "Show Notes"}
+                        {opened ? "Hide Input" : "Show Input"}
                     </Button>
                 </Group>
 
+                {/* Notes */}
+                {tournament.notes && tournament.notes.length > 0 ? (
+                    <Stack gap="md">
+                        {tournament.notes.map((note) => (
+                            <TicketMessage key={note._id} message={note} showTrueAuthor={true} />
+                        ))}
+                    </Stack>
+                ) : (
+                    <Text key={tournament._id} c="dimmed" size="sm" fs="italic">
+                        No notes yet...
+                    </Text>
+                )}
+
                 <Collapse in={opened}>
                     <Stack gap="xl">
-                        {/* Display existing notes */}
-                        {tournament.notes && tournament.notes.length > 0 ? (
-                            <Stack gap="md">
-                                {tournament.notes.map((note) => (
-                                    <TicketMessage key={note._id} message={note} showTrueAuthor={true} />
-                                ))}
-                            </Stack>
-                        ) : (
-                            <Text key={tournament._id} c="dimmed" size="sm" fs="italic">
-                                No notes yet...
-                            </Text>
-                        )}
-
                         <Divider />
-
                         {/* Note creation form */}
                         <Stack gap="md">
                             <Box>
