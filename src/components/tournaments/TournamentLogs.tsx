@@ -36,7 +36,13 @@ export default function TournamentLogs({ tournament }: IProps) {
         <Card shadow="sm" p="lg" radius="md">
             <Stack gap="md">
                 <Group justify="space-between" align="center">
-                    <Title order={3}>Logs</Title>
+                    <Group gap="7" align="baseline">
+                        <Title order={3}>Logs</Title>
+                        <Title order={4} c="dimmed">
+                            ({tournament.logs.length})
+                        </Title>
+                    </Group>
+
                     <Button
                         variant="subtle"
                         onClick={toggle}
