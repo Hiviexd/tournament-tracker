@@ -29,14 +29,29 @@ export default function TournamentStatus({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament._id);
 
     const statusOptions = [
-        { value: "supportRequestReceived", label: "Support Request Received" },
-        { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
-        { value: "reviewOngoing", label: "Under Review" },
-        { value: "onHold", label: "On Hold" },
-        { value: "changesRequested", label: "Changes Requested" },
-        { value: "badgeApproved", label: "Badge Approved" },
-        { value: "badgeRejected", label: "Badge Rejected" },
-        { value: "noBadgeRequested", label: "No Badge Requested" },
+        {
+            group: "Initial Request",
+            items: [
+                { value: "supportRequestReceived", label: "Support Request Received" },
+                { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
+            ],
+        },
+        {
+            group: "Review Process",
+            items: [
+                { value: "reviewOngoing", label: "Under Review" },
+                { value: "onHold", label: "On Hold" },
+                { value: "changesRequested", label: "Changes Requested" },
+            ],
+        },
+        {
+            group: "Consensus",
+            items: [
+                { value: "badgeApproved", label: "Badge Approved" },
+                { value: "badgeRejected", label: "Badge Rejected" },
+                { value: "noBadgeRequested", label: "No Badge Requested" },
+            ],
+        },
     ];
 
     const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
@@ -44,7 +59,10 @@ export default function TournamentStatus({ tournament }: IProps) {
     const handleStatusSave = async () => {
         let message = "Are you sure you want to update the status?\n\nThis will notify the tournament host.";
 
-        if (excludedStatusesOsu.includes(selectedStatus) || (selectedStatus === "reviewOngoing" && tournament.status === "onHold")) {
+        if (
+            excludedStatusesOsu.includes(selectedStatus) ||
+            (selectedStatus === "reviewOngoing" && tournament.status === "onHold")
+        ) {
             message = "Are you sure you want to update the status?\n\nThis will NOT send an osu! notification.";
         }
 
@@ -112,13 +130,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                 )}
 
                 <Tooltip label={`Status: ${tournament.statusString}`}>
-                    <Progress
-                        value={progressInfo.progress}
-                        color={progressInfo.color}
-                        size="md"
-                        radius="xl"
-                        my="sm"
-                    />
+                    <Progress value={progressInfo.progress} color={progressInfo.color} size="md" radius="xl" my="sm" />
                 </Tooltip>
             </Stack>
         </Group>
