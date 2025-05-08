@@ -45,11 +45,13 @@ export default function TournamentBadges({ tournament }: IProps) {
         return badges.every((badge) => badge.url.includes(config.r2.baseUrl));
     };
 
-    const uploadOptions = {
+    const serverUploadOptions = {
         maxFiles: 8,
         maxSize: 5 * 1024 * 1024, // 5MB
-        allowedTypes: ["image/jpeg", "image/png"],
+        allowedTypes: ["image/png"],
     };
+
+    const clientAcceptedTypes = [".png"];
 
     const handleUploadBadges = async () => {
         try {
@@ -132,10 +134,10 @@ export default function TournamentBadges({ tournament }: IProps) {
                                     value={files}
                                     onChange={handleFileChange}
                                     label="Upload Badges"
-                                    description="Badge dimensions must be 172x80 pixels"
+                                    description="Badge(s) must be .png and 172x80px"
                                     placeholder="Up to 8 badges"
-                                    options={uploadOptions}
-                                    imagesOnly
+                                    options={serverUploadOptions}
+                                    accept={clientAcceptedTypes}
                                 />
                             </Box>
                             <ActionIcon
