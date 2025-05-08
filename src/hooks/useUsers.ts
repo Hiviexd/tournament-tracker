@@ -21,11 +21,11 @@ export function useCreateUser() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (userData: any) => {
+        mutationFn: async (userInput: string) => {
             const response = await utils.apiCall({
                 method: "post",
                 url: "/api/users/create",
-                data: userData,
+                data: { userInput },
             });
             return utils.handleMutationResponse(response);
         },
