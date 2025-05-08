@@ -148,7 +148,7 @@ jobs:
                   description: >-
                       ${{ needs.check-deploy.outputs.skip == 'true'
                           && 'Deployment was skipped due to `--skip-deploy` flag in commit message.'
-                          || format('- Status: `{0}`\n- Reason: `{1}`',
+                          || format('- Status: `{0}`\n - Reason: `{1}`',
                               needs.deploy.result,
                               github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy') }}
                   color: >-
