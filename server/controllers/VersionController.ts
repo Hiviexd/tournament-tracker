@@ -13,9 +13,21 @@ function getGitHash() {
     }
 }
 
+/**
+ * Get the commit message of the current commit
+ * @returns The commit message of the current commit
+ */
+function getGitMessage() {
+    try {
+        return execSync("git log -1 --pretty=%B").toString().trim();
+    } catch (error) {
+        return "";
+    }
+}
+
 class VersionController {
     public getVersion(_: Request, res: Response) {
-        res.json({ hash: getGitHash() });
+        res.json({ hash: getGitHash(), message: getGitMessage() });
     }
 }
 

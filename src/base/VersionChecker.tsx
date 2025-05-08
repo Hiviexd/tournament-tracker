@@ -12,8 +12,18 @@ export default function VersionChecker() {
     const currentHash = __COMMIT_HASH__;
 
     useEffect(() => {
-        // Only show notification if we have both hashes and they don't match
-        if (version?.hash && currentHash && version.hash !== currentHash && version.hash !== "unknown") {
+        // Only show notification if we:
+        // - have both hashes
+        // - they don't match
+        // - skip flag is not present in backend commit message
+        const skipRefresh = version?.message?.includes("--skip-client-refresh");
+        if (
+            version?.hash &&
+            currentHash &&
+            version.hash !== currentHash &&
+            version.hash !== "unknown" &&
+            !skipRefresh
+        ) {
             notifications.show({
                 id: "version-check",
                 color: "primary.10",
@@ -32,7 +42,7 @@ export default function VersionChecker() {
                 withCloseButton: false,
             });
         }
-    }, [version?.hash, currentHash]);
+    }, [version?.hash, currentHash, version?.message]);
 
     return null;
 }
