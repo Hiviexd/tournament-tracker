@@ -23,8 +23,7 @@ class QuotesController {
 
     /** POST create a quote */
     public async createQuote(req: Request, res: Response) {
-        const { authorId, quote, creationDate } = req.body;
-        let createdAt = new Date();
+        const { authorId, quote } = req.body;
         const currentUser = res.locals!.user!;
 
         if (!authorId) {
@@ -35,16 +34,12 @@ class QuotesController {
             return res.status(400).json({ error: "Quote is required" });
         }
 
-        if (creationDate) {
-            createdAt = new Date(creationDate);
-        }
-
         const author = await User.findById(authorId);
         if (!author) {
             return res.status(404).json({ error: "Author not found" });
         }
 
-        const newQuote = await Quote.create({ author, quote, addedBy: currentUser._id, createdAt });
+        const newQuote = await Quote.create({ author, quote, addedBy: currentUser._id });
         res.json(newQuote);
     }
 }

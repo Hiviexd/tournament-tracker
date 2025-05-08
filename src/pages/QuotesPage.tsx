@@ -1,28 +1,27 @@
 import { useState } from "react";
-import { Stack, TextInput, Button, Table, Group, Card, ScrollArea, Skeleton } from "@mantine/core";
+import { Stack, TextInput, Button, Table, Group, Card, ScrollArea, Skeleton, Tooltip } from "@mantine/core";
 import { useAllQuotes, useCreateQuote } from "../hooks/useQuotes";
 import UserSearch from "../components/common/UserSearch";
 import { IUser } from "../../interfaces/User";
-import { DateInput } from "@mantine/dates";
-import DateBadge from "../components/common/badges/DateBadge";
 import UserLink from "../components/common/UserLink";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import moment from "moment";
 
 export default function QuotesPage() {
     const [quote, setQuote] = useState("");
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
-    const [creationDate, setCreationDate] = useState<Date | null>(new Date());
 
     const { data: quotes = [], isLoading } = useAllQuotes();
-    const createQuoteMutation = useCreateQuote(selectedUser?.id, quote, creationDate ?? undefined);
+    const createQuoteMutation = useCreateQuote(selectedUser?.id, quote ?? undefined);
 
     const LoadingState = () => (
         <ScrollArea>
             <Table miw={{ base: 1200, md: 800 }}>
                 <Table.Thead>
                     <Table.Tr>
+                        <Table.Th>Date</Table.Th>
                         <Table.Th>Author</Table.Th>
                         <Table.Th>Quote</Table.Th>
-                        <Table.Th>Creation Date</Table.Th>
                         <Table.Th>Added By</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
@@ -30,19 +29,18 @@ export default function QuotesPage() {
                     {Array.from({ length: 10 }).map((_, i) => (
                         <Table.Tr key={i}>
                             <Table.Td>
-                                <Group>
-                                    <Skeleton height={24} width={100} />
-                                </Group>
+                                <Skeleton height={20} width={120} />
+                            </Table.Td>
+                            <Table.Td>
+                                <Skeleton height={20} width={100} />
                             </Table.Td>
                             <Table.Td>
                                 <Skeleton height={20} width={300} />
                             </Table.Td>
-                            <Table.Td>
-                                <Skeleton height={20} width={120} />
-                            </Table.Td>
+
                             <Table.Td>
                                 <Group>
-                                    <Skeleton height={24} width={100} />
+                                    <Skeleton height={20} width={100} />
                                 </Group>
                             </Table.Td>
                         </Table.Tr>
@@ -60,7 +58,6 @@ export default function QuotesPage() {
             await createQuoteMutation.mutateAsync();
             setQuote("");
             setSelectedUser(null);
-            setCreationDate(new Date());
         } catch (error) {
             console.error("Failed to create quote:", error);
         }
@@ -81,9 +78,10 @@ export default function QuotesPage() {
                             required
                         />
 
-                        <DateInput label="Creation Date" value={creationDate} onChange={setCreationDate} />
-
-                        <Button type="submit" disabled={!selectedUser || !quote}>
+                        <Button
+                            type="submit"
+                            disabled={!selectedUser || !quote}
+                            leftSection={<FontAwesomeIcon icon="plus" />}>
                             Create Quote
                         </Button>
                     </Stack>
@@ -98,9 +96,9 @@ export default function QuotesPage() {
                         <Table miw={{ base: 1200, md: 800 }}>
                             <Table.Thead>
                                 <Table.Tr>
+                                    <Table.Th>Date</Table.Th>
                                     <Table.Th>Author</Table.Th>
                                     <Table.Th>Quote</Table.Th>
-                                    <Table.Th>Creation Date</Table.Th>
                                     <Table.Th>Added By</Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
@@ -108,14 +106,17 @@ export default function QuotesPage() {
                                 {quotes.map((quote) => (
                                     <Table.Tr key={quote._id}>
                                         <Table.Td>
+                                            <Tooltip label={moment(quote.createdAt).format("LLL")}>
+                                                <span>{moment(quote.createdAt).fromNow()}</span>
+                                            </Tooltip>
+                                        </Table.Td>
+                                        <Table.Td>
                                             <Group>
                                                 <UserLink user={quote.author} size="sm" />
                                             </Group>
                                         </Table.Td>
                                         <Table.Td>{quote.quote}</Table.Td>
-                                        <Table.Td>
-                                            <DateBadge date={new Date(quote.createdAt)} staticColor />
-                                        </Table.Td>
+
                                         <Table.Td>
                                             <Group>
                                                 <UserLink user={quote.addedBy} size="sm" />
