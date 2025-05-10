@@ -133,6 +133,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("state", value)}
                         data={activeOptions}
                         clearable
+                        disabled={viewMode === "review"}
                     />
                 </SimpleGrid>
 
@@ -143,6 +144,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                                 label="Show your all-time assigned reviews"
                                 checked={values.showAllAssignedReviews}
                                 onChange={(e) => handleChange("showAllAssignedReviews", e.currentTarget.checked)}
+                                disabled={viewMode === "review"}
                             />
                         )}
                     </Box>
