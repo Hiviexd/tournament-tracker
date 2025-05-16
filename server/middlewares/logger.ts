@@ -48,19 +48,20 @@ morgan.token("method-colored", (req) => {
 
 
 morgan.token("username-colored", (req: any) => {
-    const username = req.session?.username || "Unknown User";
-    return utils.consoleStyles(username, username === "Unknown User" ? ["dim"] : ["cyan", "dim"]);
+    const username = req.session?.username || "Unknown";
+    return utils.consoleStyles(username, username === "Unknown" ? ["dim"] : ["cyan", "dim"]);
 });
 
-morgan.token("ip-colored", (req: any) => {
-    // Prefer req.ip (Express sets this correctly with trust proxy), fallback to req.connection.remoteAddress
-    const ip = req.ip || req.connection?.remoteAddress || "Unknown IP";
-    return utils.consoleStyles(ip, ip === "Unknown IP" ? ["dim"] : ["magenta", "dim"]);
-});
+// Not working due to Cloudflare reverse proxy, I don't wan't to deal with that for now
+// morgan.token("ip-colored", (req: any) => {
+//     // Prefer req.ip (Express sets this correctly with trust proxy), fallback to req.connection.remoteAddress
+//     const ip = req.ip || req.connection?.remoteAddress || "Unknown IP";
+//     return utils.consoleStyles(ip, ip === "Unknown IP" ? ["dim"] : ["magenta", "dim"]);
+// });
 
 export const logger = morgan(
     `:time-colored — :method-colored ${utils.consoleStyles(":url", [
         "yellow",
         "bold",
-    ])} :status-colored — :username-colored :ip-colored — ${utils.consoleStyles(":response-time ms", ["magenta"])}`
+    ])} :status-colored — :username-colored — ${utils.consoleStyles(":response-time ms", ["magenta"])}`
 );
