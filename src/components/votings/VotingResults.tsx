@@ -8,8 +8,10 @@ import { Card, Stack, Title, Divider, Collapse, Group, Button, Text } from "@man
 import { useDisclosure } from "@mantine/hooks";
 
 // Components
-import VotingStats from "./VotingStats";
 import VoteCard from "./VoteCard";
+import ClassicVoteStats from "./votes/ClassicVoteStats";
+import BinaryVoteStats from "./votes/BinaryVoteStats";
+import VariableVoteStats from "./votes/VariableVoteStats";
 import { IUser } from "@interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -43,15 +45,28 @@ export default function VotingResults({ voting, user }: IProps) {
 
     const filteredVotes = filterVotesByOption(voting.votes, filteredOptionIndex);
 
+    const renderVotingStats = () => {
+        switch (voting.type) {
+            case "classic":
+                return (
+                    <ClassicVoteStats
+                        voting={voting}
+                        onFilterChange={setFilteredOptionIndex}
+                        activeFilter={filteredOptionIndex}
+                    />
+                );
+            case "binary":
+                return <BinaryVoteStats voting={voting} />;
+            case "variable":
+                return <VariableVoteStats voting={voting} />;
+        }
+    };
+
     return (
         <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Title order={3}>Results</Title>
-                <VotingStats
-                    voting={voting}
-                    onFilterChange={setFilteredOptionIndex}
-                    activeFilter={filteredOptionIndex}
-                />
+                {renderVotingStats()}
                 {user?.isCommittee && (
                     <>
                         <Divider />
