@@ -244,7 +244,7 @@ class AutomationService {
             await voting.save();
 
             // Send Discord notification
-            const fields = VotingService.generateVotingResults(voting);
+            const fields = VotingService.generateDiscordVotingResults(voting);
 
             await DiscordService.sendWebhook({
                 embeds: [

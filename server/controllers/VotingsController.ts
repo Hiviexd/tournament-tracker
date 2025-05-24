@@ -407,7 +407,7 @@ class VotingsController {
 
         // Only send results if concluding the vote
         if (!voting.isActive) {
-            const fields = VotingService.generateVotingResults(voting);
+            const fields = VotingService.generateDiscordVotingResults(voting);
 
             const embed = {
                 author: DiscordService.defaultWebhookAuthor(req.session),

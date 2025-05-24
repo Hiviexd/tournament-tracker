@@ -18,7 +18,7 @@ class VotingService {
         return publicVoting;
     }
 
-    public generateVotingResults(voting: IVoting): IDiscordField[] {
+    public generateDiscordVotingResults(voting: IVoting): IDiscordField[] {
         const fields: IDiscordField[] = [];
 
         switch (voting.type) {
