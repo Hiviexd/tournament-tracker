@@ -1,9 +1,13 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
 
+export type VoteType = VariableVote | BinaryVote | ClassicVote | RankedChoiceVote | BinaryStrictVote;
+
+// ? Initial commit
+
 export interface VariableVoteScore {
     optionIndex: number;
-    score: number;
+    score: number; // from -5 to 5
 }
 
 export interface VariableVote {
@@ -21,7 +25,22 @@ export interface ClassicVote {
     option: number; // index of the selected option
 }
 
-export type VoteType = VariableVote | BinaryVote | ClassicVote;
+// ? 2025-05-25: Added ranked choice and strict binary vote types
+
+export interface RankedChoiceVote {
+    type: "ranked-choice";
+    scores: RankedChoiceVoteScore[]; // array of scores for each option
+}
+
+export interface RankedChoiceVoteScore {
+    optionIndex: number;
+    score: number; // from 0 to 5
+}
+
+export interface BinaryStrictVote {
+    type: "binary-strict";
+    score: number; // from -1 to 1
+}
 
 export interface IVote extends Document {
     author: IUser;
