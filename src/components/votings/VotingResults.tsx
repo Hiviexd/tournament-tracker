@@ -38,10 +38,16 @@ export default function VotingResults({ voting, user }: IProps) {
                 return optionIndex === 0 ? vote.data.score > 0 : vote.data.score < 0;
             }
             if (vote.data.type === "binary-strict") {
-                // For binary-strict: 0=agree, 1=neutral, 2=disagree
-                if (optionIndex === 0) return vote.data.score === 1; // agree
-                if (optionIndex === 1) return vote.data.score === 0; // neutral
-                if (optionIndex === 2) return vote.data.score === -1; // disagree
+                // For binary-strict with neutral: 0=agree, 1=neutral, 2=disagree
+                // For binary-strict without neutral: 0=agree, 1=disagree
+                if (voting.allowNeutralVotes) {
+                    if (optionIndex === 0) return vote.data.score === 1; // agree
+                    if (optionIndex === 1) return vote.data.score === 0; // neutral
+                    if (optionIndex === 2) return vote.data.score === -1; // disagree
+                } else {
+                    if (optionIndex === 0) return vote.data.score === 1; // agree
+                    if (optionIndex === 1) return vote.data.score === -1; // disagree
+                }
             }
             if (vote.data.type === "variable" || vote.data.type === "ranked-choice") {
                 const score = vote.data.scores.find((s) => s.optionIndex === optionIndex)?.score;

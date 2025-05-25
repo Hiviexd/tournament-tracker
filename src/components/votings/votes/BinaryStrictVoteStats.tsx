@@ -53,9 +53,11 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
             <Group align="center" gap="xs">
                 <Text fw={500}>Total Votes:</Text>
                 <Text c="dimmed">{totalVotes}</Text>
-                <Text size="sm" c="dimmed">
-                    ({nonNeutralVotes} non-neutral)
-                </Text>
+                {voting.allowNeutralVotes && (
+                    <Text size="sm" c="dimmed">
+                        ({nonNeutralVotes} non-neutral)
+                    </Text>
+                )}
             </Group>
 
             {nonNeutralVotes > 0 && (
@@ -99,10 +101,16 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                             {onFilterChange && (
                                 <ActionIcon
                                     size="sm"
-                                    variant={activeFilter === 2 ? "filled" : "subtle"}
-                                    color={activeFilter === 2 ? "red" : "gray"}
-                                    onClick={() => handleFilterClick(2)}>
-                                    <FontAwesomeIcon icon={activeFilter === 2 ? "filter-circle-xmark" : "filter"} />
+                                    variant={activeFilter === (voting.allowNeutralVotes ? 2 : 1) ? "filled" : "subtle"}
+                                    color={activeFilter === (voting.allowNeutralVotes ? 2 : 1) ? "red" : "gray"}
+                                    onClick={() => handleFilterClick(voting.allowNeutralVotes ? 2 : 1)}>
+                                    <FontAwesomeIcon
+                                        icon={
+                                            activeFilter === (voting.allowNeutralVotes ? 2 : 1)
+                                                ? "filter-circle-xmark"
+                                                : "filter"
+                                        }
+                                    />
                                 </ActionIcon>
                             )}
                             <Text size="sm" fw={500}>

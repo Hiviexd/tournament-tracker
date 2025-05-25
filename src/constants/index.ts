@@ -47,28 +47,30 @@ export const BADGE_SUPPORT_OPTIONS = [
     "Approve badge",
 ] as const;
 
-export const TOP_THREE_BADGE_SUPPORT_OPTIONS = ["Award top 3 badges", "Only award winner badge"] as const;
-
 export const VOTE_PRESETS = {
     userAddition: {
-        type: "binary" as const,
-        options: [...USER_ADDITION_OPTIONS],
+        type: "binary-strict" as const,
+        options: ["Approve", "Oppose"],
         duration: 4,
+        allowNeutralVotes: false,
     },
     tournamentBans: {
-        type: "variable" as const,
+        type: "ranked-choice" as const,
         options: [...TOURNAMENT_OPTIONS],
         duration: 3,
+        allowNeutralVotes: true,
     },
     badgeSupport: {
-        type: "variable" as const,
+        type: "ranked-choice" as const,
         options: [...BADGE_SUPPORT_OPTIONS],
         duration: 3,
+        allowNeutralVotes: true,
     },
     topThreeBadgeSupport: {
-        type: "binary" as const,
-        options: [...TOP_THREE_BADGE_SUPPORT_OPTIONS],
+        type: "binary-strict" as const,
+        options: ["Approve", "Oppose"],
         duration: 4,
+        allowNeutralVotes: false,
     },
 } as const;
 

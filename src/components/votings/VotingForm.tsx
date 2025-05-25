@@ -131,6 +131,7 @@ export default function VotingForm({ voting, user }: IProps) {
                         options={voting.options}
                         value={voteData as BinaryStrictVote}
                         onChange={(vote) => vote && setVoteData(vote)}
+                        allowNeutralVotes={voting.allowNeutralVotes}
                     />
                 );
 

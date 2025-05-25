@@ -142,7 +142,7 @@ class VotingsController {
         const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         let neutralVotesSettingOverride = allowNeutralVotes;
-        if (type === "binary-strict" || type === "ranked-choice") neutralVotesSettingOverride = true;
+        if (type === "ranked-choice") neutralVotesSettingOverride = true;
 
         const voting = new Voting({
             author,
@@ -324,6 +324,36 @@ class VotingsController {
                     )
                 ) {
                     return res.status(400).json({ error: "Invalid scores" });
+                }
+                if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
+                    return res
+                        .status(400)
+                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                }
+                break;
+            case "binary-strict":
+                if (typeof data.score !== "number" || data.score < -1 || data.score > 1) {
+                    return res.status(400).json({ error: "Invalid score (must be between -1 and 1)" });
+                }
+                if (!voting.allowNeutralVotes && data.score === 0) {
+                    return res
+                        .status(400)
+                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                }
+                break;
+            case "ranked-choice":
+                if (
+                    !Array.isArray(data.scores) ||
+                    !data.scores.every(
+                        (s) =>
+                            typeof s.optionIndex === "number" &&
+                            s.optionIndex < voting.options.length &&
+                            typeof s.score === "number" &&
+                            s.score >= -2 &&
+                            s.score <= 2
+                    )
+                ) {
+                    return res.status(400).json({ error: "Invalid scores (must be between -2 and 2)" });
                 }
                 if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
                     return res

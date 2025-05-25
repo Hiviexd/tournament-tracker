@@ -175,7 +175,8 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
         case "binary":
             return { type: "binary", score: 0 } as BinaryVote;
         case "binary-strict":
-            return { type: "binary-strict", score: 0 } as BinaryStrictVote;
+            // Default to neutral (0) if allowed, otherwise default to agree (1)
+            return { type: "binary-strict", score: voting.allowNeutralVotes ? 0 : 1 } as BinaryStrictVote;
         case "variable":
             return {
                 type: "variable",

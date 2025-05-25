@@ -69,8 +69,13 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                 if (voting.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
                 }
-                if (voting.type === "binary-strict" && value.length !== 3) {
-                    return "Binary strict votes must have exactly 3 options";
+                if (voting.type === "binary-strict") {
+                    if (form.values.allowNeutralVotes && value.length !== 3) {
+                        return "Binary strict votes with neutral allowed must have exactly 3 options";
+                    }
+                    if (!form.values.allowNeutralVotes && value.length !== 2) {
+                        return "Binary strict votes without neutral must have exactly 2 options";
+                    }
                 }
                 return null;
             },
@@ -99,7 +104,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleAddOption = () => {
-        if (hasVotes || voting.type === "binary-strict") return;
+        if (hasVotes) return;
 
         const trimmedOption = newOption.trim();
         if (trimmedOption && !form.values.options.includes(trimmedOption)) {
@@ -109,7 +114,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleRemoveOption = (optionToRemove: string) => {
-        if (hasVotes || voting.type === "binary-strict") return;
+        if (hasVotes) return;
 
         form.setFieldValue(
             "options",
@@ -233,7 +238,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         form.values.options.map((option, index) => (
                                             <Pill
                                                 key={index}
-                                                withRemoveButton={!hasVotes && voting.type !== "binary-strict"}
+                                                withRemoveButton={!hasVotes}
                                                 onRemove={() => handleRemoveOption(option)}
                                                 variant="subtle"
                                                 style={{
@@ -248,7 +253,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         ))
                                     )}
                                 </Group>
-                                {!hasVotes && voting.type !== "binary-strict" && (
+                                {!hasVotes && (
                                     <Group gap="xs" flex={1} align="flex-start">
                                         <TextInput
                                             placeholder="Add new option"
@@ -257,7 +262,10 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                             onChange={(e) => setNewOption(e.currentTarget.value)}
                                             onKeyDown={handleKeyPress}
                                             error={form.errors.options}
-                                            disabled={form.values.type === "binary" && form.values.options.length >= 2}
+                                            disabled={
+                                                (form.values.type === "binary" && form.values.options.length >= 2) ||
+                                                form.values.type === "binary-strict"
+                                            }
                                         />
                                         <ActionIcon
                                             variant="filled"
@@ -265,7 +273,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                             onClick={handleAddOption}
                                             disabled={
                                                 !newOption.trim() ||
-                                                (form.values.type === "binary" && form.values.options.length >= 2)
+                                                (form.values.type === "binary" && form.values.options.length >= 2) ||
+                                                form.values.type === "binary-strict"
                                             }>
                                             <FontAwesomeIcon icon="plus" />
                                         </ActionIcon>
