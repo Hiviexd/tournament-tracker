@@ -3,6 +3,11 @@ import { IDiscordField } from "../interfaces/Discord";
 import { IAttachment } from "../interfaces/Attachment";
 import moment from "moment";
 
+/**
+ * Sets the session with the oauth response
+ * @param session The session object
+ * @param response The oauth response
+ */
 export function setSession(session, response: IOsuAuthResponse) {
     // set the cookie's maxAge to 7 days
     session.cookie.maxAge = moment.duration(7, "days").asMilliseconds();
@@ -13,7 +18,13 @@ export function setSession(session, response: IOsuAuthResponse) {
     session.refreshToken = response.refresh_token;
 }
 
-/** Just replaces () and [] */
+/**
+ * Escapes special characters in usernames to prevent them from being interpreted as syntax
+ * Specifically escapes parentheses () and square brackets [] by adding backslashes before them
+ * Also trims leading and trailing whitespace
+ * @param username The username string to sanitize
+ * @returns The escaped username safe for use in regex, markdown, or other contexts where these characters have special meaning
+ */
 export function escapeUsername(username: string) {
     username = username.trim();
     return username.replace(/[()[\]]/g, "\\$&");
@@ -89,6 +100,11 @@ export function getAttachmentsField(attachments: IAttachment[]): IDiscordField |
     };
 }
 
+/**
+ * Validates an osu! profile link
+ * @param input The input string to validate
+ * @returns The username if valid, otherwise `null`
+ */
 export function validateOsuProfileLink(input: string): string | null {
     const urlPattern = /^(?:https?:\/\/)?osu\.ppy\.sh\/users\/([\w\-[\]]+)\/?$/i;
 
