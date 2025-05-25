@@ -246,3 +246,5 @@ export default function VoteCard({ vote, options }: IProps) {
         </Card>
     );
 }
+
+// TODO: split into multiple components, and group components in ./votes by type
