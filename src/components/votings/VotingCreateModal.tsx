@@ -149,15 +149,15 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
     const typeOptions = [
         {
-            group: "Clear Winning Option Voting",
+            group: "Clear winning option voting",
             items: [
+                { value: "classic", label: "Classic (Single Choice)" },
                 { value: "binary-strict", label: "Binary (Strict) (Agree/Disagree with optional Neutral)" },
                 { value: "ranked-choice", label: "Ranked Choice (Schulze Method)" },
-                { value: "classic", label: "Classic (Single Choice)" },
             ],
         },
         {
-            group: "Score-based Voting",
+            group: "Score-based voting",
             items: [
                 { value: "binary", label: "Binary (Yes/No Score)" },
                 { value: "variable", label: "Variable (Multiple Scores)" },
