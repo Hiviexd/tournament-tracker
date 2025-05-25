@@ -34,7 +34,7 @@ export interface RankedChoiceVote {
 
 export interface RankedChoiceVoteScore {
     optionIndex: number;
-    score: number; // from 0 to 5
+    score: number; // from -2 to 2
 }
 
 export interface BinaryStrictVote {

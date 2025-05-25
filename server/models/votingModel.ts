@@ -17,7 +17,7 @@ const VotingSchema = new Schema<IVoting>(
         type: {
             type: String,
             required: true,
-            enum: ["variable", "binary", "classic"],
+            enum: ["variable", "binary", "classic", "binary-strict", "ranked-choice"],
             default: "classic",
         },
         options: [{ type: String, required: true }],

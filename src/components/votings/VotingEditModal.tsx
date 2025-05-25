@@ -69,6 +69,9 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                 if (voting.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
                 }
+                if (voting.type === "binary-strict" && value.length !== 3) {
+                    return "Binary strict votes must have exactly 3 options";
+                }
                 return null;
             },
         },
@@ -96,7 +99,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleAddOption = () => {
-        if (hasVotes) return;
+        if (hasVotes || voting.type === "binary-strict") return;
 
         const trimmedOption = newOption.trim();
         if (trimmedOption && !form.values.options.includes(trimmedOption)) {
@@ -106,7 +109,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     };
 
     const handleRemoveOption = (optionToRemove: string) => {
-        if (hasVotes) return;
+        if (hasVotes || voting.type === "binary-strict") return;
 
         form.setFieldValue(
             "options",
@@ -212,9 +215,12 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         Options {voting.type === "binary" && "(Must be exactly 2)"}
                                         {voting.type === "variable" && "(Each will be rated -5 to +5)"}
                                     </Text>
-                                    {hasVotes && (
+                                    {(hasVotes || voting.type === "binary-strict") && (
                                         <Text size="xs" c="dimmed">
-                                            Options cannot be modified after votes are cast
+                                            {hasVotes && "Options cannot be modified after votes are cast"}
+                                            {!hasVotes &&
+                                                voting.type === "binary-strict" &&
+                                                "Options are fixed for binary strict votes"}
                                         </Text>
                                     )}
                                 </Group>
@@ -227,7 +233,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         form.values.options.map((option, index) => (
                                             <Pill
                                                 key={index}
-                                                withRemoveButton={!hasVotes}
+                                                withRemoveButton={!hasVotes && voting.type !== "binary-strict"}
                                                 onRemove={() => handleRemoveOption(option)}
                                                 variant="subtle"
                                                 style={{
@@ -242,7 +248,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         ))
                                     )}
                                 </Group>
-                                {!hasVotes && (
+                                {!hasVotes && voting.type !== "binary-strict" && (
                                     <Group gap="xs" flex={1} align="flex-start">
                                         <TextInput
                                             placeholder="Add new option"

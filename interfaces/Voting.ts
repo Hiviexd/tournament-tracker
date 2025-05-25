@@ -11,7 +11,7 @@ export type VotingCategory = "tournament" | "user" | "discussion";
  * * **binary**: two options, set a score between -5 and 5 to express how close you are to each option
  * * **classic**: multiple options, select one option
  */
-export type VotingType = "variable" | "binary" | "classic";
+export type VotingType = "variable" | "binary" | "classic" | "binary-strict" | "ranked-choice";
 
 export interface VotingQueryParams {
     isPublic?: boolean;

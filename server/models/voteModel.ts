@@ -56,8 +56,8 @@ const VoteSchema = new Schema<IVote>(
                                     (s: RankedChoiceVoteScore) =>
                                         typeof s.optionIndex === "number" &&
                                         typeof s.score === "number" &&
-                                        s.score >= 0 &&
-                                        s.score <= 5
+                                        s.score >= -2 &&
+                                        s.score <= 2
                                 )
                             );
                         case "binary-strict":

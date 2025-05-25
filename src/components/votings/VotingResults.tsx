@@ -11,7 +11,9 @@ import { useDisclosure } from "@mantine/hooks";
 import VoteCard from "./VoteCard";
 import ClassicVoteStats from "./votes/ClassicVoteStats";
 import BinaryVoteStats from "./votes/BinaryVoteStats";
+import BinaryStrictVoteStats from "./votes/BinaryStrictVoteStats";
 import VariableVoteStats from "./votes/VariableVoteStats";
+import RankedChoiceVoteStats from "./votes/RankedChoiceVoteStats";
 import { IUser } from "@interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -35,7 +37,13 @@ export default function VotingResults({ voting, user }: IProps) {
             if (vote.data.type === "binary") {
                 return optionIndex === 0 ? vote.data.score > 0 : vote.data.score < 0;
             }
-            if (vote.data.type === "variable") {
+            if (vote.data.type === "binary-strict") {
+                // For binary-strict: 0=agree, 1=neutral, 2=disagree
+                if (optionIndex === 0) return vote.data.score === 1; // agree
+                if (optionIndex === 1) return vote.data.score === 0; // neutral
+                if (optionIndex === 2) return vote.data.score === -1; // disagree
+            }
+            if (vote.data.type === "variable" || vote.data.type === "ranked-choice") {
                 const score = vote.data.scores.find((s) => s.optionIndex === optionIndex)?.score;
                 return score !== undefined && score !== 0;
             }
@@ -57,8 +65,18 @@ export default function VotingResults({ voting, user }: IProps) {
                 );
             case "binary":
                 return <BinaryVoteStats voting={voting} />;
+            case "binary-strict":
+                return (
+                    <BinaryStrictVoteStats
+                        voting={voting}
+                        onFilterChange={setFilteredOptionIndex}
+                        activeFilter={filteredOptionIndex}
+                    />
+                );
             case "variable":
                 return <VariableVoteStats voting={voting} />;
+            case "ranked-choice":
+                return <RankedChoiceVoteStats voting={voting} />;
         }
     };
 

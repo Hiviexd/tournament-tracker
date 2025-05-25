@@ -50,7 +50,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             duration: 3,
             type: "classic" as VotingType,
             options: ["Agree", "Disagree"],
-            allowNeutralVotes: false,
+            allowNeutralVotes: true,
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
@@ -65,6 +65,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 if (value.length < 2) return "At least two options are required";
                 if (values.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
+                }
+                if (values.type === "binary-strict" && value.length !== 3) {
+                    return "Binary strict votes must have exactly 3 options";
                 }
                 return null;
             },
@@ -140,9 +143,21 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     ];
 
     const typeOptions = [
-        { value: "classic", label: "Classic (Single Choice)" },
-        { value: "binary", label: "Binary (Yes/No Score)" },
-        { value: "variable", label: "Variable (Multiple Scores)" },
+        {
+            group: "Clear Winning Option Voting",
+            items: [
+                { value: "binary-strict", label: "Binary (Strict) (Agree/Neutral/Disagree)" },
+                { value: "ranked-choice", label: "Ranked Choice (Schulze Method)" },
+                { value: "classic", label: "Classic (Single Choice)" },
+            ],
+        },
+        {
+            group: "Score-based Voting",
+            items: [
+                { value: "binary", label: "Binary (Yes/No Score)" },
+                { value: "variable", label: "Variable (Multiple Scores)" },
+            ],
+        },
     ];
 
     const presetOptions = [
@@ -163,9 +178,12 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         }
     };
 
-    // Set default options
+    // Set default options based on vote type
     const setDefaultOptions = useCallback(() => {
-        if (form.values.options.length === 0) {
+        if (form.values.type === "binary-strict") {
+            // Binary strict has fixed options
+            form.setFieldValue("options", ["Agree", "Neutral", "Disagree"]);
+        } else if (form.values.options.length === 0) {
             form.setFieldValue("options", ["Agree", "Disagree"]);
         }
     }, [form]);
@@ -176,17 +194,19 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 return "Classic voting allows users to select a single option from the provided list.";
             case "binary":
                 return "Binary voting allows users to vote between 2 options using a score ranging from -5 to +5, with the green option being +5 and the red option being -5.";
+            case "binary-strict":
+                return "Binary strict voting presents 3 fixed options: Agree, Neutral, and Disagree. Neutral votes are excluded from the final result calculation.";
             case "variable":
                 return "Variable voting allows users to rate each option with a score ranging from -5 to +5.";
+            case "ranked-choice":
+                return "Ranked choice voting allows users to rate each option on a 5-point scale from strongly disagree to strongly agree. Results are calculated using the Schulze method.";
             default:
                 return "";
         }
     };
     useEffect(() => {
-        if (form.values.type !== form.getInputProps("type").value) {
-            setDefaultOptions();
-        }
-    }, [form, form.values.type, setDefaultOptions]);
+        setDefaultOptions();
+    }, [form.values.type, setDefaultOptions]);
 
     return (
         <Modal opened={opened} onClose={onClose} title="Create New Vote" size="xl">
@@ -278,7 +298,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     />
 
                     {(form.values.type === "binary" || form.values.type === "variable") && (
-                        <Checkbox label="Allow neutral (0 score) votes" {...form.getInputProps("allowNeutralVotes")} />
+                        <Checkbox
+                            label="Allow neutral (0 score) votes"
+                            checked={form.values.allowNeutralVotes}
+                            onChange={(event) => form.setFieldValue("allowNeutralVotes", event.currentTarget.checked)}
+                        />
                     )}
 
                     <Select
@@ -307,7 +331,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 form.values.options.map((option, index) => (
                                     <Pill
                                         key={index}
-                                        withRemoveButton
+                                        withRemoveButton={form.values.type !== "binary-strict"}
                                         onRemove={() => handleRemoveOption(option)}
                                         variant="subtle"
                                         style={{
@@ -330,7 +354,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 }
                             }}
                             error={form.errors.options}
-                            disabled={form.values.type === "binary" && form.values.options.length >= 2}
+                            disabled={
+                                form.values.type === "binary-strict" ||
+                                (form.values.type === "binary" && form.values.options.length >= 2)
+                            }
                         />
                     </Stack>
 

@@ -141,6 +141,9 @@ class VotingsController {
         });
         const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
+        let neutralVotesSettingOverride = allowNeutralVotes;
+        if (type === "binary-strict" || type === "ranked-choice") neutralVotesSettingOverride = true;
+
         const voting = new Voting({
             author,
             category,
@@ -151,7 +154,7 @@ class VotingsController {
             type,
             options,
             requiredVotes,
-            allowNeutralVotes,
+            allowNeutralVotes: neutralVotesSettingOverride,
         });
 
         if (category === "user") {

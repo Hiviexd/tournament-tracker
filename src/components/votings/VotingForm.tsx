@@ -4,11 +4,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import { useSubmitVote } from "../../hooks/useVotings";
-import { VoteType, ClassicVote, BinaryVote, VariableVote } from "../../../interfaces/Vote";
+import {
+    VoteType,
+    ClassicVote,
+    BinaryVote,
+    BinaryStrictVote,
+    VariableVote,
+    RankedChoiceVote,
+} from "../../../interfaces/Vote";
 import utils from "../../../utils";
 import ClassicVoteInput from "./votes/ClassicVoteInput";
 import BinaryVoteInput from "./votes/BinaryVoteInput";
+import BinaryStrictVoteInput from "./votes/BinaryStrictVoteInput";
 import VariableVoteInput from "./votes/VariableVoteInput";
+import RankedChoiceVoteInput from "./votes/RankedChoiceVoteInput";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -19,7 +28,11 @@ const hasNeutralVote = (voteData: VoteType): boolean => {
     switch (voteData.type) {
         case "binary":
             return voteData.score === 0;
+        case "binary-strict":
+            return voteData.score === 0;
         case "variable":
+            return voteData.scores.some((s) => s.score === 0);
+        case "ranked-choice":
             return voteData.scores.some((s) => s.score === 0);
         default:
             return false;
@@ -45,6 +58,10 @@ export default function VotingForm({ voting, user }: IProps) {
                 return isExtremeVote(voteData.score);
             case "variable":
                 return voteData.scores.some((s) => isExtremeVote(s.score));
+            case "binary-strict":
+                return false;
+            case "ranked-choice":
+                return voteData.scores.some((s) => s.score === 2 || s.score === -2); // 2 or -2 is extreme for ranked choice (-2 to 2 scale)
             default:
                 return false;
         }
@@ -55,7 +72,13 @@ export default function VotingForm({ voting, user }: IProps) {
             return true;
         }
 
-        if (!voting.allowNeutralVotes && (voting.type === "binary" || voting.type === "variable")) {
+        if (
+            !voting.allowNeutralVotes &&
+            (voting.type === "binary" ||
+                voting.type === "variable" ||
+                voting.type === "ranked-choice" ||
+                voting.type === "binary-strict")
+        ) {
             return hasNeutralVote(voteData);
         }
 
@@ -102,6 +125,15 @@ export default function VotingForm({ voting, user }: IProps) {
                     />
                 );
 
+            case "binary-strict":
+                return (
+                    <BinaryStrictVoteInput
+                        options={voting.options}
+                        value={voteData as BinaryStrictVote}
+                        onChange={(vote) => vote && setVoteData(vote)}
+                    />
+                );
+
             case "variable":
                 return (
                     <VariableVoteInput
@@ -115,6 +147,15 @@ export default function VotingForm({ voting, user }: IProps) {
                                 ),
                             });
                         }}
+                    />
+                );
+
+            case "ranked-choice":
+                return (
+                    <RankedChoiceVoteInput
+                        options={voting.options}
+                        value={voteData as RankedChoiceVote}
+                        onChange={(vote) => vote && setVoteData(vote)}
                     />
                 );
         }

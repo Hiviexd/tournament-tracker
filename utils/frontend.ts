@@ -1,5 +1,13 @@
 import { IUser } from "../interfaces/User";
-import { IVote, VoteType, ClassicVote, BinaryVote, VariableVote } from "../interfaces/Vote";
+import {
+    IVote,
+    VoteType,
+    ClassicVote,
+    BinaryVote,
+    VariableVote,
+    BinaryStrictVote,
+    RankedChoiceVote,
+} from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
@@ -166,6 +174,8 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
             return { type: "classic", option: 0 } as ClassicVote;
         case "binary":
             return { type: "binary", score: 0 } as BinaryVote;
+        case "binary-strict":
+            return { type: "binary-strict", score: 0 } as BinaryStrictVote;
         case "variable":
             return {
                 type: "variable",
@@ -174,6 +184,14 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
                     score: 0,
                 })),
             } as VariableVote;
+        case "ranked-choice":
+            return {
+                type: "ranked-choice",
+                scores: voting.options.map((_, index) => ({
+                    optionIndex: index,
+                    score: 0,
+                })),
+            } as RankedChoiceVote;
     }
 }
 
