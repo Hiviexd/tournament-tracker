@@ -31,7 +31,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <StateProvider>
             <QueryClientProvider client={queryClient}>
                 <MantineProvider defaultColorScheme="dark" theme={theme}>
-                    <DatesProvider settings={{ locale: "en", timezone: "UTC", consistentWeeks: true, weekendDays: [0] }}>
+                    <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                         <ReactScan />
                         <Notifications />
                         <Router>
