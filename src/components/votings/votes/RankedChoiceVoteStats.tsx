@@ -3,74 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../../interfaces/Voting";
 import { RankedChoiceVote } from "../../../../interfaces/Vote";
 import { VOTE_COLORS } from "../../../constants";
+import utils from "../../../../utils";
 
 interface IProps {
     voting: IVoting;
-}
-
-// Schulze method implementation
-function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: number): number[] {
-    // Create preference matrix - d[i][j] is number of voters who prefer option i over option j
-    const d: number[][] = Array(optionCount)
-        .fill(null)
-        .map(() => Array(optionCount).fill(0));
-
-    votes.forEach((vote) => {
-        for (let i = 0; i < optionCount; i++) {
-            for (let j = 0; j < optionCount; j++) {
-                if (i !== j) {
-                    const scoreI = vote.scores.find((s) => s.optionIndex === i)?.score ?? 0;
-                    const scoreJ = vote.scores.find((s) => s.optionIndex === j)?.score ?? 0;
-
-                    if (scoreI > scoreJ) {
-                        d[i][j]++;
-                    }
-                }
-            }
-        }
-    });
-
-    // Calculate strongest paths using Floyd-Warshall algorithm
-    const p: number[][] = Array(optionCount)
-        .fill(null)
-        .map(() => Array(optionCount).fill(0));
-
-    // Initialize strongest paths
-    for (let i = 0; i < optionCount; i++) {
-        for (let j = 0; j < optionCount; j++) {
-            if (i !== j) {
-                p[i][j] = d[i][j] > d[j][i] ? d[i][j] : 0;
-            }
-        }
-    }
-
-    // Find strongest paths
-    for (let k = 0; k < optionCount; k++) {
-        for (let i = 0; i < optionCount; i++) {
-            for (let j = 0; j < optionCount; j++) {
-                if (i !== j && i !== k && j !== k) {
-                    p[i][j] = Math.max(p[i][j], Math.min(p[i][k], p[k][j]));
-                }
-            }
-        }
-    }
-
-    // Determine ranking based on strongest paths
-    const ranking: Array<{ index: number; wins: number }> = [];
-    for (let i = 0; i < optionCount; i++) {
-        let wins = 0;
-        for (let j = 0; j < optionCount; j++) {
-            if (i !== j && p[i][j] > p[j][i]) {
-                wins++;
-            }
-        }
-        ranking.push({ index: i, wins });
-    }
-
-    // Sort by number of wins (descending)
-    ranking.sort((a, b) => b.wins - a.wins);
-
-    return ranking.map((r) => r.index);
 }
 
 export default function RankedChoiceVoteStats({ voting }: IProps) {
@@ -80,7 +16,7 @@ export default function RankedChoiceVoteStats({ voting }: IProps) {
     );
 
     // Calculate Schulze ranking
-    const schulzeRanking = calculateSchulzeWinner(
+    const schulzeRanking = utils.calculateSchulzeWinner(
         rankedChoiceVotes.map((v) => v.data),
         voting.options.length
     );

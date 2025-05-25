@@ -1,4 +1,5 @@
 import moment from "moment";
+import { RankedChoiceVote, RankedChoiceVoteScore } from "../interfaces/Vote";
 
 /**
  * Shortens a string
@@ -105,4 +106,74 @@ export function formatGameMode(mode: string) {
  */
 export function isValidEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/**
+ * Calculates the Schulze method winner ranking for ranked choice voting
+ * @param votes Array of ranked choice votes
+ * @param optionCount Number of options
+ * @returns Array of option indices in ranking order (0 = winner, 1 = second place, etc.)
+ */
+export function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: number): number[] {
+    // Create preference matrix - d[i][j] is number of voters who prefer option i over option j
+    const d: number[][] = Array(optionCount)
+        .fill(null)
+        .map(() => Array(optionCount).fill(0));
+
+    votes.forEach((vote) => {
+        for (let i = 0; i < optionCount; i++) {
+            for (let j = 0; j < optionCount; j++) {
+                if (i !== j) {
+                    const scoreI = vote.scores.find((s: RankedChoiceVoteScore) => s.optionIndex === i)?.score ?? 0;
+                    const scoreJ = vote.scores.find((s: RankedChoiceVoteScore) => s.optionIndex === j)?.score ?? 0;
+
+                    if (scoreI > scoreJ) {
+                        d[i][j]++;
+                    }
+                }
+            }
+        }
+    });
+
+    // Calculate strongest paths using Floyd-Warshall algorithm
+    const p: number[][] = Array(optionCount)
+        .fill(null)
+        .map(() => Array(optionCount).fill(0));
+
+    // Initialize strongest paths
+    for (let i = 0; i < optionCount; i++) {
+        for (let j = 0; j < optionCount; j++) {
+            if (i !== j) {
+                p[i][j] = d[i][j] > d[j][i] ? d[i][j] : 0;
+            }
+        }
+    }
+
+    // Find strongest paths
+    for (let k = 0; k < optionCount; k++) {
+        for (let i = 0; i < optionCount; i++) {
+            for (let j = 0; j < optionCount; j++) {
+                if (i !== j && i !== k && j !== k) {
+                    p[i][j] = Math.max(p[i][j], Math.min(p[i][k], p[k][j]));
+                }
+            }
+        }
+    }
+
+    // Determine ranking based on strongest paths
+    const ranking: Array<{ index: number; wins: number }> = [];
+    for (let i = 0; i < optionCount; i++) {
+        let wins = 0;
+        for (let j = 0; j < optionCount; j++) {
+            if (i !== j && p[i][j] > p[j][i]) {
+                wins++;
+            }
+        }
+        ranking.push({ index: i, wins });
+    }
+
+    // Sort by number of wins (descending)
+    ranking.sort((a, b) => b.wins - a.wins);
+
+    return ranking.map((r) => r.index);
 }
