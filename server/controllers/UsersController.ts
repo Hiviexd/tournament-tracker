@@ -31,6 +31,8 @@ class UsersController {
             return res.status(400).json([]);
         }
 
+        userInput = utils.escapeUsername(userInput);
+
         let users: IUser[] = [];
 
         if (utils.isValidMongoId(userInput)) {
