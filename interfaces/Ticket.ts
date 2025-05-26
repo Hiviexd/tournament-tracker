@@ -34,6 +34,7 @@ export interface ITicket extends Document {
     threadId?: string;
     createdAt: Date;
     updatedAt: Date;
+    snoozedUntil?: Date;
 
     // temporary until tournaments model is used
     targetTournamentName?: string;
@@ -43,4 +44,5 @@ export interface ITicket extends Document {
     isReport: boolean;
     isTicket: boolean;
     lastResponseAt: Date;
+    isSnoozed: boolean;
 }

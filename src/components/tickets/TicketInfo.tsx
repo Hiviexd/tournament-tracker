@@ -20,7 +20,7 @@ import UserGroupBadge from "../common/badges/UserGroupBadge";
 import DateBadge from "../common/badges/DateBadge";
 import UserCard from "../common/UserCard";
 import { IUser } from "../../../interfaces/User";
-import { useToggleStatus, useUpdateThreadId } from "../../hooks/useTickets";
+import { useSnoozeTicket, useToggleStatus, useUpdateThreadId } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import moment from "moment";
@@ -38,6 +38,7 @@ export default function TicketInfo({ ticket }: IProps) {
 
     const toggleStatusMutation = useToggleStatus(ticket._id);
     const updateThreadIdMutation = useUpdateThreadId(ticket._id);
+    const snoozeTicketMutation = useSnoozeTicket(ticket._id);
 
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
@@ -52,6 +53,16 @@ export default function TicketInfo({ ticket }: IProps) {
         if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`))
             return;
         await toggleStatusMutation.mutateAsync();
+    };
+
+    const handleSnoozeTicket = async () => {
+        if (
+            !window.confirm(
+                "Are you sure you want to snooze reminders for this ticket for 7 days?\n\nIt will be unsnoozed after that time period, or when a new message is sent."
+            )
+        )
+            return;
+        await snoozeTicketMutation.mutateAsync();
     };
 
     const handleUserCardClick = (targetUser: IUser) => {
@@ -185,6 +196,17 @@ export default function TicketInfo({ ticket }: IProps) {
                                 variant={ticket.isActive ? "filled" : "outline"}
                                 leftSection={<FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />}>
                                 {ticket.isActive ? "Close" : "Reopen"}
+                            </Button>
+                            <Button
+                                onClick={handleSnoozeTicket}
+                                loading={snoozeTicketMutation.isPending}
+                                color="warning"
+                                variant="light"
+                                disabled={ticket.isSnoozed}
+                                leftSection={<FontAwesomeIcon icon="moon" />}>
+                                {ticket.isSnoozed
+                                    ? `Snoozed until ${moment(ticket.snoozedUntil).format("MMM Do, YYYY")}`
+                                    : "Snooze Reminders"}
                             </Button>
                         </Group>
                     </Stack>

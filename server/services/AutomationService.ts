@@ -270,10 +270,27 @@ class AutomationService {
             .populate("targetUser", "username osuId");
 
         const staleTickets: ITicket[] = [];
+        const ticketsToUpdate: ITicket[] = [];
 
         for (const ticket of activeTickets) {
-            const lastResponse = moment(ticket.lastResponseAt);
             const now = moment();
+
+            // Check if ticket is snoozed
+            if (ticket.snoozedUntil) {
+                const snoozeExpiration = moment(ticket.snoozedUntil);
+
+                // If snooze time has passed, remove the snooze
+                if (now.isAfter(snoozeExpiration)) {
+                    ticket.snoozedUntil = undefined;
+                    ticketsToUpdate.push(ticket);
+                    // Continue processing this ticket normally
+                } else {
+                    // Still snoozed, skip this ticket
+                    continue;
+                }
+            }
+
+            const lastResponse = moment(ticket.lastResponseAt);
             const daysSinceLastResponse = now.diff(lastResponse, "days");
 
             // Skip if less than 7 days old
@@ -347,6 +364,11 @@ class AutomationService {
                     threadId: ticket.threadId,
                 });
             }
+        }
+
+        // Update tickets that had their snooze expired
+        if (ticketsToUpdate.length > 0) {
+            await Promise.all(ticketsToUpdate.map((ticket) => ticket.save()));
         }
 
         if (staleTickets.length > 0) {

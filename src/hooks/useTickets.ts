@@ -103,3 +103,20 @@ export function useUpdateThreadId(ticketId: string) {
         },
     });
 }
+
+export function useSnoozeTicket(ticketId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tickets/${ticketId}/snooze`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+        },
+    });
+}

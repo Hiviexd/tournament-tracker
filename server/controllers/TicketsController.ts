@@ -292,6 +292,12 @@ class TicketsController {
 
         await newMessage.save();
         ticket.messages.push(newMessage._id);
+
+        // unsnooze ticket
+        if (ticket.snoozedUntil) {
+            ticket.snoozedUntil = undefined;
+        }
+
         await ticket.save();
 
         // osu! notification
@@ -472,6 +478,19 @@ class TicketsController {
         } else {
             res.json({ message: "Thread ID is already set!" });
         }
+    }
+
+    /** PATCH snooze ticket for 7 days */
+    public async snoozeTicket(req: Request, res: Response) {
+        const { ticketId } = req.params;
+        const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        const ticket = await Ticket.findById(ticketId).orFail();
+
+        ticket.snoozedUntil = sevenDaysFromNow;
+        await ticket.save();
+
+        res.json({ message: "Reminders for this ticket will be shown again in 7 days!" });
     }
 }
 

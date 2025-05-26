@@ -12,6 +12,7 @@ const TicketSchema = new Schema(
         targetUser: { type: Schema.Types.ObjectId, ref: "User" },
         targetTournament: { type: Schema.Types.ObjectId, ref: "Tournament" },
         threadId: { type: String },
+        snoozedUntil: { type: Date },
 
         // temporary until tournaments model is used
         targetTournamentName: { type: String },
@@ -46,6 +47,10 @@ TicketSchema.virtual("lastResponseAt").get(function (this: ITicket) {
     });
 
     return sortedMessages[0]?.createdAt || this.createdAt;
+});
+
+TicketSchema.virtual("isSnoozed").get(function (this: ITicket) {
+    return this.snoozedUntil && this.snoozedUntil > new Date();
 });
 
 const Ticket = mongoose.model<ITicket>("Ticket", TicketSchema);

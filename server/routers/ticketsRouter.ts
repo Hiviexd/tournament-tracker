@@ -12,5 +12,6 @@ router.get("/:ticketId", auth.optionalAuth, TicketsController.getTicket);
 router.patch("/:ticketId/sendMessage", auth.isLoggedIn, handleUpload, TicketsController.sendMessage);
 router.patch("/:ticketId/toggleStatus", auth.isLoggedIn, auth.isCommittee, TicketsController.toggleStatus);
 router.patch("/:ticketId/updateThreadId", auth.isLoggedIn, auth.isCommittee, TicketsController.updateThreadId);
+router.patch("/:ticketId/snooze", auth.isLoggedIn, auth.isCommittee, TicketsController.snoozeTicket);
 
 export default router;

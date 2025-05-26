@@ -93,6 +93,7 @@ import {
     faArrowUp,
     faCode,
     faQuoteLeft,
+    faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -190,5 +191,6 @@ export default function loadIcons() {
         faArrowUp,
         faCode,
         faQuoteLeft,
+        faMoon,
     );
 }
