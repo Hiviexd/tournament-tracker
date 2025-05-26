@@ -152,7 +152,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             group: "Clear winning option voting",
             items: [
                 { value: "classic", label: "Classic (Single Choice)" },
-                { value: "binary-strict", label: "Binary (Strict) (Agree/Disagree with optional Neutral)" },
+                { value: "binary-strict", label: "Strict Binary (Agree/Neutral/Disagree)" },
                 { value: "ranked-choice", label: "Ranked Choice (Schulze Method)" },
             ],
         },
