@@ -419,7 +419,7 @@ class TicketsController {
         // Discord
         const embed = {
             author: DiscordService.defaultWebhookAuthor(req.session),
-            color: ticket.isActive ? webhookColors.lightPurple : webhookColors.darkPurple,
+            color: ticket.isActive ? webhookColors.gray : webhookColors.black,
             description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
                 config.baseUrl
             }/${ticket.type}s/${ticket._id})`,
