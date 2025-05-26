@@ -106,11 +106,11 @@ export default function TicketInfo({ ticket }: IProps) {
                     </Stack>
                     <Group gap="xs">
                         <Tooltip label={ticket.type === "ticket" ? "Ticket" : "Report"}>
-                            <Badge color={ticket.type === "ticket" ? "info" : "red"} variant="filled">
+                            <Badge color={ticket.type === "ticket" ? "info" : "red"} variant="light">
                                 <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />
                             </Badge>
                         </Tooltip>
-                        <UserGroupBadge group={ticket.assignedGroup} tooltip="top" />
+                        <UserGroupBadge group={ticket.assignedGroup} tooltip="top" variant="light" />
                         <Badge variant="light" color={ticket.isActive ? "success" : "danger"}>
                             {ticket.isActive ? "Active" : "Closed"}
                         </Badge>

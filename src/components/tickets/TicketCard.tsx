@@ -2,6 +2,7 @@
 import { Card, Group, Stack, Text, Badge, Tooltip, Anchor } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import moment from "moment";
 
 // Types
 import { ITicket } from "../../../interfaces/Ticket";
@@ -9,10 +10,9 @@ import { ITicket } from "../../../interfaces/Ticket";
 // Components
 import UserDisplay from "../common/UserDisplay";
 import UserLink from "../common/UserLink";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import DateBadge from "../common/badges/DateBadge";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
-import moment from "moment";
+import ReportTypeBadge from "../common/badges/ReportTypeBadge";
 
 interface ITicketCardProps {
     ticket: ITicket;
@@ -21,24 +21,6 @@ interface ITicketCardProps {
 export default function TicketCard({ ticket }: ITicketCardProps) {
     const handleLinkClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-    };
-
-    const getTargetInfo = () => {
-        if (ticket.targetUser) {
-            return {
-                text: `User Report`,
-                icon: "user",
-                color: "red" as const,
-            };
-        }
-        if (ticket.targetTournamentName) {
-            return {
-                text: `Tournament Report`,
-                icon: "trophy",
-                color: "orange" as const,
-            };
-        }
-        return null;
     };
 
     const renderTarget = () => {
@@ -69,7 +51,6 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
         return "success";
     };
 
-    const targetInfo = getTargetInfo();
     const messageCount = ticket.messages.filter((message) => !message.isNote).length;
 
     return (
@@ -101,19 +82,18 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                     </Stack>
                 </Group>
 
+                {/* badges */}
+
                 <Group gap="xs" mt="auto">
-                    <Tooltip label={ticket.type === "ticket" ? "Ticket" : "Report"}>
-                        <Badge color={ticket.type === "ticket" ? "blue" : "red"} variant="filled">
-                            <FontAwesomeIcon icon={ticket.type === "ticket" ? "paper-plane" : "flag"} />{" "}
-                        </Badge>
-                    </Tooltip>
+                    <ReportTypeBadge report={ticket} />
 
-                    <UserGroupBadge group={ticket.assignedGroup} tooltip="top" />
+                    <UserGroupBadge group={ticket.assignedGroup} tooltip="top" variant="light" />
 
-                    {targetInfo && (
-                        <Tooltip label={targetInfo.text}>
-                            <Badge color={targetInfo.color} variant="light">
-                                <FontAwesomeIcon icon={targetInfo.icon as IconProp} />
+                    {ticket.isSnoozed && (
+                        <Tooltip
+                            label={`Reminders snoozed until ${moment(ticket.snoozedUntil).format("MMM Do, YYYY")}`}>
+                            <Badge color="grape" variant="light">
+                                <FontAwesomeIcon icon="moon" />
                             </Badge>
                         </Tooltip>
                     )}
@@ -126,7 +106,12 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                         </Tooltip>
                     </Badge>
 
-                    <DateBadge date={ticket.lastResponseAt} warningAge={7} dangerAge={10} staticColor={!ticket.isActive} />
+                    <DateBadge
+                        date={ticket.lastResponseAt}
+                        warningAge={7}
+                        dangerAge={10}
+                        staticColor={!ticket.isActive}
+                    />
                 </Group>
             </Stack>
         </Card>

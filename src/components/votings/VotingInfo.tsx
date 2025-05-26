@@ -35,7 +35,7 @@ import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
 import NotVotedBadge from "../common/badges/NotVotedBadge";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import VotingTypeBadge from "../common/badges/VotingTypeBadge";
 
 interface IProps {
     voting: IVoting;
@@ -51,19 +51,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const deleteVotingMutation = useDeleteVoting(voting._id);
     const clearVotesMutation = useClearVotes(voting._id);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
-
-    const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
-        switch (voting.category) {
-            case "tournament":
-                return { icon: "trophy", text: "Tournament", color: "orange" };
-            case "user":
-                return { icon: "user", text: "User", color: "red" };
-            case "discussion":
-                return { icon: "comments", text: "Discussion", color: "blue" };
-            default:
-                return { icon: "question", text: "Unknown", color: "gray" };
-        }
-    };
 
     const getDueDateColor = (): string => {
         const deadline = moment(voting.deadline);
@@ -192,11 +179,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             </Text>
                         </Stack>
                         <Group gap="xs">
-                            <Tooltip label={getVotingTypeInfo().text}>
-                                <Badge color={getVotingTypeInfo().color} variant="filled">
-                                    <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
-                                </Badge>
-                            </Tooltip>
+                            <VotingTypeBadge type={voting.category} />
                             {!voting.isActive && (
                                 <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>
                                     <Badge color={voting.isPublic ? "blue" : "gray"} variant="light">
@@ -205,7 +188,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 </Tooltip>
                             )}
                             {sortedGroups.map((group, index) => (
-                                <UserGroupBadge key={index} group={group} tooltip="top" />
+                                <UserGroupBadge key={index} group={group} tooltip="top" variant="light" />
                             ))}
                             <Badge color={voting.isActive ? "success" : "gray"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}
