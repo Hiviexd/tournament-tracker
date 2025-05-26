@@ -72,8 +72,8 @@ export default function BadgeManager({ user, committee }: IProps) {
                         <Image
                             src={`https://assets.ppy.sh/profile-badges/tcomm-${user.badgeValue}y@2x.png`}
                             alt={`Committee Badge Level ${user.badgeValue}`}
-                            width={86}
-                            height={40}
+                            w={86}
+                            radius="sm"
                         />
                     ) : (
                         <NoBadgeCard />
