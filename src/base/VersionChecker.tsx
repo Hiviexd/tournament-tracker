@@ -26,20 +26,24 @@ export default function VersionChecker() {
         ) {
             notifications.show({
                 id: "version-check",
-                color: "primary.10",
+                color: "primary",
                 title: "Website out of date!",
                 position: "bottom-center",
                 message: (
                     <Button
-                        variant="filled"
+                        mt="3px"
+                        variant="white"
                         color="primary"
                         onClick={() => window.location.reload()}
-                        leftSection={<FontAwesomeIcon icon="arrows-rotate" />}>
+                        leftSection={<FontAwesomeIcon icon="arrows-rotate" className="animation-spin" />}>
                         Refresh to get the latest version
                     </Button>
                 ),
                 autoClose: false,
                 withCloseButton: false,
+                style: {
+                    width: "fit-content",
+                },
             });
         }
     }, [version?.hash, currentHash, version?.message]);
