@@ -53,7 +53,7 @@ export const copyToClipboard = (text: string) => {
     notifications.show({
         title: "Success",
         message: "Copied to clipboard!",
-        color: "success",
+        color: "green",
     });
 };
 
