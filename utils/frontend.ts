@@ -11,6 +11,7 @@ import {
 import { IVoting } from "../interfaces/Voting";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
+import moment from "moment";
 
 export interface ApiResponse<T = any> {
     data?: T;
@@ -239,6 +240,75 @@ export const handleApiError = (error: any) => {
         message: error.response?.data?.message,
     };
 };
+
+/**
+ * Convert a date to a short relative format (e.g., "2d ago", "5h ago", "30s ago")
+ * @param date The date to convert (can be Date, string, or moment object)
+ * @param now Optional current date/time for comparison (defaults to current time)
+ * @returns Short relative time string
+ */
+export function getShortRelativeTime(date: Date | string | moment.Moment, now?: Date | moment.Moment): string {
+    const targetMoment = moment(date);
+    const nowMoment = now ? moment(now) : moment();
+
+    if (!targetMoment.isValid()) {
+        return "invalid date";
+    }
+
+    const diffMs = nowMoment.diff(targetMoment);
+    const isPast = diffMs > 0;
+    const absDiffMs = Math.abs(diffMs);
+
+    const seconds = Math.floor(absDiffMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    // Determine the appropriate unit
+    let timeUnit: string;
+    if (years > 0) timeUnit = "years";
+    else if (months > 0) timeUnit = "months";
+    else if (days > 0) timeUnit = "days";
+    else if (hours > 0) timeUnit = "hours";
+    else if (minutes > 0) timeUnit = "minutes";
+    else timeUnit = "seconds";
+
+    let value: number;
+    let unit: string;
+
+    switch (timeUnit) {
+        case "years":
+            value = years;
+            unit = "y";
+            break;
+        case "months":
+            value = months;
+            unit = "mo";
+            break;
+        case "days":
+            value = days;
+            unit = "d";
+            break;
+        case "hours":
+            value = hours;
+            unit = "h";
+            break;
+        case "minutes":
+            value = minutes;
+            unit = "m";
+            break;
+        case "seconds":
+        default:
+            value = Math.max(1, seconds); // Show at least "1s"
+            unit = "s";
+            break;
+    }
+
+    const suffix = isPast ? " ago" : " from now";
+    return `${value}${unit}${suffix}`;
+}
 
 export type ApiCallParams = {
     method: "get" | "post" | "put" | "patch" | "delete";
