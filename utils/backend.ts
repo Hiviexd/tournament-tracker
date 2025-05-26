@@ -45,6 +45,14 @@ type DiscordTimestampType =
  * Creates a dynamic Discord timestamp
  * @param date Date to convert
  * @param type Type of timestamp (defaults to `relative`)
+ * @example
+ * discordTimestamp(new Date(), "relative") // "7 days ago"
+ * discordTimestamp(new Date(), "shortTime") // "12:00"
+ * discordTimestamp(new Date(), "longTime") // "12:00:00"
+ * discordTimestamp(new Date(), "shortDate") // "05/26/2025"
+ * discordTimestamp(new Date(), "longDate") // "May 26, 2025"
+ * discordTimestamp(new Date(), "dateTime") // "May 26, 2025 12:00"
+ * discordTimestamp(new Date(), "dayDateTime") // "Monday, May 26, 2025 12:00"
  */
 export function discordTimestamp(date: Date, type: DiscordTimestampType = "relative"): string {
     const types: Record<DiscordTimestampType, string> = {
