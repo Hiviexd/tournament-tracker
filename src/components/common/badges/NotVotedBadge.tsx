@@ -36,7 +36,7 @@ export default function NotVotedBadge({ voting, user, variant = "light" }: IProp
     if (checkUserVoted()) return null;
 
     return (
-        <Badge color="orange" variant={variant} className="pulse">
+        <Badge color="orange" variant={variant} className="animation-pulse">
             <FontAwesomeIcon icon="exclamation-triangle" /> Needs your vote
         </Badge>
     );

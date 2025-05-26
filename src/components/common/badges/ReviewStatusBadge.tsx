@@ -24,14 +24,17 @@ export default function ReviewStatusBadge({ tournament, user, variant = "light" 
         if (tournament.status !== "reviewOngoing" && tournament.status !== "changesRequested") return false;
 
         // Check if user has already submitted a review
-        const hasSubmittedReview = tournament.reviews?.some((review) => review.author._id === user._id);
+        const hasSubmittedReview = tournament.reviews?.some((review) => review.author?._id === user._id);
         return !hasSubmittedReview;
     };
 
     if (!isAssigned()) return null;
 
     return (
-        <Badge color={needsReview() ? "orange" : "info"} variant={variant} className={needsReview() ? "pulse" : ""}>
+        <Badge
+            color={needsReview() ? "orange" : "info"}
+            variant={variant}
+            className={needsReview() ? "animation-pulse" : ""}>
             <FontAwesomeIcon icon={needsReview() ? "exclamation-triangle" : "check-to-slot"} />{" "}
             {needsReview() ? "Needs your review" : "Review submitted"}
         </Badge>

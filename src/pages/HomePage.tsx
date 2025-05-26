@@ -95,7 +95,7 @@ export default function HomePage() {
                         </Badge>
                     )}
                     {feature.new && (
-                        <Badge size="sm" variant="light" className="pulse">
+                        <Badge size="sm" variant="light" className="animation-pulse">
                             New Feature!
                         </Badge>
                     )}
