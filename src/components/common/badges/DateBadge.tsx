@@ -1,6 +1,7 @@
 import { Badge, Tooltip, type BadgeVariant } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
+import utils from "../../../../utils";
 
 interface IDateBadgeProps {
     date: Date;
@@ -30,7 +31,7 @@ export default function DateBadge({
         <Badge variant={variant} color={getColor()}>
             <FontAwesomeIcon icon="clock" />{" "}
             <Tooltip label={moment(date).format("LLL")}>
-                <span>{moment(date).fromNow()}</span>
+                <span>{utils.getShortRelativeTime(date)}</span>
             </Tooltip>
         </Badge>
     );
