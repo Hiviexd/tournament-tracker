@@ -482,6 +482,7 @@ class TicketsController {
 
     /** PATCH snooze ticket for 7 days */
     public async snoozeTicket(req: Request, res: Response) {
+        const user = res.locals!.user!;
         const { ticketId } = req.params;
         const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -491,6 +492,31 @@ class TicketsController {
         await ticket.save();
 
         res.json({ message: "Reminders for this ticket will be shown again in 7 days!" });
+
+        // Logger
+        await LogService.generate(
+            user._id,
+            `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
+            "ticket"
+        );
+
+        // Discord
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            color: webhookColors.purple,
+            description: `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
+            fields: [
+                {
+                    name: "Snoozed until",
+                    value: utils.discordTimestamp(sevenDaysFromNow, "dateTime"),
+                },
+            ],
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [embed],
+            threadId: ticket.threadId,
+        });
     }
 }
 
