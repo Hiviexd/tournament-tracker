@@ -4,14 +4,14 @@ import { ITournament } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
 import GameModeIcon from "../common/GameModeIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import TournamentStatusBadge from "./TournamentStatusBadge";
+import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
 import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
 import config from "../../../config.json";
 import utils from "../../../utils";
+import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 
 interface IProps {
     tournaments: ITournament[];
@@ -19,17 +19,6 @@ interface IProps {
 
 export default function TournamentTable({ tournaments }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-
-    const getTournamentTypeInfo = (type: string) => {
-        switch (type) {
-            case "tournament":
-                return { icon: "trophy", text: "Tournament", color: "orange" };
-            case "contest":
-                return { icon: "award", text: "Contest", color: "info" };
-            default:
-                return { icon: "question", text: "Unknown", color: "gray" };
-        }
-    };
 
     return (
         <Card shadow="sm" p="lg">
@@ -48,17 +37,10 @@ export default function TournamentTable({ tournaments }: IProps) {
                     </Table.Thead>
                     <Table.Tbody>
                         {tournaments.map((tournament) => {
-                            const typeInfo = getTournamentTypeInfo(tournament.type);
                             return (
                                 <Table.Tr key={tournament._id}>
                                     <Table.Td>
-                                        <Group gap="xs">
-                                            <Tooltip label={typeInfo.text}>
-                                                <Badge color={typeInfo.color} variant="filled">
-                                                    <FontAwesomeIcon icon={typeInfo.icon as IconProp} />
-                                                </Badge>
-                                            </Tooltip>
-                                        </Group>
+                                        <TournamentTypeBadge type={tournament.type} />
                                     </Table.Td>
 
                                     <Table.Td>

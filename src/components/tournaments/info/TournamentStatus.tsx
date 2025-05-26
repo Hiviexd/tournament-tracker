@@ -2,7 +2,7 @@ import { Stack, Group, Text, Progress, Tooltip, ActionIcon, Select } from "@mant
 import { ITournament, TournamentStatus as TournamentStatusType } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import TournamentStatusBadge from "../TournamentStatusBadge";
+import TournamentStatusBadge from "../../common/badges/TournamentStatusBadge";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";

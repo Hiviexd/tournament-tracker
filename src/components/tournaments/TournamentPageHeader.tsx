@@ -1,26 +1,15 @@
 import { Card, Title, Group, Stack, Badge, Text } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import GameModeIcon from "../common/GameModeIcon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import DateBadge from "../common/badges/DateBadge";
 import UserLink from "../common/UserLink";
+import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentPageHeader({ tournament }: IProps) {
-    const getTournamentTypeInfo = () => {
-        switch (tournament.type) {
-            case "tournament":
-                return { icon: "trophy", text: "Tournament", color: "orange" };
-            case "contest":
-                return { icon: "award", text: "Contest", color: "info" };
-            default:
-                return { icon: "question", text: "Unknown", color: "gray" };
-        }
-    };
 
     return (
         <Card shadow="sm" p="0" radius="md">
@@ -52,12 +41,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
 
                 <Group gap="xs" justify="space-between">
                     <Group gap={5}>
-                        <Badge color={getTournamentTypeInfo().color} variant="filled">
-                            <Group gap={5}>
-                                <FontAwesomeIcon icon={getTournamentTypeInfo().icon as IconProp} />
-                                <span>{getTournamentTypeInfo().text}</span>
-                            </Group>
-                        </Badge>
+                        <TournamentTypeBadge type={tournament.type} withText />
                         <GameModeIcon mode={tournament.modes} />
                     </Group>
 

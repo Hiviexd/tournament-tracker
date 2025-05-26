@@ -1,5 +1,5 @@
 import { Badge } from "@mantine/core";
-import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
+import { ITournament, TournamentStatus } from "../../../../interfaces/Tournament";
 
 interface IProps {
     tournament: ITournament;

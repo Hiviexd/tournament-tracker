@@ -1,15 +1,14 @@
-import { Card, Group, Stack, Title, Badge, Tooltip } from "@mantine/core";
+import { Card, Group, Stack, Title, Badge } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserDisplay from "../common/UserDisplay";
 import GameModeIcon from "../common/GameModeIcon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import TournamentStatusBadge from "./TournamentStatusBadge";
+import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
 import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
+import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 
 interface IProps {
     tournament: ITournament;
@@ -17,16 +16,6 @@ interface IProps {
 
 export default function TournamentCard({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const getTournamentTypeInfo = () => {
-        switch (tournament.type) {
-            case "tournament":
-                return { icon: "trophy", text: "Tournament", color: "orange" };
-            case "contest":
-                return { icon: "award", text: "Contest", color: "info" };
-            default:
-                return { icon: "question", text: "Unknown", color: "gray" };
-        }
-    };
 
     return (
         <Card
@@ -60,11 +49,7 @@ export default function TournamentCard({ tournament }: IProps) {
 
                 {/* badges */}
                 <Group gap="xs">
-                    <Tooltip label={getTournamentTypeInfo().text}>
-                        <Badge color={getTournamentTypeInfo().color} variant="filled">
-                            <FontAwesomeIcon icon={getTournamentTypeInfo().icon as IconProp} />
-                        </Badge>
-                    </Tooltip>
+                    <TournamentTypeBadge type={tournament.type} />
                     <GameModeIcon mode={tournament.modes} />
                     <TournamentStatusBadge tournament={tournament} />
                     {user?.isCommittee && ["reviewOngoing", "changesRequested"].includes(tournament.status) && (
