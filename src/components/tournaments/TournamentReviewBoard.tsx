@@ -1,12 +1,12 @@
-import { Table, Group, Text, Tooltip, ScrollArea, Card, ActionIcon } from "@mantine/core";
+import { Table, Group, Text, ScrollArea, Card } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import config from "../../../config.json";
-import utils from "../../../utils";
 import DateBadge from "../common/badges/DateBadge";
 import _ from "lodash";
+import CopyActionIcon from "../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournaments: ITournament[];
@@ -38,6 +38,10 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
                 {review.createdAt && <DateBadge date={review.createdAt} staticColor />}
             </Group>
         );
+    };
+
+    const getDiscordThreadLink = (tournament: ITournament) => {
+        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
     };
 
     // Sort tournaments by createdAt in descending order (newest first)
@@ -85,19 +89,12 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
 
                                     <Table.Td ta="center">
                                         {tournament.threadId ? (
-                                            <Group gap={4} justify="center">
-                                                <Tooltip label="Copy Discord thread link">
-                                                    <ActionIcon
-                                                        variant="subtle"
-                                                        onClick={() =>
-                                                            utils.copyToClipboard(
-                                                                `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
-                                                            )
-                                                        }>
-                                                        <FontAwesomeIcon icon="copy" />
-                                                    </ActionIcon>
-                                                </Tooltip>
-                                            </Group>
+                                            <CopyActionIcon
+                                                value={getDiscordThreadLink(tournament)}
+                                                tooltip="Copy Discord thread link"
+                                                size="sm"
+                                                color="primary"
+                                            />
                                         ) : (
                                             "-"
                                         )}

@@ -6,8 +6,8 @@ import { useUpdateThreadId } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import config from "../../../../config.json";
-import utils from "../../../../utils";
 import AlertText from "../../common/AlertText";
+import CopyActionIcon from "../../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournament: ITournament;
@@ -55,17 +55,10 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                             </ActionIcon>
                         )}
                         {tournament.threadId?.length && (
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={() =>
-                                    utils.copyToClipboard(
-                                        `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
-                                    )
-                                }
-                                color="success"
-                                title="Copy thread link">
-                                <FontAwesomeIcon icon="copy" />
-                            </ActionIcon>
+                            <CopyActionIcon
+                                value={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`}
+                                tooltip="Copy thread link"
+                            />
                         )}
                     </Group>
                 )}

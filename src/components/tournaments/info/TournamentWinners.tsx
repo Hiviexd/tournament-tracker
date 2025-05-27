@@ -9,7 +9,7 @@ import UserSearch, { UserSearchRef } from "../../common/UserSearch";
 import UserLink from "../../common/UserLink";
 import { notifications } from "@mantine/notifications";
 import { useEditTournament } from "../../../hooks/useTournaments";
-import utils from "../../../../utils";
+import CopyActionIcon from "../../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournament: ITournament;
@@ -44,11 +44,6 @@ export default function TournamentWinners({ tournament }: IProps) {
 
     const handleRemoveWinner = (winnerId: string) => {
         setWinners(winners.filter((w) => w._id !== winnerId));
-    };
-
-    const handleCopyAllUserIds = () => {
-        const userIds = winners.map((winner) => winner.osuId).join(",");
-        utils.copyToClipboard(userIds);
     };
 
     return (
@@ -88,13 +83,10 @@ export default function TournamentWinners({ tournament }: IProps) {
                             <FontAwesomeIcon icon="pen-to-square" />
                         </ActionIcon>
                         {winners.length > 0 && (
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={handleCopyAllUserIds}
-                                color="success"
-                                title="Copy all winner IDs">
-                                <FontAwesomeIcon icon="copy" />
-                            </ActionIcon>
+                            <CopyActionIcon
+                                value={winners.map((winner) => winner.osuId).join(",")}
+                                tooltip="Copy all winner IDs"
+                            />
                         )}
                     </Group>
                 ) : null}

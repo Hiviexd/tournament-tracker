@@ -1,17 +1,16 @@
-import { Table, Group, Badge, Text, Tooltip, ScrollArea, Card, ActionIcon } from "@mantine/core";
+import { Table, Group, Badge, Text, ScrollArea, Card } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
 import GameModeIcon from "../common/GameModeIcon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
 import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
 import config from "../../../config.json";
-import utils from "../../../utils";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
+import CopyActionIcon from "../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournaments: ITournament[];
@@ -19,6 +18,10 @@ interface IProps {
 
 export default function TournamentTable({ tournaments }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+
+    const getDiscordThreadLink = (tournament: ITournament) => {
+        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
+    };
 
     return (
         <Card shadow="sm" p="lg">
@@ -75,19 +78,12 @@ export default function TournamentTable({ tournaments }: IProps) {
                                     {user?.isCommittee && (
                                         <Table.Td ta="center">
                                             {tournament.threadId ? (
-                                                <Group gap={4} justify="center">
-                                                    <Tooltip label="Copy Discord thread link">
-                                                        <ActionIcon
-                                                            variant="subtle"
-                                                            onClick={() =>
-                                                                utils.copyToClipboard(
-                                                                    `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`
-                                                                )
-                                                            }>
-                                                            <FontAwesomeIcon icon="copy" />
-                                                        </ActionIcon>
-                                                    </Tooltip>
-                                                </Group>
+                                                <CopyActionIcon
+                                                    value={getDiscordThreadLink(tournament)}
+                                                    tooltip="Copy Discord thread link"
+                                                    size="sm"
+                                                    color="primary"
+                                                />
                                             ) : (
                                                 "-"
                                             )}

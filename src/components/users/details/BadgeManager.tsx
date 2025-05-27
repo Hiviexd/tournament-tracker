@@ -1,11 +1,12 @@
 // src/components/users/details/BadgeManager.tsx
-import { Group, Stack, Text, ActionIcon, Image, Card, Button } from "@mantine/core";
+import { Group, Stack, Text, ActionIcon, Image, Card } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IUser } from "../../../../interfaces/User";
 import { useUpdateUserBadge } from "../../../hooks/useUsers";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import utils from "../../../../utils";
+import CopyButton from "../../common/buttons/CopyButton";
 
 interface IProps {
     user: IUser;
@@ -28,11 +29,6 @@ export default function BadgeManager({ user, committee }: IProps) {
         } catch (error) {
             console.error("Failed to update badge value:", error);
         }
-    };
-
-    const handleCopyCommand = () => {
-        const commandString = utils.generateBadgeCommand(user.osuId, eligibleBadgeYears, user.badgeValue, committee);
-        utils.copyToClipboard(commandString);
     };
 
     const NoBadgeCard = () => (
@@ -63,7 +59,8 @@ export default function BadgeManager({ user, committee }: IProps) {
                             variant="subtle"
                             color="gray"
                             onClick={() => handleBadgeUpdate(false)}
-                            disabled={user.badgeValue === 0 || updateBadgeMutation.isPending}>
+                            disabled={user.badgeValue === 0}
+                            loading={updateBadgeMutation.isPending}>
                             <FontAwesomeIcon icon="chevron-left" />
                         </ActionIcon>
                     )}
@@ -84,19 +81,24 @@ export default function BadgeManager({ user, committee }: IProps) {
                             variant="subtle"
                             color="gray"
                             onClick={() => handleBadgeUpdate(true)}
-                            disabled={user.badgeValue === 10 || updateBadgeMutation.isPending}>
+                            disabled={user.badgeValue === 10}
+                            loading={updateBadgeMutation.isPending}>
                             <FontAwesomeIcon icon="chevron-right" />
                         </ActionIcon>
                     )}
                     {loggedInUser!.isAdmin && user.badgeValue !== eligibleBadgeYears && (
-                        <Button
-                            variant="light"
-                            color="primary"
-                            size="xs"
+                        <CopyButton
+                            value={utils.generateBadgeCommand(
+                                user.osuId,
+                                eligibleBadgeYears,
+                                user.badgeValue,
+                                committee
+                            )}
+                            text="Copy Badge Command"
                             leftSection={<FontAwesomeIcon icon="copy" />}
-                            onClick={handleCopyCommand}>
-                            Copy Badge Command
-                        </Button>
+                            size="xs"
+                            color="primary"
+                        />
                     )}
                 </Group>
             </Stack>

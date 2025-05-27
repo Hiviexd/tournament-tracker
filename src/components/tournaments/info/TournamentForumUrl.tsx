@@ -7,6 +7,7 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import utils from "../../../../utils";
 import { notifications } from "@mantine/notifications";
+import CopyActionIcon from "../../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournament: ITournament;
@@ -51,13 +52,16 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                     </ActionIcon>
                 ) : user?.isCommittee ? (
                     tournament.isActive && (
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => setIsEditingForumUrl(true)}
-                            color="info"
-                            title="Edit forum URL">
-                            <FontAwesomeIcon icon="pen-to-square" />
-                        </ActionIcon>
+                        <Group gap={4}>
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setIsEditingForumUrl(true)}
+                                color="info"
+                                title="Edit forum URL">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                            <CopyActionIcon value={tournament.forumUrl || ""} tooltip="Copy forum URL" />
+                        </Group>
                     )
                 ) : null}
             </Group>

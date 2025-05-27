@@ -48,6 +48,7 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
 /**
  * Copy text to clipboard and emit a notification
  * @param text The text to copy
+ * @warning Use `CopyActionIcon` or `CopyButton` components instead of this whenever possible
  */
 export const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
