@@ -1,18 +1,18 @@
 import { TextInput, Group, Stack, ActionIcon, Text } from "@mantine/core";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../../../store/atoms";
-import { useUpdateEmail } from "../../../../hooks/useUsers";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useUpdateDiscordId } from "../../../hooks/useUsers";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function EmailSetting() {
+export default function DiscordIdSetting() {
     const [user] = useAtom(loggedInUserAtom);
-    const [email, setEmail] = useState(user?.email || "");
-    const updateEmail = useUpdateEmail(user?._id || "");
+    const [discordId, setDiscordId] = useState(user?.discordId || "");
+    const updateDiscordId = useUpdateDiscordId(user?._id || "");
 
     const handleSubmit = async () => {
         try {
-            await updateEmail.mutateAsync(email);
+            await updateDiscordId.mutateAsync(discordId.toString());
         } catch (error) {
             console.error(error);
         }
@@ -22,17 +22,17 @@ export default function EmailSetting() {
         <Stack gap="xs">
             <span>
                 <Text size="sm" fw={500}>
-                    Email
+                    Discord ID
                 </Text>
                 <Text size="xs" c="dimmed">
-                    For Google Drive access (ping a TC member if you don't have access)
+                    Your Discord user ID for notifications
                 </Text>
             </span>
             <Group align="center" gap="xs">
                 <TextInput
-                    placeholder="Enter your email..."
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your Discord ID..."
+                    value={discordId}
+                    onChange={(e) => setDiscordId(e.target.value)}
                     style={{ flex: 1 }}
                 />
                 <ActionIcon size="lg" variant="subtle" onClick={handleSubmit}>

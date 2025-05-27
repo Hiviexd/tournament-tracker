@@ -3,10 +3,10 @@ import { Menu, Avatar } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { IUser } from "../../../../interfaces/User";
-import ThemeCustomizeModal from "../modals/ThemeCustomizeModal";
-import SettingsModal from "../modals/SettingsModal";
+import ThemeCustomizeModal from "../../modals/ThemeCustomizeModal";
+import SettingsModal from "../../modals/SettingsModal";
 import LoginButton from "../LoginButton";
-import DebugModal from "../modals/DebugModal";
+import DebugModal from "../../modals/DebugModal";
 
 interface IProps {
     user: IUser | null;

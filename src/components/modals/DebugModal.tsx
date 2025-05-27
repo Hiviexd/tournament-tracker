@@ -1,7 +1,7 @@
 import { Modal, Stack } from "@mantine/core";
 import { useAtom } from "jotai";
 import SessionEditor from "./debug/SessionEditor";
-import { loggedInUserAtom } from "../../../store/atoms";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
     opened: boolean;

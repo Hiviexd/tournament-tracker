@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useSession, useUpdateSession } from "../../../../hooks/useDebug";
+import { useSession, useUpdateSession } from "../../../hooks/useDebug";
 import { TextInput, Button, Stack, Text } from "@mantine/core";
-import type { UpdateSessionBody } from "../../../../api/debug";
 
 export default function SessionEditor() {
     const { data: session, isLoading: isLoadingSession } = useSession();
-    const [changes, setChanges] = useState<Partial<UpdateSessionBody>>({});
+    const [changes, setChanges] = useState<any>({});
 
-    const formData: UpdateSessionBody = {
+    const formData = {
         mongoId: changes.mongoId ?? session?.mongoId ?? "",
         osuId: changes.osuId ?? session?.osuId?.toString() ?? "",
         username: changes.username ?? session?.username ?? "",
