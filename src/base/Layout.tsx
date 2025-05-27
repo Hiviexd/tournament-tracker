@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import Header from "../components/common/Header";
 import MobileHeader from "../components/common/MobileHeader";
 import Footer from "./Footer";
-import ScrollToTopButton from "../components/common/ScrollToTopButton";
+import ScrollToTopButton from "../components/common/buttons/ScrollToTopButton";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";

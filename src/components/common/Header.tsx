@@ -11,7 +11,7 @@ import { AppShell, Burger, Group, Image, Transition } from "@mantine/core";
 // components
 import MainNavigation from "./header/MainNavigation";
 import UserMenu from "./header/UserMenu";
-import LoginButton from "./LoginButton";
+import LoginButton from "./buttons/LoginButton";
 
 interface IPropTypes {
     mobileHeaderOpened: boolean;

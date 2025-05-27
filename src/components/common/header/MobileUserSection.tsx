@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MobileUserSectionCard from "./MobileUserSectionCard";
-import LoginButton from "../LoginButton";
+import LoginButton from "../buttons/LoginButton";
 
 interface IProps {
     onClose: () => void;

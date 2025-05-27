@@ -1,6 +1,6 @@
 import { Alert, Group } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import LoginButton from "./LoginButton";
+import LoginButton from "./buttons/LoginButton";
 
 interface IProps {
     text?: string;

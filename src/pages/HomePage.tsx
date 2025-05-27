@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
-import LoginButton from "../components/common/LoginButton";
+import LoginButton from "../components/common/buttons/LoginButton";
 import CommitteeSection from "../components/users/CommitteeSection";
 import { IUser } from "@interfaces/User";
 import { Link } from "react-router-dom";

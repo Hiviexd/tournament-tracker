@@ -1,7 +1,7 @@
 import { Button, Image, ButtonProps } from "@mantine/core";
 import { useState } from "react";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../store/atoms";
+import { loggedInUserAtom } from "../../../store/atoms";
 
 interface IProps extends Omit<ButtonProps, "onClick" | "loading" | "leftSection" | "variant" | "gradient"> {
     size?: "xs" | "sm" | "md" | "lg" | "xl";
