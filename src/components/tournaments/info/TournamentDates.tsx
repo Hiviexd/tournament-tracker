@@ -25,8 +25,8 @@ export default function TournamentDates({ tournament }: IProps) {
     const handleSaveDates = async () => {
         if (startDate && endDate) {
             await editTournamentMutation.mutateAsync({
-                startDate: startDate.toISOString() as unknown as Date,
-                endDate: endDate.toISOString() as unknown as Date,
+                startDate,
+                endDate,
             });
             setIsEditingDates(false);
         }
@@ -86,14 +86,14 @@ export default function TournamentDates({ tournament }: IProps) {
                         <DateInput
                             label="Start Date"
                             value={startDate}
-                            onChange={setStartDate}
+                            onChange={(value) => setStartDate(value ? new Date(value) : null)}
                             placeholder="Select start date..."
                             clearable
                         />
                         <DateInput
                             label="End Date"
                             value={endDate}
-                            onChange={setEndDate}
+                            onChange={(value) => setEndDate(value ? new Date(value) : null)}
                             placeholder="Select end date..."
                             clearable
                             minDate={startDate || undefined}
