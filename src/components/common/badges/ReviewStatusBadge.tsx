@@ -36,7 +36,7 @@ export default function ReviewStatusBadge({ tournament, user, variant = "light" 
             variant={variant}
             className={needsReview() ? "animation-pulse" : ""}>
             <FontAwesomeIcon icon={needsReview() ? "exclamation-triangle" : "check-to-slot"} />{" "}
-            {needsReview() ? "Needs your review" : "Review submitted"}
+            {needsReview() ? "Needs Review" : "Reviewed"}
         </Badge>
     );
 }
