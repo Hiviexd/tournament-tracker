@@ -452,6 +452,16 @@ class TournamentsController {
             await LogService.generate(actioner._id, `Updated banner for **${tournament.name}**`, "tournament");
         }
 
+        if (winners) {
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated winners: ${winners.map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`).join(", ")}`,
+                "trophy"
+            );
+            await LogService.generate(currentUser._id, `Updated winners for **${tournament.name}**`, "tournament");
+        }
+
         if (status) {
             // logging
             await TournamentService.addTournamentLog(
