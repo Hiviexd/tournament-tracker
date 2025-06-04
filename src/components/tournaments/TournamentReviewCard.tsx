@@ -35,6 +35,14 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
         return review.checklist.filter((item) => !item.checked).map((item) => item.item);
     };
 
+    const getCheckedItemsCount = () => {
+        return review.checklist.filter((item) => item.checked).length;
+    };
+
+    const shouldHideChecklist = () => {
+        return review.vote === "deny" && getCheckedItemsCount() === 0;
+    };
+
     const getUserDisplayProps = () => {
         if (!user?.isCommittee) {
             return {
@@ -68,22 +76,29 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                             {_.startCase(review.vote)}
                         </Badge>
                         <Stack gap="xs">
-                            <AlertText
-                                text={
-                                    uncheckedItems.length === 0
-                                        ? "No issues with checklist!"
-                                        : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`
-                                }
-                                type={uncheckedItems.length === 0 ? "success" : "danger"}
-                                icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
-                                size="sm"
-                            />
-                            {uncheckedItems.length > 0 && (
-                                <Box ml="md">
-                                    {uncheckedItems.map((item, index) => (
-                                        <AlertText key={index} text={item} type="danger" size="sm" />
-                                    ))}
-                                </Box>
+                            {!shouldHideChecklist() && (
+                                <>
+                                    <AlertText
+                                        text={
+                                            uncheckedItems.length === 0
+                                                ? "No issues with checklist!"
+                                                : `Found ${utils.countToWord(
+                                                      uncheckedItems.length,
+                                                      "issue"
+                                                  )} with checklist:`
+                                        }
+                                        type={uncheckedItems.length === 0 ? "success" : "danger"}
+                                        icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
+                                        size="sm"
+                                    />
+                                    {uncheckedItems.length > 0 && (
+                                        <Box ml="md">
+                                            {uncheckedItems.map((item, index) => (
+                                                <AlertText key={index} text={item} type="danger" size="sm" />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </>
                             )}
                         </Stack>
                         {review.comment && (
@@ -104,22 +119,29 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                     <Box>
                         <UserDisplay {...getUserDisplayProps()} />
                         <Stack gap="xs" mt="xs">
-                            <AlertText
-                                text={
-                                    uncheckedItems.length === 0
-                                        ? "No issues with checklist!"
-                                        : `Found ${utils.countToWord(uncheckedItems.length, "issue")} with checklist:`
-                                }
-                                type={uncheckedItems.length === 0 ? "success" : "danger"}
-                                icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
-                                size="sm"
-                            />
-                            {uncheckedItems.length > 0 && (
-                                <Box ml="md">
-                                    {uncheckedItems.map((item, index) => (
-                                        <AlertText key={index} text={item} type="danger" size="sm" />
-                                    ))}
-                                </Box>
+                            {!shouldHideChecklist() && (
+                                <>
+                                    <AlertText
+                                        text={
+                                            uncheckedItems.length === 0
+                                                ? "No issues with checklist!"
+                                                : `Found ${utils.countToWord(
+                                                      uncheckedItems.length,
+                                                      "issue"
+                                                  )} with checklist:`
+                                        }
+                                        type={uncheckedItems.length === 0 ? "success" : "danger"}
+                                        icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
+                                        size="sm"
+                                    />
+                                    {uncheckedItems.length > 0 && (
+                                        <Box ml="md">
+                                            {uncheckedItems.map((item, index) => (
+                                                <AlertText key={index} text={item} type="danger" size="sm" />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </>
                             )}
                             {review.comment && (
                                 <Box mt="xs">
