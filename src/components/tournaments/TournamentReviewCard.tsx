@@ -2,7 +2,6 @@ import { Card, Stack, Badge, Text, Box } from "@mantine/core";
 import { IReview } from "../../../interfaces/Review";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
-import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import _ from "lodash";
 import { ITournament } from "../../../interfaces/Tournament";
 import utils from "../../../utils";
@@ -18,7 +17,6 @@ interface IProps {
 
 export default function TournamentReviewCard({ tournament, review }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
     const getVoteColor = () => {
         switch (review.vote) {
@@ -34,21 +32,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
     };
 
     const getUncheckedItems = () => {
-        const uncheckedItems: string[] = [];
-
-        // Create a map of item -> checked status
-        const checklistMap = new Map(review.checklist.map((item) => [item.item, item.checked]));
-
-        // Check each item in the constant against the map
-        for (const category of REVIEW_CHECKLIST) {
-            for (const item of category.items) {
-                if (!checklistMap.get(item)) {
-                    uncheckedItems.push(item);
-                }
-            }
-        }
-
-        return uncheckedItems;
+        return review.checklist.filter((item) => !item.checked).map((item) => item.item);
     };
 
     const getUserDisplayProps = () => {
