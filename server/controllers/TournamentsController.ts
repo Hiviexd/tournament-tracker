@@ -787,45 +787,133 @@ class TournamentsController {
         const files = req.files as Express.Multer.File[];
         const currentUser = res.locals!.user!;
 
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!files?.length) {
             return res.status(400).json({ error: "No files uploaded" });
         }
 
-        // Check dimensions of each file before uploading
+        // Separate valid and invalid files
+        const validFiles: Express.Multer.File[] = [];
+        const invalidFiles: { file: Express.Multer.File; width: number; height: number }[] = [];
+
+        // Check dimensions of each file
         for (const file of files) {
             try {
                 const metadata = await sharp(file.buffer).metadata();
+                const width = metadata.width || 0;
+                const height = metadata.height || 0;
 
-                if (metadata.width !== 172 || metadata.height !== 80) {
-                    return res.status(400).json({
-                        error: `Invalid badge dimensions in file ${file.originalname}. Expected 172x80, got ${metadata.width}x${metadata.height}`,
-                    });
+                if (width !== 172 || height !== 80) {
+                    invalidFiles.push({ file, width, height });
+                } else {
+                    validFiles.push(file);
                 }
             } catch (error) {
-                return res.status(400).json({
-                    error: "Failed to process image. Please ensure it's a valid PNG or JPG file.",
-                });
+                // If we can't process the image, treat it as invalid
+                invalidFiles.push({ file, width: 0, height: 0 });
             }
         }
 
-        const badges = await UploadService.handleFileUploads(
-            files,
-            FILE_UPLOAD_CATEGORY,
-            tournament._id,
-            currentUser._id
-        );
+        // If there are invalid files, create a note with them
+        if (invalidFiles.length > 0) {
+            const failedBadgesInfo = invalidFiles
+                .map(({ file, width, height }) => {
+                    if (width === 0 && height === 0) {
+                        return `- **${file.originalname}**: Invalid image file (could not process)`;
+                    }
+                    return `- **${file.originalname}**: ${width}x${height}`;
+                })
+                .join("\n");
 
-        tournament.badges = badges;
+            const noteContent = `The following badge uploads failed the dimension requirements:\n\n${failedBadgesInfo}`;
+
+            const note = new Message({
+                author: currentUser,
+                content: noteContent,
+                isCommittee: true,
+                isNote: true,
+            });
+
+            // Add failed badge files as attachments
+            note.attachments = await UploadService.handleFileUploads(
+                invalidFiles.map((item) => item.file),
+                FILE_UPLOAD_CATEGORY,
+                tournament._id,
+                currentUser._id
+            );
+
+            await note.save();
+            tournament.notes.push(note);
+
+            // logging and Discord notification for failed badges
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Created note for failed badge uploads`,
+                "sticky-note"
+            );
+            await LogService.generate(
+                currentUser._id,
+                `Created note for failed badge uploads for **${tournament.name}**`,
+                "tournament"
+            );
+
+            // Discord notification for failed badges note
+            const fields: IDiscordField[] = [
+                {
+                    name: "Note",
+                    value: utils.shorten(noteContent, 512),
+                },
+            ];
+
+            if (note.attachments?.length) {
+                fields.push(utils.getAttachmentsField(note.attachments)!);
+            }
+
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                description: `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                color: webhookColors.yellow,
+                fields,
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+                threadId: tournament.threadId,
+            });
+        }
+
+        // Upload only valid badges
+        if (validFiles.length > 0) {
+            const badges = await UploadService.handleFileUploads(
+                validFiles,
+                FILE_UPLOAD_CATEGORY,
+                tournament._id,
+                currentUser._id
+            );
+
+            tournament.badges = badges;
+
+            // logging for successful uploads
+            await TournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
+            await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
+        }
 
         await tournament.save();
 
-        res.json({ message: "Badges uploaded successfully!" });
+        // Determine response message
+        let message = "";
+        if (validFiles.length > 0 && invalidFiles.length > 0) {
+            message = `${validFiles.length} badge(s) uploaded successfully! ${invalidFiles.length} badge(s) failed dimension requirements and were added to notes.`;
+        } else if (validFiles.length > 0) {
+            message = "Badges uploaded successfully!";
+        } else {
+            message =
+                "No valid badges were uploaded. All badges failed dimension requirements and were added to notes.";
+        }
 
-        // logging
-        await TournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
-        await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
+        res.json({ message });
     }
 
     /** POST download badges */
