@@ -68,7 +68,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         }));
     };
 
-    const isSubmitDisabled = !decision || Object.values(checkedState).every((v) => !v);
+    const isSubmitDisabled = !decision || (decision !== "deny" && Object.values(checkedState).every((v) => !v));
 
     return (
         <Stack gap="md">
