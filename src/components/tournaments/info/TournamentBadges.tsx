@@ -145,6 +145,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 color="success"
                                 title="Save"
                                 mb={4}
+                                loading={uploadBadgesMutation.isPending}
                                 disabled={!files.length}>
                                 <FontAwesomeIcon icon="save" />
                             </ActionIcon>
