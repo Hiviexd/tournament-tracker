@@ -18,7 +18,6 @@ module.exports = {
         "keyword-spacing": "error",
         "space-before-blocks": "error",
         "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-        indent: ["error", 4, { SwitchCase: 1 }],
         "@typescript-eslint/no-explicit-any": "off",
     },
     overrides: [
