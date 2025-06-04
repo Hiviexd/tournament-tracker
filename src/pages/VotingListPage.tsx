@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { useVotings } from "../hooks/useVotings";
 import { IVoting, VotingCategory } from "../../interfaces/Voting";
 import { UserGroup } from "../../interfaces/User";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 // Mantine
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
@@ -20,12 +21,22 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 
 export default function VotingListPage() {
+    const [user] = useAtom(loggedInUserAtom);
+    const automaticTypeFilter = getSavedPreference<boolean>("automatic_type_filter", true);
+
+    const getTypeFilterFromUser = () => {
+        if (!user?.isCommittee || !automaticTypeFilter) return "";
+        if (user?.isTournamentCommittee) return "tc";
+        if (user?.isContestCommittee) return "cc";
+        return "";
+    };
+
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [searchInput, setSearchInput] = useState({
         title: searchParams.get("title") || "",
         category: (searchParams.get("category") as VotingCategory) || "",
-        assignedGroup: (searchParams.get("group") as UserGroup) || "",
+        assignedGroup: (searchParams.get("group") as UserGroup) || getTypeFilterFromUser(),
         status: searchParams.get("status") || "",
         showNeedsAttention: searchParams.get("needsAttention") === "true",
         visibility: searchParams.get("visibility") || "",
@@ -33,7 +44,6 @@ export default function VotingListPage() {
     const [opened, { open, close }] = useDisclosure(false);
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
 
-    const [user] = useAtom(loggedInUserAtom);
 
     const handleFilterChange = (newFilters) => {
         setSearchInput(newFilters);

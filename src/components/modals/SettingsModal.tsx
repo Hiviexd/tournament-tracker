@@ -4,6 +4,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
 import DiscordIdSetting from "./settings/DiscordIdSetting";
 import EmailSetting from "./settings/EmailSetting";
+import AutomaticTypeFilterSetting from "./settings/AutomaticTypeFilterSetting";
 
 interface IProps {
     opened: boolean;
@@ -19,6 +20,8 @@ export default function SettingsModal({ opened, onClose }: IProps) {
         <Modal opened={opened} onClose={onClose} title="Settings" size="md">
             <Stack>
                 <ReviewerStatusSetting />
+                <Divider />
+                <AutomaticTypeFilterSetting />
                 <Divider />
                 <DiscordIdSetting />
                 <Divider />

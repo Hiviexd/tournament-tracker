@@ -25,6 +25,7 @@ import { loggedInUserAtom, tournamentViewModeAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { IUser } from "../../interfaces/User";
 import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoard";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 interface FilterValues {
     name: string;
@@ -155,6 +156,15 @@ function LoadingState({ viewMode, user }: { viewMode: "cards" | "table" | "revie
 
 export default function TournamentListPage() {
     const [user] = useAtom(loggedInUserAtom);
+    const automaticTypeFilter = getSavedPreference<boolean>("automatic_type_filter", true);
+
+    const getTypeFilterFromUser = () => {
+        if (!user?.isCommittee || !automaticTypeFilter) return "";
+        if (user?.isTournamentCommittee) return "tournament";
+        if (user?.isContestCommittee) return "contest";
+        return "";
+    };
+
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
@@ -162,7 +172,7 @@ export default function TournamentListPage() {
         name: searchParams.get("name") || "",
         mode: (searchParams.get("mode") as GameMode) || "",
         host: searchParams.get("host") || "",
-        type: (searchParams.get("type") as TournamentType) || "",
+        type: (searchParams.get("type") as TournamentType) || getTypeFilterFromUser(),
         status: (searchParams.get("status") as TournamentStatus) || "",
         state: searchParams.get("state") || "",
         showAllAssignedReviews: searchParams.get("showAllAssignedReviews") === "true" || false,

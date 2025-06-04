@@ -10,6 +10,7 @@ import TicketCard from "../components/tickets/TicketCard";
 import TicketsFilters from "../components/tickets/TicketsFilters";
 import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 interface FilterValues {
     title: string;
@@ -21,6 +22,16 @@ interface FilterValues {
 }
 
 export default function TicketsListPage() {
+    const [user] = useAtom(loggedInUserAtom);
+    const automaticTypeFilter = getSavedPreference<boolean>("automatic_type_filter", true);
+
+    const getTypeFilterFromUser = () => {
+        if (!user?.isCommittee || !automaticTypeFilter) return "";
+        if (user?.isTournamentCommittee) return "tc";
+        if (user?.isContestCommittee) return "cc";
+        return "";
+    };
+
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
@@ -30,12 +41,10 @@ export default function TicketsListPage() {
         title: searchParams.get("title") || "",
         targetUser: searchParams.get("targetUser") || "",
         targetTournament: searchParams.get("targetTournament") || "",
-        assignedGroup: (searchParams.get("assignedGroup") as UserGroup) || "",
+        assignedGroup: (searchParams.get("assignedGroup") as UserGroup) || getTypeFilterFromUser(),
         status: searchParams.get("status") || "",
         showOwn: searchParams.get("showOwn") === "true",
     });
-
-    const [user] = useAtom(loggedInUserAtom);
 
     // Reset pagination when type changes
     useEffect(() => {
@@ -127,8 +136,8 @@ export default function TicketsListPage() {
                 {hasError
                     ? "Try refreshing the page"
                     : type === "ticket" || user?.isCommittee
-                        ? "Try adjusting your filters"
-                        : ""}
+                    ? "Try adjusting your filters"
+                    : ""}
             </Text>
         </Stack>
     );
