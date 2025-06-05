@@ -941,7 +941,10 @@ class TournamentsController {
 
             // Set the headers for file download
             res.setHeader("Content-Type", "application/zip");
-            res.setHeader("Content-Disposition", `attachment; filename=${tournament.name} Badges.zip`);
+
+            // Sanitize the tournament name for use in filename
+            const { ascii: sanitizedTournamentName } = utils.sanitizeFilename(tournament.name);
+            res.setHeader("Content-Disposition", `attachment; filename=${sanitizedTournamentName} Badges.zip`);
 
             // Pipe archive data to the response
             archive.pipe(res);

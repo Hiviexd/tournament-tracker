@@ -229,3 +229,25 @@ export const consoleStyles = (text: string, styleNames: StyleName[]) => {
 
     return `${codes.join("")}${text}${stylesCodes.reset}`;
 };
+
+/**
+ * Sanitizes a filename for safe use in HTTP Content-Disposition headers
+ * Replaces unsafe characters with safe alternatives and provides both ASCII and UTF-8 encoded versions
+ * @param filename The filename to sanitize
+ * @returns Object with sanitized ASCII filename and properly encoded UTF-8 version
+ */
+export function sanitizeFilename(filename: string): { ascii: string; encoded: string } {
+    // Remove or replace unsafe characters for ASCII version
+    const ascii = filename
+        .trim()
+        // Replace smart quotes and other problematic quotes
+        .replace(/[""'']/g, '"')
+        .replace(/[''’]/g, "'")
+        // Remove leading/trailing underscores and dots
+        .replace(/^[._]+|[._]+$/g, "");
+
+    // Create RFC 5987 encoded version for UTF-8 support
+    const encoded = `UTF-8''${encodeURIComponent(filename.trim())}`;
+
+    return { ascii, encoded };
+}
