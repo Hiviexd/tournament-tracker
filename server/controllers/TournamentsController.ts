@@ -822,7 +822,7 @@ class TournamentsController {
                     if (width === 0 && height === 0) {
                         return `- **${file.originalname}**: Invalid image file (could not process)`;
                     }
-                    return `- **${file.originalname}**: ${width}x${height}`;
+                    return `- **${file.originalname}**: ${width}x${height}px`;
                 })
                 .join("\n");
 
