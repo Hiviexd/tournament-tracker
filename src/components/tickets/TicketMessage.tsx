@@ -41,7 +41,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         <Stack gap="sm">
             <Group justify="space-between" align="center">
                 <UserDisplay {...getUserDisplayProps()} />
-                <Group gap="xs" ml={ {base: "auto", xs: "0"}}>
+                <Group gap="xs" ml={{ base: "auto", xs: "0" }}>
                     <DateBadge date={message.createdAt} staticColor />
                     <Menu position="bottom-end" withArrow>
                         <Menu.Target>
@@ -96,7 +96,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                         c="white"
                     />{" "}
                     {isClosing ? "closed" : "reopened"} this {ticket.isTicket ? "ticket" : "report"}{" "}
-                    <DateBadge date={message.createdAt} staticColor />
+                    <DateBadge date={message.createdAt} staticColor size="sm" />
                 </Text>
             </Group>
         );

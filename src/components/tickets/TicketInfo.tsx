@@ -84,8 +84,8 @@ export default function TicketInfo({ ticket }: IProps) {
             style={
                 ticket.isActive
                     ? {
-                        ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
-                    }
+                          ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
+                      }
                     : undefined
             }>
             <Stack gap="md">
@@ -101,6 +101,7 @@ export default function TicketInfo({ ticket }: IProps) {
                                 warningAge={7}
                                 dangerAge={10}
                                 staticColor={!ticket.isActive}
+                                size="sm"
                             />
                         </Text>
                     </Stack>
