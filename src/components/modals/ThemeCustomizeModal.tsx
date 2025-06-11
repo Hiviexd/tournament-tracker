@@ -1,9 +1,10 @@
-import { Modal, Stack, Group, Button } from "@mantine/core";
+import { Modal, Stack, Group, Button, Text, Alert } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { updateTheme } from "../../themes/main";
-import { HueSlider, ColorSwatch, Checkbox, Divider } from "@mantine/core";
-import { DEFAULT_HUE } from "../../constants";
+import { updateTheme } from "../../themes";
+import { HueSlider, Checkbox, Divider, Select } from "@mantine/core";
+import { DEFAULT_HUE, COLORBLIND_MODES, ColorblindMode, DEFAULT_COLORBLIND_MODE } from "../../constants";
+import { useLocalPreference } from "../../hooks/useLocalPreferences";
 
 interface IProps {
     opened: boolean;
@@ -11,46 +12,102 @@ interface IProps {
 }
 
 export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
+    const [hue, setHue] = useLocalPreference<number>("hue", Number(DEFAULT_HUE));
+    const [isGreyscale, setIsGreyscale] = useLocalPreference<boolean>("greyscale", false);
+    const [colorblindMode, setColorblindMode] = useLocalPreference<ColorblindMode>(
+        "colorblindMode",
+        DEFAULT_COLORBLIND_MODE
+    );
+
     const [initialHue, setInitialHue] = useState(Number(DEFAULT_HUE));
-    const [newHue, setNewHue] = useState(initialHue);
-    const [isGreyscale, setIsGreyscale] = useState(false);
+    const [initialIsGreyscale, setInitialIsGreyscale] = useState(false);
+    const [initialColorblindMode, setInitialColorblindMode] = useState<ColorblindMode>(DEFAULT_COLORBLIND_MODE);
 
     useEffect(() => {
-        const hue = localStorage.getItem("hue");
-        const isGreyscale = localStorage.getItem("greyscale");
-        if (hue && isGreyscale) {
-            setInitialHue(Number(hue));
-            setNewHue(Number(hue));
-            setIsGreyscale(isGreyscale === "true");
+        // Set initial values for comparison only when modal opens
+        if (opened) {
+            setInitialHue(hue);
+            setInitialIsGreyscale(isGreyscale);
+            setInitialColorblindMode(colorblindMode);
         }
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [opened]);
 
-    const getPreviewColor = (hue: number, isGreyscale: boolean) => {
-        if (isGreyscale) return "#656565";
-        return `hsl(${hue}, 50%, 50%)`;
-    };
+    const isColorblindMode = colorblindMode !== "none";
 
     const handleSubmit = () => {
-        updateTheme(newHue, isGreyscale);
+        if (isColorblindMode) {
+            // For colorblind themes, only pass the colorblind mode
+            updateTheme(undefined, undefined, colorblindMode);
+        } else {
+            // For normal theme, pass hue and greyscale
+            updateTheme(hue, isGreyscale, colorblindMode);
+        }
     };
 
     const handleReset = () => {
-        localStorage.removeItem("hue");
-        localStorage.removeItem("greyscale");
-        window.location.reload();
+        setHue(Number(DEFAULT_HUE));
+        setIsGreyscale(false);
+        setColorblindMode(DEFAULT_COLORBLIND_MODE);
+        // Small delay to ensure state updates before reload
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    };
+
+    const hasChanges = () => {
+        if (isColorblindMode) {
+            // For colorblind modes, only check if colorblind mode changed
+            return initialColorblindMode !== colorblindMode;
+        } else {
+            // For normal mode, check all settings
+            return initialHue !== hue || initialIsGreyscale !== isGreyscale || initialColorblindMode !== colorblindMode;
+        }
     };
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Customize Theme" size="sm">
+        <Modal opened={opened} onClose={onClose} title="Customize Theme" size="md">
             <Stack>
                 <Divider />
-                <HueSlider value={newHue} onChange={(value) => setNewHue(value)} />
-                <Checkbox
-                    label="Greyscale"
-                    checked={isGreyscale}
-                    onChange={(event) => setIsGreyscale(event.currentTarget.checked)}
+
+                {/* Colorblind Mode Selection */}
+                <Select
+                    label="Color Vision Accessibility"
+                    description="Select your color vision type for optimal color differentiation"
+                    placeholder="Choose accessibility mode"
+                    value={colorblindMode}
+                    onChange={(value) => setColorblindMode(value as ColorblindMode)}
+                    data={Object.entries(COLORBLIND_MODES).map(([key, label]) => ({
+                        value: key,
+                        label,
+                    }))}
                 />
-                <ColorSwatch w="100%" color={getPreviewColor(newHue, isGreyscale)} />
+
+                {/* Theme Customization - Only show for normal vision */}
+                {!isColorblindMode && (
+                    <Stack gap="sm">
+                        <Text size="sm" fw={500}>
+                            Theme Colors
+                        </Text>
+                        <HueSlider value={hue} onChange={(value) => setHue(value)} />
+                        <Checkbox
+                            label="Greyscale mode"
+                            checked={isGreyscale}
+                            onChange={(event) => setIsGreyscale(event.currentTarget.checked)}
+                        />
+                    </Stack>
+                )}
+
+                {/* Colorblind Mode Info */}
+                {isColorblindMode && (
+                    <Alert
+                        icon={<FontAwesomeIcon icon="info-circle" />}
+                        color="blue"
+                        variant="light"
+                        title={`${COLORBLIND_MODES[colorblindMode]} theme selected`}>
+                        <Text size="sm">Hue and greyscale customization are disabled to maintain accessibility.</Text>
+                    </Alert>
+                )}
 
                 <Group justify="space-between">
                     <Button
@@ -62,10 +119,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={
-                            initialHue === newHue &&
-                            isGreyscale === (localStorage.getItem("greyscale") === "true")
-                        }
+                        disabled={!hasChanges()}
                         leftSection={<FontAwesomeIcon icon="palette" />}>
                         Apply Theme
                     </Button>

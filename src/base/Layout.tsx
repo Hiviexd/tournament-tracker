@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { DEFAULT_HUE } from "../constants";
 import utils from "../../utils";
 import { useState, useEffect } from "react";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { getAccessibleColorScheme } from "../themes/accessibility/colors";
 
 // components
 import Header from "../components/common/Header";
@@ -29,9 +31,24 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 
     const getThemeColor = () => {
-        const hue = parseInt(localStorage.getItem("hue") || DEFAULT_HUE, 10);
-        const isGreyscale = localStorage.getItem("greyscale") === "true";
+        const hue = getSavedPreference<number>("hue", Number(DEFAULT_HUE));
+        const isGreyscale = getSavedPreference<boolean>("greyscale", false);
+        const colorblindMode = getSavedPreference<"none" | "deuteranopia" | "protanopia" | "tritanopia">(
+            "colorblindMode",
+            "none"
+        );
 
+        // For colorblind modes, use the same colors as the actual themes
+        if (colorblindMode !== "none") {
+            const accessibleColors = getAccessibleColorScheme(colorblindMode);
+            if (colorblindMode === "tritanopia") {
+                return accessibleColors.pink[6]; // Use the same pink as the theme (index 6 is the base color)
+            } else {
+                return accessibleColors.blue[6]; // Use the same blue as the theme for deuteranopia/protanopia
+            }
+        }
+
+        // For normal vision, use customizable hue/greyscale
         if (isGreyscale) {
             return "#656565";
         }

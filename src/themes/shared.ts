@@ -1,0 +1,133 @@
+import { MantineThemeComponents } from "@mantine/core";
+
+/**
+ * Base theme configuration shared across all themes
+ */
+export const baseThemeConfig = {
+    fontFamily: "Nunito, sans-serif",
+    shadows: {
+        md: "1px 1px 3px rgba(0, 0, 0, .25)",
+        xl: "5px 5px 3px rgba(0, 0, 0, .25)",
+    },
+    primaryColor: "primary" as const,
+    white: "#f8f9fa",
+    black: "#212529",
+};
+
+/**
+ * Shared component configurations
+ */
+export const baseComponents: MantineThemeComponents = {
+    Anchor: {
+        styles: (theme) => ({
+            root: {
+                color: theme.colors.primary[3],
+                "&:hover": {
+                    textDecoration: "underline",
+                },
+                "&.whiteLink": {
+                    color: theme.white,
+                },
+            },
+        }),
+    },
+    Tooltip: {
+        defaultProps: {
+            withArrow: true,
+            color: "primary.11",
+        },
+        styles: {
+            tooltip: {
+                border: "1px solid var(--mantine-color-primary-6)",
+                boxShadow: "0 4px 4px rgba(0, 0, 0, 0.1)",
+                filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1))",
+            },
+            arrow: {
+                border: "1px solid var(--mantine-color-primary-6)",
+                filter: "drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1))",
+            },
+        },
+    },
+    Button: {
+        styles: {
+            root: {
+                transition: "all 0.2s ease",
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                },
+            },
+        },
+    },
+    ActionIcon: {
+        styles: {
+            root: {
+                transition: "all 0.2s ease",
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                },
+            },
+        },
+    },
+    Card: {
+        defaultProps: {
+            bg: "primary.11",
+        },
+        styles: {
+            root: {
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+        },
+    },
+    Popover: {
+        styles: {
+            dropdown: {
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+        },
+    },
+    Notification: {
+        styles: {
+            root: {
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+        },
+    },
+    Select: {
+        defaultProps: {
+            withScrollArea: false,
+            comboboxProps: { transitionProps: { transition: "fade", duration: 150 } },
+        },
+        styles: {
+            dropdown: {
+                maxHeight: 200,
+                overflowY: "auto",
+            },
+        },
+    },
+    SegmentedControl: {
+        styles: {
+            root: {
+                backgroundColor: "var(--mantine-color-primary-10)",
+            },
+        },
+    },
+};
+
+/**
+ * Special Anchor styles for the main theme (handles greyscale mode)
+ */
+export const getMainThemeAnchorStyles = (isGreyscale: boolean) => ({
+    Anchor: {
+        styles: (theme: any) => ({
+            root: {
+                color: isGreyscale ? theme.colors.info[4] : theme.colors.primary[3],
+                "&:hover": {
+                    textDecoration: "underline",
+                },
+                "&.whiteLink": {
+                    color: theme.white,
+                },
+            },
+        }),
+    },
+});

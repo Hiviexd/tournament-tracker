@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 // Mantine
 import { MantineProvider } from "@mantine/core";
 import { DatesProvider } from "@mantine/dates";
-import { theme } from "./themes/main";
+import { theme } from "./themes";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
