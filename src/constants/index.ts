@@ -76,6 +76,18 @@ export const VOTE_PRESETS = {
 
 export const DEFAULT_HUE = "36";
 
+// Colorblind accessibility modes
+export type ColorblindMode = "none" | "deuteranopia" | "protanopia" | "tritanopia";
+
+export const COLORBLIND_MODES = {
+    none: "Normal Vision",
+    deuteranopia: "Deuteranopia (Red-Green)",
+    protanopia: "Protanopia (Red-blind)",
+    tritanopia: "Tritanopia (Blue-Yellow)",
+} as const;
+
+export const DEFAULT_COLORBLIND_MODE: ColorblindMode = "none";
+
 import checklist from "../../checklist.json";
 
 export const TC_REVIEW_CHECKLIST = checklist.tc;

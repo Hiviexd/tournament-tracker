@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { DEFAULT_HUE } from "../constants";
 import utils from "../../utils";
 import { useState, useEffect } from "react";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 // components
 import Header from "../components/common/Header";
@@ -29,9 +30,21 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 
     const getThemeColor = () => {
-        const hue = parseInt(localStorage.getItem("hue") || DEFAULT_HUE, 10);
-        const isGreyscale = localStorage.getItem("greyscale") === "true";
+        const hue = getSavedPreference<number>("hue", Number(DEFAULT_HUE));
+        const isGreyscale = getSavedPreference<boolean>("greyscale", false);
+        const colorblindMode = getSavedPreference<"none" | "deuteranopia" | "protanopia" | "tritanopia">(
+            "colorblindMode",
+            "none"
+        );
 
+        // For colorblind modes, use fixed theme colors (blue for most, red for tritanopia)
+        if (colorblindMode === "tritanopia") {
+            return "#F44336"; // Red primary for tritanopia
+        } else if (colorblindMode !== "none") {
+            return "#1976D2"; // Blue primary for deuteranopia/protanopia
+        }
+
+        // For normal vision, use customizable hue/greyscale
         if (isGreyscale) {
             return "#656565";
         }
