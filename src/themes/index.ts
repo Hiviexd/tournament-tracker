@@ -1,26 +1,14 @@
 import { MantineTheme } from "@mantine/core";
 import { theme as mainTheme } from "./main";
-import { deuteranopiaTheme } from "./accessibility/deuteranopia";
-import { protanopiaTheme } from "./accessibility/protanopia";
-import { tritanopiaTheme } from "./accessibility/tritanopia";
+import { deuteranopiaTheme, protanopiaTheme, tritanopiaTheme } from "./accessibility/colorblind";
 import { ColorblindMode, DEFAULT_COLORBLIND_MODE } from "../constants";
+import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 /**
  * Get the appropriate theme based on colorblind mode setting
  */
 export const getTheme = (): MantineTheme => {
-    // Helper function to get JSON-parsed localStorage values
-    const getLocalPreference = <T>(key: string, defaultValue: T): T => {
-        try {
-            const savedValue = localStorage.getItem(key);
-            return savedValue ? JSON.parse(savedValue) : defaultValue;
-        } catch (error) {
-            console.error(`Error reading ${key} from localStorage:`, error);
-            return defaultValue;
-        }
-    };
-
-    const colorblindMode = getLocalPreference<ColorblindMode>("colorblindMode", DEFAULT_COLORBLIND_MODE);
+    const colorblindMode = getSavedPreference<ColorblindMode>("colorblindMode", DEFAULT_COLORBLIND_MODE);
 
     switch (colorblindMode) {
         case "deuteranopia":
