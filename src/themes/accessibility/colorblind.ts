@@ -9,9 +9,9 @@ import { ColorblindMode } from "../../constants";
 export const createColorblindTheme = (type: Exclude<ColorblindMode, "none">) => {
     const accessibleColors = getAccessibleColorScheme(type);
 
-    // Tritanopia uses red as primary (blue-yellow colorblind)
+    // Tritanopia uses pink as primary (blue-yellow colorblind)
     // Deuteranopia & Protanopia use blue as primary (red-green colorblind)
-    const primaryColor = type === "tritanopia" ? accessibleColors.red : accessibleColors.blue;
+    const primaryColor = type === "tritanopia" ? accessibleColors.pink : accessibleColors.blue;
 
     return createTheme({
         ...baseThemeConfig,

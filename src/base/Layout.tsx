@@ -6,6 +6,7 @@ import { DEFAULT_HUE } from "../constants";
 import utils from "../../utils";
 import { useState, useEffect } from "react";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { deuteranopiaColors, tritanopiaColors } from "../themes/accessibility/colors";
 
 // components
 import Header from "../components/common/Header";
@@ -39,9 +40,9 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
 
         // For colorblind modes, use fixed theme colors (blue for most, red for tritanopia)
         if (colorblindMode === "tritanopia") {
-            return "#F44336"; // Red primary for tritanopia
+            return tritanopiaColors.pink; // Pink primary for tritanopia
         } else if (colorblindMode !== "none") {
-            return "#1976D2"; // Blue primary for deuteranopia/protanopia
+            return deuteranopiaColors.blue; // Blue primary for deuteranopia/protanopia
         }
 
         // For normal vision, use customizable hue/greyscale
