@@ -1,4 +1,6 @@
 import { Card, Stack, Badge, Text, Progress, Group, Box, Tooltip } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IVote } from "../../../interfaces/Vote";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
@@ -20,63 +22,33 @@ const getRankedChoiceScoreColor = (score: number, separator: string = ".") => {
     return `${color}${separator}${level}`;
 };
 
-const getBinaryStrictLabel = (score: number) => {
+const getBinaryStrictDisplay = (score: number) => {
     switch (score) {
         case 1:
-            return "Agree";
+            return { label: "Agree", color: "success" };
         case 0:
-            return "Neutral";
+            return { label: "Neutral", color: "gray" };
         case -1:
-            return "Disagree";
+            return { label: "Disagree", color: "danger" };
         default:
-            return "Unknown";
+            return { label: "Unknown", color: "gray" };
     }
 };
 
-const getBinaryStrictColor = (score: number) => {
-    switch (score) {
-        case 1:
-            return "success";
-        case 0:
-            return "gray";
-        case -1:
-            return "danger";
-        default:
-            return "gray";
-    }
-};
-
-const getRankedChoiceLabel = (score: number) => {
+const getRankedChoiceDisplay = (score: number) => {
     switch (score) {
         case -2:
-            return "DD";
+            return { icon: "thumbs-down", count: 2, tooltip: "Strongly Disagree" };
         case -1:
-            return "D";
+            return { icon: "thumbs-down", count: 1, tooltip: "Disagree" };
         case 0:
-            return "N";
+            return { icon: "minus", count: 1, tooltip: "Neutral" };
         case 1:
-            return "A";
+            return { icon: "thumbs-up", count: 1, tooltip: "Agree" };
         case 2:
-            return "AA";
+            return { icon: "thumbs-up", count: 2, tooltip: "Strongly Agree" };
         default:
-            return "?";
-    }
-};
-
-const getRankedChoiceTooltip = (score: number) => {
-    switch (score) {
-        case -2:
-            return "Strongly Disagree";
-        case -1:
-            return "Disagree";
-        case 0:
-            return "Neutral";
-        case 1:
-            return "Agree";
-        case 2:
-            return "Strongly Agree";
-        default:
-            return "Unknown";
+            return { icon: "question", count: 1, tooltip: "Unknown" };
     }
 };
 
@@ -97,7 +69,7 @@ export default function VoteCard({ vote, options }: IProps) {
                 color = `var(--mantine-color-${getScoreColor(vote.data.score, "-")})`;
                 break;
             case "binary-strict":
-                color = `var(--mantine-color-${getBinaryStrictColor(vote.data.score)}-6)`;
+                color = `var(--mantine-color-${getBinaryStrictDisplay(vote.data.score).color}-6)`;
                 break;
             case "variable": {
                 const avgScore = vote.data.scores.reduce((sum, s) => sum + s.score, 0) / vote.data.scores.length;
@@ -138,8 +110,8 @@ export default function VoteCard({ vote, options }: IProps) {
 
             case "binary-strict":
                 return (
-                    <Badge size="lg" variant="light" color={getBinaryStrictColor(vote.data.score)}>
-                        {getBinaryStrictLabel(vote.data.score)}
+                    <Badge size="lg" variant="light" color={getBinaryStrictDisplay(vote.data.score).color}>
+                        {getBinaryStrictDisplay(vote.data.score).label}
                     </Badge>
                 );
 
@@ -178,31 +150,47 @@ export default function VoteCard({ vote, options }: IProps) {
                 return (
                     <Card bg="primary.11" p="xs" radius="sm" withBorder>
                         <Stack gap={4}>
-                            {vote.data.scores.map((score) => {
-                                const color = getRankedChoiceScoreColor(score.score);
+                            {vote.data.scores
+                                .sort((a, b) => a.optionIndex - b.optionIndex)
+                                .map((score) => {
+                                    const color = getRankedChoiceScoreColor(score.score);
 
-                                return (
-                                    <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
-                                        <Text
-                                            size="sm"
-                                            w={{ base: 500, sm: 200 }}
-                                            truncate
-                                            title={options[score.optionIndex]}>
-                                            {options[score.optionIndex]}
-                                        </Text>
-                                        <Tooltip label={getRankedChoiceTooltip(score.score)}>
-                                            <Badge
+                                    return (
+                                        <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
+                                            <Text
                                                 size="sm"
-                                                variant="light"
-                                                color={color}
-                                                w={{ base: 60, sm: 40 }}
-                                                style={{ textAlign: "center" }}>
-                                                {getRankedChoiceLabel(score.score)}
-                                            </Badge>
-                                        </Tooltip>
-                                    </Group>
-                                );
-                            })}
+                                                w={{ base: 500, sm: 200 }}
+                                                truncate
+                                                title={options[score.optionIndex]}>
+                                                {options[score.optionIndex]}
+                                            </Text>
+                                            <Tooltip label={getRankedChoiceDisplay(score.score).tooltip}>
+                                                <Badge
+                                                    size="sm"
+                                                    variant="light"
+                                                    color={color}
+                                                    w={{ base: 60, sm: 40 }}
+                                                    style={{ textAlign: "center" }}>
+                                                    {Array.from({
+                                                        length: getRankedChoiceDisplay(score.score).count,
+                                                    }).map((_, index) => (
+                                                        <FontAwesomeIcon
+                                                            key={index}
+                                                            icon={getRankedChoiceDisplay(score.score).icon as IconProp}
+                                                            style={{
+                                                                marginRight:
+                                                                    index <
+                                                                    getRankedChoiceDisplay(score.score).count - 1
+                                                                        ? "2px"
+                                                                        : "0",
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </Badge>
+                                            </Tooltip>
+                                        </Group>
+                                    );
+                                })}
                         </Stack>
                     </Card>
                 );
