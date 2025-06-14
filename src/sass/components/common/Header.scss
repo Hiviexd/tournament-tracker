@@ -1,0 +1,45 @@
+.header {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    z-index: 100;
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-bottom-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        -webkit-backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .nav-group {
+        padding: 1.4rem 0;
+        transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .logo-image {
+            transform: scale(1.18);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    }
+}
+
+.header.scrolled {
+    background: color-mix(in srgb, var(--mantine-color-primary-11) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+
+    .nav-group {
+        padding: 0.4rem 0;
+
+        .logo-image {
+            transform: scale(1);
+        }
+    }
+}
+
+.mantine-AppShell-navbar {
+    background: color-mix(in srgb, var(--mantine-color-primary-11) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
