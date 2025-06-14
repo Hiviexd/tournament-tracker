@@ -13,6 +13,8 @@ import { useWindowScroll } from "@mantine/hooks";
 import MainNavigation from "./header/MainNavigation";
 import UserMenu from "./header/UserMenu";
 import LoginButton from "./buttons/LoginButton";
+import { getSavedPreference } from "../../hooks/useLocalPreferences";
+import { DEFAULT_HUE } from "../../constants";
 
 interface IPropTypes {
     mobileHeaderOpened: boolean;
@@ -22,11 +24,27 @@ interface IPropTypes {
 export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
     const [scroll] = useWindowScroll();
+    let hue = getSavedPreference<number>("hue", Number(DEFAULT_HUE));
 
-    const blurState = scroll.y > 0 || mobileHeaderOpened;
+    // For colorblind modes, use the same colors as the actual themes
+    const colorblindMode = getSavedPreference<"none" | "deuteranopia" | "protanopia" | "tritanopia">(
+        "colorblindMode",
+        "none"
+    );
+
+    if (colorblindMode !== "none") {
+        if (colorblindMode === "tritanopia") {
+            hue = 330;
+        } else {
+            hue = 200;
+        }
+    }
+
+    const blurState = scroll.y > 5 || mobileHeaderOpened;
 
     return (
         <AppShell.Header className={`header${blurState ? " scrolled" : ""}`}>
+            <div className="header-triangles-bg" style={{ "--primary-hue": hue + "deg" } as React.CSSProperties} />
             <Group h="100%" px="xl">
                 <div className="nav-group">
                     <Link to="/">
