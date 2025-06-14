@@ -10,7 +10,7 @@ import { getAccessibleColorScheme } from "../themes/accessibility/colors";
 
 // components
 import Header from "../components/common/Header";
-import MobileHeader from "../components/common/MobileHeader";
+import MobileNavbar from "../components/common/header/MobileNavbar";
 import Footer from "./Footer";
 import ScrollToTopButton from "../components/common/buttons/ScrollToTopButton";
 
@@ -82,11 +82,8 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                     collapsed: { desktop: true, mobile: !opened },
                 }}
                 padding={{ base: 10, sm: 15, lg: "xl" }}>
-                <AppShell.Header>
-                    <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
-                </AppShell.Header>
-
-                <MobileHeader opened={opened} onClose={toggle} />
+                <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
+                <MobileNavbar opened={opened} onClose={toggle} />
 
                 <AppShell.Main>
                     <div className="main-layout">

@@ -1,17 +1,17 @@
 import { AppShell, Stack, Divider, Transition } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import MobileUserSection from "./header/MobileUserSection";
-import MobileNavigation from "./header/MobileNavigation";
-import ThemeCustomizeModal from "../modals/ThemeCustomizeModal";
-import SettingsModal from "../modals/SettingsModal";
-import DebugModal from "../modals/DebugModal";
+import MobileUserSection from "./MobileUserSection";
+import MobileNavigation from "./MobileNavigation";
+import ThemeCustomizeModal from "../../modals/ThemeCustomizeModal";
+import SettingsModal from "../../modals/SettingsModal";
+import DebugModal from "../../modals/DebugModal";
 
 interface IProps {
     opened: boolean;
     onClose: () => void;
 }
 
-export default function MobileHeader({ opened, onClose }: IProps) {
+export default function MobileNavbar({ opened, onClose }: IProps) {
     const [customizeOpened, { open: openCustomize, close: closeCustomize }] = useDisclosure(false);
     const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false);
     const [debugOpened, { open: openDebug, close: closeDebug }] = useDisclosure(false);
