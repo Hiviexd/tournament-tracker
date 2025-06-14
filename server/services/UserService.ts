@@ -96,24 +96,38 @@ class UserService {
      * * If there's less than 2 users with isBag set to true, set all users' isBag to true.
      */
     public async assignReviewers(type: UserGroup): Promise<IUser[]> {
-        const users = await User.find({
-            groups: { $in: [type] },
-            isActiveReviewer: true,
-            inBag: true,
-        });
-
-        // get count of total users in groups
         const totalUsersCount = await User.countDocuments({
             groups: { $in: [type] },
             isActiveReviewer: true,
         });
 
-        // safer check if there's less than 2 active users in the group
-        if (users.length < _.min([2, totalUsersCount])) {
-            await User.updateMany({}, { $set: { inBag: true } });
+        if (totalUsersCount < 2) {
+            // Not enough reviewers to assign
+            return [];
+        }
 
-            // refetch users
-            return this.assignReviewers(type);
+        let users = await User.find({
+            groups: { $in: [type] },
+            isActiveReviewer: true,
+            inBag: true,
+        });
+
+        if (users.length < 2) {
+            // Reset only relevant users
+            await User.updateMany(
+                {
+                    groups: { $in: [type] },
+                    isActiveReviewer: true,
+                },
+                { $set: { inBag: true } }
+            );
+
+            // Refetch after reset
+            users = await User.find({
+                groups: { $in: [type] },
+                isActiveReviewer: true,
+                inBag: true,
+            });
         }
 
         const selectedUsers: IUser[] = _.sampleSize(users, 2);
