@@ -24,6 +24,8 @@
 
 @import "components/compliance/BeatmapCard.scss";
 
+@import "mixins.scss";
+
 /* Fonts */
 
 @font-face {
@@ -102,7 +104,7 @@
     }
 
     .mantine-Notification-root {
-        background-color: var(--notification-color) !important;
+        @include glass-bg(var(--notification-color));
 
         &:before {
             background-color: var(--mantine-color-white) !important;
@@ -273,6 +275,7 @@ html {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }

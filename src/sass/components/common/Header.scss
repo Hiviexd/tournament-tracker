@@ -1,3 +1,5 @@
+@import "../../mixins.scss";
+
 .header {
     background: transparent;
     backdrop-filter: none;
@@ -23,11 +25,9 @@
 }
 
 .header.scrolled {
-    background: color-mix(in srgb, var(--mantine-color-primary-11) 70%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    @include glass-bg(var(--mantine-color-primary-11), false);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border-bottom-color: rgba(255, 255, 255, 0.3);
+    border-bottom-color: rgba(255, 255, 255, 0.2);
 
     .nav-group {
         padding: 0.4rem 0;
