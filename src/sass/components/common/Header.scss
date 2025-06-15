@@ -14,17 +14,21 @@
         -webkit-backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     .nav-group {
-        padding: 1.4rem 0;
-        transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-        .logo-image {
-            transform: scale(1.25);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        // only on desktop
+        @media (min-width: 62em) {
+            padding: 1.4rem 0;
+            transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-        .user-avatar {
-            transform: scale(1.25);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+            .logo-image {
+                transform: scale(1.25);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .user-avatar {
+                transform: scale(1.25);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+            }
         }
     }
 }
@@ -35,14 +39,18 @@
     border-bottom-color: rgba(255, 255, 255, 0.2);
 
     .nav-group {
-        padding: 0.4rem 0;
 
-        .logo-image {
-            transform: scale(1);
-        }
+        // only on desktop
+        @media (min-width: 62em) {
+            padding: 0.4rem 0;
 
-        .user-avatar {
-            transform: scale(1);
+            .logo-image {
+                transform: scale(1);
+            }
+
+            .user-avatar {
+                transform: scale(1);
+            }
         }
     }
 }
