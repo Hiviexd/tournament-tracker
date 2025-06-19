@@ -394,7 +394,7 @@ class VotingsController {
             // Logger
             await LogService.generate(
                 req.session.mongoId!,
-                `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votings/${voting._id})`,
+                `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                 "voting"
             );
 
