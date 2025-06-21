@@ -125,7 +125,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                             {/* Editing reviewer section */}
                             {isEditingReviewer ? (
                                 <Stack gap="md">
-                                    <Group gap="xl">
+                                    <Group gap="md">
                                         {tournament.assignedReviewers.map((reviewer) => (
                                             <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
                                         ))}
@@ -190,7 +190,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                     </Stack>
                                 </Stack>
                             ) : (
-                                <Group gap="xl">
+                                <Group gap="md">
                                     {/* Reviewer Display */}
                                     {tournament.assignedReviewers.map((reviewer) => (
                                         <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />

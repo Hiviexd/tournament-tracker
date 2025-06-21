@@ -2,21 +2,29 @@ import { Card, Group, Tooltip, Badge } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import UserDisplay from "./UserDisplay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 interface IProps {
     user: IUser;
     onSelect: (user: IUser) => void;
     static?: boolean;
     showBadges?: boolean;
+    fullWidth?: boolean;
 }
 
-export default function UserCard({ user, onSelect, static: isStatic = false, showBadges = false }: IProps) {
+export default function UserCard({
+    user,
+    onSelect,
+    static: isStatic = false,
+    showBadges = false,
+    fullWidth = false,
+}: IProps) {
     return (
         <Card
             key={user._id}
             shadow="sm"
             p="md"
             bg="primary.10"
-            className={isStatic ? "user-card user-card-static" : "user-card"}
+            className={`user-card ${isStatic ? "user-card-static" : ""} ${fullWidth ? "user-card-full-width" : ""}`}
             style={{ minWidth: 240, cursor: isStatic ? "default" : "pointer" }}
             onClick={() => onSelect(user)}>
             <div

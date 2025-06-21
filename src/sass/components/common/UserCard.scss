@@ -5,6 +5,18 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
+    // Grid layout styling (default)
+    &:not(.user-card-full-width) {
+        flex: 0 0 auto;
+        width: calc(25% - 12px);
+        min-width: 240px;
+    }
+
+    // Full width styling
+    &.user-card-full-width {
+        width: 100%;
+    }
+
     &:not(.user-card-static):hover {
         transform: translateY(-4px) scale(1.02);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);

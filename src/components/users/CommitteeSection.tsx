@@ -1,4 +1,4 @@
-import { SimpleGrid, Card, Stack, Skeleton, Group, Title, Divider } from "@mantine/core";
+import { SimpleGrid, Card, Stack, Skeleton, Group, Title, Divider, Flex } from "@mantine/core";
 import { useCommitteeUsers } from "../../hooks/useUsers";
 import { IUser } from "../../../interfaces/User";
 import UserCard from "../common/UserCard";
@@ -45,11 +45,11 @@ export default function CommitteeSection({ onSelect, showBadges = false }: IProp
     );
 
     const UserGrid = ({ users }: { users: IUser[] }) => (
-        <SimpleGrid cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
+        <Flex wrap="wrap" gap="md" justify="center">
             {users.map((user) => (
                 <UserCard key={user._id} user={user} onSelect={onSelect} showBadges={showBadges} />
             ))}
-        </SimpleGrid>
+        </Flex>
     );
 
     const CommitteeSection = ({ title, users }: ISectionProps) => {
