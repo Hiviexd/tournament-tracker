@@ -47,6 +47,14 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     const submitReviewMutation = useSubmitReview(tournament._id);
 
+    // Get all possible checklist items
+    const allItems = REVIEW_CHECKLIST.flatMap((category) => category.items);
+
+    // Calculate select all state
+    const checkedItems = allItems.filter((item) => checkedState[item]);
+    const allChecked = checkedItems.length === allItems.length;
+    const indeterminate = checkedItems.length > 0 && checkedItems.length < allItems.length;
+
     const handleSubmitReview = async () => {
         const reviewData = {
             tournamentId: tournament._id,
@@ -68,6 +76,14 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         }));
     };
 
+    const handleSelectAllChange = (checked: boolean) => {
+        const newState: ChecklistState = {};
+        for (const item of allItems) {
+            newState[item] = checked;
+        }
+        setCheckedState(newState);
+    };
+
     const isSubmitDisabled = !decision || (decision !== "deny" && Object.values(checkedState).every((v) => !v));
 
     return (
@@ -79,6 +95,16 @@ export default function TournamentReviewInput({ tournament }: IProps) {
             <Text size="xs" c="dimmed">
                 If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
             </Text>
+
+            <Checkbox
+                label="Select All"
+                checked={allChecked}
+                indeterminate={indeterminate}
+                onChange={(event) => handleSelectAllChange(event.currentTarget.checked)}
+                size="sm"
+                mb="xs"
+            />
+
             {REVIEW_CHECKLIST.map((category) => (
                 <Stack key={category.category} gap="xs">
                     <Text fw={400} size="sm" c="dimmed">
