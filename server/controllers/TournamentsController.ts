@@ -453,10 +453,15 @@ class TournamentsController {
         }
 
         if (winners) {
+            // Need to re-fetch because tournament.winners is depopulated after update
+            const winnerUsers = await User.find({ _id: { $in: winners } }).select("username osuId");
+
             await TournamentService.addTournamentLog(
                 tournament,
                 currentUser,
-                `Updated winners: ${winners.map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`).join(", ")}`,
+                `Updated winners: ${winnerUsers
+                    .map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`)
+                    .join(", ")}`,
                 "trophy"
             );
             await LogService.generate(currentUser._id, `Updated winners for **${tournament.name}**`, "tournament");
