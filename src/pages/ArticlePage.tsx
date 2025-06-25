@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text, Tooltip, TextInput } from "@mantine/core";
+import {
+    Button,
+    Card,
+    Group,
+    Modal,
+    Stack,
+    Title,
+    Container,
+    Skeleton,
+    Text,
+    Tooltip,
+    TextInput,
+    ActionIcon,
+} from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticle";
@@ -11,6 +24,8 @@ import moment from "moment";
 import TextEditor from "../components/common/TextEditor";
 import { clearAutoSavedValue } from "../hooks/useAutoSave";
 import { useDocumentTitle } from "@mantine/hooks";
+import DateBadge from "../components/common/badges/DateBadge";
+import UserLink from "../components/common/UserLink";
 
 const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
     "/resources/official": "official-resources",
@@ -123,34 +138,70 @@ export default function ArticlePage() {
     return (
         <Container size="lg">
             <Stack gap="lg">
-                <Group justify="flex-end" align="center">
-                    {!isPredefined && (
-                        <Title order={2} style={{ marginRight: "auto" }}>
-                            {article.title}
-                        </Title>
-                    )}
-                    {user?.isCommittee && (
-                        <>
-                            <Tooltip label={moment(article.updatedAt).format("LLL")}>
-                                <Text fs="italic" size="xs" c="dimmed">
-                                    Last edited: {moment(article.updatedAt).fromNow()}
-                                </Text>
-                            </Tooltip>
-                            <Button bg="info" onClick={handleEdit} leftSection={<FontAwesomeIcon icon="edit" />}>
-                                Edit
-                            </Button>
-                            {user?.isAdmin && (
-                                <Button
-                                    bg="danger"
-                                    onClick={handleDelete}
-                                    leftSection={<FontAwesomeIcon icon="trash" />}
-                                    loading={deleteArticleMutation.isPending}>
-                                    Delete
-                                </Button>
+                {!isPredefined && (
+                    <Stack gap="xs">
+                        <Group align="center">
+                            <Title order={2}>
+                                {article.title}
+                            </Title>
+                            {user?.isCommittee && (
+                                <Group gap="xs">
+                                    <Tooltip label="Edit article">
+                                        <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
+                                            <FontAwesomeIcon icon="edit" />
+                                        </ActionIcon>
+                                    </Tooltip>
+                                    {user?.isAdmin && (
+                                        <Tooltip label="Delete article">
+                                            <ActionIcon
+                                                size="md"
+                                                variant="subtle"
+                                                color="danger"
+                                                onClick={handleDelete}
+                                                loading={deleteArticleMutation.isPending}>
+                                                <FontAwesomeIcon icon="trash" />
+                                            </ActionIcon>
+                                        </Tooltip>
+                                    )}
+                                </Group>
                             )}
-                        </>
-                    )}
-                </Group>
+                        </Group>
+                        {user?.isCommittee && (
+                            <Group gap="xs">
+                                <Text size="xs" c="dimmed">
+                                    Last edited by <UserLink user={article.lastEditor} />
+                                </Text>
+                                <DateBadge date={article.updatedAt} size="sm" staticColor />
+                            </Group>
+                        )}
+                    </Stack>
+                )}
+                {isPredefined && user?.isCommittee && (
+                    <Group justify="flex-end" align="center">
+                        <Tooltip label={moment(article.updatedAt).format("LLL")}>
+                            <Text fs="italic" size="xs" c="dimmed">
+                                Last edited: {moment(article.updatedAt).fromNow()}
+                            </Text>
+                        </Tooltip>
+                        <Tooltip label="Edit article">
+                            <ActionIcon size="lg" variant="subtle" color="blue" onClick={handleEdit}>
+                                <FontAwesomeIcon icon="edit" />
+                            </ActionIcon>
+                        </Tooltip>
+                        {user?.isAdmin && (
+                            <Tooltip label="Delete article">
+                                <ActionIcon
+                                    size="lg"
+                                    variant="subtle"
+                                    color="red"
+                                    onClick={handleDelete}
+                                    loading={deleteArticleMutation.isPending}>
+                                    <FontAwesomeIcon icon="trash" />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+                    </Group>
+                )}
 
                 <Card shadow="sm" p="lg">
                     <MarkdownText
