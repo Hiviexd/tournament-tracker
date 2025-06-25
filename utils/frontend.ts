@@ -9,6 +9,7 @@ import {
     RankedChoiceVote,
 } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
+import { TournamentStatus } from "../interfaces/Tournament";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import moment from "moment";
@@ -57,6 +58,34 @@ export const copyToClipboard = (text: string) => {
         message: "Copied to clipboard!",
         color: "green",
     });
+};
+
+/**
+ * Get tournament status badge color
+ * @param status The tournament status
+ * @returns The color string for the status
+ */
+export const getTournamentStatusColor = (status: TournamentStatus): string => {
+    switch (status) {
+        case "supportRequestReceived":
+            return "violet";
+        case "screeningConcluded":
+            return "info";
+        case "reviewOngoing":
+            return "yellow";
+        case "onHold":
+            return "pink";
+        case "changesRequested":
+            return "orange";
+        case "badgeApproved":
+            return "success";
+        case "badgeRejected":
+            return "danger";
+        case "noBadgeRequested":
+            return "gray.6";
+        default:
+            return "gray";
+    }
 };
 
 /**

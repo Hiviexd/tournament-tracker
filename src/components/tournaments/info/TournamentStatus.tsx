@@ -1,8 +1,9 @@
-import { Stack, Group, Text, Progress, Tooltip, ActionIcon, Select } from "@mantine/core";
+import { Stack, Group, Text, Progress, Tooltip, ActionIcon } from "@mantine/core";
 import { ITournament, TournamentStatus as TournamentStatusType } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import TournamentStatusBadge from "../../common/badges/TournamentStatusBadge";
+import TournamentStatusSelect from "../../common/TournamentStatusSelect";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
@@ -27,32 +28,6 @@ export default function TournamentStatus({ tournament }: IProps) {
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
     const editTournamentMutation = useEditTournament(tournament._id);
-
-    const statusOptions = [
-        {
-            group: "Initial Request",
-            items: [
-                { value: "supportRequestReceived", label: "Support Request Received" },
-                { value: "screeningConcluded", label: "Screening Concluded", disabled: !user?.isAdmin },
-            ],
-        },
-        {
-            group: "Review Process",
-            items: [
-                { value: "reviewOngoing", label: "Under Review" },
-                { value: "onHold", label: "On Hold" },
-                { value: "changesRequested", label: "Changes Requested" },
-            ],
-        },
-        {
-            group: "Consensus",
-            items: [
-                { value: "badgeApproved", label: "Badge Approved" },
-                { value: "badgeRejected", label: "Badge Rejected" },
-                { value: "noBadgeRequested", label: "No Badge Requested" },
-            ],
-        },
-    ];
 
     const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
@@ -115,11 +90,13 @@ export default function TournamentStatus({ tournament }: IProps) {
 
                 {isEditingStatus ? (
                     <Group gap="xs" w={{ base: "100%", xs: "50%" }}>
-                        <Select
+                        <TournamentStatusSelect
                             value={selectedStatus}
                             onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
-                            data={statusOptions}
                             allowDeselect={false}
+                            clearable={false}
+                            searchable={true}
+                            includeAdminOnly={user?.isAdmin}
                         />
                         <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
                             <FontAwesomeIcon icon="save" />

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
+import TournamentStatusSelect from "../common/TournamentStatusSelect";
 import { loggedInUserAtom, tournamentViewModeAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
@@ -51,32 +52,6 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         { value: "contest", label: "Contest" },
     ];
 
-    const statusOptions = [
-        {
-            group: "Initial Request",
-            items: [
-                { value: "supportRequestReceived", label: "Support Request Received" },
-                { value: "screeningConcluded", label: "Screening Concluded" },
-            ],
-        },
-        {
-            group: "Review Process",
-            items: [
-                { value: "reviewOngoing", label: "Under Review" },
-                { value: "onHold", label: "On Hold" },
-                { value: "changesRequested", label: "Changes Requested" },
-            ],
-        },
-        {
-            group: "Consensus",
-            items: [
-                { value: "badgeApproved", label: "Badge Approved" },
-                { value: "badgeRejected", label: "Badge Rejected" },
-                { value: "noBadgeRequested", label: "No Badge Requested" },
-            ],
-        },
-    ];
-
     const stateOptions = [
         { value: "all", label: "All Tournaments" },
         { value: "archived", label: "Archived" },
@@ -117,12 +92,12 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         clearable
                         disabled={viewMode === "review"}
                     />
-                    <Select
-                        placeholder="Filter by status"
-                        leftSection={<FontAwesomeIcon icon="list" />}
+                    <TournamentStatusSelect
                         value={values.status}
-                        onChange={(value) => handleChange("status", value as TournamentStatus)}
-                        data={statusOptions}
+                        leftSection={<FontAwesomeIcon icon="list" />}
+                        onChange={(value) => handleChange("status", value)}
+                        placeholder="Filter by status"
+                        searchable
                         clearable
                         disabled={viewMode === "review"}
                     />
