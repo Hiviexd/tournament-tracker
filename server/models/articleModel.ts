@@ -54,6 +54,10 @@ articleSchema.pre("save", async function (next) {
     next();
 });
 
+articleSchema.virtual("isDocumentation").get(function (this: IArticle) {
+    return this.type === "documentation";
+});
+
 const Article = model<IArticle>("Article", articleSchema);
 
 export default Article;

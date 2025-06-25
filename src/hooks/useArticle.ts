@@ -45,16 +45,17 @@ export function useEditArticle(slug: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (content: string) => {
+        mutationFn: async (data: { title?: string; content?: string }) => {
             const response = await utils.apiCall({
                 method: "put",
                 url: `/api/articles/${slug}/edit`,
-                data: { content },
+                data,
             });
             return utils.handleMutationResponse(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["article", slug] });
+            queryClient.invalidateQueries({ queryKey: ["documentation"] });
         },
     });
 }

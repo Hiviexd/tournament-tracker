@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
-import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text, Tooltip } from "@mantine/core";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { Button, Card, Group, Modal, Stack, Title, Container, Skeleton, Text, Tooltip, TextInput } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticle";
@@ -20,6 +20,7 @@ const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
 export default function ArticlePage() {
     const { slug } = useParams<{ slug: string }>();
     const location = useLocation();
+    const navigate = useNavigate();
     const [user] = useAtom(loggedInUserAtom);
 
     const articleSlug = PREDEFINED_ARTICLE_SLUGS[location.pathname] || slug;
@@ -28,6 +29,7 @@ export default function ArticlePage() {
     const { mutate: editArticle, isPending: isEditing } = useEditArticle(articleSlug!);
     const deleteArticleMutation = useDeleteArticle(articleSlug!);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
     const [editContent, setEditContent] = useState("");
 
     useDocumentTitle(article?.title ? `${article.title} | Article` : "Article | Tournament Tracker");
@@ -70,14 +72,42 @@ export default function ArticlePage() {
     }
 
     const handleEdit = () => {
+        setEditTitle(article.title);
         setEditContent(article.content);
         setIsEditModalOpen(true);
     };
 
     const handleSave = () => {
-        editArticle(editContent, {
-            onSuccess: () => {
+        const data: { title?: string; content?: string } = {};
+
+        if (editTitle !== article.title) {
+            data.title = editTitle;
+        }
+        if (editContent !== article.content) {
+            data.content = editContent;
+        }
+
+        editArticle(data, {
+            onSuccess: (response: any) => {
                 setIsEditModalOpen(false);
+
+                // If title was changed, navigate to the new slug
+                if (data.title && response?.article?.slug && response.article.slug !== articleSlug) {
+                    // Handle predefined slugs
+                    const predefinedPath = Object.keys(PREDEFINED_ARTICLE_SLUGS).find(
+                        (key) => PREDEFINED_ARTICLE_SLUGS[key] === articleSlug
+                    );
+
+                    if (predefinedPath) {
+                        // For predefined articles, just refresh the current page
+                        window.location.reload();
+                    } else {
+                        // For regular articles, navigate to the new slug
+                        navigate(`/${article.isDocumentation ? "docs" : "articles"}/${response.article.slug}`, {
+                            replace: true,
+                        });
+                    }
+                }
             },
         });
     };
@@ -135,14 +165,29 @@ export default function ArticlePage() {
                     title="Edit Article"
                     size="xl">
                     <Stack gap="md">
-                        <TextEditor
-                            value={editContent}
-                            onChange={setEditContent}
-                            placeholder="Enter article content..."
-                            minHeight={300}
-                            autoSaveKey={`edit-article-${article?._id}`}
-                            allowHtml={article.type === "documentation" && !article.isPublic}
-                        />
+                        {!isPredefined && (
+                            <TextInput
+                                label="Title"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.currentTarget.value)}
+                                placeholder="Enter article title..."
+                            />
+                        )}
+
+                        <Stack gap="4">
+                            <Text size="sm" fw={500} mb="0">
+                                Content
+                            </Text>
+
+                            <TextEditor
+                                value={editContent}
+                                onChange={setEditContent}
+                                placeholder="Enter article content..."
+                                minHeight={300}
+                                autoSaveKey={`edit-article-${article?._id}`}
+                                allowHtml={article.type === "documentation" && !article.isPublic}
+                            />
+                        </Stack>
 
                         <Group justify="flex-end">
                             <Button

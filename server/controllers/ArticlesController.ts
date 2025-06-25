@@ -73,7 +73,7 @@ class ArticlesController {
     /** POST edit article */
     public async editArticle(req: Request, res: Response) {
         const { slug } = req.params;
-        const { content } = req.body;
+        const { title, content } = req.body;
 
         const article = await Article.findOne({
             slug: { $regex: new RegExp(`^${slug}$`, "i") },
@@ -82,11 +82,13 @@ class ArticlesController {
             return res.status(404).json({ error: "Article not found" });
         }
 
-        if (!content) {
-            return res.status(400).json({ error: "Missing content" });
-        }
+        let oldTitle: string | null = null;
 
-        article.content = content;
+        if (title) {
+            oldTitle = article.title;
+            article.title = title;
+        }
+        if (content) article.content = content;
 
         await article.save();
 
@@ -98,7 +100,9 @@ class ArticlesController {
         // Logger
         await LogService.generate(
             req.session.mongoId!,
-            `Updated the ${article.type} article: [**${article.title}**](${config.baseUrl}/articles/${article.slug})`,
+            `Updated the ${article.type} article: [**${oldTitle ? `${oldTitle} → ` : ""}${article.title}**](${
+                config.baseUrl
+            }/articles/${article.slug})`,
             "article"
         );
     }
