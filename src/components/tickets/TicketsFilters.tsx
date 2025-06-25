@@ -7,6 +7,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 
 interface FilterValues {
     title: string;
+    content: string;
     targetUser: string;
     targetTournament: string;
     assignedGroup: UserGroup;
@@ -53,7 +54,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                     // Ticket Filters
                     <>
                         <TextInput
-                            placeholder="Search by title..."
+                            placeholder="Search by title or message content..."
                             leftSection={<FontAwesomeIcon icon="search" />}
                             value={values.title}
                             onChange={(e) => handleChange("title", e.currentTarget.value)}
@@ -88,6 +89,13 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                 ) : (
                     // Report Filters
                     <>
+                        <TextInput
+                            placeholder="Search by message content..."
+                            leftSection={<FontAwesomeIcon icon="search" />}
+                            value={values.content}
+                            onChange={(e) => handleChange("content", e.currentTarget.value)}
+                            w="100%"
+                        />
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                             <UserSearch
                                 placeholder="Search by reported user..."

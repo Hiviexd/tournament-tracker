@@ -37,19 +37,88 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
-        const { type, title, targetUser, targetTournament, assignedGroup, isActive, showOwn, page = 1 } = req.query;
+        const {
+            type,
+            title,
+            content,
+            targetUser,
+            targetTournament,
+            assignedGroup,
+            isActive,
+            showOwn,
+            page = 1,
+        } = req.query;
 
-        const query: any = {};
         const user = res.locals!.user;
+        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
+
+        // Check if we need content search
+        const needsContentSearch = content && (content as string).trim().length >= 3;
+        const needsUnifiedSearch = type === "ticket" && title && (title as string).trim().length >= 3;
+
+        let ticketIdsFromContent: any[] = [];
+
+        // Handle content search with simple post-query processing
+        if (needsContentSearch || needsUnifiedSearch) {
+            const searchTerm = needsContentSearch ? (content as string).trim() : (title as string).trim();
+
+            // Find messages that match the content search
+            const matchingMessages = await Message.find({
+                content: new RegExp(searchTerm, "i"),
+                isNote: { $ne: true },
+                event: { $exists: false },
+            }).distinct("_id");
+
+            // Find tickets that contain these messages
+            if (needsUnifiedSearch) {
+                // For tickets: title OR content search
+                const titleMatchingTickets = await Ticket.find({
+                    title: new RegExp(searchTerm, "i"),
+                }).distinct("_id");
+
+                const contentMatchingTickets = await Ticket.find({
+                    messages: { $in: matchingMessages },
+                }).distinct("_id");
+
+                // Combine both searches
+                ticketIdsFromContent = [...new Set([...titleMatchingTickets, ...contentMatchingTickets])];
+            } else {
+                // For reports: content search only
+                ticketIdsFromContent = await Ticket.find({
+                    messages: { $in: matchingMessages },
+                }).distinct("_id");
+            }
+
+            // If no matching tickets found, return empty result
+            if (ticketIdsFromContent.length === 0) {
+                return res.json({
+                    tickets: [],
+                    total: 0,
+                    page: Number(page),
+                    pages: 0,
+                });
+            }
+        }
+
+        // Build regular query (with potential content search constraint)
+        const query: any = {};
 
         if (type) query.type = user ? type : "ticket";
-        if (type === "ticket" && title) {
-            query.title = new RegExp(title as string, "i");
+
+        // Add content search constraint if applicable
+        if (ticketIdsFromContent.length > 0) {
+            query._id = { $in: ticketIdsFromContent };
+        } else {
+            // Apply title search only if not doing content search
+            if (type === "ticket" && title && (title as string).trim().length >= 3) {
+                query.title = new RegExp(title as string, "i");
+            }
         }
+
         if (type === "report") {
             if (targetUser) {
-                const user = await User.findByUsernameOrOsuId(targetUser as string);
-                if (user) query.targetUser = user._id;
+                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser as string);
+                if (targetUserDoc) query.targetUser = targetUserDoc._id;
             }
             if (targetTournament) {
                 query.targetTournamentName = new RegExp(targetTournament as string, "i");
@@ -62,8 +131,6 @@ class TicketsController {
         if (!user?.isCommittee && !user?.isAdmin) {
             query.$or = [{ author: user?._id }, { type: "ticket" }];
         }
-
-        const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         const [tickets, total] = await Promise.all([
             Ticket.find(query)

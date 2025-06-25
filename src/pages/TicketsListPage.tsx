@@ -14,6 +14,7 @@ import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 interface FilterValues {
     title: string;
+    content: string;
     targetUser: string;
     targetTournament: string;
     assignedGroup: UserGroup;
@@ -39,6 +40,7 @@ export default function TicketsListPage() {
 
     const [searchInput, setSearchInput] = useState<FilterValues>({
         title: searchParams.get("title") || "",
+        content: searchParams.get("content") || "",
         targetUser: searchParams.get("targetUser") || "",
         targetTournament: searchParams.get("targetTournament") || "",
         assignedGroup: (searchParams.get("assignedGroup") as UserGroup) || getTypeFilterFromUser(),
@@ -52,6 +54,7 @@ export default function TicketsListPage() {
     }, [type]);
 
     const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
+    const [debouncedContent] = useDebouncedValue(searchInput.content, 400);
     const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
 
     const handleFilterChange = (newFilters) => {
@@ -62,6 +65,7 @@ export default function TicketsListPage() {
     const { data, isLoading, error } = useTickets({
         type,
         title: debouncedTitle,
+        content: debouncedContent,
         targetUser: searchInput.targetUser,
         targetTournament: debouncedTournament,
         assignedGroup: searchInput.assignedGroup,
@@ -77,6 +81,7 @@ export default function TicketsListPage() {
             if (debouncedTitle) params.set("title", debouncedTitle);
             if (searchInput.showOwn) params.set("showOwn", "true");
         } else {
+            if (debouncedContent) params.set("content", debouncedContent);
             if (searchInput.targetUser) params.set("targetUser", searchInput.targetUser);
             if (debouncedTournament) params.set("targetTournament", debouncedTournament);
         }
@@ -86,6 +91,7 @@ export default function TicketsListPage() {
         setSearchParams(params, { replace: true });
     }, [
         debouncedTitle,
+        debouncedContent,
         debouncedTournament,
         searchInput.targetUser,
         searchInput.targetTournament,
