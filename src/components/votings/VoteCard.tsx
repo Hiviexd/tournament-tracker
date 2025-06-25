@@ -169,7 +169,7 @@ export default function VoteCard({ vote, options }: IProps) {
                                                     size="sm"
                                                     variant="light"
                                                     color={color}
-                                                    w={{ base: 60, sm: 40 }}
+                                                    w={{ base: 100, xs: 40 }}
                                                     style={{ textAlign: "center" }}>
                                                     {Array.from({
                                                         length: getRankedChoiceDisplay(score.score).count,
