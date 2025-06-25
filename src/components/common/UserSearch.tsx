@@ -125,9 +125,13 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
                             onFocus={() => combobox.openDropdown()}
                             onChange={(e) => handleChange(e.currentTarget.value)}
                             onKeyDown={(e) => {
-                                if (e.key === "Enter" && users.length > 0) {
+                                if (e.key === "Enter") {
                                     e.preventDefault();
-                                    handleSelect(users[0]);
+                                    if (users.length > 0) {
+                                        handleSelect(users[0]);
+                                    } else if (isSearchComplete && allowUserCreation && search) {
+                                        handleCreateUser();
+                                    }
                                 }
                             }}
                             value={search}
