@@ -77,9 +77,9 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         },
     ];
 
-    const activeOptions = [
-        { value: "active", label: "Active" },
-        { value: "concluded", label: "Archived" },
+    const stateOptions = [
+        { value: "all", label: "All Tournaments" },
+        { value: "archived", label: "Archived" },
     ];
 
     return (
@@ -131,7 +131,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         leftSection={<FontAwesomeIcon icon="clock" />}
                         value={values.state}
                         onChange={(value) => handleChange("state", value)}
-                        data={activeOptions}
+                        data={stateOptions}
                         clearable
                         disabled={viewMode === "review"}
                     />
