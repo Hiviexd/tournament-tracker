@@ -30,6 +30,10 @@ const articleSchema = new Schema<IArticle>(
             type: String,
             unique: true,
         },
+        lastEditor: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+        },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

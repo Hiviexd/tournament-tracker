@@ -17,7 +17,10 @@ class ArticlesController {
             query.isPublic = true;
         }
 
-        const article = await Article.findOne(query);
+        const article = await Article.findOne(query).populate({
+            path: "lastEditor",
+            select: "username osuId",
+        });
 
         if (!article) {
             return res.status(404).json({ error: "Article not found" });
@@ -53,6 +56,7 @@ class ArticlesController {
             content,
             type,
             isPublic,
+            lastEditor: res.locals!.user!,
         });
 
         await article.save();
@@ -78,17 +82,28 @@ class ArticlesController {
         const article = await Article.findOne({
             slug: { $regex: new RegExp(`^${slug}$`, "i") },
         });
+
         if (!article) {
             return res.status(404).json({ error: "Article not found" });
         }
 
         let oldTitle: string | null = null;
+        let isEdited = false;
 
-        if (title) {
+        if (title && title.trim() !== "" && title.trim() !== article.title.trim()) {
             oldTitle = article.title;
             article.title = title;
+            isEdited = true;
         }
-        if (content) article.content = content;
+
+        if (content && content.trim() !== "" && content.trim() !== article.content.trim()) {
+            article.content = content;
+            isEdited = true;
+        }
+
+        if (isEdited) {
+            article.lastEditor = res.locals!.user!;
+        }
 
         await article.save();
 
