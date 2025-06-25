@@ -20,7 +20,6 @@ import { useArticle, useEditArticle, useDeleteArticle } from "../hooks/useArticl
 import MarkdownText from "../components/common/MarkdownText";
 import EmptyState from "../components/common/EmptyState";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
 import TextEditor from "../components/common/TextEditor";
 import { clearAutoSavedValue } from "../hooks/useAutoSave";
 import { useDocumentTitle } from "@mantine/hooks";
@@ -141,9 +140,7 @@ export default function ArticlePage() {
                 {!isPredefined && (
                     <Stack gap="xs">
                         <Group align="center">
-                            <Title order={2}>
-                                {article.title}
-                            </Title>
+                            <Title order={2}>{article.title}</Title>
                             {user?.isCommittee && (
                                 <Group gap="xs">
                                     <Tooltip label="Edit article">
@@ -167,9 +164,14 @@ export default function ArticlePage() {
                             )}
                         </Group>
                         {user?.isCommittee && (
-                            <Group gap="xs">
+                            <Group gap="5">
                                 <Text size="xs" c="dimmed">
-                                    Last edited by <UserLink user={article.lastEditor} />
+                                    Last edited{" "}
+                                    {article.lastEditor && (
+                                        <>
+                                            by <UserLink user={article.lastEditor} />
+                                        </>
+                                    )}
                                 </Text>
                                 <DateBadge date={article.updatedAt} size="sm" staticColor />
                             </Group>
@@ -178,22 +180,28 @@ export default function ArticlePage() {
                 )}
                 {isPredefined && user?.isCommittee && (
                     <Group justify="flex-end" align="center">
-                        <Tooltip label={moment(article.updatedAt).format("LLL")}>
-                            <Text fs="italic" size="xs" c="dimmed">
-                                Last edited: {moment(article.updatedAt).fromNow()}
+                        <Group gap="xs">
+                            <Text size="xs" c="dimmed">
+                                Last edited{" "}
+                                {article.lastEditor && (
+                                    <>
+                                        by <UserLink user={article.lastEditor} />
+                                    </>
+                                )}
                             </Text>
-                        </Tooltip>
+                            <DateBadge date={article.updatedAt} size="sm" staticColor />
+                        </Group>
                         <Tooltip label="Edit article">
-                            <ActionIcon size="lg" variant="subtle" color="blue" onClick={handleEdit}>
+                            <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
                                 <FontAwesomeIcon icon="edit" />
                             </ActionIcon>
                         </Tooltip>
                         {user?.isAdmin && (
                             <Tooltip label="Delete article">
                                 <ActionIcon
-                                    size="lg"
+                                    size="md"
                                     variant="subtle"
-                                    color="red"
+                                    color="danger"
                                     onClick={handleDelete}
                                     loading={deleteArticleMutation.isPending}>
                                     <FontAwesomeIcon icon="trash" />
