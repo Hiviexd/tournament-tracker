@@ -10,8 +10,8 @@ interface IProps {
 
 export default function NoResultsOption({ search, onAdd, isLoading, allowUserCreation = true }: IProps) {
     return (
-        <Group p="xs" justify="space-between" wrap="nowrap">
-            <Text size="sm" c="dimmed">
+        <Group p="xs" justify="space-between" wrap="wrap">
+            <Text size="sm" c="dimmed" style={{ flex: 1 }}>
                 No users found matching "{search}"
             </Text>
             {allowUserCreation && (
