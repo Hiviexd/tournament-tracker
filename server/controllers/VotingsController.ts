@@ -128,6 +128,7 @@ class VotingsController {
             targetTournamentLink,
             type,
             allowNeutralVotes,
+            forceFullParticipation,
         } = req.body;
         const files = req.files as Express.Multer.File[];
 
@@ -139,7 +140,13 @@ class VotingsController {
             groups: { $in: assignedGroups },
             isActiveReviewer: true,
         });
-        const requiredVotes = Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
+
+        const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";
+
+        const requiredVotes =
+            forceFullParticipationBool
+                ? assignedUsersCount
+                : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;
@@ -244,6 +251,13 @@ class VotingsController {
 
         if (voting.attachments?.length) {
             fields.push(utils.getAttachmentsField(voting.attachments)!);
+        }
+
+        if (forceFullParticipation) {
+            fields.push({
+                name: "Participation Requirement",
+                value: forceFullParticipationBool ? "100%" : "75%",
+            });
         }
 
         const embed = {

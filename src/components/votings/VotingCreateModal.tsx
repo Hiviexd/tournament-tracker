@@ -54,6 +54,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
+            forceFullParticipation: false,
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
@@ -181,6 +182,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             form.setFieldValue("options", [...selectedPreset.options]);
             form.setFieldValue("duration", selectedPreset.duration);
             form.setFieldValue("allowNeutralVotes", selectedPreset.allowNeutralVotes);
+            form.setFieldValue("forceFullParticipation", selectedPreset.forceFullParticipation);
         }
     };
 
@@ -290,6 +292,13 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         data={groupOptions}
                         withAsterisk
                         {...form.getInputProps("assignedGroups")}
+                    />
+
+                    <Checkbox
+                        label="Force full participation"
+                        description="Raises the participation requirement from 75% to 100%"
+                        checked={form.values.forceFullParticipation}
+                        onChange={(event) => form.setFieldValue("forceFullParticipation", event.currentTarget.checked)}
                     />
 
                     <NumberInput

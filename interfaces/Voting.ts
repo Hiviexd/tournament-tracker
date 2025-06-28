@@ -41,6 +41,7 @@ export interface VotingListQuery {
 }
 
 export interface IVotingFormData extends FormData {
+    forceFullParticipation?: boolean;
     files?: File[];
 }
 

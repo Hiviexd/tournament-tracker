@@ -53,24 +53,28 @@ export const VOTE_PRESETS = {
         options: ["Approve", "Oppose"],
         duration: 4,
         allowNeutralVotes: false,
+        forceFullParticipation: false,
     },
     tournamentBans: {
         type: "ranked-choice" as const,
         options: [...TOURNAMENT_OPTIONS],
         duration: 3,
         allowNeutralVotes: true,
+        forceFullParticipation: false,
     },
     badgeSupport: {
         type: "ranked-choice" as const,
         options: [...BADGE_SUPPORT_OPTIONS],
         duration: 3,
         allowNeutralVotes: true,
+        forceFullParticipation: false,
     },
     topThreeBadgeSupport: {
         type: "binary-strict" as const,
         options: ["Approve", "Oppose"],
         duration: 4,
         allowNeutralVotes: false,
+        forceFullParticipation: true,
     },
 } as const;
 
