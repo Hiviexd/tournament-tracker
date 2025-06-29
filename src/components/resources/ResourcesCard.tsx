@@ -55,7 +55,7 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
             </Text>
             {resource.author && (
                 <Text size="xs" c="dimmed" fs="italic" mt="auto">
-                    By <UserLink user={resource.author} />
+                    by <UserLink user={resource.author} />
                 </Text>
             )}
         </Card>
