@@ -27,6 +27,18 @@ export function isOsuForumLink(link: string): boolean {
 }
 
 /**
+ * Extracts the osu! forum ID from a link
+ * @param link Link to extract the ID from
+ * @returns The osu! forum ID, or `null` if the link is not a valid osu! forum link
+ */
+export function extractOsuForumId(link: string): number | null {
+    if (!isOsuForumLink(link)) return null;
+
+    const match = link.match(/https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)/);
+    return match ? parseInt(match[1]) : null;
+}
+
+/**
  * Checks if a link is an enchant ticket link
  * @param link Link to check
  */
