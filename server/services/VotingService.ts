@@ -4,6 +4,7 @@ import { IUser } from "@interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@interfaces/Vote";
 import utils from "../../utils";
+import Voting from "../models/votingModel";
 
 class VotingService {
     public censorVotingForNonCommittee(voting: IVoting) {
@@ -17,6 +18,23 @@ class VotingService {
             author: undefined,
         })) as unknown as IVote[];
         return publicVoting;
+    }
+
+    /**
+     * Gets all votings with targetTournamentLink containing the given forum ID
+     * @param forumId The osu forum topic ID to match
+     * @returns Array of votings that have matching forum IDs
+     */
+    public async getVotingsByForumId(forumId: number): Promise<IVoting[]> {
+        const votings = await Voting.find({
+            targetTournamentLink: { $regex: `/topics/${forumId}` },
+        }).populate([
+            {
+                path: "author",
+                select: "username osuId groups",
+            },
+        ]);
+        return votings;
     }
 
     public generateDiscordVotingResults(voting: IVoting): IDiscordField[] {

@@ -10,16 +10,22 @@ import TournamentEnchantUrl from "./info/TournamentEnchantUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import TournamentBanner from "./info/TournamentBanner";
 import TournamentWinners from "./info/TournamentWinners";
+import TournamentReports from "./info/TournamentReports";
+import TournamentVotings from "./info/TournamentVotings";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
 import { useNavigate } from "react-router";
+import { ITicket } from "../../../interfaces/Ticket";
+import { IVoting } from "../../../interfaces/Voting";
 
 interface IProps {
     tournament: ITournament;
+    reports: ITicket[];
+    votings: IVoting[];
 }
 
-export default function TournamentPageInfo({ tournament }: IProps) {
+export default function TournamentPageInfo({ tournament, reports, votings }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const editTournamentMutation = useEditTournament(tournament._id);
     const deleteTournamentMutation = useDeleteTournament(tournament._id);
@@ -77,6 +83,8 @@ export default function TournamentPageInfo({ tournament }: IProps) {
                     <TournamentForumUrl tournament={tournament} />
                     {(user?.isCommittee || user?.isAdmin) && <TournamentEnchantUrl tournament={tournament} />}
                     {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
+                    {(user?.isCommittee || user?.isAdmin) && <TournamentReports reports={reports} />}
+                    {(user?.isCommittee || user?.isAdmin) && <TournamentVotings votings={votings} />}
                     <TournamentWinners tournament={tournament} />
                 </SimpleGrid>
 

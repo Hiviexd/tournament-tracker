@@ -25,7 +25,11 @@ import config from "../../config.json";
 import Message from "../models/messageModel";
 import OsuBotService from "../services/OsuBotService";
 import utils from "../../utils";
-import { IDiscordField } from "@interfaces/Discord";
+import { IDiscordField } from "../../interfaces/Discord";
+import TicketService from "../services/TicketService";
+import { ITicket } from "../../interfaces/Ticket";
+import VotingService from "../services/VotingService";
+import { IVoting } from "../../interfaces/Voting";
 
 const defaultPopulate = [
     {
@@ -210,13 +214,25 @@ class TournamentsController {
 
         let tournament = await Tournament.findById(tournamentId)
             .select(selectFields(isCommittee))
-            .populate(defaultPopulate);
+            .populate(defaultPopulate)
+            .orFail();
 
-        if (tournament) {
-            tournament = TournamentService.censorTournamentReviews(tournament, res.locals!.user);
+        tournament = TournamentService.censorTournamentReviews(tournament, res.locals!.user);
+
+        let reports: ITicket[] = [];
+        let votings: IVoting[] = [];
+
+        if (isCommittee && tournament.forumUrl) {
+            const forumId = utils.extractOsuForumId(tournament.forumUrl);
+            if (forumId) {
+                [reports, votings] = await Promise.all([
+                    TicketService.getReportsByForumId(forumId),
+                    VotingService.getVotingsByForumId(forumId),
+                ]);
+            }
         }
 
-        res.json(tournament);
+        res.json({ tournament, reports, votings });
     }
 
     /** POST create a tournament */

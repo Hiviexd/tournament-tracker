@@ -15,7 +15,10 @@ import { useDocumentTitle } from "@mantine/hooks";
 export default function TournamentDetailsPage() {
     const [user] = useAtom(loggedInUserAtom);
     const { tournamentId } = useParams();
-    const { data: tournament, isLoading } = useTournament(tournamentId!);
+    const { data, isLoading } = useTournament(tournamentId!);
+    const tournament = data?.tournament;
+    const reports = data?.reports;
+    const votings = data?.votings;
 
     useDocumentTitle(tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker");
 
@@ -73,7 +76,7 @@ export default function TournamentDetailsPage() {
                 tournament && (
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
-                        <TournamentPageInfo tournament={tournament} />
+                        <TournamentPageInfo tournament={tournament} reports={reports} votings={votings} />
                         {(user?.isCommittee || user?.isAdmin) && <TournamentNotes tournament={tournament} />}
                         {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
                         <TournamentReviewSection tournament={tournament} />

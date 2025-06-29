@@ -24,6 +24,11 @@ export function useTournament(tournamentId: string) {
                 method: "get",
                 url: `/api/tournaments/${tournamentId}`,
             }),
+        select: (data) => ({
+            tournament: data.tournament,
+            reports: data.reports || [],
+            votings: data.votings || [],
+        }),
     });
 }
 

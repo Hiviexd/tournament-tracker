@@ -54,3 +54,27 @@
         border: none;
     }
 }
+
+.tournament-report-card {
+    transition: transform 0.2s ease;
+    text-decoration: none !important;
+    background-color: var(--mantine-color-primary-10) !important;
+    border-left: 3px solid var(--mantine-color-red-6) !important;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mantine-shadow-md);
+    }
+}
+
+.tournament-voting-card {
+    transition: transform 0.2s ease;
+    text-decoration: none !important;
+    background-color: var(--mantine-color-primary-10) !important;
+    border-left: 3px solid var(--mantine-color-info-6) !important;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mantine-shadow-md);
+    }
+}
