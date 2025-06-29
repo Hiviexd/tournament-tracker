@@ -133,13 +133,24 @@ app.use((req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err, req, res, next) => {
     let customErrorMessage = "";
-    if (err.name == "DocumentNotFoundError") customErrorMessage = "Error: Object not found";
+    let statusCode = 500;
+
+    if (err.name === "DocumentNotFoundError") {
+        customErrorMessage = "Object not found";
+        statusCode = 404;
+    } else if (err.name === "ValidationError") {
+        customErrorMessage = "Validation error";
+        statusCode = 400;
+    } else if (err.name === "CastError") {
+        customErrorMessage = "Invalid ID format";
+        statusCode = 400;
+    }
 
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};
 
-    res.json({ error: customErrorMessage || err.message || "Something went wrong!" });
+    res.status(statusCode).json({ error: customErrorMessage || err.message || "Something went wrong!" });
 
     console.log(err);
 });
@@ -155,8 +166,8 @@ const mode =
     process.env.AUTOMATION_DEBUG === "true"
         ? "Auto-start Automation Jobs"
         : process.env.MIGRATION === "true"
-            ? "Run Migrations"
-            : null;
+        ? "Run Migrations"
+        : null;
 
 app.set("port", port);
 
