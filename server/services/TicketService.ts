@@ -1,6 +1,5 @@
 import { ITicket } from "../../interfaces/Ticket";
 import { IUser } from "../../interfaces/User";
-import Ticket from "../models/ticketModel";
 
 class TicketService {
     /**
@@ -22,25 +21,6 @@ class TicketService {
         }
 
         return ticket;
-    }
-
-    /**
-     * Gets all reports with targetTournamentLink containing the given forum ID
-     * @param forumId The osu forum topic ID to match
-     * @returns Array of tickets that are reports with matching forum IDs
-     */
-    public async getReportsByForumId(forumId: number): Promise<ITicket[]> {
-        const reports = await Ticket.find({
-            type: "report",
-            targetTournamentLink: { $regex: `/topics/${forumId}` },
-        }).populate([
-            {
-                path: "author",
-                select: "username osuId groups",
-            },
-        ]);
-
-        return reports;
     }
 }
 

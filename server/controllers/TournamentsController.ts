@@ -26,9 +26,7 @@ import Message from "../models/messageModel";
 import OsuBotService from "../services/OsuBotService";
 import utils from "../../utils";
 import { IDiscordField } from "../../interfaces/Discord";
-import TicketService from "../services/TicketService";
 import { ITicket } from "../../interfaces/Ticket";
-import VotingService from "../services/VotingService";
 import { IVoting } from "../../interfaces/Voting";
 
 const defaultPopulate = [
@@ -222,14 +220,11 @@ class TournamentsController {
         let reports: ITicket[] = [];
         let votings: IVoting[] = [];
 
-        if (isCommittee && tournament.forumUrl) {
-            const forumId = utils.extractOsuForumId(tournament.forumUrl);
-            if (forumId) {
-                [reports, votings] = await Promise.all([
-                    TicketService.getReportsByForumId(forumId),
-                    VotingService.getVotingsByForumId(forumId),
-                ]);
-            }
+        if (isCommittee) {
+            [reports, votings] = await Promise.all([
+                TournamentService.getRelatedReports(tournament),
+                TournamentService.getRelatedVotings(tournament),
+            ]);
         }
 
         res.json({ tournament, reports, votings });

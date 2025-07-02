@@ -2,6 +2,11 @@ import { ITournament } from "@interfaces/Tournament";
 import { IUser } from "@interfaces/User";
 import { LeanDocument } from "mongoose";
 import { IReview } from "@interfaces/Review";
+import { ITicket } from "@interfaces/Ticket";
+import { IVoting } from "@interfaces/Voting";
+import Ticket from "../models/ticketModel";
+import Voting from "../models/votingModel";
+import utils from "../../utils";
 
 class TournamentService {
     /**
@@ -64,6 +69,94 @@ class TournamentService {
         }
 
         return tournament;
+    }
+
+    /**
+     * Gets all reports related to a tournament by forum ID and tournament name
+     * @param tournament The tournament to find related reports for
+     * @returns Array of tickets that are reports related to this tournament
+     */
+    public async getRelatedReports(tournament: ITournament): Promise<ITicket[]> {
+        const searchCriteria: any[] = [];
+
+        // Search by forum ID if available
+        if (tournament.forumUrl) {
+            const forumId = utils.extractOsuForumId(tournament.forumUrl);
+            if (forumId) {
+                searchCriteria.push({
+                    targetTournamentLink: { $regex: `/topics/${forumId}` },
+                });
+            }
+        }
+
+        // Search by tournament name
+        if (tournament.name) {
+            searchCriteria.push({
+                targetTournamentName: { $regex: tournament.name, $options: "i" },
+            });
+        }
+
+        if (searchCriteria.length === 0) {
+            return [];
+        }
+
+        const reports = await Ticket.find({
+            type: "report",
+            $or: searchCriteria,
+        }).populate([
+            {
+                path: "author",
+                select: "username osuId groups",
+            },
+        ]);
+
+        return reports;
+    }
+
+    /**
+     * Gets all votings related to a tournament by forum ID, tournament name, and voting title
+     * @param tournament The tournament to find related votings for
+     * @returns Array of votings related to this tournament
+     */
+    public async getRelatedVotings(tournament: ITournament): Promise<IVoting[]> {
+        const searchCriteria: any[] = [];
+
+        // Search by forum ID if available
+        if (tournament.forumUrl) {
+            const forumId = utils.extractOsuForumId(tournament.forumUrl);
+            if (forumId) {
+                searchCriteria.push({
+                    targetTournamentLink: { $regex: `/topics/${forumId}` },
+                });
+            }
+        }
+
+        // Search by tournament name in voting title and targetTournamentName
+        if (tournament.name) {
+            searchCriteria.push(
+                {
+                    title: { $regex: tournament.name, $options: "i" },
+                },
+                {
+                    targetTournamentName: { $regex: tournament.name, $options: "i" },
+                }
+            );
+        }
+
+        if (searchCriteria.length === 0) {
+            return [];
+        }
+
+        const votings = await Voting.find({
+            $or: searchCriteria,
+        }).populate([
+            {
+                path: "author",
+                select: "username osuId groups",
+            },
+        ]);
+
+        return votings;
     }
 }
 
