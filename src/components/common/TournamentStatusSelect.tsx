@@ -1,7 +1,7 @@
-import { Select, Badge } from "@mantine/core";
+import { Select } from "@mantine/core";
 import { forwardRef } from "react";
 import { TournamentStatus } from "../../../interfaces/Tournament";
-import utils from "../../../utils";
+import TournamentStatusBadge from "./badges/TournamentStatusBadge";
 
 interface TournamentStatusSelectProps {
     value: TournamentStatus | "";
@@ -15,22 +15,9 @@ interface TournamentStatusSelectProps {
     includeAdminOnly?: boolean; // Whether to include admin-only options
 }
 
-// Helper function to get status display text
-const getStatusDisplayText = (status: TournamentStatus): string => {
-    return status === "reviewOngoing"
-        ? "Under Review"
-        : status
-              .replace(/([A-Z])/g, " $1")
-              .replace(/^./, (str) => str.toUpperCase())
-              .trim();
-};
-
-// Custom option renderer for status dropdown
 const StatusOption = forwardRef<HTMLDivElement, { value: string; label: string }>((props, ref) => (
     <div ref={ref} {...props}>
-        <Badge color={utils.getTournamentStatusColor(props.value as TournamentStatus)} variant="light" size="sm">
-            {getStatusDisplayText(props.value as TournamentStatus)}
-        </Badge>
+        <TournamentStatusBadge status={props.value as TournamentStatus} size="sm" />
     </div>
 ));
 

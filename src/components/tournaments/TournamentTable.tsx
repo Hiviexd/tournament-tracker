@@ -64,7 +64,7 @@ export default function TournamentTable({ tournaments }: IProps) {
 
                                     <Table.Td>
                                         <Group gap="xs">
-                                            <TournamentStatusBadge tournament={tournament} />
+                                            <TournamentStatusBadge status={tournament.status} />
                                             <ReviewStatusBadge tournament={tournament} user={user} />
                                         </Group>
                                     </Table.Td>

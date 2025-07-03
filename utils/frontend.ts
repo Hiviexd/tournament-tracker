@@ -10,6 +10,7 @@ import {
 } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
 import { TournamentStatus } from "../interfaces/Tournament";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import moment from "moment";
@@ -61,30 +62,30 @@ export const copyToClipboard = (text: string) => {
 };
 
 /**
- * Get tournament status badge color
+ * Get tournament status styles (color and icon)
  * @param status The tournament status
- * @returns The color string for the status
+ * @returns Object containing color and icon for the status
  */
-export const getTournamentStatusColor = (status: TournamentStatus): string => {
+export const getTournamentStatusStyles = (status: TournamentStatus): { color: string; icon: IconProp } => {
     switch (status) {
         case "supportRequestReceived":
-            return "violet";
+            return { color: "violet", icon: "inbox" };
         case "screeningConcluded":
-            return "info";
+            return { color: "info", icon: "search" };
         case "reviewOngoing":
-            return "yellow";
+            return { color: "yellow", icon: "clock" };
         case "onHold":
-            return "pink";
+            return { color: "pink", icon: "pause" };
         case "changesRequested":
-            return "orange";
+            return { color: "orange", icon: "edit" };
         case "badgeApproved":
-            return "success";
+            return { color: "success", icon: "check-circle" };
         case "badgeRejected":
-            return "danger";
+            return { color: "danger", icon: "times-circle" };
         case "noBadgeRequested":
-            return "gray.6";
+            return { color: "gray.6", icon: "question-circle" };
         default:
-            return "gray";
+            return { color: "gray", icon: "circle" };
     }
 };
 

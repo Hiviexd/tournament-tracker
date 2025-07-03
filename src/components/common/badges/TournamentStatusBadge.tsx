@@ -1,18 +1,26 @@
 import { Badge } from "@mantine/core";
-import { ITournament } from "../../../../interfaces/Tournament";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TournamentStatus } from "../../../../interfaces/Tournament";
 import utils from "../../../../utils";
+import _ from "lodash";
 
 interface IProps {
-    tournament: ITournament;
+    status: TournamentStatus;
     variant?: "light" | "filled";
     size?: "sm" | "md" | "lg" | "xl";
 }
 
-export default function TournamentStatusBadge({ tournament, variant = "light", size }: IProps) {
-    const statusString = tournament.status === "reviewOngoing" ? "Under Review" : tournament.statusString;
+export default function TournamentStatusBadge({ status, variant = "light", size }: IProps) {
+    const statusString = status === "reviewOngoing" ? "Under Review" : _.startCase(status);
+    const statusStyles = utils.getTournamentStatusStyles(status);
+
     return (
-        <Badge color={utils.getTournamentStatusColor(tournament.status)} variant={variant} size={size}>
-            {statusString || tournament.status}
+        <Badge
+            color={statusStyles.color}
+            variant={variant}
+            size={size}
+            leftSection={<FontAwesomeIcon icon={statusStyles.icon} />}>
+            {statusString || status}
         </Badge>
     );
 }

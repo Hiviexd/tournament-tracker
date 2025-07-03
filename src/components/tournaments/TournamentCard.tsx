@@ -51,7 +51,7 @@ export default function TournamentCard({ tournament }: IProps) {
                 <Group gap="xs">
                     <TournamentTypeBadge type={tournament.type} />
                     <GameModeIcon mode={tournament.modes} />
-                    <TournamentStatusBadge tournament={tournament} />
+                    <TournamentStatusBadge status={tournament.status} />
                     {user?.isCommittee && ["reviewOngoing", "changesRequested"].includes(tournament.status) && (
                         <VoteCountBadge
                             voteCount={tournament.reviews.length}

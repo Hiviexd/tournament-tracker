@@ -97,6 +97,7 @@ import {
     faMinus,
     faThumbsUp,
     faThumbsDown,
+    faPause,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -198,5 +199,6 @@ export default function loadIcons() {
         faMinus,
         faThumbsUp,
         faThumbsDown,
+        faPause
     );
 }

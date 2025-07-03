@@ -103,7 +103,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                         </ActionIcon>
                     </Group>
                 ) : (
-                    <TournamentStatusBadge tournament={tournament} />
+                    <TournamentStatusBadge status={tournament.status} />
                 )}
 
                 <Tooltip label={`Status: ${tournament.statusString}`}>
