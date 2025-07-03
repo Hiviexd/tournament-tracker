@@ -3,6 +3,7 @@ import { ILog } from "../../../interfaces/Log";
 import moment from "moment";
 import MarkdownText from "../common/MarkdownText";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import UserLink from "../common/UserLink";
 
 interface IProps {
     logs: ILog[];
@@ -32,10 +33,16 @@ export default function LogsTable({ logs }: IProps) {
                                 </Table.Td>
                                 <Table.Td p={0}>{log.isSystemLog && <FontAwesomeIcon icon="robot" />}</Table.Td>
                                 <Table.Td>
-                                    <Text size="sm" truncate>{log.user?.username || "System"}</Text>
+                                    {log.isSystemLog ? (
+                                        <Text size="sm" truncate>
+                                            System
+                                        </Text>
+                                    ) : (
+                                        <UserLink user={log.user} size="sm" />
+                                    )}
                                 </Table.Td>
                                 <Table.Td>
-                                    <Text size="sm" tt="capitalize">
+                                    <Text size="sm" tt="capitalize" fw={700}>
                                         {log.category}
                                     </Text>
                                 </Table.Td>
