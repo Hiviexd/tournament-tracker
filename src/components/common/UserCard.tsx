@@ -1,7 +1,8 @@
-import { Card, Group, Tooltip, Badge } from "@mantine/core";
+import { Card, Group, Tooltip, Badge, Loader } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import UserDisplay from "./UserDisplay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useImageLoad } from "../../hooks/useImageLoad";
 
 interface IProps {
     user: IUser;
@@ -18,6 +19,11 @@ export default function UserCard({
     showBadges = false,
     fullWidth = false,
 }: IProps) {
+    const { loading, error } = useImageLoad(user.coverUrl);
+
+    // Use fallback image if there's an error or no cover URL
+    const backgroundImageUrl = error || !user.coverUrl ? "/assets/default-banner.jpg" : user.coverUrl;
+
     return (
         <Card
             key={user._id}
@@ -34,15 +40,30 @@ export default function UserCard({
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundImage: `url(${user.coverUrl})`,
+                    backgroundImage: `url(${backgroundImageUrl})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     filter: "brightness(0.4)",
+                    opacity: loading ? 0 : 1,
                     zIndex: 0,
                 }}
             />
+
+            {/* Loading spinner */}
+            {loading && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 2,
+                    }}>
+                    <Loader size="sm" color="primary" />
+                </div>
+            )}
             <div className="user-card-tint" />
-            <div className="user-card-content">
+            <div className="user-card-content" style={{ opacity: loading ? 0 : 1 }}>
                 <Group gap="xs" justify="space-between">
                     <UserDisplay user={user} disablePopover />
 

@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Title, Badge } from "@mantine/core";
+import { Card, Group, Stack, Title, Badge, Loader } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserDisplay from "../common/UserDisplay";
@@ -9,6 +9,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
+import { useImageLoad } from "../../hooks/useImageLoad";
 
 interface IProps {
     tournament: ITournament;
@@ -16,6 +17,10 @@ interface IProps {
 
 export default function TournamentCard({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+    const { loading, error } = useImageLoad(tournament.bannerUrl);
+
+    // Use fallback image if there's an error or no banner URL
+    const bannerImageUrl = error || !tournament.bannerUrl ? "/assets/default-banner.jpg" : tournament.bannerUrl;
 
     return (
         <Card
@@ -31,10 +36,25 @@ export default function TournamentCard({ tournament }: IProps) {
                     "--card-status-color": tournament.isActive
                         ? "var(--mantine-color-success-6)"
                         : "var(--mantine-color-danger-6)",
-                    "--banner-url": `url(${tournament.bannerUrl || "/assets/default-banner.jpg"})`,
+                    "--banner-url": `url(${bannerImageUrl})`,
+                    "--banner-opacity": loading ? 0 : 1,
                 } as React.CSSProperties
             }>
             <div className="tournament-card-banner" />
+
+            {/* Loading spinner */}
+            {loading && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 2,
+                    }}>
+                    <Loader size="sm" color="primary" />
+                </div>
+            )}
             <Stack gap="md" className="tournament-card-content" justify="space-between" h="100%">
                 <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <Title order={4} style={{ wordBreak: "break-word", flex: 1 }}>
