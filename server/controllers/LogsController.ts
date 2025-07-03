@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 const DEFAULT_POPULATE = [
     {
         path: "user",
-        select: "username osuId",
+        select: "username osuId groups coverUrl",
     },
 ];
 
