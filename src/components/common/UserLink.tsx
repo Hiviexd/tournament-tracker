@@ -26,7 +26,7 @@ export default function UserLink({ user, username, asText, disablePopover = fals
     }
 
     return (
-        <Popover position="top" shadow="md" disabled={!user || disablePopover} opened={opened}>
+        <Popover position="right" shadow="md" disabled={!user || disablePopover} opened={opened}>
             <Popover.Target>
                 <Anchor
                     {...props}
