@@ -9,9 +9,10 @@ interface IPropTypes {
     avatarUrl?: string;
     group?: UserGroup;
     asText?: boolean;
+    disablePopover?: boolean;
 }
 
-export default function UserDisplay({ user, username, avatarUrl, group, asText }: IPropTypes) {
+export default function UserDisplay({ user, username, avatarUrl, group, asText, disablePopover = false }: IPropTypes) {
     let userGroups: BadgedUserGroup[] | null;
 
     if (user?.groups) {
@@ -24,7 +25,7 @@ export default function UserDisplay({ user, username, avatarUrl, group, asText }
         <Group align="center" gap="sm">
             <Avatar src={avatarUrl ?? user?.avatarUrl} size={40} radius="md" />
             <Stack gap={2}>
-                <UserLink user={user} username={username} asText={!!username || asText} c="white" />
+                <UserLink user={user} username={username} asText={!!username || asText} c="white" disablePopover={disablePopover} />
                 <Group gap="0.5rem">
                     {group && <UserGroupBadge group={group as BadgedUserGroup} />}
                     {userGroups?.map((g) => (

@@ -44,7 +44,7 @@ export default function UserCard({
             <div className="user-card-tint" />
             <div className="user-card-content">
                 <Group gap="xs" justify="space-between">
-                    <UserDisplay user={user} />
+                    <UserDisplay user={user} disablePopover />
 
                     {/* warning badges */}
                     {user.isCommittee && showBadges && (
