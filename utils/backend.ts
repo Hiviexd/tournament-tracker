@@ -167,14 +167,24 @@ export function sanitizeBeatmapInput(input: string): Set<number> {
 }
 
 /**
- * Sorts beatmaps by their status
- * * Order: graveyard -> pending -> loved -> approved -> qualified -> ranked
+ * Sorts beatmaps by their status, then by artist within each status
+ * * Order: graveyard -> wip -> pending -> loved -> approved -> qualified -> ranked
+ * * Within each status: alphabetical by artist
  * @param beatmaps Beatmaps to sort
  * @returns Sorted beatmaps
  */
 export function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
-    const statusOrder = ["graveyard", "pending", "loved", "approved", "qualified", "ranked"];
-    return beatmaps.sort((a, b) => statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status));
+    const statusOrder = ["graveyard", "wip", "pending", "loved", "approved", "qualified", "ranked"];
+    return beatmaps.sort((a, b) => {
+        // First, sort by status
+        const statusDiff = statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status);
+        if (statusDiff !== 0) {
+            return statusDiff;
+        }
+
+        // If statuses are the same, sort by artist
+        return a.beatmapset.artist.localeCompare(b.beatmapset.artist);
+    });
 }
 
 /**
