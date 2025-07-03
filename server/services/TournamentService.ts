@@ -106,7 +106,7 @@ class TournamentService {
         }).populate([
             {
                 path: "author",
-                select: "username osuId groups",
+                select: "username osuId groups coverUrl",
             },
         ]);
 
@@ -152,7 +152,7 @@ class TournamentService {
         }).populate([
             {
                 path: "author",
-                select: "username osuId groups",
+                select: "username osuId groups coverUrl",
             },
         ]);
 
