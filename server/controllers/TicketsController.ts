@@ -15,13 +15,13 @@ import UploadService from "../services/UploadService";
 import OsuBotService from "../services/OsuBotService";
 
 const DEFAULT_POPULATE = [
-    { path: "author", select: "username osuId groups" },
+    { path: "author", select: "username osuId groups coverUrl" },
     {
         path: "messages",
         populate: [
             {
                 path: "author",
-                select: "username osuId groups discordId",
+                select: "username osuId groups discordId coverUrl",
             },
             { path: "attachments", select: "originalName url size type" },
         ],

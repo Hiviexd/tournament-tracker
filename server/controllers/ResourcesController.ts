@@ -3,7 +3,7 @@ import Resource from "../models/resourceModel";
 import LogService from "../services/LogService";
 import User from "../models/userModel";
 
-const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups" }];
+const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl" }];
 
 const DEFAULT_LIMIT = 20;
 

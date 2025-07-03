@@ -15,8 +15,8 @@ class QuotesController {
     /** GET all quotes */
     public async getAllQuotes(_: Request, res: Response) {
         const quotes = await Quote.find()
-            .populate("author", "username osuId")
-            .populate("addedBy", "username osuId")
+            .populate("author", "username osuId groups coverUrl")
+            .populate("addedBy", "username osuId groups coverUrl")
             .sort({ createdAt: -1 });
         res.json(quotes);
     }

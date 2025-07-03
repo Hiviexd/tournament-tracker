@@ -14,12 +14,12 @@ import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";
 
 const DEFAULT_POPULATE = [
-    { path: "author", select: "username osuId groups" },
+    { path: "author", select: "username osuId groups coverUrl" },
     {
         path: "votes",
         populate: {
             path: "author",
-            select: "username osuId groups",
+            select: "username osuId groups coverUrl",
         },
     },
     { path: "targetUser", select: "username osuId groups coverUrl" },
