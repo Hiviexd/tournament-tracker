@@ -7,6 +7,8 @@ import defaultBanner from "/assets/default-banner.jpg";
 import moment from "moment";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
 
 interface BannerPreview {
     description: string;
@@ -20,12 +22,13 @@ const DEFAULT_PREVIEW: BannerPreview = {
     description:
         "Long description text goes here. Reasonably long, two lines, gotta keep typing or else we'll have to make this even longer to unreasonable degrees!",
     author: "You & Me",
-    date: { day: moment().format("DD"), month: moment().format("MMM"), year: moment().format("YYYY") },
+    date: { day: moment().format("D"), month: moment().format("MMM"), year: moment().format("YYYY") },
     imageUrl: defaultBanner,
     isLocalImage: false,
 };
 
 export default function NewsBannersTab() {
+    const [user] = useAtom(loggedInUserAtom);
     const [searchParams] = useSearchParams();
     const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
     const [currentUrl, setCurrentUrl] = useState<string | null>(null);
@@ -157,7 +160,7 @@ export default function NewsBannersTab() {
                     <p className="newspost-listing-title">Newspost in news history page</p>
                     <p className="newspost-listing-description">{preview.description}</p>
                     <p className="newspost-listing-meta">
-                        by <strong>{preview.author}</strong>
+                        by <strong>{user?.username ?? preview.author}</strong>
                     </p>
                 </div>
             </div>
@@ -176,7 +179,7 @@ export default function NewsBannersTab() {
                 <div className="newspost-loggedout-inner">
                     <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
                     <p className="newspost-listing-meta">
-                        by <strong>{preview.author}</strong>
+                        by <strong>{user?.username ?? preview.author}</strong>
                     </p>
                 </div>
             </div>
@@ -195,7 +198,7 @@ export default function NewsBannersTab() {
                 <div className="newspost-loggedout-inner">
                     <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
                     <p className="newspost-listing-meta">
-                        by <strong>{preview.author}</strong>
+                        by <strong>{user?.username ?? preview.author}</strong>
                     </p>
                 </div>
             </div>
@@ -214,7 +217,7 @@ export default function NewsBannersTab() {
                     </div>
                     <p className="newspost-newspost-title">Newspost in newspost page</p>
                     <p className="newspost-newspost-meta">
-                        by <strong>{preview.author}</strong>
+                        by <strong>{user?.username ?? preview.author}</strong>
                     </p>
                 </div>
 
