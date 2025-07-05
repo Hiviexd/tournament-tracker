@@ -13,7 +13,7 @@ import Header from "../components/common/Header";
 import MobileNavbar from "../components/common/header/MobileNavbar";
 import Footer from "../components/base/Footer";
 import ScrollToTopButton from "../components/base/ScrollToTopButton";
-import DevelopmentBanner from "../components/base/DevelopmentBanner";
+import DevelopmentBanner from "../components/base/EnvironmentBanner";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";

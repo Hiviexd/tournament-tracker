@@ -1,7 +1,7 @@
 @import "../../mixins.scss";
 
-.development-banner {
-    @include glass-bg(var(--mantine-color-yellow-9), false);
+.environment-banner {
+    @include glass-bg(var(--environment-banner-background), false);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
     position: fixed;
@@ -14,7 +14,7 @@
     padding: 8px 16px;
     font-size: 12px;
     font-weight: 600;
-    border-top: 1px solid color-mix(in srgb, #fff 30%, var(--mantine-color-primary-9) 70%);
+    border-top: 1px solid color-mix(in srgb, #fff 30%, var(--environment-banner-background) 70%);
     z-index: 100;
 
     .banner-text {
