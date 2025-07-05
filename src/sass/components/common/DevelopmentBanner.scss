@@ -1,11 +1,13 @@
 @import "../../mixins.scss";
 
 .development-banner {
-    @include glass-bg(var(--mantine-color-primary-9), false);
+    @include glass-bg(var(--mantine-color-yellow-9), false);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     color: white;
     text-align: center;
