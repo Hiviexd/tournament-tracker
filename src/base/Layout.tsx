@@ -13,6 +13,7 @@ import Header from "../components/common/Header";
 import MobileNavbar from "../components/common/header/MobileNavbar";
 import Footer from "./Footer";
 import ScrollToTopButton from "../components/common/buttons/ScrollToTopButton";
+import DevelopmentBanner from "../components/common/DevelopmentBanner";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -27,6 +28,7 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
+    const devBannerPadding = process.env.NODE_ENV === "development" ? "1.5em" : "0";
 
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 
@@ -85,7 +87,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                 <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
                 <MobileNavbar opened={opened} onClose={toggle} />
 
-                <AppShell.Main>
+                <AppShell.Main style={{ paddingBottom: devBannerPadding }}>
                     <div className="main-layout">
                         <Container fluid className="page-header">
                             <Flex align="center" gap="md">
@@ -110,8 +112,9 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                     </div>
                     <Footer />
                 </AppShell.Main>
-                <ScrollToTopButton />
+                <ScrollToTopButton style={{ paddingBottom: devBannerPadding }} />
             </AppShell>
+            <DevelopmentBanner />
         </>
     );
 }

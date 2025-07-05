@@ -2,12 +2,16 @@ import { useWindowScroll } from "@mantine/hooks";
 import { Affix, Button, Transition } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function ScrollToTopButton() {
+interface IPropTypes {
+    style?: React.CSSProperties;
+}
+
+export default function ScrollToTopButton({ style }: IPropTypes) {
     const [scroll, scrollTo] = useWindowScroll();
 
     return (
         <>
-            <Affix position={{ bottom: 20, right: 20 }}>
+            <Affix position={{ bottom: 20, right: 20 }} style={style}>
                 <Transition transition="slide-up" mounted={scroll.y > 0}>
                     {(transitionStyles) => (
                         <Button
