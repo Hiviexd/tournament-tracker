@@ -8,23 +8,9 @@ export default function DevelopmentBanner() {
     }
 
     return (
-        <Box
-            style={{
-                position: "sticky",
-                bottom: 0,
-                width: "100%",
-                backgroundColor: "#ff6b35",
-                color: "white",
-                textAlign: "center",
-                padding: "8px 16px",
-                fontSize: "12px",
-                fontWeight: 600,
-                borderTop: "2px solid #e55a2b",
-                boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.1)",
-                zIndex: 100,
-            }}>
-            <Text size="xs" fw={600}>
-                <FontAwesomeIcon icon="code" style={{ marginRight: "6px" }} />
+        <Box className="development-banner">
+            <Text size="xs" fw={600} className="banner-text">
+                <FontAwesomeIcon icon="code" />
                 DEVELOPMENT INSTANCE
             </Text>
         </Box>
