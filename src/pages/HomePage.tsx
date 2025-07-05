@@ -1,4 +1,4 @@
-import { Container, Stack, Title, Text, Card, SimpleGrid, Group, Badge } from "@mantine/core";
+import { Stack, Title, Text, Card, SimpleGrid, Group, Badge } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useAtom } from "jotai";
@@ -48,7 +48,7 @@ const features: Feature[] = [
     {
         icon: "images",
         title: "Assets Previewer",
-        description: "Preview how badges, news banners, and in-game banners will look like in the osu! website/client",
+        description: "Preview badges, news banners, and in-game banners in osu! website/client specs",
         link: "/assets-previewer",
     },
     {
@@ -129,48 +129,46 @@ export default function HomePage() {
     };
 
     return (
-        <Container size="lg">
-            <Stack gap="xl" py="xl">
-                {/* Hero Section */}
-                <Stack ta="center" gap="md">
-                    <Title order={1}>Tournament Tracker</Title>
-                    <Text size="xl" c="dimmed" maw={600} mx="auto">
-                        The one-stop shop for all official osu! tournament correspondence and information!
-                    </Text>
-                </Stack>
-
-                {/* Features Grid */}
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                    {features.map((feature, index) => renderFeatureCard(feature, index))}
-                </SimpleGrid>
-
-                {/* Login Section */}
-                {!user && (
-                    <Card padding="xl" radius="md">
-                        <Stack align="center" gap="md">
-                            <Title order={3}>Get Started</Title>
-                            <Text c="dimmed" ta="center" maw={400}>
-                                Sign in with your osu! account to access the platform's features
-                            </Text>
-                            <LoginButton size="lg" text="Sign in with osu!" />
-                        </Stack>
-                    </Card>
-                )}
-
-                {/* Committee Section */}
-                <Stack gap="md">
-                    <Title order={2} ta="center">
-                        Meet the Committee
-                    </Title>
-                    <Text size="sm" ta="center">
-                        Here's some wisdom from one of them:
-                        <Text size="sm" c="dimmed" ta="center" maw={400} mx="auto">
-                            {quote?.quote} — {quote?.author?.username}, {moment(quote?.createdAt).format("YYYY")}
-                        </Text>
-                    </Text>
-                    <CommitteeSection onSelect={handleUserSelect} />
-                </Stack>
+        <Stack gap="xl" py="xl">
+            {/* Hero Section */}
+            <Stack ta="center" gap="md">
+                <Title order={1}>Tournament Tracker</Title>
+                <Text size="xl" c="dimmed" maw={600} mx="auto">
+                    The one-stop shop for all official osu! tournament correspondence and information!
+                </Text>
             </Stack>
-        </Container>
+
+            {/* Features Grid */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                {features.map((feature, index) => renderFeatureCard(feature, index))}
+            </SimpleGrid>
+
+            {/* Login Section */}
+            {!user && (
+                <Card padding="xl" radius="md">
+                    <Stack align="center" gap="md">
+                        <Title order={3}>Get Started</Title>
+                        <Text c="dimmed" ta="center" maw={400}>
+                            Sign in with your osu! account to access the platform's features
+                        </Text>
+                        <LoginButton size="lg" text="Sign in with osu!" />
+                    </Stack>
+                </Card>
+            )}
+
+            {/* Committee Section */}
+            <Stack gap="md">
+                <Title order={2} ta="center">
+                    Meet the Committee
+                </Title>
+                <Text size="sm" ta="center">
+                    Here's some wisdom from one of them:
+                    <Text size="sm" c="dimmed" ta="center" maw={400} mx="auto">
+                        {quote?.quote} — {quote?.author?.username}, {moment(quote?.createdAt).format("YYYY")}
+                    </Text>
+                </Text>
+                <CommitteeSection onSelect={handleUserSelect} />
+            </Stack>
+        </Stack>
     );
 }
