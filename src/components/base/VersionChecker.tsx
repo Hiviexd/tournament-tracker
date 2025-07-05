@@ -43,6 +43,7 @@ export default function VersionChecker() {
                 withCloseButton: false,
                 style: {
                     width: "fit-content",
+                    margin: "0 auto",
                 },
             });
         }
