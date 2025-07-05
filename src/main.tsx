@@ -4,8 +4,8 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
-import ReactScan from "./base/ReactScan";
-import VersionChecker from "./base/VersionChecker";
+import ReactScan from "./components/base/ReactScan";
+import VersionChecker from "./components/base/VersionChecker";
 
 const queryClient = new QueryClient();
 

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useVersion } from "../hooks/useVersion";
+import { useVersion } from "../../hooks/useVersion";
 
 // This will be replaced by Vite at build time
 declare const __COMMIT_HASH__: string;

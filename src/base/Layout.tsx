@@ -11,9 +11,9 @@ import { getAccessibleColorScheme } from "../themes/accessibility/colors";
 // components
 import Header from "../components/common/Header";
 import MobileNavbar from "../components/common/header/MobileNavbar";
-import Footer from "./Footer";
-import ScrollToTopButton from "../components/common/buttons/ScrollToTopButton";
-import DevelopmentBanner from "../components/common/DevelopmentBanner";
+import Footer from "../components/base/Footer";
+import ScrollToTopButton from "../components/base/ScrollToTopButton";
+import DevelopmentBanner from "../components/base/DevelopmentBanner";
 
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
