@@ -25,6 +25,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
     const [user] = useAtom(loggedInUserAtom);
     const [scroll] = useWindowScroll();
     let hue = getSavedPreference<number>("hue", Number(DEFAULT_HUE));
+    const isGreyscale = getSavedPreference<boolean>("greyscale", false);
 
     // For colorblind modes, use the same colors as the actual themes
     const colorblindMode = getSavedPreference<"none" | "deuteranopia" | "protanopia" | "tritanopia">(
@@ -44,7 +45,10 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
 
     return (
         <AppShell.Header className={`header${blurState ? " scrolled" : ""}`}>
-            <div className="header-triangles-bg" style={{ "--primary-hue": hue + "deg" } as React.CSSProperties} />
+            <div
+                className={`header-triangles-bg${isGreyscale ? " greyscale" : ""}`}
+                style={{ "--primary-hue": hue + "deg" } as React.CSSProperties}
+            />
             <Group h="100%" px="xl">
                 <div className="nav-group">
                     <Link to="/">
