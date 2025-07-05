@@ -11,7 +11,7 @@ export default function ScrollToTopButton({ style }: IPropTypes) {
 
     return (
         <>
-            <Affix position={{ bottom: 20, right: 20 }} style={style}>
+            <Affix position={{ bottom: 10, right: 20 }} style={style}>
                 <Transition transition="slide-up" mounted={scroll.y > 0}>
                     {(transitionStyles) => (
                         <Button
