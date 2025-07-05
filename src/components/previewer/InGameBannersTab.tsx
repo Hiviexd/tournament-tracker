@@ -5,6 +5,7 @@ import { notifications } from "@mantine/notifications";
 import defaultStableBackground from "/assets/default-bg-stable.jpg";
 import defaultLazerBackground from "/assets/default-bg-lazer.jpg";
 import utils from "../../../utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface BannerPreview {
     bannerUrl: string;
@@ -263,7 +264,11 @@ export default function InGameBannersTab() {
                 </Group>
 
                 <Center mt="md">
-                    <Button size="sm" variant="light" onClick={handleReset}>
+                    <Button
+                        size="sm"
+                        variant="light"
+                        onClick={handleReset}
+                        leftSection={<FontAwesomeIcon icon="arrows-rotate" />}>
                         Reset to defaults
                     </Button>
                 </Center>
