@@ -23,8 +23,8 @@ class AutomationService {
     private checkOverdueReviewsJob: CronJob;
 
     constructor() {
-        // Run every hour
-        this.checkConcludableVotingsJob = new CronJob("0 * * * *", this.checkConcludableVotings.bind(this));
+        // Run every 30 minutes
+        this.checkConcludableVotingsJob = new CronJob("0,30 * * * *", this.checkConcludableVotings.bind(this));
 
         // Run at 17:00 UTC every day
         this.checkVotingsJob = new CronJob("0 17 * * *", this.checkVotings.bind(this));
