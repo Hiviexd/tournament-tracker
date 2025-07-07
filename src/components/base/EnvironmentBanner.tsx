@@ -1,7 +1,11 @@
 import { Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useVersion } from "../../hooks/useVersion";
+import utils from "../../../utils";
 
 export default function EnvironmentBanner() {
+    const { data: version } = useVersion();
+
     if (process.env.NODE_ENV === "production") {
         return null;
     }
@@ -19,6 +23,28 @@ export default function EnvironmentBanner() {
 
     const environmentName = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : "UNKNOWN ENVIRONMENT";
 
+    const getBranchStatusText = () => {
+        if (process.env.NODE_ENV !== "preview" || !version?.branchStatus) {
+            return "";
+        }
+
+        const { ahead, behind } = version.branchStatus;
+        const statusParts: string[] = [];
+
+        if (behind && behind > 0) {
+            statusParts.push(`${utils.formatCount(behind, "commit")} behind`);
+        }
+        if (ahead && ahead > 0) {
+            statusParts.push(`${utils.formatCount(ahead, "commit")} ahead`);
+        }
+
+        if (statusParts.length === 0) {
+            return "";
+        }
+
+        return `[${statusParts.join(", ")}]`;
+    };
+
     return (
         <Box
             className="environment-banner"
@@ -29,7 +55,7 @@ export default function EnvironmentBanner() {
             }>
             <Text size="xs" fw={600} className="banner-text">
                 <FontAwesomeIcon icon="code" />
-                {environmentName} INSTANCE
+                {environmentName} INSTANCE {getBranchStatusText().toUpperCase()}
             </Text>
         </Box>
     );

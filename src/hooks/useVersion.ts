@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import utils from "../../utils";
+import { VersionInfo } from "../../interfaces/Version";
 
 export const useVersion = () => {
-    return useQuery({
+    return useQuery<VersionInfo>({
         queryKey: ["version"],
         queryFn: () =>
             utils.apiCall({
