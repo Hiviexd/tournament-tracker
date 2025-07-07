@@ -28,7 +28,7 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
-    const envBannerPadding = process.env.NODE_ENV !== "production" ? "3em" : "1em";
+    const envBannerPadding = !import.meta.env.PROD ? "3em" : "1em";
 
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 

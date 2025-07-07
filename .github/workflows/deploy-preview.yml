@@ -135,7 +135,7 @@ jobs:
 
                       # Build both frontend and backend
                       echo "Building project for preview..."
-                      yarn build
+                      yarn build-preview
 
                       # Reload service
                       echo "Reloading preview service..."

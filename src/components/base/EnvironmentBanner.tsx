@@ -6,25 +6,29 @@ import utils from "../../../utils";
 export default function EnvironmentBanner() {
     const { data: version } = useVersion();
 
-    if (process.env.NODE_ENV === "production") {
+    // we need to use Vite's import.meta.env because process.env is not available prod builds
+    const isDevelopment = import.meta.env.MODE === "development";
+    const isPreview = import.meta.env.MODE === "preview";
+    const isProduction = import.meta.env.PROD && !isDevelopment && !isPreview;
+
+    if (isProduction) {
         return null;
     }
 
     const getEnvironmentColor = () => {
-        switch (process.env.NODE_ENV) {
-            case "development":
-                return "var(--mantine-color-yellow-9)";
-            case "preview":
-                return "var(--mantine-color-primary-9)";
-            default:
-                return "var(--mantine-color-orange-9)";
+        if (isDevelopment) {
+            return "var(--mantine-color-yellow-9)";
         }
+        if (isPreview) {
+            return "var(--mantine-color-primary-9)";
+        }
+        return "var(--mantine-color-orange-9)";
     };
 
-    const environmentName = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : "UNKNOWN ENVIRONMENT";
+    const environmentName = import.meta.env.MODE ? import.meta.env.MODE.toUpperCase() : "UNKNOWN ENVIRONMENT";
 
     const getBranchStatusText = () => {
-        if (process.env.NODE_ENV !== "preview" || !version?.branchStatus) {
+        if (!isPreview || !version?.branchStatus) {
             return "";
         }
 
@@ -39,7 +43,7 @@ export default function EnvironmentBanner() {
         }
 
         if (statusParts.length === 0) {
-            return "";
+            return "[up to date]";
         }
 
         return `[${statusParts.join(", ")}]`;
