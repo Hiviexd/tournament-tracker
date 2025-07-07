@@ -102,7 +102,9 @@ class AutomationService {
 
                 const minutesUntilDeadline = deadline.diff(now, "minutes");
                 const dueText =
-                    hoursUntilDeadline > 0 ? `${hoursUntilDeadline} hours` : `${minutesUntilDeadline} minutes`;
+                    hoursUntilDeadline > 0
+                        ? utils.formatCount(hoursUntilDeadline, "hour")
+                        : utils.formatCount(minutesUntilDeadline, "minute");
 
                 await DiscordService.sendWebhook({
                     embeds: [
@@ -138,7 +140,9 @@ class AutomationService {
 
                 const overdueDuration = Math.abs(hoursUntilDeadline);
                 const overdueText =
-                    overdueDuration >= 24 ? `${Math.floor(overdueDuration / 24)} days` : `${overdueDuration} hours`;
+                    overdueDuration >= 24
+                        ? utils.formatCount(Math.floor(overdueDuration / 24), "day")
+                        : utils.formatCount(overdueDuration, "hour");
 
                 await DiscordService.sendUserHighlightWebhook({
                     users: usersToPing,
@@ -322,7 +326,12 @@ class AutomationService {
                     embeds: [
                         {
                             color: webhookColors.red,
-                            description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
+                            description: `[**${
+                                ticket.title
+                            }**](${ticketUrl}) has had no response for ${utils.formatCount(
+                                daysSinceLastResponse,
+                                "day"
+                            )}!`,
                             fields: [
                                 { name: "Type", value: ticketType, inline: true },
                                 {
@@ -349,7 +358,12 @@ class AutomationService {
                     embeds: [
                         {
                             color: webhookColors.orange,
-                            description: `[**${ticket.title}**](${ticketUrl}) has had no response for ${daysSinceLastResponse} days!`,
+                            description: `[**${
+                                ticket.title
+                            }**](${ticketUrl}) has had no response for ${utils.formatCount(
+                                daysSinceLastResponse,
+                                "day"
+                            )}!`,
                             fields: [
                                 { name: "Type", value: ticketType, inline: true },
                                 { name: "Author", value: ticket.author.username, inline: true },
@@ -516,7 +530,12 @@ class AutomationService {
                     embeds: [
                         {
                             color,
-                            description: `Review for ${tournament.type} [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id}) has been ongoing for ${daysSinceReview} days!`,
+                            description: `Review for ${tournament.type} [**${tournament.name}**](${
+                                config.baseUrl
+                            }/tournaments/${tournament._id}) has been ongoing for ${utils.formatCount(
+                                daysSinceReview,
+                                "day"
+                            )}!`,
                             fields: [
                                 {
                                     name: "Missing Reviews",
