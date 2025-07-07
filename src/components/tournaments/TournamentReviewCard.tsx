@@ -82,7 +82,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                                         text={
                                             uncheckedItems.length === 0
                                                 ? "No issues with checklist!"
-                                                : `Found ${utils.countToWord(
+                                                : `Found ${utils.formatCount(
                                                       uncheckedItems.length,
                                                       "issue"
                                                   )} with checklist:`
@@ -125,7 +125,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                                         text={
                                             uncheckedItems.length === 0
                                                 ? "No issues with checklist!"
-                                                : `Found ${utils.countToWord(
+                                                : `Found ${utils.formatCount(
                                                       uncheckedItems.length,
                                                       "issue"
                                                   )} with checklist:`

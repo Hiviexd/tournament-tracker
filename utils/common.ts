@@ -87,7 +87,7 @@ export function isValidUrl(url: string): boolean {
  * @param count Count of the word
  * @param word Word to append the count to
  */
-export function countToWord(count: number, word: string) {
+export function formatCount(count: number, word: string) {
     return count === 1 ? `${count} ${word}` : `${count} ${word}s`;
 }
 
