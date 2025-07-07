@@ -110,7 +110,9 @@ app.use("/api/*", (req, res) => {
 });
 
 // serve production frontend
-if (process.env.NODE_ENV === "production") {
+const DIST_ENVS = ["production", "preview"];
+
+if (DIST_ENVS.includes(process.env.NODE_ENV || "")) {
     app.use(express.static(path.join(__dirname, "../../dist")));
 
     // exclude API routes
