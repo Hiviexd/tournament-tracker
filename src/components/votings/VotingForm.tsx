@@ -24,6 +24,7 @@ import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import VoteStatusBanner from "../common/banners/VoteStatusBanner";
 
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
+
 const hasNeutralVote = (voteData: VoteType): boolean => {
     switch (voteData.type) {
         case "binary":
@@ -54,14 +55,15 @@ export default function VotingForm({ voting, user }: IProps) {
 
     const isCommentRequired = useMemo(() => {
         switch (voteData.type) {
+            // Very explicit with declaration for my own sanity
             case "binary":
                 return isExtremeVote(voteData.score);
             case "variable":
                 return voteData.scores.some((s) => isExtremeVote(s.score));
+            case "classic":
             case "binary-strict":
-                return false;
             case "ranked-choice":
-                return voteData.scores.some((s) => s.score === 2 || s.score === -2); // 2 or -2 is extreme for ranked choice (-2 to 2 scale)
+                return false;
             default:
                 return false;
         }
