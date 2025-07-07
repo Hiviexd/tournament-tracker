@@ -30,7 +30,7 @@ jobs:
         needs: check-deploy
         if: needs.check-deploy.outputs.skip == 'false'
         runs-on: ubuntu-latest
-        environment: production
+        environment: preview
 
         steps:
             - name: Send Deploy Start Notification
