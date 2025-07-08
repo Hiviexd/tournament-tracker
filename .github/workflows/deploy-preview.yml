@@ -133,6 +133,11 @@ jobs:
                       echo "Installing dependencies..."
                       yarn install
 
+                      # Stop pm2 process
+                      # needed to avoid memory issues
+                      echo "Stopping pm2 process..."
+                      pm2 stop tcomm-preview
+
                       # Build frontend
                       echo "Building frontend..."
                       if ! yarn build-client-preview; then
