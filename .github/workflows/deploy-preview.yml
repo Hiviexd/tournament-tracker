@@ -1,0 +1,198 @@
+name: Deploy to Preview
+
+on:
+    workflow_dispatch:
+        inputs:
+            reason:
+                description: "Reason for preview deployment"
+                required: false
+                type: string
+    push:
+        branches: [preview, "preview/*"]
+
+jobs:
+    check-deploy:
+        runs-on: ubuntu-latest
+        outputs:
+            skip: ${{ steps.skip_check.outputs.skip }}
+        steps:
+            - name: Check for --skip-deploy flag
+              id: skip_check
+              run: |
+                  echo "Commit message: ${{ github.event.head_commit.message }}"
+                  if [[ "${{ github.event.head_commit.message }}" == *"--skip-deploy"* ]]; then
+                    echo "skip=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "skip=false" >> $GITHUB_OUTPUT
+                  fi
+
+    deploy:
+        needs: check-deploy
+        if: needs.check-deploy.outputs.skip == 'false'
+        runs-on: ubuntu-latest
+        environment: preview
+
+        steps:
+            - name: Send Deploy Start Notification
+              uses: sarisia/actions-status-discord@v1
+              if: always()
+              with:
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  noprefix: true
+                  title: "🔄 Preview Deployment Started"
+                  description: |
+                      Starting deployment to preview environment...
+                      - Branch: `${{ github.ref_name }}`
+                      - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Manual preview deploy' }}`
+                  color: 0xff8c00
+
+            - name: Verify Dependencies
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      echo "Checking dependencies..."
+                      echo "========================"
+
+                      # Node.js check and install
+                      if ! command -v node &> /dev/null; then
+                          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - 
+                          sudo apt-get install -y nodejs
+                      fi
+
+                      # Check Yarn
+                      if ! command -v yarn &> /dev/null; then
+                          echo "Installing Yarn..."
+                          npm install -g yarn
+                      fi
+
+                      # PM2 check
+                      if ! command -v pm2 &> /dev/null; then
+                          npm install -g pm2
+                      fi
+
+            - name: List Current PM2 Processes
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      echo "List of current pm2 processes:"
+                      echo "==============================="
+                      pm2 ls
+
+            - name: Setup Preview Directory & Deploy
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      # Navigate to projects directory
+                      cd ~/projects || { echo "Projects directory not found"; exit 1; }
+
+                      # Check if preview directory exists
+                      if [ ! -d "tournament-tracker-preview" ]; then
+                          echo "Cloning repository for preview instance..."
+                          git clone https://github.com/${{ github.repository }}.git tournament-tracker-preview
+                          cd tournament-tracker-preview
+                          echo "Fetching all branches for comparison..."
+                          git fetch origin --all
+                          git checkout ${{ github.ref_name }}
+                      else
+                          echo "Preview directory exists, updating..."
+                          cd tournament-tracker-preview
+
+                          # Check if there are any uncommitted changes
+                          if [[ -n $(git status -s) ]]; then
+                              echo "Warning: Working directory is not clean. Stashing changes..."
+                              git stash push -m "Auto-stash before preview deploy $(date)"
+                          fi
+
+                          # Fetch all branches to enable accurate branch comparison
+                          echo "Fetching all branches for comparison..."
+                          git fetch origin --all
+                          git checkout ${{ github.ref_name }}
+                          
+                          # Pull latest changes
+                          pull_output=$(git pull origin ${{ github.ref_name }} 2>&1)
+                          pull_status=$?
+                          echo "$pull_output"
+
+                          # Check for conflicts or errors
+                          if [[ $pull_status -ne 0 ]] && [[ $pull_output != *"Already up to date"* ]]; then
+                              echo "Error: Git pull failed"
+                              git status
+                              exit 1
+                          fi
+                      fi
+
+                      echo "Installing dependencies..."
+                      yarn install
+
+                      # Stop pm2 process
+                      # needed to avoid memory issues
+                      echo "Stopping pm2 process..."
+                      pm2 stop tcomm-preview
+
+                      # Build frontend
+                      echo "Building frontend..."
+                      if ! yarn build-client-preview; then
+                          echo "❌ Frontend build failed!"
+                          exit 1
+                      fi
+
+                      # Build backend
+                      echo "Building backend..."
+                      if ! yarn build-server-preview; then
+                          echo "❌ Backend build failed!"
+                          exit 1
+                      fi
+
+                      # Reload service
+                      echo "Reloading preview service..."
+                      pm2 reload tcomm-preview || pm2 start "yarn preview" --name tcomm-preview
+
+                      # Ensure it's running
+                      sleep 5
+                      pm2 ls
+
+                      # Show initial logs
+                      echo "Success! Showing startup logs for 5 seconds..."
+                      timeout 5 pm2 logs tcomm-preview --lines 15 || true
+
+                      # Show final status
+                      echo "Preview deployment completed!"
+                      echo "Preview instance should be running on port 8089"
+                      exit 0
+
+    notify:
+        needs: [check-deploy, deploy]
+        runs-on: ubuntu-latest
+        if: always()
+        steps:
+            - name: Send Discord Notification
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
+                  noprefix: true
+                  title: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true' && '⏭️ Preview Deployment Skipped' ||
+                          (needs.deploy.result == 'success' && '✅ Preview Deployment Successful') ||
+                          '❌ Preview Deployment Failed' }}
+                  description: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true'
+                          && 'Preview deployment was skipped due to `--skip-deploy` flag in commit message.'
+                          || format('- Branch: `{0}`\n- Status: `{1}`\n- Reason: `{2}`',
+                              github.ref_name,
+                              needs.deploy.result,
+                              github.event.inputs.reason || github.event.head_commit.message || 'Automated preview deploy') }}
+                  color: >-
+                      ${{ needs.check-deploy.outputs.skip == 'true' && '0xffff00' ||
+                          (needs.deploy.result == 'success' && '0x1df27d') || '0xff5050' }}
+                  content: >-
+                      ${{ needs.deploy.result != 'success' && needs.check-deploy.outputs.skip != 'true'
+                          && '⚠️ preview deploy failed! <@341321481390784512>' || '' }}

@@ -1,33 +1,23 @@
 import { Request, Response } from "express";
-import { execSync } from "child_process";
-
-/**
- * Get the git hash of the current commit
- * @returns The git hash of the current commit
- */
-function getGitHash() {
-    try {
-        return execSync("git rev-parse HEAD").toString().trim();
-    } catch (error) {
-        return "unknown";
-    }
-}
-
-/**
- * Get the commit message of the current commit
- * @returns The commit message of the current commit
- */
-function getGitMessage() {
-    try {
-        return execSync("git log -1 --pretty=%B").toString().trim();
-    } catch (error) {
-        return "";
-    }
-}
+import { VersionInfo } from "../../interfaces/Version";
+import VersionService from "../services/VersionService";
 
 class VersionController {
-    public getVersion(_: Request, res: Response) {
-        res.json({ hash: getGitHash(), message: getGitMessage() });
+    public getVersion(_: Request, res: Response<VersionInfo>) {
+        const versionData: VersionInfo = {
+            hash: VersionService.getGitHash(),
+            message: VersionService.getGitMessage(),
+        };
+
+        // Only include branch status on preview instances
+        if (process.env.NODE_ENV === "preview") {
+            const branchStatus = VersionService.getBranchStatus();
+            if (branchStatus) {
+                versionData.branchStatus = branchStatus;
+            }
+        }
+
+        res.json(versionData);
     }
 }
 
