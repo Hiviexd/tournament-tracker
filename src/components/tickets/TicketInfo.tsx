@@ -26,6 +26,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import moment from "moment";
 import { useState } from "react";
 import config from "../../../config.json";
+import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
 
 interface IProps {
     ticket: ITicket;
@@ -39,6 +40,8 @@ export default function TicketInfo({ ticket }: IProps) {
     const toggleStatusMutation = useToggleStatus(ticket._id);
     const updateThreadIdMutation = useUpdateThreadId(ticket._id);
     const snoozeTicketMutation = useSnoozeTicket(ticket._id);
+
+    const threadLink = `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId ?? ""}`;
 
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
@@ -151,9 +154,7 @@ export default function TicketInfo({ ticket }: IProps) {
                             ) : (
                                 <Text size="sm">
                                     {ticket.threadId ? (
-                                        <Anchor
-                                            href={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId}`}
-                                            target="_blank">
+                                        <Anchor href={threadLink} target="_blank">
                                             {ticket.threadId}
                                         </Anchor>
                                     ) : (
@@ -162,7 +163,7 @@ export default function TicketInfo({ ticket }: IProps) {
                                 </Text>
                             )}
                             {isUpdatingThreadId ? (
-                                <Group gap={4}>
+                                <Group gap="xs">
                                     <ActionIcon
                                         size="sm"
                                         variant="subtle"
@@ -180,13 +181,20 @@ export default function TicketInfo({ ticket }: IProps) {
                                     </ActionIcon>
                                 </Group>
                             ) : (
-                                <ActionIcon
-                                    size="sm"
-                                    color="info"
-                                    variant="subtle"
-                                    onClick={() => setIsUpdatingThreadId(true)}>
-                                    <FontAwesomeIcon icon="pen-to-square" size="sm" />
-                                </ActionIcon>
+                                <Group gap="xs">
+                                    <Tooltip label="Update Thread ID">
+                                        <ActionIcon
+                                            size="sm"
+                                            color="info"
+                                            variant="subtle"
+                                            onClick={() => setIsUpdatingThreadId(true)}>
+                                            <FontAwesomeIcon icon="pen-to-square" size="sm" />
+                                        </ActionIcon>
+                                    </Tooltip>
+                                    {ticket.threadId && (
+                                        <CopyActionIcon value={threadLink} tooltip="Copy Thread Link" size="sm" />
+                                    )}
+                                </Group>
                             )}
                         </Group>
                         <Group gap="xs">
