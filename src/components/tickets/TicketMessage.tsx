@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -41,8 +41,10 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         <Stack gap="sm">
             <Group justify="space-between" align="center">
                 <UserDisplay {...getUserDisplayProps()} />
-                <Group gap="xs" ml={{ base: "auto", xs: "0" }}>
-                    <DateBadge date={message.createdAt} staticColor />
+                <Group gap="xs">
+                    <Box visibleFrom="xs">
+                        <DateBadge date={message.createdAt} staticColor />
+                    </Box>
                     <Menu position="bottom-end" withArrow>
                         <Menu.Target>
                             <ActionIcon size="sm" variant="subtle">
@@ -59,6 +61,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                     </Menu>
                 </Group>
             </Group>
+            <Box hiddenFrom="xs">
+                <DateBadge date={message.createdAt} staticColor />
+            </Box>
             <MarkdownText content={message.content} />
             {message.attachments && message.attachments.length > 0 && (
                 <Stack mt="lg" gap="sm">
