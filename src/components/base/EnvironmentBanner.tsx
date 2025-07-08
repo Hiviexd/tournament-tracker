@@ -11,8 +11,6 @@ export default function EnvironmentBanner() {
     const isPreview = import.meta.env.MODE === "preview";
     const isProduction = import.meta.env.PROD && !isDevelopment && !isPreview;
 
-    console.log(import.meta.env);
-
     if (isProduction) {
         return null;
     }
