@@ -133,9 +133,19 @@ jobs:
                       echo "Installing dependencies..."
                       yarn install
 
-                      # Build both frontend and backend
-                      echo "Building project for preview..."
-                      yarn build-preview
+                      # Build frontend
+                      echo "Building frontend..."
+                      if ! yarn build-client-preview; then
+                          echo "❌ Frontend build failed!"
+                          exit 1
+                      fi
+
+                      # Build backend
+                      echo "Building backend..."
+                      if ! yarn build-server-preview; then
+                          echo "❌ Backend build failed!"
+                          exit 1
+                      fi
 
                       # Reload service
                       echo "Reloading preview service..."
