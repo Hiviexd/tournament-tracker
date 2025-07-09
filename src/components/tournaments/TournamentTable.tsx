@@ -14,9 +14,11 @@ import CopyActionIcon from "../common/buttons/CopyActionIcon";
 
 interface IProps {
     tournaments: ITournament[];
+    total?: number;
+    currentPage?: number;
 }
 
-export default function TournamentTable({ tournaments }: IProps) {
+export default function TournamentTable({ tournaments, total, currentPage }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
 
     const getDiscordThreadLink = (tournament: ITournament) => {
@@ -95,6 +97,14 @@ export default function TournamentTable({ tournaments }: IProps) {
                     </Table.Tbody>
                 </Table>
             </ScrollArea>
+            {total !== undefined && (
+                <Group justify="space-between" align="center" mt="md" ml="auto">
+                    <Text size="sm" c="dimmed">
+                        Showing {tournaments.length} out of {total} tournaments
+                        {currentPage && currentPage > 1 && ` (page ${currentPage})`}
+                    </Text>
+                </Group>
+            )}
         </Card>
     );
 }
