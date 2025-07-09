@@ -265,7 +265,7 @@ export default function TournamentListPage() {
                     {viewMode === "review" ? (
                         <TournamentReviewBoard tournaments={data.tournaments} />
                     ) : viewMode === "table" ? (
-                        <TournamentTable tournaments={data.tournaments} />
+                        <TournamentTable tournaments={data.tournaments} total={data.total} currentPage={data.page} />
                     ) : (
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                             {data.tournaments.map((tournament: ITournament) => (
