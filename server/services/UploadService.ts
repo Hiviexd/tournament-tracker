@@ -36,7 +36,10 @@ class UploadService {
         });
 
         await this.client.send(command);
-        return `${config.r2.baseUrl}/${fileName}`;
+
+        const encodedFilename = encodeURIComponent(file.originalname);
+        const path = `${config.r2.baseFolder}/${category}/${categoryObjectId}/${timestamp}-${encodedFilename}`;
+        return `${config.r2.baseUrl}/${path}`;
     }
 
     /**
