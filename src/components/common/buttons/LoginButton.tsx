@@ -31,7 +31,12 @@ export default function LoginButton({ size = "md", text = "Login", ...props }: I
             variant="gradient"
             loading={isLoggingIn}
             gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
-            leftSection={<Image src="/assets/logo-osu.svg" h={getIconSize()} />}
+            leftSection={
+                <Image
+                    src="/assets/logo-osu.svg?20250714"
+                    style={{ maxWidth: `${getIconSize()}px`, maxHeight: `${getIconSize()}px` }}
+                />
+            }
             size={size}
             {...props}>
             {text}
