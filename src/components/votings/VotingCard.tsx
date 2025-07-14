@@ -27,7 +27,6 @@ export default function VotingCard({ voting }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
-
     const getDueDateColor = (): string => {
         const deadline = moment(voting.deadline);
         const now = moment();
@@ -48,8 +47,8 @@ export default function VotingCard({ voting }: IPropTypes) {
             style={
                 voting.isActive
                     ? {
-                        ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
-                    }
+                          ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
+                      }
                     : undefined
             }>
             <Group justify="space-between" mb="xs">
