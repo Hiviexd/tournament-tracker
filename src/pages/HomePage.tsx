@@ -161,12 +161,14 @@ export default function HomePage() {
                 <Title order={2} ta="center">
                     Meet the Committee
                 </Title>
-                <Text size="sm" ta="center">
-                    Here's some wisdom from one of them:
+                <Stack gap="0">
+                    <Text size="sm" ta="center">
+                        Here's some wisdom from one of them:
+                    </Text>
                     <Text size="sm" c="dimmed" ta="center" maw={400} mx="auto">
                         {quote?.quote} — {quote?.author?.username}, {moment(quote?.createdAt).format("YYYY")}
                     </Text>
-                </Text>
+                </Stack>
                 <CommitteeSection onSelect={handleUserSelect} />
             </Stack>
         </Stack>

@@ -52,7 +52,12 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
             <Group h="100%" px="xl">
                 <div className="nav-group">
                     <Link to="/">
-                        <Image src="/assets/logo-main.svg?20250305" alt="Logo" h={35} className="logo-image" />
+                        <Image
+                            src="/assets/logo-main.svg?20250714"
+                            alt="Logo"
+                            className="logo-image"
+                            style={{ maxWidth: "35px", maxHeight: "35px" }}
+                        />
                     </Link>
                     <Group visibleFrom="md">
                         <MainNavigation user={user} />
