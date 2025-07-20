@@ -65,7 +65,7 @@ export default function UserCard({
             <div className="user-card-tint" />
             <div className="user-card-content" style={{ opacity: loading ? 0 : 1 }}>
                 <Group gap="xs" justify="space-between">
-                    <UserDisplay user={user} disablePopover />
+                    <UserDisplay user={user} disablePopover showCountryFlag />
 
                     {/* warning badges */}
                     {user.isCommittee && showBadges && (

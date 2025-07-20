@@ -3,6 +3,7 @@ import { IUser, type UserGroup, type BadgedUserGroup } from "../../../interfaces
 import UserGroupBadge from "./badges/UserGroupBadge";
 import UserLink from "./UserLink";
 import { useImageLoad } from "../../hooks/useImageLoad";
+import CountryFlag from "./CountryFlag";
 
 interface IPropTypes {
     user?: IUser;
@@ -11,9 +12,10 @@ interface IPropTypes {
     group?: UserGroup;
     asText?: boolean;
     disablePopover?: boolean;
+    showCountryFlag?: boolean;
 }
 
-export default function UserDisplay({ user, username, avatarUrl, group, asText, disablePopover = false }: IPropTypes) {
+export default function UserDisplay({ user, username, avatarUrl, group, asText, disablePopover = false, showCountryFlag = false }: IPropTypes) {
     const avatarSrc = avatarUrl ?? user?.avatarUrl;
     const { loading, error } = useImageLoad(avatarSrc);
 
@@ -54,7 +56,8 @@ export default function UserDisplay({ user, username, avatarUrl, group, asText, 
                     c="white"
                     disablePopover={disablePopover}
                 />
-                <Group gap="0.5rem">
+                <Group gap="0.5rem" align="center">
+                    {showCountryFlag && user?.country && <CountryFlag country={user.country} />}
                     {group && <UserGroupBadge group={group as BadgedUserGroup} />}
                     {userGroups?.map((g) => (
                         <UserGroupBadge key={g} group={g} />
