@@ -111,6 +111,14 @@ export const baseComponents: MantineThemeComponents = {
             },
         },
     },
+    TagsInput: {
+        styles: {
+            pill: {
+                backgroundColor: "var(--mantine-color-primary-light)",
+                color: "var(--mantine-color-primary-light-color)",
+            },
+        },
+    },
 };
 
 /**

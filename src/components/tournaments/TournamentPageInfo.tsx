@@ -3,6 +3,7 @@ import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDeleteTournament, useEditTournament } from "../../hooks/useTournaments";
 import TournamentStatus from "./info/TournamentStatus";
+import TournamentTags from "./info/TournamentTags";
 import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
@@ -76,7 +77,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     )}
                 </Group>
 
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" verticalSpacing="lg">
                     <TournamentStatus tournament={tournament} />
                     <TournamentBanner tournament={tournament} />
                     <TournamentDates tournament={tournament} />
@@ -86,6 +87,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     {(user?.isCommittee || user?.isAdmin) && <TournamentReports reports={reports} />}
                     {(user?.isCommittee || user?.isAdmin) && <TournamentVotings votings={votings} />}
                     <TournamentWinners tournament={tournament} />
+                    <TournamentTags tournament={tournament} />
                 </SimpleGrid>
 
                 <Stack gap="md">
