@@ -10,7 +10,7 @@ import { useLocalPreference } from "../../hooks/useLocalPreferences";
 
 interface IProps {
     values: {
-        name: string;
+        search: string;
         mode: GameMode;
         host: string;
         type: TournamentType | "";
@@ -62,10 +62,10 @@ export default function TournamentFilters({ values, onChange }: IProps) {
             <Stack gap="md">
                 <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     <TextInput
-                        placeholder="Search by tournament name..."
+                        placeholder="Search by name or tags..."
                         leftSection={<FontAwesomeIcon icon="search" />}
-                        value={values.name}
-                        onChange={(e) => handleChange("name", e.currentTarget.value)}
+                        value={values.search}
+                        onChange={(e) => handleChange("search", e.currentTarget.value)}
                     />
                     <UserSearch
                         placeholder="Search by tournament host..."

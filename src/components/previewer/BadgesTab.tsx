@@ -14,6 +14,7 @@ import {
     Textarea,
     Tooltip,
     Loader,
+    Box,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useDropzone } from "react-dropzone";
@@ -23,10 +24,10 @@ import { IOsuUser } from "../../../interfaces/OsuApi";
 import { useOsuUserInfo } from "../../hooks/useUsers";
 import { useBadgePreviewer, LocalBadge } from "../../hooks/useBadgePreviewer";
 import defaultBanner from "/assets/default-bg-stable.jpg";
-import * as countryFlags from "country-flag-icons/react/3x2";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import SignInBanner from "../common/SignInBanner";
+import CountryFlag from "../common/CountryFlag";
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -275,11 +276,6 @@ export default function BadgesTab({ skeleton }: IProps) {
             : [];
     }, [user.badges]);
 
-    // Get the country flag component
-    const CountryFlag = useMemo(() => {
-        return countryFlags[user.country.code as keyof typeof countryFlags];
-    }, [user.country.code]);
-
     // Render the search section based on login status
     const renderSearchSection = () => {
         return (
@@ -397,12 +393,9 @@ export default function BadgesTab({ skeleton }: IProps) {
                                 {user.title}
                             </div>
                         )}
-                        <div className="user-country">
-                            <span className="country-flag">
-                                <CountryFlag />
-                            </span>
-                            <span className="country-name">{user.country.name}</span>
-                        </div>
+                        <Box mt="5">
+                            <CountryFlag country={user.country} showCountryName />
+                        </Box>
                     </div>
                 </div>
 

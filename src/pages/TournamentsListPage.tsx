@@ -28,7 +28,7 @@ import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoa
 import { getSavedPreference } from "../hooks/useLocalPreferences";
 
 interface FilterValues {
-    name: string;
+    search: string;
     mode: GameMode;
     host: string;
     type: TournamentType | "";
@@ -169,7 +169,7 @@ export default function TournamentListPage() {
     const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
     const [filters, setFilters] = useState<FilterValues>({
-        name: searchParams.get("name") || "",
+        search: searchParams.get("search") || searchParams.get("name") || "", // Support legacy name param
         mode: (searchParams.get("mode") as GameMode) || "",
         host: searchParams.get("host") || "",
         type: (searchParams.get("type") as TournamentType) || getTypeFilterFromUser(),
@@ -178,11 +178,11 @@ export default function TournamentListPage() {
         showAllAssignedReviews: searchParams.get("showAllAssignedReviews") === "true" || false,
     });
     const [opened, { open, close }] = useDisclosure(false);
-    const [debouncedName] = useDebouncedValue(filters.name, 400);
+    const [debouncedSearch] = useDebouncedValue(filters.search, 400);
     const [debouncedHost] = useDebouncedValue(filters.host, 400);
 
     const { data, isLoading } = useTournaments({
-        name: debouncedName,
+        search: debouncedSearch,
         mode: filters.mode,
         host: debouncedHost,
         type: viewMode === "review" ? "tournament" : filters.type,
@@ -195,7 +195,7 @@ export default function TournamentListPage() {
     // Update URL params
     useEffect(() => {
         const params = new URLSearchParams();
-        if (debouncedName) params.set("name", debouncedName);
+        if (debouncedSearch) params.set("search", debouncedSearch);
         if (filters.mode) params.set("mode", filters.mode);
         if (debouncedHost) params.set("host", debouncedHost);
         if (filters.type) params.set("type", filters.type);
@@ -206,7 +206,7 @@ export default function TournamentListPage() {
         if (page > 1) params.set("page", page.toString());
         setSearchParams(params);
     }, [
-        debouncedName,
+        debouncedSearch,
         debouncedHost,
         filters.mode,
         filters.type,
@@ -221,7 +221,7 @@ export default function TournamentListPage() {
     useEffect(() => {
         setPage(1);
     }, [
-        debouncedName,
+        debouncedSearch,
         debouncedHost,
         filters.mode,
         filters.type,

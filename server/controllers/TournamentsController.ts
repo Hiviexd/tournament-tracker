@@ -32,18 +32,18 @@ import { IVoting } from "../../interfaces/Voting";
 const defaultPopulate = [
     {
         path: "host",
-        select: "username osuId groups coverUrl",
+        select: "username osuId groups coverUrl country",
     },
     {
         path: "assignedReviewers",
-        select: "username osuId groups coverUrl isActiveReviewer",
+        select: "username osuId groups coverUrl isActiveReviewer country",
     },
     {
         path: "reviews",
         select: "comment author vote checklist createdAt updatedAt",
         populate: {
             path: "author",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         },
     },
     {
@@ -55,7 +55,7 @@ const defaultPopulate = [
         select: "user action createdAt",
         populate: {
             path: "user",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         },
     },
     {
@@ -64,7 +64,7 @@ const defaultPopulate = [
         populate: [
             {
                 path: "author",
-                select: "username osuId groups coverUrl",
+                select: "username osuId groups coverUrl country",
             },
             {
                 path: "attachments",
@@ -74,7 +74,7 @@ const defaultPopulate = [
     },
     {
         path: "winners",
-        select: "username osuId groups coverUrl",
+        select: "username osuId groups coverUrl country",
     },
 ];
 
@@ -88,11 +88,24 @@ const selectFields = (isCommittee: boolean) =>
 class TournamentsController {
     /** GET tournament listing */
     public async index(req: Request, res: Response) {
-        const { name, mode, host, type, status, state, showAllAssignedReviews, page = 1 } = req.query;
+        const { search, mode, host, type, status, state, showAllAssignedReviews, page = 1 } = req.query;
         const query: TournamentQueryParams = {};
         const user = res.locals!.user;
 
-        if (name) query.name = new RegExp(name as string, "i");
+        if (search) {
+            const searchTerms = (search as string)
+                .trim()
+                .split(/\s+/)
+                .filter((term) => term.length > 0);
+            if (searchTerms.length > 0) {
+                query.$and = searchTerms.map((term) => {
+                    const termRegex = new RegExp(term, "i");
+                    return {
+                        $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
+                    };
+                });
+            }
+        }
         if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
             const hostUser = await User.findByUsernameOrOsuId(host as string);
@@ -117,7 +130,11 @@ class TournamentsController {
         }
 
         if (showAllAssignedReviews === "true" && user && user.isCommittee) {
-            query.$and = [{ assignedReviewers: user._id }];
+            if (query.$and) {
+                query.$and.push({ assignedReviewers: user._id });
+            } else {
+                query.$and = [{ assignedReviewers: user._id }];
+            }
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
@@ -232,7 +249,7 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl } = req.body;
+        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags } = req.body;
         const currentUser = res.locals!.user!;
 
         const host = await User.findById(hostId).orFail();
@@ -247,6 +264,8 @@ class TournamentsController {
             return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
         }
 
+        const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
+
         const tournament = new Tournament({
             name,
             host,
@@ -258,6 +277,7 @@ class TournamentsController {
             endDate,
             bannerUrl,
             enchantUrl,
+            tags: lowerCaseTags,
         });
 
         await tournament.save();
@@ -302,6 +322,13 @@ class TournamentsController {
                 {
                     name: "Forum URL",
                     value: tournament.forumUrl.length ? tournament.forumUrl : "*None*",
+                },
+                {
+                    name: "Search Tags",
+                    value:
+                        tournament.tags && tournament.tags.length
+                            ? tournament.tags.map((tag) => `\`${tag}\``).join(", ")
+                            : "*None*",
                 },
             ],
             image: {
@@ -381,18 +408,20 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners, enchantUrl } = req.body;
+        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners, enchantUrl, tags } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         const oldStatus = tournament.status;
 
-        // only allow editing banners if tournament is inactive
-        if (!tournament.isActive && isActive === undefined && !bannerUrl) {
+        // only allow editing the following if tournament is inactive:
+        // - banner
+        // - tags
+        if (!tournament.isActive && isActive === undefined && !bannerUrl && !tags) {
             return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
-        // allow hosts to only edit banner
+        // allow tournamenthosts to only edit banner
         let actioner = currentUser;
         if (!actioner.isCommittee && tournament.host.equals(currentUser)) {
             actioner = tournament.host;
@@ -409,6 +438,7 @@ class TournamentsController {
         if (enchantUrl) tournament.enchantUrl = enchantUrl;
         if (startDate) tournament.startDate = startDate;
         if (endDate) tournament.endDate = endDate;
+        if (tags) tournament.tags = tags.map((tag: string) => tag.toLowerCase());
         if (status) {
             if (excludedStatusesOsu.includes(status)) {
                 shouldSendOsuMessage = false;
@@ -470,6 +500,16 @@ class TournamentsController {
                 `Updated start and end date for **${tournament.name}**`,
                 "tournament"
             );
+        }
+
+        if (tags) {
+            await TournamentService.addTournamentLog(
+                tournament,
+                actioner,
+                `Updated tags: ${tags.map((tag: string) => `\`${tag}\``).join(", ")}`,
+                "tag"
+            );
+            await LogService.generate(actioner._id, `Updated tags for **${tournament.name}**`, "tournament");
         }
 
         if (bannerUrl) {

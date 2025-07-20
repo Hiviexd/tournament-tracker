@@ -1,5 +1,5 @@
 import { useCreateTournament } from "../../hooks/useTournaments";
-import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay } from "@mantine/core";
+import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
@@ -25,6 +25,8 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             forumUrl: "",
             startDate: null as Date | null,
             endDate: null as Date | null,
+            enchantUrl: "",
+            tags: [] as string[],
         },
         validate: {
             name: (value) => (!value ? "Name is required" : null),
@@ -36,6 +38,9 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             },
             bannerUrl: (value) => {
                 if (value && !utils.isValidUrl(value)) return "Invalid URL";
+            },
+            enchantUrl: (value) => {
+                if (value && !utils.isEnchantTicketLink(value)) return "Invalid Enchant ticket URL";
             },
             startDate: (value) => (!value ? "Start date is required" : null),
             endDate: (value, values) => {
@@ -127,6 +132,13 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         label="Enchant URL"
                         placeholder="Enter enchant ticket URL..."
                         {...form.getInputProps("enchantUrl")}
+                    />
+
+                    <TagsInput
+                        label="Search Tags"
+                        placeholder="Enter tags..."
+                        description="Press enter to add a tag"
+                        {...form.getInputProps("tags")}
                     />
 
                     <Group grow>

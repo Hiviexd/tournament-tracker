@@ -19,7 +19,6 @@ export type TournamentStatus =
     | "noBadgeRequested";
 
 export interface TournamentQueryParams {
-    name?: string | RegExp;
     modes?: { $in: GameMode[] };
     host?: IUser;
     type?: TournamentType;
@@ -30,6 +29,7 @@ export interface TournamentQueryParams {
 
     // backend only
     $and?: any[]; // For complex MongoDB queries
+    $or?: any[]; // For search queries
 }
 
 export interface ITournamentFormData extends FormData {
@@ -66,6 +66,7 @@ export interface ITournament extends Document {
     enchantUrl?: string;
     createdAt: Date;
     startedReviewAt?: Date;
+    tags?: string[];
 
     // virtuals
     isTournament: boolean;

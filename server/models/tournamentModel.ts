@@ -41,6 +41,7 @@ const TournamentSchema = new Schema<ITournament>(
         winners: [{ type: Schema.Types.ObjectId, ref: "User" }],
         enchantUrl: { type: String },
         startedReviewAt: { type: Date },
+        tags: [{ type: String }],
     },
     {
         timestamps: true,

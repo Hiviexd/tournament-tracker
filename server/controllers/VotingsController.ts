@@ -14,7 +14,7 @@ import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";
 
 const DEFAULT_POPULATE = [
-    { path: "author", select: "username osuId groups coverUrl" },
+    { path: "author", select: "username osuId groups coverUrl country" },
     {
         path: "votes",
         populate: {
@@ -22,7 +22,7 @@ const DEFAULT_POPULATE = [
             select: "username osuId groups coverUrl",
         },
     },
-    { path: "targetUser", select: "username osuId groups coverUrl" },
+    { path: "targetUser", select: "username osuId groups coverUrl country" },
     { path: "targetTournament", select: "name" },
     { path: "attachments", select: "originalName url size type" },
 ];
@@ -143,10 +143,9 @@ class VotingsController {
 
         const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";
 
-        const requiredVotes =
-            forceFullParticipationBool
-                ? assignedUsersCount
-                : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
+        const requiredVotes = forceFullParticipationBool
+            ? assignedUsersCount
+            : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;

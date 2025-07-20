@@ -15,18 +15,18 @@ import UploadService from "../services/UploadService";
 import OsuBotService from "../services/OsuBotService";
 
 const DEFAULT_POPULATE = [
-    { path: "author", select: "username osuId groups coverUrl" },
+    { path: "author", select: "username osuId groups coverUrl country" },
     {
         path: "messages",
         populate: [
             {
                 path: "author",
-                select: "username osuId groups discordId coverUrl",
+                select: "username osuId groups discordId coverUrl country",
             },
             { path: "attachments", select: "originalName url size type" },
         ],
     },
-    { path: "targetUser", select: "username osuId groups coverUrl" },
+    { path: "targetUser", select: "username osuId groups coverUrl country" },
 ];
 const DEFAULT_LIMIT = 12;
 
