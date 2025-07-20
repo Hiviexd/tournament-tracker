@@ -19,7 +19,7 @@ class ArticlesController {
 
         const article = await Article.findOne(query).populate({
             path: "lastEditor",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         });
 
         if (!article) {

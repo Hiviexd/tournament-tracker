@@ -32,18 +32,18 @@ import { IVoting } from "../../interfaces/Voting";
 const defaultPopulate = [
     {
         path: "host",
-        select: "username osuId groups coverUrl",
+        select: "username osuId groups coverUrl country",
     },
     {
         path: "assignedReviewers",
-        select: "username osuId groups coverUrl isActiveReviewer",
+        select: "username osuId groups coverUrl isActiveReviewer country",
     },
     {
         path: "reviews",
         select: "comment author vote checklist createdAt updatedAt",
         populate: {
             path: "author",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         },
     },
     {
@@ -55,7 +55,7 @@ const defaultPopulate = [
         select: "user action createdAt",
         populate: {
             path: "user",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         },
     },
     {
@@ -64,7 +64,7 @@ const defaultPopulate = [
         populate: [
             {
                 path: "author",
-                select: "username osuId groups coverUrl",
+                select: "username osuId groups coverUrl country",
             },
             {
                 path: "attachments",
@@ -74,7 +74,7 @@ const defaultPopulate = [
     },
     {
         path: "winners",
-        select: "username osuId groups coverUrl",
+        select: "username osuId groups coverUrl country",
     },
 ];
 
