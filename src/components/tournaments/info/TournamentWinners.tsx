@@ -102,7 +102,10 @@ export default function TournamentWinners({ tournament }: IProps) {
                                     withRemoveButton
                                     onRemove={() => handleRemoveWinner(winner._id)}
                                     styles={{
-                                        root: { backgroundColor: "var(--mantine-color-primary-filled)" },
+                                        root: {
+                                            backgroundColor: "var(--mantine-color-primary-light)",
+                                            color: "var(--mantine-color-primary-light-color)",
+                                        },
                                         label: { fontWeight: 700 },
                                     }}>
                                     {winner.username}
