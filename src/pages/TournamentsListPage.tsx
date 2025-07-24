@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import {
     Stack,
     Group,
@@ -13,7 +12,7 @@ import {
     Table,
     ScrollArea,
 } from "@mantine/core";
-import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
 import TournamentFilters from "../components/tournaments/TournamentFilters";
@@ -26,6 +25,7 @@ import { useAtom } from "jotai";
 import { IUser } from "../../interfaces/User";
 import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoard";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 
 interface FilterValues {
     search: string;
@@ -165,70 +165,78 @@ export default function TournamentListPage() {
         return "";
     };
 
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
+    // Define query state parsers with default values
+    const [queryState, setQueryState] = useQueryStates(
+        {
+            search: parseAsString.withDefault(""),
+            mode: parseAsString.withDefault(""),
+            host: parseAsString.withDefault(""),
+            type: parseAsString.withDefault(getTypeFilterFromUser()),
+            status: parseAsString.withDefault(""),
+            state: parseAsString.withDefault(""),
+            showAllAssignedReviews: parseAsBoolean.withDefault(false),
+            page: parseAsInteger.withDefault(1),
+        },
+        {
+            // Only include non-default values in URL
+            clearOnDefault: true,
+        }
+    );
+
     const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
-    const [filters, setFilters] = useState<FilterValues>({
-        search: searchParams.get("search") || searchParams.get("name") || "", // Support legacy name param
-        mode: (searchParams.get("mode") as GameMode) || "",
-        host: searchParams.get("host") || "",
-        type: (searchParams.get("type") as TournamentType) || getTypeFilterFromUser(),
-        status: (searchParams.get("status") as TournamentStatus) || "",
-        state: searchParams.get("state") || "",
-        showAllAssignedReviews: searchParams.get("showAllAssignedReviews") === "true" || false,
-    });
     const [opened, { open, close }] = useDisclosure(false);
-    const [debouncedSearch] = useDebouncedValue(filters.search, 400);
-    const [debouncedHost] = useDebouncedValue(filters.host, 400);
+
+    // Create filters object for TournamentFilters component
+    const filters: FilterValues = {
+        search: queryState.search,
+        mode: queryState.mode as GameMode,
+        host: queryState.host,
+        type: queryState.type as TournamentType | "",
+        status: queryState.status as TournamentStatus | "",
+        state: queryState.state,
+        showAllAssignedReviews: queryState.showAllAssignedReviews,
+    };
 
     const { data, isLoading } = useTournaments({
-        search: debouncedSearch,
-        mode: filters.mode,
-        host: debouncedHost,
-        type: viewMode === "review" ? "tournament" : filters.type,
-        status: viewMode === "review" ? "reviewOngoing" : filters.status,
-        state: filters.state,
-        showAllAssignedReviews: filters.showAllAssignedReviews,
-        page,
+        search: queryState.search,
+        mode: queryState.mode as GameMode,
+        host: queryState.host,
+        type: viewMode === "review" ? "tournament" : (queryState.type as TournamentType),
+        status: viewMode === "review" ? "reviewOngoing" : (queryState.status as TournamentStatus),
+        state: queryState.state,
+        showAllAssignedReviews: queryState.showAllAssignedReviews,
+        page: queryState.page,
     });
 
-    // Update URL params
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (debouncedSearch) params.set("search", debouncedSearch);
-        if (filters.mode) params.set("mode", filters.mode);
-        if (debouncedHost) params.set("host", debouncedHost);
-        if (filters.type) params.set("type", filters.type);
-        if (filters.status) params.set("status", filters.status);
-        if (filters.state) params.set("state", filters.state);
-        if (filters.showAllAssignedReviews)
-            params.set("showAllAssignedReviews", filters.showAllAssignedReviews.toString());
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params);
-    }, [
-        debouncedSearch,
-        debouncedHost,
-        filters.mode,
-        filters.type,
-        filters.status,
-        filters.state,
-        filters.showAllAssignedReviews,
-        page,
-        setSearchParams,
-    ]);
+    // Handle filter changes - automatically reset page to 1 when filters change
+    const handleFiltersChange = (newFilters: FilterValues) => {
+        // Check if any filter (except page) has changed
+        const filterChanged =
+            newFilters.search !== filters.search ||
+            newFilters.mode !== filters.mode ||
+            newFilters.host !== filters.host ||
+            newFilters.type !== filters.type ||
+            newFilters.status !== filters.status ||
+            newFilters.state !== filters.state ||
+            newFilters.showAllAssignedReviews !== filters.showAllAssignedReviews;
 
-    // Reset pagination when debounced values or other filter values change
-    useEffect(() => {
-        setPage(1);
-    }, [
-        debouncedSearch,
-        debouncedHost,
-        filters.mode,
-        filters.type,
-        filters.status,
-        filters.state,
-        filters.showAllAssignedReviews,
-    ]);
+        setQueryState({
+            search: newFilters.search,
+            mode: newFilters.mode,
+            host: newFilters.host,
+            type: newFilters.type,
+            status: newFilters.status,
+            state: newFilters.state,
+            showAllAssignedReviews: newFilters.showAllAssignedReviews,
+            // Reset page to 1 only when filters change, not on page load
+            page: filterChanged ? 1 : queryState.page,
+        });
+    };
+
+    // Handle page changes
+    const handlePageChange = (newPage: number) => {
+        setQueryState({ page: newPage });
+    };
 
     // Reset view mode to table if user is not in committee and current mode is review
     useEffect(() => {
@@ -239,7 +247,7 @@ export default function TournamentListPage() {
 
     return (
         <Stack gap="md">
-            <TournamentFilters values={filters} onChange={setFilters} />
+            <TournamentFilters values={filters} onChange={handleFiltersChange} />
 
             {user?.isCommittee && (
                 <Button
@@ -275,7 +283,13 @@ export default function TournamentListPage() {
                     )}
                     {data.pages > 1 && (
                         <Group justify="center" mt="xs">
-                            <Pagination value={page} onChange={setPage} total={data.pages} color="primary" mt="sm" />
+                            <Pagination
+                                value={queryState.page}
+                                onChange={handlePageChange}
+                                total={data.pages}
+                                color="primary"
+                                mt="sm"
+                            />
                         </Group>
                     )}
                 </Stack>

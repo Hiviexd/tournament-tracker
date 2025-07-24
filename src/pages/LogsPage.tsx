@@ -1,37 +1,66 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Stack, Group, Pagination, Card, Skeleton, Text } from "@mantine/core";
 import { useLogs } from "../hooks/useLogs";
 import { LogCategory } from "../../interfaces/Log";
-import { useDebouncedValue } from "@mantine/hooks";
-import { Stack, Group, Pagination, Card, Skeleton, Text } from "@mantine/core";
+import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import LogsFilters from "../components/logs/LogsFilters";
 import LogsTable from "../components/logs/LogsTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function LogsPage() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
-    const [searchInput, setSearchInput] = useState({
-        user: searchParams.get("user") || "",
-        category: (searchParams.get("category") as LogCategory) || "",
-        type: searchParams.get("type") || "",
-    });
-    const [debouncedUser] = useDebouncedValue(searchInput.user, 400);
+interface FilterValues {
+    user: string;
+    category: LogCategory;
+    type: string;
+}
 
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (debouncedUser) params.set("user", debouncedUser);
-        if (searchInput.category) params.set("category", searchInput.category);
-        if (searchInput.type) params.set("type", searchInput.type);
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params);
-    }, [debouncedUser, searchInput.category, searchInput.type, page, setSearchParams]);
+export default function LogsPage() {
+    // Define query state parsers with default values
+    const [queryState, setQueryState] = useQueryStates(
+        {
+            user: parseAsString.withDefault(""),
+            category: parseAsString.withDefault(""),
+            type: parseAsString.withDefault(""),
+            page: parseAsInteger.withDefault(1),
+        },
+        {
+            // Only include non-default values in URL
+            clearOnDefault: true,
+        }
+    );
+
+    // Create filters object for LogsFilters component
+    const filters: FilterValues = {
+        user: queryState.user,
+        category: queryState.category as LogCategory,
+        type: queryState.type,
+    };
+
+    const handleFilterChange = (newFilters: FilterValues) => {
+        // Check if any filter has changed to reset page
+        const filterChanged =
+            newFilters.user !== filters.user ||
+            newFilters.category !== filters.category ||
+            newFilters.type !== filters.type;
+
+        setQueryState({
+            user: newFilters.user,
+            category: newFilters.category,
+            type: newFilters.type,
+            page: filterChanged ? 1 : queryState.page,
+        });
+    };
+
+    // Handle page changes
+    const handlePageChange = (newPage: number) => {
+        setQueryState({ page: newPage });
+    };
 
     const { data, isLoading, error } = useLogs({
-        user: debouncedUser,
-        category: searchInput.category,
-        type: searchInput.type,
-        page,
+        // TODO: fix typing in user param
+        // @ts-expect-error - if it works, it works.
+        user: queryState.user,
+        category: queryState.category as LogCategory,
+        type: queryState.type,
+        page: queryState.page,
     });
 
     const LoadingState = () => (
@@ -63,7 +92,7 @@ export default function LogsPage() {
 
     return (
         <Stack gap="md">
-            <LogsFilters values={searchInput} onChange={setSearchInput} />
+            <LogsFilters values={filters} onChange={handleFilterChange} />
 
             {isLoading ? (
                 <LoadingState />
@@ -75,7 +104,7 @@ export default function LogsPage() {
 
             {data && data.pages > 1 && (
                 <Group justify="center" mt="xs">
-                    <Pagination value={page} onChange={setPage} total={data.pages} />
+                    <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
                 </Group>
             )}
         </Stack>

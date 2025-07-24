@@ -1,13 +1,13 @@
 // Base
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useVotings } from "../hooks/useVotings";
 import { IVoting, VotingCategory } from "../../interfaces/Voting";
 import { UserGroup } from "../../interfaces/User";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 
 // Mantine
-import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { Card, Stack, Group, Pagination, Text, Button, Skeleton, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -31,63 +31,77 @@ export default function VotingListPage() {
         return "";
     };
 
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
-    const [searchInput, setSearchInput] = useState({
-        title: searchParams.get("title") || "",
-        category: (searchParams.get("category") as VotingCategory) || "",
-        assignedGroup: (searchParams.get("group") as UserGroup) || getTypeFilterFromUser(),
-        status: searchParams.get("status") || "",
-        showNeedsAttention: searchParams.get("needsAttention") === "true",
-        visibility: searchParams.get("visibility") || "",
-    });
-    const [opened, { open, close }] = useDisclosure(false);
-    const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
+    // Define query state parsers with default values
+    const [queryState, setQueryState] = useQueryStates(
+        {
+            title: parseAsString.withDefault(""),
+            category: parseAsString.withDefault(""),
+            group: parseAsString.withDefault(getTypeFilterFromUser()),
+            status: parseAsString.withDefault(""),
+            needsAttention: parseAsBoolean.withDefault(false),
+            visibility: parseAsString.withDefault(""),
+            page: parseAsInteger.withDefault(1),
+        },
+        {
+            // Only include non-default values in URL
+            clearOnDefault: true,
+        }
+    );
 
+    const [opened, { open, close }] = useDisclosure(false);
+
+    // Create filters object for VotingFilters component
+    const filters = {
+        title: queryState.title,
+        category: queryState.category as VotingCategory,
+        assignedGroup: queryState.group as UserGroup,
+        status: queryState.status,
+        showNeedsAttention: queryState.needsAttention,
+        visibility: queryState.visibility,
+    };
 
     const handleFilterChange = (newFilters) => {
-        setSearchInput(newFilters);
-        setPage(1);
+        // Check if any filter has changed to reset page
+        const filterChanged =
+            newFilters.title !== filters.title ||
+            newFilters.category !== filters.category ||
+            newFilters.assignedGroup !== filters.assignedGroup ||
+            newFilters.status !== filters.status ||
+            newFilters.showNeedsAttention !== filters.showNeedsAttention ||
+            newFilters.visibility !== filters.visibility;
+
+        setQueryState({
+            title: newFilters.title,
+            category: newFilters.category,
+            group: newFilters.assignedGroup,
+            status: newFilters.status,
+            needsAttention: newFilters.showNeedsAttention,
+            visibility: newFilters.visibility,
+            page: filterChanged ? 1 : queryState.page,
+        });
     };
 
     const { data, isLoading, error } = useVotings({
-        title: debouncedTitle,
-        category: searchInput.category,
-        assignedGroup: searchInput.assignedGroup,
-        status: searchInput.status,
-        showNeedsAttention: searchInput.showNeedsAttention,
-        visibility: searchInput.visibility,
-        page,
+        title: queryState.title,
+        category: queryState.category as VotingCategory,
+        assignedGroup: queryState.group as UserGroup,
+        status: queryState.status,
+        showNeedsAttention: queryState.needsAttention,
+        visibility: queryState.visibility,
+        page: queryState.page,
     });
+
+    // Handle page changes
+    const handlePageChange = (newPage: number) => {
+        setQueryState({ page: newPage });
+    };
 
     // Ensure page number is valid when data changes
     useEffect(() => {
-        if (data && page > data.pages && data.pages > 0) {
-            setPage(data.pages);
+        if (data && queryState.page > data.pages && data.pages > 0) {
+            setQueryState({ page: data.pages });
         }
-    }, [data, page]);
-
-    // Handle URL params
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (debouncedTitle) params.set("title", debouncedTitle);
-        if (searchInput.category) params.set("category", searchInput.category);
-        if (searchInput.assignedGroup) params.set("group", searchInput.assignedGroup);
-        if (searchInput.status) params.set("status", searchInput.status);
-        if (searchInput.showNeedsAttention) params.set("needsAttention", "true");
-        if (searchInput.visibility) params.set("visibility", searchInput.visibility);
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params, { replace: true });
-    }, [
-        debouncedTitle,
-        searchInput.category,
-        searchInput.assignedGroup,
-        searchInput.status,
-        searchInput.showNeedsAttention,
-        searchInput.visibility,
-        page,
-        setSearchParams,
-    ]);
+    }, [data, queryState.page, setQueryState]);
 
     const LoadingState = () => (
         <Stack gap="md">
@@ -112,8 +126,8 @@ export default function VotingListPage() {
                     {hasError
                         ? `Try refreshing the page`
                         : user?.isCommittee
-                            ? "Try adjusting your filters or create a new vote"
-                            : ""}
+                        ? "Try adjusting your filters or create a new vote"
+                        : ""}
                 </Text>
             </Stack>
         );
@@ -123,7 +137,7 @@ export default function VotingListPage() {
         <Stack gap="md">
             {/* Only show filters and create button for committee members */}
             <Stack gap="md">
-                <VotingFilters user={user} values={searchInput} onChange={handleFilterChange} />
+                <VotingFilters user={user} values={filters} onChange={handleFilterChange} />
                 {user?.isCommittee && (
                     <Button
                         onClick={open}
@@ -157,7 +171,7 @@ export default function VotingListPage() {
             {/* Pagination */}
             {!isLoading && data && data.pages > 1 && (
                 <Group justify="center" mt="xs">
-                    <Pagination value={page} onChange={setPage} total={data.pages} />
+                    <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
                 </Group>
             )}
         </Stack>

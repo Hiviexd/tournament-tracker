@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useTickets } from "../hooks/useTickets";
 import { UserGroup } from "../../interfaces/User";
 import { ITicket } from "../../interfaces/Ticket";
 import { Stack, Card, SimpleGrid, Group, Pagination, Text, Skeleton, Divider } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 import TicketCard from "../components/tickets/TicketCard";
 import TicketsFilters from "../components/tickets/TicketsFilters";
 import { loggedInUserAtom } from "../store/atoms";
@@ -34,74 +34,87 @@ export default function TicketsListPage() {
     };
 
     const location = useLocation();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const type = location.pathname.includes("/reports") ? "report" : "ticket";
 
-    const [searchInput, setSearchInput] = useState<FilterValues>({
-        title: searchParams.get("title") || "",
-        content: searchParams.get("content") || "",
-        targetUser: searchParams.get("targetUser") || "",
-        targetTournament: searchParams.get("targetTournament") || "",
-        assignedGroup: (searchParams.get("assignedGroup") as UserGroup) || getTypeFilterFromUser(),
-        status: searchParams.get("status") || "",
-        showOwn: searchParams.get("showOwn") === "true",
-    });
+    // Define query state parsers with default values
+    const [queryState, setQueryState] = useQueryStates(
+        {
+            title: parseAsString.withDefault(""),
+            content: parseAsString.withDefault(""),
+            targetUser: parseAsString.withDefault(""),
+            targetTournament: parseAsString.withDefault(""),
+            assignedGroup: parseAsString.withDefault(getTypeFilterFromUser()),
+            status: parseAsString.withDefault(""),
+            showOwn: parseAsBoolean.withDefault(false),
+            page: parseAsInteger.withDefault(1),
+        },
+        {
+            // Only include non-default values in URL
+            clearOnDefault: true,
+        }
+    );
+
+    // Create filters object for TicketsFilters component
+    const filters: FilterValues = {
+        title: queryState.title,
+        content: queryState.content,
+        targetUser: queryState.targetUser,
+        targetTournament: queryState.targetTournament,
+        assignedGroup: queryState.assignedGroup as UserGroup,
+        status: queryState.status,
+        showOwn: queryState.showOwn,
+    };
+
+    // Track previous type to detect actual changes
+    const prevType = useRef(type);
 
     // Reset pagination when type changes
     useEffect(() => {
-        setPage(1);
-    }, [type]);
+        if (prevType.current !== type) {
+            prevType.current = type;
+            setQueryState({ page: 1 });
+        }
+    }, [type, setQueryState]);
 
-    const [debouncedTitle] = useDebouncedValue(searchInput.title, 400);
-    const [debouncedContent] = useDebouncedValue(searchInput.content, 400);
-    const [debouncedTournament] = useDebouncedValue(searchInput.targetTournament, 400);
+    const handleFilterChange = (newFilters: FilterValues) => {
+        // Check if any filter has changed to reset page
+        const filterChanged =
+            newFilters.title !== filters.title ||
+            newFilters.content !== filters.content ||
+            newFilters.targetUser !== filters.targetUser ||
+            newFilters.targetTournament !== filters.targetTournament ||
+            newFilters.assignedGroup !== filters.assignedGroup ||
+            newFilters.status !== filters.status ||
+            newFilters.showOwn !== filters.showOwn;
 
-    const handleFilterChange = (newFilters) => {
-        setSearchInput(newFilters);
-        setPage(1);
+        setQueryState({
+            title: newFilters.title,
+            content: newFilters.content,
+            targetUser: newFilters.targetUser,
+            targetTournament: newFilters.targetTournament,
+            assignedGroup: newFilters.assignedGroup,
+            status: newFilters.status,
+            showOwn: newFilters.showOwn,
+            page: filterChanged ? 1 : queryState.page,
+        });
     };
 
     const { data, isLoading, error } = useTickets({
         type,
-        title: debouncedTitle,
-        content: debouncedContent,
-        targetUser: searchInput.targetUser,
-        targetTournament: debouncedTournament,
-        assignedGroup: searchInput.assignedGroup,
-        isActive: searchInput.status ? searchInput.status === "active" : undefined,
-        showOwn: searchInput.showOwn,
-        page,
+        title: queryState.title,
+        content: queryState.content,
+        targetUser: queryState.targetUser,
+        targetTournament: queryState.targetTournament,
+        assignedGroup: queryState.assignedGroup as UserGroup,
+        isActive: queryState.status ? queryState.status === "active" : undefined,
+        showOwn: queryState.showOwn,
+        page: queryState.page,
     });
 
-    // Handle URL params
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (type === "ticket") {
-            if (debouncedTitle) params.set("title", debouncedTitle);
-            if (searchInput.showOwn) params.set("showOwn", "true");
-        } else {
-            if (debouncedContent) params.set("content", debouncedContent);
-            if (searchInput.targetUser) params.set("targetUser", searchInput.targetUser);
-            if (debouncedTournament) params.set("targetTournament", debouncedTournament);
-        }
-        if (searchInput.assignedGroup) params.set("assignedGroup", searchInput.assignedGroup);
-        if (searchInput.status) params.set("status", searchInput.status);
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params, { replace: true });
-    }, [
-        debouncedTitle,
-        debouncedContent,
-        debouncedTournament,
-        searchInput.targetUser,
-        searchInput.targetTournament,
-        searchInput.assignedGroup,
-        searchInput.status,
-        searchInput.showOwn,
-        page,
-        setSearchParams,
-        type,
-    ]);
+    // Handle page changes
+    const handlePageChange = (newPage: number) => {
+        setQueryState({ page: newPage });
+    };
 
     const LoadingState = () => (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
@@ -150,7 +163,7 @@ export default function TicketsListPage() {
 
     return (
         <Stack gap="md">
-            <TicketsFilters values={searchInput} onChange={handleFilterChange} type={type} />
+            <TicketsFilters values={filters} onChange={handleFilterChange} type={type} />
 
             <Divider />
 
@@ -168,7 +181,7 @@ export default function TicketsListPage() {
 
                     {data.pages > 1 && (
                         <Group justify="center" mt="xs">
-                            <Pagination value={page} onChange={setPage} total={data.pages} />
+                            <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
                         </Group>
                     )}
                 </Stack>

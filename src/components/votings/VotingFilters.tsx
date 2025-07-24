@@ -1,4 +1,6 @@
 import { Card, Group, TextInput, Select, Stack, Checkbox } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { useState } from "react";
 import { VotingCategory } from "../../../interfaces/Voting";
 import { IUser, UserGroup } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,6 +21,14 @@ interface IProps {
 }
 
 export default function VotingFilters({ user, values, onChange }: IProps) {
+    // Local state for title input (for immediate UI updates)
+    const [titleInput, setTitleInput] = useState(values.title);
+
+    // Debounced onChange handler for title
+    const debouncedOnChange = useDebouncedCallback((newValues: FilterValues) => {
+        onChange(newValues);
+    }, 400);
+
     const categoryOptions = [
         { value: "discussion", label: "Discussions" },
         { value: "tournament", label: "Tournaments" },
@@ -52,14 +62,20 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
         }
     };
 
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setTitleInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, title: newValue }); // Debounce the onChange call
+    };
+
     return (
         <Card shadow="sm" p="md">
             <Stack align="stretch" w="100%">
                 <TextInput
                     placeholder="Search by title..."
                     leftSection={<FontAwesomeIcon icon="search" />}
-                    value={values.title}
-                    onChange={(e) => handleChange("title", e.currentTarget.value)}
+                    value={titleInput}
+                    onChange={handleTitleChange}
                     w="100%"
                 />
                 <Group>
