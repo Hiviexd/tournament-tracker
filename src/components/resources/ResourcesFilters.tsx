@@ -1,4 +1,6 @@
 import { Card, TextInput, Select, Stack, Button, SimpleGrid } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ResourceCategory, ResourceType } from "../../../interfaces/Resource";
 import UserSearch from "../common/UserSearch";
@@ -21,6 +23,14 @@ interface IProps {
 export default function ResourcesFilters({ values, onChange, onCreateClick }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
 
+    // Local state for search input (for immediate UI updates)
+    const [searchInput, setSearchInput] = useState(values.search);
+
+    // Debounced onChange handler for search
+    const debouncedOnChange = useDebouncedCallback((newValues: FilterValues) => {
+        onChange(newValues);
+    }, 400);
+
     const categoryOptions = [
         { value: "discord", label: "Discord Server" },
         { value: "tool", label: "Tool" },
@@ -33,6 +43,12 @@ export default function ResourcesFilters({ values, onChange, onCreateClick }: IP
         onChange({ ...values, [key]: value });
     };
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setSearchInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, search: newValue }); // Debounce the onChange call
+    };
+
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
@@ -40,8 +56,8 @@ export default function ResourcesFilters({ values, onChange, onCreateClick }: IP
                     <TextInput
                         placeholder="Search resources..."
                         leftSection={<FontAwesomeIcon icon="search" />}
-                        value={values.search}
-                        onChange={(e) => handleChange("search", e.currentTarget.value)}
+                        value={searchInput}
+                        onChange={handleSearchChange}
                     />
                     {user && (
                         <UserSearch

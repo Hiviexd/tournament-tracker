@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Divider, Alert } from "@mantine/core";
-import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { ResourceCategory, ResourceType, IResource } from "../../interfaces/Resource";
 import { useResources } from "../hooks/useResources";
 import ResourcesFilters from "../components/resources/ResourcesFilters";
@@ -23,32 +24,58 @@ interface FilterValues {
 export default function ResourcesPage() {
     const [user] = useAtom(loggedInUserAtom);
     const location = useLocation();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
     const type = location.pathname.includes("/official") ? "official" : "community";
 
+    // Define query state parsers with default values
+    const [queryState, setQueryState] = useQueryStates(
+        {
+            search: parseAsString.withDefault(""),
+            author: parseAsString.withDefault(""),
+            category: parseAsString.withDefault(""),
+            page: parseAsInteger.withDefault(1),
+        },
+        {
+            // Only include non-default values in URL
+            clearOnDefault: true,
+        }
+    );
+
     const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
-
-    // Reset pagination when type changes
-    useEffect(() => {
-        setPage(1);
-    }, [type]);
-
     const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
     const [selectedResource, setSelectedResource] = useState<IResource | null>(null);
 
-    const [searchInput, setSearchInput] = useState<FilterValues>({
-        search: searchParams.get("search") || "",
-        author: searchParams.get("author") || "",
-        category: (searchParams.get("category") as ResourceCategory) || "",
+    // Create filters object for ResourcesFilters component
+    const filters: FilterValues = {
+        search: queryState.search,
+        author: queryState.author,
+        category: queryState.category as ResourceCategory | "",
         type,
-    });
+    };
 
-    const [debouncedSearch] = useDebouncedValue(searchInput.search, 400);
+    // Track previous type to detect actual changes
+    const prevType = useRef(type);
+
+    // Reset pagination when type changes
+    useEffect(() => {
+        if (prevType.current !== type) {
+            prevType.current = type;
+            setQueryState({ page: 1 });
+        }
+    }, [type, setQueryState]);
 
     const handleFilterChange = (newFilters: FilterValues) => {
-        setSearchInput(newFilters);
-        setPage(1);
+        // Check if any filter has changed to reset page
+        const filterChanged =
+            newFilters.search !== filters.search ||
+            newFilters.author !== filters.author ||
+            newFilters.category !== filters.category;
+
+        setQueryState({
+            search: newFilters.search,
+            author: newFilters.author,
+            category: newFilters.category,
+            page: filterChanged ? 1 : queryState.page,
+        });
     };
 
     const handleEditResource = (resource: IResource) => {
@@ -61,23 +88,18 @@ export default function ResourcesPage() {
         setSelectedResource(null);
     };
 
-    const { data, isLoading } = useResources({
-        search: debouncedSearch,
-        author: searchInput.author,
-        category: searchInput.category || undefined,
-        type,
-        page,
-    });
+    // Handle page changes
+    const handlePageChange = (newPage: number) => {
+        setQueryState({ page: newPage });
+    };
 
-    // Handle URL params
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (debouncedSearch) params.set("search", debouncedSearch);
-        if (searchInput.author) params.set("author", searchInput.author);
-        if (searchInput.category) params.set("category", searchInput.category);
-        if (page > 1) params.set("page", page.toString());
-        setSearchParams(params, { replace: true });
-    }, [debouncedSearch, searchInput.author, searchInput.category, page, setSearchParams]);
+    const { data, isLoading } = useResources({
+        search: queryState.search,
+        author: queryState.author,
+        category: (queryState.category as ResourceCategory) || undefined,
+        type,
+        page: queryState.page,
+    });
 
     const LoadingState = () => (
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -117,7 +139,7 @@ export default function ResourcesPage() {
                     />
                 </Alert>
             )}
-            <ResourcesFilters values={searchInput} onChange={handleFilterChange} onCreateClick={openCreate} />
+            <ResourcesFilters values={filters} onChange={handleFilterChange} onCreateClick={openCreate} />
             <Divider />
 
             {isLoading ? (
@@ -128,7 +150,11 @@ export default function ResourcesPage() {
                 <Stack gap="md">
                     {data.pagination.total > 1 && (
                         <Group justify="center" my="xs">
-                            <Pagination value={page} onChange={setPage} total={data.pagination.total} />
+                            <Pagination
+                                value={queryState.page}
+                                onChange={handlePageChange}
+                                total={data.pagination.total}
+                            />
                         </Group>
                     )}
 
@@ -144,7 +170,11 @@ export default function ResourcesPage() {
 
                     {data.pagination.total > 1 && (
                         <Group justify="center" mt="xs">
-                            <Pagination value={page} onChange={setPage} total={data.pagination.total} />
+                            <Pagination
+                                value={queryState.page}
+                                onChange={handlePageChange}
+                                total={data.pagination.total}
+                            />
                         </Group>
                     )}
                 </Stack>
