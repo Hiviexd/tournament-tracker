@@ -1,4 +1,4 @@
-import { Stack, Group, Text } from "@mantine/core";
+import { Stack, Group, Text, Table } from "@mantine/core";
 import { IVoting } from "../../../../interfaces/Voting";
 import { BinaryVote } from "../../../../interfaces/Vote";
 
@@ -37,22 +37,45 @@ export default function BinaryVoteStats({ voting }: IProps) {
                 <Text size="sm" fw={500}>
                     Distribution:
                 </Text>
-                <Stack gap={4}>
-                    {[
-                        { label: `${voting.options[0]}`, count: distribution.positive, color: "green.6" },
-                        { label: "Neutral", count: distribution.neutral, color: "gray.6" },
-                        { label: `${voting.options[1]}`, count: distribution.negative, color: "red.6" },
-                    ].map(({ label, count, color }) => (
-                        <Group key={label} wrap="nowrap">
-                            <Text size="sm" w={150} truncate title={label}>
-                                {label}
-                            </Text>
-                            <Text size="sm" c={color} w={40} style={{ textAlign: "center" }}>
-                                {count}
-                            </Text>
-                        </Group>
-                    ))}
-                </Stack>
+                <Table
+                    withTableBorder={false}
+                    withColumnBorders={false}
+                    withRowBorders={false}
+                    ml="md"
+                    styles={{
+                        table: {
+                            backgroundColor: "transparent",
+                            width: "fit-content",
+                        },
+                        tbody: { backgroundColor: "transparent" },
+                        tr: { backgroundColor: "transparent" },
+                        td: {
+                            backgroundColor: "transparent",
+                            padding: "4px 16px 4px 0",
+                            border: "none",
+                        },
+                    }}>
+                    <Table.Tbody>
+                        {[
+                            { label: `${voting.options[0]}`, count: distribution.positive, color: "green.6" },
+                            { label: "Neutral", count: distribution.neutral, color: "gray.6" },
+                            { label: `${voting.options[1]}`, count: distribution.negative, color: "red.6" },
+                        ].map(({ label, count, color }) => (
+                            <Table.Tr key={label}>
+                                <Table.Td>
+                                    <Text size="sm" title={label}>
+                                        {label}
+                                    </Text>
+                                </Table.Td>
+                                <Table.Td style={{ textAlign: "center" }}>
+                                    <Text size="sm" c={color}>
+                                        {count}
+                                    </Text>
+                                </Table.Td>
+                            </Table.Tr>
+                        ))}
+                    </Table.Tbody>
+                </Table>
             </Stack>
         </Stack>
     );
