@@ -1,4 +1,6 @@
 import { Card, TextInput, Select, Stack, Alert, Checkbox, SimpleGrid } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserGroup } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
@@ -24,6 +26,16 @@ interface IProps {
 export default function TicketsFilters({ values, onChange, type }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
 
+    // Local state for debounced inputs (for immediate UI updates)
+    const [titleInput, setTitleInput] = useState(values.title);
+    const [contentInput, setContentInput] = useState(values.content);
+    const [tournamentInput, setTournamentInput] = useState(values.targetTournament);
+
+    // Debounced onChange handler
+    const debouncedOnChange = useDebouncedCallback((newValues: FilterValues) => {
+        onChange(newValues);
+    }, 400);
+
     const assignedGroupOptions = [
         { value: "tc", label: "Tournament Committee" },
         { value: "cc", label: "Contest Committee" },
@@ -36,6 +48,24 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
 
     const handleChange = (key: keyof FilterValues, value: any) => {
         onChange({ ...values, [key]: value });
+    };
+
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setTitleInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, title: newValue }); // Debounce the onChange call
+    };
+
+    const handleContentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setContentInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, content: newValue }); // Debounce the onChange call
+    };
+
+    const handleTournamentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setTournamentInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, targetTournament: newValue }); // Debounce the onChange call
     };
 
     // Non-committee users viewing reports
@@ -56,8 +86,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         <TextInput
                             placeholder="Search by title or message content..."
                             leftSection={<FontAwesomeIcon icon="search" />}
-                            value={values.title}
-                            onChange={(e) => handleChange("title", e.currentTarget.value)}
+                            value={titleInput}
+                            onChange={handleTitleChange}
                             w="100%"
                         />
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -92,8 +122,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                         <TextInput
                             placeholder="Search by message content..."
                             leftSection={<FontAwesomeIcon icon="search" />}
-                            value={values.content}
-                            onChange={(e) => handleChange("content", e.currentTarget.value)}
+                            value={contentInput}
+                            onChange={handleContentChange}
                             w="100%"
                         />
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -106,8 +136,8 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                             <TextInput
                                 placeholder="Search by tournament name..."
                                 leftSection={<FontAwesomeIcon icon="trophy" />}
-                                value={values.targetTournament}
-                                onChange={(e) => handleChange("targetTournament", e.currentTarget.value)}
+                                value={tournamentInput}
+                                onChange={handleTournamentChange}
                             />
                         </SimpleGrid>
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
