@@ -1,4 +1,6 @@
 import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox, Group, SegmentedControl, Box } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
@@ -26,8 +28,22 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const [viewMode, setViewMode] = useLocalPreference<"cards" | "table" | "review">("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
 
+    // Local state for immediate UI updates
+    const [searchInput, setSearchInput] = useState(values.search);
+
+    // Debounced onChange handler
+    const debouncedOnChange = useDebouncedCallback((newValues: typeof values) => {
+        onChange(newValues);
+    }, 400);
+
     const handleChange = (key: string, value: any) => {
         onChange({ ...values, [key]: value });
+    };
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value;
+        setSearchInput(newValue); // Update input immediately
+        debouncedOnChange({ ...values, search: newValue }); // Debounce the onChange call
     };
 
     const handleHostSelect = (user: IUser | null) => {
@@ -64,8 +80,8 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     <TextInput
                         placeholder="Search by name or tags..."
                         leftSection={<FontAwesomeIcon icon="search" />}
-                        value={values.search}
-                        onChange={(e) => handleChange("search", e.currentTarget.value)}
+                        value={searchInput}
+                        onChange={handleSearchChange}
                     />
                     <UserSearch
                         placeholder="Search by tournament host..."
