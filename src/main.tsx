@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Provider as StateProvider } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
+import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
 
@@ -35,7 +36,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                         <ReactScan />
                         <Notifications />
                         <Router>
-                            <AuthRouter />
+                            <NuqsAdapter>
+                                <AuthRouter />
+                            </NuqsAdapter>
                         </Router>
                     </DatesProvider>
                     <VersionChecker />
