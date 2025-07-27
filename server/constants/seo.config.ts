@@ -139,6 +139,11 @@ export const seoRoutes: SEORoute[] = [
         name: "Quotes",
         description: "Manage the home page committee quotes.",
     },
+    {
+        path: "/templates",
+        name: "Templates",
+        description: "Manage message templates used in tickets and reports.",
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {
