@@ -118,21 +118,23 @@ export default function TicketMessageForm({ ticket }: IProps) {
                 </Box>
                 <FileUploadInput value={files} onChange={handleFileChange} />
                 <Group justify="end" align="center">
-                    <TemplateSelect
-                        onTemplateSelect={handleTemplateSelect}
-                        buttonProps={{ variant: "light" }}
-                    />
                     {user?.isCommittee && (
-                        <Tooltip label="Notes are only visible to committee members">
-                            <Button
-                                color="info"
-                                onClick={() => handleSubmit(true)}
-                                loading={createMessageMutation.isPending}
-                                disabled={!!error || !content}
-                                leftSection={<FontAwesomeIcon icon="sticky-note" />}>
-                                Add Note
-                            </Button>
-                        </Tooltip>
+                        <>
+                            <TemplateSelect
+                                onTemplateSelect={handleTemplateSelect}
+                                buttonProps={{ variant: "light" }}
+                            />
+                            <Tooltip label="Notes are only visible to committee members">
+                                <Button
+                                    color="info"
+                                    onClick={() => handleSubmit(true)}
+                                    loading={createMessageMutation.isPending}
+                                    disabled={!!error || !content}
+                                    leftSection={<FontAwesomeIcon icon="sticky-note" />}>
+                                    Add Note
+                                </Button>
+                            </Tooltip>
+                        </>
                     )}
                     <Button
                         color="primary"
