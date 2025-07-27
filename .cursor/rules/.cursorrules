@@ -49,7 +49,120 @@ Tournament Tracker is a full-stack application for managing osu! tournaments, ba
 - **Global state**: Managed with Jotai atoms in `src/store/atoms.ts` (e.g., `loggedInUserAtom`, `tournamentViewModeAtom`).
 - **Local state**: Managed with React hooks.
 - **API state**: Managed with React Query, using custom hooks for each domain (e.g., `useTournaments`, `useTickets`, `useVotings`, `useUsers`).
+- **Query parameters**: Managed with `nuqs` for URL synchronization and filter state.
 - **Preferences**: UI preferences (e.g., view mode) are persisted and loaded via hooks.
+
+### Query Parameter Management
+
+The project uses `nuqs` for declarative query parameter handling, eliminating manual `useSearchParams` and `useEffect` management.
+
+#### **Pattern for List Pages**
+
+All list pages (tournaments, tickets, votings, resources, logs) follow this pattern:
+
+```typescript
+// 1. Define query state with parsers and defaults
+const [queryState, setQueryState] = useQueryStates(
+    {
+        search: parseAsString.withDefault(""),
+        category: parseAsString.withDefault(""),
+        status: parseAsString.withDefault(""),
+        page: parseAsInteger.withDefault(1),
+    },
+    {
+        clearOnDefault: true, // Only non-default values in URL
+    }
+);
+
+// 2. Create filters object for filter components
+const filters: FilterValues = {
+    search: queryState.search,
+    category: queryState.category as CategoryType,
+    status: queryState.status,
+};
+
+// 3. Handle filter changes with smart page reset
+const handleFilterChange = (newFilters: FilterValues) => {
+    const filterChanged = 
+        newFilters.search !== filters.search ||
+        newFilters.category !== filters.category ||
+        newFilters.status !== filters.status;
+
+    setQueryState({
+        search: newFilters.search,
+        category: newFilters.category,
+        status: newFilters.status,
+        page: filterChanged ? 1 : queryState.page, // Reset page only when filters change
+    });
+};
+
+// 4. Handle page changes separately
+const handlePageChange = (newPage: number) => {
+    setQueryState({ page: newPage });
+};
+```
+
+#### **Pattern for Filter Components**
+
+Filter components handle debounced text inputs for responsive typing:
+
+```typescript
+// 1. Local state for immediate UI updates
+const [searchInput, setSearchInput] = useState(values.search);
+
+// 2. Debounced onChange handler
+const debouncedOnChange = useDebouncedCallback((newValues: FilterValues) => {
+    onChange(newValues);
+}, 400);
+
+// 3. Handle text input changes
+const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.currentTarget.value;
+    setSearchInput(newValue); // Update input immediately
+    debouncedOnChange({ ...values, search: newValue }); // Debounce the onChange call
+};
+
+// 4. Use local state in TextInput
+<TextInput
+    value={searchInput}
+    onChange={handleSearchChange}
+/>
+```
+
+#### **Key Principles**
+
+- **Use `nuqs` over manual `useSearchParams`**: Never use `useSearchParams` + `useEffect` for URL management.
+- **Debounce text inputs**: Search fields should use debounced callbacks (400ms) for responsive typing.
+- **Smart page reset**: Page resets to 1 only when filters change, not on page load.
+- **Clean URLs**: Only non-default values appear in query parameters (`clearOnDefault: true`).
+- **Type safety**: All query parameters are parsed with proper types (`parseAsString`, `parseAsInteger`, `parseAsBoolean`).
+- **No double API calls**: Proper state management prevents pagination conflicts.
+
+#### **When NOT to Debounce**
+
+- **Select-based inputs**: Category, status, and other dropdown selections don't need debouncing.
+- **User selection components**: Components like `UserSearch` that show autocomplete dropdowns don't need debouncing.
+- **Checkbox/toggle inputs**: Boolean inputs should update immediately.
+
+#### **Route Type Handling**
+
+For pages with different types based on route (e.g., tickets/reports, official/community resources):
+
+```typescript
+// 1. Detect type from route
+const location = useLocation();
+const type = location.pathname.includes("/reports") ? "report" : "ticket";
+
+// 2. Use useRef to track type changes and prevent feedback loops
+const prevType = useRef(type);
+
+useEffect(() => {
+    if (prevType.current !== type) {
+        prevType.current = type;
+        setQueryState({ page: 1 }); // Reset page only on actual type change
+    }
+}, [type, setQueryState]);
+```
 
 ### API Integration
 
@@ -225,9 +338,11 @@ Tournament Tracker is a full-stack application for managing osu! tournaments, ba
 4. Implement business logic in `server/services/`.
 5. Create/update frontend hooks in `src/hooks/`.
 6. Build or update components in `src/components/` and pages in `src/pages/`.
-7. Add/modify routes in `src/base/routes.config.tsx`.
-8. Implement error handling and notifications.
-9. Add logging and Discord notifications as needed.
+7. **For list pages**: Implement query parameter handling using `nuqs` patterns.
+8. **For filter components**: Add debounced text inputs where appropriate.
+9. Add/modify routes in `src/base/routes.config.tsx`.
+10. Implement error handling and notifications.
+11. Add logging and Discord notifications as needed.
 
 ### Console Commands
 

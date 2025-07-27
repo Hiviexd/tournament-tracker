@@ -19,10 +19,11 @@ import ResourcesPage from "../pages/ResourcesPage";
 import MappoolCompliancePage from "../pages/MappoolCompliancePage";
 import TournamentDetailsPage from "../pages/TournamentDetailsPage";
 import QuotesPage from "../pages/QuotesPage";
+import TemplatesPage from "../pages/TemplatesPage";
 
 interface RouteConfig {
     path: string;
-    page: JSX.Element;
+    page: React.ReactNode;
     title: string;
     icon: string;
     permissions?: string[];
@@ -213,6 +214,13 @@ const routes: RouteConfig[] = [
         title: "Mappool Compliance",
         icon: "check-circle",
         permissions: [],
+    },
+    {
+        path: "/templates",
+        page: <TemplatesPage />,
+        title: "Templates",
+        icon: "comment-dots",
+        permissions: ["committee"],
     },
     {
         path: "/quotes",
