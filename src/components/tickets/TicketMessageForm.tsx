@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Card, Stack, Group, Button, Text, Box } from "@mantine/core";
+import { useState, useRef } from "react";
+import { Card, Stack, Group, Button, Box, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSendMessage } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
@@ -10,7 +10,9 @@ import { IMessageFormData } from "../../../interfaces/Message";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import TextLengthIndicator from "../common/TextLengthIndicator";
 import FileUploadInput from "../common/FileUploadInput";
-import TextEditor from "../common/TextEditor";
+import TextEditor, { TextEditorRef } from "../common/TextEditor";
+import { TemplateSelect } from "../templates/TemplateSelect";
+import { ITemplate } from "../../../interfaces/Template";
 
 interface IProps {
     ticket: ITicket;
@@ -24,6 +26,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
     const autoSaveKey = `ticket-message-${ticket.id}`;
+    const textEditorRef = useRef<TextEditorRef>(null);
 
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
@@ -41,6 +44,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const handleContentChange = (value: string) => {
         setContent(value);
         if (error) setError(null);
+    };
+
+    const handleTemplateSelect = (template: ITemplate) => {
+        if (textEditorRef.current) {
+            textEditorRef.current.insertText(template.content);
+        }
     };
 
     const handleSubmit = async (isNote: boolean) => {
@@ -83,12 +92,15 @@ export default function TicketMessageForm({ ticket }: IProps) {
             <Stack gap="md">
                 <Box>
                     <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
-                            Message
-                        </Box>
+                        <Group gap="sm">
+                            <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                Message
+                            </Box>
+                        </Group>
                         <TextLengthIndicator length={content.length} maxLength={8000} />
                     </Box>
                     <TextEditor
+                        ref={textEditorRef}
                         key={`${ticket.id}-${submissionCount}`}
                         value={content}
                         onChange={handleContentChange}
@@ -106,13 +118,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
                 </Box>
                 <FileUploadInput value={files} onChange={handleFileChange} />
                 <Group justify="end" align="center">
+                    <TemplateSelect
+                        onTemplateSelect={handleTemplateSelect}
+                        buttonProps={{ variant: "light" }}
+                    />
                     {user?.isCommittee && (
-                        <Text fs="italic" size="xs" c="dimmed">
-                            Notes are only visible to committee members
-                        </Text>
-                    )}
-                    <Group>
-                        {user?.isCommittee && (
+                        <Tooltip label="Notes are only visible to committee members">
                             <Button
                                 color="info"
                                 onClick={() => handleSubmit(true)}
@@ -121,16 +132,16 @@ export default function TicketMessageForm({ ticket }: IProps) {
                                 leftSection={<FontAwesomeIcon icon="sticky-note" />}>
                                 Add Note
                             </Button>
-                        )}
-                        <Button
-                            color="primary"
-                            onClick={() => handleSubmit(false)}
-                            loading={createMessageMutation.isPending}
-                            disabled={!!error || !content || !ticket.isActive}
-                            leftSection={<FontAwesomeIcon icon="paper-plane" />}>
-                            Send Message
-                        </Button>
-                    </Group>
+                        </Tooltip>
+                    )}
+                    <Button
+                        color="primary"
+                        onClick={() => handleSubmit(false)}
+                        loading={createMessageMutation.isPending}
+                        disabled={!!error || !content || !ticket.isActive}
+                        leftSection={<FontAwesomeIcon icon="paper-plane" />}>
+                        Send Message
+                    </Button>
                 </Group>
             </Stack>
         </Card>
