@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTemplates } from "../../hooks/useTemplates";
 import { ITemplate } from "../../../interfaces/Template";
 import MarkdownText from "../common/MarkdownText";
+import { loggedInUserAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
 
 interface TemplateSelectProps {
     onTemplateSelect: (template: ITemplate) => void;
@@ -12,7 +14,8 @@ interface TemplateSelectProps {
 }
 
 export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "Templates" }: TemplateSelectProps) {
-    const { data: templates = [], isLoading } = useTemplates();
+    const [user] = useAtom(loggedInUserAtom);
+    const { data: templates = [], isLoading } = useTemplates(user?.isCommittee ?? false);
     const [search, setSearch] = useState("");
     const [openedPopover, setOpenedPopover] = useState<string | null>(null);
 

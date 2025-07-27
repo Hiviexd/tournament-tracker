@@ -6,9 +6,12 @@ import { useTemplates } from "../hooks/useTemplates";
 import { ITemplate } from "../../interfaces/Template";
 import TemplateCreateModal from "../components/templates/TemplateCreateModal";
 import TemplateEditModal from "../components/templates/TemplateEditModal";
+import { loggedInUserAtom } from "../store/atoms";
+import { useAtom } from "jotai";
 
 export default function TemplatesPage() {
-    const { data: templates = [], isLoading } = useTemplates();
+    const [user] = useAtom(loggedInUserAtom);
+    const { data: templates = [], isLoading } = useTemplates(user?.isCommittee ?? false);
     const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
     const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
     const [selectedTemplate, setSelectedTemplate] = useState<ITemplate | null>(null);

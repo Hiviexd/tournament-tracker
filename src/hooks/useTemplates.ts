@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
 import { ITemplate } from "../../interfaces/Template";
 
-export function useTemplates() {
+export function useTemplates(isCommittee: boolean) {
     return useQuery({
         queryKey: ["templates"],
         queryFn: () =>
@@ -10,6 +10,8 @@ export function useTemplates() {
                 method: "get",
                 url: "/api/templates",
             }),
+
+        enabled: isCommittee,
     });
 }
 
