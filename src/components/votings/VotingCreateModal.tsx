@@ -1,5 +1,4 @@
 // Base
-import { useEffect, useCallback } from "react";
 import { useCreateVoting } from "../../hooks/useVotings";
 import { VotingCategory, type VotingFormData, VotingType } from "../../../interfaces/Voting";
 import { UserGroup } from "../../../interfaces/User";
@@ -186,10 +185,21 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         }
     };
 
-    // Set default options based on vote type
-    const setDefaultOptions = useCallback(() => {
-        if (form.values.type === "binary-strict") {
-            if (form.values.allowNeutralVotes) {
+    const setDefaultOptionsForType = (type: VotingType, allowNeutralVotes: boolean, skipIfCustomOptions = false) => {
+        if (type === "binary-strict") {
+            // Check if we already have custom options (likely from a preset)
+            if (skipIfCustomOptions) {
+                const currentOptions = form.values.options;
+                const isDefaultOptions = allowNeutralVotes
+                    ? currentOptions.length === 3 && currentOptions.join(",") === "Agree,Neutral,Disagree"
+                    : currentOptions.length === 2 && currentOptions.join(",") === "Agree,Disagree";
+
+                if (!isDefaultOptions && currentOptions.length > 0) {
+                    return; // Don't override custom options
+                }
+            }
+
+            if (allowNeutralVotes) {
                 form.setFieldValue("options", ["Agree", "Neutral", "Disagree"]);
             } else {
                 form.setFieldValue("options", ["Agree", "Disagree"]);
@@ -197,7 +207,21 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         } else if (form.values.options.length === 0) {
             form.setFieldValue("options", ["Agree", "Disagree"]);
         }
-    }, [form]);
+    };
+
+    const handleTypeChange = (value: string | null) => {
+        if (value) {
+            const newType = value as VotingType;
+            form.setFieldValue("type", newType);
+            setDefaultOptionsForType(newType, form.values.allowNeutralVotes, true);
+        }
+    };
+
+    const handleAllowNeutralVotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.checked;
+        form.setFieldValue("allowNeutralVotes", newValue);
+        setDefaultOptionsForType(form.values.type, newValue, true);
+    };
 
     const getVotingMethodDescription = () => {
         switch (form.values.type) {
@@ -217,9 +241,6 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 return "";
         }
     };
-    useEffect(() => {
-        setDefaultOptions();
-    }, [form.values.type, form.values.allowNeutralVotes, setDefaultOptions]);
 
     return (
         <Modal opened={opened} onClose={onClose} title="Create New Vote" size="xl">
@@ -314,7 +335,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         placeholder="Select vote type"
                         data={typeOptions}
                         withAsterisk
-                        {...form.getInputProps("type")}
+                        value={form.values.type}
+                        onChange={handleTypeChange}
+                        error={form.errors.type}
                     />
 
                     {(form.values.type === "binary" ||
@@ -323,7 +346,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         <Checkbox
                             label="Allow neutral (0 score) votes"
                             checked={form.values.allowNeutralVotes}
-                            onChange={(event) => form.setFieldValue("allowNeutralVotes", event.currentTarget.checked)}
+                            onChange={handleAllowNeutralVotesChange}
                         />
                     )}
 
