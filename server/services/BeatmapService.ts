@@ -1,7 +1,7 @@
 import { IBeatmapset } from "../../interfaces/OsuApi";
 import flaggedArtists from "../constants/artist-permissions/flagged.json";
 import overrides from "../constants/artist-permissions/overrides.json";
-import bannedSources from "../constants/artist-permissions/bannedSources.json";
+import bannedSources from "../constants/artist-permissions/banned_sources.json";
 
 interface FlaggedArtistData {
     status: "partial" | "disallowed";
