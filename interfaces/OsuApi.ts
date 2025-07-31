@@ -139,7 +139,7 @@ export interface IBeatmapset {
     status: string;
     title: string;
     title_unicode: string;
-    track_id: null;
+    track_id: number | null;
     user_id: number;
     video: boolean;
     bpm: number;
@@ -162,7 +162,7 @@ export interface IBeatmapset {
 
 export interface IBeatmapAvailability {
     download_disabled: boolean;
-    more_information: null;
+    more_information: string | null;
 }
 
 export interface IBeatmapNominationsSummary {

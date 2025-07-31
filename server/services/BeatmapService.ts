@@ -1,7 +1,7 @@
 import { IBeatmapset } from "../../interfaces/OsuApi";
 import flaggedArtists from "../constants/artist-permissions/flagged.json";
 import overrides from "../constants/artist-permissions/overrides.json";
-import bannedSources from "../constants/artist-permissions/bannedSources.json";
+import bannedSources from "../constants/artist-permissions/banned_sources.json";
 
 interface FlaggedArtistData {
     status: "partial" | "disallowed";
@@ -12,7 +12,7 @@ type FlaggedArtists = {
     [key: string]: FlaggedArtistData;
 };
 
-// Reference: https://github.com/hburn7/mappool-compliance-checker/blob/master/src/validator.py
+// Reference: https://github.com/hburn7/mappool-compliance-checker/blob/6a161ec8b707ba4b9d1f39857af041a9376d2309/src/validator.py
 export default class BeatmapService {
     private static readonly PARTIAL_STATUS = "partial";
     private static readonly DISALLOWED_STATUS = "disallowed";
@@ -58,51 +58,108 @@ export default class BeatmapService {
     }
 
     /**
+     * Checks if any flagged artist is present in the given text
+     * @param text The text to check (artist name, title, etc.)
+     * @returns Object with found status and matching key
+     */
+    private static isArtistInText(text: string): { found: boolean; key: string | null } {
+        const keys = Object.keys(flaggedArtists);
+        // Check for exact matches first (case-insensitive)
+        for (const key of keys) {
+            if (key.toLowerCase() === text.toLowerCase()) {
+                return { found: true, key };
+            }
+        }
+
+        // Check for partial matches (substring matching)
+        for (const key of keys) {
+            if (text.toLowerCase().includes(key.toLowerCase())) {
+                return { found: true, key };
+            }
+        }
+
+        return { found: false, key: null };
+    }
+
+    /**
      * Finds a matching flagged artist key for partial matches
      * @param artist The artist name to check
      * @returns The matching flagged artist key or null if no match
      */
     private static flagKeyMatch(artist: string): string | null {
-        const keys = Object.keys(flaggedArtists);
-
-        if (artist.includes(" ")) {
-            // Partial match for artists with spaces
-            for (const key of keys) {
-                if (artist.toLowerCase().includes(key.toLowerCase())) {
-                    return key;
-                }
-            }
-        } else {
-            // Exact match for artists without spaces
-            for (const key of keys) {
-                if (key.toLowerCase() === artist.toLowerCase()) {
-                    return key;
-                }
-            }
-        }
-
-        return null;
+        return this.isArtistInText(artist).key;
     }
 
     /**
-     * Checks if an artist is flagged
-     * @param artist The artist name to check
-     * @returns True if the artist is flagged, false otherwise
+     * Checks if any flagged artist is present in the beatmapset (artist or title)
+     * @param beatmapset The beatmapset to check
+     * @returns True if any flagged artist is found, false otherwise
      */
-    private static artistFlagged(artist: string): boolean {
+    private static artistFlagged(beatmapset: IBeatmapset): boolean {
+        // Check artist field
+        const artistResult = this.isArtistInText(beatmapset.artist);
+        if (artistResult.found) {
+            return true;
+        }
+
+        // Check title field
+        const titleResult = this.isArtistInText(beatmapset.title);
+        return titleResult.found;
+    }
+
+    /**
+     * Gets all flagged artist keys from both artist and title fields
+     * @param beatmapset The beatmapset to check
+     * @returns Array of all matching flagged artist keys
+     */
+    private static getAllFlaggedArtistKeys(beatmapset: IBeatmapset): string[] {
+        const keys: string[] = [];
+        const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+        const allKeys = Object.keys(flaggedArtistsTyped);
+
+        // Check both artist and title fields
+        const textsToCheck = [beatmapset.artist, beatmapset.title];
+
+        for (const text of textsToCheck) {
+            for (const key of allKeys) {
+                if (text.toLowerCase().includes(key.toLowerCase()) && !keys.includes(key)) {
+                    keys.push(key);
+                }
+            }
+        }
+
+        return keys;
+    }
+
+    /**
+     * Gets the flagged artist key from either artist or title field
+     * Returns the most restrictive status (disallowed > partial)
+     * @param beatmapset The beatmapset to check
+     * @returns The matching flagged artist key or null if no match
+     */
+    private static getFlaggedArtistKey(beatmapset: IBeatmapset): string | null {
+        const allKeys = this.getAllFlaggedArtistKeys(beatmapset);
+        if (allKeys.length === 0) {
+            return null;
+        }
+
         const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
 
-        // Exact match
-        if (artist in flaggedArtistsTyped) {
-            return true;
+        // Return first disallowed artist found (most restrictive)
+        for (const key of allKeys) {
+            if (flaggedArtistsTyped[key].status === this.DISALLOWED_STATUS) {
+                return key;
+            }
         }
 
-        // Case-insensitive match
-        if (Object.keys(flaggedArtistsTyped).some((key) => key.toLowerCase() === artist.toLowerCase())) {
-            return true;
+        // Return first partial artist if no disallowed found
+        for (const key of allKeys) {
+            if (flaggedArtistsTyped[key].status === this.PARTIAL_STATUS) {
+                return key;
+            }
         }
 
-        return this.flagKeyMatch(artist) !== null;
+        return allKeys[0]; // Fallback
     }
 
     /**
@@ -155,7 +212,7 @@ export default class BeatmapService {
             return false;
         }
 
-        return !this.artistFlagged(beatmapset.artist);
+        return !this.artistFlagged(beatmapset);
     }
 
     /**
@@ -176,12 +233,11 @@ export default class BeatmapService {
             return true;
         }
 
-        const artist = beatmapset.artist;
-        if (!this.artistFlagged(artist)) {
+        if (!this.artistFlagged(beatmapset)) {
             return false;
         }
 
-        const key = this.flagKeyMatch(artist);
+        const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
             const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
             return flaggedArtistsTyped[key].status === this.PARTIAL_STATUS;
@@ -212,12 +268,11 @@ export default class BeatmapService {
             return true;
         }
 
-        const artist = beatmapset.artist;
-        if (!this.artistFlagged(artist)) {
+        if (!this.artistFlagged(beatmapset)) {
             return false;
         }
 
-        const key = this.flagKeyMatch(artist);
+        const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
             const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
             return flaggedArtistsTyped[key].status === this.DISALLOWED_STATUS;
@@ -232,7 +287,7 @@ export default class BeatmapService {
      * @returns The notes for the beatmapset
      */
     public static getNotes(beatmapset: IBeatmapset): string | null {
-        const key = this.flagKeyMatch(beatmapset.artist);
+        const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
             const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
             return flaggedArtistsTyped[key].notes;
