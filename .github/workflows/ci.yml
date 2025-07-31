@@ -1,10 +1,7 @@
 name: CI
 
 on:
-    push:
-        branches: [main, preview]
     pull_request:
-        branches: [main, preview]
 
 jobs:
     test:
@@ -26,6 +23,11 @@ jobs:
 
             - name: Install dependencies
               run: yarn install --frozen-lockfile
+
+            - name: Setup config files for CI
+              run: |
+                  cp config.example.json config.json
+                  cp checklist.example.json checklist.json
 
             - name: Run ESLint
               run: yarn lint
