@@ -346,7 +346,7 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await Tournament.findById(tournamentId).populate("host winners").orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
@@ -355,13 +355,32 @@ class TournamentsController {
 
         const assignedReviewersType = reviewerTypeMap[tournament.type];
 
+        const usersToExclude: string[] = [];
+
+        if (tournament.host) {
+            usersToExclude.push(tournament.host._id.toString());
+        }
+
+        if (tournament.winners && tournament.winners.length > 0) {
+            tournament.winners.forEach((winner) => {
+                usersToExclude.push(winner._id.toString());
+            });
+        }
+
         let reviewers: IUser[] = [];
 
         if (assignedReviewersType === "cc") {
             // assign all of CC
-            reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
+            if (usersToExclude.length > 0) {
+                reviewers = await User.find({
+                    groups: { $in: ["cc"] },
+                    _id: { $nin: usersToExclude },
+                }).sort("username");
+            } else {
+                reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
+            }
         } else {
-            reviewers = await UserService.assignReviewers(assignedReviewersType);
+            reviewers = await UserService.assignReviewers(assignedReviewersType, usersToExclude);
         }
 
         tournament.assignedReviewers = reviewers;

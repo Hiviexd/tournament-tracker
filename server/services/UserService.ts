@@ -91,15 +91,21 @@ class UserService {
     /**
      * Assign reviewers via bag randomization
      * @param type - user group to assign reviewers from
+     * @param usersToExclude - array of user IDs to exclude from assignment (e.g., tournament host, winners)
      * @returns - 2 randomly selected reviewers
      * * Main concept is to fetch all users who have isBag set to true, randomly pick 2, and set their isBag to false.
      * * If there's less than 2 users with isBag set to true, set all users' isBag to true.
      */
-    public async assignReviewers(type: UserGroup): Promise<IUser[]> {
-        const totalUsersCount = await User.countDocuments({
+    public async assignReviewers(type: UserGroup, usersToExclude: string[] = []): Promise<IUser[]> {
+        const baseQuery = {
             groups: { $in: [type] },
             isActiveReviewer: true,
-        });
+        };
+
+        // Add exclusion filter if users to exclude are provided
+        const excludeQuery = usersToExclude.length > 0 ? { ...baseQuery, _id: { $nin: usersToExclude } } : baseQuery;
+
+        const totalUsersCount = await User.countDocuments(excludeQuery);
 
         if (totalUsersCount < 2) {
             // Not enough reviewers to assign
@@ -107,25 +113,17 @@ class UserService {
         }
 
         let users = await User.find({
-            groups: { $in: [type] },
-            isActiveReviewer: true,
+            ...excludeQuery,
             inBag: true,
         });
 
         if (users.length < 2) {
             // Reset only relevant users
-            await User.updateMany(
-                {
-                    groups: { $in: [type] },
-                    isActiveReviewer: true,
-                },
-                { $set: { inBag: true } }
-            );
+            await User.updateMany(excludeQuery, { $set: { inBag: true } });
 
             // Refetch after reset
             users = await User.find({
-                groups: { $in: [type] },
-                isActiveReviewer: true,
+                ...excludeQuery,
                 inBag: true,
             });
         }
