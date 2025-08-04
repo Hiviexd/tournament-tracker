@@ -12,7 +12,7 @@ import {
     Table,
     ScrollArea,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useIsFirstRender } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
 import TournamentFilters from "../components/tournaments/TournamentFilters";
@@ -157,13 +157,7 @@ function LoadingState({ viewMode, user }: { viewMode: "cards" | "table" | "revie
 export default function TournamentListPage() {
     const [user] = useAtom(loggedInUserAtom);
     const automaticTypeFilter = getSavedPreference<boolean>("automatic_type_filter", true);
-
-    const getTypeFilterFromUser = () => {
-        if (!user?.isCommittee || !automaticTypeFilter) return "";
-        if (user?.isTournamentCommittee) return "tournament";
-        if (user?.isContestCommittee) return "contest";
-        return "";
-    };
+    const isFirstRender = useIsFirstRender();
 
     // Define query state parsers with default values
     const [queryState, setQueryState] = useQueryStates(
@@ -171,7 +165,7 @@ export default function TournamentListPage() {
             search: parseAsString.withDefault(""),
             mode: parseAsString.withDefault(""),
             host: parseAsString.withDefault(""),
-            type: parseAsString.withDefault(getTypeFilterFromUser()),
+            type: parseAsString.withDefault(""),
             status: parseAsString.withDefault(""),
             state: parseAsString.withDefault(""),
             showAllAssignedReviews: parseAsBoolean.withDefault(false),
@@ -185,6 +179,21 @@ export default function TournamentListPage() {
 
     const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
     const [opened, { open, close }] = useDisclosure(false);
+
+    // Apply automatic type filter only on first render when user loads and no type is set
+    useEffect(() => {
+        if (isFirstRender && user && automaticTypeFilter && !queryState.type) {
+            let autoType = "";
+            if (user.isCommittee) {
+                if (user.isTournamentCommittee) autoType = "tournament";
+                else if (user.isContestCommittee) autoType = "contest";
+            }
+
+            if (autoType) {
+                setQueryState({ type: autoType });
+            }
+        }
+    }, [isFirstRender, user, automaticTypeFilter, queryState.type, setQueryState]);
 
     // Create filters object for TournamentFilters component
     const filters: FilterValues = {
