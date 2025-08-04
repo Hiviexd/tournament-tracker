@@ -99,6 +99,7 @@ import {
     faThumbsDown,
     faPause,
     faCommentDots,
+    faTag,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -202,5 +203,6 @@ export default function loadIcons() {
         faThumbsDown,
         faPause,
         faCommentDots,
+        faTag,
     );
 }
