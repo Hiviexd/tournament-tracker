@@ -1,24 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faTimes } from "@fortawesome/free-solid-svg-icons";
-import {
-    TextInput,
-    Button,
-    Group,
-    Card,
-    Stack,
-    Paper,
-    Center,
-    Text,
-    Modal,
-    Textarea,
-    Tooltip,
-    Loader,
-    Box,
-} from "@mantine/core";
+import { useState, useEffect, useCallback } from "react";
+import { TextInput, Button, Group, Card, Stack, Paper, Center, Text, Modal, Textarea, Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useDropzone } from "react-dropzone";
-import moment from "moment";
 import { useSearchParams } from "react-router-dom";
 import { IOsuUser } from "../../../interfaces/OsuApi";
 import { useOsuUserInfo } from "../../hooks/useUsers";
@@ -27,7 +10,7 @@ import defaultBanner from "/assets/default-bg-stable.jpg";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import SignInBanner from "../common/SignInBanner";
-import CountryFlag from "../common/CountryFlag";
+import OsuProfile from "./OsuProfile";
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -263,19 +246,6 @@ export default function BadgesTab({ skeleton }: IProps) {
         [user.badges, deleteBadge]
     );
 
-    const renderSupporterHearts = useCallback(() => {
-        return Array.from({ length: user.support_level || 0 }).map((_, index) => (
-            <FontAwesomeIcon key={index} icon={faHeart} />
-        ));
-    }, [user.support_level]);
-
-    // Sort badges by awarded date (newest first)
-    const sortedBadges = useMemo(() => {
-        return user.badges
-            ? [...user.badges].sort((a, b) => new Date(b.awarded_at).getTime() - new Date(a.awarded_at).getTime())
-            : [];
-    }, [user.badges]);
-
     // Render the search section based on login status
     const renderSearchSection = () => {
         return (
@@ -370,75 +340,7 @@ export default function BadgesTab({ skeleton }: IProps) {
             {/* Search Section */}
             {renderSearchSection()}
 
-            <div className="osu-profile">
-                {/* Banner Section */}
-                <div className="profile-banner">
-                    <img src={user.cover.url} alt="Profile Banner" />
-                </div>
-
-                {/* User Info Section */}
-                <div className="profile-info">
-                    <div className="profile-avatar">
-                        <img src={user.avatar_url} alt={user.username} />
-                    </div>
-                    <div className="profile-details">
-                        <div className="username-container">
-                            <a className="username" href={`https://osu.ppy.sh/users/${user.id}`} target="_blank">
-                                {user.username}
-                            </a>
-                            {!!user.support_level && <div className="supporter-badge">{renderSupporterHearts()}</div>}
-                        </div>
-                        {user.title && (
-                            <div className="user-title" style={{ color: user.profile_colour }}>
-                                {user.title}
-                            </div>
-                        )}
-                        <Box mt="5">
-                            <CountryFlag country={user.country} showCountryName />
-                        </Box>
-                    </div>
-                </div>
-
-                {/* Badges Section */}
-                <div className="profile-badges">
-                    {sortedBadges.map((badge) => (
-                        <Tooltip
-                            label={
-                                <Stack gap={2}>
-                                    <Text size="sm">{badge.description}</Text>
-                                    <Text size="xs" c="#dcaec3">
-                                        {moment(badge.awarded_at).format("D MMMM YYYY")}
-                                    </Text>
-                                </Stack>
-                            }
-                            key={badge.localId}
-                            multiline
-                            miw={100}
-                            maw={300}
-                            styles={{
-                                tooltip: {
-                                    textAlign: "center",
-                                    border: "none",
-                                },
-                                arrow: {
-                                    border: "none",
-                                },
-                            }}>
-                            <div className="badge-item">
-                                <img src={badge["image@2x_url"]} alt={badge.description} title={badge.description} />
-                                <div
-                                    className="badge-delete-overlay"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteBadge(badge);
-                                    }}>
-                                    <FontAwesomeIcon icon={faTimes} />
-                                </div>
-                            </div>
-                        </Tooltip>
-                    ))}
-                </div>
-            </div>
+            <OsuProfile user={user} onDeleteBadge={handleDeleteBadge} />
 
             {/* Badge Add Modal */}
             <Modal opened={isAddingBadge} onClose={handleCloseModal} title="Add New Badge">
