@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, Image, Popover } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, Image, Popover, Modal } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -12,9 +12,17 @@ import { IAttachment } from "../../../../interfaces/Attachment";
 import { useDisclosure } from "@mantine/hooks";
 import TournamentAwardsManager from "./TournamentAwardsManager";
 import AlertText from "../../common/AlertText";
+import { useOsuUserInfo } from "../../../hooks/useUsers";
+import OsuProfile from "../../previewer/OsuProfile";
+import { IOsuUser } from "../../../../interfaces/OsuApi";
+import { LocalBadge } from "../../../hooks/useBadgePreviewer";
 
 interface IProps {
     tournament: ITournament;
+}
+
+interface LocalUser extends IOsuUser {
+    badges?: LocalBadge[];
 }
 
 const BadgeImage = ({ badge, index }: { badge: { url: string }; index: number }) => {
@@ -40,6 +48,12 @@ export default function TournamentBadges({ tournament }: IProps) {
     const uploadBadgesMutation = useUploadBadges(tournament._id);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const [awardsManagerOpened, { toggle: toggleAwardsManager }] = useDisclosure(false);
+    const [profilePreviewOpened, { open: openProfilePreview, close: closeProfilePreview }] = useDisclosure(false);
+
+    // Load current user's osu info for profile preview
+    const { data: osuUser, isLoading: isLoadingOsuUser } = useOsuUserInfo(
+        profilePreviewOpened && user?.osuId ? user.osuId.toString() : ""
+    );
 
     // check if none of the badges have file size 0
     const validateBadges = (badges: IAttachment[]) => {
@@ -66,6 +80,22 @@ export default function TournamentBadges({ tournament }: IProps) {
 
     const badges = tournament.badges || [];
 
+    const createUserWithTournamentBadges = (osuUser: IOsuUser): LocalUser => {
+        return {
+            ...osuUser,
+            badges: [
+                ...(osuUser.badges || []),
+                ...badges.map((badge, index) => ({
+                    image_url: badge.url,
+                    "image@2x_url": badge.url,
+                    description: `${tournament.name} Winner`,
+                    awarded_at: new Date(),
+                    localId: `tournament-${tournament._id}-${index}`,
+                })),
+            ],
+        } as LocalUser;
+    };
+
     return (
         <Stack gap={5}>
             <TournamentAwardsManager
@@ -73,6 +103,35 @@ export default function TournamentBadges({ tournament }: IProps) {
                 onClose={toggleAwardsManager}
                 tournament={tournament}
             />
+
+            {/* Profile Preview Modal */}
+            <Modal
+                opened={profilePreviewOpened}
+                onClose={closeProfilePreview}
+                size="xl"
+                title="Profile Preview"
+                styles={{
+                    header: {
+                        backgroundColor: "var(--mantine-color-body)",
+                        borderBottom: "1px solid var(--mantine-color-gray-3)",
+                    },
+                    body: {
+                        padding: 0,
+                    },
+                }}>
+                {isLoadingOsuUser ? (
+                    <Box style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+                        <Text>Loading profile...</Text>
+                    </Box>
+                ) : osuUser ? (
+                    <OsuProfile user={createUserWithTournamentBadges(osuUser)} />
+                ) : (
+                    <Box style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+                        <Text>Failed to load profile</Text>
+                    </Box>
+                )}
+            </Modal>
+
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500}>
                     Badges
@@ -100,14 +159,25 @@ export default function TournamentBadges({ tournament }: IProps) {
                             </ActionIcon>
                         )}
                         {badges.length > 0 && (
-                            <ActionIcon
-                                variant="subtle"
-                                color="success"
-                                onClick={toggleAwardsManager}
-                                disabled={!validateBadges(badges)}
-                                title="Open awards manager">
-                                <FontAwesomeIcon icon="award" />
-                            </ActionIcon>
+                            <>
+                                <ActionIcon
+                                    variant="subtle"
+                                    onClick={openProfilePreview}
+                                    color="blue"
+                                    title="Preview profile">
+                                    <FontAwesomeIcon icon="eye" />
+                                </ActionIcon>
+                                {tournament.isActive && (
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="success"
+                                        onClick={toggleAwardsManager}
+                                        disabled={!validateBadges(badges)}
+                                        title="Open awards manager">
+                                        <FontAwesomeIcon icon="award" />
+                                    </ActionIcon>
+                                )}
+                            </>
                         )}
                     </Group>
                 ) : null}
