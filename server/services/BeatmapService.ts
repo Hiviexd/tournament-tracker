@@ -64,30 +64,24 @@ export default class BeatmapService {
      */
     private static isArtistInText(text: string): { found: boolean; key: string | null } {
         const keys = Object.keys(flaggedArtists);
-        // Check for exact matches first (case-insensitive)
+        const textLower = text.toLowerCase();
+
         for (const key of keys) {
-            if (key.toLowerCase() === text.toLowerCase()) {
+            if (key.toLowerCase() === textLower) {
                 return { found: true, key };
             }
         }
 
-        // Check for partial matches (substring matching)
         for (const key of keys) {
-            if (text.toLowerCase().includes(key.toLowerCase())) {
+            const keyLower = key.toLowerCase();
+            // Regex pattern with word boundaries
+            const pattern = new RegExp(`\\b${keyLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+            if (pattern.test(text)) {
                 return { found: true, key };
             }
         }
 
         return { found: false, key: null };
-    }
-
-    /**
-     * Finds a matching flagged artist key for partial matches
-     * @param artist The artist name to check
-     * @returns The matching flagged artist key or null if no match
-     */
-    private static flagKeyMatch(artist: string): string | null {
-        return this.isArtistInText(artist).key;
     }
 
     /**
@@ -122,7 +116,10 @@ export default class BeatmapService {
 
         for (const text of textsToCheck) {
             for (const key of allKeys) {
-                if (text.toLowerCase().includes(key.toLowerCase()) && !keys.includes(key)) {
+                const keyLower = key.toLowerCase();
+                // Regex pattern with word boundaries
+                const pattern = new RegExp(`\\b${keyLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+                if (pattern.test(text) && !keys.includes(key)) {
                     keys.push(key);
                 }
             }
