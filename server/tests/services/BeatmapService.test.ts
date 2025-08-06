@@ -364,4 +364,131 @@ describe("BeatmapService", () => {
             expect(BeatmapService.isPartial(beatmapset)).toBe(true);
         });
     });
+
+    describe("Word Boundary Edge Cases", () => {
+        it("should NOT flag artist containing flagged artist as substring", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Tsunomaki Watame", // Contains "noma" but should not match "NOMA"
+                title: "Clean Title",
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(true);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(false);
+            expect(BeatmapService.getNotes(beatmapset)).toBeNull();
+        });
+
+        it("should NOT flag title containing flagged artist as substring", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song by Tsunomaki Watame", // Contains "noma" but should not match "NOMA"
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(true);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(false);
+            expect(BeatmapService.getNotes(beatmapset)).toBeNull();
+        });
+
+        it("should flag exact word match of flagged artist", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song (NOMA Remix)", // Exact word match should be flagged
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+            expect(BeatmapService.getNotes(beatmapset)).toBeNull();
+        });
+
+        it("should flag flagged artist at word boundary", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song feat. NOMA", // NOMA at word boundary should be flagged
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+        });
+
+        it("should flag flagged artist with punctuation boundaries", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song [NOMA] Remix", // NOMA with punctuation boundaries should be flagged
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+        });
+
+        it("should NOT flag artist with flagged artist embedded in longer word", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Anomaly", // Contains "noma" but should not match "NOMA"
+                title: "Clean Title",
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(true);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(false);
+        });
+
+        it("should NOT flag title with flagged artist embedded in longer word", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Anomaly Detection", // Contains "noma" but should not match "NOMA"
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(true);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(false);
+        });
+
+        it("should handle case insensitive word boundary matching", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song (noma remix)", // Lowercase should still match "NOMA"
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+        });
+
+        it("should handle mixed case word boundary matching", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song (NoMa Remix)", // Mixed case should still match "NOMA"
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+        });
+
+        it("should handle regex special characters in flagged artist names", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song (ak+q remix)", // Contains regex special characters
+            });
+
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(true);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(false);
+        });
+
+        it("should handle multiple word boundary matches correctly", () => {
+            const beatmapset = createMockBeatmapset({
+                artist: "Clean Artist",
+                title: "Song (NOMA feat. Zekk)", // Both NOMA and Zekk should be detected
+            });
+
+            // Should be disallowed because NOMA is disallowed (more restrictive than Zekk's partial)
+            expect(BeatmapService.isAllowed(beatmapset)).toBe(false);
+            expect(BeatmapService.isPartial(beatmapset)).toBe(false);
+            expect(BeatmapService.isDisallowed(beatmapset)).toBe(true);
+        });
+    });
 });
