@@ -81,7 +81,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         icon={<FontAwesomeIcon icon="exclamation-circle" />}
                         title={`Found ${utils.formatCount(
                             complianceData.partial.length,
-                            "partially disallowed beatmap"
+                            "potentially disallowed beatmap"
                         )}!`}
                     />
                 )}
@@ -191,7 +191,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             renderItem={(beatmap) => <BeatmapCard key={beatmap.id} beatmap={beatmap} />}
                         />
                         <ResultSection
-                            title="Partially Disallowed Beatmaps"
+                            title="Potentially Disallowed Beatmaps"
                             color="warning"
                             icon="exclamation-circle"
                             items={complianceData.partial}
