@@ -100,6 +100,7 @@ import {
     faPause,
     faCommentDots,
     faTag,
+    faGhost,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -204,5 +205,6 @@ export default function loadIcons() {
         faPause,
         faCommentDots,
         faTag,
+        faGhost,
     );
 }

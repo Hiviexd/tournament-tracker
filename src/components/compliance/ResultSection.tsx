@@ -7,7 +7,7 @@ interface ResultSectionProps {
     color: string;
     icon: IconProp;
     items: any[];
-    renderItem: (item: any) => JSX.Element;
+    renderItem: (item: any) => React.ReactNode;
 }
 
 export default function ResultSection({ title, color, icon, items, renderItem }: ResultSectionProps) {
@@ -26,9 +26,12 @@ export default function ResultSection({ title, color, icon, items, renderItem }:
                         {items.map(renderItem)}
                     </SimpleGrid>
                 ) : (
-                    <Text c="dimmed" ta="center" size="sm" py="xl">
-                        No beatmaps in this category...
-                    </Text>
+                    <Stack justify="center" py="xl">
+                        <FontAwesomeIcon icon="ghost" size="2x" color="gray" />
+                        <Text c="dimmed" ta="center" size="sm">
+                            No beatmaps in this category...
+                        </Text>
+                    </Stack>
                 )}
             </Stack>
         </Card>
