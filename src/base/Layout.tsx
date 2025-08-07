@@ -20,7 +20,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IPropTypes {
-    page: JSX.Element;
+    page: React.ReactNode;
     title?: string;
     icon?: string;
     parent?: { title: string; path: string };
