@@ -132,7 +132,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                                 </Mark>
                             </Popover.Target>
                             <Popover.Dropdown>
-                                <Highlight highlight="1234567" color="success" size="sm" className="pulse">
+                                <Highlight highlight="1234567" color="success" size="sm" className="animation-pulse">
                                     https://osu.ppy.sh/beatmaps/7654321#osu/1234567
                                 </Highlight>
                             </Popover.Dropdown>
