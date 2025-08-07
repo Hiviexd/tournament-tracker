@@ -191,7 +191,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             renderItem={(beatmap) => <BeatmapCard key={beatmap.id} beatmap={beatmap} />}
                         />
                         <ResultSection
-                            title="Partially Allowed Beatmaps"
+                            title="Partially Disallowed Beatmaps"
                             color="warning"
                             icon="exclamation-circle"
                             items={complianceData.partial}
