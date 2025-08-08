@@ -32,6 +32,9 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     // Check if current user is the tournament host
     const isUserHost = user?._id === tournament.host._id;
 
+    // Check if current user is a committee member or admin
+    const isCommitteeOrAdmin = !!user && (user.isCommittee || user.isAdmin);
+
     const handleAssignReviewers = async () => {
         await assignReviewersMutation.mutateAsync();
     };
@@ -82,9 +85,9 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     // 3. Tournament status is changesRequested and user is either committee or host
     if (
         !(
-            (user?.isCommittee && tournament.status === "reviewOngoing") ||
-            (tournament.reviews?.length > 0 && user?.isCommittee) ||
-            (tournament.status === "changesRequested" && (user?.isCommittee || isUserHost))
+            (isCommitteeOrAdmin && tournament.status === "reviewOngoing") ||
+            (tournament.reviews?.length > 0 && isCommitteeOrAdmin) ||
+            (tournament.status === "changesRequested" && (isCommitteeOrAdmin || isUserHost))
         )
     ) {
         return null;

@@ -225,10 +225,11 @@ class TournamentsController {
     /** GET tournament */
     public async getTournament(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
-        const isCommittee = res.locals!.user?.isCommittee ?? false;
+        const user = res.locals!.user;
+        const isCommitteeOrAdmin = !!user && (user.isCommittee || user.isAdmin);
 
         let tournament = await Tournament.findById(tournamentId)
-            .select(selectFields(isCommittee))
+            .select(selectFields(isCommitteeOrAdmin))
             .populate(defaultPopulate)
             .orFail();
 
@@ -237,7 +238,7 @@ class TournamentsController {
         let reports: ITicket[] = [];
         let votings: IVoting[] = [];
 
-        if (isCommittee) {
+        if (isCommitteeOrAdmin) {
             [reports, votings] = await Promise.all([
                 TournamentService.getRelatedReports(tournament),
                 TournamentService.getRelatedVotings(tournament),

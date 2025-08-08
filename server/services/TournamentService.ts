@@ -52,7 +52,7 @@ class TournamentService {
      * Censors reviews from non-committee users
      */
     public censorTournamentReviews(tournament: ITournament, user: IUser | undefined) {
-        if (!user || !user.isCommittee) {
+        if (!user || (!user.isCommittee && !user.isAdmin)) {
             // outright clear the reviews array if the user is not the tournament host, or if the status is not changesRequested
             if (!user || !tournament.host._id.equals(user._id) || tournament.status !== "changesRequested") {
                 tournament.reviews = [];
