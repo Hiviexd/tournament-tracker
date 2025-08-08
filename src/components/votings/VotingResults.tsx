@@ -91,7 +91,7 @@ export default function VotingResults({ voting, user }: IProps) {
             <Stack gap="lg">
                 <Title order={3}>Results</Title>
                 {renderVotingStats()}
-                {user?.isCommittee && (
+                {(user?.isCommittee || user?.isAdmin) && (
                     <>
                         <Divider />
                         <Group justify="space-between" align="center">

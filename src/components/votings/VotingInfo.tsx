@@ -100,7 +100,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     };
 
     const renderDescription = () => {
-        if (user?.isCommittee) {
+        if (user?.isCommittee || user?.isAdmin) {
             return (
                 <>
                     <Group align="center">
@@ -160,7 +160,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 )}
                             </Group>
                             <Text size="sm" c="dimmed">
-                                {(user?.isCommittee || voting.isActive) && (
+                                {(user?.isCommittee || user?.isAdmin || voting.isActive) && (
                                     <>
                                         Created by <UserLink user={voting.author} /> •{" "}
                                     </>
@@ -196,7 +196,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </Group>
                     </Group>
 
-                    {user?.isCommittee && (
+                    {(user?.isCommittee || user?.isAdmin) && (
                         <Group wrap="wrap" gap="xs">
                             <VoteCountBadge
                                 voteCount={voting.votes.length}
@@ -209,7 +209,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </Group>
                     )}
 
-                    {user?.isCommittee ? (
+                    {user?.isCommittee || user?.isAdmin ? (
                         <>
                             <Divider />
                             {renderDescription()}
