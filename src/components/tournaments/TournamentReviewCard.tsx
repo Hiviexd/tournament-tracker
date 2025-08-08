@@ -44,7 +44,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
     };
 
     const getUserDisplayProps = () => {
-        if (!user?.isCommittee) {
+        if (!user?.isCommittee && !user?.isAdmin) {
             return {
                 username: "Reviewer",
                 avatarUrl: "/assets/logo-512.png",
