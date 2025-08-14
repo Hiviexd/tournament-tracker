@@ -46,6 +46,37 @@ class LogsController {
             pages: Math.ceil(total / DEFAULT_LIMIT),
         });
     }
+
+    /** GET logs CSV export */
+    public async exportCsv(req: Request, res: Response) {
+        const logs = await Log.find({}).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE);
+
+        const csvData = logs.map((log) => ({
+            timestamp: log.createdAt.toISOString(),
+            username: log.user?.username || "System",
+            osuId: log.user?.osuId || "NULL",
+            category: log.category,
+            action: log.action,
+        }));
+
+        const headers = ["timestamp", "username", "osuId", "category", "action"];
+        const csvRows = [headers.join(",")];
+
+        csvData.forEach((row) => {
+            const values = headers.map((header) => {
+                const value = row[header as keyof typeof row];
+                const escapedValue = String(value).replace(/"/g, '""');
+                return `"${escapedValue}"`;
+            });
+            csvRows.push(values.join(","));
+        });
+
+        const csv = csvRows.join("\n");
+
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=logs-export.csv");
+        res.send(csv);
+    }
 }
 
 export default new LogsController();

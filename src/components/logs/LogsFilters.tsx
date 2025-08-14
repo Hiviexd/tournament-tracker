@@ -1,8 +1,11 @@
-import { Card, Stack, Select, SimpleGrid } from "@mantine/core";
+import { Card, Stack, Select, SimpleGrid, Button, Group } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LogCategory } from "../../../interfaces/Log";
 import UserSearch from "../common/UserSearch";
 import { IUser } from "../../../interfaces/User";
+import { useExportLogsCsv } from "../../hooks/useLogs";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface FilterValues {
     user: string;
@@ -16,6 +19,9 @@ interface IProps {
 }
 
 export default function LogsFilters({ values, onChange }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const exportCsvMutation = useExportLogsCsv();
+
     const categoryOptions = [
         { value: "account", label: "Account" },
         { value: "user", label: "User" },
@@ -36,6 +42,10 @@ export default function LogsFilters({ values, onChange }: IProps) {
 
     const handleUserSelect = (user: IUser | null) => {
         handleChange("user", user ? user.username : "");
+    };
+
+    const handleExportCsv = async () => {
+        await exportCsvMutation.mutateAsync();
     };
 
     return (
@@ -66,6 +76,18 @@ export default function LogsFilters({ values, onChange }: IProps) {
                         clearable
                     />
                 </SimpleGrid>
+                {user?.isAdmin && (
+                <Group>
+                    <Button
+                        leftSection={<FontAwesomeIcon icon="download" />}
+                        onClick={handleExportCsv}
+                        variant="light"
+                        loading={exportCsvMutation.isPending}
+                        disabled={exportCsvMutation.isPending}>
+                            Export to CSV
+                        </Button>
+                    </Group>
+                )}
             </Stack>
         </Card>
     );

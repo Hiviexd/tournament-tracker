@@ -6,5 +6,6 @@ import auth from "../middlewares/auth";
 const logsRouter = express.Router();
 
 logsRouter.get("/", auth.isLoggedIn, auth.isCommittee, LogsController.index);
+logsRouter.get("/export", auth.isLoggedIn, auth.isAdmin, LogsController.exportCsv);
 
 export default logsRouter;
