@@ -398,7 +398,7 @@ class TournamentsController {
             "users"
         );
 
-        await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**`, "tournament");
+        await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**: ${reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", ")}`, "tournament");
 
         // Discord
         const usersToPing = reviewers.map((r) => r.discordId || r.username);
@@ -736,7 +736,7 @@ class TournamentsController {
             "user-pen"
         );
 
-        await LogService.generate(currentUser._id, `Reassigned reviewer for **${tournament.name}**`, "tournament");
+        await LogService.generate(currentUser._id, `Reassigned reviewer for **${tournament.name}** from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`, "tournament");
 
         // Discord
         const usersToPing = [
