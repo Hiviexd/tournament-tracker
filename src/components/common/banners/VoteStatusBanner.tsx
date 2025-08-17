@@ -6,9 +6,10 @@ import { Alert } from "@mantine/core";
 interface IProps {
     voting: IVoting;
     user: IUser | null;
+    isAbstained?: boolean;
 }
 
-export default function VoteStatusBanner({ voting, user }: IProps) {
+export default function VoteStatusBanner({ voting, user, isAbstained = false }: IProps) {
     const userHasVoted = voting.votes.some((vote) => vote.author && vote.author._id === user?._id);
 
     const isInAssignedGroups = voting.assignedGroups.some((group) => {
@@ -24,6 +25,11 @@ export default function VoteStatusBanner({ voting, user }: IProps) {
     });
 
     const userNeedsToVote = !userHasVoted && isInAssignedGroups && voting.isActive;
+
+    if (isAbstained)
+        return (
+            <Alert color="gray" title="You have abstained from this vote." icon={<FontAwesomeIcon icon="flag-checkered" />} />
+        );
 
     if (userHasVoted)
         return (

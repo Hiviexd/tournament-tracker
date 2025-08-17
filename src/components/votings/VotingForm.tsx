@@ -3,7 +3,7 @@ import { Card, Stack, Title, Button, Group, Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
-import { useSubmitVote } from "../../hooks/useVotings";
+import { useSubmitVote, useToggleAbstention } from "../../hooks/useVotings";
 import {
     VoteType,
     ClassicVote,
@@ -47,11 +47,19 @@ interface IProps {
 
 export default function VotingForm({ voting, user }: IProps) {
     const submitVoteMutation = useSubmitVote(voting._id);
+    const toggleAbstentionMutation = useToggleAbstention(voting._id);
     const userVote = voting.votes.find((vote) => vote.author._id === user._id);
 
     const [comment, setComment] = useState(userVote?.comment ?? "");
     const [voteData, setVoteData] = useState<VoteType>(() => utils.getInitialVoteData(voting, userVote));
     const autoSaveKey = `voting-comment-${voting._id}`;
+
+    const isAbstained = useMemo(
+        () =>
+            voting.abstainedUsers?.some((abstainedUser) => abstainedUser._id.toString() === user._id.toString()) ??
+            false,
+        [voting.abstainedUsers, user._id]
+    );
 
     const isCommentRequired = useMemo(() => {
         switch (voteData.type) {
@@ -70,6 +78,10 @@ export default function VotingForm({ voting, user }: IProps) {
     }, [voteData]);
 
     const isSubmitDisabled = useMemo(() => {
+        if (isAbstained) {
+            return true;
+        }
+
         if (isCommentRequired && !comment.trim()) {
             return true;
         }
@@ -85,7 +97,7 @@ export default function VotingForm({ voting, user }: IProps) {
         }
 
         return false;
-    }, [isCommentRequired, comment, voting.allowNeutralVotes, voting.type, voteData]);
+    }, [isCommentRequired, comment, voting.allowNeutralVotes, voting.type, voteData, isAbstained]);
 
     const handleSubmit = async () => {
         if (isSubmitDisabled) {
@@ -104,6 +116,12 @@ export default function VotingForm({ voting, user }: IProps) {
             }
         } catch (error) {
             console.error("Failed to submit vote:", error);
+        }
+    };
+
+    const handleToggleAbstention = async () => {
+        if (confirm("Are you sure you want to " + (isAbstained ? "remove your abstention" : "abstain from this vote") + "?")) {
+            await toggleAbstentionMutation.mutateAsync();
         }
     };
 
@@ -167,57 +185,80 @@ export default function VotingForm({ voting, user }: IProps) {
     return (
         <Card shadow="sm" p="lg">
             <Stack gap="lg">
-                <VoteStatusBanner voting={voting} user={user} />
+                <VoteStatusBanner voting={voting} user={user} isAbstained={isAbstained} />
 
-                <Group gap="xs" align="baseline">
-                    <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
-                </Group>
+                {!isAbstained && (
+                    <Group gap="xs" align="baseline">
+                        <Title order={3}>{userVote ? "Your Vote" : "Submit Your Vote"}</Title>
+                    </Group>
+                )}
 
-                {renderVoteInput()}
-
-                <Box>
-                    <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
-                            Comment
-                            {isCommentRequired && <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>}
-                            {!isCommentRequired && " (Optional)"}
+                {!isAbstained && (
+                    <Stack gap="md">
+                        {renderVoteInput()}
+                        <Box>
+                            <Group justify="space-between" align="center" mb={5}>
+                                <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                    Comment
+                                    {isCommentRequired && (
+                                        <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                    )}
+                                    {!isCommentRequired && " (Optional)"}
+                                </Box>
+                                <TextLengthIndicator length={comment.length} maxLength={6000} />
+                            </Group>
+                            <TextEditor
+                                value={comment}
+                                disabled={isAbstained}
+                                onChange={setComment}
+                                placeholder={
+                                    isCommentRequired
+                                        ? "Please explain your extreme vote (-5/-4 or 4/5)"
+                                        : "Add a comment to your vote..."
+                                }
+                                minHeight={120}
+                                maxHeight={300}
+                                className={isCommentRequired && !comment.trim() ? "error" : ""}
+                                autoSaveKey={autoSaveKey}
+                            />
+                            {isCommentRequired && !comment.trim() && (
+                                <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                    Comment is required for extreme votes
+                                </Box>
+                            )}
                         </Box>
-                        <TextLengthIndicator length={comment.length} maxLength={6000} />
-                    </Box>
-                    <TextEditor
-                        value={comment}
-                        onChange={setComment}
-                        placeholder={
-                            isCommentRequired
-                                ? "Please explain your extreme vote (-5/-4 or 4/5)"
-                                : "Add a comment to your vote..."
-                        }
-                        minHeight={120}
-                        maxHeight={300}
-                        className={isCommentRequired && !comment.trim() ? "error" : ""}
-                        autoSaveKey={autoSaveKey}
-                    />
-                    {isCommentRequired && !comment.trim() && (
-                        <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
-                            Comment is required for extreme votes
-                        </Box>
-                    )}
-                </Box>
+                    </Stack>
+                )}
 
-                <Group justify="flex-end">
-                    {!voting.allowNeutralVotes && hasNeutralVote(voteData) && (
-                        <Text size="xs" c="danger">
-                            Neutral (0 score) votes are not allowed
-                        </Text>
+                <Group justify={userVote ? "flex-end" : "space-between"}>
+                    {!userVote && (
+                        <Button
+                            color="gray"
+                            variant={isAbstained ? "outline" : "filled"}
+                            onClick={handleToggleAbstention}
+                            loading={toggleAbstentionMutation.isPending}
+                            disabled={!!userVote}
+                            leftSection={<FontAwesomeIcon icon={isAbstained ? "flag" : "flag-checkered"} />}>
+                            {isAbstained ? "Remove Abstention" : "Abstain"}
+                        </Button>
                     )}
-                    <Button
-                        color={userVote ? "info" : "success"}
-                        onClick={handleSubmit}
-                        loading={submitVoteMutation.isPending}
-                        disabled={isSubmitDisabled}
-                        leftSection={<FontAwesomeIcon icon={userVote ? "edit" : "check"} />}>
-                        {userVote ? "Update Vote" : "Submit Vote"}
-                    </Button>
+                    <Group justify="flex-end">
+                        {!voting.allowNeutralVotes && hasNeutralVote(voteData) && (
+                            <Text size="xs" c="danger">
+                                Neutral (0 score) votes are not allowed
+                            </Text>
+                        )}
+                        {!isAbstained && (
+                            <Button
+                                color={userVote ? "info" : "success"}
+                                onClick={handleSubmit}
+                                loading={submitVoteMutation.isPending}
+                                disabled={isSubmitDisabled}
+                                leftSection={<FontAwesomeIcon icon={userVote ? "edit" : "check"} />}>
+                                {userVote ? "Update Vote" : "Submit Vote"}
+                            </Button>
+                        )}
+                    </Group>
                 </Group>
             </Stack>
         </Card>

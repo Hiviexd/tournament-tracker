@@ -16,6 +16,8 @@ export default function NotVotedBadge({ voting, user, variant = "light" }: IProp
     const checkUserVoted = (): boolean => {
         if (!voting.isActive) return true;
         if (!voting.votes || !user) return false;
+        if (voting.abstainedUsers?.some((abstainedUser) => abstainedUser._id.toString() === user._id.toString()))
+            return true;
 
         // First check if user is in any of the assigned groups
         const isInAssignedGroups = voting.assignedGroups.some((group) => {

@@ -155,3 +155,20 @@ export function useClearVotes(votingId: string) {
         },
     });
 }
+
+export function useToggleAbstention(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/votes/${votingId}/toggleAbstention`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+        },
+    });
+}

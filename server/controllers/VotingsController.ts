@@ -25,6 +25,7 @@ const DEFAULT_POPULATE = [
     { path: "targetUser", select: "username osuId groups coverUrl country" },
     { path: "targetTournament", select: "name" },
     { path: "attachments", select: "originalName url size type" },
+    { path: "abstainedUsers", select: "username osuId groups coverUrl country" },
 ];
 
 const DEFAULT_LIMIT = 10;
@@ -282,12 +283,16 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         if (!voting.isActive) {
-            return res.status(400).json({ message: "Vote is not active" });
+            return res.status(400).json({ message: "Vote is not active!" });
+        }
+
+        if (voting.abstainedUsers?.includes(author._id)) {
+            return res.status(400).json({ error: "You are abstained from this vote!" });
         }
 
         // Validate vote based on voting type
         if (data.type !== voting.type) {
-            return res.status(400).json({ error: "Vote type does not match voting type" });
+            return res.status(400).json({ error: "Vote type does not match voting type!" });
         }
 
         const isExtremeVote = (value: number) => Math.abs(value) >= 4;
@@ -621,6 +626,84 @@ class VotingsController {
 
         await DiscordService.sendWebhook({
             embeds: [embed],
+        });
+    }
+
+    /** PATCH toggle abstention */
+    public async toggleAbstention(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+
+        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+
+        if (!voting.isActive) {
+            return res.status(400).json({ error: "Cannot handle concluded votes!" });
+        }
+
+        const user = res.locals!.user!;
+
+        // check if user already submitted a vote
+        if (voting.votes.some((vote) => vote.author.equals(user._id))) {
+            return res.status(400).json({ error: "You have already submitted a vote!" });
+        }
+
+        let isAbstained: boolean;
+
+        const originalRequiredVotes = voting.requiredVotes;
+
+        if (!voting.abstainedUsers) {
+            voting.abstainedUsers = [];
+        }
+
+        // check if user is already abstained (comparing by _id)
+        const userIndex = voting.abstainedUsers.findIndex((abstainedUser) => abstainedUser._id.equals(user._id));
+
+        if (userIndex >= 0) {
+            // user is abstained, remove them
+            voting.abstainedUsers.splice(userIndex, 1);
+            voting.requiredVotes++;
+            isAbstained = false;
+        } else {
+            // user is not abstained, add them
+            voting.abstainedUsers.push(user);
+            voting.requiredVotes--;
+            isAbstained = true;
+        }
+
+        if (voting.requiredVotes < 1) {
+            return res.status(400).json({
+                error: "Cannot abstain: would result in no required votes!",
+            });
+        }
+
+        await voting.save();
+
+        res.json({
+            message: `You ${isAbstained ? "have abstained" : "are no longer abstained"} from this vote!`,
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Toggled abstention for [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${
+                isAbstained ? "true" : "false"
+            }`,
+            "voting"
+        );
+
+        // Discord
+        const mainEmbed = {
+            author: DiscordService.defaultWebhookAuthor(req.session),
+            description: `${isAbstained ? "Abstained" : "Removed abstention"} from vote: [**${voting.title}**](${
+                config.baseUrl
+            }/votes/${voting._id})`,
+            color: isAbstained ? webhookColors.darkGray : webhookColors.white,
+            footer: {
+                text: `Required votes: ${originalRequiredVotes} → ${voting.requiredVotes}`,
+            },
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [mainEmbed],
         });
     }
 }

@@ -4,7 +4,7 @@ import { IVoting } from "../../../interfaces/Voting";
 import { IVote } from "../../../interfaces/Vote";
 
 // Mantine
-import { Card, Stack, Title, Divider, Collapse, Group, Button, Text } from "@mantine/core";
+import { Card, Stack, Title, Divider, Collapse, Group, Button, Text, List } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 // Components
@@ -16,6 +16,7 @@ import VariableVoteStats from "./votes/VariableVoteStats";
 import RankedChoiceVoteStats from "./votes/RankedChoiceVoteStats";
 import { IUser } from "@interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import UserLink from "../common/UserLink";
 
 interface IProps {
     voting: IVoting;
@@ -104,6 +105,20 @@ export default function VotingResults({ voting, user }: IProps) {
                             </Button>
                         </Group>
                         <Collapse in={opened}>
+                            {voting.abstainedUsers?.length ? (
+                                <Stack gap={5} mb="md">
+                                    <Text size="sm" fw={500}>
+                                        Abstained users:
+                                    </Text>
+                                    <List ml="md">
+                                        {voting.abstainedUsers?.map((user) => (
+                                            <List.Item key={user._id}>
+                                                <UserLink user={user} size="sm" />
+                                            </List.Item>
+                                        ))}
+                                    </List>
+                                </Stack>
+                            ) : null}
                             <Stack gap="md">
                                 {filteredVotes.map((vote) => (
                                     <VoteCard key={vote._id} vote={vote} options={voting.options} />

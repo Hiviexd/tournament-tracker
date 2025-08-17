@@ -101,6 +101,7 @@ import {
     faCommentDots,
     faTag,
     faGhost,
+    faFlagCheckered,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -206,5 +207,6 @@ export default function loadIcons() {
         faCommentDots,
         faTag,
         faGhost,
+        faFlagCheckered,
     );
 }

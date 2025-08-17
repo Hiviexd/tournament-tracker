@@ -69,6 +69,7 @@ export interface IVoting extends Document {
     isPublic: boolean;
     publicDescription?: string;
     allowNeutralVotes: boolean;
+    abstainedUsers?: IUser[];
 
     // virtuals
     deadline: Date;

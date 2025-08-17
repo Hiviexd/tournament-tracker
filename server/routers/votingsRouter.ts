@@ -15,5 +15,6 @@ votingsRouter.put("/:votingId/update", auth.isLoggedIn, auth.isCommittee, Voting
 votingsRouter.delete("/:votingId/delete", auth.isLoggedIn, auth.isCommittee, VotingsController.deleteVoting);
 votingsRouter.patch("/:votingId/togglePublic", auth.isLoggedIn, auth.isCommittee, VotingsController.toggleVotingPublic);
 votingsRouter.delete("/:votingId/clearVotes", auth.isLoggedIn, auth.isAdmin, VotingsController.clearVotes);
+votingsRouter.patch("/:votingId/toggleAbstention", auth.isLoggedIn, auth.isCommittee, VotingsController.toggleAbstention);
 
 export default votingsRouter;

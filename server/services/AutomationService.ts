@@ -62,13 +62,19 @@ class AutomationService {
     }
 
     private async checkVotings() {
-        const activeVotings = await Voting.find({ isActive: true }).populate({
-            path: "votes",
-            populate: {
-                path: "author",
+        const activeVotings = await Voting.find({ isActive: true }).populate([
+            {
+                path: "votes",
+                populate: {
+                    path: "author",
+                    select: "username osuId discordId groups",
+                },
+            },
+            {
+                path: "abstainedUsers",
                 select: "username osuId discordId groups",
             },
-        });
+        ]);
         const votingsToNotify: IVoting[] = [];
 
         for (const voting of activeVotings) {
@@ -87,11 +93,14 @@ class AutomationService {
                 isActiveReviewer: true,
             }).select("username osuId discordId groups");
 
-            // Get set of user IDs who have already voted
+            // Get set of user IDs who have already voted or abstained
             const votedUserIds = new Set(voting.votes.map((vote) => vote.author._id.toString()));
+            const abstainedUserIds = new Set(voting.abstainedUsers?.map((user) => user._id.toString()) || []);
 
-            // Filter out users who have already voted
-            const missingVotes = usersInAssignedGroups.filter((user) => !votedUserIds.has(user._id.toString()));
+            // Filter out users who have already voted or abstained
+            const missingVotes = usersInAssignedGroups.filter(
+                (user) => !votedUserIds.has(user._id.toString()) && !abstainedUserIds.has(user._id.toString())
+            );
 
             // Get Discord IDs for pinging (fall back to username if no Discord ID)
             const usersToPing = missingVotes.map((user) => user.discordId || user.username);

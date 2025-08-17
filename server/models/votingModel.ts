@@ -31,6 +31,7 @@ const VotingSchema = new Schema<IVoting>(
         publicDescription: { type: String },
         concludedAt: { type: Date },
         allowNeutralVotes: { type: Boolean, default: true },
+        abstainedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -49,6 +50,15 @@ VotingSchema.pre("save", function (next) {
             }
             break;
     }
+
+    // ensure no duplicate users in abstainedUsers
+    if (this.abstainedUsers && this.abstainedUsers.length > 0) {
+        const uniqueUserIds = new Set(this.abstainedUsers.map((userId) => userId.toString()));
+        if (uniqueUserIds.size !== this.abstainedUsers.length) {
+            next(new Error("Duplicate users found in abstainedUsers"));
+        }
+    }
+
     next();
 });
 
