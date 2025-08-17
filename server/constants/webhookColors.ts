@@ -36,6 +36,7 @@ const webhookColors = {
     white:       parseColor("#EFEFEF"),
     brown:       parseColor("#91582A"),
     gray:        parseColor("#9E9E9E"),
+    darkGray:    parseColor("#424242"),
     black:       parseColor("#272727"),
 };
 
