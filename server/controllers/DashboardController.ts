@@ -94,8 +94,8 @@ class DashboardController {
         const response: IDashboardResponse = {
             tournaments,
             votings,
-            tickets,
             reports,
+            tickets,
         };
 
         res.json(response);
