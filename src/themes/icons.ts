@@ -102,6 +102,7 @@ import {
     faTag,
     faGhost,
     faFlagCheckered,
+    faLineChart,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -208,5 +209,6 @@ export default function loadIcons() {
         faTag,
         faGhost,
         faFlagCheckered,
+        faLineChart,
     );
 }
