@@ -53,7 +53,7 @@ const routes: RouteConfig[] = [
         path: "/dashboard",
         page: <DashboardPage />,
         title: "Dashboard",
-        icon: "chart-line",
+        icon: "table-columns",
         permissions: ["committee"],
     },
     {
