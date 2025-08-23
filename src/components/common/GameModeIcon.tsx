@@ -1,19 +1,21 @@
+import { OsuGameMode } from "../../../interfaces/OsuApi";
 import { GameMode } from "../../../interfaces/Tournament";
 import { Group } from "@mantine/core";
 import { Tooltip } from "@mantine/core";
 
 interface Props {
-    mode: GameMode | GameMode[];
+    mode: GameMode | OsuGameMode | (GameMode | OsuGameMode)[];
 }
 
 export default function GameModeIcon({ mode }: Props) {
-    function getModeName(mode: GameMode) {
+    function getModeName(mode: GameMode | OsuGameMode) {
         switch (mode) {
             case "osu":
                 return "osu!";
             case "taiko":
                 return "osu!taiko";
             case "catch":
+            case "fruits":
                 return "osu!catch";
             case "mania":
                 return "osu!mania";
@@ -21,9 +23,9 @@ export default function GameModeIcon({ mode }: Props) {
     }
 
     if (Array.isArray(mode)) {
-        // order modes, osu -> taiko -> catch -> mania
-        const orderedModes = mode.sort((a: GameMode, b: GameMode) => {
-            const order = ["osu", "taiko", "catch", "mania"];
+        // order modes, osu -> taiko -> catch/fruits -> mania
+        const orderedModes = mode.sort((a: GameMode | OsuGameMode, b: GameMode | OsuGameMode) => {
+            const order = ["osu", "taiko", "catch", "fruits", "mania"];
             return order.indexOf(a) - order.indexOf(b);
         });
 
