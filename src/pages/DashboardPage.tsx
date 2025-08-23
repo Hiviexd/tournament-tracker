@@ -1,4 +1,4 @@
-import { Stack, Title, Text, Card, SimpleGrid, Group, Skeleton, Divider } from "@mantine/core";
+import { Stack, Title, Text, Card, SimpleGrid, Group, Skeleton, Divider, Avatar } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useDashboard } from "../hooks/useDashboard";
@@ -26,10 +26,16 @@ export default function DashboardPage() {
         <Stack gap="xl">
             {/* Welcome Section */}
             <Card shadow="sm" p="lg">
-                <Title order={2} mb="xs">
-                    Hello {user?.username} 👋
-                </Title>
-                <Text c="dimmed">Let's catch up on what needs your attention in the Tournament Committee.</Text>
+                <Group gap="xs" align="center" mb="xs">
+                    <Avatar src={user?.avatarUrl} size="md" radius="xl" />
+                    <Title order={2} style={{ lineHeight: "normal" }}>
+                        Hello, {user?.username} 👋
+                    </Title>
+                </Group>
+                <Text c="dimmed">
+                    Let's catch up on what needs your attention in the{" "}
+                    {user?.isContestCommittee ? "Contest Committee" : "Tournament Committee"}.
+                </Text>
             </Card>
 
             {/* Dashboard Sections */}
