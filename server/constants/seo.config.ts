@@ -144,6 +144,11 @@ export const seoRoutes: SEORoute[] = [
         name: "Templates",
         description: "Manage message templates used in tickets and reports.",
     },
+    {
+        path: "/dashboard",
+        name: "Dashboard",
+        description: "Catch up on what needs your attention in the team.",
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {
