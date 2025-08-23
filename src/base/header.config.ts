@@ -39,7 +39,7 @@ export const routes: IRoute[] = [
                 permissions: [],
             },
             {
-                title: "Reports listing",
+                title: "Reports Listing",
                 link: "/reports",
                 icon: "mail-bulk",
                 permissions: ["user"],
@@ -59,7 +59,7 @@ export const routes: IRoute[] = [
                 permissions: [],
             },
             {
-                title: "Tickets listing",
+                title: "Tickets Listing",
                 link: "/tickets",
                 icon: "mail-bulk",
                 permissions: [],
@@ -122,12 +122,12 @@ export const routes: IRoute[] = [
                 icon: "quote-left",
                 permissions: ["committee"],
             },
-            {
-                title: "Create Article",
-                link: "/articles/create",
-                icon: "file-circle-plus",
-                permissions: ["admin"],
-            },
+            // {
+            //     title: "Create Article",
+            //     link: "/articles/create",
+            //     icon: "file-circle-plus",
+            //     permissions: ["admin"],
+            // },
         ],
     },
 ];
