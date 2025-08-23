@@ -10,7 +10,7 @@ export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
                 <div className="gamemode-icons">
                     {group.playmodes.map((mode) => (
                         <div key={mode} style={{ fontWeight: 400 }}>
-                            <GameModeIcon mode={mode as OsuGameMode} />
+                            <GameModeIcon mode={mode as OsuGameMode} noTooltip />
                         </div>
                     ))}
                 </div>
