@@ -60,9 +60,9 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                     </Stack>
                 ) : (
                     <Group gap="xs" pl="md">
-                        <FontAwesomeIcon icon="ghost" style={{ opacity: 0.5 }} />
+                        <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
                         <Text size="sm" c="dimmed">
-                            Nothing here...
+                            All clear!
                         </Text>
                     </Group>
                 )}
@@ -81,9 +81,9 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                     </Stack>
                 ) : (
                     <Group gap="xs" pl="md">
-                        <FontAwesomeIcon icon="ghost" style={{ opacity: 0.5 }} />
+                        <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
                         <Text size="sm" c="dimmed">
-                            Nothing here...
+                            All clear!
                         </Text>
                     </Group>
                 )}
