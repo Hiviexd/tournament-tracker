@@ -5,6 +5,7 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MobileUserSectionCard from "./MobileUserSectionCard";
 import LoginButton from "../buttons/LoginButton";
+import { useNavigate } from "react-router-dom";
 
 interface IProps {
     onClose: () => void;
@@ -16,6 +17,13 @@ interface IProps {
 export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSettings, onOpenDebug }: IProps) {
     const [opened, { toggle }] = useDisclosure(false);
     const [user] = useAtom(loggedInUserAtom);
+
+    const navigate = useNavigate();
+
+    const handleDashboard = () => {
+        onClose();
+        navigate("/dashboard");
+    };
 
     const handleCustomize = () => {
         onClose();
@@ -40,6 +48,15 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
 
             <Collapse in={opened}>
                 <Stack px="xs" pb="xs">
+                    {user.isCommittee && (
+                        <UnstyledButton onClick={handleDashboard}>
+                            <Group>
+                                <FontAwesomeIcon icon="table-columns" />
+                                <Text size="sm">Dashboard</Text>
+                            </Group>
+                        </UnstyledButton>
+                    )}
+
                     <UnstyledButton onClick={handleCustomize}>
                         <Group>
                             <FontAwesomeIcon icon="palette" />
