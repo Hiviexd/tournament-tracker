@@ -69,7 +69,7 @@ export default function TournamentNotes({ tournament }: IProps) {
     if (!user?.isCommittee && !user?.isAdmin) return null;
 
     return (
-        <Card shadow="sm" p="lg">
+        <Card shadow="sm" p="lg" radius="md">
             <Stack gap="xl">
                 <Group justify="space-between" align="center">
                     <Title order={3}>Notes</Title>

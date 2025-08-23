@@ -81,7 +81,7 @@ export default function TournamentDetailsPage() {
                         {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
                         <TournamentReviewSection tournament={tournament} />
                         {user?.isCommittee && tournament.isTournament && (
-                            <MappoolCompliancePage header="Mappool Compliance Checker" />
+                            <MappoolCompliancePage header="Mappool Compliance Checker" radius="md" />
                         )}
                     </Stack>
                 )
