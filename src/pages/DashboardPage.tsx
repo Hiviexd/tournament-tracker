@@ -39,13 +39,22 @@ export default function DashboardPage() {
             </Card>
 
             {/* Dashboard Sections */}
-            {tournaments.length > 0 || votings.length > 0 || tickets.length > 0 || reports.length > 0 ? (<>
-                <DashboardTournamentsSection tournaments={tournaments} user={user} />
-                <DashboardVotingsSection votings={votings} user={user} />
-                <DashboardReportsSection reports={reports} />
-                <DashboardTicketsSection tickets={tickets} />
-            </>) : (
-                <EmptyState icon="home" title="All caught up!" description="Go play some osu!, annoy Albion, or do what you do best." />
+            {tournaments.length > 0 || votings.length > 0 || tickets.length > 0 || reports.length > 0 ? (
+                <>
+                    <DashboardTournamentsSection tournaments={tournaments} user={user} />
+                    <Divider />
+                    <DashboardVotingsSection votings={votings} user={user} />
+                    <Divider />
+                    <DashboardReportsSection reports={reports} />
+                    <Divider />
+                    <DashboardTicketsSection tickets={tickets} />
+                </>
+            ) : (
+                <EmptyState
+                    icon="home"
+                    title="All caught up!"
+                    description="Go play some osu!, annoy Albion, or do what you do best."
+                />
             )}
         </Stack>
     );

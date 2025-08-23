@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, Divider } from "@mantine/core";
+import { Stack, Title, Group, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
@@ -39,7 +39,6 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
 
     return (
         <Stack gap="md">
-            <Divider />
             <Title order={3}>Votes</Title>
 
             {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (

@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, SimpleGrid, Divider } from "@mantine/core";
+import { Stack, Title, Group, Text, SimpleGrid } from "@mantine/core";
 import TicketCard from "../tickets/TicketCard";
 import { ITicket } from "../../../interfaces/Ticket";
 import EmptyState from "../common/EmptyState";
@@ -10,7 +10,6 @@ interface IProps {
 export default function DashboardTicketsSection({ tickets }: IProps) {
     return (
         <Stack gap="md">
-            <Divider />
             <Group align="center" gap="xs">
                 <Title order={3}>Tickets</Title>
                 <Text c="dimmed">({tickets.length})</Text>
