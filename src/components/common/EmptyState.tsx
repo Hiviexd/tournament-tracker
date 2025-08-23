@@ -10,11 +10,12 @@ interface IEmptyStateProps {
     description?: string;
     returnLink?: string;
     returnText?: string;
+    height?: number;
 }
 
-export default function EmptyState({ icon, title, description, returnLink, returnText }: IEmptyStateProps) {
+export default function EmptyState({ icon, title, description, returnLink, returnText, height = 200 }: IEmptyStateProps) {
     return (
-        <Stack align="center" justify="center" h={200}>
+        <Stack align="center" justify="center" h={height}>
             <FontAwesomeIcon icon={icon} size="2x" style={{ opacity: 0.5 }} />
             <Text size="lg" c="dimmed">
                 {title}
