@@ -4,6 +4,7 @@ import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
+import _ from "lodash";
 
 interface IProps {
     tournaments: ITournament[];
@@ -11,6 +12,8 @@ interface IProps {
 }
 
 export default function DashboardTournamentsSection({ tournaments, user }: IProps) {
+    const typeString = user?.isTournamentCommittee ? "tournaments" : "contests";
+
     const checkTournamentNeedsReview = (tournament: ITournament, user: IUser | null): boolean => {
         if (!user) return false;
 
@@ -32,7 +35,7 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
 
     return (
         <Stack gap="md">
-            <Title order={3}>Tournaments</Title>
+            <Title order={3}>{_.capitalize(typeString)}</Title>
 
             {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
                 <>
@@ -61,7 +64,7 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
 
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
-                            <Title order={4}>Other Assigned Tournaments</Title>
+                            <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
                             <Text c="dimmed">({otherTournaments.length})</Text>
                         </Group>
                         {otherTournaments.length > 0 ? (
@@ -84,7 +87,7 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                 <EmptyState
                     height={100}
                     icon="trophy"
-                    title="All tournaments are clear!"
+                    title={`All ${typeString} are clear!`}
                     description="Hello shdewz, we meet again."
                 />
             )}
