@@ -5,9 +5,10 @@ import { Tooltip } from "@mantine/core";
 
 interface Props {
     mode: GameMode | OsuGameMode | (GameMode | OsuGameMode)[];
+    noTooltip?: boolean;
 }
 
-export default function GameModeIcon({ mode }: Props) {
+export default function GameModeIcon({ mode, noTooltip = false }: Props) {
     function getModeName(mode: GameMode | OsuGameMode) {
         switch (mode) {
             case "osu":
@@ -31,16 +32,22 @@ export default function GameModeIcon({ mode }: Props) {
 
         return (
             <Group gap={0} wrap="nowrap">
-                {orderedModes.map((m) => (
-                    <Tooltip key={m} label={getModeName(m)}>
+                {orderedModes.map((m) =>
+                    noTooltip ? (
                         <div key={m} className={`gamemode-icon ${m}`} />
-                    </Tooltip>
-                ))}
+                    ) : (
+                        <Tooltip key={m} label={getModeName(m)}>
+                            <div key={m} className={`gamemode-icon ${m}`} />
+                        </Tooltip>
+                    )
+                )}
             </Group>
         );
     }
 
-    return (
+    return noTooltip ? (
+        <div key={mode} className={`gamemode-icon ${mode}`} />
+    ) : (
         <Tooltip key={mode} label={getModeName(mode)}>
             <div key={mode} className={`gamemode-icon ${mode}`} />
         </Tooltip>
