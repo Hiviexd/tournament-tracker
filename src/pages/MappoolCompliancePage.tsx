@@ -14,6 +14,7 @@ import {
     Highlight,
     Alert,
     Title,
+    type MantineRadius
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,9 +39,10 @@ interface ComplianceData {
 
 interface IProps {
     header?: string;
+    radius?: MantineRadius;
 }
 
-export default function MappoolCompliancePage({ header }: IProps) {
+export default function MappoolCompliancePage({ header, radius = "sm" }: IProps) {
     const [input, setInput] = useState("");
     const [opened, { close, open }] = useDisclosure(false);
     const { mutate: checkCompliance, isPending, data } = useMappoolCompliance(input);
@@ -119,7 +121,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
 
     return (
         <Stack gap="lg">
-            <Card shadow="sm" p="lg">
+            <Card shadow="sm" p="lg" radius={radius}>
                 <Stack gap="md">
                     {header && <Title order={3}>{header}</Title>}
                     <MarkdownText content={infoText} />
