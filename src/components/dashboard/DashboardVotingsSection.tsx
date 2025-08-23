@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
+import EmptyState from "../common/EmptyState";
 
 interface IProps {
     votings: IVoting[];
@@ -36,58 +37,65 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
     const votingsNeedingVote = votings.filter((voting) => checkVotingNeedsVote(voting, user));
     const otherVotings = votings.filter((voting) => !checkVotingNeedsVote(voting, user));
 
-    if (votingsNeedingVote.length === 0 && otherVotings.length === 0) {
-        return null;
-    }
-
     return (
         <Stack gap="md">
             <Divider />
             <Title order={3}>Votes</Title>
 
-            <Stack gap="sm">
-                <Group align="center" gap="xs">
-                    <Title order={4} c="orange">
-                        Needs Your Vote
-                    </Title>
-                    <Text c="dimmed">({votingsNeedingVote.length})</Text>
-                </Group>
-                {votingsNeedingVote.length > 0 ? (
-                    <Stack gap="md">
-                        {votingsNeedingVote.map((voting) => (
-                            <VotingCard key={voting._id} voting={voting} />
-                        ))}
+            {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
+                <>
+                    <Stack gap="sm">
+                        <Group align="center" gap="xs">
+                            <Title order={4} c="orange">
+                                Needs Your Vote
+                            </Title>
+                            <Text c="dimmed">({votingsNeedingVote.length})</Text>
+                        </Group>
+                        {votingsNeedingVote.length > 0 ? (
+                            <Stack gap="md">
+                                {votingsNeedingVote.map((voting) => (
+                                    <VotingCard key={voting._id} voting={voting} />
+                                ))}
+                            </Stack>
+                        ) : (
+                            <Group gap="xs" pl="md">
+                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                <Text size="sm" c="dimmed">
+                                    All clear!
+                                </Text>
+                            </Group>
+                        )}
                     </Stack>
-                ) : (
-                    <Group gap="xs" pl="md">
-                        <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                        <Text size="sm" c="dimmed">
-                            All clear!
-                        </Text>
-                    </Group>
-                )}
-            </Stack>
 
-            <Stack gap="sm">
-                <Group align="center" gap="xs">
-                    <Title order={4}>Other Active Votes</Title>
-                    <Text c="dimmed">({otherVotings.length})</Text>
-                </Group>
-                {otherVotings.length > 0 ? (
-                    <Stack gap="md">
-                        {otherVotings.map((voting) => (
-                            <VotingCard key={voting._id} voting={voting} />
-                        ))}
+                    <Stack gap="sm">
+                        <Group align="center" gap="xs">
+                            <Title order={4}>Other Active Votes</Title>
+                            <Text c="dimmed">({otherVotings.length})</Text>
+                        </Group>
+                        {otherVotings.length > 0 ? (
+                            <Stack gap="md">
+                                {otherVotings.map((voting) => (
+                                    <VotingCard key={voting._id} voting={voting} />
+                                ))}
+                            </Stack>
+                        ) : (
+                            <Group gap="xs" pl="md">
+                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                <Text size="sm" c="dimmed">
+                                    All clear!
+                                </Text>
+                            </Group>
+                        )}
                     </Stack>
-                ) : (
-                    <Group gap="xs" pl="md">
-                        <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                        <Text size="sm" c="dimmed">
-                            All clear!
-                        </Text>
-                    </Group>
-                )}
-            </Stack>
+                </>
+            ) : (
+                <EmptyState
+                    height={100}
+                    icon="vote-yea"
+                    title="All votes are clear!"
+                    description="Go play some osu!, annoy Albion, or do what you do best."
+                />
+            )}
         </Stack>
     );
 }

@@ -1,16 +1,13 @@
 import { Stack, Title, Group, Text, SimpleGrid, Divider } from "@mantine/core";
 import TicketCard from "../tickets/TicketCard";
 import { ITicket } from "../../../interfaces/Ticket";
+import EmptyState from "../common/EmptyState";
 
 interface IProps {
     reports: ITicket[];
 }
 
 export default function DashboardReportsSection({ reports }: IProps) {
-    if (reports.length === 0) {
-        return null;
-    }
-
     return (
         <Stack gap="md">
             <Divider />
@@ -18,11 +15,20 @@ export default function DashboardReportsSection({ reports }: IProps) {
                 <Title order={3}>Reports</Title>
                 <Text c="dimmed">({reports.length})</Text>
             </Group>
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {reports.map((report) => (
-                    <TicketCard key={report._id} ticket={report} />
-                ))}
-            </SimpleGrid>
+            {reports.length > 0 ? (
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                    {reports.map((report) => (
+                        <TicketCard key={report._id} ticket={report} />
+                    ))}
+                </SimpleGrid>
+            ) : (
+                <EmptyState
+                    height={100}
+                    icon="flag"
+                    title="All reports are clear!"
+                    description={`When in doubt, ping t1g with a "why" for no reason.`}
+                />
+            )}
         </Stack>
     );
 }
