@@ -20,6 +20,7 @@ import MappoolCompliancePage from "../pages/MappoolCompliancePage";
 import TournamentDetailsPage from "../pages/TournamentDetailsPage";
 import QuotesPage from "../pages/QuotesPage";
 import TemplatesPage from "../pages/TemplatesPage";
+import DashboardPage from "../pages/DashboardPage";
 
 interface RouteConfig {
     path: string;
@@ -47,6 +48,13 @@ const routes: RouteConfig[] = [
         title: "Home",
         icon: "home",
         permissions: [],
+    },
+    {
+        path: "/dashboard",
+        page: <DashboardPage />,
+        title: "Dashboard",
+        icon: "chart-line",
+        permissions: ["committee"],
     },
     {
         path: "/error",

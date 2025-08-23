@@ -86,6 +86,7 @@ import beatmapsRouter from "./routers/beatmapsRouter";
 import versionRouter from "./routers/versionRouter";
 import quotesRouter from "./routers/quotesRouter";
 import templatesRouter from "./routers/templatesRouter";
+import dashboardRouter from "./routers/dashboardRouter";
 
 // setup api routes
 const apiRouter = express.Router();
@@ -103,6 +104,7 @@ apiRouter.use("/beatmaps", beatmapsRouter);
 apiRouter.use("/version", versionRouter);
 apiRouter.use("/quotes", quotesRouter);
 apiRouter.use("/templates", templatesRouter);
+apiRouter.use("/dashboard", dashboardRouter);
 
 app.use("/api", apiRouter);
 

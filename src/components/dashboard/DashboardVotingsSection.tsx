@@ -1,0 +1,93 @@
+import { Stack, Title, Group, Text, Divider } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import VotingCard from "../votings/VotingCard";
+import { IVoting } from "../../../interfaces/Voting";
+import { IUser } from "../../../interfaces/User";
+
+interface IProps {
+    votings: IVoting[];
+    user: IUser | null;
+}
+
+export default function DashboardVotingsSection({ votings, user }: IProps) {
+    const checkVotingNeedsVote = (voting: IVoting, user: IUser | null): boolean => {
+        if (!voting.isActive) return false;
+        if (!voting.votes || !user) return false;
+        if (voting.abstainedUsers?.some((abstainedUser) => abstainedUser._id.toString() === user._id.toString()))
+            return false;
+
+        // First check if user is in any of the assigned groups
+        const isInAssignedGroups = voting.assignedGroups.some((group) => {
+            switch (group) {
+                case "tc":
+                    return user.isTournamentCommittee;
+                case "cc":
+                    return user.isContestCommittee;
+                default:
+                    return false;
+            }
+        });
+
+        if (!isInAssignedGroups) return false;
+        return !voting.votes.some((vote) => vote.author && vote.author._id === user._id);
+    };
+
+    // Group votings
+    const votingsNeedingVote = votings.filter((voting) => checkVotingNeedsVote(voting, user));
+    const otherVotings = votings.filter((voting) => !checkVotingNeedsVote(voting, user));
+
+    if (votingsNeedingVote.length === 0 && otherVotings.length === 0) {
+        return null;
+    }
+
+    return (
+        <Stack gap="md">
+            <Divider />
+            <Title order={3}>Votes</Title>
+
+            <Stack gap="sm">
+                <Group align="center" gap="xs">
+                    <Title order={4} c="orange">
+                        Needs Your Vote
+                    </Title>
+                    <Text c="dimmed">({votingsNeedingVote.length})</Text>
+                </Group>
+                {votingsNeedingVote.length > 0 ? (
+                    <Stack gap="md">
+                        {votingsNeedingVote.map((voting) => (
+                            <VotingCard key={voting._id} voting={voting} />
+                        ))}
+                    </Stack>
+                ) : (
+                    <Group gap="xs" pl="md">
+                        <FontAwesomeIcon icon="ghost" style={{ opacity: 0.5 }} />
+                        <Text size="sm" c="dimmed">
+                            Nothing here...
+                        </Text>
+                    </Group>
+                )}
+            </Stack>
+
+            <Stack gap="sm">
+                <Group align="center" gap="xs">
+                    <Title order={4}>Other Active Votes</Title>
+                    <Text c="dimmed">({otherVotings.length})</Text>
+                </Group>
+                {otherVotings.length > 0 ? (
+                    <Stack gap="md">
+                        {otherVotings.map((voting) => (
+                            <VotingCard key={voting._id} voting={voting} />
+                        ))}
+                    </Stack>
+                ) : (
+                    <Group gap="xs" pl="md">
+                        <FontAwesomeIcon icon="ghost" style={{ opacity: 0.5 }} />
+                        <Text size="sm" c="dimmed">
+                            Nothing here...
+                        </Text>
+                    </Group>
+                )}
+            </Stack>
+        </Stack>
+    );
+}
