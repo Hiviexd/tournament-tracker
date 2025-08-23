@@ -34,7 +34,7 @@ export default function DashboardPage() {
                 </Group>
                 <Text c="dimmed">
                     Let's catch up on what needs your attention in the{" "}
-                    {user?.isContestCommittee ? "Contest Committee" : "Tournament Committee"}.
+                    {user?.isTournamentCommittee ? "Tournament Committee" : "Contest Committee"}.
                 </Text>
             </Card>
 
