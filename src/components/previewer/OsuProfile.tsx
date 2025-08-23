@@ -5,6 +5,7 @@ import moment from "moment";
 import { LocalBadge } from "../../hooks/useBadgePreviewer";
 import CountryFlag from "../common/CountryFlag";
 import { IOsuUser } from "../../../interfaces/OsuApi";
+import OsuUserGroupBadge from "./OsuUserGroupBadge";
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -45,6 +46,7 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                             {user.username}
                         </a>
                         {!!user.support_level && <div className="supporter-badge">{renderSupporterHearts()}</div>}
+                        {user.groups && user.groups.map((group) => <OsuUserGroupBadge group={group} />)}
                     </div>
                     {user.title && (
                         <div className="user-title" style={{ color: user.profile_colour || undefined }}>
