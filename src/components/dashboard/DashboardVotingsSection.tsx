@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text } from "@mantine/core";
+import { Stack, Title, Group, Text, Badge } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
@@ -48,7 +48,9 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                             <Title order={4} c="orange">
                                 Needs Your Vote
                             </Title>
-                            <Text c="dimmed">({votingsNeedingVote.length})</Text>
+                            <Badge color="orange" variant="light">
+                                {votingsNeedingVote.length}
+                            </Badge>
                         </Group>
                         {votingsNeedingVote.length > 0 ? (
                             <Stack gap="md">
@@ -69,7 +71,9 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
                             <Title order={4}>Other Active Votes</Title>
-                            <Text c="dimmed">({otherVotings.length})</Text>
+                            <Badge color="gray" variant="light">
+                                {otherVotings.length}
+                            </Badge>
                         </Group>
                         {otherVotings.length > 0 ? (
                             <Stack gap="md">

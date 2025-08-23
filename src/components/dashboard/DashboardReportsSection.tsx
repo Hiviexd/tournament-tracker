@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, SimpleGrid } from "@mantine/core";
+import { Stack, Title, Group, SimpleGrid, Badge } from "@mantine/core";
 import TicketCard from "../tickets/TicketCard";
 import { ITicket } from "../../../interfaces/Ticket";
 import EmptyState from "../common/EmptyState";
@@ -12,7 +12,9 @@ export default function DashboardReportsSection({ reports }: IProps) {
         <Stack gap="md">
             <Group align="center" gap="xs">
                 <Title order={3}>Reports</Title>
-                <Text c="dimmed">({reports.length})</Text>
+                <Badge color="gray" variant="light">
+                    {reports.length}
+                </Badge>
             </Group>
             {reports.length > 0 ? (
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">

@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, SimpleGrid } from "@mantine/core";
+import { Stack, Title, Group, Text, SimpleGrid, Badge } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
@@ -44,7 +44,9 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                             <Title order={4} c="orange">
                                 Needs Your Review
                             </Title>
-                            <Text c="dimmed">({tournamentsNeedingReview.length})</Text>
+                            <Badge color="orange" variant="light">
+                                {tournamentsNeedingReview.length}
+                            </Badge>
                         </Group>
                         {tournamentsNeedingReview.length > 0 ? (
                             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -65,7 +67,9 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
                             <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
-                            <Text c="dimmed">({otherTournaments.length})</Text>
+                            <Badge color="gray" variant="light">
+                                {otherTournaments.length}
+                            </Badge>
                         </Group>
                         {otherTournaments.length > 0 ? (
                             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
