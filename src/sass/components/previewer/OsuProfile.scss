@@ -91,31 +91,39 @@
                     }
                 }
 
-                .supporter-badge {
-                    font-size: 0.75em;
-                    background-color: rgba(255, 102, 171);
-                    padding: 1px 10px;
-                    border-radius: 10px;
-                    color: #fff;
-                }
-
-                .usergroup-badge {
-                    font-size: 0.75em;
-                    height: 1.33em;
-                    text-shadow: none;
-                    background-color: hsla(333, 10%, 10%, .75);
-                    padding: 2px 10px;
-                    border-radius: 20px;
-                    font-weight: 600;
+                .user-badges {
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                    text-decoration: none;
+                    gap: 2px;
 
-                    .gamemode-icons {
-                        padding-left: 3px;
+                    .supporter-badge {
+                        font-size: 0.75em;
+                        background-color: rgba(255, 102, 171);
+                        padding: 1px 10px;
+                        border-radius: 10px;
+                        color: #fff;
+                    }
+
+                    .usergroup-badge {
+                        font-size: 0.75em;
+                        height: 1.33em;
+                        text-shadow: none;
+                        background-color: hsla(333, 10%, 10%, .75);
+                        padding: 2px 10px;
+                        border-radius: 20px;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        text-decoration: none;
+
+                        .gamemode-icons {
+                            padding-left: 3px;
+                        }
                     }
                 }
+
+
             }
 
             .user-title {

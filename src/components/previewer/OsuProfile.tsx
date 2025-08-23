@@ -45,8 +45,10 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                         <a className="username" href={`https://osu.ppy.sh/users/${user.id}`} target="_blank">
                             {user.username}
                         </a>
-                        {!!user.support_level && <div className="supporter-badge">{renderSupporterHearts()}</div>}
-                        {user.groups && user.groups.map((group) => <OsuUserGroupBadge group={group} />)}
+                        <div className="user-badges">
+                            {!!user.support_level && <div className="supporter-badge">{renderSupporterHearts()}</div>}
+                            {user.groups && user.groups.map((group) => <OsuUserGroupBadge group={group} />)}
+                        </div>
                     </div>
                     {user.title && (
                         <div className="user-title" style={{ color: user.profile_colour || undefined }}>
