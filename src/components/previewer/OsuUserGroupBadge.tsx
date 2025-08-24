@@ -20,7 +20,19 @@ export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
 
     if (group.has_listing) {
         return (
-            <Tooltip label={group.name}>
+            <Tooltip
+                label={group.name}
+                arrowSize={10}
+                styles={{
+                    tooltip: {
+                        textAlign: "center",
+                        border: "none",
+                        backgroundColor: "hsl(333, 10%, 10%)",
+                    },
+                    arrow: {
+                        border: "none",
+                    },
+                }}>
                 <a
                     href={`https://osu.ppy.sh/groups/${group.id}`}
                     target="_blank"
@@ -33,7 +45,19 @@ export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
     }
 
     return (
-        <Tooltip label={group.name}>
+        <Tooltip
+            label={group.name}
+            arrowSize={10}
+            styles={{
+                tooltip: {
+                    textAlign: "center",
+                    border: "none",
+                    backgroundColor: "hsl(333, 10%, 10%)",
+                },
+                arrow: {
+                    border: "none",
+                },
+            }}>
             <div className="usergroup-badge" style={{ color: group.colour }}>
                 {userGroupBadgeContent}
             </div>

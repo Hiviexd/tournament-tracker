@@ -81,10 +81,12 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                         multiline
                         miw={100}
                         maw={300}
+                        arrowSize={10}
                         styles={{
                             tooltip: {
                                 textAlign: "center",
                                 border: "none",
+                                backgroundColor: "hsl(333, 10%, 10%)",
                             },
                             arrow: {
                                 border: "none",
