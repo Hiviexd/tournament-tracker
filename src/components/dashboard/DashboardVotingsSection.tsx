@@ -45,10 +45,10 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                 <>
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
-                            <Title order={4} c="orange">
+                            <Title order={4} c={votingsNeedingVote.length > 0 ? "orange" : "white"}>
                                 Needs Your Vote
                             </Title>
-                            <Badge color="orange" variant="light">
+                            <Badge color={votingsNeedingVote.length > 0 ? "orange" : "gray"} variant="light">
                                 {votingsNeedingVote.length}
                             </Badge>
                         </Group>

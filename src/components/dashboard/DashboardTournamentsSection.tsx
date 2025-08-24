@@ -41,10 +41,10 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                 <>
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
-                            <Title order={4} c="orange">
+                            <Title order={4} c={tournamentsNeedingReview.length > 0 ? "orange" : "white"}>
                                 Needs Your Review
                             </Title>
-                            <Badge color="orange" variant="light">
+                            <Badge color={tournamentsNeedingReview.length > 0 ? "orange" : "gray"} variant="light">
                                 {tournamentsNeedingReview.length}
                             </Badge>
                         </Group>
