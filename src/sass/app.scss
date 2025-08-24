@@ -190,6 +190,23 @@ a {
     }
 }
 
+/* Headers */
+.header-border-left {
+    margin-left: .625em;
+
+    &:before {
+        margin-left: -.625em;
+        margin-top: .3em;
+        border-radius: 1000em;
+        content: "";
+        display: block;
+        width: .2em;
+        height: 0.8em;
+        background-color: var(--mantine-color-primary-5);
+        position: absolute;
+    }
+}
+
 /* Triangles background */
 body {
     background-color: var(--mantine-color-primary-11);
