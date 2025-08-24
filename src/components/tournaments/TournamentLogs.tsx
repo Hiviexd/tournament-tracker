@@ -1,4 +1,4 @@
-import { Stack, Group, Text, Timeline, Card, Button, Title, Collapse } from "@mantine/core";
+import { Stack, Group, Text, Timeline, Card, Button, Title, Collapse, Tooltip } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
@@ -67,9 +67,11 @@ export default function TournamentLogs({ tournament }: IProps) {
                                         </Text>
                                     </Group>
                                 }>
-                                <Text size="xs" c="dimmed">
-                                    {moment(log.createdAt).fromNow()}
-                                </Text>
+                                <Tooltip label={moment(log.createdAt).format("LLL")} position="right">
+                                    <Text size="xs" c="dimmed" w="fit-content">
+                                        {moment(log.createdAt).fromNow()}
+                                    </Text>
+                                </Tooltip>
                             </Timeline.Item>
                         ))}
                     </Timeline>
