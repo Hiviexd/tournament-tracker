@@ -47,7 +47,19 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                         </a>
                         <div className="user-badges">
                             {!!user.support_level && (
-                                <Tooltip label="osu!supporter">
+                                <Tooltip
+                                    label="osu!supporter"
+                                    arrowSize={10}
+                                    styles={{
+                                        tooltip: {
+                                            textAlign: "center",
+                                            border: "none",
+                                            backgroundColor: "hsl(333, 10%, 10%)",
+                                        },
+                                        arrow: {
+                                            border: "none",
+                                        },
+                                    }}>
                                     <div className="supporter-badge">{renderSupporterHearts()}</div>
                                 </Tooltip>
                             )}
