@@ -12,7 +12,7 @@ export default function TournamentReports({ reports }: IProps) {
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
-                <Text size="sm" fw={500}>
+                <Text size="sm" fw={500} className="header-border-left">
                     Reports
                 </Text>
                 <Tooltip multiline w={240} label="Only shows reports matching the tournament's name or forum URL">

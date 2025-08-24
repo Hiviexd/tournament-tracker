@@ -12,7 +12,7 @@ export default function TournamentVotings({ votings }: IProps) {
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
-                <Text size="sm" fw={500}>
+                <Text size="sm" fw={500} className="header-border-left">
                     Votes
                 </Text>
                 <Tooltip multiline w={230} label="Only shows votes matching the tournament's name or forum URL">

@@ -35,7 +35,9 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
 
     return (
         <Stack gap="md">
-            <Title order={3}>{_.capitalize(typeString)}</Title>
+            <Title order={3} className="header-border-left">
+                {_.capitalize(typeString)}
+            </Title>
 
             {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
                 <>

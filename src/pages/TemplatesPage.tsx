@@ -100,7 +100,9 @@ export default function TemplatesPage() {
                         <Card key={category} shadow="sm" p="lg">
                             <Stack gap="md">
                                 <Group justify="space-between" align="center">
-                                    <Title order={4}>{category}</Title>
+                                    <Title order={4} className="header-border-left">
+                                        {category}
+                                    </Title>
                                     <Text size="sm" c="dimmed">
                                         {templates.length} template{templates.length !== 1 ? "s" : ""}
                                     </Text>

@@ -11,7 +11,9 @@ export default function DashboardTicketsSection({ tickets }: IProps) {
     return (
         <Stack gap="md">
             <Group align="center" gap="xs">
-                <Title order={3}>Tickets</Title>
+                <Title order={3} className="header-border-left">
+                    Tickets
+                </Title>
                 <Badge color="gray" variant="light">
                     {tickets.length}
                 </Badge>

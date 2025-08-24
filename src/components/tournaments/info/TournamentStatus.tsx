@@ -64,7 +64,7 @@ export default function TournamentStatus({ tournament }: IProps) {
         <Group align="flex-start">
             <Stack gap={5} style={{ flex: 1 }}>
                 <Group gap="xs" align="center">
-                    <Text size="sm" fw={500}>
+                    <Text size="sm" fw={500} className="header-border-left">
                         Status
                     </Text>
                     {isEditingStatus ? (

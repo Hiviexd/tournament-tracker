@@ -107,7 +107,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
             {REVIEW_CHECKLIST.map((category) => (
                 <Stack key={category.category} gap="xs">
-                    <Text fw={400} size="sm" c="dimmed">
+                    <Text fw={400} size="sm" c="dimmed" className="header-border-left">
                         {category.category}
                     </Text>
                     {category.items.map((item) => (

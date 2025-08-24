@@ -44,7 +44,7 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
                 </Title>
                 {onEdit && (
                     <Tooltip label="Edit resource">
-                        <ActionIcon variant="subtle" onClick={handleClick} aria-label="Edit resource">
+                        <ActionIcon variant="subtle" color="info" onClick={handleClick} aria-label="Edit resource">
                             <FontAwesomeIcon icon="edit" />
                         </ActionIcon>
                     </Tooltip>

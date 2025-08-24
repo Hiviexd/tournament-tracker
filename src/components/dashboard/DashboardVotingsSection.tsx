@@ -39,7 +39,9 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
 
     return (
         <Stack gap="md">
-            <Title order={3}>Votes</Title>
+            <Title order={3} className="header-border-left">
+                Votes
+            </Title>
 
             {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
                 <>

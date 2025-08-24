@@ -36,7 +36,7 @@ export default function TournamentEnchantUrl({ tournament }: IProps) {
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
-                <Text size="sm" fw={500}>
+                <Text size="sm" fw={500} className="header-border-left">
                     Enchant Ticket
                 </Text>
                 {isEditingEnchantUrl ? (

@@ -140,7 +140,9 @@ export default function ArticlePage() {
                 {!isPredefined && (
                     <Stack gap="xs">
                         <Group align="center">
-                            <Title order={2}>{article.title}</Title>
+                            <Title order={2} className="header-border-left">
+                                {article.title}
+                            </Title>
                             {user?.isCommittee && (
                                 <Group gap="xs">
                                     <Tooltip label="Edit article">

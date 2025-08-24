@@ -11,7 +11,9 @@ export default function DashboardReportsSection({ reports }: IProps) {
     return (
         <Stack gap="md">
             <Group align="center" gap="xs">
-                <Title order={3}>Reports</Title>
+                <Title order={3} className="header-border-left">
+                    Reports
+                </Title>
                 <Badge color="gray" variant="light">
                     {reports.length}
                 </Badge>
