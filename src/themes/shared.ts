@@ -35,6 +35,7 @@ export const baseComponents: MantineThemeComponents = {
         defaultProps: {
             withArrow: true,
             color: "primary.11",
+            arrowSize: 8,
         },
         styles: {
             tooltip: {
