@@ -10,12 +10,22 @@ interface IPropTypes {
     username?: string;
     avatarUrl?: string;
     group?: UserGroup;
+    tooltips?: "top" | "right" | "bottom" | "left";
     asText?: boolean;
     disablePopover?: boolean;
     showCountryFlag?: boolean;
 }
 
-export default function UserDisplay({ user, username, avatarUrl, group, asText, disablePopover = false, showCountryFlag = false }: IPropTypes) {
+export default function UserDisplay({
+    user,
+    username,
+    avatarUrl,
+    group,
+    asText,
+    tooltips,
+    disablePopover = false,
+    showCountryFlag = false,
+}: IPropTypes) {
     const avatarSrc = avatarUrl ?? user?.avatarUrl;
     const { loading, error } = useImageLoad(avatarSrc);
 
@@ -58,9 +68,9 @@ export default function UserDisplay({ user, username, avatarUrl, group, asText, 
                 />
                 <Group gap="0.5rem" align="center">
                     {showCountryFlag && user?.country && <CountryFlag country={user.country} />}
-                    {group && <UserGroupBadge group={group as BadgedUserGroup} />}
+                    {group && <UserGroupBadge group={group as BadgedUserGroup} tooltip={tooltips} />}
                     {userGroups?.map((g) => (
-                        <UserGroupBadge key={g} group={g} />
+                        <UserGroupBadge key={g} group={g} tooltip={tooltips} />
                     ))}
                 </Group>
             </Stack>
