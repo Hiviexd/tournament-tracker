@@ -123,35 +123,37 @@ const LoadingState = () => (
         </Stack>
 
         {/* Reports/Tickets Section Skeleton */}
-        <Stack gap="md">
-            <Divider />
-            <Skeleton height={24} width="20%" />
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {[1, 2, 3].map((i) => (
-                    <Card
-                        key={i}
-                        shadow="sm"
-                        p="lg"
-                        radius="md"
-                        className="ticket-card"
-                        style={{
-                            "--card-status-color": "var(--mantine-color-primary-6)",
-                        }}>
-                        <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
-                            <Stack gap="xs">
-                                <Skeleton height={24} width="80%" />
-                                <Skeleton height={16} width={120} />
+        {Array.from({ length: 2 }).map(() => (
+            <Stack gap="md">
+                <Divider />
+                <Skeleton height={24} width="20%" />
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                    {[1, 2, 3].map((i) => (
+                        <Card
+                            key={i}
+                            shadow="sm"
+                            p="lg"
+                            radius="md"
+                            className="ticket-card"
+                            style={{
+                                "--card-status-color": "var(--mantine-color-primary-6)",
+                            }}>
+                            <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
+                                <Stack gap="xs">
+                                    <Skeleton height={24} width="80%" />
+                                    <Skeleton height={16} width={120} />
+                                </Stack>
+                                <Group mt="auto">
+                                    <Skeleton height={22} width={40} radius="xl" />
+                                    <Skeleton height={22} width={40} radius="xl" />
+                                    <Skeleton height={22} width={40} radius="xl" />
+                                    <Skeleton height={22} width={80} radius="xl" />
+                                </Group>
                             </Stack>
-                            <Group mt="auto">
-                                <Skeleton height={22} width={40} radius="xl" />
-                                <Skeleton height={22} width={40} radius="xl" />
-                                <Skeleton height={22} width={40} radius="xl" />
-                                <Skeleton height={22} width={80} radius="xl" />
-                            </Group>
-                        </Stack>
-                    </Card>
-                ))}
-            </SimpleGrid>
-        </Stack>
+                        </Card>
+                    ))}
+                </SimpleGrid>
+            </Stack>
+        ))}
     </Stack>
 );
