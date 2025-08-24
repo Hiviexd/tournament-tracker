@@ -60,12 +60,7 @@ export default function TournamentBanner({ tournament }: IProps) {
                             onFocus={(event) => event.target.select()}
                         />
                     </FocusTrap>
-                    <ActionIcon
-                        variant="subtle"
-                        onClick={handleBannerUrlSave}
-                        color="success"
-                        title="Save"
-                        disabled={!bannerUrl.trim()}>
+                    <ActionIcon variant="subtle" onClick={handleBannerUrlSave} color="success" title="Save">
                         <FontAwesomeIcon icon="save" />
                     </ActionIcon>
                 </Group>

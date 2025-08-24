@@ -474,7 +474,7 @@ class TournamentsController {
             }
         }
         if (isActive !== undefined) tournament.isActive = isActive;
-        if (bannerUrl) tournament.bannerUrl = bannerUrl;
+        if (typeof bannerUrl === "string") tournament.bannerUrl = bannerUrl;
         if (winners) tournament.winners = winners;
 
         await tournament.save();
