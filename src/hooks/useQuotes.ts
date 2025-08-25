@@ -9,6 +9,9 @@ export function useRandomQuote() {
                 method: "get",
                 url: "/api/quotes",
             }),
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     });
 }
 
