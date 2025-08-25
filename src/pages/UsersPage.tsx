@@ -36,13 +36,21 @@ export default function UsersPage() {
             <CycleBagModal opened={cycleBagModalOpened} onClose={closeCycleBagModal} />
             <Card shadow="sm" p="md">
                 <Stack gap="lg">
-                    <UserSearch label="Load or create user" width="100%" onChange={handleUserSelect} allowUserCreation />
+                    <UserSearch
+                        label="Load or create user"
+                        width="100%"
+                        onChange={handleUserSelect}
+                        allowUserCreation
+                    />
                     <Group justify="flex-start">
-                        <Button variant="light" onClick={openEmailsModal} leftSection={<FontAwesomeIcon icon="envelope" />}>
-                        Show emails list
+                        <Button
+                            variant="light"
+                            onClick={openEmailsModal}
+                            leftSection={<FontAwesomeIcon icon="envelope" />}>
+                            Show emails list
                         </Button>
-                        <Button variant="light" onClick={openCycleBag} leftSection={<FontAwesomeIcon icon="shuffle" />}>
-                            Cycle bag
+                        <Button variant="light" onClick={openCycleBag} leftSection={<FontAwesomeIcon icon="rotate" />}>
+                            Cycle Assignments
                         </Button>
                     </Group>
                 </Stack>
