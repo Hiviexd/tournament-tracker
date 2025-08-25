@@ -42,10 +42,14 @@ export default function UserMenu({ user }: IProps) {
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>
-                    <Menu.Item component={Link} to="/dashboard" leftSection={<FontAwesomeIcon icon="table-columns" />}>
-                        Dashboard
-                    </Menu.Item>
-                    <Menu.Divider />
+                    {user.isCommittee && (
+                        <>
+                            <Menu.Item component={Link} to="/dashboard" leftSection={<FontAwesomeIcon icon="table-columns" />}>
+                                Dashboard
+                            </Menu.Item>
+                            <Menu.Divider />
+                        </>
+                    )}
                     <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>
