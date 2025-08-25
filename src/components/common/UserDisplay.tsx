@@ -1,8 +1,7 @@
-import { Stack, Group, Avatar, Loader } from "@mantine/core";
+import { Stack, Group, Avatar } from "@mantine/core";
 import { IUser, type UserGroup, type BadgedUserGroup } from "../../../interfaces/User";
 import UserGroupBadge from "./badges/UserGroupBadge";
 import UserLink from "./UserLink";
-import { useImageLoad } from "../../hooks/useImageLoad";
 import CountryFlag from "./CountryFlag";
 
 interface IPropTypes {
@@ -26,9 +25,6 @@ export default function UserDisplay({
     disablePopover = false,
     showCountryFlag = false,
 }: IPropTypes) {
-    const avatarSrc = avatarUrl ?? user?.avatarUrl;
-    const { loading, error } = useImageLoad(avatarSrc);
-
     let userGroups: BadgedUserGroup[] | null;
 
     if (user?.groups) {
@@ -39,25 +35,7 @@ export default function UserDisplay({
 
     return (
         <Group align="center" gap="sm">
-            <div style={{ position: "relative", display: "inline-block" }}>
-                <Avatar
-                    src={error ? undefined : avatarSrc}
-                    size={40}
-                    radius="md"
-                    style={{ opacity: loading ? 0 : 1 }}
-                />
-                {loading && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                        }}>
-                        <Loader size="xs" color="primary" />
-                    </div>
-                )}
-            </div>
+            <Avatar src={avatarUrl ?? user?.avatarUrl} size={40} radius="md" />
             <Stack gap={2}>
                 <UserLink
                     user={user}

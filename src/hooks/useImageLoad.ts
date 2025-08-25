@@ -14,6 +14,7 @@ interface UseImageLoadReturn {
 
 /**
  * Hook to load an image and track its loading state
+ * @warn This hook is stupid and should avoid using it on anything that's prone to regular state changes because of flickering
  * @param src - The source URL of the image
  * @param options - Optional parameters
  * @param options.onLoad - Callback function to be called when the image loads successfully
