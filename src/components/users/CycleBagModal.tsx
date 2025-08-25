@@ -4,6 +4,9 @@ import UserDisplay from "../common/UserDisplay";
 import { useState } from "react";
 import { IUser } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import AlertText from "../common/AlertText";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
     opened: boolean;
@@ -11,11 +14,12 @@ interface IProps {
 }
 
 export default function CycleBagModal({ opened, onClose }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const { data: committeeUsers, isLoading } = useCommitteeUsers();
     const cycleBagMutation = useCycleBag();
-    const [bagResponse, setBagResponse] = useState<{ message: string; reviewers: any[] } | null>(null);
+    const [bagResponse, setBagResponse] = useState<{ message: string; reviewers: IUser[] } | null>(null);
 
-    const sortedUsers = committeeUsers?.sort((a, b) => {
+    const sortedUsers = committeeUsers?.sort((a: IUser, b: IUser) => {
         return a.username.localeCompare(b.username);
     });
 
@@ -29,7 +33,7 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
         setBagResponse(response);
     };
 
-    const renderUserRows = (users: any[]) => {
+    const renderUserRows = (users: IUser[]) => {
         return users.map((user) => (
             <Table.Tr key={user._id}>
                 <Table.Td>
@@ -50,14 +54,12 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
             ) : (
                 <Stack gap="md">
                     <Group justify="space-between" align="center">
-                        <Text size="sm" c="dimmed">
-                            TC members grouped by selection pool status
-                        </Text>
+                        <AlertText type="warning" text="Avoid using this button unless investigating issues" />
                         <Button
                             leftSection={<FontAwesomeIcon icon="rotate" />}
                             onClick={handleCycleBag}
                             loading={cycleBagMutation.isPending}
-                            disabled={cycleBagMutation.isPending}>
+                            disabled={!user?.isAdmin}>
                             Cycle Assignments
                         </Button>
                     </Group>
@@ -67,11 +69,11 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
                             <Text size="sm" fw={500}>
                                 Members removed from selection pool:
                             </Text>
-                            <Stack gap="xs" mt="xs">
+                            <Group gap="xl" mt="xs">
                                 {bagResponse.reviewers.map((reviewer, index) => (
                                     <UserDisplay key={index} user={reviewer} />
                                 ))}
-                            </Stack>
+                            </Group>
                         </Alert>
                     )}
 
