@@ -14,11 +14,11 @@ export default function AlertText({ text, type, size = "sm", icon }: IProps) {
         success: "circle-check",
         warning: "exclamation-triangle",
         danger: "circle-xmark",
-        info: "info",
+        info: "circle-info",
     };
     return (
         <Text fw={500} size={size} c={type}>
-            <FontAwesomeIcon icon={icon ?? IconTypeMap[type] as IconProp} /> {text}
+            <FontAwesomeIcon icon={icon ?? (IconTypeMap[type] as IconProp)} /> {text}
         </Text>
     );
 }
