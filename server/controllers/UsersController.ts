@@ -406,6 +406,16 @@ class UsersController {
 
         res.json(stats);
     }
+
+    /** PATCH cycle bag */
+    public async cycleBag(req: Request, res: Response) {
+        const reviewers = await UserService.assignReviewers("tc");
+
+        res.json({
+            message: "Assignments cycled successfully!",
+            reviewers,
+        });
+    }
 }
 
 export default new UsersController();

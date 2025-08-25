@@ -237,3 +237,18 @@ export function useReviewStats(userId: string) {
         enabled: !!userId,
     });
 }
+
+export function useCycleBag() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () =>
+            utils.apiCall<{ message: string; reviewers: IUser[] }>({
+                method: "patch",
+                url: "/api/users/cycleBag",
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+        },
+    });
+}
