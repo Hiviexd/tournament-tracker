@@ -103,7 +103,7 @@ class UserService {
         };
 
         // Add exclusion filter if users to exclude are provided
-        const excludeQuery = usersToExclude.length > 0 ? { ...baseQuery, _id: { $nin: usersToExclude } } : baseQuery;
+        let excludeQuery = usersToExclude.length > 0 ? { ...baseQuery, _id: { $nin: usersToExclude } } : baseQuery;
 
         const totalUsersCount = await User.countDocuments(excludeQuery);
 
@@ -117,7 +117,16 @@ class UserService {
             inBag: true,
         });
 
+        const selectedUsers: IUser[] = [];
+
         if (users.length < 2) {
+            // if there's 1 user, assign them and add them to the exclude list
+            if (users.length === 1) {
+                selectedUsers.push(users[0]);
+                usersToExclude.push(users[0]._id);
+                excludeQuery = { ...baseQuery, _id: { $nin: usersToExclude } };
+            }
+
             // Reset only relevant users
             await User.updateMany(excludeQuery, { $set: { inBag: true } });
 
@@ -128,7 +137,7 @@ class UserService {
             });
         }
 
-        const selectedUsers: IUser[] = _.sampleSize(users, 2);
+        selectedUsers.push(..._.sampleSize(users, selectedUsers.length === 0 ? 2 : 1));
 
         await User.updateMany({ _id: { $in: selectedUsers.map((user) => user._id) } }, { $set: { inBag: false } });
 
