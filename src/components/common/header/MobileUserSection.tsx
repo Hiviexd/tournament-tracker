@@ -25,6 +25,11 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
         navigate("/dashboard");
     };
 
+    const handleYourTournaments = () => {
+        onClose();
+        navigate(`/tournaments?host=${user?.osuId}&state=all`);
+    };
+
     const handleCustomize = () => {
         onClose();
         onOpenCustomize();
@@ -56,6 +61,13 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
                             </Group>
                         </UnstyledButton>
                     )}
+
+                    <UnstyledButton onClick={handleYourTournaments}>
+                        <Group>
+                            <FontAwesomeIcon icon="trophy" />
+                            <Text size="sm">Your Tournaments</Text>
+                        </Group>
+                    </UnstyledButton>
 
                     <UnstyledButton onClick={handleCustomize}>
                         <Group>

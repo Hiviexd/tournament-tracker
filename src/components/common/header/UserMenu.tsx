@@ -43,13 +43,14 @@ export default function UserMenu({ user }: IProps) {
                 <Menu.Dropdown>
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>
                     {user.isCommittee && (
-                        <>
-                            <Menu.Item component={Link} to="/dashboard" leftSection={<FontAwesomeIcon icon="table-columns" />}>
-                                Dashboard
-                            </Menu.Item>
-                            <Menu.Divider />
-                        </>
+                        <Menu.Item component={Link} to="/dashboard" leftSection={<FontAwesomeIcon icon="table-columns" />}>
+                            Dashboard
+                        </Menu.Item>
                     )}
+                    <Menu.Item component={Link} to={`/tournaments?host=${user.osuId}&state=all`} leftSection={<FontAwesomeIcon icon="trophy" />}>
+                        Your Tournaments
+                    </Menu.Item>
+                    {user.isCommittee && <Menu.Divider />}
                     <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>
