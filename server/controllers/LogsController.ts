@@ -26,6 +26,7 @@ class LogsController {
         if (reqQuery.category) dbQuery.category = reqQuery.category;
         if (reqQuery.type === "system") dbQuery.isSystemLog = true;
         if (reqQuery.type === "user") dbQuery.isSystemLog = false;
+        if (reqQuery.content) dbQuery.action = { $regex: reqQuery.content, $options: "i" };
 
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;

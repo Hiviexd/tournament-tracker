@@ -10,6 +10,7 @@ interface FilterValues {
     user: string;
     category: LogCategory;
     type: string;
+    content: string;
 }
 
 export default function LogsPage() {
@@ -20,6 +21,7 @@ export default function LogsPage() {
             category: parseAsString.withDefault(""),
             type: parseAsString.withDefault(""),
             page: parseAsInteger.withDefault(1),
+            content: parseAsString.withDefault(""),
         },
         {
             // Only include non-default values in URL
@@ -32,6 +34,7 @@ export default function LogsPage() {
         user: queryState.user,
         category: queryState.category as LogCategory,
         type: queryState.type,
+        content: queryState.content,
     };
 
     const handleFilterChange = (newFilters: FilterValues) => {
@@ -39,13 +42,15 @@ export default function LogsPage() {
         const filterChanged =
             newFilters.user !== filters.user ||
             newFilters.category !== filters.category ||
-            newFilters.type !== filters.type;
+            newFilters.type !== filters.type ||
+            newFilters.content !== filters.content;
 
         setQueryState({
             user: newFilters.user,
             category: newFilters.category,
             type: newFilters.type,
             page: filterChanged ? 1 : queryState.page,
+            content: newFilters.content,
         });
     };
 
@@ -61,6 +66,7 @@ export default function LogsPage() {
         category: queryState.category as LogCategory,
         type: queryState.type,
         page: queryState.page,
+        content: queryState.content
     });
 
     const LoadingState = () => (

@@ -6,6 +6,7 @@ export type LogCategory = "account" | "user" | "tournament" | "voting" | "ticket
 export interface LogQueryParams {
     user?: IUser;
     category?: LogCategory;
+    action?: { $regex: string; $options: string };
     isSystemLog?: boolean;
     page?: number;
 }
@@ -14,6 +15,7 @@ export interface LogListQuery {
     user?: string;
     category?: LogCategory;
     type?: string;
+    content?: string;
     page?: number;
 }
 

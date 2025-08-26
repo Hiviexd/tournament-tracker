@@ -1,4 +1,5 @@
-import { Card, Stack, Select, SimpleGrid, Button, Group } from "@mantine/core";
+import { Card, Stack, Select, SimpleGrid, Button, Group, TextInput } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LogCategory } from "../../../interfaces/Log";
 import UserSearch from "../common/UserSearch";
@@ -6,11 +7,13 @@ import { IUser } from "../../../interfaces/User";
 import { useExportLogsCsv } from "../../hooks/useLogs";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
+import { useState } from "react";
 
 interface FilterValues {
     user: string;
     category: LogCategory;
     type: string;
+    content: string;
 }
 
 interface IProps {
@@ -21,6 +24,21 @@ interface IProps {
 export default function LogsFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const exportCsvMutation = useExportLogsCsv();
+
+        // Local state for immediate UI updates
+        const [contentInput, setContentInput] = useState(values.content);
+
+    // debounced callback for content search
+    const debouncedContentSearch = useDebouncedCallback((value: string) => {
+        setContentInput(value);
+        onChange({ ...values, content: value });
+    }, 500);
+
+    const handleContentSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setContentInput(value);
+        debouncedContentSearch(value);
+    };
 
     const categoryOptions = [
         { value: "account", label: "Account" },
@@ -51,14 +69,21 @@ export default function LogsFilters({ values, onChange }: IProps) {
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
-                <UserSearch
-                    placeholder="Search by username or osu! ID..."
-                    leftSection={<FontAwesomeIcon icon="user" />}
-                    onChange={handleUserSelect}
-                    width="100%"
-                    allowUserCreation
-                />
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <UserSearch
+                        placeholder="Search by username or osu! ID..."
+                        leftSection={<FontAwesomeIcon icon="user" />}
+                        onChange={handleUserSelect}
+                        width="100%"
+                        allowUserCreation
+                    />
+                    <TextInput
+                        placeholder="Search by content"
+                        leftSection={<FontAwesomeIcon icon="search" />}
+                        value={contentInput}
+                        onChange={handleContentSearch}
+                        //rightSection={values.content ? <FontAwesomeIcon icon="times" onClick={() => handleChange("content", "")} /> : null}
+                    />
                     <Select
                         placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
@@ -77,13 +102,13 @@ export default function LogsFilters({ values, onChange }: IProps) {
                     />
                 </SimpleGrid>
                 {user?.isAdmin && (
-                <Group>
-                    <Button
-                        leftSection={<FontAwesomeIcon icon="download" />}
-                        onClick={handleExportCsv}
-                        variant="light"
-                        loading={exportCsvMutation.isPending}
-                        disabled={exportCsvMutation.isPending}>
+                    <Group>
+                        <Button
+                            leftSection={<FontAwesomeIcon icon="download" />}
+                            onClick={handleExportCsv}
+                            variant="light"
+                            loading={exportCsvMutation.isPending}
+                            disabled={exportCsvMutation.isPending}>
                             Export to CSV
                         </Button>
                     </Group>
