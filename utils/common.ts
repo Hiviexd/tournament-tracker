@@ -19,6 +19,14 @@ export function isNumeric(str: string): boolean {
 }
 
 /**
+ * Checks if a string is only Latin script (no Cyrillic, Chinese, etc.)
+ * @param input String to check
+ */
+export function isLatinScriptOnly(input: string): boolean {
+    return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(input);
+}
+
+/**
  * Checks if a link is an osu! forum topic link
  * @param link Link to check
  */
