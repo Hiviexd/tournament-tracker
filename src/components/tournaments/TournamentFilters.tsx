@@ -1,5 +1,5 @@
 import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox, Group, SegmentedControl, Box } from "@mantine/core";
-import { useDebouncedCallback } from "@mantine/hooks";
+import { useDebouncedCallback, useIsFirstRender } from "@mantine/hooks";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/Tournament";
@@ -27,6 +27,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [viewMode, setViewMode] = useLocalPreference<"cards" | "table" | "review">("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
+    const isFirstRender = useIsFirstRender();
 
     // Local state for immediate UI updates
     const [searchInput, setSearchInput] = useState(values.search);
@@ -49,6 +50,9 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const handleHostSelect = (user: IUser | null) => {
         handleChange("host", user ? user.osuId.toString() : "");
     };
+
+    // Preload user from host query on first render
+    const preloadUser = isFirstRender && values.host ? values.host : undefined;
 
     const handleViewModeChange = (value: string) => {
         const newMode = value as "cards" | "table" | "review";
@@ -87,6 +91,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         placeholder="Search by tournament host..."
                         leftSection={<FontAwesomeIcon icon="user" />}
                         onChange={handleHostSelect}
+                        preloadUser={preloadUser}
                     />
                     <Select
                         placeholder="Filter by game mode"
