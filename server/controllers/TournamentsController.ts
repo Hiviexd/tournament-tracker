@@ -265,6 +265,10 @@ class TournamentsController {
             return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
         }
 
+        if (name && !utils.isLatinScriptOnly(name)) {
+            return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
+        }
+
         const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
 
         const tournament = new Tournament({

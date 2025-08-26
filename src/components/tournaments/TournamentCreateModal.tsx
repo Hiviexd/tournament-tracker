@@ -29,7 +29,11 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             tags: [] as string[],
         },
         validate: {
-            name: (value) => (!value ? "Name is required" : null),
+            name: (value) => {
+                if (!value) return "Name is required";
+                if (!utils.isLatinScriptOnly(value)) return "Name must be in Latin script (no Cyrillic, Chinese, etc.)";
+                return null;
+            },
             hostId: (value) => (!value ? "Host is required" : null),
             modes: (value) => (value.length === 0 ? "At least one game mode is required" : null),
             type: (value) => (!value ? "Type is required" : null),
