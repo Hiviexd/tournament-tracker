@@ -415,6 +415,12 @@ class UsersController {
             message: "Assignments cycled successfully!",
             reviewers,
         });
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `Cycled tournament reviewers and got: ${reviewers.map((u) => `[**${u.username}**](${u.osuProfileUrl})`).join(", ")}`,
+            "user"
+        );
     }
 }
 
