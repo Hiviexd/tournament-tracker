@@ -18,6 +18,7 @@ interface IProps {
     allowUserCreation?: boolean;
     disabled?: boolean;
     onEnterWhenSelected?: () => void;
+    preloadUser?: string;
 }
 
 export interface UserSearchRef {
@@ -36,10 +37,11 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
         allowUserCreation = false,
         disabled = false,
         onEnterWhenSelected,
+        preloadUser,
     }: IProps,
     ref
 ) {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(preloadUser || "");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const { data: users = [], isLoading } = useUsers(debouncedSearch, 5);
@@ -47,10 +49,17 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
     const combobox = useCombobox();
     const buttonRef = useRef<HTMLButtonElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const hasAutoSelected = useRef(false);
 
     const isSearchComplete = search === debouncedSearch && !isLoading;
     const isLoaderVisible = isLoading || createUserMutation.isPending;
     const shouldShowDropdown = search && !isLoaderVisible && (isLoading || users.length > 0 || isSearchComplete);
+
+    // Auto-select first user when preloadUser search completes
+    if (preloadUser && isSearchComplete && users.length > 0 && !selectedUser && !hasAutoSelected.current) {
+        hasAutoSelected.current = true;
+        setTimeout(() => handleSelect(users[0]), 0);
+    }
 
     useImperativeHandle(ref, () => ({
         clearSelection: () => handleSelect(null),
