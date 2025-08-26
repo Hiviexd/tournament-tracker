@@ -1,4 +1,4 @@
-import { Table, Group, Badge, Text, ScrollArea, Card } from "@mantine/core";
+import { Table, Group, Badge, Text, ScrollArea, Card, Tooltip } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
@@ -11,6 +11,7 @@ import _ from "lodash";
 import config from "../../../config.json";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     tournaments: ITournament[];
@@ -23,6 +24,12 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
 
     const getDiscordThreadLink = (tournament: ITournament) => {
         return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
+    };
+
+    const potentiallyNeedsReview = (tournament: ITournament) => {
+        const validStatuses = ["supportRequestReceived", "screeningConcluded"];
+        if (!validStatuses.includes(tournament.status) || !tournament.endDate) return false;
+        return new Date(tournament.endDate) < new Date();
     };
 
     return (
@@ -67,6 +74,13 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                     <Table.Td>
                                         <Group gap="xs">
                                             <TournamentStatusBadge status={tournament.status} />
+                                            {potentiallyNeedsReview(tournament) && (
+                                                <Tooltip multiline w={220} label="Tournament ended, potentially movable to review phase">
+                                                    <Badge color="yellow" variant="light">
+                                                        <FontAwesomeIcon icon="exclamation-triangle" />
+                                                    </Badge>
+                                                </Tooltip>
+                                            )}
                                             <ReviewStatusBadge tournament={tournament} user={user} />
                                         </Group>
                                     </Table.Td>
