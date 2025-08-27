@@ -1,4 +1,4 @@
-import { Card, Group, Skeleton, Stack } from "@mantine/core";
+import { Card, Group, Skeleton, Stack, Divider } from "@mantine/core";
 import { useParams, useLocation, Navigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
@@ -63,6 +63,8 @@ export default function TicketDetailsPage() {
                     </Stack>
                 </Card>
 
+                <Divider my="sm" />
+
                 {/* TicketMessages skeleton */}
                 <Card shadow="sm" p="lg">
                     <Stack gap="md">
@@ -78,6 +80,8 @@ export default function TicketDetailsPage() {
                         ))}
                     </Stack>
                 </Card>
+
+                <Divider my="sm" />
 
                 {/* TicketMessageForm skeleton */}
                 <Card shadow="sm" p="lg">
@@ -110,8 +114,14 @@ export default function TicketDetailsPage() {
     return (
         <Stack gap="md">
             <TicketInfo ticket={ticket} />
+            <Divider my="sm" />
             <TicketMessages ticket={ticket} />
-            {showMessageForm && <TicketMessageForm ticket={ticket} />}
+            {showMessageForm && (
+                <>
+                    <Divider my="sm" />
+                    <TicketMessageForm ticket={ticket} />
+                </>
+            )}
         </Stack>
     );
 }
