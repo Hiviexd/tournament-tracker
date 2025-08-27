@@ -15,7 +15,7 @@ export default function TournamentReports({ reports }: IProps) {
                 <Text size="sm" fw={500} className="header-border-left">
                     Reports
                 </Text>
-                <Tooltip multiline w={240} label="Only shows reports matching the tournament's name or forum URL">
+                <Tooltip multiline w={232} label="Only shows reports matching the tournament's name or forum URL">
                     <FontAwesomeIcon icon="exclamation-circle" size="sm" style={{ opacity: 0.6 }} />
                 </Tooltip>
                 <Badge color={reports.length > 0 ? "red" : "gray"} variant="light" size="sm">

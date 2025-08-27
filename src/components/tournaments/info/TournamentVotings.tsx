@@ -15,7 +15,7 @@ export default function TournamentVotings({ votings }: IProps) {
                 <Text size="sm" fw={500} className="header-border-left">
                     Votes
                 </Text>
-                <Tooltip multiline w={230} label="Only shows votes matching the tournament's name or forum URL">
+                <Tooltip multiline w={232} label="Only shows votes matching the tournament's name or forum URL">
                     <FontAwesomeIcon icon="exclamation-circle" size="sm" style={{ opacity: 0.6 }} />
                 </Tooltip>
                 <Badge color={votings.length > 0 ? "blue" : "gray"} variant="light" size="sm">
