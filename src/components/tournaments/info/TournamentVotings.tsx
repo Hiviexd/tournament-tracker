@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../../interfaces/Voting";
 import UserLink from "../../common/UserLink";
 import DateBadge from "../../common/badges/DateBadge";
+import { TruncatedText } from "../../common/TruncatedText";
 
 interface IProps {
     votings: IVoting[];
@@ -41,9 +42,9 @@ export default function TournamentVotings({ votings }: IProps) {
                         className="tournament-voting-card">
                         <Group justify="space-between" align="flex-start" gap="xs">
                             <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                                <Text size="sm" fw={500} lineClamp={1}>
+                                <TruncatedText lineClamp={1} textProps={{ size: "sm", fw: 500 }}>
                                     {voting.title}
-                                </Text>
+                                </TruncatedText>
                                 <Text size="xs" c="dimmed">
                                     by <UserLink user={voting.author} />
                                 </Text>
