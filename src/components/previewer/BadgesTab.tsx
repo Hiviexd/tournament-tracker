@@ -43,6 +43,17 @@ export default function BadgesTab({ skeleton }: IProps) {
         profile_colour: "#E45678",
         title: "w00t p00t",
         support_level: 3,
+        groups: [
+            {
+                has_listing: false,
+                has_playmodes: false,
+                id: 29,
+                identifier: "bot",
+                is_probationary: false,
+                name: "Chat Bots",
+                short_name: "BOT",
+            },
+        ],
         badges: [
             {
                 awarded_at: new Date("2024-12-01"),
