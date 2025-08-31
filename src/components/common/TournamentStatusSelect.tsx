@@ -12,7 +12,6 @@ interface TournamentStatusSelectProps {
     searchable?: boolean;
     disabled?: boolean;
     allowDeselect?: boolean;
-    includeAdminOnly?: boolean; // Whether to include admin-only options
 }
 
 const StatusOption = forwardRef<HTMLDivElement, { value: string; label: string }>((props, ref) => (
@@ -30,14 +29,13 @@ export default function TournamentStatusSelect({
     searchable = true,
     disabled = false,
     allowDeselect = true,
-    includeAdminOnly = true,
 }: TournamentStatusSelectProps) {
     const statusOptions = [
         {
             group: "Initial Request",
             items: [
                 { value: "supportRequestReceived", label: "Support Request Received" },
-                ...(includeAdminOnly ? [{ value: "screeningConcluded", label: "Screening Concluded" }] : []),
+                { value: "screeningConcluded", label: "Screening Concluded" },
             ],
         },
         {

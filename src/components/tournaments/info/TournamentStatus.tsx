@@ -96,7 +96,6 @@ export default function TournamentStatus({ tournament }: IProps) {
                             allowDeselect={false}
                             clearable={false}
                             searchable={true}
-                            includeAdminOnly={user?.isAdmin}
                         />
                         <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
                             <FontAwesomeIcon icon="save" />
