@@ -32,6 +32,10 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
         return new Date(tournament.endDate) < new Date();
     };
 
+    const needsReviewAssignment = (tournament: ITournament) => {
+        return tournament.status === "reviewOngoing" && !tournament.assignedReviewers?.length;
+    };
+
     return (
         <Card shadow="sm" p="lg">
             <ScrollArea>
@@ -80,6 +84,13 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                                     w={220}
                                                     label="Tournament ended, potentially movable to review phase">
                                                     <Badge color="yellow" variant="light">
+                                                        <FontAwesomeIcon icon="exclamation-triangle" />
+                                                    </Badge>
+                                                </Tooltip>
+                                            )}
+                                            {user?.isCommittee && needsReviewAssignment(tournament) && (
+                                                <Tooltip label="Needs review assignment">
+                                                    <Badge color="red" variant="light" className="animation-pulse">
                                                         <FontAwesomeIcon icon="exclamation-triangle" />
                                                     </Badge>
                                                 </Tooltip>
