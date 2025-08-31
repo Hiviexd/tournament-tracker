@@ -147,13 +147,16 @@ class UserService {
     /**
      * * Sanitize user data based on user permissions
      * * Removes email from non-committee users
+     * @param targetUser - the user to sanitize
+     * @param actor - the user who is receiving the user data
+     * @returns the sanitized user
      */
-    public sanitizeUser(user: IUser, isCommittee: boolean): IUser {
-        if (!isCommittee) {
-            user.email = undefined;
+    public sanitizeUser(targetUser: IUser, actor: IUser | undefined): IUser {
+        if (!actor || !actor.isCommitteeOrAdmin) {
+            targetUser.email = undefined;
         }
 
-        return user;
+        return targetUser;
     }
 }
 

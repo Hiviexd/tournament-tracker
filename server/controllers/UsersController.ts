@@ -45,7 +45,7 @@ class UsersController {
             users = await User.find({ username: { $regex: userInput, $options: "i" } });
         }
 
-        const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser?.isCommittee || false));
+        const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser));
 
         res.json(reqQuery.limit ? sanitizedUsers.slice(0, parseInt(reqQuery.limit, 10)) : sanitizedUsers);
     }
@@ -61,7 +61,7 @@ class UsersController {
             return res.status(404).json({ error: "User not found" });
         }
 
-        const sanitizedUser = UserService.sanitizeUser(user, currentUser?.isCommittee || false);
+        const sanitizedUser = UserService.sanitizeUser(user, currentUser);
 
         res.json(sanitizedUser);
     }
@@ -101,7 +101,7 @@ class UsersController {
         const committee = await User.find(query).orFail();
 
         const sanitizedCommittee = committee.map((user) =>
-            UserService.sanitizeUser(user, currentUser?.isCommittee || false)
+            UserService.sanitizeUser(user, currentUser)
         );
 
         res.json(sanitizedCommittee);
