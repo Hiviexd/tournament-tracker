@@ -107,6 +107,8 @@ export default class OsuBotService extends OsuApiService {
         const finalUserIds: number[] = [];
 
         // Prevent sending announcements to actual users in dev env
+        // TODO: isolate fallbackId to this method and try to remove the extra param from the main method
+        // ? Possibly look into saving the req.ession into env? or try to somehow access it from here
         if (process.env.NODE_ENV === "production") {
             finalUserIds.push(...userIds);
         } else if (fallbackId) {
