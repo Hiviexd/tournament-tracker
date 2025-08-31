@@ -82,6 +82,7 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                                 <Tooltip
                                                     multiline
                                                     w={220}
+                                                    ta="center"
                                                     label="Tournament ended, potentially movable to review phase">
                                                     <Badge color="yellow" variant="light">
                                                         <FontAwesomeIcon icon="exclamation-triangle" />
