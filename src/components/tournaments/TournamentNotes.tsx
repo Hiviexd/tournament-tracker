@@ -66,7 +66,7 @@ export default function TournamentNotes({ tournament }: IProps) {
         }
     };
 
-    if (!user?.isCommittee && !user?.isAdmin) return null;
+    if (!user?.isCommitteeOrAdmin) return null;
 
     return (
         <Card shadow="sm" p="lg" radius="md">

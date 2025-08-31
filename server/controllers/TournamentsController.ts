@@ -226,7 +226,7 @@ class TournamentsController {
     public async getTournament(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
         const user = res.locals!.user;
-        const isCommitteeOrAdmin = !!user && (user.isCommittee || user.isAdmin);
+        const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
 
         let tournament = await Tournament.findById(tournamentId)
             .select(selectFields(isCommitteeOrAdmin))

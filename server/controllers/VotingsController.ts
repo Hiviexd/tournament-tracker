@@ -48,7 +48,7 @@ class VotingsController {
         if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
 
         // Only show concluded AND public votes to non-committee members
-        if (!user || (!user.isCommittee && !user.isAdmin)) {
+        if (!user || !user.isCommitteeOrAdmin) {
             dbQuery.isActive = false;
             dbQuery.isPublic = true;
         }
@@ -103,12 +103,12 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         // Non-committee members can only view concluded public votes
-        if ((!user || (!user.isCommittee && !user.isAdmin)) && (voting.isActive || !voting.isPublic)) {
+        if ((!user || !user.isCommitteeOrAdmin) && (voting.isActive || !voting.isPublic)) {
             return res.status(403).json({ error: "You can only view concluded public votes" });
         }
 
         // Censor voting for non-committee members
-        if (!user || (!user.isCommittee && !user.isAdmin)) {
+        if (!user || !user.isCommitteeOrAdmin) {
             return res.json(VotingService.censorVotingForNonCommittee(voting));
         }
 

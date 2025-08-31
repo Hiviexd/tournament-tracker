@@ -128,7 +128,7 @@ class TicketsController {
         if (showOwn === "true") query.author = user?._id;
         if (isActive !== undefined) query.isActive = isActive === "true";
 
-        if (!user?.isCommittee && !user?.isAdmin) {
+        if (!user?.isCommitteeOrAdmin) {
             query.$or = [{ author: user?._id }, { type: "ticket" }];
         }
 
@@ -162,7 +162,7 @@ class TicketsController {
         }
 
         // Case 2: If it's a report, only allow access to admins, committee members, or the author
-        if (!ticket.isTicket && user && !(user.isAdmin || user.isCommittee || ticket.author.equals(user._id))) {
+        if (!ticket.isTicket && user && !(user.isCommitteeOrAdmin || ticket.author.equals(user._id))) {
             return res.status(403).json({ error: "Not authorized to view this ticket" });
         }
 

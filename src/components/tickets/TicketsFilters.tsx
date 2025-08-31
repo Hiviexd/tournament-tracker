@@ -69,7 +69,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
     };
 
     // Non-committee users viewing reports
-    if (type === "report" && !user?.isCommittee && !user?.isAdmin) {
+    if (type === "report" && !user?.isCommitteeOrAdmin) {
         return (
             <Alert color="info" title="Note" icon={<FontAwesomeIcon icon="info-circle" />}>
                 Below is a list of all of your submitted reports.
