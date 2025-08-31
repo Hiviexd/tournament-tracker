@@ -53,6 +53,10 @@ UserSchema.virtual("isCommittee").get(function (this: IUser) {
     return this.isTournamentCommittee || this.isContestCommittee;
 });
 
+UserSchema.virtual("isCommitteeOrAdmin").get(function (this: IUser) {
+    return this.isCommittee || this.isAdmin;
+});
+
 UserSchema.virtual("isAlumni").get(function (this: IUser) {
     return this.groups && this.groups.includes("alm");
 });
