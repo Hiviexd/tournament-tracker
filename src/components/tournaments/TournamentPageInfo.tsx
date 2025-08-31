@@ -82,10 +82,10 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     <TournamentBanner tournament={tournament} />
                     <TournamentDates tournament={tournament} />
                     <TournamentForumUrl tournament={tournament} />
-                    {(user?.isCommittee || user?.isAdmin) && <TournamentEnchantUrl tournament={tournament} />}
-                    {(user?.isCommittee || user?.isAdmin) && <TournamentDiscordThread tournament={tournament} />}
-                    {(user?.isCommittee || user?.isAdmin) && <TournamentReports reports={reports} />}
-                    {(user?.isCommittee || user?.isAdmin) && <TournamentVotings votings={votings} />}
+                    {user?.isCommitteeOrAdmin && <TournamentEnchantUrl tournament={tournament} />}
+                    {user?.isCommitteeOrAdmin && <TournamentDiscordThread tournament={tournament} />}
+                    {user?.isCommitteeOrAdmin && <TournamentReports reports={reports} />}
+                    {user?.isCommitteeOrAdmin && <TournamentVotings votings={votings} />}
                     <TournamentWinners tournament={tournament} />
                     <TournamentTags tournament={tournament} />
                 </SimpleGrid>

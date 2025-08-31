@@ -80,12 +80,14 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         </Stack>
     );
 
+    // Notes
     if (message.isNote && showTrueAuthor) {
         return (
             <Alert radius="md" variant="light" color="info" icon={<FontAwesomeIcon icon="sticky-note" />}>
                 <MessageContent />
             </Alert>
         );
+    // Event logs
     } else if (message.event && ticket) {
         const isClosing = message.event === "close";
         return (
@@ -105,6 +107,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 </Text>
             </Group>
         );
+    // Regular message
     } else if (!message.isNote) {
         return (
             <Card

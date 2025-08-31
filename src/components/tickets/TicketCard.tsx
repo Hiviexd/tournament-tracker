@@ -13,6 +13,7 @@ import UserLink from "../common/UserLink";
 import DateBadge from "../common/badges/DateBadge";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
 import ReportTypeBadge from "../common/badges/ReportTypeBadge";
+import { TruncatedText } from "../common/TruncatedText";
 
 interface ITicketCardProps {
     ticket: ITicket;
@@ -72,9 +73,9 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             <Stack gap="md" justify="space-between" h="100%">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap="xs">
-                        <Text size="lg" fw={500}>
+                        <TruncatedText lineClamp={2} textProps={{ size: "lg", fw: 500 }}>
                             {ticket.title}
-                        </Text>
+                        </TruncatedText>
                         <Text size="sm" c="dimmed">
                             Created by <UserLink user={ticket.author} />
                         </Text>

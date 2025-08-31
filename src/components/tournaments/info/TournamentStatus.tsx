@@ -75,7 +75,7 @@ export default function TournamentStatus({ tournament }: IProps) {
                             title="Cancel">
                             <FontAwesomeIcon icon="xmark" />
                         </ActionIcon>
-                    ) : user?.isCommittee || user?.isAdmin ? (
+                    ) : user?.isCommitteeOrAdmin ? (
                         tournament.isActive && (
                             <ActionIcon
                                 variant="subtle"

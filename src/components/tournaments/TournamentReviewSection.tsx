@@ -33,7 +33,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     const isUserHost = user?._id === tournament.host._id;
 
     // Check if current user is a committee member or admin
-    const isCommitteeOrAdmin = !!user && (user.isCommittee || user.isAdmin);
+    const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
 
     const handleAssignReviewers = async () => {
         await assignReviewersMutation.mutateAsync();

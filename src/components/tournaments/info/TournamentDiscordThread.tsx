@@ -24,7 +24,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
         setIsEditingThreadId(false);
     };
 
-    if (!user?.isCommittee && !user?.isAdmin) return null;
+    if (!user?.isCommitteeOrAdmin) return null;
 
     return (
         <Stack gap={5}>

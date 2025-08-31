@@ -8,7 +8,7 @@ class TicketService {
      * * Depopulates committee message authors for privacy
      */
     public sanitizeTicket(ticket: ITicket, user: IUser | undefined): ITicket {
-        if (!user || !user.isCommittee) {
+        if (!user || !user.isCommitteeOrAdmin) {
             // Filter out notes
             ticket.messages = ticket.messages.filter((message) => !message.isNote);
 

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "../../../../interfaces/Ticket";
 import UserLink from "../../common/UserLink";
 import DateBadge from "../../common/badges/DateBadge";
+import { TruncatedText } from "../../common/TruncatedText";
 
 interface IProps {
     reports: ITicket[];
@@ -15,7 +16,7 @@ export default function TournamentReports({ reports }: IProps) {
                 <Text size="sm" fw={500} className="header-border-left">
                     Reports
                 </Text>
-                <Tooltip multiline w={240} label="Only shows reports matching the tournament's name or forum URL">
+                <Tooltip multiline w={232} label="Only shows reports matching the tournament's name or forum URL">
                     <FontAwesomeIcon icon="exclamation-circle" size="sm" style={{ opacity: 0.6 }} />
                 </Tooltip>
                 <Badge color={reports.length > 0 ? "red" : "gray"} variant="light" size="sm">
@@ -41,9 +42,9 @@ export default function TournamentReports({ reports }: IProps) {
                         className="tournament-report-card">
                         <Group justify="space-between" align="flex-start" gap="xs">
                             <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                                <Text size="sm" fw={500} lineClamp={1}>
+                                <TruncatedText lineClamp={1} textProps={{ size: "sm", fw: 500 }}>
                                     {report.title}
-                                </Text>
+                                </TruncatedText>
                                 <Text size="xs" c="dimmed">
                                     by <UserLink user={report.author} />
                                 </Text>

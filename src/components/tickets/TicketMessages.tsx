@@ -14,7 +14,7 @@ export default function TicketMessages({ ticket }: IProps) {
     return (
         <Stack gap="md">
             {ticket.messages.map((message) => (
-                <TicketMessage key={message._id} ticket={ticket} message={message} showTrueAuthor={!!(user && user.isCommittee)} />
+                <TicketMessage key={message._id} ticket={ticket} message={message} showTrueAuthor={!!(user && user.isCommitteeOrAdmin)} />
             ))}
         </Stack>
     );

@@ -7,11 +7,11 @@ import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
 import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
-import _ from "lodash";
 import config from "../../../config.json";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TruncatedText } from "../common/TruncatedText";
 
 interface IProps {
     tournaments: ITournament[];
@@ -59,12 +59,12 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                         <GameModeIcon mode={tournament.modes} />
                                     </Table.Td>
 
-                                    <Table.Td>
-                                        <Text fw={500} truncate>
-                                            <Link to={`/tournaments/${tournament._id}`}>
-                                                {_.truncate(tournament.name, { length: 45 })}
-                                            </Link>
-                                        </Text>
+                                    <Table.Td w={400}>
+                                        <Link to={`/tournaments/${tournament._id}`}>
+                                            <TruncatedText lineClamp={1} textProps={{ fw: 500 }}>
+                                                {tournament.name}
+                                            </TruncatedText>
+                                        </Link>
                                     </Table.Td>
 
                                     <Table.Td>

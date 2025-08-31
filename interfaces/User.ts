@@ -49,6 +49,7 @@ export interface IUser extends Document {
     isDev: boolean;
     isAlumni: boolean;
     isCommittee: boolean;
+    isCommitteeOrAdmin: boolean;
     tcDuration: number;
     ccDuration: number;
 }

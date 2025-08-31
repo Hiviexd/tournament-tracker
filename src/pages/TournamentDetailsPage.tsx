@@ -20,7 +20,9 @@ export default function TournamentDetailsPage() {
     const reports = data?.reports;
     const votings = data?.votings;
 
-    useDocumentTitle(tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker");
+    useDocumentTitle(
+        tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker"
+    );
 
     const LoadingState = () => (
         <Stack gap="md">
@@ -77,8 +79,8 @@ export default function TournamentDetailsPage() {
                     <Stack gap="xl">
                         <TournamentPageHeader tournament={tournament} />
                         <TournamentPageInfo tournament={tournament} reports={reports} votings={votings} />
-                        {(user?.isCommittee || user?.isAdmin) && <TournamentNotes tournament={tournament} />}
-                        {(user?.isCommittee || user?.isAdmin) && <TournamentLogs tournament={tournament} />}
+                        {user?.isCommitteeOrAdmin && <TournamentNotes tournament={tournament} />}
+                        {user?.isCommitteeOrAdmin && <TournamentLogs tournament={tournament} />}
                         <TournamentReviewSection tournament={tournament} />
                         {user?.isCommittee && tournament.isTournament && (
                             <MappoolCompliancePage header="Mappool Compliance Checker" radius="md" />

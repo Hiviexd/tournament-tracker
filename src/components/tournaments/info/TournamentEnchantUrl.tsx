@@ -50,7 +50,7 @@ export default function TournamentEnchantUrl({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : user?.isCommittee ? (
+                ) : user?.isCommitteeOrAdmin ? (
                     tournament.isActive && (
                         <Group gap={4}>
                             <ActionIcon
