@@ -59,7 +59,7 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                         <GameModeIcon mode={tournament.modes} />
                                     </Table.Td>
 
-                                    <Table.Td w={400}>
+                                    <Table.Td w={350}>
                                         <Link to={`/tournaments/${tournament._id}`}>
                                             <TruncatedText lineClamp={1} textProps={{ fw: 500 }}>
                                                 {tournament.name}
@@ -75,7 +75,10 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                         <Group gap="xs">
                                             <TournamentStatusBadge status={tournament.status} />
                                             {user?.isCommittee && potentiallyNeedsReview(tournament) && (
-                                                <Tooltip multiline w={220} label="Tournament ended, potentially movable to review phase">
+                                                <Tooltip
+                                                    multiline
+                                                    w={220}
+                                                    label="Tournament ended, potentially movable to review phase">
                                                     <Badge color="yellow" variant="light">
                                                         <FontAwesomeIcon icon="exclamation-triangle" />
                                                     </Badge>
