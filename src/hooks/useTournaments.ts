@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
-import { TournamentFormData } from "../../interfaces/Tournament";
+import { ITournamentCreateResponse, TournamentFormData } from "../../interfaces/Tournament";
 import { IReview } from "../../interfaces/Review";
 import { IMessageFormData } from "../../interfaces/Message";
 
@@ -37,12 +37,12 @@ export function useCreateTournament() {
 
     return useMutation({
         mutationFn: async (tournamentData: TournamentFormData) => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<ITournamentCreateResponse>({
                 method: "post",
                 url: "/api/tournaments/create",
                 data: tournamentData,
             });
-            return utils.handleMutationResponse(response);
+            return utils.handleMutationResponse<ITournamentCreateResponse>(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournaments"] });

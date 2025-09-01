@@ -45,6 +45,11 @@ export interface ITournamentLog {
     createdAt: Date;
 }
 
+export interface ITournamentCreateResponse {
+    message: string;
+    tournament: ITournament;
+}
+
 export interface ITournament extends Document {
     name: string;
     modes: GameMode[];

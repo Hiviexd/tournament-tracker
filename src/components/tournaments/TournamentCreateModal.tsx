@@ -5,6 +5,7 @@ import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
 import UserSearch from "../common/UserSearch";
 import utils from "../../../utils";
+import { useNavigate } from "react-router";
 
 interface IProps {
     opened: boolean;
@@ -13,6 +14,7 @@ interface IProps {
 
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
+    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: {
@@ -59,9 +61,10 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
 
     const handleSubmit = async (values) => {
         try {
-            await createTournamentMutation.mutateAsync(values);
+            const res = await createTournamentMutation.mutateAsync(values);
             form.reset();
             onClose();
+            navigate(`/tournaments/${res.tournament._id}`);
         } catch (error) {
             console.error("Failed to create tournament:", error);
         }
