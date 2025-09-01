@@ -119,12 +119,12 @@ export default function ReportForm() {
         files.forEach((file) => formData.append("files", file));
 
         try {
-            await createTicketMutation.mutateAsync(formData);
+            const res = await createTicketMutation.mutateAsync(formData);
 
             // Clear the autosaved text after successful submission
             clearAutoSavedValue("report-form-message");
 
-            navigate("/reports");
+            navigate(`/reports/${res.ticket._id}`);
         } catch (error) {
             console.error("Failed to create report:", error);
         }

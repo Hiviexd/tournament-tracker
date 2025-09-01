@@ -69,12 +69,12 @@ export default function TicketForm() {
         files.forEach((file) => formData.append("files", file));
 
         try {
-            await createTicketMutation.mutateAsync(formData);
+            const res = await createTicketMutation.mutateAsync(formData);
 
             // Clear the autosaved text after successful submission
             clearAutoSavedValue(autoSaveKey);
 
-            navigate("/tickets");
+            navigate(`/tickets/${res.ticket._id}`);
         } catch (error) {
             console.error("Failed to create ticket:", error);
         }

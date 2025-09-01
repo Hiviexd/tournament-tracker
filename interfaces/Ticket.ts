@@ -23,6 +23,11 @@ export interface ITicketFormData extends FormData {
 
 export type TicketFormData = Partial<ITicket> & ITicketFormData;
 
+export interface ITicketCreateResponse {
+    message: string;
+    ticket: ITicket;
+}
+
 export interface ITicket extends Document {
     author: IUser;
     type: TicketType;

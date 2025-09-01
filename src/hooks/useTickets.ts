@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
 
 // Types
-import { TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
+import { ITicketCreateResponse, TicketQueryParams, type TicketFormData } from "../../interfaces/Ticket";
 import { IMessageFormData } from "../../interfaces/Message";
 
 export function useTickets(params?: TicketQueryParams) {
@@ -34,13 +34,13 @@ export function useCreateTicket() {
 
     return useMutation({
         mutationFn: async (ticketData: TicketFormData) => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<ITicketCreateResponse>({
                 method: "post",
                 url: "/api/tickets/create",
                 data: ticketData,
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            return utils.handleMutationResponse(response);
+            return utils.handleMutationResponse<ITicketCreateResponse>(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tickets"] });
