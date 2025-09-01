@@ -1,5 +1,5 @@
 import { useWindowScroll } from "@mantine/hooks";
-import { Affix, Button, Transition } from "@mantine/core";
+import { Affix, Transition, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IPropTypes {
@@ -11,14 +11,29 @@ export default function ScrollToTopButton({ style }: IPropTypes) {
 
     return (
         <>
-            <Affix position={{ bottom: 10, right: 20 }} style={style}>
+            <Affix position={{ bottom: 15, right: 30 }} style={style}>
                 <Transition transition="slide-up" mounted={scroll.y > 0}>
                     {(transitionStyles) => (
                         <Button
-                            leftSection={<FontAwesomeIcon icon="arrow-up" />}
-                            style={transitionStyles}
-                            onClick={() => scrollTo({ y: 0 })}>
-                            Scroll to top
+                            style={{
+                                ...transitionStyles,
+                                transition: "all 0.2s ease",
+                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                            }}
+                            radius="xl"
+                            w="3.5em"
+                            h="3.5em"
+                            p="0"
+                            onClick={() => scrollTo({ y: 0 })}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = `${
+                                    transitionStyles.transform || ""
+                                } translateY(-4px)`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = transitionStyles.transform || "";
+                            }}>
+                            <FontAwesomeIcon icon="chevron-up" style={{ fontSize: "1.2em" }} />
                         </Button>
                     )}
                 </Transition>
