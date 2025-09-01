@@ -7,6 +7,8 @@ import TournamentStatusSelect from "../../common/TournamentStatusSelect";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
+import { useConfirmModal } from "../../../hooks/useModals";
+import AlertText from "../../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -28,20 +30,37 @@ export default function TournamentStatus({ tournament }: IProps) {
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
     const editTournamentMutation = useEditTournament(tournament._id);
+    const confirmModal = useConfirmModal();
 
     const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
 
     const handleStatusSave = async () => {
-        let message = "Are you sure you want to update the status?\n\nThis will notify the tournament host.";
+        const notificationNotSending =
+            excludedStatusesOsu.includes(selectedStatus) ||
+            (selectedStatus === "reviewOngoing" && tournament.status === "onHold");
+
+        const message = (
+            <>
+                <Text size="sm" mb="sm">
+                    Are you sure you want to update the {tournament.type}'s status to{" "}
+                    <TournamentStatusBadge status={selectedStatus} /> ?
+                </Text>
+                {notificationNotSending ? (
+                    <AlertText text="This will not notify the host." type="info" />
+                ) : (
+                    <AlertText text="This will notify the tournament host via an osu! message." type="warning" />
+                )}
+            </>
+        );
 
         if (
-            excludedStatusesOsu.includes(selectedStatus) ||
-            (selectedStatus === "reviewOngoing" && tournament.status === "onHold")
+            await confirmModal({
+                title: "Update Status?",
+                children: message,
+                confirmText: "Update Status",
+                confirmProps: { leftSection: <FontAwesomeIcon icon="floppy-disk" /> },
+            })
         ) {
-            message = "Are you sure you want to update the status?\n\nThis will NOT send an osu! notification.";
-        }
-
-        if (confirm(message)) {
             await editTournamentMutation.mutateAsync({ status: selectedStatus });
             setIsEditingStatus(false);
         }

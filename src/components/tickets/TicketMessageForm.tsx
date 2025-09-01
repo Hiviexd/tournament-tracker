@@ -13,6 +13,7 @@ import FileUploadInput from "../common/FileUploadInput";
 import TextEditor, { TextEditorRef } from "../common/TextEditor";
 import { TemplateSelect } from "../templates/TemplateSelect";
 import { ITemplate } from "../../../interfaces/Template";
+import { useConfirmModal } from "../../hooks/useModals";
 
 interface IProps {
     ticket: ITicket;
@@ -27,6 +28,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const createMessageMutation = useSendMessage(ticket.id);
     const autoSaveKey = `ticket-message-${ticket.id}`;
     const textEditorRef = useRef<TextEditorRef>(null);
+    const confirmModal = useConfirmModal();
 
     const validateMessage = (message: string): string | null => {
         if (!message.trim()) return "Message is required";
@@ -65,11 +67,12 @@ export default function TicketMessageForm({ ticket }: IProps) {
         files.forEach((file) => formData.append("files", file));
 
         if (user?.isCommittee) {
-            const confirmed = window.confirm(
-                `Are you sure you want to ${
-                    isNote ? "add a note" : "send a message"
-                }? Please double check your selection.`
-            );
+            const confirmed = await confirmModal({
+                title: `${isNote ? "Add a Note" : "Send a Message"}?`,
+                text: `Are you sure you want to ${isNote ? "add a note" : "send a message"}? Please double check your selection just in case.`,
+                confirmText: isNote ? "Add Note" : "Send Message",
+                confirmProps: { color: isNote ? "info" : "primary", leftSection: <FontAwesomeIcon icon={isNote ? "sticky-note" : "paper-plane" } /> },
+            });
             if (!confirmed) return;
         }
 

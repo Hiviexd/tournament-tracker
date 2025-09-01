@@ -27,6 +27,8 @@ import moment from "moment";
 import { useState } from "react";
 import config from "../../../config.json";
 import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
+import { useConfirmModal } from "../../hooks/useModals";
+import AlertText from "../common/AlertText";
 
 interface IProps {
     ticket: ITicket;
@@ -40,6 +42,7 @@ export default function TicketInfo({ ticket }: IProps) {
     const toggleStatusMutation = useToggleStatus(ticket._id);
     const updateThreadIdMutation = useUpdateThreadId(ticket._id);
     const snoozeTicketMutation = useSnoozeTicket(ticket._id);
+    const confirmModal = useConfirmModal();
 
     const threadLink = `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId ?? ""}`;
 
@@ -53,16 +56,37 @@ export default function TicketInfo({ ticket }: IProps) {
     };
 
     const handleToggleStatus = async () => {
-        if (!window.confirm(`Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`))
+        if (
+            !(await confirmModal({
+                title: `${ticket.isActive ? "Close" : "Reopen"} ${ticket.type}?`,
+                text: `Are you sure you want to ${ticket.isActive ? "close" : "reopen"} this ${ticket.type}?`,
+                confirmText: ticket.isActive ? "Close" : "Reopen",
+                confirmProps: {
+                    color: ticket.isActive ? "warning" : "success",
+                    leftSection: <FontAwesomeIcon icon={ticket.isActive ? "lock" : "lock-open"} />,
+                },
+            }))
+        )
             return;
         await toggleStatusMutation.mutateAsync();
     };
 
     const handleSnoozeTicket = async () => {
+        const message = (
+            <>
+                <Text size="sm" mb="sm">
+                    Are you sure you want to snooze reminders for 7 days?
+                </Text>
+                <AlertText text="Reminders will resume after that time period, or when a new message is sent." type="info" />
+            </>
+        );
         if (
-            !window.confirm(
-                "Are you sure you want to snooze reminders for this ticket for 7 days?\n\nIt will be unsnoozed after that time period, or when a new message is sent."
-            )
+            !(await confirmModal({
+                title: "Snooze Reminders?",
+                children: message,
+                confirmText: "Snooze Reminders",
+                confirmProps: { leftSection: <FontAwesomeIcon icon="moon" />, color: "warning" },
+            }))
         )
             return;
         await snoozeTicketMutation.mutateAsync();

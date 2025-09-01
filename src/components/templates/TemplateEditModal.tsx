@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITemplate } from "../../../interfaces/Template";
 import { useDeleteTemplate, useUpdateTemplate } from "../../hooks/useTemplates";
+import { useConfirmModal } from "../../hooks/useModals";
 import { useEffect } from "react";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -17,6 +18,7 @@ export default function TemplateEditModal({ opened, onClose, template }: IProps)
     const updateTemplateMutation = useUpdateTemplate(template?._id || "");
     const deleteTemplateMutation = useDeleteTemplate(template?._id || "");
     const autoSaveKey = `template-edit-${template?._id || "new"}-content`;
+    const confirmModal = useConfirmModal();
 
     const form = useForm({
         initialValues: {
@@ -57,7 +59,13 @@ export default function TemplateEditModal({ opened, onClose, template }: IProps)
     };
 
     const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this template?")) {
+        if (
+            await confirmModal({
+                preset: "delete",
+                title: `Delete template?`,
+                text: "Are you sure you want to delete this template? This action is irreversible.",
+            })
+        ) {
             try {
                 await deleteTemplateMutation.mutateAsync();
                 onClose();

@@ -25,6 +25,7 @@ import { clearAutoSavedValue } from "../hooks/useAutoSave";
 import { useDocumentTitle } from "@mantine/hooks";
 import DateBadge from "../components/common/badges/DateBadge";
 import UserLink from "../components/common/UserLink";
+import { useConfirmModal } from "../hooks/useModals";
 
 const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
     "/resources/official": "official-resources",
@@ -42,6 +43,8 @@ export default function ArticlePage() {
     const { data: article, isLoading, isError } = useArticle(articleSlug!);
     const { mutate: editArticle, isPending: isEditing } = useEditArticle(articleSlug!);
     const deleteArticleMutation = useDeleteArticle(articleSlug!);
+    const confirmModal = useConfirmModal();
+
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editTitle, setEditTitle] = useState("");
     const [editContent, setEditContent] = useState("");
@@ -128,7 +131,11 @@ export default function ArticlePage() {
 
     const handleDelete = async () => {
         // confirm the deletion
-        const confirm = window.confirm("Are you sure you want to delete this article? This action is irreversible.");
+        const confirm = await confirmModal({
+            preset: "delete",
+            title: "Delete Article?",
+            text: "Are you sure you want to delete this article? This action is irreversible.",
+        });
         if (!confirm) return;
 
         await deleteArticleMutation.mutateAsync();

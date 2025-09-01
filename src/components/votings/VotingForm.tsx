@@ -22,6 +22,7 @@ import TextLengthIndicator from "../common/TextLengthIndicator";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import VoteStatusBanner from "../common/banners/VoteStatusBanner";
+import { useConfirmModal } from "../../hooks/useModals";
 
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
 
@@ -48,8 +49,9 @@ interface IProps {
 export default function VotingForm({ voting, user }: IProps) {
     const submitVoteMutation = useSubmitVote(voting._id);
     const toggleAbstentionMutation = useToggleAbstention(voting._id);
-    const userVote = voting.votes.find((vote) => vote.author._id === user._id);
+    const confirmModal = useConfirmModal();
 
+    const userVote = voting.votes.find((vote) => vote.author._id === user._id);
     const [comment, setComment] = useState(userVote?.comment ?? "");
     const [voteData, setVoteData] = useState<VoteType>(() => utils.getInitialVoteData(voting, userVote));
     const autoSaveKey = `voting-comment-${voting._id}`;
@@ -120,7 +122,17 @@ export default function VotingForm({ voting, user }: IProps) {
     };
 
     const handleToggleAbstention = async () => {
-        if (confirm("Are you sure you want to " + (isAbstained ? "remove your abstention" : "abstain from this vote") + "?")) {
+        if (
+            await confirmModal({
+                title: `${isAbstained ? "Remove abstention" : "Abstain"}?`,
+                text: `Are you sure you want to ${isAbstained ? "remove your abstention" : "abstain"} from this vote?`,
+                confirmText: isAbstained ? "Remove Abstention" : "Abstain",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon={isAbstained ? "flag" : "flag-checkered"} />,
+                    color: isAbstained ? "success" : "warning",
+                },
+            })
+        ) {
             await toggleAbstentionMutation.mutateAsync();
         }
     };

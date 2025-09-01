@@ -4,6 +4,7 @@ import { useState } from "react";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic, useClearVotes } from "../../hooks/useVotings";
+import { useConfirmModal } from "../../hooks/useModals";
 
 // Mantine
 import {
@@ -36,6 +37,7 @@ import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
 import NotVotedBadge from "../common/badges/NotVotedBadge";
 import VotingTypeBadge from "../common/badges/VotingTypeBadge";
+import AlertText from "../common/AlertText";
 
 interface IProps {
     voting: IVoting;
@@ -51,6 +53,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const deleteVotingMutation = useDeleteVoting(voting._id);
     const clearVotesMutation = useClearVotes(voting._id);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
+    const confirmModal = useConfirmModal();
 
     const getDueDateColor = (): string => {
         const deadline = moment(voting.deadline);
@@ -70,26 +73,66 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     };
 
     const handleToggleStatus = async () => {
-        if (!window.confirm("Are you sure you want to toggle the status of this vote?")) return;
+        if (
+            !(await confirmModal({
+                title: `${voting.isActive ? "Conclude" : "Reopen"} Vote?`,
+                text: `Are you sure you want to ${voting.isActive ? "conclude" : "reopen"} this vote?`,
+                confirmText: voting.isActive ? "Conclude" : "Reopen",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />,
+                    color: voting.isActive ? "warning" : "success",
+                },
+            }))
+        )
+            return;
         await toggleStatusMutation.mutateAsync();
     };
 
     const handleTogglePublic = async () => {
-        if (!window.confirm("Are you sure you want to toggle the publicity of this vote?")) return;
+        if (
+            !(await confirmModal({
+                title: voting.isPublic ? "Mark as Private?" : "Mark as Public?",
+                text: `Are you sure you want to ${voting.isPublic ? "privatize" : "publish"} this vote?`,
+                confirmText: voting.isPublic ? "Mark as Private" : "Mark as Public",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon={voting.isPublic ? "eye-slash" : "eye"} />,
+                    color: voting.isPublic ? "warning" : "blue",
+                },
+            }))
+        )
+            return;
         await togglePublicMutation.mutateAsync();
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this vote? This action is irreversible.")) return;
+        if (
+            !(await confirmModal({
+                preset: "delete",
+                title: "Delete Vote?",
+                text: "Are you sure you want to delete this vote? This action is irreversible.",
+            }))
+        )
+            return;
         await deleteVotingMutation.mutateAsync();
         onNavigateBack();
     };
 
     const handleClearVotes = async () => {
+        const message = (
+            <>
+                <Text size="sm" mb="sm">
+                    Are you sure you want to clear all submitted votes?
+                </Text>
+                <AlertText text="Only use this if you intend to delete the vote afterwards." type="warning" />
+            </>
+        );
         if (
-            !window.confirm(
-                "Are you sure you want to clear all votes from this voting?\n\nOnly use this if you know what you're doing (i.e. deleting a non-fresh vote)."
-            )
+            !(await confirmModal({
+                preset: "delete",
+                title: "Clear Votes?",
+                children: message,
+                confirmText: "Clear Votes",
+            }))
         )
             return;
         await clearVotesMutation.mutateAsync();
@@ -278,7 +321,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     onClick={handleTogglePublic}
                                     loading={togglePublicMutation.isPending}
                                     leftSection={<FontAwesomeIcon icon={voting.isPublic ? "eye-slash" : "eye"} />}>
-                                    {voting.isPublic ? "Make Private" : "Make Public"}
+                                    {voting.isPublic ? "Mark as Private" : "Mark as Public"}
                                 </Button>
                             )}
                             {!voting.votes.length && (

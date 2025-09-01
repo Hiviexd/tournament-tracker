@@ -1,7 +1,8 @@
-import { Stack, Group, Title, Button, Card, SimpleGrid } from "@mantine/core";
+import { Stack, Group, Title, Button, Card, SimpleGrid, Text } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDeleteTournament, useEditTournament } from "../../hooks/useTournaments";
+import { useConfirmModal } from "../../hooks/useModals";
 import TournamentStatus from "./info/TournamentStatus";
 import TournamentTags from "./info/TournamentTags";
 import TournamentDates from "./info/TournamentDates";
@@ -19,6 +20,7 @@ import _ from "lodash";
 import { useNavigate } from "react-router";
 import { ITicket } from "../../../interfaces/Ticket";
 import { IVoting } from "../../../interfaces/Voting";
+import AlertText from "../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -31,20 +33,42 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
     const editTournamentMutation = useEditTournament(tournament._id);
     const deleteTournamentMutation = useDeleteTournament(tournament._id);
     const navigate = useNavigate();
+    const confirmModal = useConfirmModal();
 
     const handleToggleState = async () => {
-        let message = `Are you sure you want to ${tournament.isActive ? "archive" : "unarchive"} this tournament?`;
-        if (tournament.isActive) {
-            message += "\n\nPlease ensure that the conclusion email is sent before archiving.";
-        }
+        const message = (
+            <>
+                <Text size="sm" mb="sm">
+                    Are you sure you want to {tournament.isActive ? "archive" : "unarchive"} this {tournament.type}?
+                </Text>
+                {tournament.isActive && (
+                    <AlertText text="Ensure the conclusion email is sent before archiving." type="warning" />
+                )}
+            </>
+        );
 
-        if (confirm(message)) {
+        if (
+            await confirmModal({
+                title: `${tournament.isActive ? "Archive" : "Unarchive"} ${tournament.type}?`,
+                children: message,
+                confirmText: `${tournament.isActive ? "Archive" : "Unarchive"}`,
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon="box-archive" />,
+                    color: tournament.isActive ? "warning" : "success",
+                },
+            })
+        ) {
             await editTournamentMutation.mutateAsync({ isActive: !tournament.isActive });
         }
     };
 
     const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this tournament? This action is irreversible.")) {
+        const confirmProps = {
+            preset: "delete" as const,
+            title: `Delete ${tournament.type}?`,
+            text: `Are you sure you want to delete this ${tournament.type}? This action is irreversible.`,
+        };
+        if (await confirmModal(confirmProps)) {
             await deleteTournamentMutation.mutateAsync();
             navigate("/tournaments");
         }
@@ -70,6 +94,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                                 variant={tournament.isActive ? "filled" : "outline"}
                                 color="warning"
                                 onClick={handleToggleState}
+                                loading={editTournamentMutation.isPending}
                                 leftSection={<FontAwesomeIcon icon="box-archive" />}>
                                 {tournament.isActive ? "Archive" : "Unarchive"}
                             </Button>

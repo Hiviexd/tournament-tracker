@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IResource, ResourceCategory } from "../../../interfaces/Resource";
 import { useDeleteResource, useUpdateResource } from "../../hooks/useResources";
+import { useConfirmModal } from "../../hooks/useModals";
 import UserSearch from "../common/UserSearch";
 import { useEffect } from "react";
 
@@ -15,6 +16,7 @@ interface IProps {
 export default function ResourcesEditModal({ opened, onClose, resource }: IProps) {
     const updateResourceMutation = useUpdateResource(resource?._id || "");
     const deleteResourceMutation = useDeleteResource(resource?._id || "");
+    const confirmModal = useConfirmModal();
 
     const form = useForm({
         initialValues: {
@@ -86,7 +88,13 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
     };
 
     const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this resource?")) {
+        if (
+            await confirmModal({
+                preset: "delete",
+                title: `Delete resource?`,
+                text: "Are you sure you want to delete this resource? This action is irreversible.",
+            })
+        ) {
             try {
                 await deleteResourceMutation.mutateAsync();
                 onClose();
