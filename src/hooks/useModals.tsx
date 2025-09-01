@@ -24,8 +24,8 @@ interface WithChildren extends BaseProps {
 type ConfirmModalOptions = WithText | WithChildren;
 
 /**
- * Initiates a confirmation modal and returns a boolean indicating if the user confirmed the action.
- * @returns A function that takes the params below, opens the modal, and returns a promise that resolves to a boolean indicating confirmation state.
+ * Initiates a confirmation modal.
+ * @returns An async function that takes the params below, opens the modal, and returns a promise that resolves to a boolean indicating confirmation state.
  * @param preset - Preset to use for the modal.
  * @param title - Title override for the modal.
  * @param children - Children to render in the modal.
