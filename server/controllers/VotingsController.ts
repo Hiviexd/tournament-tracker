@@ -81,7 +81,7 @@ class VotingsController {
         }
 
         // Censor votings for non-committee members
-        if (!user || !user.isCommittee) {
+        if (!user || !user.isCommitteeOrAdmin) {
             votings = votings.map((voting) =>
                 VotingService.censorVotingForNonCommittee(voting)
             ) as unknown as IVoting[];

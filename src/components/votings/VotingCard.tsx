@@ -58,7 +58,7 @@ export default function VotingCard({ voting }: IPropTypes) {
 
                     <Text size="sm" c="dimmed">
                         {/* User info */}
-                        {(user?.isCommittee || voting.isActive) && voting.author && (
+                        {(user?.isCommitteeOrAdmin || voting.isActive) && voting.author && (
                             <>
                                 Created by <UserLink user={voting.author} /> •{" "}
                             </>
@@ -99,7 +99,7 @@ export default function VotingCard({ voting }: IPropTypes) {
                         {voting.isActive ? "Active" : "Concluded"}
                     </Badge>
                     {/* Vote count */}
-                    {(user?.isCommittee || voting.isActive) && (
+                    {(user?.isCommitteeOrAdmin || voting.isActive) && (
                         <VoteCountBadge
                             voteCount={voting.votes.length}
                             totalVotes={voting.requiredVotes}
