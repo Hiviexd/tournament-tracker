@@ -51,7 +51,7 @@ export function useConfirmModal() {
                 children: text ? <Text size="sm">{text}</Text> : children,
                 labels: { confirm: confirmText || presetConfirmText, cancel: cancelText || "Cancel" },
                 confirmProps: { ...presetConfirmProps, ...confirmProps },
-                cancelProps,
+                cancelProps: { variant: "light", color: "gray", ...cancelProps },
                 onConfirm: () => resolve(true),
                 onCancel: () => resolve(false),
             });
