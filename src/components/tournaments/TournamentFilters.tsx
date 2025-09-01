@@ -137,7 +137,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                     <Box>
                         {user?.isCommittee && (
                             <Checkbox
-                                label="Show your all-time assigned reviews"
+                                label="Filter to assigned reviews"
                                 checked={values.showAllAssignedReviews}
                                 onChange={(e) => handleChange("showAllAssignedReviews", e.currentTarget.checked)}
                                 disabled={viewMode === "review"}

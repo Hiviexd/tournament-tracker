@@ -124,7 +124,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                 </Group>
                 {user?.isCommittee && (
                     <Checkbox
-                        label="Show only votes that need my attention"
+                        label="Filter to votes that need attention"
                         checked={values.showNeedsAttention}
                         onChange={(e) => handleChange("showNeedsAttention", e.currentTarget.checked)}
                     />
