@@ -67,7 +67,7 @@ export default function TournamentDates({ tournament }: IProps) {
                     <ActionIcon variant="subtle" onClick={handleCancel} color="danger" title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : user?.isCommittee ? (
+                ) : user?.isCommitteeOrAdmin ? (
                     tournament.isActive && (
                         <ActionIcon
                             variant="subtle"

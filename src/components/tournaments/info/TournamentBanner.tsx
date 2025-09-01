@@ -38,7 +38,7 @@ export default function TournamentBanner({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : user?.isCommittee || tournament.host._id === user?._id ? (
+                ) : user?.isCommitteeOrAdmin || tournament.host._id === user?._id ? (
                     <ActionIcon
                         variant="subtle"
                         onClick={() => setIsEditingBannerUrl(true)}

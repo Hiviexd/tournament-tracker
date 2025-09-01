@@ -38,7 +38,7 @@ export default function TournamentTags({ tournament }: IProps) {
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
                 ) : (
-                    user?.isCommittee && (
+                    user?.isCommitteeOrAdmin && (
                         <ActionIcon
                             variant="subtle"
                             onClick={() => setIsEditingTags(true)}

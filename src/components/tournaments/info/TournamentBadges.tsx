@@ -187,7 +187,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : user?.isCommittee ? (
+                ) : user?.isCommitteeOrAdmin ? (
                     <Group gap={4}>
                         {tournament.isActive && (
                             <ActionIcon
@@ -223,7 +223,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                 ) : null}
             </Group>
 
-            {user?.isCommittee && badges.length > 0 && !validateBadges(badges) && (
+            {user?.isCommitteeOrAdmin && badges.length > 0 && !validateBadges(badges) && (
                 <AlertText size="xs" type="warning" text="Badges need to be re-uploaded to enable the awards manager" />
             )}
 
