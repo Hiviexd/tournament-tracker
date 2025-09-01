@@ -1,10 +1,11 @@
-import { Card, Stack, Badge, Text, Progress, Group, Box, Tooltip } from "@mantine/core";
+import { Card, Stack, Badge, Progress, Group, Box, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IVote } from "../../../interfaces/Vote";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import { VOTE_COLORS } from "../../constants";
+import { TruncatedText } from "../common/TruncatedText";
 
 const getScoreColor = (score: number, separator: string = ".") => {
     if (score === 0) return "gray" + separator + "2";
@@ -124,13 +125,12 @@ export default function VoteCard({ vote, options }: IProps) {
 
                                 return (
                                     <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
-                                        <Text
-                                            size="sm"
-                                            w={{ base: 500, sm: 200 }}
-                                            truncate
-                                            title={options[score.optionIndex]}>
+                                        <TruncatedText
+                                            lineClamp={1}
+                                            textProps={{ size: "sm", w: { base: 500, sm: 200 } }}
+                                            tooltipProps={{ w: { base: 500, sm: "fit-content" } }}>
                                             {options[score.optionIndex]}
-                                        </Text>
+                                        </TruncatedText>
                                         <Badge
                                             size="sm"
                                             variant="light"
@@ -157,13 +157,12 @@ export default function VoteCard({ vote, options }: IProps) {
 
                                     return (
                                         <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
-                                            <Text
-                                                size="sm"
-                                                w={{ base: 500, sm: 200 }}
-                                                truncate
-                                                title={options[score.optionIndex]}>
+                                            <TruncatedText
+                                                lineClamp={1}
+                                                textProps={{ size: "sm", w: { base: 500, sm: 200 } }}
+                                                tooltipProps={{ w: { base: 500, sm: "fit-content" } }}>
                                                 {options[score.optionIndex]}
-                                            </Text>
+                                            </TruncatedText>
                                             <Tooltip label={getRankedChoiceDisplay(score.score).tooltip}>
                                                 <Badge
                                                     size="sm"
