@@ -29,6 +29,7 @@ import UserSearch from "../common/UserSearch";
 import FileUploadInput from "../common/FileUploadInput";
 import OptionSearch from "../common/OptionSearch";
 import TextEditor from "../common/TextEditor";
+import { useNavigate } from "react-router";
 
 interface IProps {
     opened: boolean;
@@ -39,6 +40,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
     const { files, handleFileChange } = useFileUpload();
     const autoSaveKey = "voting-create-description";
+    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: {
@@ -117,13 +119,15 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         files.forEach((file) => formData.append("files", file));
 
         try {
-            await createVotingMutation.mutateAsync(formData);
+            const res = await createVotingMutation.mutateAsync(formData);
 
             // Clear autosaved content after successful submission
             clearAutoSavedValue(autoSaveKey);
 
             form.reset();
             onClose();
+
+            navigate(`/votes/${res.voting._id}`);
         } catch (error) {
             console.error("Failed to create voting:", error);
         }

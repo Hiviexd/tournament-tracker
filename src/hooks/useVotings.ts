@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
-import { IVoting, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
+import { IVoting, IVotingCreateResponse, type VotingFormData, VotingQueryParams } from "../../interfaces/Voting";
 import { type VoteType } from "../../interfaces/Vote";
 
 export function useVotings(params?: VotingQueryParams) {
@@ -36,12 +36,12 @@ export function useCreateVoting() {
 
     return useMutation({
         mutationFn: async (votingData: VotingFormData) => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<IVotingCreateResponse>({
                 method: "post",
                 url: "/api/votes/create",
                 data: votingData,
             });
-            return utils.handleMutationResponse(response);
+            return utils.handleMutationResponse<IVotingCreateResponse>(response);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });

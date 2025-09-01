@@ -47,6 +47,11 @@ export interface IVotingFormData extends FormData {
 
 export type VotingFormData = Partial<IVoting> & IVotingFormData;
 
+export interface IVotingCreateResponse {
+    message: string;
+    voting: IVoting;
+}
+
 export interface IVoting extends Document {
     author: IUser;
     category: VotingCategory;
