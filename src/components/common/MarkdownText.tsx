@@ -1,4 +1,4 @@
-import { Anchor } from "@mantine/core";
+import { Anchor, ScrollArea, Table } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -25,6 +25,11 @@ export default function MarkdownText({ content, className, allowHtml = false }: 
                         <Anchor href={href} target="_blank" rel="noopener noreferrer" className="markdown-link">
                             {children}
                         </Anchor>
+                    ),
+                    table: ({ children }) => (
+                        <ScrollArea>
+                            <Table>{children}</Table>
+                        </ScrollArea>
                     ),
                 }}>
                 {content}
