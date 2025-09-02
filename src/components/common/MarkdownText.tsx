@@ -28,7 +28,7 @@ export default function MarkdownText({ content, className, allowHtml = false }: 
                     ),
                     table: ({ children }) => (
                         <ScrollArea>
-                            <Table>{children}</Table>
+                            <Table w="fit-content">{children}</Table>
                         </ScrollArea>
                     ),
                 }}>
