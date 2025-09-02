@@ -13,6 +13,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 
 // Components
 import DueDateBadge from "../../components/common/badges/DueDateBadge";
+import DateBadge from "../../components/common/badges/DateBadge";
 import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
@@ -64,15 +65,13 @@ export default function VotingCard({ voting }: IPropTypes) {
                             </>
                         )}
                         {/* Date info */}
-                        {voting.isActive && (
-                            <Tooltip label={moment(voting.createdAt).format("LLL")}>
-                                <span>{moment(voting.createdAt).fromNow()}</span>
-                            </Tooltip>
-                        )}
-                        {!voting.isActive && (
-                            <Tooltip label={moment(voting.concludedAt ?? voting.updatedAt).format("LLL")}>
-                                <span>concluded {moment(voting.concludedAt ?? voting.updatedAt).fromNow()}</span>
-                            </Tooltip>
+                        {voting.isActive ? (
+                            <DateBadge size="xs" date={voting.createdAt} staticColor />
+                        ) : (
+                            <span>
+                                concluded{" "}
+                                <DateBadge size="xs" date={voting.concludedAt ?? voting.updatedAt} staticColor />
+                            </span>
                         )}
                     </Text>
                 </div>

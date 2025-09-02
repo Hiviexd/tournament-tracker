@@ -29,6 +29,7 @@ import { useDisclosure } from "@mantine/hooks";
 // Components
 import VotingEditModal from "./VotingEditModal";
 import DueDateBadge from "../common/badges/DueDateBadge";
+import DateBadge from "../common/badges/DateBadge";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
 import MarkdownText from "../common/MarkdownText";
 import UserCard from "../common/UserCard";
@@ -209,15 +210,16 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     </>
                                 )}
                                 {voting.isActive ? (
-                                    <Tooltip label={moment(voting.createdAt).format("LLL")}>
-                                        <span>{moment(voting.createdAt).fromNow()}</span>
-                                    </Tooltip>
+                                    <DateBadge size="sm" date={voting.createdAt} staticColor />
                                 ) : (
-                                    <Tooltip label={moment(voting.concludedAt ?? voting.updatedAt).format("LLL")}>
-                                        <span>
-                                            concluded {moment(voting.concludedAt ?? voting.updatedAt).fromNow()}
-                                        </span>
-                                    </Tooltip>
+                                    <span>
+                                        concluded{" "}
+                                        <DateBadge
+                                            size="sm"
+                                            date={voting.concludedAt ?? voting.updatedAt}
+                                            staticColor
+                                        />
+                                    </span>
                                 )}
                             </Text>
                         </Stack>
