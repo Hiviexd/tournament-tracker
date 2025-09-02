@@ -226,7 +226,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 </>
                             )}
                         </Stack>
-                    ) : user?.isCommittee && tournament.status === "reviewOngoing" ? (
+                    ) : user?.isCommitteeOrAdmin && tournament.status === "reviewOngoing" ? (
                         <Button
                             variant="light"
                             color="info"
