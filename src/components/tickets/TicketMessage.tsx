@@ -84,12 +84,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
     // TODO: split into its own component and make mobile ver less ass
     if (message.isNote && showTrueAuthor) {
         return (
-            <Alert
-                radius="md"
-                variant="light"
-                color="info"
-                icon={<FontAwesomeIcon icon="sticky-note" />}
-                style={{ overflow: "scroll" }}>
+            <Alert radius="md" variant="light" color="info" icon={<FontAwesomeIcon icon="sticky-note" />}>
                 <MessageContent />
             </Alert>
         );
