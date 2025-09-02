@@ -73,7 +73,7 @@ export default function TournamentWinners({ tournament }: IProps) {
                             <FontAwesomeIcon icon="save" />
                         </ActionIcon>
                     </Group>
-                ) : user?.isCommittee ? (
+                ) : user?.isCommitteeOrAdmin ? (
                     <Group gap={4}>
                         <ActionIcon
                             variant="subtle"
