@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box, useMantineTheme } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -8,6 +8,7 @@ import DateBadge from "../common/badges/DateBadge";
 import AttachmentDisplay from "../common/AttachmentDisplay";
 import UserLink from "../common/UserLink";
 import utils from "../../../utils";
+import { useMediaQuery } from "@mantine/hooks";
 
 interface IProps {
     ticket?: ITicket;
@@ -16,6 +17,9 @@ interface IProps {
 }
 
 export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
+    const theme = useMantineTheme();
+    const mobileNoteIcon = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+
     const getUserDisplayProps = () => {
         if (message.isCommittee && !showTrueAuthor) {
             return {
@@ -37,7 +41,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         return theme.colors.primary[6];
     };
 
-    const MessageContent = () => (
+    const MessageContent = ({ mobileNoteIcon = false }: { mobileNoteIcon?: boolean }) => (
         <Stack gap="sm">
             <Group justify="space-between" align="center">
                 <UserDisplay {...getUserDisplayProps()} />
@@ -45,6 +49,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                     <Box visibleFrom="xs">
                         <DateBadge date={message.createdAt} staticColor />
                     </Box>
+                    {mobileNoteIcon && (
+                        <FontAwesomeIcon icon="sticky-note" color="var(--mantine-color-info-light-color)" />
+                    )}
                     <Menu position="bottom-end" withArrow>
                         <Menu.Target>
                             <ActionIcon size="sm" variant="subtle">
@@ -64,7 +71,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
             <Box hiddenFrom="xs">
                 <DateBadge date={message.createdAt} staticColor />
             </Box>
-            <MarkdownText content={message.content} />
+            <Box style={{ overflowWrap: "anywhere" }}>
+                <MarkdownText content={message.content} />
+            </Box>
             {message.attachments && message.attachments.length > 0 && (
                 <Stack mt="lg" gap="sm">
                     <Text size="sm" c="grey">
@@ -84,8 +93,12 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
     // TODO: split into its own component and make mobile ver less ass
     if (message.isNote && showTrueAuthor) {
         return (
-            <Alert radius="md" variant="light" color="info" icon={<FontAwesomeIcon icon="sticky-note" />}>
-                <MessageContent />
+            <Alert
+                radius="md"
+                variant="light"
+                color="info"
+                icon={!mobileNoteIcon && <FontAwesomeIcon icon="sticky-note" />}>
+                <MessageContent mobileNoteIcon={mobileNoteIcon} />
             </Alert>
         );
     // Event logs
