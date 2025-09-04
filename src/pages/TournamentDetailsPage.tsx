@@ -26,7 +26,7 @@ export default function TournamentDetailsPage() {
 
     const LoadingState = () => (
         <Stack gap="md">
-            <Card shadow="sm" p={0}>
+            <Card shadow="sm" p={0} radius="md">
                 <Skeleton height={200} radius="md" mb="md" /> {/* Banner */}
                 <Stack p="lg" gap="md">
                     <Skeleton height={32} width="70%" /> {/* Title */}
@@ -39,7 +39,7 @@ export default function TournamentDetailsPage() {
                 </Stack>
             </Card>
 
-            <Card shadow="sm" p="lg">
+            <Card shadow="sm" p="lg" radius="md">
                 <Skeleton height={24} width="30%" mb="lg" /> {/* Section Title */}
                 <Stack gap="md">
                     <Skeleton height={36} width="40%" /> {/* Status */}
@@ -53,10 +53,20 @@ export default function TournamentDetailsPage() {
                             <Skeleton height={20} width="60%" /> {/* End Date */}
                         </Stack>
                     </Group>
+                    <Group grow>
+                        <Stack gap="xs">
+                            <Skeleton height={20} width="30%" /> {/* Start Date Label */}
+                            <Skeleton height={20} width="60%" /> {/* Start Date */}
+                        </Stack>
+                        <Stack gap="xs">
+                            <Skeleton height={20} width="30%" /> {/* End Date Label */}
+                            <Skeleton height={20} width="60%" /> {/* End Date */}
+                        </Stack>
+                    </Group>
                 </Stack>
             </Card>
 
-            <Card shadow="sm" p="lg">
+            <Card shadow="sm" p="lg" radius="md">
                 <Skeleton height={24} width="20%" mb="lg" /> {/* Reviews Title */}
                 <Skeleton height={16} width="40%" /> {/* Reviews Content */}
             </Card>
