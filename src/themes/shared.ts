@@ -18,6 +18,16 @@ export const baseThemeConfig = {
  * Shared component configurations
  */
 export const baseComponents: MantineThemeComponents = {
+    ActionIcon: {
+        styles: {
+            root: {
+                transition: "all 0.2s ease",
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                },
+            },
+        },
+    },
     Anchor: {
         styles: (theme) => ({
             root: {
@@ -31,36 +41,7 @@ export const baseComponents: MantineThemeComponents = {
             },
         }),
     },
-    Tooltip: {
-        defaultProps: {
-            withArrow: true,
-            color: "primary.11",
-            arrowSize: 8,
-            events: { hover: true, focus: true, touch: true },
-        },
-        styles: {
-            tooltip: {
-                border: "1px solid var(--mantine-color-primary-6)",
-                boxShadow: "0 4px 4px rgba(0, 0, 0, 0.1)",
-                filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1))",
-            },
-            arrow: {
-                border: "1px solid var(--mantine-color-primary-6)",
-                filter: "drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1))",
-            },
-        },
-    },
     Button: {
-        styles: {
-            root: {
-                transition: "all 0.2s ease",
-                "&:hover": {
-                    transform: "translateY(-2px)",
-                },
-            },
-        },
-    },
-    ActionIcon: {
         styles: {
             root: {
                 transition: "all 0.2s ease",
@@ -80,7 +61,7 @@ export const baseComponents: MantineThemeComponents = {
             },
         },
     },
-    Popover: {
+    HoverCard: {
         styles: {
             dropdown: {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
@@ -91,6 +72,20 @@ export const baseComponents: MantineThemeComponents = {
         styles: {
             root: {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+        },
+    },
+    Popover: {
+        styles: {
+            dropdown: {
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+        },
+    },
+    SegmentedControl: {
+        styles: {
+            root: {
+                backgroundColor: "var(--mantine-color-primary-10)",
             },
         },
     },
@@ -106,18 +101,30 @@ export const baseComponents: MantineThemeComponents = {
             },
         },
     },
-    SegmentedControl: {
-        styles: {
-            root: {
-                backgroundColor: "var(--mantine-color-primary-10)",
-            },
-        },
-    },
     TagsInput: {
         styles: {
             pill: {
                 backgroundColor: "var(--mantine-color-primary-light)",
                 color: "var(--mantine-color-primary-light-color)",
+            },
+        },
+    },
+    Tooltip: {
+        defaultProps: {
+            withArrow: true,
+            color: "primary.11",
+            arrowSize: 8,
+            events: { hover: true, focus: true, touch: true },
+        },
+        styles: {
+            tooltip: {
+                border: "1px solid var(--mantine-color-primary-6)",
+                boxShadow: "0 4px 4px rgba(0, 0, 0, 0.1)",
+                filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1))",
+            },
+            arrow: {
+                border: "1px solid var(--mantine-color-primary-6)",
+                filter: "drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1))",
             },
         },
     },
