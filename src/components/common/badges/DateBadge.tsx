@@ -30,11 +30,10 @@ export default function DateBadge({
     };
 
     return (
-        <Badge variant={variant} color={getColor()} size={size}>
-            <FontAwesomeIcon icon="clock" />{" "}
-            <Tooltip label={moment(date).format("LLL")}>
-                <span>{utils.getShortRelativeTime(date)}</span>
-            </Tooltip>
-        </Badge>
+        <Tooltip label={moment(date).format("LLL")}>
+            <Badge variant={variant} color={getColor()} size={size}>
+                <FontAwesomeIcon icon="clock" /> {utils.getShortRelativeTime(date)}
+            </Badge>
+        </Tooltip>
     );
 }
