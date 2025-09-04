@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Button, Combobox, ScrollArea, Text, useCombobox, FocusTrap, Popover, Box } from "@mantine/core";
+import { Button, Combobox, ScrollArea, Text, useCombobox, FocusTrap, HoverCard, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTemplates } from "../../hooks/useTemplates";
 import { ITemplate } from "../../../interfaces/Template";
@@ -17,7 +17,6 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
     const [user] = useAtom(loggedInUserAtom);
     const { data: templates = [], isLoading } = useTemplates(user?.isCommittee ?? false);
     const [search, setSearch] = useState("");
-    const [openedPopover, setOpenedPopover] = useState<string | null>(null);
 
     const combobox = useCombobox({
         onDropdownClose: () => {
@@ -63,19 +62,9 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
     const options = filteredAndGroupedTemplates.map(({ category, templates }) => (
         <Combobox.Group label={category} key={category}>
             {templates.map((template) => (
-                <Combobox.Option
-                    key={template._id}
-                    value={template._id}
-                    onClick={() => handleTemplateSelect(template)}
-                    onMouseEnter={() => setOpenedPopover(template._id)}
-                    onMouseLeave={() => setOpenedPopover(null)}>
-                    <Popover
-                        position="left"
-                        withArrow
-                        offset={11}
-                        middlewares={{ flip: true, shift: true }}
-                        opened={openedPopover === template._id}>
-                        <Popover.Target>
+                <Combobox.Option key={template._id} value={template._id} onClick={() => handleTemplateSelect(template)}>
+                    <HoverCard position="left" shadow="md" offset={11} withArrow>
+                        <HoverCard.Target>
                             <Box>
                                 <Text size="sm" fw={500}>
                                     {template.name}
@@ -84,13 +73,16 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
                                     {template.content}
                                 </Text>
                             </Box>
-                        </Popover.Target>
-                        <Popover.Dropdown maw={350}>
-                            <Text size="sm">
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown
+                            maw={350}
+                            p={0}
+                            style={{ backgroundColor: "var(--mantine-color-primary-10)" }}>
+                            <Text size="sm" p="sm">
                                 <MarkdownText content={template.content} />
                             </Text>
-                        </Popover.Dropdown>
-                    </Popover>
+                        </HoverCard.Dropdown>
+                    </HoverCard>
                 </Combobox.Option>
             ))}
         </Combobox.Group>
