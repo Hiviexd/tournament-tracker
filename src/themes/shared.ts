@@ -36,6 +36,7 @@ export const baseComponents: MantineThemeComponents = {
             withArrow: true,
             color: "primary.11",
             arrowSize: 8,
+            events: { hover: true, focus: true, touch: true },
         },
         styles: {
             tooltip: {
