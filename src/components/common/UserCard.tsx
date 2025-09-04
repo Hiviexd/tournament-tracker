@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     user: IUser;
-    onSelect: (user: IUser) => void;
+    onSelect?: (user: IUser) => void;
     static?: boolean;
     showBadges?: boolean;
     fullWidth?: boolean;
@@ -13,7 +13,7 @@ interface IProps {
 
 export default function UserCard({
     user,
-    onSelect,
+    onSelect = () => {},
     static: isStatic = false,
     showBadges = false,
     fullWidth = false,

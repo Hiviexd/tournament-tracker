@@ -96,7 +96,7 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                 <LoadingState />
             ) : selectedUser ? (
                 <Stack gap="md">
-                    <UserCard user={selectedUser} onSelect={() => {}} static fullWidth />
+                    <UserCard user={selectedUser} static fullWidth />
 
                     <UserStatus user={selectedUser} />
                     <Divider />

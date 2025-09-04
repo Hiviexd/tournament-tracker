@@ -35,7 +35,7 @@ export default function UserLink({ user, username, asText, disablePopover = fals
                 </Anchor>
             </HoverCard.Target>
             <HoverCard.Dropdown p={0} style={{ border: "none" }}>
-                {user && <UserCard user={user} onSelect={() => {}} static />}
+                {user && <UserCard user={user} static />}
             </HoverCard.Dropdown>
         </HoverCard>
     );
