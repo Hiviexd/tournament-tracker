@@ -1,4 +1,4 @@
-import { Title, Stack, Group, Button, Divider, Select, ActionIcon, Card } from "@mantine/core";
+import { Title, Stack, Group, Button, Divider, Select, ActionIcon, Card, useMantineTheme } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import UserCard from "../common/UserCard";
@@ -9,6 +9,7 @@ import { useCommitteeUsers } from "../../hooks/useUsers";
 import { useState } from "react";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import { useMediaQuery } from "@mantine/hooks";
 
 interface IProps {
     tournament: ITournament;
@@ -16,6 +17,9 @@ interface IProps {
 
 export default function TournamentReviewSection({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+
+    const theme = useMantineTheme();
+    const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
     const [isEditingReviewer, setIsEditingReviewer] = useState<boolean>(false);
     const [reviewer1, setReviewer1] = useState<string>("");
@@ -130,7 +134,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 <Stack gap="md">
                                     <Group gap="md">
                                         {tournament.assignedReviewers.map((reviewer) => (
-                                            <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
+                                            <UserCard static key={reviewer._id} user={reviewer} fullWidth={isMobile} />
                                         ))}
                                     </Group>
 
@@ -196,7 +200,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 <Group gap="md">
                                     {/* Reviewer Display */}
                                     {tournament.assignedReviewers.map((reviewer) => (
-                                        <UserCard static key={reviewer._id} user={reviewer} onSelect={() => {}} />
+                                        <UserCard static key={reviewer._id} user={reviewer} fullWidth={isMobile} />
                                     ))}
                                 </Group>
                             )}

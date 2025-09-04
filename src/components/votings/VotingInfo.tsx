@@ -22,9 +22,11 @@ import {
     SegmentedControl,
     Box,
     MantineStyleProp,
+    useMantineTheme,
 } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDisclosure } from "@mantine/hooks";
+import { useMediaQuery } from "@mantine/hooks";
 
 // Components
 import VotingEditModal from "./VotingEditModal";
@@ -55,6 +57,9 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const clearVotesMutation = useClearVotes(voting._id);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
+
+    const theme = useMantineTheme();
+    const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
     const getDueDateColor = (): string => {
         const deadline = moment(voting.deadline);
@@ -261,7 +266,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             <Divider />
                             {voting.targetUser && (
                                 <>
-                                    <Stack gap="sm" maw={300}>
+                                    <Stack gap="sm">
                                         <Text size="sm" c="dimmed">
                                             Target User
                                         </Text>
@@ -269,6 +274,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                             user={voting.targetUser}
                                             onSelect={() => handleUserCardClick(voting.targetUser!)}
                                             static
+                                            fullWidth={isMobile}
                                         />
                                     </Stack>
                                 </>

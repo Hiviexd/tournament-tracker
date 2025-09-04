@@ -12,6 +12,7 @@ import {
     ActionIcon,
     Divider,
     FocusTrap,
+    useMantineTheme,
 } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -29,6 +30,7 @@ import config from "../../../config.json";
 import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
 import { useConfirmModal } from "../../hooks/useModals";
 import AlertText from "../common/AlertText";
+import { useMediaQuery } from "@mantine/hooks";
 
 interface IProps {
     ticket: ITicket;
@@ -36,6 +38,10 @@ interface IProps {
 
 export default function TicketInfo({ ticket }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+
+    const theme = useMantineTheme();
+    const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+
     const [threadId, setThreadId] = useState(ticket.threadId);
     const [isUpdatingThreadId, setIsUpdatingThreadId] = useState(false);
 
@@ -77,7 +83,10 @@ export default function TicketInfo({ ticket }: IProps) {
                 <Text size="sm" mb="sm">
                     Are you sure you want to snooze reminders for 7 days?
                 </Text>
-                <AlertText text="Reminders will resume after that time period, or when a new message is sent." type="info" />
+                <AlertText
+                    text="Reminders will resume after that time period, or when a new message is sent."
+                    type="info"
+                />
             </>
         );
         if (
@@ -145,9 +154,9 @@ export default function TicketInfo({ ticket }: IProps) {
                     </Group>
                 </Group>
                 {ticket.targetUser && (
-                    <Stack gap="xs" w="25%">
+                    <Stack gap="xs">
                         <Title order={5}>Reported User</Title>
-                        <UserCard static user={ticket.targetUser} onSelect={handleUserCardClick} />
+                        <UserCard static user={ticket.targetUser} onSelect={handleUserCardClick} fullWidth={isMobile} />
                     </Stack>
                 )}
                 {ticket.targetTournamentName && (
