@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
+import { ApiScope } from "../../interfaces/ApiKey";
 
 export interface IApiKeyMeta {
     id: string;
@@ -34,11 +35,11 @@ export function useCreateApiKey() {
 
     return useMutation({
         mutationKey: ["apiKey", "create"],
-        mutationFn: async ({ name }: { name: string }) => {
+        mutationFn: async ({ name, scopes }: { name: string, scopes: ApiScope[] }) => {
             const res = await utils.apiCall<IApiKeyCreateResponse>({
                 method: "post",
                 url: "/api/keys/create",
-                data: { name },
+                data: { name, scopes },
             });
             return res;
         },
