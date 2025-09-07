@@ -7,7 +7,7 @@ import { requireScopes } from "../middlewares/authenticateRequest";
 const usersRouter = express.Router();
 
 usersRouter.get("/", auth.optionalAuth, UsersController.index);
-usersRouter.get("/me", requireScopes(["users:read"]), auth.optionalAuth, auth.isLoggedIn, UsersController.getSelf);
+usersRouter.get("/me", requireScopes(["users:read"]), auth.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
 usersRouter.get("/:userInput", auth.optionalAuth, UsersController.getUser);
