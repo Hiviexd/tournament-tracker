@@ -18,16 +18,14 @@ export default function SettingsModal({ opened, onClose }: IProps) {
     if (!user?.isCommittee) return null;
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Settings" size="md">
+        <Modal opened={opened} onClose={onClose} title="Settings" size="lg">
             <Stack>
+                <Divider label="Preferences" labelPosition="left" />
                 <ReviewerStatusSetting />
-                <Divider />
                 <AutomaticTypeFilterSetting />
-                <Divider />
                 <DiscordIdSetting />
-                <Divider />
                 <EmailSetting />
-                <Divider />
+                <Divider label="API Key" labelPosition="left" />
                 <ApiKeySection />
             </Stack>
         </Modal>
