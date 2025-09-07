@@ -9,6 +9,8 @@ import { logger } from "./middlewares/logger";
 import path from "path";
 import utils from "../utils";
 import AutomationService from "./services/AutomationService";
+import { authenticateRequest } from "./middlewares/authenticateRequest";
+import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -87,9 +89,14 @@ import versionRouter from "./routers/versionRouter";
 import quotesRouter from "./routers/quotesRouter";
 import templatesRouter from "./routers/templatesRouter";
 import dashboardRouter from "./routers/dashboardRouter";
+import apiKeysRouter from "./routers/apiKeysRouter";
 
 // setup api routes
 const apiRouter = express.Router();
+
+// First authenticate request to determine auth method (apiKey vs session), then conditionally enforce CSRF
+apiRouter.use(authenticateRequest as express.RequestHandler);
+apiRouter.use(conditionalCsrf as express.RequestHandler);
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
@@ -105,6 +112,7 @@ apiRouter.use("/version", versionRouter);
 apiRouter.use("/quotes", quotesRouter);
 apiRouter.use("/templates", templatesRouter);
 apiRouter.use("/dashboard", dashboardRouter);
+apiRouter.use("/keys", apiKeysRouter);
 
 app.use("/api", apiRouter);
 
@@ -136,6 +144,8 @@ app.use((req, res) => {
 });
 
 // error handler
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use(handleCsrfError as express.ErrorRequestHandler);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err, req, res, next) => {
     let customErrorMessage = "";

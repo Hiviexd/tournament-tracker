@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MobileUserSectionCard from "./MobileUserSectionCard";
 import LoginButton from "../buttons/LoginButton";
 import { useNavigate } from "react-router-dom";
+import utils from "../../../../utils";
 
 interface IProps {
     onClose: () => void;
@@ -95,9 +96,13 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
                     )}
 
                     <UnstyledButton
-                        onClick={() => {
-                            window.location.href = "/api/auth/logout";
+                        onClick={async () => {
+                            await utils.apiCall({
+                                method: "post",
+                                url: "/api/auth/logout",
+                            });
                             onClose();
+                            window.location.href = "/";
                         }}>
                         <Group>
                             <FontAwesomeIcon icon="sign-out-alt" color="var(--mantine-color-danger-5)" />

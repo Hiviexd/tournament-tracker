@@ -28,6 +28,10 @@ import AuthRouter from "./base/AuthRouter";
 import loadIcons from "./themes/icons";
 loadIcons();
 
+// Initialize CSRF protection for unsafe requests in session-auth flows
+import { ensureCsrfInterceptor } from "../utils/csrf";
+ensureCsrfInterceptor();
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <HelmetProvider>
         <StateProvider>
