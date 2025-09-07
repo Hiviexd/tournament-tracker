@@ -23,8 +23,13 @@ function unauthorize(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+/**
+ * Check apiKey request has been granted access via requireScopes middleware
+ * @param res
+ * @returns boolean
+ */
 function checkApiKeyAccess(res: Response): boolean {
-    if (!res.locals?.isAccessibleViaKey) {
+    if (res.locals?.authMethod === "apiKey" && !res.locals?.isAccessibleViaKey) {
         res.status(403).json({ error: "API is not accessible via key" });
         return false;
     }
