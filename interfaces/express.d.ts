@@ -27,6 +27,7 @@ declare module "express" {
             user?: IUser;
             authMethod?: "session" | "apiKey";
             apiKey?: IApiKey;
+            isAccessibleViaKey?: boolean;
         };
     }
 }

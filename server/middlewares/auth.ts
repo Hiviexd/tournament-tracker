@@ -23,6 +23,14 @@ function unauthorize(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+function checkApiKeyAccess(res: Response): boolean {
+    if (!res.locals?.isAccessibleViaKey) {
+        res.status(403).json({ error: "API is not accessible via key" });
+        return false;
+    }
+    return true;
+}
+
 /**
  * Check if user is logged in, and assign user to res.locals
  * @param req
@@ -30,6 +38,8 @@ function unauthorize(req: Request, res: Response, next: NextFunction) {
  * @param next
  */
 async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
+    if (!checkApiKeyAccess(res)) return;
+
     const user = await User.findById(req.session.mongoId);
 
     if (!user) {
@@ -62,6 +72,8 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
  * @param next
  */
 function isCommittee(req: Request, res: Response, next: NextFunction) {
+    if (!checkApiKeyAccess(res)) return;
+
     const user = res.locals!.user;
     if (!user || !user.isCommittee) return unauthorize(req, res, next);
 
@@ -75,6 +87,8 @@ function isCommittee(req: Request, res: Response, next: NextFunction) {
  * @param next
  */
 function isAdmin(req: Request, res: Response, next: NextFunction) {
+    if (!checkApiKeyAccess(res)) return;
+
     const user = res.locals!.user;
     if (!user || !user.isAdmin) return unauthorize(req, res, next);
 
@@ -88,6 +102,8 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
  * @param next
  */
 function isDev(req: Request, res: Response, next: NextFunction) {
+    if (!checkApiKeyAccess(res)) return;
+
     const user = res.locals!.user;
     if (!user || !user.isDev) return unauthorize(req, res, next);
 
@@ -102,6 +118,8 @@ function isDev(req: Request, res: Response, next: NextFunction) {
  * @param next
  */
 async function optionalAuth(req: Request, res: Response, next: NextFunction) {
+    if (!checkApiKeyAccess(res)) return;
+
     if (!req.session || !req.session.mongoId) {
         return next();
     }

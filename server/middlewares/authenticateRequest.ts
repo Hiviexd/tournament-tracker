@@ -13,6 +13,9 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
                 res.locals.user = result.user;
                 res.locals.apiKey = result.apiKey; // expose apiKey for scope checks
                 res.locals.authMethod = "apiKey";
+                // We're setting this to false so no APIs are accessible by key by default, and only
+                // allow routes that have requireScopes middleware to be usable via key.
+                res.locals.isAccessibleViaKey = false;
                 return next();
             }
             return res.status(401).json({ error: "Invalid or revoked API key" });
@@ -36,7 +39,11 @@ export function requireScopes(scopes: string[]) {
         }
 
         const hasAll = scopes.every((s) => apiKey.scopes.includes(s as ApiScope));
-        if (!hasAll) return res.status(403).json({ error: "Missing required scope" });
+        if (!hasAll) {
+            res.locals!.isAccessibleViaKey = false;
+            return res.status(403).json({ error: "Missing required scope" });
+        }
+        res.locals!.isAccessibleViaKey = true;
         return next();
     };
 }
