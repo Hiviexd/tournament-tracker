@@ -4,6 +4,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
 import DiscordIdSetting from "./settings/DiscordIdSetting";
 import EmailSetting from "./settings/EmailSetting";
+import ApiKeySection from "./settings/ApiKeySection";
 import AutomaticTypeFilterSetting from "./settings/AutomaticTypeFilterSetting";
 
 interface IProps {
@@ -26,6 +27,8 @@ export default function SettingsModal({ opened, onClose }: IProps) {
                 <DiscordIdSetting />
                 <Divider />
                 <EmailSetting />
+                <Divider />
+                <ApiKeySection />
             </Stack>
         </Modal>
     );
