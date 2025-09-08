@@ -1,4 +1,4 @@
-## Notes
+# Notes
 
 - @ts-nocheck is needed for each route file because we modified `express.Request` and `express.Response` interfaces to include more user-related data for auth.
 - `requireScopes` is a middleware that checks if the user has the required scopes to access the route.
