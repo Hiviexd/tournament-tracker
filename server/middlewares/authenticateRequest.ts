@@ -25,6 +25,7 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
     // Fallback to existing optionalAuth or session-based flow elsewhere
     res.locals = res.locals || {};
     res.locals.authMethod = "session";
+    res.locals.isAccessibleViaKey = false; // Session routes are not accessible via API key by default
     return next();
 }
 
