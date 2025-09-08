@@ -12,7 +12,7 @@ export default class ApiKeyService {
      * @param options - the options for the API key
      * @returns the raw and API key
      */
-    static async createKey(user: IUser, options: { name: string; scopes: ApiScope[] }): Promise<{ rawKey: string; apiKey: IApiKey }> {
+    static async createKey(user: IUser, options: { name: string; scopes: ApiScope[], isElevated: boolean }): Promise<{ rawKey: string; apiKey: IApiKey }> {
         const existing = await ApiKey.findOne({ user, revokedAt: null });
         if (existing) {
             throw Object.assign(new Error("API key already exists for this user"), { status: 409 });
@@ -30,6 +30,7 @@ export default class ApiKeyService {
             timesUsed: 0,
             lastRouteUsed: "",
             revokedAt: null,
+            isElevated: false, // Replace with options.isElevated when we allow it to be set
         });
 
         return { rawKey: raw, apiKey };
@@ -66,6 +67,11 @@ export default class ApiKeyService {
 
         const user = await User.findById(apiKey.user).orFail();
         if (!user) return null;
+
+        // Lobotomize user if not elevated
+        if (!apiKey.isElevated) {
+            user.groups = ["user"];
+        }
 
         apiKey.lastUsedAt = new Date();
         apiKey.timesUsed++;

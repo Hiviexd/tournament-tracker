@@ -1,5 +1,17 @@
 import { useMemo, useState } from "react";
-import { Alert, Button, Code, Group, MultiSelect, Stack, Text, TextInput, Skeleton, Anchor } from "@mantine/core";
+import {
+    Alert,
+    Button,
+    Code,
+    Group,
+    MultiSelect,
+    Stack,
+    Text,
+    TextInput,
+    Skeleton,
+    Anchor,
+    Checkbox,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useApiKeyMeta, useCreateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
 import { useConfirmModal } from "../../../hooks/useModals";
@@ -7,8 +19,12 @@ import { type ApiScope, AvailableApiScopes } from "../../../../interfaces/ApiKey
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CopyButton from "../../common/buttons/CopyButton";
 import DateBadge from "../../common/badges/DateBadge";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../../store/atoms";
 
 export default function ApiKeySection() {
+    const [user] = useAtom(loggedInUserAtom);
+
     const { data: meta, isLoading } = useApiKeyMeta();
     const createKeyMutation = useCreateApiKey();
     const revokeKeyMutation = useRevokeApiKey();
@@ -18,10 +34,12 @@ export default function ApiKeySection() {
         initialValues: {
             name: "",
             scopes: [] as ApiScope[],
+            isElevated: false,
         },
         validate: {
             name: (value) => (!value || value.trim() === "" ? "Name is required" : null),
             scopes: (value) => (value.length === 0 ? "At least one scope is required" : null),
+            isElevated: (value) => (value ? "API key elevation is disabled for now" : null),
         },
     });
 
@@ -30,7 +48,11 @@ export default function ApiKeySection() {
     const hasActiveKey = useMemo(() => !!meta && !meta.revokedAt, [meta]);
 
     const handleCreateKey = async () => {
-        const res = await createKeyMutation.mutateAsync({ name: form.values.name.trim(), scopes: form.values.scopes });
+        const res = await createKeyMutation.mutateAsync({
+            name: form.values.name.trim(),
+            scopes: form.values.scopes,
+            isElevated: form.values.isElevated,
+        });
         setRevealedKey(res.key);
         form.reset();
     };
@@ -161,6 +183,14 @@ export default function ApiKeySection() {
                             {...form.getInputProps("scopes")}
                             withAsterisk
                         />
+                        {user?.isDev && (
+                            <Checkbox
+                                label="Elevate API key permissions"
+                                description="This will grant the API key your website-level permissions."
+                                disabled
+                                {...form.getInputProps("isElevated")}
+                            />
+                        )}
                         <Group mt="xs">
                             <Button
                                 type="submit"

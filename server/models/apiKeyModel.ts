@@ -12,6 +12,7 @@ const ApiKeySchema = new Schema<IApiKey>(
         timesUsed: { type: Number, default: 0 },
         lastRouteUsed: { type: String, default: "" },
         revokedAt: { type: Date, default: null },
+        isElevated: { type: Boolean, default: false },
     },
     { timestamps: false }
 );

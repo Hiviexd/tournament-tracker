@@ -25,4 +25,5 @@ export interface IApiKey extends Document {
     timesUsed: number;
     lastRouteUsed: string;
     revokedAt?: Date | null;
+    isElevated: boolean;
 }

@@ -8,7 +8,7 @@ import webhookColors from "../constants/webhookColors";
 class ApiKeysController {
     /** POST create API key (single per user) - returns raw key once */
     public async create(req: Request, res: Response) {
-        const { name, scopes } = req.body || {};
+        const { name, scopes, isElevated } = req.body || {};
 
         if (!name) {
             return res.status(400).json({ error: "Name is required" });
@@ -22,6 +22,7 @@ class ApiKeysController {
         const { rawKey, apiKey } = await ApiKeyService.createKey(res.locals!.user!, {
             name: String(name),
             scopes,
+            isElevated,
         });
 
         await LogService.generate(res.locals!.user!._id, `Created API key: **${apiKey.name}**`, "api_key");

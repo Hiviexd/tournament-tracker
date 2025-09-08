@@ -35,11 +35,11 @@ export function useCreateApiKey() {
 
     return useMutation({
         mutationKey: ["apiKey", "create"],
-        mutationFn: async ({ name, scopes }: { name: string, scopes: ApiScope[] }) => {
+        mutationFn: async ({ name, scopes, isElevated }: { name: string; scopes: ApiScope[]; isElevated: boolean }) => {
             const res = await utils.apiCall<IApiKeyCreateResponse>({
                 method: "post",
                 url: "/api/keys/create",
-                data: { name, scopes },
+                data: { name, scopes, isElevated },
             });
             return res;
         },
