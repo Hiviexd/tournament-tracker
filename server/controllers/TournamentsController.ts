@@ -243,9 +243,10 @@ class TournamentsController {
                 TournamentService.getRelatedReports(tournament),
                 TournamentService.getRelatedVotings(tournament),
             ]);
+            return res.json({ tournament, reports, votings });
         }
 
-        res.json({ tournament, reports, votings });
+        res.json({ tournament });
     }
 
     /** POST create a tournament */
