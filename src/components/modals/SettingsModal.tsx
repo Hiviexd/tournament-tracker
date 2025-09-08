@@ -1,4 +1,4 @@
-import { Modal, Stack, Divider } from "@mantine/core";
+import { Modal, Stack, Tabs } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
@@ -17,19 +17,26 @@ export default function SettingsModal({ opened, onClose }: IProps) {
 
     return (
         <Modal opened={opened} onClose={onClose} title="Settings" size="lg">
-            <Stack>
+            <Tabs defaultValue={user?.isCommittee ? "preferences" : "api-key"}>
+                <Tabs.List>
+                    {user?.isCommittee && <Tabs.Tab value="preferences">Preferences</Tabs.Tab>}
+                    <Tabs.Tab value="api-key">API Key</Tabs.Tab>
+                </Tabs.List>
+
                 {user?.isCommittee && (
-                    <>
-                        <Divider label="Preferences" labelPosition="left" />
-                        <ReviewerStatusSetting />
-                        <AutomaticTypeFilterSetting />
-                        <DiscordIdSetting />
-                        <EmailSetting />
-                    </>
+                    <Tabs.Panel value="preferences" mt="md">
+                        <Stack>
+                            <ReviewerStatusSetting />
+                            <AutomaticTypeFilterSetting />
+                            <DiscordIdSetting />
+                            <EmailSetting />
+                        </Stack>
+                    </Tabs.Panel>
                 )}
-                <Divider label="API Key" labelPosition="left" />
-                <ApiKeySection />
-            </Stack>
+                <Tabs.Panel value="api-key" mt="md">
+                    <ApiKeySection />
+                </Tabs.Panel>
+            </Tabs>
         </Modal>
     );
 }
