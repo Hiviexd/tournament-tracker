@@ -64,7 +64,7 @@ POST /api/beatmaps/check
 
 **Request Body:**
 
-```json
+```jsonc
 {
   "input": "list of beatmap IDs, and/or URLs. Separators like spaces, commas, and newlines are supported.",
 }
@@ -72,7 +72,7 @@ POST /api/beatmaps/check
 
 **Response:**
 
-```json
+```jsonc
 {
   message: "Beatmaps checked successfully!",
   "allowed": [...], // IBeatmap[]
@@ -109,7 +109,7 @@ GET /api/tournaments
 
 **Response:**
 
-```json
+```jsonc
 {
   "tournaments": [...], // A censored version of ITournament[]
   "totalCount": 150,
@@ -136,7 +136,7 @@ GET /api/tournaments/{tournamentId}
 
 **Response:**
 
-```json
+```jsonc
 {
   "tournament": { ... }, // A censored version of ITournament
 }
@@ -165,7 +165,7 @@ GET /api/votes
 
 **Response:**
 
-```json
+```jsonc
 {
   "votings": [...], // A censored version of IVoting[]
   "totalCount": 150,
@@ -192,7 +192,7 @@ GET /api/votes/{voteId}
 
 **Response:**
 
-```json
+```jsonc
 {
   ..., // A censored version of IVoting
 }
@@ -222,7 +222,7 @@ GET /api/resources
 
 **Response:**
 
-```json
+```jsonc
 {
   "resources": [...], // IResource[]
   "totalCount": 150,
@@ -247,7 +247,7 @@ GET /api/users/me
 
 **Response:**
 
-```json
+```jsonc
 {
   ..., // IUser
 }
@@ -263,6 +263,7 @@ GET /api/users/me
 > Tickets and reports are the same entity, they're differentiated by the `type` field.
 
 #### Search Tickets/Reports
+
 ```http
 GET /api/tickets
 ```
@@ -283,7 +284,7 @@ GET /api/tickets
 
 **Response:**
 
-```json
+```jsonc
 {
   "tickets": [...], // A censored version of ITicket[]
   "totalCount": 150,
@@ -310,7 +311,7 @@ GET /api/tickets/{ticketId}
 
 **Response:**
 
-```json
+```jsonc
 {
   ..., // A censored version of ITicket
 }
@@ -326,7 +327,7 @@ GET /api/tickets/{ticketId}
 
 #### 401 Unauthorized
 
-```json
+```jsonc
 {
   "error": "Invalid or revoked API key"
 }
@@ -334,7 +335,7 @@ GET /api/tickets/{ticketId}
 
 #### 403 Forbidden
 
-```json
+```jsonc
 {
   "error": "Missing required scope"
 }
@@ -342,7 +343,7 @@ GET /api/tickets/{ticketId}
 
 #### 403 Forbidden (CORS)
 
-```json
+```jsonc
 {
   "error": "Access denied. This endpoint is only accessible from the client application or with a valid API key."
 }
@@ -352,7 +353,7 @@ GET /api/tickets/{ticketId}
 
 #### 429 Too Many Requests
 
-```json
+```jsonc
 {
   "error": "Rate limit exceeded"
 }
@@ -362,7 +363,7 @@ GET /api/tickets/{ticketId}
 
 #### 400 Bad Request
 
-```json
+```jsonc
 {
   "error": "Validation error"
 }
@@ -370,7 +371,7 @@ GET /api/tickets/{ticketId}
 
 #### 404 Not Found
 
-```json
+```jsonc
 {
   "error": "API endpoint not found"
 }
@@ -378,7 +379,7 @@ GET /api/tickets/{ticketId}
 
 #### 500 Internal Server Error
 
-```json
+```jsonc
 {
   "error": "Something went wrong!"
 }
@@ -387,6 +388,7 @@ GET /api/tickets/{ticketId}
 ## Examples
 
 ### Python Example
+
 ```python
 import requests
 import time
@@ -423,6 +425,7 @@ tournaments = api.get_tournaments(search="Suiji", status="badgeApproved", state=
 ```
 
 ### JavaScript Example
+
 ```javascript
 class TournamentTrackerAPI {
     constructor(apiKey, baseUrl = 'https://tcomm.hivie.tn') {
@@ -555,6 +558,7 @@ function CHECK_COMPLIANCE(input) {
 
 > [!TIP]
 > Examples of supported input formats:
+>
 > ```text
 > # Single beatmap ID
 > 1234567
