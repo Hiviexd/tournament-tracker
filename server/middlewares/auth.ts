@@ -45,7 +45,7 @@ function checkApiKeyAccess(res: Response): boolean {
 async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
     if (!checkApiKeyAccess(res)) return;
 
-    const user = await User.findById(req.session.mongoId);
+    const user = await User.findById(req.session.mongoId || res.locals!.user?._id);
 
     if (!user) {
         return unauthorize(req, res, next);
@@ -129,7 +129,7 @@ async function optionalAuth(req: Request, res: Response, next: NextFunction) {
         return next();
     }
 
-    const user = await User.findById(req.session.mongoId);
+    const user = await User.findById(req.session.mongoId || res.locals!.user?._id);
 
     if (!user) {
         return next();
