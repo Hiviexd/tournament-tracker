@@ -15,16 +15,18 @@ interface IProps {
 export default function SettingsModal({ opened, onClose }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
 
-    if (!user?.isCommittee) return null;
-
     return (
         <Modal opened={opened} onClose={onClose} title="Settings" size="lg">
             <Stack>
-                <Divider label="Preferences" labelPosition="left" />
-                <ReviewerStatusSetting />
-                <AutomaticTypeFilterSetting />
-                <DiscordIdSetting />
-                <EmailSetting />
+                {user?.isCommittee && (
+                    <>
+                        <Divider label="Preferences" labelPosition="left" />
+                        <ReviewerStatusSetting />
+                        <AutomaticTypeFilterSetting />
+                        <DiscordIdSetting />
+                        <EmailSetting />
+                    </>
+                )}
                 <Divider label="API Key" labelPosition="left" />
                 <ApiKeySection />
             </Stack>

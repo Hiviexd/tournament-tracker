@@ -61,11 +61,9 @@ export default function UserMenu({ user }: IProps) {
                     <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>
-                    {user.isCommittee && (
-                        <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
-                            Settings
-                        </Menu.Item>
-                    )}
+                    <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
+                        Settings
+                    </Menu.Item>
                     {user.isDev && (
                         <Menu.Item onClick={openDebug} leftSection={<FontAwesomeIcon icon="bug" />}>
                             Debug

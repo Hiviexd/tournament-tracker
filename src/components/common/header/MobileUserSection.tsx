@@ -77,14 +77,12 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
                         </Group>
                     </UnstyledButton>
 
-                    {user.isCommittee && (
-                        <UnstyledButton onClick={handleSettings}>
-                            <Group>
-                                <FontAwesomeIcon icon="cog" />
-                                <Text size="sm">Settings</Text>
-                            </Group>
-                        </UnstyledButton>
-                    )}
+                    <UnstyledButton onClick={handleSettings}>
+                        <Group>
+                            <FontAwesomeIcon icon="cog" />
+                            <Text size="sm">Settings</Text>
+                        </Group>
+                    </UnstyledButton>
 
                     {user.isDev && (
                         <UnstyledButton onClick={handleDebug}>
