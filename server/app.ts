@@ -11,6 +11,8 @@ import utils from "../utils";
 import AutomationService from "./services/AutomationService";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
+import { conditionalCors } from "./middlewares/cors";
+import { conditionalRateLimiter, apiKeyBurstLimiter } from "./middlewares/rateLimiter";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -94,8 +96,11 @@ import apiKeysRouter from "./routers/apiKeysRouter";
 // setup api routes
 const apiRouter = express.Router();
 
-// First authenticate request to determine auth method (apiKey vs session), then conditionally enforce CSRF
+// First authenticate request to determine auth method (apiKey vs session), then conditionally enforce CORS, rate limiting, and CSRF
 apiRouter.use(authenticateRequest as express.RequestHandler);
+apiRouter.use(conditionalCors as express.RequestHandler);
+apiRouter.use(conditionalRateLimiter as express.RequestHandler);
+apiRouter.use(apiKeyBurstLimiter as express.RequestHandler);
 apiRouter.use(conditionalCsrf as express.RequestHandler);
 
 apiRouter.use("/auth", authRouter);
