@@ -25,6 +25,8 @@ import { loggedInUserAtom } from "../../../store/atoms";
 export default function ApiKeySection() {
     const [user] = useAtom(loggedInUserAtom);
 
+    const DOCS_URL = "https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation";
+
     const { data: meta, isLoading } = useApiKeyMeta();
     const createKeyMutation = useCreateApiKey();
     const revokeKeyMutation = useRevokeApiKey();
@@ -97,7 +99,7 @@ export default function ApiKeySection() {
 
                     <Text size="sm" fw={600}>
                         Refer to{" "}
-                        <Anchor href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">
+                        <Anchor href={DOCS_URL} target="_blank">
                             the documentation
                         </Anchor>{" "}
                         for more information.
@@ -172,7 +174,7 @@ export default function ApiKeySection() {
                         <Text size="sm">You can create one API key to access certain endpoints programmatically.</Text>
                         <Text size="sm" fw={600}>
                             Refer to{" "}
-                            <Anchor fw={600} href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">
+                            <Anchor fw={600} href={DOCS_URL} target="_blank">
                                 the documentation
                             </Anchor>{" "}
                             for more information.

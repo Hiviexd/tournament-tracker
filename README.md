@@ -46,4 +46,4 @@ This is purely for self-documentation purposes.
 
 ## API
 
-Please refer to the [API documentation](API.md) for more information.
+Please refer to the [API documentation](https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation) for more information.
