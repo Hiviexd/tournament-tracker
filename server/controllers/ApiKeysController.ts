@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import ApiKeyService from "../services/ApiKeyService";
 import { AvailableApiScopes } from "../../interfaces/ApiKey";
+import LogService from "../services/LogService";
+import DiscordService from "../services/DiscordService";
+import webhookColors from "../constants/webhookColors";
 
 class ApiKeysController {
     /** POST create API key (single per user) - returns raw key once */
@@ -21,6 +24,19 @@ class ApiKeysController {
             scopes,
         });
 
+        await LogService.generate(res.locals!.user!._id, `Created API key: **${apiKey.name}**`, "api_key");
+
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.white,
+                    description: `Created new API key: **${apiKey.name}**`,
+                },
+            ],
+            webhook: "dev",
+        });
+
         return res.status(201).json({ key: rawKey, apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
     }
 
@@ -31,8 +47,21 @@ class ApiKeysController {
     }
 
     /** POST revoke key */
-    public async revoke(_: Request, res: Response) {
-        await ApiKeyService.revokeKey(res.locals!.user!);
+    public async revoke(req: Request, res: Response) {
+        const result = await ApiKeyService.revokeKey(res.locals!.user!);
+        if (result.apiKey && !result.alreadyRevoked) {
+            await LogService.generate(res.locals!.user!._id, `Revoked API key: **${result.apiKey.name}**`, "api_key");
+            await DiscordService.sendWebhook({
+                embeds: [
+                    {
+                        author: DiscordService.defaultWebhookAuthor(req.session),
+                        color: webhookColors.gray,
+                        description: `Revoked API key: **${result.apiKey.name}**`,
+                    },
+                ],
+                webhook: "dev",
+            });
+        }
         return res.json({ message: "API key revoked" });
     }
 }
