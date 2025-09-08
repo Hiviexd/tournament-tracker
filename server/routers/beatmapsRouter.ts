@@ -6,6 +6,6 @@ import BeatmapsController from "../controllers/BeatmapsController";
 
 const beatmapsRouter = Router();
 
-beatmapsRouter.post("/check",requireScopes(["beatmaps:read"]), auth.isLoggedIn, BeatmapsController.checkMappoolCompliance);
+beatmapsRouter.post("/check", requireScopes(["beatmaps:read"]), auth.isLoggedIn, BeatmapsController.checkMappoolCompliance);
 
 export default beatmapsRouter;
