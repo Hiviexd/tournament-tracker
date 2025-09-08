@@ -131,7 +131,15 @@ export default function ApiKeySection() {
                         <Text span fw={600}>
                             Times used:
                         </Text>{" "}
-                        <Code>{meta?.timesUsed ?? "-"}</Code>
+                        {meta?.timesUsed ? (
+                            <Text span size="sm">
+                                <Code>{meta.timesUsed}</Code>
+                            </Text>
+                        ) : (
+                            <Text span size="sm" c="dimmed">
+                                Never
+                            </Text>
+                        )}
                     </Text>
                     <Text size="sm">
                         <Text span fw={600}>
@@ -154,7 +162,7 @@ export default function ApiKeySection() {
                             leftSection={<FontAwesomeIcon icon="trash" />}
                             loading={revokeKeyMutation.isPending}
                             onClick={handleRevokeKey}>
-                            Revoke key
+                            Revoke Key
                         </Button>
                     </Group>
                 </Stack>
