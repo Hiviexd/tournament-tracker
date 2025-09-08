@@ -7,7 +7,7 @@ export interface IApiKeyMeta {
     name: string;
     scopes: string[];
     createdAt: string;
-    lastUsed?: string | null;
+    lastUsedAt?: string | null;
     revokedAt?: string | null;
 }
 

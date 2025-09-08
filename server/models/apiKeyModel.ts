@@ -8,7 +8,9 @@ const ApiKeySchema = new Schema<IApiKey>(
         name: { type: String, required: true },
         scopes: { type: [String], default: [], enum: Object.values(AvailableApiScopes) },
         createdAt: { type: Date, default: () => new Date() },
-        lastUsed: { type: Date },
+        lastUsedAt: { type: Date },
+        timesUsed: { type: Number, default: 0 },
+        lastRouteUsed: { type: String, default: "" },
         revokedAt: { type: Date, default: null },
     },
     { timestamps: false }

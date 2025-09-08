@@ -3,6 +3,7 @@ import User from "../models/userModel";
 import ApiKey from "../models/apiKeyModel";
 import utils from "../../utils";
 import { IUser } from "../../interfaces/User";
+import { Request } from "express";
 
 export default class ApiKeyService {
     /**
@@ -25,7 +26,9 @@ export default class ApiKeyService {
             name: options.name,
             scopes: options.scopes,
             createdAt: new Date(),
-            lastUsed: undefined,
+            lastUsedAt: undefined,
+            timesUsed: 0,
+            lastRouteUsed: "",
             revokedAt: null,
         });
 
@@ -55,7 +58,7 @@ export default class ApiKeyService {
      * @param rawKey - the raw API key
      * @returns the user and API key
      */
-    static async validate(rawKey: string): Promise<{ user: IUser; apiKey: IApiKey } | null> {
+    static async validate(rawKey: string, req: Request): Promise<{ user: IUser; apiKey: IApiKey } | null> {
         const { hashed } = utils.generateApiKey(rawKey);
 
         const apiKey = await ApiKey.findOne({ hashedKey: hashed });
@@ -64,7 +67,9 @@ export default class ApiKeyService {
         const user = await User.findById(apiKey.user).orFail();
         if (!user) return null;
 
-        apiKey.lastUsed = new Date();
+        apiKey.lastUsedAt = new Date();
+        apiKey.timesUsed++;
+        apiKey.lastRouteUsed = req.originalUrl || "";
         await apiKey.save();
 
         return { user, apiKey };

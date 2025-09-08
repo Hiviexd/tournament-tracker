@@ -7,7 +7,7 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
     if (authz && typeof authz === "string" && authz.startsWith("Bearer ")) {
         const rawKey = authz.slice("Bearer ".length).trim();
         if (rawKey) {
-            const result = await ApiKeyService.validate(rawKey);
+            const result = await ApiKeyService.validate(rawKey, req);
             if (result) {
                 res.locals = res.locals || {};
                 res.locals.user = result.user;

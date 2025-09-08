@@ -74,14 +74,18 @@ export default function ApiKeySection() {
                     )}
 
                     <Text size="sm" fw={600}>
-                        Refer to <Anchor href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">the documentation</Anchor> for more information.
+                        Refer to{" "}
+                        <Anchor href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">
+                            the documentation
+                        </Anchor>{" "}
+                        for more information.
                     </Text>
 
                     <Text size="sm">
                         <Text span fw={600}>
                             Name:
                         </Text>{" "}
-                        {meta?.name ?? "-"}
+                        <Code>{meta?.name ?? "-"}</Code>
                     </Text>
                     <Text size="sm">
                         <Text span fw={600}>
@@ -93,8 +97,28 @@ export default function ApiKeySection() {
                         <Text span fw={600}>
                             Last used:
                         </Text>{" "}
-                        {meta?.lastUsed ? (
-                            <DateBadge date={meta.lastUsed} size="sm" staticColor />
+                        {meta?.lastUsedAt ? (
+                            <DateBadge date={meta.lastUsedAt} size="sm" staticColor />
+                        ) : (
+                            <Text span size="sm" c="dimmed">
+                                Never
+                            </Text>
+                        )}
+                    </Text>
+                    <Text size="sm">
+                        <Text span fw={600}>
+                            Times used:
+                        </Text>{" "}
+                        <Code>{meta?.timesUsed ?? "-"}</Code>
+                    </Text>
+                    <Text size="sm">
+                        <Text span fw={600}>
+                            Last route used:
+                        </Text>{" "}
+                        {meta?.lastRouteUsed ? (
+                            <Text span size="sm">
+                                <Code>{meta.lastRouteUsed}</Code>
+                            </Text>
                         ) : (
                             <Text span size="sm" c="dimmed">
                                 Never
@@ -104,6 +128,7 @@ export default function ApiKeySection() {
                     <Group mt="xs">
                         <Button
                             color="red"
+                            variant="light"
                             leftSection={<FontAwesomeIcon icon="trash" />}
                             loading={revokeKeyMutation.isPending}
                             onClick={handleRevokeKey}>
@@ -114,11 +139,13 @@ export default function ApiKeySection() {
             ) : (
                 <form onSubmit={form.onSubmit(handleCreateKey)}>
                     <Stack gap="xs">
-                        <Text size="sm">
-                            You can create one API key to access certain endpoints programmatically.
-                        </Text>
+                        <Text size="sm">You can create one API key to access certain endpoints programmatically.</Text>
                         <Text size="sm" fw={600}>
-                            Refer to <Anchor fw={600} href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">the documentation</Anchor> for more information.
+                            Refer to{" "}
+                            <Anchor fw={600} href="https://github.com/Hiviexd/tournament-tracker#api" target="_blank">
+                                the documentation
+                            </Anchor>{" "}
+                            for more information.
                         </Text>
                         <TextInput
                             label="Name"
@@ -129,7 +156,7 @@ export default function ApiKeySection() {
                         <MultiSelect
                             label="Scopes"
                             placeholder="Select scopes"
-                            description={`If you only care about using the Mappool Compliance API, select "${AvailableApiScopes.BEATMAPS_READ}"`}
+                            /* description={`If you only care about using the Mappool Compliance API, select "${AvailableApiScopes.BEATMAPS_READ}"`} */
                             data={Object.values(AvailableApiScopes)}
                             {...form.getInputProps("scopes")}
                             withAsterisk
@@ -137,6 +164,7 @@ export default function ApiKeySection() {
                         <Group mt="xs">
                             <Button
                                 type="submit"
+                                variant="light"
                                 leftSection={<FontAwesomeIcon icon="code" />}
                                 loading={createKeyMutation.isPending}>
                                 Generate API Key

@@ -21,6 +21,8 @@ export interface IApiKey extends Document {
     name: string;
     scopes: ApiScope[];
     createdAt: Date;
-    lastUsed?: Date;
+    lastUsedAt?: Date;
+    timesUsed: number;
+    lastRouteUsed: string;
     revokedAt?: Date | null;
 }
