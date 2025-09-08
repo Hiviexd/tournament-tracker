@@ -46,13 +46,4 @@ This is purely for self-documentation purposes.
 
 ## API
 
-This project has a few public API endpoints, feel free to use them within reasonable limits.
-
-- `GET` `/api/tournaments` — queries the tournament listing
-- `GET` `/api/tournaments/:id` — gets a specific [tournament](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Tournament.ts) via its ID
-- `GET` `/api/votes` — queries the public votes listing
-- `GET` `/api/votes/:id` — gets a specific public [vote](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Voting.ts) via its ID
-- `GET` `/api/tickets` — queries the tickets listing
-- `GET` `/api/tickets/:id` — gets a specific [ticket](https://github.com/Hiviexd/tournament-tracker/blob/main/interfaces/Ticket.ts) via its ID
-
-Again, please use these with moderation. If you need other API functionalities (i.e. more routes, websockets, etc.), contact [me](https://osu.ppy.sh/users/14102976) and we'll figure something out.
+Please refer to the [API documentation](API.md) for more information.
