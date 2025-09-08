@@ -22,6 +22,7 @@ export function conditionalCors(req: Request, res: Response, next: NextFunction)
         "http://localhost:3000", // Backend
         "http://localhost:8088", // Frontend
         `http://localhost:${process.env.PORT}`, // Custom port
+        "https://osu.ppy.sh", // osu!
     ];
     const methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"];
     const allowedHeaders = ["Content-Type", "Authorization", "X-CSRF-Token"];
