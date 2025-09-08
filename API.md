@@ -6,6 +6,9 @@
 
 The Tournament Tracker API provides programmatic access to various types of data and functionality. Access is controlled through API keys with scope-based permissions + your website-level permissions.
 
+> [!TIP]
+> If you only care about using the Mappool Compliance API in your pooling sheet, you can simply follow the [Google Sheets example](#google-sheets-example-for-mappool-compliance-purposes) below.
+
 >[!NOTE]
 > If you're experiencing any issues, or want to report a bug, [open a GitHub issue](https://github.com/Hiviexd/tournament-tracker/issues/new) or contact me on Discord (hivie).
 
@@ -29,7 +32,8 @@ Authorization: Bearer YOUR_API_KEY
 - Select the required scopes (see [Scopes](#scopes) below)
 - Click "Generate API Key"
 
-**⚠️ Important:** The raw API key is only shown once after creation. Save it securely as it cannot be retrieved later.
+> [!IMPORTANT]
+> The raw API key is only shown once after creation. Save it securely as it cannot be retrieved later.
 
 ## Scopes
 
@@ -477,11 +481,15 @@ const tournaments = await api.getTournaments({ search: 'Suiji', status: 'badgeAp
 
 This example shows how to create a custom function in Google Sheets that checks mappool compliance using the API.
 
+> ![CAUTION]
+> When using the Mappool Compliance API in your pooling sheet, it's highly recommended you invoke the API as little as possible to avoid rate limiting. Try to have the function run once somewhere rather than run it once per cell for example.
+
 #### Setup Instructions
 
-1. **Open Google Sheets** and create a new spreadsheet
-2. **Go to Extensions → Apps Script**
-3. **Replace the default code** with the following:
+1. **Create an API key** with the `beatmaps:read` scope by following the [Creating an API Key](#creating-an-api-key) instructions.
+2. **Open your desired spreadsheet**
+3. **Go to Extensions → Apps Script**
+4. **Replace the default code** with the following:
 
 ```javascript
 // Configuration - Replace with your actual API key
