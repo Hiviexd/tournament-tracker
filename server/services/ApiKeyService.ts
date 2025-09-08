@@ -37,17 +37,17 @@ export default class ApiKeyService {
      * @param user - the user to revoke the API key for
      * @returns the API key
      */
-    static async revokeKey(user: IUser): Promise<{ apiKey: IApiKey } | { alreadyRevoked: true }> {
+    static async revokeKey(user: IUser) {
 
         const apiKey = await ApiKey.findOne({ user, revokedAt: null });
 
         if (apiKey) {
             apiKey.revokedAt = new Date();
             await apiKey.save();
-            return { apiKey };
+            return { apiKey, alreadyRevoked: false };
         }
 
-        return { alreadyRevoked: true } as const;
+        return { apiKey: null, alreadyRevoked: true } as const;
     }
 
     /**
