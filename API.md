@@ -550,24 +550,26 @@ function CHECK_COMPLIANCE(input) {
 | **Beatmap Input** | **Approved** | **Partial** | **Disallowed** | **Errors** |
 | 1234567,2345678,3456789 | `=CHECK_COMPLIANCE(A2)` | | | |
 
-**Note:** If you use the code above verbatim, the `CHECK_COMPLIANCE` function will automatically fill cells B2, C2, D2, and E2 with the approved, partial, disallowed, and error beatmap IDs respectively.
+> [!NOTE]
+> If you use the code above verbatim, the `CHECK_COMPLIANCE` function will automatically fill cells B2, C2, D2, and E2 with the approved, partial, disallowed, and error beatmap IDs respectively.
 
-4. **Supported input formats** in cell A2:
-   ```
-   # Single beatmap ID
-   1234567
-   
-   # Multiple IDs (comma-separated)
-   1234567, 2345678, 3456789
-   
-   # Mixed with URLs
-   1234567, https://osu.ppy.sh/beatmapsets/123#osu/2345678
-   
-   # Line-separated
-   1234567
-   2345678
-   3456789
-   
-   # Beatmapset URLs
-   https://osu.ppy.sh/beatmapsets/123#osu/456
-   ```
+> [!TIP]
+> Examples of supported input formats:
+> ```text
+> # Single beatmap ID
+> 1234567
+>
+> # Multiple IDs (comma-separated)
+> 1234567,2345678,3456789
+>
+> # Mixed with URLs
+> 1234567, https://osu.ppy.sh/beatmapsets/123#osu/2345678
+>
+> # Line-separated
+> 1234567
+>2345678
+> 3456789
+>
+> # Beatmapset URLs
+> https://osu.ppy.sh/beatmapsets/123#osu/456
+> ```
