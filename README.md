@@ -47,3 +47,5 @@ This is purely for self-documentation purposes.
 ## API
 
 Please refer to the [API documentation](https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation) for more information.
+
+For a guide on how to use the Mappool Compliance API in your mappooling sheets, consult [this wiki article](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage).
