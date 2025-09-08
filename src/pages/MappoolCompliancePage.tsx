@@ -23,6 +23,9 @@ import { IBeatmap } from "../../interfaces/OsuApi";
 import BeatmapCard from "../components/compliance/BeatmapCard";
 import ResultSection from "../components/compliance/ResultSection";
 import MarkdownText from "../components/common/MarkdownText";
+import SignInBanner from "../components/common/SignInBanner";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../store/atoms";
 import utils from "../../utils";
 
 interface IBeatmapWithNotes extends IBeatmap {
@@ -43,6 +46,7 @@ interface IProps {
 }
 
 export default function MappoolCompliancePage({ header, radius = "sm" }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [input, setInput] = useState("");
     const [opened, { close, open }] = useDisclosure(false);
     const { mutate: checkCompliance, isPending, data } = useMappoolCompliance(input);
@@ -142,6 +146,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         (not beatmapset) IDs and/or full URLs into the text area below.
                     </Text>
                     <Divider />
+                    {!user && <SignInBanner />}
                     <Textarea
                         label="Beatmap IDs"
                         description="Enter beatmap IDs, and/or URLs. Separators like spaces, commas, and newlines are supported."
@@ -150,6 +155,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         resize="vertical"
                         value={input}
                         onChange={(e) => setInput(e.currentTarget.value)}
+                        disabled={!user}
                     />
                     <Button
                         onClick={handleSubmit}

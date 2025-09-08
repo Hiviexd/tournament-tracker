@@ -4,6 +4,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
 import DiscordIdSetting from "./settings/DiscordIdSetting";
 import EmailSetting from "./settings/EmailSetting";
+import ApiKeySection from "./settings/ApiKeySection";
 import AutomaticTypeFilterSetting from "./settings/AutomaticTypeFilterSetting";
 
 interface IProps {
@@ -14,18 +15,20 @@ interface IProps {
 export default function SettingsModal({ opened, onClose }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
 
-    if (!user?.isCommittee) return null;
-
     return (
-        <Modal opened={opened} onClose={onClose} title="Settings" size="md">
+        <Modal opened={opened} onClose={onClose} title="Settings" size="lg">
             <Stack>
-                <ReviewerStatusSetting />
-                <Divider />
-                <AutomaticTypeFilterSetting />
-                <Divider />
-                <DiscordIdSetting />
-                <Divider />
-                <EmailSetting />
+                {user?.isCommittee && (
+                    <>
+                        <Divider label="Preferences" labelPosition="left" />
+                        <ReviewerStatusSetting />
+                        <AutomaticTypeFilterSetting />
+                        <DiscordIdSetting />
+                        <EmailSetting />
+                    </>
+                )}
+                <Divider label="API Key" labelPosition="left" />
+                <ApiKeySection />
             </Stack>
         </Modal>
     );

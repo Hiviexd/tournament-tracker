@@ -7,6 +7,16 @@ import User from "../models/userModel";
 import { Request, Response } from "express";
 
 class AuthController {
+    /** GET CSRF token for session-auth flows */
+    public getCsrfToken(req: Request, res: Response) {
+        if (!req.session || !req.session.mongoId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        const token = req.csrfToken ? req.csrfToken() : undefined;
+        if (!token) return res.status(500).json({ error: "CSRF not initialized" });
+        res.json({ token });
+    }
+
     /** osu! OAuth login */
     public login(req: Request, res: Response): void {
         const state = crypto.randomBytes(48).toString("hex");
@@ -27,7 +37,7 @@ class AuthController {
     /** Log out through destroying session */
     public logout(req: Request, res: Response): void {
         req.session.destroy(() => {
-            res.redirect("/");
+            res.json({ message: "Logged out" });
         });
     }
 

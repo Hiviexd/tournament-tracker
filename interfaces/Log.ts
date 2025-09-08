@@ -1,7 +1,7 @@
 import { IUser } from "./User";
 import { Document } from "mongoose";
 
-export type LogCategory = "account" | "user" | "tournament" | "voting" | "ticket" | "article" | "resource";
+export type LogCategory = "account" | "user" | "tournament" | "voting" | "ticket" | "article" | "resource" | "api_key";
 
 export interface LogQueryParams {
     user?: IUser;
@@ -25,4 +25,7 @@ export interface ILog extends Document {
     category: LogCategory;
     isSystemLog: boolean;
     createdAt: Date;
+
+    // virtuals
+    categoryString: string;
 }

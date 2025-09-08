@@ -2,6 +2,7 @@ import { IOsuAuthResponse, IBeatmapWithNotes } from "../interfaces/OsuApi";
 import { IDiscordField } from "../interfaces/Discord";
 import { IAttachment } from "../interfaces/Attachment";
 import moment from "moment";
+import crypto from "crypto";
 
 /**
  * Sets the session with the oauth response
@@ -260,4 +261,19 @@ export function sanitizeFilename(filename: string): { ascii: string; encoded: st
     const encoded = `UTF-8''${encodeURIComponent(filename.trim())}`;
 
     return { ascii, encoded };
+}
+
+/**
+ * Generates a raw and hashed API key
+ * @param rawKeyOverride Optional raw key to use instead of generating a new one
+ * @returns The raw and hashed API key
+ * @example
+ * generateApiKey("1234567890") // { raw: "1234567890", hashed: "84d898...<sha256 hash>..." }
+ * generateApiKey() // { raw: "randomBase64urlString", hashed: "sha256 hash of it" }
+ */
+export function generateApiKey(rawKeyOverride?: string): { raw: string; hashed: string } {
+    // 32 bytes random -> base64url
+    const raw = rawKeyOverride || crypto.randomBytes(32).toString("base64url");
+    const hashed = crypto.createHash("sha256").update(raw).digest("hex");
+    return { raw, hashed };
 }

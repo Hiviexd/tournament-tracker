@@ -42,8 +42,8 @@ export default function LogsTable({ logs }: IProps) {
                                     )}
                                 </Table.Td>
                                 <Table.Td>
-                                    <Text size="sm" tt="capitalize" fw={700}>
-                                        {log.category}
+                                    <Text size="sm" fw={700}>
+                                        {log.categoryString}
                                     </Text>
                                 </Table.Td>
                                 <Table.Td>
