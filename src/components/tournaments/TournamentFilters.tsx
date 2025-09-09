@@ -82,7 +82,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
             <Stack gap="md">
                 <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     <TextInput
-                        placeholder="Search by name or tags..."
+                        placeholder="Search by name, tags, or forum URL..."
                         leftSection={<FontAwesomeIcon icon="search" />}
                         value={searchInput}
                         onChange={handleSearchChange}
@@ -129,7 +129,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("state", value)}
                         data={stateOptions}
                         clearable
-                        disabled={viewMode === "review"}
+                        disabled={viewMode === "review" || searchInput !== ""}
                     />
                 </SimpleGrid>
 
