@@ -28,7 +28,12 @@ export const sessionRateLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => req.ip || "unknown",
+    keyGenerator: (req) => {
+        console.log("sessionRateLimiter");
+        console.log("req.session?.mongoId", req.session?.mongoId);
+        console.log("req.ip", req.ip);
+        return req.session?.mongoId as string || req.ip || "unknown";
+    },
     skip: (req, res) => res.locals?.authMethod === "apiKey", // skip if API key
 });
 
@@ -41,6 +46,9 @@ export const apiKeyRateLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => {
+        console.log("apiKeyRateLimiter");
+        console.log("req.headers[authorization]", req.headers["authorization"]);
+        console.log("req.ip", req.ip);
         return (req.headers["authorization"] as string) || req.ip || "unknown";
     },
     skip: (req, res) => res.locals?.authMethod !== "apiKey", // apply only to API keys
