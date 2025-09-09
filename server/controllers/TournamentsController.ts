@@ -93,17 +93,24 @@ class TournamentsController {
         const user = res.locals!.user;
 
         if (search) {
-            const searchTerms = (search as string)
-                .trim()
-                .split(/\s+/)
-                .filter((term) => term.length > 0);
-            if (searchTerms.length > 0) {
-                query.$and = searchTerms.map((term) => {
-                    const termRegex = new RegExp(term, "i");
-                    return {
-                        $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
-                    };
-                });
+            // Verify if search is a valid osu! forum URL, if so, use it to search for tournaments
+            const forumId = utils.extractOsuForumId(search as string);
+            if (forumId) {
+                query.$and = [{ forumUrl: { $regex: forumId.toString() } }];
+            } else {
+                // fallback to searching by name and tags
+                const searchTerms = (search as string)
+                    .trim()
+                    .split(/\s+/)
+                    .filter((term) => term.length > 0);
+                if (searchTerms.length > 0) {
+                    query.$and = searchTerms.map((term) => {
+                        const termRegex = new RegExp(term, "i");
+                        return {
+                            $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
+                        };
+                    });
+                }
             }
         }
         if (mode) query.modes = { $in: [mode as GameMode] };
@@ -128,6 +135,9 @@ class TournamentsController {
             // Default behavior: show only active tournaments
             query.isActive = true;
         }
+
+        // if search is not empty, remove query.isActive; we want to show all tournaments
+        if (search) delete query.isActive;
 
         if (showAllAssignedReviews === "true" && user && user.isCommittee) {
             if (query.$and) {
@@ -403,7 +413,13 @@ class TournamentsController {
             "users"
         );
 
-        await LogService.generate(currentUser._id, `Assigned reviewers to **${tournament.name}**: ${reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", ")}`, "tournament");
+        await LogService.generate(
+            currentUser._id,
+            `Assigned reviewers to **${tournament.name}**: ${reviewers
+                .map((r) => `[**${r.username}**](${r.osuProfileUrl})`)
+                .join(", ")}`,
+            "tournament"
+        );
 
         // Discord
         const usersToPing = reviewers.map((r) => r.discordId || r.username);
@@ -741,7 +757,11 @@ class TournamentsController {
             "user-pen"
         );
 
-        await LogService.generate(currentUser._id, `Reassigned reviewer for **${tournament.name}** from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`, "tournament");
+        await LogService.generate(
+            currentUser._id,
+            `Reassigned reviewer for **${tournament.name}** from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
+            "tournament"
+        );
 
         // Discord
         const usersToPing = [
