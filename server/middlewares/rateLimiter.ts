@@ -20,44 +20,28 @@ export const apiKeyManagementLimiter = rateLimit({
     keyGenerator: (req) => (req.session?.mongoId as string) || req.ip || "unknown",
 });
 
-// Conditional rate limiter that applies different limits based on auth method
-export const conditionalRateLimiter = rateLimit({
+// Session-based rate limiter
+export const sessionRateLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: (req, res) => {
-        // More restrictive limits for API key requests
-        if (res.locals?.authMethod === "apiKey") {
-            return 100; // 100 requests per minute for API keys
-        }
-        // More lenient for session requests (web client)
-        return 1000; // 1000 requests per minute for web client
-    },
+    max: 500, // 500 requests per minute
     message: { error: "Rate limit exceeded" },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req, res) => {
-        // Use API key as identifier for API requests, IP for session requests
-        if (res.locals?.authMethod === "apiKey") {
-            return (req.headers["authorization"] as string) || req.ip || "unknown";
-        }
-        return req.ip || "unknown";
-    },
+    keyGenerator: (req) => req.ip || "unknown",
+    skip: (req, res) => res.locals?.authMethod === "apiKey", // skip if API key
 });
 
-// Burst protection for API keys
-export const apiKeyBurstLimiter = rateLimit({
-    windowMs: 10 * 1000, // 10 seconds
-    max: 20, // 20 requests per 10 seconds
-    message: { error: "Burst rate limit exceeded" },
+// API key rate limiter
+export const apiKeyRateLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 100, // 100 requests per 10 minutes
+    message: { error: "Rate limit exceeded" },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req, res) => {
-        // Only apply to API key requests
-        if (res.locals?.authMethod === "apiKey") {
-            return (req.headers["authorization"] as string) || req.ip || "unknown";
-        }
-        return "bypass"; // Bypass for session requests
+    keyGenerator: (req) => {
+        return (req.headers["authorization"] as string) || req.ip || "unknown";
     },
-    skip: (req, res) => res.locals?.authMethod !== "apiKey", // Skip for non-API key requests
+    skip: (req, res) => res.locals?.authMethod !== "apiKey", // apply only to API keys
 });

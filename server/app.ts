@@ -12,7 +12,7 @@ import AutomationService from "./services/AutomationService";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
-import { conditionalRateLimiter, apiKeyBurstLimiter } from "./middlewares/rateLimiter";
+import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -96,13 +96,20 @@ import apiKeysRouter from "./routers/apiKeysRouter";
 // setup api routes
 const apiRouter = express.Router();
 
-// First authenticate request to determine auth method (apiKey vs session), then conditionally enforce CORS, rate limiting, and CSRF
+// Determine auth method (apiKey vs session)
 apiRouter.use(authenticateRequest as express.RequestHandler);
+
+// Conditionally enforce CORS
 apiRouter.use(conditionalCors as express.RequestHandler);
-apiRouter.use(conditionalRateLimiter as express.RequestHandler);
-apiRouter.use(apiKeyBurstLimiter as express.RequestHandler);
+
+// Rate limit based on auth method
+apiRouter.use(sessionRateLimiter as express.RequestHandler);
+apiRouter.use(apiKeyRateLimiter as express.RequestHandler);
+
+// Conditionally enforce CSRF
 apiRouter.use(conditionalCsrf as express.RequestHandler);
 
+// API routes
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/votes", votingsRouter);
