@@ -30,6 +30,7 @@ export interface TournamentQueryParams {
     // backend only
     $and?: any[]; // For complex MongoDB queries
     $or?: any[]; // For search queries
+    forumUrl?: string;
 }
 
 export interface ITournamentFormData extends FormData {
