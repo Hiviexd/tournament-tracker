@@ -1,6 +1,8 @@
-import { Group, Button } from "@mantine/core";
+import { Group, Button, Popover, useMantineTheme } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import CommitHeatmap from "./CommitHeatmap";
 
 interface FooterItem {
     icon: IconProp;
@@ -9,6 +11,9 @@ interface FooterItem {
 }
 
 export default function Footer() {
+    const theme = useMantineTheme();
+    const isLargeScreen = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+
     const footerItems: FooterItem[] = [
         {
             icon: ["fab", "github"],
@@ -41,6 +46,19 @@ export default function Footer() {
                     {item.label}
                 </Button>
             ))}
+
+            {isLargeScreen && (
+                <Popover position="top" withArrow shadow="md">
+                    <Popover.Target>
+                        <Button variant="subtle" size="sm" leftSection={<FontAwesomeIcon icon="code" />}>
+                            Commit History
+                        </Button>
+                    </Popover.Target>
+                    <Popover.Dropdown w="fit-content">
+                        <CommitHeatmap />
+                    </Popover.Dropdown>
+                </Popover>
+            )}
         </Group>
     );
 }
