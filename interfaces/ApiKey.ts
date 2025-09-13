@@ -1,13 +1,13 @@
 import { Document } from "mongoose";
 import { IUser } from "./User";
 
-type ApiScopeCategory = "tournaments" | "votings" | "resources" | "users" | "tickets" | "beatmaps";
+type ApiScopeCategory = "tournaments" | "votings" | "resources" | "users" | "tickets" | "compliance";
 type ApiScopeAction = "read" | "write";
 
 export type ApiScope = `${ApiScopeCategory}:${ApiScopeAction}`;
 
 export enum AvailableApiScopes {
-    BEATMAPS_READ = "beatmaps:read",
+    COMPLIANCE_READ = "compliance:read",
     TOURNAMENTS_READ = "tournaments:read",
     VOTINGS_READ = "votings:read",
     RESOURCES_READ = "resources:read",
