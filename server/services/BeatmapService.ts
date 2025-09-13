@@ -13,6 +13,9 @@ type FlaggedArtists = {
 };
 
 // Reference: https://github.com/hburn7/mappool-compliance-checker/blob/6a161ec8b707ba4b9d1f39857af041a9376d2309/src/validator.py
+/**
+ * @deprecated Replaced with ComplianceApiService
+ */
 export default class BeatmapService {
     private static readonly PARTIAL_STATUS = "partial";
     private static readonly DISALLOWED_STATUS = "disallowed";
