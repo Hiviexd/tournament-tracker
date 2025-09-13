@@ -18,7 +18,7 @@ class ComplianceController {
 
         const data = await ComplianceApiService.validateBeatmaps(Array.from(beatmapIds));
         if ("statusCode" in data) {
-            return res.status(data.statusCode).json({ error: data.error });
+            return res.status(data.statusCode).json({ error: `${data.error} — ${data.message}` });
         }
 
         // categorize all beatmaps
@@ -26,9 +26,7 @@ class ComplianceController {
         const partial: IValidationResult[] = [];
         const disallowed: IValidationResult[] = [];
 
-        const remainingBeatmapIds = new Set<number>(beatmapIds);
-
-        for (const beatmap of data) {
+        for (const beatmap of data.results) {
             switch (beatmap.complianceStatus) {
                 case ComplianceStatus.DISALLOWED:
                     disallowed.push(beatmap);
@@ -40,19 +38,14 @@ class ComplianceController {
                     allowed.push(beatmap);
                     break;
             }
-
-            remainingBeatmapIds.delete(beatmap.beatmapset_id);
         }
-
-        // Derive errors from unvalidated beatmaps
-        const errors = [...remainingBeatmapIds].map(String);
 
         res.json({
             message: "Beatmaps checked successfully!",
             allowed: utils.sortBeatmapsByStatus<IValidationResult>(allowed),
             partial: utils.sortBeatmapsByStatus<IValidationResult>(partial),
             disallowed: utils.sortBeatmapsByStatus<IValidationResult>(disallowed),
-            errors,
+            errors: data.failures,
         });
     }
 }

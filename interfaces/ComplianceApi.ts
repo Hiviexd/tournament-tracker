@@ -20,7 +20,12 @@ export interface IComplianceApiErrorResponse {
     message: string;
 }
 
-export type IComplianceApiResponse = IValidationResult[] | IComplianceApiErrorResponse;
+export interface IComplianceApiSuccessResponse {
+    results: IValidationResult[];
+    failures: string[];
+}
+
+export type IComplianceApiResponse = IComplianceApiSuccessResponse | IComplianceApiErrorResponse;
 
 export const ComplianceStatus = {
     OK: 0,
