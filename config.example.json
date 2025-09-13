@@ -41,5 +41,9 @@
         "bucketName": "your-bucket-name",
         "baseUrl": "https://bucket-public-url.com",
         "baseFolder": "tcomm"
+    },
+    "complianceApi": {
+        "url": "",
+        "apiKey": ""
     }
 }
