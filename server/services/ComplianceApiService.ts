@@ -26,9 +26,18 @@ export default class ComplianceApiService {
             headers: {
                 "X-Api-Key": config.complianceApi.apiKey,
             },
-            data: { beatmapIds },
+            data: beatmapIds,
         };
-        const response = await axios(options);
+        const response = await axios(options).catch((error) => {
+            return {
+                data: {
+                    statusCode: error.response.status,
+                    code: error.response.data.code,
+                    error: error.response.data.error,
+                    message: error.response.data.message,
+                },
+            };
+        });
 
         const data: IComplianceApiResponse = response.data;
 
