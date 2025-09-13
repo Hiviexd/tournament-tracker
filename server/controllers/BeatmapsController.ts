@@ -64,9 +64,9 @@ class BeatmapsController {
         }
 
         // sort beatmaps in each array by their status
-        allowed = utils.sortBeatmapsByStatus(allowed);
-        partial = utils.sortBeatmapsByStatus(partial);
-        disallowed = utils.sortBeatmapsByStatus(disallowed);
+        allowed = utils.sortBeatmapsByStatus<IBeatmap>(allowed);
+        partial = utils.sortBeatmapsByStatus<IBeatmapWithNotes>(partial);
+        disallowed = utils.sortBeatmapsByStatus<IBeatmap>(disallowed);
 
         res.json({
             message: "Beatmaps checked successfully!",
