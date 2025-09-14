@@ -29,6 +29,7 @@ The one-stop shop for all official osu! tournament correspondence and informatio
   - `osuBot`: credentials for the osu! bot API client
   - `discord`: Discord webhook setup
   - `r2`: the Cloudflare R2 bucket's credentials (optional)
+  - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
 - Set up `checklist.json` from `checklist.example.json`
 - Run `yarn dev`, the project will be served in `http://localhost:8088`
 - If you need automation jobs to run when the project starts, use `yarn dev-automation` instead
