@@ -1,9 +1,10 @@
-import { Card, Group, Stack, Text, Tooltip, Anchor, Flex } from "@mantine/core";
+import { Card, Group, Stack, Text, Tooltip, Anchor } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Link } from "react-router-dom";
 import { IValidationResult } from "../../../interfaces/ComplianceApi";
 import MarkdownText from "../common/MarkdownText";
+import AlertText from "../common/AlertText";
 
 interface BeatmapCardProps {
     beatmap: IValidationResult;
@@ -67,12 +68,9 @@ export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
                 </Text>
 
                 {beatmap.notes && (
-                    <Flex align="flex-start" gap="xs" c="yellow">
-                        <Text size="sm">
-                            <FontAwesomeIcon icon="circle-info" />
-                        </Text>
+                    <AlertText type="warning" size="sm">
                         <MarkdownText content={beatmap.notes} size="sm" />
-                    </Flex>
+                    </AlertText>
                 )}
 
                 {/*["graveyard", "pending", "wip"].includes(beatmap.status) && (
