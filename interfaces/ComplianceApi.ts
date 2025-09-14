@@ -27,6 +27,14 @@ export interface IComplianceApiSuccessResponse {
 
 export type IComplianceApiResponse = IComplianceApiSuccessResponse | IComplianceApiErrorResponse;
 
+export interface IValidateBeatmapsResponse {
+    message: string;
+    allowed: IValidationResult[];
+    partial: IValidationResult[];
+    disallowed: IValidationResult[];
+    errors: string[];
+}
+
 export const ComplianceStatus = {
     OK: 0,
     POTENTIALLY_DISALLOWED: 1,
