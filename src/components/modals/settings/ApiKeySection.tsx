@@ -21,6 +21,8 @@ import CopyButton from "../../common/buttons/CopyButton";
 import DateBadge from "../../common/badges/DateBadge";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
+import AlertText from "../../common/AlertText";
+import MarkdownText from "../../common/MarkdownText";
 
 export default function ApiKeySection() {
     const [user] = useAtom(loggedInUserAtom);
@@ -179,6 +181,12 @@ export default function ApiKeySection() {
                             </Anchor>{" "}
                             for more information.
                         </Text>
+                        <AlertText type="info" size="sm">
+                            <MarkdownText
+                                size="sm"
+                                content="If you only care about using the Compliance API in your mappooling sheets, consult this [wiki page guide](https://github.com/hburn7/mappool-compliance-checker/wiki/API-Usage)."
+                            />
+                        </AlertText>
                         <TextInput
                             label="Name"
                             placeholder="Enter project name"
