@@ -41,7 +41,7 @@ class ComplianceController {
         }
 
         res.json({
-            message: "Beatmaps checked successfully!",
+            message: "Beatmaps validated successfully!",
             allowed: utils.sortBeatmapsByStatus<IValidationResult>(allowed),
             partial: utils.sortBeatmapsByStatus<IValidationResult>(partial),
             disallowed: utils.sortBeatmapsByStatus<IValidationResult>(disallowed),
