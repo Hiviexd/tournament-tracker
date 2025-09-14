@@ -16,6 +16,7 @@ import {
     Title,
     type MantineRadius,
     Flex,
+    Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +29,7 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import utils from "../../utils";
 import { IValidateBeatmapsResponse, IValidationResult } from "../../interfaces/ComplianceApi";
+import AlertText from "../components/common/AlertText";
 
 interface IProps {
     header?: string;
@@ -134,6 +136,17 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         </Popover>{" "}
                         (not beatmapset) IDs and/or full URLs into the text area below.
                     </Text>
+                    <AlertText type="info" size="md">
+                        <Text>
+                            If you want to use this tool directly in your mappooling sheet (via the API), consult this{" "}
+                            <Anchor
+                                href="https://github.com/hburn7/mappool-compliance-checker/wiki/API-Usage"
+                                target="_blank">
+                                wiki page guide
+                            </Anchor>
+                            .
+                        </Text>
+                    </AlertText>
                     <Divider />
                     {!user && <SignInBanner />}
                     <Textarea
