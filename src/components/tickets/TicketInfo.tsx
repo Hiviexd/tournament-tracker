@@ -83,10 +83,9 @@ export default function TicketInfo({ ticket }: IProps) {
                 <Text size="sm" mb="sm">
                     Are you sure you want to snooze reminders for 7 days?
                 </Text>
-                <AlertText
-                    text="Reminders will resume after that time period, or when a new message is sent."
-                    type="info"
-                />
+                <AlertText type="info">
+                    Reminders will resume after that time period, or when a new message is sent.
+                </AlertText>
             </>
         );
         if (

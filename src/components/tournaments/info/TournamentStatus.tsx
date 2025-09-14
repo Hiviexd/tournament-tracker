@@ -46,9 +46,9 @@ export default function TournamentStatus({ tournament }: IProps) {
                     <TournamentStatusBadge status={selectedStatus} /> ?
                 </Text>
                 {notificationNotSending ? (
-                    <AlertText text="This will not notify the host." type="info" />
+                    <AlertText type="info">This will not notify the host.</AlertText>
                 ) : (
-                    <AlertText text="This will notify the tournament host via an osu! message." type="warning" />
+                    <AlertText type="warning">This will notify the tournament host via an osu! message.</AlertText>
                 )}
             </>
         );

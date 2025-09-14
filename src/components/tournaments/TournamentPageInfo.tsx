@@ -42,7 +42,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     Are you sure you want to {tournament.isActive ? "archive" : "unarchive"} this {tournament.type}?
                 </Text>
                 {tournament.isActive && (
-                    <AlertText text="Ensure the conclusion email is sent before archiving." type="warning" />
+                    <AlertText type="warning">Ensure the conclusion email is sent before archiving.</AlertText>
                 )}
             </>
         );

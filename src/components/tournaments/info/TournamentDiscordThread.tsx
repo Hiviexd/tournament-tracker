@@ -92,10 +92,9 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                             {tournament.threadId}
                         </Anchor>
                     ) : (
-                        <AlertText
-                            type="warning"
-                            text="Not set! Make sure to set it to the thread where the tournament is being discussed."
-                        />
+                        <AlertText type="warning">
+                            Not set! Make sure to set it to the thread where the tournament is being discussed.
+                        </AlertText>
                     )}
                 </Text>
             )}
