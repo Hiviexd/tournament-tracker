@@ -1,4 +1,4 @@
-import { Anchor, ScrollArea, Table } from "@mantine/core";
+import { Anchor, ScrollArea, Table, Text, type MantineSize } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -8,21 +8,32 @@ interface IProps {
     content: string;
     className?: string;
     allowHtml?: boolean;
+    size?: MantineSize;
 }
 
 /**
  * Plugins: https://github.com/remarkjs/remark/blob/main/doc/plugins.md#list-of-plugins
  */
 
-export default function MarkdownText({ content, className, allowHtml = false }: IProps) {
+export default function MarkdownText({ content, className, allowHtml = false, size }: IProps) {
     return (
         <div className={`markdown-content ${className || ""}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={allowHtml ? [rehypeRaw, rehypeSlug] : [rehypeSlug]}
                 components={{
+                    p: ({ children }) => (
+                        <Text size={size} component="p" style={{ margin: 0 }}>
+                            {children}
+                        </Text>
+                    ),
                     a: ({ href, children }) => (
-                        <Anchor href={href} target="_blank" rel="noopener noreferrer" className="markdown-link">
+                        <Anchor
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="markdown-link"
+                            size={size}>
                             {children}
                         </Anchor>
                     ),

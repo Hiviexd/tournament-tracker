@@ -1,4 +1,5 @@
 import { IOsuAuthResponse, IBeatmapWithNotes } from "../interfaces/OsuApi";
+import { IValidationResult } from "../interfaces/ComplianceApi";
 import { IDiscordField } from "../interfaces/Discord";
 import { IAttachment } from "../interfaces/Attachment";
 import moment from "moment";
@@ -174,17 +175,23 @@ export function sanitizeBeatmapInput(input: string): Set<number> {
  * @param beatmaps Beatmaps to sort
  * @returns Sorted beatmaps
  */
-export function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
+export function sortBeatmapsByStatus<T extends IBeatmapWithNotes | IValidationResult>(beatmaps: T[]) {
     const statusOrder = ["graveyard", "wip", "pending", "loved", "approved", "qualified", "ranked"];
     return beatmaps.sort((a, b) => {
+        // Extract status and artist based on the type
+        const statusA = "beatmapset" in a ? a.beatmapset.status : a.status;
+        const statusB = "beatmapset" in b ? b.beatmapset.status : b.status;
+        const artistA = "beatmapset" in a ? a.beatmapset.artist : a.artist;
+        const artistB = "beatmapset" in b ? b.beatmapset.artist : b.artist;
+
         // First, sort by status
-        const statusDiff = statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status);
+        const statusDiff = statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
         if (statusDiff !== 0) {
             return statusDiff;
         }
 
         // If statuses are the same, sort by artist
-        return a.beatmapset.artist.localeCompare(b.beatmapset.artist);
+        return artistA.localeCompare(artistB);
     });
 }
 

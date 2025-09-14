@@ -29,7 +29,7 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
     return next();
 }
 
-export function requireScopes(scopes: string[]) {
+export function requireScopes(scopes: ApiScope[]) {
     return (req: Request, res: Response, next: NextFunction) => {
         // Session users bypass scope checks (role-based auth applies in existing middlewares)
         if (res.locals?.authMethod !== "apiKey") return next();
@@ -39,7 +39,7 @@ export function requireScopes(scopes: string[]) {
             return res.status(401).json({ error: "Unauthorized" });
         }
 
-        const hasAll = scopes.every((s) => apiKey.scopes.includes(s as ApiScope));
+        const hasAll = scopes.every((s) => apiKey.scopes.includes(s));
         if (!hasAll) {
             res.locals!.isAccessibleViaKey = false;
             return res.status(403).json({ error: "Missing required scope" });
