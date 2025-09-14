@@ -11,6 +11,7 @@ import {
     Skeleton,
     Anchor,
     Checkbox,
+    Pill,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useApiKeyMeta, useCreateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
@@ -99,7 +100,7 @@ export default function ApiKeySection() {
                         </Alert>
                     )}
 
-                    <Text size="sm" fw={600}>
+                    <Text size="sm" fw={600} mb="md">
                         Refer to{" "}
                         <Anchor href={DOCS_URL} target="_blank">
                             the documentation
@@ -119,6 +120,16 @@ export default function ApiKeySection() {
                         </Text>{" "}
                         <DateBadge date={meta?.createdAt} size="sm" staticColor />
                     </Text>
+                    <Group gap="xs">
+                        <Text size="sm" fw={600}>
+                            Scopes:
+                        </Text>
+                        <Pill.Group>
+                            {meta?.scopes.map((scope) => (
+                                <Pill key={scope}>{scope}</Pill>
+                            ))}
+                        </Pill.Group>
+                    </Group>
                     <Text size="sm">
                         <Text span fw={600}>
                             Last used:
