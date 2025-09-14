@@ -5,6 +5,7 @@ import { IComplianceApiResponse } from "../../interfaces/ComplianceApi";
 export default class ComplianceApiService {
     static async validateBeatmaps(beatmapIds: (string | number)[]) {
         if (
+            !config.complianceApi ||
             !config.complianceApi.url ||
             config.complianceApi.url.trim() === "" ||
             !config.complianceApi.apiKey ||
