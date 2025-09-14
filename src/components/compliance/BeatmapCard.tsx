@@ -41,7 +41,7 @@ export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
             p="md"
             className="beatmap-card"
             component={Link}
-            to={`https://osu.ppy.sh/beatmaps/${beatmap.beatmapset_id}`}
+            to={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapsetId}`}
             target="_blank"
             style={
                 {
@@ -62,8 +62,8 @@ export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
                 </Group>
                 <Text size="sm" c="dimmed" lineClamp={1}>
                     mapped by{" "}
-                    <Anchor fw={700} href={`https://osu.ppy.sh/users/${beatmap.owner_id}`} target="_blank">
-                        {beatmap.owner_username}
+                    <Anchor fw={700} href={`https://osu.ppy.sh/users/${beatmap.ownerId}`} target="_blank">
+                        {beatmap.ownerUsername}
                     </Anchor>
                 </Text>
 

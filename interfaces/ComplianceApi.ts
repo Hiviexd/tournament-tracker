@@ -1,5 +1,6 @@
 export interface IValidationResult {
-    beatmapset_id: number;
+    beatmapIds: number[];
+    beatmapsetId: number;
     complianceStatus: ComplianceStatus;
     complianceStatusString?: string;
     complianceFailureReason?: ComplianceFailureReason;
@@ -8,8 +9,8 @@ export interface IValidationResult {
     cover?: string;
     artist: string;
     title: string;
-    owner_id?: number;
-    owner_username?: string;
+    ownerId?: number;
+    ownerUsername?: string;
     status: string;
 }
 

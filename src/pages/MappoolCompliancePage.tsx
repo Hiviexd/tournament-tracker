@@ -204,7 +204,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             icon="times-circle"
                             items={complianceData.disallowed}
                             renderItem={(beatmap: IValidationResult) => (
-                                <BeatmapCard key={beatmap.beatmapset_id} beatmap={beatmap} />
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} />
                             )}
                         />
                         <ResultSection
@@ -213,7 +213,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             icon="exclamation-circle"
                             items={complianceData.partial}
                             renderItem={(beatmap: IValidationResult) => (
-                                <BeatmapCard key={beatmap.beatmapset_id} beatmap={beatmap} notes={beatmap.notes} />
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} notes={beatmap.notes} />
                             )}
                         />
                         <ResultSection
@@ -222,7 +222,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             icon="check-circle"
                             items={complianceData.allowed}
                             renderItem={(beatmap: IValidationResult) => (
-                                <BeatmapCard key={beatmap.beatmapset_id} beatmap={beatmap} />
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} />
                             )}
                         />
                     </Stack>
