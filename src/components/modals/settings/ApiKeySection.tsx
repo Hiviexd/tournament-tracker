@@ -195,7 +195,7 @@ export default function ApiKeySection() {
                         <AlertText type="info" size="sm">
                             <MarkdownText
                                 size="sm"
-                                content="If you only care about using the Compliance API in your mappooling sheets, consult this [wiki page guide](https://github.com/hburn7/mappool-compliance-checker/wiki/API-Usage)."
+                                content="If you only care about using the Compliance API in your mappooling sheets, consult this [wiki page guide](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage)."
                             />
                         </AlertText>
                         <TextInput
