@@ -148,7 +148,8 @@
     }
 
     .mantine-MultiSelect-pill {
-        background-color: var(--mantine-color-primary-9) !important;
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
     }
 
     .mantine-Pagination-control {
@@ -177,6 +178,11 @@
 
     .mantine-Code-root {
         background-color: var(--mantine-color-primary-10);
+    }
+
+    .mantine-Pill-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
     }
 }
 
