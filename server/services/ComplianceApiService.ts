@@ -34,7 +34,6 @@ export default class ComplianceApiService {
             data: beatmapIds,
         };
         const response = await axios(options).catch((error) => {
-            console.error(error);
             return {
                 data: {
                     statusCode: error.response.status,
@@ -46,8 +45,6 @@ export default class ComplianceApiService {
         });
 
         const data: IComplianceApiResponse = response.data;
-
-        console.log(data);
 
         return data;
     }
