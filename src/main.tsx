@@ -45,8 +45,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                         <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                             <ReactScan />
                             <Notifications />
-                            <Spotlight />
                             <Router>
+                                <Spotlight />
                                 <NuqsAdapter>
                                     <AuthRouter />
                                 </NuqsAdapter>
