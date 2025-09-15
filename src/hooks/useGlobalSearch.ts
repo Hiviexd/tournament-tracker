@@ -144,7 +144,7 @@ export function useGlobalSearch(query: string) {
                 searchResults.push({
                     object: article,
                     type: "article",
-                    link: `/docs/${article._id}`,
+                    link: `/docs/${article.slug}`,
                 });
             });
         }
