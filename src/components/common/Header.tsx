@@ -13,6 +13,9 @@ import { useWindowScroll } from "@mantine/hooks";
 import MainNavigation from "./header/MainNavigation";
 import UserMenu from "./header/UserMenu";
 import LoginButton from "./buttons/LoginButton";
+import SearchButton from "./header/SearchButton";
+
+// hooks
 import { getSavedPreference } from "../../hooks/useLocalPreferences";
 import { DEFAULT_HUE } from "../../constants";
 
@@ -51,14 +54,17 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
             />
             <Group h="100%" px="xl">
                 <div className="nav-group">
-                    <Link to="/">
-                        <Image
-                            src="/assets/logo-main.svg?20250714"
-                            alt="Logo"
-                            className="logo-image"
-                            style={{ maxWidth: "35px", maxHeight: "35px" }}
-                        />
-                    </Link>
+                    <Group gap="xl">
+                        <Link to="/">
+                            <Image
+                                src="/assets/logo-main.svg?20250714"
+                                alt="Logo"
+                                className="logo-image"
+                                style={{ maxWidth: "35px", maxHeight: "35px" }}
+                            />
+                        </Link>
+                        <SearchButton />
+                    </Group>
                     <Group visibleFrom="md">
                         <MainNavigation user={user} />
                         <UserMenu user={user} />

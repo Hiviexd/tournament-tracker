@@ -11,6 +11,7 @@
 @import "components/common/FeatureCard.scss";
 @import "components/common/TextEditor.scss";
 @import "components/common/CountryFlag.scss";
+@import "components/common/SearchButton.scss";
 
 @import "components/votings/VotingInfo.scss";
 @import "components/votings/VotingCard.scss";
@@ -183,6 +184,12 @@
     .mantine-Pill-root {
         background-color: var(--mantine-color-primary-light);
         color: var(--mantine-color-primary-light-color);
+    }
+
+    .mantine-Kbd-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+        border-color: var(--mantine-color-primary-light);
     }
 }
 
