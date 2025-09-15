@@ -10,7 +10,8 @@ class GlobalSearchController {
             return res.status(400).json({ error: "No valid search query provided" });
         }
 
-        // TODO: add permission restrictions and expose to all users
+        const currentUser = res.locals!.user;
+
         try {
             // Parse type-specific search
             const { searchType, searchContent } = GlobalSearchService.parseSearchQuery(query as string);
@@ -19,10 +20,10 @@ class GlobalSearchController {
             // Perform searches based on type
             const [tournaments, votings, tickets, reports, articles, resources] = await Promise.all([
                 GlobalSearchService.searchTournaments(searchType, tournamentSearchQuery),
-                GlobalSearchService.searchVotings(searchType, searchContent),
+                GlobalSearchService.searchVotings(searchType, searchContent, currentUser?.isCommitteeOrAdmin ?? false),
                 GlobalSearchService.searchTickets(searchType, searchContent),
-                GlobalSearchService.searchReports(searchType, searchContent),
-                GlobalSearchService.searchArticles(searchType, searchContent),
+                currentUser?.isCommitteeOrAdmin ? GlobalSearchService.searchReports(searchType, searchContent) : [],
+                currentUser?.isCommitteeOrAdmin ? GlobalSearchService.searchArticles(searchType, searchContent) : [],
                 GlobalSearchService.searchResources(searchType, searchContent),
             ]);
 

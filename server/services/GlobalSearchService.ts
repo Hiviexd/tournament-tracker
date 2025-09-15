@@ -54,7 +54,11 @@ class GlobalSearchService {
     /**
      * Search votes by title or description
      */
-    public async searchVotings(searchType: string | null, searchContent: string): Promise<IVoting[]> {
+    public async searchVotings(
+        searchType: string | null,
+        searchContent: string,
+        isCommitteeOrAdmin: boolean
+    ): Promise<IVoting[]> {
         if (
             searchType &&
             searchType !== "voting" &&
@@ -68,11 +72,19 @@ class GlobalSearchService {
         // split search content by spaces
         const searchTerms = utils.splitSearchTerms(searchContent);
 
-        return await Voting.find({
+        // if isCommitteeOrAdmin, search all votes by title or description
+        // else search only public and inactive votes by title or public description
+        const query = {
             $and: searchTerms.map((term) => ({
-                $or: [{ title: { $regex: term, $options: "i" } }, { description: { $regex: term, $options: "i" } }],
+                $or: [
+                    { title: { $regex: term, $options: "i" } },
+                    isCommitteeOrAdmin ? { description: { $regex: term, $options: "i" } } : { publicDescription: { $regex: term, $options: "i" } },
+                ],
             })),
-        })
+            ...(isCommitteeOrAdmin ? {} : { isPublic: true, isActive: false }),
+        };
+
+        return await Voting.find(query)
             .select("_id title category isActive duration createdAt assignedGroups")
             .limit(DEFAULT_LIMIT);
     }

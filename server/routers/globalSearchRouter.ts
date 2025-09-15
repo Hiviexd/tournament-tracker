@@ -5,6 +5,6 @@ import auth from "../middlewares/auth";
 
 const globalSearchRouter = express.Router();
 
-globalSearchRouter.get("/", auth.isLoggedIn, auth.isCommittee, GlobalSearchController.index);
+globalSearchRouter.get("/", auth.optionalAuth, GlobalSearchController.index);
 
 export default globalSearchRouter;
