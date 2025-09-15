@@ -78,7 +78,9 @@ class GlobalSearchService {
             $and: searchTerms.map((term) => ({
                 $or: [
                     { title: { $regex: term, $options: "i" } },
-                    isCommitteeOrAdmin ? { description: { $regex: term, $options: "i" } } : { publicDescription: { $regex: term, $options: "i" } },
+                    isCommitteeOrAdmin
+                        ? { description: { $regex: term, $options: "i" } }
+                        : { publicDescription: { $regex: term, $options: "i" } },
                 ],
             })),
             ...(isCommitteeOrAdmin ? {} : { isPublic: true, isActive: false }),
@@ -135,7 +137,13 @@ class GlobalSearchService {
      * Search articles by title or content
      */
     public async searchArticles(searchType: string | null, searchContent: string): Promise<IArticle[]> {
-        if (searchType && searchType !== "article" && searchType !== "articles") {
+        if (
+            searchType &&
+            searchType !== "article" &&
+            searchType !== "articles" &&
+            searchType !== "doc" &&
+            searchType !== "docs"
+        ) {
             return [];
         }
 
