@@ -7,7 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
-import Spotlight from "./components/base/Spotlight";
+import Spotlight from "./components/common/Spotlight";
 
 const queryClient = new QueryClient();
 

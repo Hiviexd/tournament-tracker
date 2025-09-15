@@ -6,12 +6,12 @@ import { Group, Badge, Text, Stack, Card } from "@mantine/core";
 import { ITicket } from "../../../../interfaces/Ticket";
 
 // badges
-import TournamentTypeBadge from "../../common/badges/TournamentTypeBadge";
-import TournamentStatusBadge from "../../common/badges/TournamentStatusBadge";
-import VotingTypeBadge from "../../common/badges/VotingTypeBadge";
-import ReportTypeBadge from "../../common/badges/ReportTypeBadge";
-import DueDateBadge from "../../common/badges/DueDateBadge";
-import UserGroupBadge from "../../common/badges/UserGroupBadge";
+import TournamentTypeBadge from "../badges/TournamentTypeBadge";
+import TournamentStatusBadge from "../badges/TournamentStatusBadge";
+import VotingTypeBadge from "../badges/VotingTypeBadge";
+import ReportTypeBadge from "../badges/ReportTypeBadge";
+import DueDateBadge from "../badges/DueDateBadge";
+import UserGroupBadge from "../badges/UserGroupBadge";
 
 interface SpotlightActionProps {
     searchItem: ISearchItem;
