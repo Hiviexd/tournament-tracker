@@ -1,13 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Badge, Tooltip } from "@mantine/core";
+import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 import { ITicket } from "../../../../interfaces/Ticket";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
     report: ITicket;
+    size?: MantineSize;
 }
 
-export default function ReportTypeBadge({ report }: IProps) {
+export default function ReportTypeBadge({ report, size }: IProps) {
     if (report.isTicket) return null;
 
     const getTargetInfo = () => {
@@ -33,7 +34,7 @@ export default function ReportTypeBadge({ report }: IProps) {
     };
     return (
         <Tooltip label={getTargetInfo().text}>
-            <Badge color={getTargetInfo().color} variant="light">
+            <Badge color={getTargetInfo().color} variant="light" size={size}>
                 <FontAwesomeIcon icon={getTargetInfo().icon as IconProp} />
             </Badge>
         </Tooltip>

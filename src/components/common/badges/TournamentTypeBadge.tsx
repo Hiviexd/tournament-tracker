@@ -1,13 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Badge, Tooltip, Group } from "@mantine/core";
+import { Badge, Tooltip, Group, type MantineSize } from "@mantine/core";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
     type: string;
     withText?: boolean;
+    size?: MantineSize;
 }
 
-export default function TournamentTypeBadge({ type, withText = false }: IProps) {
+export default function TournamentTypeBadge({ type, withText = false, size }: IProps) {
     const getTournamentTypeInfo = () => {
         switch (type) {
             case "tournament":
@@ -20,7 +21,7 @@ export default function TournamentTypeBadge({ type, withText = false }: IProps) 
     };
     return (
         <Tooltip label={getTournamentTypeInfo().text}>
-            <Badge color={getTournamentTypeInfo().color} variant="light">
+            <Badge color={getTournamentTypeInfo().color} variant="light" size={size}>
                 <Group gap={5}>
                     <FontAwesomeIcon icon={getTournamentTypeInfo().icon as IconProp} />
                     {withText && getTournamentTypeInfo().text}

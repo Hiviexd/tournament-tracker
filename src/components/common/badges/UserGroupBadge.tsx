@@ -1,10 +1,11 @@
-import { Badge, Tooltip } from "@mantine/core";
+import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 import { type UserGroup } from "../../../../interfaces/User";
 
 interface IPropTypes {
     group?: UserGroup;
     tooltip?: "top" | "right" | "bottom" | "left";
     variant?: "default" | "light";
+    size?: MantineSize;
 }
 
 interface IBadgeConfig {
@@ -31,7 +32,7 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
     },
 };
 
-export default function UserGroupBadge({ group, tooltip, variant = "default" }: IPropTypes) {
+export default function UserGroupBadge({ group, tooltip, variant = "default", size }: IPropTypes) {
     if (!group) return null;
     const usegroup = USER_GROUP_BADGES[group];
 
@@ -40,6 +41,7 @@ export default function UserGroupBadge({ group, tooltip, variant = "default" }: 
             <Badge
                 color={usegroup.color}
                 variant="light"
+                size={size}
                 style={variant === "light" ? {} : {
                     background: "color-mix(in srgb, var(--mantine-color-primary-11) 75%, transparent)",
                     border: `1px solid ${usegroup.color}`,

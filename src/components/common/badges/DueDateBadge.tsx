@@ -1,13 +1,14 @@
 import moment from "moment";
-import { Badge, BadgeVariant, Tooltip } from "@mantine/core";
+import { Badge, BadgeVariant, Tooltip, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IPropTypes {
     date: Date;
     variant?: BadgeVariant;
+    size?: MantineSize;
 }
 
-export default function DueDateBadge({ date, variant = "filled" }: IPropTypes) {
+export default function DueDateBadge({ date, variant = "filled", size }: IPropTypes) {
     const getDueDateColor = (): string => {
         const deadline = moment(date);
         const now = moment();
@@ -18,7 +19,7 @@ export default function DueDateBadge({ date, variant = "filled" }: IPropTypes) {
 
     return (
         <Tooltip label={moment(date).format("LLL")}>
-            <Badge color={getDueDateColor()} variant={variant}>
+            <Badge color={getDueDateColor()} variant={variant} size={size}>
                 <FontAwesomeIcon icon="clock" /> Due {moment(date).fromNow()}
             </Badge>
         </Tooltip>
