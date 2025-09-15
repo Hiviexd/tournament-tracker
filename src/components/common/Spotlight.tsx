@@ -7,13 +7,28 @@ import { ISearchItem, useGlobalSearch } from "../../hooks/useGlobalSearch";
 import SpotlightAction from "./spotlight/SpotlightAction";
 import { useNavigate } from "react-router-dom";
 import utils from "../../../utils";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 
 export default function Spotlight() {
+    const [user] = useAtom(loggedInUserAtom);
+
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const { results, isLoading, error } = useGlobalSearch(debouncedSearch);
 
     const navigate = useNavigate();
+
+    const ALL_TYPES: Record<string, boolean> = {
+        tournament: true,
+        voting: true,
+        ticket: true,
+        report: user?.isCommitteeOrAdmin ?? false,
+        resource: true,
+        doc: user?.isCommitteeOrAdmin ?? false,
+    };
+
+    const AVAILABLE_TYPES = Object.entries(ALL_TYPES).filter(([, enabled]) => enabled).map(([type]) => type);
 
     const getGroupLabel = (type: string) => {
         switch (type) {
@@ -102,19 +117,32 @@ export default function Spotlight() {
                                 {error && <Text>{error.message}</Text>}
                             </Stack>
                         ) : (
-                            <Alert ta="left" color="primary" title="Tip" icon={<FontAwesomeIcon icon="info-circle" />}>
-                                Try searching with the format <Code>type:query</Code>, for example:
+                            <Alert ta="left" color="primary" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
+                                You can navigate to anything from here, i.e. website pages, tournaments, resources, etc.
+                                <br />
+                                <br />
+                                For better results, try searching with the format <Code>type:query</Code>, for example:
                                 <List>
                                     <List.Item>
-                                        <Code>tournament:world cup</Code>
+                                        <Code>tournament:suiji</Code>
                                     </List.Item>
                                     <List.Item>
-                                        <Code>vote:tribadge</Code>
+                                        <Code>ticket:bracket</Code>
                                     </List.Item>
                                     <List.Item>
-                                        <Code>ticket:tournament bans</Code>
+                                        <Code>resource:official support</Code>
                                     </List.Item>
                                 </List>
+                                <br />
+                                Available types are:
+                                <br />
+                                {AVAILABLE_TYPES
+                                    .map((type, index) => (
+                                        <Text span key={type}>
+                                            <Code>{type}</Code>
+                                            {index < AVAILABLE_TYPES.length - 1 && ", "}
+                                        </Text>
+                                    ))}
                             </Alert>
                         )}
                     </MantineSpotlight.Empty>
