@@ -5,6 +5,7 @@ import MobileNavigation from "./MobileNavigation";
 import ThemeCustomizeModal from "../../modals/ThemeCustomizeModal";
 import SettingsModal from "../../modals/SettingsModal";
 import DebugModal from "../../modals/DebugModal";
+import SearchButton from "./SearchButton";
 
 interface IProps {
     opened: boolean;
@@ -32,6 +33,7 @@ export default function MobileNavbar({ opened, onClose }: IProps) {
                                     onOpenSettings={openSettings}
                                     onOpenDebug={openDebug}
                                 />
+                                <SearchButton hiddenFrom="md" isMobile onOpen={onClose} text="Search for anything..." />
                                 <Divider />
                                 <MobileNavigation onClose={onClose} />
                             </Stack>

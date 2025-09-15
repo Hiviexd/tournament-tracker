@@ -63,7 +63,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                                 style={{ maxWidth: "35px", maxHeight: "35px" }}
                             />
                         </Link>
-                        <SearchButton />
+                        <SearchButton visibleFrom="md" />
                     </Group>
                     <Group visibleFrom="md">
                         <MainNavigation user={user} />
