@@ -1376,10 +1376,22 @@
     "@mantine/store" "8.1.3"
     react-transition-group "4.4.5"
 
+"@mantine/spotlight@^8.3.1":
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/@mantine/spotlight/-/spotlight-8.3.1.tgz#bffb4fd95800099f066acfededef9d4d762cfa2f"
+  integrity sha512-Efmvk/uiG4MhmlkUGBu7afz5BgBDMwKUJMhMThDKZkaZfp7/VxOhHNEfC5ZPYMYd5Nk5i8Wo0urfybIMRwyO2A==
+  dependencies:
+    "@mantine/store" "8.3.1"
+
 "@mantine/store@8.1.3":
   version "8.1.3"
   resolved "https://registry.yarnpkg.com/@mantine/store/-/store-8.1.3.tgz#3d9bb6350f64cb922d3cd1a601df9a99e25bd242"
   integrity sha512-rO72LfSJqSNCwufqJxTWiHMyOR6sR3mqAcnBcw/f5aTvyOYoHZzlm4q4+TL8/2vYGRVsr9YM2Ez6HQ1vk/RR8g==
+
+"@mantine/store@8.3.1":
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/@mantine/store/-/store-8.3.1.tgz#6e337dedf906a2535a2bc508d33081189edbee6c"
+  integrity sha512-OZwg0YKbCEKnkFmS9oRLKA8TMriBzO1T6nUib1yfLCx0VFuznllYZiDtaSWNkEYSdnFWCv5hKh5aOD4RHUnQfQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
