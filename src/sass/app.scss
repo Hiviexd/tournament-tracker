@@ -244,8 +244,6 @@ body {
 
 /* Scrollbar */
 html {
-    overflow-y: scroll;
-
     /* Firefox */
     scrollbar-width: thin;
     scrollbar-color: var(--mantine-color-primary-6) var(--mantine-color-primary-11);
