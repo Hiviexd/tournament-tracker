@@ -10,6 +10,7 @@ class GlobalSearchController {
             return res.status(400).json({ error: "No valid search query provided" });
         }
 
+        // TODO: add permission restrictions and expose to all users
         try {
             // Parse type-specific search
             const { searchType, searchContent } = GlobalSearchService.parseSearchQuery(query as string);
