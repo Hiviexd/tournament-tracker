@@ -179,7 +179,7 @@
     }
 
     .mantine-Code-root {
-        background-color: var(--mantine-color-primary-10);
+        background-color: color-mix(in srgb, var(--mantine-color-primary-11) 80%, transparent);
     }
 
     .mantine-Pill-root {
