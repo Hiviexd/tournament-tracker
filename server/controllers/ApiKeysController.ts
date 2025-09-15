@@ -38,13 +38,46 @@ class ApiKeysController {
             webhook: "dev",
         });
 
-        return res.status(201).json({ key: rawKey, apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
+        return res.status(201).json({ message: "API key created!", key: rawKey, apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
     }
 
     /** GET key metadata (no secret) */
     public async get(_: Request, res: Response) {
         const apiKey = await ApiKeyService.getForUser(res.locals!.user!);
         return res.json({ apiKey: apiKey ? { ...apiKey.toObject(), hashedKey: undefined } : null });
+    }
+
+    /** PUT update API key scopes */
+    public async update(req: Request, res: Response) {
+        const { scopes } = req.body || {};
+
+        // validate scopes from enum
+        if (!scopes.every((scope) => Object.values(AvailableApiScopes).includes(scope as AvailableApiScopes))) {
+            return res.status(400).json({ error: "Invalid scopes" });
+        }
+
+        const apiKey = await ApiKeyService.updateKey(res.locals!.user!, { scopes });
+
+        await LogService.generate(res.locals!.user!._id, `Updated API key scopes: **${apiKey.name}**`, "api_key");
+
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.blue,
+                    description: `Updated API key scopes: **${apiKey.name}**`,
+                    fields: [
+                        {
+                            name: "NewScopes",
+                            value: scopes.map((scope) => `\`${scope}\``).join(", "),
+                        },
+                    ],
+                },
+            ],
+            webhook: "dev",
+        });
+
+        return res.json({ message: "API key scopes updated!", apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
     }
 
     /** POST revoke key */
@@ -63,7 +96,7 @@ class ApiKeysController {
                 webhook: "dev",
             });
         }
-        return res.json({ message: "API key revoked" });
+        return res.json({ message: "API key revoked!" });
     }
 }
 

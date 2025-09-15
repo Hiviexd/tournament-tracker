@@ -12,7 +12,10 @@ export default class ApiKeyService {
      * @param options - the options for the API key
      * @returns the raw and API key
      */
-    static async createKey(user: IUser, options: { name: string; scopes: ApiScope[], isElevated: boolean }): Promise<{ rawKey: string; apiKey: IApiKey }> {
+    static async createKey(
+        user: IUser,
+        options: { name: string; scopes: ApiScope[]; isElevated: boolean }
+    ): Promise<{ rawKey: string; apiKey: IApiKey }> {
         const existing = await ApiKey.findOne({ user, revokedAt: null });
         if (existing) {
             throw Object.assign(new Error("API key already exists for this user"), { status: 409 });
@@ -42,7 +45,6 @@ export default class ApiKeyService {
      * @returns the API key
      */
     static async revokeKey(user: IUser) {
-
         const apiKey = await ApiKey.findOne({ user, revokedAt: null });
 
         if (apiKey) {
@@ -79,6 +81,24 @@ export default class ApiKeyService {
         await apiKey.save();
 
         return { user, apiKey };
+    }
+
+    /**
+     * Updates an API key for a user
+     * @param user - the user to update the API key for
+     * @param options - the options to update
+     * @returns the updated API key
+     */
+    static async updateKey(user: IUser, options: { scopes: ApiScope[] }): Promise<IApiKey> {
+        const apiKey = await ApiKey.findOne({ user, revokedAt: null });
+        if (!apiKey) {
+            throw Object.assign(new Error("No active API key found for this user"), { status: 404 });
+        }
+
+        apiKey.scopes = options.scopes;
+        await apiKey.save();
+
+        return apiKey;
     }
 
     /**

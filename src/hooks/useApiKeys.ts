@@ -12,6 +12,7 @@ export interface IApiKeyMeta {
 }
 
 export interface IApiKeyCreateResponse {
+    message: string;
     key: string;
     apiKey: IApiKeyMeta;
 }
@@ -41,7 +42,26 @@ export function useCreateApiKey() {
                 url: "/api/keys/create",
                 data: { name, scopes, isElevated },
             });
-            return res;
+            return utils.handleMutationResponse<IApiKeyCreateResponse>(res);
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
+        },
+    });
+}
+
+export function useUpdateApiKey() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationKey: ["apiKey", "update"],
+        mutationFn: async ({ scopes }: { scopes: ApiScope[] }) => {
+            const res = await utils.apiCall<{ apiKey: IApiKeyMeta }>({
+                method: "put",
+                url: "/api/keys/update",
+                data: { scopes },
+            });
+            return utils.handleMutationResponse(res);
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
@@ -55,10 +75,11 @@ export function useRevokeApiKey() {
     return useMutation({
         mutationKey: ["apiKey", "revoke"],
         mutationFn: async () => {
-            await utils.apiCall({
+            const res = await utils.apiCall({
                 method: "post",
                 url: "/api/keys/revoke",
             });
+            return utils.handleMutationResponse(res);
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });

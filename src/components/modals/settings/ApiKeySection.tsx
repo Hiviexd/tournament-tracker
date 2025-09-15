@@ -12,9 +12,10 @@ import {
     Anchor,
     Checkbox,
     Pill,
+    ActionIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useApiKeyMeta, useCreateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
+import { useApiKeyMeta, useCreateApiKey, useUpdateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
 import { useConfirmModal } from "../../../hooks/useModals";
 import { type ApiScope, AvailableApiScopes } from "../../../../interfaces/ApiKey";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +33,7 @@ export default function ApiKeySection() {
 
     const { data: meta, isLoading } = useApiKeyMeta();
     const createKeyMutation = useCreateApiKey();
+    const updateKeyMutation = useUpdateApiKey();
     const revokeKeyMutation = useRevokeApiKey();
     const confirmModal = useConfirmModal();
 
@@ -49,6 +51,7 @@ export default function ApiKeySection() {
     });
 
     const [revealedKey, setRevealedKey] = useState<string | null>(null);
+    const [isEditingScopes, setIsEditingScopes] = useState(false);
 
     const hasActiveKey = useMemo(() => !!meta && !meta.revokedAt, [meta]);
 
@@ -59,6 +62,22 @@ export default function ApiKeySection() {
             isElevated: form.values.isElevated,
         });
         setRevealedKey(res.key);
+        form.reset();
+    };
+
+    const handleUpdateScopes = async () => {
+        await updateKeyMutation.mutateAsync({ scopes: form.values.scopes });
+        setIsEditingScopes(false);
+        form.reset();
+    };
+
+    const handleEditScopes = () => {
+        form.setValues({ scopes: meta?.scopes || [] });
+        setIsEditingScopes(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditingScopes(false);
         form.reset();
     };
 
@@ -120,15 +139,56 @@ export default function ApiKeySection() {
                         </Text>{" "}
                         <DateBadge date={meta?.createdAt} size="sm" staticColor />
                     </Text>
-                    <Group gap="xs">
+                    <Group gap="xs" align="flex-start">
                         <Text size="sm" fw={600}>
                             Scopes:
                         </Text>
-                        <Pill.Group>
-                            {meta?.scopes.map((scope) => (
-                                <Pill key={scope}>{scope}</Pill>
-                            ))}
-                        </Pill.Group>
+                        {isEditingScopes ? (
+                            <Stack gap="xs" style={{ flex: 1 }}>
+                                <MultiSelect
+                                    placeholder="Select scopes"
+                                    data={Object.values(AvailableApiScopes)}
+                                    {...form.getInputProps("scopes")}
+                                    size="sm"
+                                />
+                                <Group gap="xs">
+                                    <Button
+                                        size="xs"
+                                        variant="light"
+                                        color="success"
+                                        leftSection={<FontAwesomeIcon icon="floppy-disk" />}
+                                        loading={updateKeyMutation.isPending}
+                                        disabled={form.values.scopes.length === 0}
+                                        onClick={handleUpdateScopes}>
+                                        Save
+                                    </Button>
+                                    <Button
+                                        size="xs"
+                                        variant="subtle"
+                                        color="red"
+                                        leftSection={<FontAwesomeIcon icon="times" />}
+                                        onClick={handleCancelEdit}>
+                                        Cancel
+                                    </Button>
+                                </Group>
+                            </Stack>
+                        ) : (
+                            <Group gap="xs" style={{ flex: 1 }}>
+                                <Pill.Group>
+                                    {meta?.scopes.map((scope) => (
+                                        <Pill key={scope}>{scope}</Pill>
+                                    ))}
+                                </Pill.Group>
+                                <ActionIcon
+                                    size="sm"
+                                    variant="subtle"
+                                    color="info"
+                                    title="Edit scopes"
+                                    onClick={handleEditScopes}>
+                                    <FontAwesomeIcon icon="edit" size="xs" />
+                                </ActionIcon>
+                            </Group>
+                        )}
                     </Group>
                     <Text size="sm">
                         <Text span fw={600}>
