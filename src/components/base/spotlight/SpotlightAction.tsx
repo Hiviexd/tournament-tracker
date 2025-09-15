@@ -97,7 +97,7 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
                         </Badge>
                     );
                 }
-                if ("deadline" in obj && obj.deadline) {
+                if ("deadline" in obj && obj.deadline && obj.isActive) {
                     badges.push(<DueDateBadge key="deadline" date={obj.deadline} size="xs" variant="light" />);
                 }
                 break;
