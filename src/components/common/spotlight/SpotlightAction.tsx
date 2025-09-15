@@ -104,7 +104,9 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
 
             case "ticket":
             case "report":
-                badges.push(<ReportTypeBadge key="type" report={obj as ITicket} size="xs" />);
+                if (searchItem.type === "report") {
+                    badges.push(<ReportTypeBadge key="type" report={obj as ITicket} size="xs" />);
+                }
 
                 if ("assignedGroup" in obj && obj.assignedGroup) {
                     badges.push(<UserGroupBadge key="group" group={obj.assignedGroup} size="xs" variant="light" />);
