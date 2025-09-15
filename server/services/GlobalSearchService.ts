@@ -14,32 +14,10 @@ const DEFAULT_LIMIT = 5 as const;
 
 class GlobalSearchService {
     /**
-     * Parse search query to extract type and content
-     * @param query The search query string
-     * @returns Object with searchType and searchContent
-     */
-    public parseSearchQuery(query: string): { searchType: string | null; searchContent: string } {
-        const typePrefixMatch = query.match(/^(\w+):(.+)$/);
-
-        if (typePrefixMatch) {
-            const [, type, content] = typePrefixMatch;
-            return {
-                searchType: type.toLowerCase(),
-                searchContent: content.trim(),
-            };
-        }
-
-        return {
-            searchType: null,
-            searchContent: query,
-        };
-    }
-
-    /**
      * Search tournaments by title or tags or forum URL
      */
     public async searchTournaments(searchType: string | null, tournamentSearchQuery: any): Promise<ITournament[]> {
-        if (searchType && searchType !== "tournament" && searchType !== "tournaments") {
+        if (searchType && searchType !== "tournament") {
             return [];
         }
 
@@ -54,14 +32,12 @@ class GlobalSearchService {
     /**
      * Search votes by title or description
      */
-    public async searchVotings(searchType: string | null, searchContent: string, isCommitteeOrAdmin: boolean): Promise<IVoting[]> {
-        if (
-            searchType &&
-            searchType !== "voting" &&
-            searchType !== "votings" &&
-            searchType !== "vote" &&
-            searchType !== "votes"
-        ) {
+    public async searchVotings(
+        searchType: string | null,
+        searchContent: string,
+        isCommitteeOrAdmin: boolean
+    ): Promise<IVoting[]> {
+        if (searchType && searchType !== "voting") {
             return [];
         }
 
@@ -91,7 +67,7 @@ class GlobalSearchService {
      * Search tickets by title only
      */
     public async searchTickets(searchType: string | null, searchContent: string): Promise<ITicket[]> {
-        if (searchType && searchType !== "ticket" && searchType !== "tickets") {
+        if (searchType && searchType !== "ticket") {
             return [];
         }
 
@@ -112,7 +88,7 @@ class GlobalSearchService {
      * Search reports by title
      */
     public async searchReports(searchType: string | null, searchContent: string): Promise<ITicket[]> {
-        if (searchType && searchType !== "report" && searchType !== "reports") {
+        if (searchType && searchType !== "report") {
             return [];
         }
 
@@ -133,13 +109,7 @@ class GlobalSearchService {
      * Search articles by title or content
      */
     public async searchArticles(searchType: string | null, searchContent: string): Promise<IArticle[]> {
-        if (
-            searchType &&
-            searchType !== "article" &&
-            searchType !== "articles" &&
-            searchType !== "doc" &&
-            searchType !== "docs"
-        ) {
+        if (searchType && searchType !== "article") {
             return [];
         }
 
@@ -159,7 +129,7 @@ class GlobalSearchService {
      * Search resources by title
      */
     public async searchResources(searchType: string | null, searchContent: string): Promise<IResource[]> {
-        if (searchType && searchType !== "resource" && searchType !== "resources") {
+        if (searchType && searchType !== "resource") {
             return [];
         }
 

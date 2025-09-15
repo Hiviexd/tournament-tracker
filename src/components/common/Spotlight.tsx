@@ -19,16 +19,13 @@ export default function Spotlight() {
 
     const navigate = useNavigate();
 
-    const ALL_TYPES: Record<string, boolean> = {
-        tournament: true,
-        voting: true,
-        ticket: true,
-        report: user?.isCommitteeOrAdmin ?? false,
-        resource: true,
-        doc: user?.isCommitteeOrAdmin ?? false,
-    };
+    const SEARCH_TYPES = utils.getSearchTypes({ user, searchType: "all" });
 
-    const AVAILABLE_TYPES = Object.entries(ALL_TYPES).filter(([, enabled]) => enabled).map(([type]) => type);
+    const formatType = (type: string) => {
+        if (type === "voting") return "Votes";
+        if (type === "article") return "Documentation";
+        return type.charAt(0).toUpperCase() + type.slice(1) + "s";
+    };
 
     const getGroupLabel = (type: string) => {
         switch (type) {
@@ -74,7 +71,7 @@ export default function Spotlight() {
     };
 
     return (
-        <MantineSpotlight.Root scrollable>
+        <MantineSpotlight.Root scrollable maxHeight="460px">
             <FocusTrap active>
                 <MantineSpotlight.Search
                     placeholder="Search for anything..."
@@ -118,31 +115,31 @@ export default function Spotlight() {
                             </Stack>
                         ) : (
                             <Alert ta="left" color="primary" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
-                                You can navigate to anything from here, i.e. website pages, tournaments, resources, etc.
-                                <br />
-                                <br />
-                                For better results, try searching with the format <Code>type:query</Code>, for example:
+                                <Text size="sm" mb="xs">
+                                    You can navigate to anything from here, i.e. website pages, tournaments, resources,
+                                    etc.
+                                </Text>
+
+                                <Text size="sm" mb="xs">
+                                    For better results, try searching with the format <Code>type:query</Code>, for
+                                    example: <Code>tournament:suiji</Code> or <Code>rs:official support</Code>
+                                </Text>
+                                <Text size="sm">Available types are:</Text>
                                 <List>
-                                    <List.Item>
-                                        <Code>tournament:suiji</Code>
-                                    </List.Item>
-                                    <List.Item>
-                                        <Code>ticket:bracket</Code>
-                                    </List.Item>
-                                    <List.Item>
-                                        <Code>resource:official support</Code>
-                                    </List.Item>
-                                </List>
-                                <br />
-                                Available types are:
-                                <br />
-                                {AVAILABLE_TYPES
-                                    .map((type, index) => (
-                                        <Text span key={type}>
-                                            <Code>{type}</Code>
-                                            {index < AVAILABLE_TYPES.length - 1 && ", "}
-                                        </Text>
+                                    {Object.entries(SEARCH_TYPES).map(([type, aliases]) => (
+                                        <List.Item key={type}>
+                                            <Text span size="sm">
+                                                {formatType(type)}:{" "}
+                                            </Text>
+                                            {aliases.map((alias, index) => (
+                                                <Text span key={alias}>
+                                                    <Code>{alias}</Code>
+                                                    {index < aliases.length - 1 && ", "}
+                                                </Text>
+                                            ))}
+                                        </List.Item>
                                     ))}
+                                </List>
                             </Alert>
                         )}
                     </MantineSpotlight.Empty>

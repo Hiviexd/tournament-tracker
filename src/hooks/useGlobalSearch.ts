@@ -30,6 +30,9 @@ export function useGlobalSearch(query: string) {
     // Get available routes filtered by permissions
     const availableRoutes = routes.filter((route) => utils.hasRequiredPermissions(user, route.permissions));
 
+    // Frontend search types (only page type)
+    const FRONTEND_SEARCH_TYPES = utils.getSearchTypes({ searchType: "frontend" });
+
     // Search routes by title
     const searchRoutes = (searchQuery: string): ISearchItem[] => {
         if (!searchQuery.trim()) return [];
@@ -66,7 +69,9 @@ export function useGlobalSearch(query: string) {
         return routeResults.slice(0, 5); // Limit to 5 results
     };
 
-    // API search query
+    const { searchType, searchContent } = utils.parseSearchQuery(query, FRONTEND_SEARCH_TYPES);
+
+    // API search query - only enabled when not searching for pages specifically
     const {
         data: apiResults,
         isLoading,
@@ -79,21 +84,21 @@ export function useGlobalSearch(query: string) {
                 url: "/api/search",
                 params: { query },
             }),
-        enabled: !!query && query.trim().length > 0,
+        enabled: !!query && query.trim().length > 0 && searchType !== "page",
     });
 
     // Combine route and API search results
     const searchResults: ISearchItem[] = [];
 
-    // Only add results when not loading (wait for API to complete)
-    if (!isLoading) {
+    // Only add results when not loading (wait for API to complete) or when searching for pages
+    if (!isLoading || searchType === "page") {
         // Add route results first
         if (query) {
-            searchResults.push(...searchRoutes(query));
+            searchResults.push(...searchRoutes(searchContent));
         }
 
-        // Add API results
-        if (apiResults) {
+        // Add API results (only if not searching for pages specifically)
+        if (apiResults && searchType !== "page") {
             // Add tournaments
             apiResults.tournaments.forEach((tournament) => {
                 searchResults.push({

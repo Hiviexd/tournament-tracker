@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import TournamentService from "../services/TournamentService";
 import GlobalSearchService from "../services/GlobalSearchService";
+import utils from "../../utils";
 
 class GlobalSearchController {
     public async index(req: Request, res: Response) {
@@ -14,8 +15,12 @@ class GlobalSearchController {
 
         try {
             // Parse type-specific search
-            const { searchType, searchContent } = GlobalSearchService.parseSearchQuery(query as string);
+            const searchTypes = utils.getSearchTypes({ user: currentUser, searchType: "backend" });
+            const { searchType, searchContent } = utils.parseSearchQuery(query as string, searchTypes);
+
             const tournamentSearchQuery = TournamentService.createSearchQuery(searchContent);
+
+            console.log(searchType, searchContent);
 
             // Perform searches based on type
             const [tournaments, votings, tickets, reports, articles, resources] = await Promise.all([
