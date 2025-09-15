@@ -1,0 +1,14 @@
+.mantine-Spotlight-action {
+
+    &:hover {
+        // remove current hover effect
+        background-color: transparent !important;
+    }
+
+    .spotlight-action-card {
+        transition: transform 0.2s ease;
+        &:hover {
+            transform: translateY(-4px);
+        }
+    }
+}

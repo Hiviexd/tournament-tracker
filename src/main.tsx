@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
+import Spotlight from "./components/base/Spotlight";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                         <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                             <ReactScan />
                             <Notifications />
+                            <Spotlight />
                             <Router>
                                 <NuqsAdapter>
                                     <AuthRouter />
