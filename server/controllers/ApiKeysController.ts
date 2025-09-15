@@ -68,7 +68,7 @@ class ApiKeysController {
                     description: `Updated API key scopes: **${apiKey.name}**`,
                     fields: [
                         {
-                            name: "NewScopes",
+                            name: "New Scopes",
                             value: scopes.map((scope) => `\`${scope}\``).join(", "),
                         },
                     ],
@@ -89,7 +89,7 @@ class ApiKeysController {
                 embeds: [
                     {
                         author: DiscordService.defaultWebhookAuthor(req.session),
-                        color: webhookColors.gray,
+                        color: webhookColors.darkRed,
                         description: `Revoked API key: **${result.apiKey.name}**`,
                     },
                 ],
