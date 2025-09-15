@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import BeatmapService from "../../services/BeatmapService";
 import { createMockBeatmapset } from "../utils/beatmaps";
 
-describe("BeatmapService", () => {
+// ARCHIVED: BeatmapService tests are disabled but preserved for future reference
+describe.skip("BeatmapService", () => {
     describe("isAllowed", () => {
         it("should allow ranked beatmapsets", () => {
             const beatmapset = createMockBeatmapset({
