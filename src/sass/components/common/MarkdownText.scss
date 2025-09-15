@@ -89,7 +89,7 @@
     }
 
     pre {
-        background-color: var(--mantine-color-primary-10);
+        background-color: color-mix(in srgb, var(--mantine-color-primary-10) 60%, var(--mantine-color-primary-11));
         padding: 1rem;
         border-radius: 4px;
         overflow-x: auto;
