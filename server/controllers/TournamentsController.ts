@@ -93,24 +93,9 @@ class TournamentsController {
         const user = res.locals!.user;
 
         if (search) {
-            // Verify if search is a valid osu! forum URL, if so, use it to search for tournaments
-            const forumId = utils.extractOsuForumId(search as string);
-            if (forumId) {
-                query.$and = [{ forumUrl: { $regex: forumId.toString() } }];
-            } else {
-                // fallback to searching by name and tags
-                const searchTerms = (search as string)
-                    .trim()
-                    .split(/\s+/)
-                    .filter((term) => term.length > 0);
-                if (searchTerms.length > 0) {
-                    query.$and = searchTerms.map((term) => {
-                        const termRegex = new RegExp(term, "i");
-                        return {
-                            $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
-                        };
-                    });
-                }
+            const searchQuery = TournamentService.createSearchQuery(search as string);
+            if (searchQuery.$and) {
+                query.$and = searchQuery.$and;
             }
         }
         if (mode) query.modes = { $in: [mode as GameMode] };

@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
+import Spotlight from "./components/common/Spotlight";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,8 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/charts/styles.css";
+import "@mantine/spotlight/styles.css";
+
 import "./sass/app.scss";
 
 // Layout
@@ -43,6 +46,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             <ReactScan />
                             <Notifications />
                             <Router>
+                                <Spotlight />
                                 <NuqsAdapter>
                                     <AuthRouter />
                                 </NuqsAdapter>

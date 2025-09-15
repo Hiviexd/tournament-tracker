@@ -52,7 +52,7 @@ class TournamentService {
      * Censors reviews from non-committee users
      */
     public censorTournamentReviews(tournament: ITournament, user: IUser | undefined) {
-        if (!user || (!user.isCommitteeOrAdmin)) {
+        if (!user || !user.isCommitteeOrAdmin) {
             // outright clear the reviews array if the user is not the tournament host, or if the status is not changesRequested
             if (!user || !tournament.host._id.equals(user._id) || tournament.status !== "changesRequested") {
                 tournament.reviews = [];
@@ -157,6 +157,39 @@ class TournamentService {
         ]);
 
         return votings;
+    }
+
+    /**
+     * Creates a search query for tournaments based on search string
+     * @param search The search string to process
+     * @returns MongoDB query object for tournament search
+     */
+    public createSearchQuery(search: string): any {
+        if (!search) {
+            return {};
+        }
+
+        // Verify if search is a valid osu! forum URL, if so, use it to search for tournaments
+        const forumId = utils.extractOsuForumId(search);
+        if (forumId) {
+            return { $and: [{ forumUrl: { $regex: forumId.toString() } }] };
+        }
+
+        // fallback to searching by name and tags
+        const searchTerms = utils.splitSearchTerms(search);
+
+        if (searchTerms.length === 0) {
+            return {};
+        }
+
+        return {
+            $and: searchTerms.map((term) => {
+                const termRegex = new RegExp(term, "i");
+                return {
+                    $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
+                };
+            }),
+        };
     }
 }
 

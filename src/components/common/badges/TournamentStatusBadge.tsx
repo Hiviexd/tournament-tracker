@@ -1,4 +1,4 @@
-import { Badge } from "@mantine/core";
+import { Badge, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TournamentStatus } from "../../../../interfaces/Tournament";
 import utils from "../../../../utils";
@@ -7,7 +7,7 @@ import _ from "lodash";
 interface IProps {
     status: TournamentStatus;
     variant?: "light" | "filled";
-    size?: "sm" | "md" | "lg" | "xl";
+    size?: MantineSize;
 }
 
 export default function TournamentStatusBadge({ status, variant = "light", size }: IProps) {

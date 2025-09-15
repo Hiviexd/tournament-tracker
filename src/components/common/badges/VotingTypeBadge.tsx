@@ -1,12 +1,13 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Badge, Tooltip } from "@mantine/core";
+import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 
 interface IPropTypes {
     type: string;
+    size?: MantineSize;
 }
 
-export default function VotingTypeBadge({ type }: IPropTypes) {
+export default function VotingTypeBadge({ type, size }: IPropTypes) {
     const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
         switch (type) {
             case "tournament":
@@ -22,7 +23,7 @@ export default function VotingTypeBadge({ type }: IPropTypes) {
 
     return (
         <Tooltip label={getVotingTypeInfo().text}>
-            <Badge color={getVotingTypeInfo().color} variant="light">
+            <Badge color={getVotingTypeInfo().color} variant="light" size={size}>
                 <FontAwesomeIcon icon={getVotingTypeInfo().icon} />
             </Badge>
         </Tooltip>
