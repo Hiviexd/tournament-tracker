@@ -284,3 +284,12 @@ export function generateApiKey(rawKeyOverride?: string): { raw: string; hashed: 
     const hashed = crypto.createHash("sha256").update(raw).digest("hex");
     return { raw, hashed };
 }
+
+/**
+ * Splits a search content into an array of search terms by spaces
+ * @param searchContent The search content to split
+ * @returns An array of search terms
+ */
+export function splitSearchTerms(searchContent: string): string[] {
+    return searchContent.trim().split(/\s+/).filter((term) => term.length > 0);
+}

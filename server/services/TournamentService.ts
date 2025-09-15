@@ -176,10 +176,7 @@ class TournamentService {
         }
 
         // fallback to searching by name and tags
-        const searchTerms = search
-            .trim()
-            .split(/\s+/)
-            .filter((term) => term.length > 0);
+        const searchTerms = utils.splitSearchTerms(search);
 
         if (searchTerms.length === 0) {
             return {};
