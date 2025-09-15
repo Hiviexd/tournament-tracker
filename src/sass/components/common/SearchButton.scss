@@ -23,8 +23,8 @@
     }
 
     &.collapsed {
-        // left padding + right padding + icon width + 2px offset to make icon more visually balanced
-        width: calc((var(--mantine-spacing-sm) * 3) + 2px);
+        // left padding + right padding + icon width + 1px offset to make icon more visually balanced
+        width: calc((var(--mantine-spacing-sm) * 3) + 1px);
     }
 
     .search-icon {
