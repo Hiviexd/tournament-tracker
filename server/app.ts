@@ -93,6 +93,7 @@ import templatesRouter from "./routers/templatesRouter";
 import dashboardRouter from "./routers/dashboardRouter";
 import apiKeysRouter from "./routers/apiKeysRouter";
 import complianceRouter from "./routers/complianceRouter";
+import globalSearchRouter from "./routers/globalSearchRouter";
 
 // setup api routes
 const apiRouter = express.Router();
@@ -127,6 +128,7 @@ apiRouter.use("/templates", templatesRouter);
 apiRouter.use("/dashboard", dashboardRouter);
 apiRouter.use("/keys", apiKeysRouter);
 apiRouter.use("/compliance", complianceRouter);
+apiRouter.use("/search", globalSearchRouter);
 
 app.use("/api", apiRouter);
 
