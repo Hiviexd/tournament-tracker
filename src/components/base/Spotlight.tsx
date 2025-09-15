@@ -46,9 +46,15 @@ export default function Spotlight() {
 
     const SpotlightSkeleton = () => {
         return (
-            <MantineSpotlight.ActionsList>
-                <Skeleton height={40} width="100%" />
-            </MantineSpotlight.ActionsList>
+            <>
+                <MantineSpotlight.ActionsGroup label="Loading...">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <MantineSpotlight.Action key={index} disabled>
+                            <Skeleton height={60} width="100%" radius="md" />
+                        </MantineSpotlight.Action>
+                    ))}
+                </MantineSpotlight.ActionsGroup>
+            </>
         );
     };
 
