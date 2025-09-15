@@ -1,4 +1,4 @@
-import { Stack, Text, Skeleton, Alert, Code, List } from "@mantine/core";
+import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap } from "@mantine/core";
 import { Spotlight as MantineSpotlight } from "@mantine/spotlight";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState } from "react";
@@ -60,12 +60,14 @@ export default function Spotlight() {
 
     return (
         <MantineSpotlight.Root scrollable>
-            <MantineSpotlight.Search
-                placeholder="Search for anything..."
-                leftSection={<FontAwesomeIcon icon="search" />}
-                value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
-            />
+            <FocusTrap active>
+                <MantineSpotlight.Search
+                    placeholder="Search for anything..."
+                    leftSection={<FontAwesomeIcon icon="search" />}
+                    value={search}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                />
+            </FocusTrap>
             <MantineSpotlight.ActionsList>
                 {isLoading && <SpotlightSkeleton />}
                 {results.length > 0 && (
