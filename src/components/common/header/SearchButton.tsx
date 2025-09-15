@@ -1,5 +1,5 @@
 import { UnstyledButton, Text, Kbd, useMantineTheme, type UnstyledButtonProps } from "@mantine/core";
-import { useOs, useWindowScroll, useMediaQuery } from "@mantine/hooks";
+import { useOs, useWindowScroll, useMediaQuery, useHover } from "@mantine/hooks";
 import { spotlight } from "@mantine/spotlight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -18,8 +18,19 @@ export default function SearchButton({ text, isMobile, onOpen, ...props }: Searc
     const collapseOnDesktopWidth = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
     const minimumDesktopWidth = useMediaQuery(`(min-width: ${theme.breakpoints.lg})`);
 
+    const { hovered, ref } = useHover();
     const [scroll] = useWindowScroll();
-    const collapsed = !isMobile && (scroll.y > 5 || !minimumMobileWidth || (collapseOnDesktopWidth && !minimumDesktopWidth));
+
+    // Determine if we should force collapse because of desktop width
+    const forceCollapseOnDesktop = collapseOnDesktopWidth && !minimumDesktopWidth;
+
+    // Determine if scrolling or lack of minimum mobile width requires collapse
+    const collapseDueToScrollOrMobile = scroll.y > 5 || !minimumMobileWidth;
+
+    // Final collapsed state:
+    // 1. Always collapsed if desktop width forces it
+    // 2. Otherwise collapsed if not hovered, not on mobile, and scrolled / mobile conditions apply
+    const collapsed = forceCollapseOnDesktop || (!hovered && !isMobile && collapseDueToScrollOrMobile);
 
     const handleOpen = () => {
         onOpen?.();
@@ -32,6 +43,7 @@ export default function SearchButton({ text, isMobile, onOpen, ...props }: Searc
             className={`search-button ${collapsed ? "collapsed" : ""}`}
             onClick={handleOpen}
             mod={{ mobile: isMobile }}
+            ref={ref}
             {...props}>
             <FontAwesomeIcon icon="search" size="xs" className="search-icon" />
             <div className="search-content">
