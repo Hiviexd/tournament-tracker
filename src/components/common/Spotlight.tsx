@@ -30,7 +30,7 @@ export default function Spotlight() {
             case "resource":
                 return "Resources";
             case "article":
-                return "Articles";
+                return "Documentation";
             default:
                 return type.charAt(0).toUpperCase() + type.slice(1);
         }
