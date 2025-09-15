@@ -54,11 +54,7 @@ class GlobalSearchService {
     /**
      * Search votes by title or description
      */
-    public async searchVotings(
-        searchType: string | null,
-        searchContent: string,
-        isCommitteeOrAdmin: boolean
-    ): Promise<IVoting[]> {
+    public async searchVotings(searchType: string | null, searchContent: string, isCommitteeOrAdmin: boolean): Promise<IVoting[]> {
         if (
             searchType &&
             searchType !== "voting" &&
