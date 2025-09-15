@@ -383,3 +383,11 @@ export const apiCall = async <T = any>({
         return handleApiError(error);
     }
 };
+
+/**
+ * Check if a link is an external link
+ * @param link Link to check
+ */
+export function isExternalLink(link: string): boolean {
+    return link.startsWith("http") || link.startsWith("//") || link.startsWith("mailto:") || link.startsWith("tel:");
+}
