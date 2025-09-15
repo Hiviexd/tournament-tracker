@@ -8,6 +8,7 @@ import Resource from "../models/resourceModel";
 import { IResource } from "../../interfaces/Resource";
 import Article from "../models/articleModel";
 import { IArticle } from "../../interfaces/Article";
+import utils from "../../utils";
 
 const DEFAULT_LIMIT = 5 as const;
 
@@ -64,27 +65,33 @@ class GlobalSearchService {
             return [];
         }
 
+        // split search content by spaces
+        const searchTerms = utils.splitSearchTerms(searchContent);
+
         return await Voting.find({
-            $or: [
-                { title: { $regex: searchContent, $options: "i" } },
-                { description: { $regex: searchContent, $options: "i" } },
-            ],
+            $and: searchTerms.map((term) => ({
+                $or: [{ title: { $regex: term, $options: "i" } }, { description: { $regex: term, $options: "i" } }],
+            })),
         })
             .select("_id title category isActive duration createdAt assignedGroups")
             .limit(DEFAULT_LIMIT);
     }
 
     /**
-     * Search tickets by title
+     * Search tickets by title only
      */
     public async searchTickets(searchType: string | null, searchContent: string): Promise<ITicket[]> {
         if (searchType && searchType !== "ticket" && searchType !== "tickets") {
             return [];
         }
 
+        const searchTerms = utils.splitSearchTerms(searchContent);
+
         return await Ticket.find({
             type: "ticket",
-            title: { $regex: searchContent, $options: "i" },
+            $and: searchTerms.map((term) => ({
+                $or: [{ title: { $regex: term, $options: "i" } }],
+            })),
         })
             .select("_id title isActive assignedGroup")
             .limit(DEFAULT_LIMIT)
@@ -99,9 +106,13 @@ class GlobalSearchService {
             return [];
         }
 
+        const searchTerms = utils.splitSearchTerms(searchContent);
+
         return await Ticket.find({
             type: "report",
-            title: { $regex: searchContent, $options: "i" },
+            $and: searchTerms.map((term) => ({
+                $or: [{ title: { $regex: term, $options: "i" } }],
+            })),
         })
             .select("_id title isActive assignedGroup targetUser targetTournamentName")
             .limit(DEFAULT_LIMIT)
@@ -109,17 +120,21 @@ class GlobalSearchService {
     }
 
     /**
-     * Search articles by title
+     * Search articles by title or content
      */
     public async searchArticles(searchType: string | null, searchContent: string): Promise<IArticle[]> {
         if (searchType && searchType !== "article" && searchType !== "articles") {
             return [];
         }
 
+        const searchTerms = utils.splitSearchTerms(searchContent);
+
         return await Article.find({
-            title: { $regex: searchContent, $options: "i" },
+            $and: searchTerms.map((term) => ({
+                $or: [{ title: { $regex: term, $options: "i" } }, { content: { $regex: term, $options: "i" } }],
+            })),
         })
-            .select("_id title")
+            .select("_id title slug")
             .limit(DEFAULT_LIMIT)
             .lean();
     }
@@ -132,8 +147,12 @@ class GlobalSearchService {
             return [];
         }
 
+        const searchTerms = utils.splitSearchTerms(searchContent);
+
         return await Resource.find({
-            title: { $regex: searchContent, $options: "i" },
+            $and: searchTerms.map((term) => ({
+                $or: [{ title: { $regex: term, $options: "i" } }],
+            })),
         })
             .select("_id title category link")
             .limit(DEFAULT_LIMIT)
