@@ -160,7 +160,6 @@ app.use((req, res) => {
 });
 
 // error handler
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(handleCsrfError as express.ErrorRequestHandler);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err, req, res, next) => {
