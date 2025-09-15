@@ -91,6 +91,8 @@ import {
     faUserPen,
     faEnvelope,
     faArrowUp,
+    faArrowDown,
+    faArrowTurnDown,
     faCode,
     faQuoteLeft,
     faMoon,
@@ -198,6 +200,8 @@ export default function loadIcons() {
         faUserPen,
         faEnvelope,
         faArrowUp,
+        faArrowDown,
+        faArrowTurnDown,
         faCode,
         faQuoteLeft,
         faMoon,
@@ -209,6 +213,6 @@ export default function loadIcons() {
         faTag,
         faGhost,
         faFlagCheckered,
-        faTableColumns,
+        faTableColumns
     );
 }

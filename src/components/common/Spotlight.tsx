@@ -1,4 +1,4 @@
-import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap } from "@mantine/core";
+import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap, Kbd, Group } from "@mantine/core";
 import { Spotlight as MantineSpotlight } from "@mantine/spotlight";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState } from "react";
@@ -71,7 +71,7 @@ export default function Spotlight() {
     };
 
     return (
-        <MantineSpotlight.Root scrollable maxHeight="460px">
+        <MantineSpotlight.Root scrollable maxHeight="500px">
             <FocusTrap active>
                 <MantineSpotlight.Search
                     placeholder="Search for anything..."
@@ -114,33 +114,59 @@ export default function Spotlight() {
                                 {error && <Text>{error.message}</Text>}
                             </Stack>
                         ) : (
-                            <Alert ta="left" color="primary" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
-                                <Text size="sm" mb="xs">
-                                    You can navigate to anything from here, i.e. website pages, tournaments, resources,
-                                    etc.
-                                </Text>
+                            <Stack gap="lg" align="center">
+                                <Group gap="lg">
+                                    <Text size="sm">
+                                        <Kbd size="xs">
+                                            <FontAwesomeIcon icon="arrow-up" />
+                                        </Kbd>{" "}
+                                        <Kbd size="xs">
+                                            <FontAwesomeIcon icon="arrow-down" />
+                                        </Kbd>{" "}
+                                        to navigate
+                                    </Text>
+                                    <Text size="sm">
+                                        <Kbd size="xs">
+                                            <FontAwesomeIcon icon="arrow-turn-down" rotation={90} />
+                                        </Kbd>{" "}
+                                        to select
+                                    </Text>
+                                    <Text size="sm">
+                                        <Kbd size="xs">Esc</Kbd> to close
+                                    </Text>
+                                </Group>
+                                <Alert
+                                    ta="left"
+                                    color="primary"
+                                    title="Info"
+                                    icon={<FontAwesomeIcon icon="info-circle" />}>
+                                    <Text size="sm" mb="xs">
+                                        You can navigate to anything from here, i.e. website pages, tournaments,
+                                        resources, etc.
+                                    </Text>
 
-                                <Text size="sm" mb="xs">
-                                    For better results, try searching with the format <Code>type:query</Code>, for
-                                    example: <Code>tournament:suiji</Code> or <Code>rs:official support</Code>
-                                </Text>
-                                <Text size="sm">Available types are:</Text>
-                                <List>
-                                    {Object.entries(SEARCH_TYPES).map(([type, aliases]) => (
-                                        <List.Item key={type}>
-                                            <Text span size="sm">
-                                                {formatType(type)}:{" "}
-                                            </Text>
-                                            {aliases.map((alias, index) => (
-                                                <Text span key={alias}>
-                                                    <Code>{alias}</Code>
-                                                    {index < aliases.length - 1 && ", "}
+                                    <Text size="sm" mb="xs">
+                                        For better results, try searching with the format <Code>type:query</Code>, for
+                                        example: <Code>tournament:suiji</Code> or <Code>rs:official support</Code>
+                                    </Text>
+                                    <Text size="sm">Available types are:</Text>
+                                    <List>
+                                        {Object.entries(SEARCH_TYPES).map(([type, aliases]) => (
+                                            <List.Item key={type}>
+                                                <Text span size="sm">
+                                                    {formatType(type)}:{" "}
                                                 </Text>
-                                            ))}
-                                        </List.Item>
-                                    ))}
-                                </List>
-                            </Alert>
+                                                {aliases.map((alias, index) => (
+                                                    <Text span key={alias}>
+                                                        <Code>{alias}</Code>
+                                                        {index < aliases.length - 1 && ", "}
+                                                    </Text>
+                                                ))}
+                                            </List.Item>
+                                        ))}
+                                    </List>
+                                </Alert>
+                            </Stack>
                         )}
                     </MantineSpotlight.Empty>
                 )}
