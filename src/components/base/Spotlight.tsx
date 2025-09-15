@@ -1,15 +1,19 @@
-import { Stack, Text, Skeleton } from "@mantine/core";
+import { Stack, Text, Skeleton, Alert, Code, List } from "@mantine/core";
 import { Spotlight as MantineSpotlight } from "@mantine/spotlight";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useGlobalSearch } from "../../hooks/useGlobalSearch";
+import { ISearchItem, useGlobalSearch } from "../../hooks/useGlobalSearch";
 import SpotlightAction from "./spotlight/SpotlightAction";
+import { useNavigate } from "react-router-dom";
+import utils from "../../../utils";
 
 export default function Spotlight() {
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const { results, isLoading, error } = useGlobalSearch(debouncedSearch);
+
+    const navigate = useNavigate();
 
     const getGroupLabel = (type: string) => {
         switch (type) {
@@ -29,6 +33,14 @@ export default function Spotlight() {
                 return "Articles";
             default:
                 return type.charAt(0).toUpperCase() + type.slice(1);
+        }
+    };
+
+    const handleSelectOption = (result: ISearchItem) => {
+        if (utils.isExternalLink(result.link)) {
+            window.open(result.link, "_blank");
+        } else {
+            navigate(result.link);
         }
     };
 
@@ -64,7 +76,11 @@ export default function Spotlight() {
                         ).map(([type, typeResults]) => (
                             <MantineSpotlight.ActionsGroup key={type} label={getGroupLabel(type)}>
                                 {typeResults.map((result) => (
-                                    <SpotlightAction key={result.link} searchItem={result} />
+                                    <SpotlightAction
+                                        key={result.link}
+                                        searchItem={result}
+                                        onClick={() => handleSelectOption(result)}
+                                    />
                                 ))}
                             </MantineSpotlight.ActionsGroup>
                         ))}
@@ -72,10 +88,27 @@ export default function Spotlight() {
                 )}
                 {!isLoading && results.length === 0 && (
                     <MantineSpotlight.Empty>
-                        <Stack>
-                            <Text>No results found :(</Text>
-                            {error && <Text>{error.message}</Text>}
-                        </Stack>
+                        {debouncedSearch.length > 0 ? (
+                            <Stack gap="xs">
+                                <Text>No results found :(</Text>
+                                {error && <Text>{error.message}</Text>}
+                            </Stack>
+                        ) : (
+                            <Alert ta="left" color="primary" title="Tip" icon={<FontAwesomeIcon icon="info-circle" />}>
+                                Try searching with the format <Code>type:query</Code>, for example:
+                                <List>
+                                    <List.Item>
+                                        <Code>tournament:world cup</Code>
+                                    </List.Item>
+                                    <List.Item>
+                                        <Code>vote:tribadge</Code>
+                                    </List.Item>
+                                    <List.Item>
+                                        <Code>ticket:tournament bans</Code>
+                                    </List.Item>
+                                </List>
+                            </Alert>
+                        )}
                     </MantineSpotlight.Empty>
                 )}
             </MantineSpotlight.ActionsList>
