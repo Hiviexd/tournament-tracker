@@ -70,9 +70,8 @@ class GlobalSearchService {
                 { description: { $regex: searchContent, $options: "i" } },
             ],
         })
-            .select("_id title type isActive duration assignedGroups")
-            .limit(DEFAULT_LIMIT)
-            .lean();
+            .select("_id title category isActive duration createdAt assignedGroups")
+            .limit(DEFAULT_LIMIT);
     }
 
     /**
@@ -104,7 +103,7 @@ class GlobalSearchService {
             type: "report",
             title: { $regex: searchContent, $options: "i" },
         })
-            .select("_id title isActive assignedGroup")
+            .select("_id title isActive assignedGroup targetUser targetTournamentName")
             .limit(DEFAULT_LIMIT)
             .lean();
     }
