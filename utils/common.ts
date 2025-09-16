@@ -32,7 +32,7 @@ export function isLatinScriptOnly(input: string): boolean {
  * @param link Link to check
  */
 export function isOsuForumLink(link: string): boolean {
-    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?.*)?$/.test(link);
 }
 
 /**
@@ -230,8 +230,14 @@ export function getSearchTypes({
     };
 
     if (searchType === "frontend") return FRONTEND_SEARCH_TYPES;
-    if (searchType === "backend") return { ...BASE_SEARCH_TYPES, ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}) };
-    if (searchType === "all") return { ...FRONTEND_SEARCH_TYPES, ...BASE_SEARCH_TYPES, ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}) };
+    if (searchType === "backend")
+        return { ...BASE_SEARCH_TYPES, ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}) };
+    if (searchType === "all")
+        return {
+            ...FRONTEND_SEARCH_TYPES,
+            ...BASE_SEARCH_TYPES,
+            ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}),
+        };
 
     return BASE_SEARCH_TYPES;
 }
