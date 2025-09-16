@@ -14,6 +14,7 @@ import { IVoting } from "../../interfaces/Voting";
 import { ITicket } from "../../interfaces/Ticket";
 import { IUser } from "../../interfaces/User";
 import { ITournament } from "../../interfaces/Tournament";
+import { IDiscordField } from "../../interfaces/Discord";
 
 class AutomationService {
     private checkVotingsJob: CronJob;
@@ -510,7 +511,7 @@ class AutomationService {
                 (reviewer) => !reviewedUserIds.has(reviewer._id.toString())
             );
 
-            // Filter out users who have already reviewed and are inactive reviewers
+            // Filter out inactive reviewers
             const missingReviewersExcludingInactive = missingReviewers.filter((reviewer) => reviewer.isActiveReviewer);
 
             if (missingReviewers.length === 0) continue;
@@ -534,6 +535,59 @@ class AutomationService {
             ) {
                 overdueReviews.push({ tournament, daysSinceReview, missingReviewers });
 
+                // If we're on the 3rd ping onwards, ping a random committee member (who's also active)
+                if (daysSinceReview >= 15) {
+                    const targetGroup = tournament.type === "tournament" ? "tc" : "cc";
+                    let thirdUser: IUser | null = null;
+
+                    const [randomUser]: IUser[] = await User.aggregate([
+                        {
+                            $match: {
+                                groups: targetGroup,
+                                isActiveReviewer: true,
+                                _id: { $nin: tournament.assignedReviewers },
+                            },
+                        },
+                        { $sample: { size: 1 } }, // get 1 random user
+                    ]);
+
+                    thirdUser = randomUser ?? null;
+
+                    if (thirdUser) {
+                        usersToPing.push(thirdUser.discordId || thirdUser.username);
+                    }
+                }
+
+                const fields: IDiscordField[] = [
+                    {
+                        name: "Missing Reviews",
+                        value: missingReviewers
+                            .map(
+                                (reviewer) =>
+                                    `[**${reviewer.username}**](${reviewer.osuProfileUrl})${
+                                        reviewer.isActiveReviewer ? "" : " *(inactive)*"
+                                    }`
+                            )
+                            .join(", "),
+                    },
+                    {
+                        name: "Review Started",
+                        value: `${utils.discordTimestamp(tournament.startedReviewAt)} (${utils.discordTimestamp(
+                            tournament.startedReviewAt,
+                            "dateTime"
+                        )})`,
+                    },
+                ];
+
+                if (daysSinceReview >= 15) {
+                    fields.push({
+                        name: "Note",
+                        value: `This is the third reminder ping onwards. A random committee member(<@${
+                            usersToPing[usersToPing.length - 1]
+                        }>) has been pinged for awareness.`,
+                    });
+                }
+
                 await DiscordService.sendUserHighlightWebhook({
                     users: usersToPing,
                     embeds: [
@@ -545,25 +599,7 @@ class AutomationService {
                                 daysSinceReview,
                                 "day"
                             )}!`,
-                            fields: [
-                                {
-                                    name: "Missing Reviews",
-                                    value: missingReviewers
-                                        .map(
-                                            (reviewer) =>
-                                                `[**${reviewer.username}**](${reviewer.osuProfileUrl})${
-                                                    reviewer.isActiveReviewer ? "" : " *(inactive)*"
-                                                }`
-                                        )
-                                        .join(", "),
-                                },
-                                {
-                                    name: "Review Started",
-                                    value: `${utils.discordTimestamp(
-                                        tournament.startedReviewAt
-                                    )} (${utils.discordTimestamp(tournament.startedReviewAt, "dateTime")})`,
-                                },
-                            ],
+                            fields,
                         },
                     ],
                     message: "Overdue Tournament Review",
