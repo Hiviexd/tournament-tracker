@@ -4,11 +4,13 @@ import Voting from "../models/votingModel";
 import { IVoting } from "../../interfaces/Voting";
 import Ticket from "../models/ticketModel";
 import { ITicket } from "../../interfaces/Ticket";
+import TicketService from "./TicketService";
 import Resource from "../models/resourceModel";
 import { IResource } from "../../interfaces/Resource";
 import Article from "../models/articleModel";
 import { IArticle } from "../../interfaces/Article";
 import utils from "../../utils";
+import { IMessage } from "../../interfaces/Message";
 
 const DEFAULT_LIMIT = 5 as const;
 
@@ -24,6 +26,7 @@ class GlobalSearchService {
         return tournamentSearchQuery.$and
             ? await Tournament.find({ $and: tournamentSearchQuery.$and })
                   .select("_id name type status isActive")
+                  .sort({ createdAt: -1 })
                   .limit(DEFAULT_LIMIT)
                   .lean()
             : [];
@@ -60,6 +63,7 @@ class GlobalSearchService {
 
         return await Voting.find(query)
             .select("_id title category isActive duration createdAt assignedGroups")
+            .sort({ createdAt: -1 })
             .limit(DEFAULT_LIMIT);
     }
 
@@ -73,13 +77,24 @@ class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
+        let matchingMessages: IMessage[] = [];
+
+        // Only search messages if searchType is specified, given this query is kinda expensive
+        if (searchType === "ticket") {
+            matchingMessages = await TicketService.searchMessageContent(searchContent);
+        }
+
         return await Ticket.find({
             type: "ticket",
             $and: searchTerms.map((term) => ({
-                $or: [{ title: { $regex: term, $options: "i" } }],
+                $or: [
+                    { title: { $regex: term, $options: "i" } },
+                    ...(searchType === "ticket" ? [{ messages: { $in: matchingMessages } }] : []),
+                ],
             })),
         })
             .select("_id title isActive assignedGroup")
+            .sort({ createdAt: -1 })
             .limit(DEFAULT_LIMIT)
             .lean();
     }
@@ -94,13 +109,23 @@ class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
+        let matchingMessages: IMessage[] = [];
+
+        if (searchType === "report") {
+            matchingMessages = await TicketService.searchMessageContent(searchContent);
+        }
+
         return await Ticket.find({
             type: "report",
             $and: searchTerms.map((term) => ({
-                $or: [{ title: { $regex: term, $options: "i" } }],
+                $or: [
+                    { title: { $regex: term, $options: "i" } },
+                    ...(searchType === "report" ? [{ messages: { $in: matchingMessages } }] : []),
+                ],
             })),
         })
             .select("_id title isActive assignedGroup targetUser targetTournamentName")
+            .sort({ createdAt: -1 })
             .limit(DEFAULT_LIMIT)
             .lean();
     }
@@ -121,6 +146,7 @@ class GlobalSearchService {
             })),
         })
             .select("_id title slug")
+            .sort({ createdAt: -1 })
             .limit(DEFAULT_LIMIT)
             .lean();
     }
@@ -141,6 +167,7 @@ class GlobalSearchService {
             })),
         })
             .select("_id title category link")
+            .sort({ createdAt: -1 })
             .limit(DEFAULT_LIMIT)
             .lean();
     }
