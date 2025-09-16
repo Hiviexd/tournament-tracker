@@ -169,8 +169,9 @@ class TournamentService {
             return {};
         }
 
-        // Verify if search is a valid osu! forum URL, if so, use it to search for tournaments
-        const forumId = utils.extractOsuForumId(search);
+        // search by forum url if the search is either a number or a valid osu! forum URL
+        const forumId = utils.isNumeric(search) ? parseInt(search) : utils.extractOsuForumId(search);
+
         if (forumId) {
             return { $and: [{ forumUrl: { $regex: forumId.toString() } }] };
         }
