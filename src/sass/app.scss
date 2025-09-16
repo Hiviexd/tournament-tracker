@@ -192,6 +192,11 @@
         color: var(--mantine-color-primary-light-color);
         border-color: var(--mantine-color-primary-light);
     }
+
+    .mantine-Accordion-item {
+        background-color: var(--mantine-color-primary-10);
+        border: none;
+    }
 }
 
 /* Links */

@@ -122,6 +122,12 @@ export const routes: IRoute[] = [
                 icon: "quote-left",
                 permissions: ["committee"],
             },
+            {
+                title: "API Keys",
+                link: "/keys",
+                icon: "key",
+                permissions: ["dev"],
+            },
             // {
             //     title: "Create Article",
             //     link: "/articles/create",

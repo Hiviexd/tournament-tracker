@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
 import { ApiScope } from "../../interfaces/ApiKey";
+import { IUser } from "../../interfaces/User";
+import { IApiKey } from "../../interfaces/ApiKey";
 
 export interface IApiKeyMeta {
     id: string;
@@ -23,11 +25,24 @@ export function useApiKeyMeta() {
         queryFn: async () => {
             const res = await utils.apiCall<{ apiKey: IApiKeyMeta | null }>({
                 method: "get",
-                url: "/api/keys/get",
+                url: "/api/keys",
             });
             return res?.apiKey ?? null;
         },
         staleTime: 60_000,
+    });
+}
+
+export function useAllApiKeys() {
+    return useQuery({
+        queryKey: ["apiKey", "all"],
+        queryFn: async () => {
+            const res = await utils.apiCall<{ apiKeys: { user: IUser; apiKeys: IApiKey[] }[] }>({
+                method: "get",
+                url: "/api/keys/all",
+            });
+            return res?.apiKeys ?? [];
+        },
     });
 }
 
@@ -46,6 +61,7 @@ export function useCreateApiKey() {
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
+            qc.invalidateQueries({ queryKey: ["apiKey", "all"] });
         },
     });
 }
@@ -65,6 +81,7 @@ export function useUpdateApiKey() {
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
+            qc.invalidateQueries({ queryKey: ["apiKey", "all"] });
         },
     });
 }
@@ -83,6 +100,7 @@ export function useRevokeApiKey() {
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
+            qc.invalidateQueries({ queryKey: ["apiKey", "all"] });
         },
     });
 }

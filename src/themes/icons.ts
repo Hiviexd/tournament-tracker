@@ -105,6 +105,7 @@ import {
     faGhost,
     faFlagCheckered,
     faTableColumns,
+    faKey,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -213,6 +214,7 @@ export default function loadIcons() {
         faTag,
         faGhost,
         faFlagCheckered,
-        faTableColumns
+        faTableColumns,
+        faKey,
     );
 }
