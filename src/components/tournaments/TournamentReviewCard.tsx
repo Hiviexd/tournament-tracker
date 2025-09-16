@@ -79,22 +79,22 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                             {!shouldHideChecklist() && (
                                 <>
                                     <AlertText
-                                        text={
-                                            uncheckedItems.length === 0
-                                                ? "No issues with checklist!"
-                                                : `Found ${utils.formatCount(
-                                                      uncheckedItems.length,
-                                                      "issue"
-                                                  )} with checklist:`
-                                        }
                                         type={uncheckedItems.length === 0 ? "success" : "danger"}
                                         icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
-                                        size="sm"
-                                    />
+                                        size="sm">
+                                        {uncheckedItems.length === 0
+                                            ? "No issues with checklist!"
+                                            : `Found ${utils.formatCount(
+                                                  uncheckedItems.length,
+                                                  "issue"
+                                              )} with checklist:`}
+                                    </AlertText>
                                     {uncheckedItems.length > 0 && (
                                         <Box ml="md">
                                             {uncheckedItems.map((item, index) => (
-                                                <AlertText key={index} text={item} type="danger" size="sm" />
+                                                <AlertText key={index} type="danger" size="sm">
+                                                    {item}
+                                                </AlertText>
                                             ))}
                                         </Box>
                                     )}
@@ -122,22 +122,22 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                             {!shouldHideChecklist() && (
                                 <>
                                     <AlertText
-                                        text={
-                                            uncheckedItems.length === 0
-                                                ? "No issues with checklist!"
-                                                : `Found ${utils.formatCount(
-                                                      uncheckedItems.length,
-                                                      "issue"
-                                                  )} with checklist:`
-                                        }
                                         type={uncheckedItems.length === 0 ? "success" : "danger"}
                                         icon={uncheckedItems.length === 0 ? "circle-check" : "exclamation-triangle"}
-                                        size="sm"
-                                    />
+                                        size="sm">
+                                        {uncheckedItems.length === 0
+                                            ? "No issues with checklist!"
+                                            : `Found ${utils.formatCount(
+                                                  uncheckedItems.length,
+                                                  "issue"
+                                              )} with checklist:`}
+                                    </AlertText>
                                     {uncheckedItems.length > 0 && (
                                         <Box ml="md">
                                             {uncheckedItems.map((item, index) => (
-                                                <AlertText key={index} text={item} type="danger" size="sm" />
+                                                <AlertText key={index} type="danger" size="sm">
+                                                    {item}
+                                                </AlertText>
                                             ))}
                                         </Box>
                                     )}

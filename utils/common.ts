@@ -1,5 +1,6 @@
 import moment from "moment";
 import { RankedChoiceVote, RankedChoiceVoteScore } from "../interfaces/Vote";
+import { IUser } from "../interfaces/User";
 
 /**
  * Shortens a string
@@ -31,7 +32,7 @@ export function isLatinScriptOnly(input: string): boolean {
  * @param link Link to check
  */
 export function isOsuForumLink(link: string): boolean {
-    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?n=\d+)?$/.test(link);
+    return /^https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+(?:\?.*)?$/.test(link);
 }
 
 /**
@@ -196,4 +197,83 @@ export function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: n
     ranking.sort((a, b) => b.wins - a.wins);
 
     return ranking.map((r) => r.index);
+}
+
+/**
+ * Returns the available global search types based on the user's permissions
+ * @param params The parameters for the search types
+ * @param params.user The user to check permissions for
+ * @param params.searchType The type of filters to return (frontend | backend | all)
+ * @returns The available global search types
+ */
+export function getSearchTypes({
+    user = null,
+    searchType = "backend",
+}: {
+    user?: IUser | null;
+    searchType?: "frontend" | "backend" | "all";
+}): Record<string, string[]> {
+    const BASE_SEARCH_TYPES: Record<string, string[]> = {
+        tournament: ["tournament", "tournaments", "t"],
+        voting: ["voting", "votings", "vote", "votes", "v"],
+        ticket: ["ticket", "tickets", "tk"],
+        resource: ["resource", "resources", "rs"],
+    };
+
+    const FRONTEND_SEARCH_TYPES: Record<string, string[]> = {
+        page: ["page", "pages", "p"],
+    };
+
+    const PRIVATE_SEARCH_TYPES: Record<string, string[]> = {
+        report: ["report", "reports", "r"],
+        article: ["article", "articles", "doc", "docs", "d"],
+    };
+
+    if (searchType === "frontend") return FRONTEND_SEARCH_TYPES;
+    if (searchType === "backend")
+        return { ...BASE_SEARCH_TYPES, ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}) };
+    if (searchType === "all")
+        return {
+            ...FRONTEND_SEARCH_TYPES,
+            ...BASE_SEARCH_TYPES,
+            ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}),
+        };
+
+    return BASE_SEARCH_TYPES;
+}
+
+/**
+ * Parse search query to extract type and content
+ * @param query The search query string
+ * @param searchTypes The available search types mapping (frontend: page only, backend: all types)
+ * @returns Object with searchType and searchContent
+ */
+export function parseSearchQuery(
+    query: string,
+    searchTypes: Record<string, string[]>
+): { searchType: string | null; searchContent: string } {
+    const typePrefixMatch = query.match(/^(\w+):(.+)$/);
+
+    // default result
+    let result = { searchType: null as string | null, searchContent: query };
+
+    if (typePrefixMatch) {
+        const [, type, content] = typePrefixMatch;
+        const normalizedType = type.toLowerCase();
+
+        // Create alias map from search types
+        const searchAliasMap: Record<string, string> = Object.fromEntries(
+            Object.entries(searchTypes).flatMap(([canonical, aliases]) => aliases.map((alias) => [alias, canonical]))
+        );
+
+        const canonicalType = searchAliasMap[normalizedType];
+        if (canonicalType) {
+            result = {
+                searchType: canonicalType,
+                searchContent: content.trim(),
+            };
+        }
+    }
+
+    return result;
 }

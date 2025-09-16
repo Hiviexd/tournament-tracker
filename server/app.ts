@@ -9,6 +9,10 @@ import { logger } from "./middlewares/logger";
 import path from "path";
 import utils from "../utils";
 import AutomationService from "./services/AutomationService";
+import { authenticateRequest } from "./middlewares/authenticateRequest";
+import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
+import { conditionalCors } from "./middlewares/cors";
+import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -87,10 +91,27 @@ import versionRouter from "./routers/versionRouter";
 import quotesRouter from "./routers/quotesRouter";
 import templatesRouter from "./routers/templatesRouter";
 import dashboardRouter from "./routers/dashboardRouter";
+import apiKeysRouter from "./routers/apiKeysRouter";
+import complianceRouter from "./routers/complianceRouter";
+import globalSearchRouter from "./routers/globalSearchRouter";
 
 // setup api routes
 const apiRouter = express.Router();
 
+// Determine auth method (apiKey vs session)
+apiRouter.use(authenticateRequest as express.RequestHandler);
+
+// Conditionally enforce CORS
+apiRouter.use(conditionalCors as express.RequestHandler);
+
+// Rate limit based on auth method
+apiRouter.use(sessionRateLimiter as express.RequestHandler);
+apiRouter.use(apiKeyRateLimiter as express.RequestHandler);
+
+// Conditionally enforce CSRF
+apiRouter.use(conditionalCsrf as express.RequestHandler);
+
+// API routes
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/votes", votingsRouter);
@@ -105,6 +126,9 @@ apiRouter.use("/version", versionRouter);
 apiRouter.use("/quotes", quotesRouter);
 apiRouter.use("/templates", templatesRouter);
 apiRouter.use("/dashboard", dashboardRouter);
+apiRouter.use("/keys", apiKeysRouter);
+apiRouter.use("/compliance", complianceRouter);
+apiRouter.use("/search", globalSearchRouter);
 
 app.use("/api", apiRouter);
 
@@ -136,6 +160,7 @@ app.use((req, res) => {
 });
 
 // error handler
+app.use(handleCsrfError as express.ErrorRequestHandler);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err, req, res, next) => {
     let customErrorMessage = "";

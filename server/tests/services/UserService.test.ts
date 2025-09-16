@@ -106,20 +106,23 @@ describe("UserService", () => {
                     .mockResolvedValueOnce(mockTCUsers); // Second call after reset returns all users
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[0], mockTCUsers[1]]);
+                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[1]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc");
 
                 // Assert
                 expect(result).toHaveLength(2);
+                expect(result[0]).toBe(mockTCUsers[0]); // First user from bag
+                expect(result[1]).toBe(mockTCUsers[1]); // Second user from sampleSize
                 expect(mockUser.updateMany).toHaveBeenCalledTimes(2);
-                // First call to reset bag
+                // First call to reset bag (excluding the user that was already selected)
                 expect(mockUser.updateMany).toHaveBeenNthCalledWith(
                     1,
                     {
                         groups: { $in: ["tc"] },
                         isActiveReviewer: true,
+                        _id: { $nin: [mockTCUsers[0]._id] },
                     },
                     { $set: { inBag: true } }
                 );
@@ -144,13 +147,15 @@ describe("UserService", () => {
                     .mockResolvedValueOnce(availableAfterReset); // Second call after reset
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[1], mockTCUsers[2]]);
+                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[2]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc", usersToExclude);
 
                 // Assert
                 expect(result).toHaveLength(2);
+                expect(result[0]).toBe(mockTCUsers[1]); // First user from bag
+                expect(result[1]).toBe(mockTCUsers[2]); // Second user from sampleSize
                 expect(mockUser.updateMany).toHaveBeenCalledTimes(2);
                 // First call to reset bag (with exclusions)
                 expect(mockUser.updateMany).toHaveBeenNthCalledWith(
@@ -161,6 +166,12 @@ describe("UserService", () => {
                         _id: { $nin: usersToExclude },
                     },
                     { $set: { inBag: true } }
+                );
+                // Second call to mark selected users as out of bag
+                expect(mockUser.updateMany).toHaveBeenNthCalledWith(
+                    2,
+                    { _id: { $in: [mockTCUsers[1]._id, mockTCUsers[2]._id] } },
+                    { $set: { inBag: false } }
                 );
             });
         });

@@ -3,6 +3,7 @@
 @import "Layout.scss";
 @import "components/common/Header.scss";
 @import "components/common/EnvironmentBanner.scss";
+@import "components/common/SpotlightAction.scss";
 
 @import "components/common/MarkdownText.scss";
 @import "components/common/UserCard.scss";
@@ -11,6 +12,7 @@
 @import "components/common/FeatureCard.scss";
 @import "components/common/TextEditor.scss";
 @import "components/common/CountryFlag.scss";
+@import "components/common/SearchButton.scss";
 
 @import "components/votings/VotingInfo.scss";
 @import "components/votings/VotingCard.scss";
@@ -148,7 +150,8 @@
     }
 
     .mantine-MultiSelect-pill {
-        background-color: var(--mantine-color-primary-9) !important;
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
     }
 
     .mantine-Pagination-control {
@@ -173,6 +176,26 @@
 
     .mantine-Badge-label {
         line-height: normal;
+    }
+
+    .mantine-Code-root {
+        background-color: color-mix(in srgb, var(--mantine-color-primary-11) 80%, transparent);
+    }
+
+    .mantine-Pill-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+    }
+
+    .mantine-Kbd-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+        border-color: var(--mantine-color-primary-light);
+    }
+
+    .mantine-Accordion-item {
+        background-color: var(--mantine-color-primary-10);
+        border: none;
     }
 }
 
@@ -226,8 +249,6 @@ body {
 
 /* Scrollbar */
 html {
-    overflow-y: scroll;
-
     /* Firefox */
     scrollbar-width: thin;
     scrollbar-color: var(--mantine-color-primary-6) var(--mantine-color-primary-11);

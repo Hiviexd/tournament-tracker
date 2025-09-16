@@ -5,6 +5,9 @@ import OsuBotService from "../services/OsuBotService";
 import { IBeatmap, IBeatmapWithNotes } from "../../interfaces/OsuApi";
 import utils from "../../utils";
 
+/**
+ * @deprecated Replaced with ComplianceController
+ */
 class BeatmapsController {
     /** POST check mappool compliance */
     public async checkMappoolCompliance(req: Request, res: Response) {
@@ -64,9 +67,9 @@ class BeatmapsController {
         }
 
         // sort beatmaps in each array by their status
-        allowed = utils.sortBeatmapsByStatus(allowed);
-        partial = utils.sortBeatmapsByStatus(partial);
-        disallowed = utils.sortBeatmapsByStatus(disallowed);
+        allowed = utils.sortBeatmapsByStatus<IBeatmap>(allowed);
+        partial = utils.sortBeatmapsByStatus<IBeatmapWithNotes>(partial);
+        disallowed = utils.sortBeatmapsByStatus<IBeatmap>(disallowed);
 
         res.json({
             message: "Beatmaps checked successfully!",
@@ -78,4 +81,5 @@ class BeatmapsController {
     }
 }
 
+/** @deprecated Replaced with ComplianceController */
 export default new BeatmapsController();

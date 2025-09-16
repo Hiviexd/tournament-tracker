@@ -1,5 +1,6 @@
 import { Session } from "express-session";
 import { IUser } from "./User";
+import { IApiKey } from "./ApiKey";
 
 declare module "express-session" {
     interface Session {
@@ -24,6 +25,9 @@ declare module "express" {
     interface Response {
         locals?: {
             user?: IUser;
+            authMethod?: "session" | "apiKey";
+            apiKey?: IApiKey;
+            isAccessibleViaKey?: boolean;
         };
     }
 }

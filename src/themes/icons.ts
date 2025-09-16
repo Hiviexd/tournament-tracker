@@ -91,6 +91,8 @@ import {
     faUserPen,
     faEnvelope,
     faArrowUp,
+    faArrowDown,
+    faArrowTurnDown,
     faCode,
     faQuoteLeft,
     faMoon,
@@ -103,6 +105,7 @@ import {
     faGhost,
     faFlagCheckered,
     faTableColumns,
+    faKey,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -198,6 +201,8 @@ export default function loadIcons() {
         faUserPen,
         faEnvelope,
         faArrowUp,
+        faArrowDown,
+        faArrowTurnDown,
         faCode,
         faQuoteLeft,
         faMoon,
@@ -210,5 +215,6 @@ export default function loadIcons() {
         faGhost,
         faFlagCheckered,
         faTableColumns,
+        faKey,
     );
 }

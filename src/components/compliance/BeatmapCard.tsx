@@ -1,15 +1,17 @@
 import { Card, Group, Stack, Text, Tooltip, Anchor } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { IBeatmap } from "../../../interfaces/OsuApi";
 import { Link } from "react-router-dom";
+import { IValidationResult } from "../../../interfaces/ComplianceApi";
+import MarkdownText from "../common/MarkdownText";
+import AlertText from "../common/AlertText";
 
 interface BeatmapCardProps {
-    beatmap: IBeatmap;
+    beatmap: IValidationResult;
     notes?: string | null;
 }
 
-export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps) {
+export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
     const getStatusIcon = (status: string): { icon: IconProp; color: string; label: string } => {
         const statusLower = status.toLowerCase();
         switch (statusLower) {
@@ -31,7 +33,7 @@ export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps)
         }
     };
 
-    const statusInfo = getStatusIcon(beatmap.beatmapset.status);
+    const statusInfo = getStatusIcon(beatmap.status);
 
     return (
         <Card
@@ -39,11 +41,11 @@ export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps)
             p="md"
             className="beatmap-card"
             component={Link}
-            to={`${beatmap.url}#${beatmap.mode}/${beatmap.id}`}
+            to={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapsetId}`}
             target="_blank"
             style={
                 {
-                    "--banner-url": `url(${beatmap.beatmapset.covers["card@2x"]})`,
+                    "--banner-url": `url(${beatmap.cover})`,
                 } as React.CSSProperties
             }>
             <div className="beatmap-card-banner" />
@@ -55,28 +57,28 @@ export default function BeatmapCard({ beatmap, notes = null }: BeatmapCardProps)
                         </Text>
                     </Tooltip>
                     <Text size="lg" fw={600} lineClamp={2} style={{ flex: 1 }}>
-                        {beatmap.beatmapset.artist} - {beatmap.beatmapset.title}
+                        {beatmap.artist} - {beatmap.title}
                     </Text>
                 </Group>
                 <Text size="sm" c="dimmed" lineClamp={1}>
                     mapped by{" "}
-                    <Anchor fw={700} href={`https://osu.ppy.sh/users/${beatmap.beatmapset.user_id}`} target="_blank">
-                        {beatmap.beatmapset.creator}
+                    <Anchor fw={700} href={`https://osu.ppy.sh/users/${beatmap.ownerId}`} target="_blank">
+                        {beatmap.ownerUsername}
                     </Anchor>
                 </Text>
 
-                {notes && (
-                    <Text size="sm" c="yellow" lineClamp={2}>
-                        <FontAwesomeIcon icon="circle-info" /> {notes}
-                    </Text>
+                {beatmap.notes && (
+                    <AlertText type="warning" size="sm">
+                        <MarkdownText content={beatmap.notes} size="sm" />
+                    </AlertText>
                 )}
 
-                {["graveyard", "pending", "wip"].includes(beatmap.beatmapset.status) && (
+                {/*["graveyard", "pending", "wip"].includes(beatmap.status) && (
                     <Text size="sm" c="orange" lineClamp={2}>
                         <FontAwesomeIcon icon="triangle-exclamation" /> Graveyard/Pending beatmaps don't always have
                         correct metadata.
                     </Text>
-                )}
+                )*/}
             </Stack>
         </Card>
     );

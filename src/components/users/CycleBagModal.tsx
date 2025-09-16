@@ -54,7 +54,7 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
             ) : (
                 <Stack gap="md">
                     <Group justify="space-between" align="center">
-                        <AlertText type="warning" text="Avoid using this button unless investigating issues" />
+                        <AlertText type="warning">Avoid using this button unless investigating issues.</AlertText>
                         <Button
                             leftSection={<FontAwesomeIcon icon="rotate" />}
                             onClick={handleCycleBag}

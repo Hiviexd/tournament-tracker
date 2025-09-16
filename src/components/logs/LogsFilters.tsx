@@ -47,6 +47,8 @@ export default function LogsFilters({ values, onChange }: IProps) {
         { value: "voting", label: "Voting" },
         { value: "ticket", label: "Ticket" },
         { value: "article", label: "Article" },
+        { value: "resource", label: "Resource" },
+        { value: "api_key", label: "API Key" },
     ];
 
     const typeOptions = [

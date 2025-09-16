@@ -1,7 +1,9 @@
 import { IOsuAuthResponse, IBeatmapWithNotes } from "../interfaces/OsuApi";
+import { IValidationResult } from "../interfaces/ComplianceApi";
 import { IDiscordField } from "../interfaces/Discord";
 import { IAttachment } from "../interfaces/Attachment";
 import moment from "moment";
+import crypto from "crypto";
 
 /**
  * Sets the session with the oauth response
@@ -173,17 +175,23 @@ export function sanitizeBeatmapInput(input: string): Set<number> {
  * @param beatmaps Beatmaps to sort
  * @returns Sorted beatmaps
  */
-export function sortBeatmapsByStatus(beatmaps: IBeatmapWithNotes[]) {
+export function sortBeatmapsByStatus<T extends IBeatmapWithNotes | IValidationResult>(beatmaps: T[]) {
     const statusOrder = ["graveyard", "wip", "pending", "loved", "approved", "qualified", "ranked"];
     return beatmaps.sort((a, b) => {
+        // Extract status and artist based on the type
+        const statusA = "beatmapset" in a ? a.beatmapset.status : a.status;
+        const statusB = "beatmapset" in b ? b.beatmapset.status : b.status;
+        const artistA = "beatmapset" in a ? a.beatmapset.artist : a.artist;
+        const artistB = "beatmapset" in b ? b.beatmapset.artist : b.artist;
+
         // First, sort by status
-        const statusDiff = statusOrder.indexOf(a.beatmapset.status) - statusOrder.indexOf(b.beatmapset.status);
+        const statusDiff = statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
         if (statusDiff !== 0) {
             return statusDiff;
         }
 
         // If statuses are the same, sort by artist
-        return a.beatmapset.artist.localeCompare(b.beatmapset.artist);
+        return artistA.localeCompare(artistB);
     });
 }
 
@@ -260,4 +268,28 @@ export function sanitizeFilename(filename: string): { ascii: string; encoded: st
     const encoded = `UTF-8''${encodeURIComponent(filename.trim())}`;
 
     return { ascii, encoded };
+}
+
+/**
+ * Generates a raw and hashed API key
+ * @param rawKeyOverride Optional raw key to use instead of generating a new one
+ * @returns The raw and hashed API key
+ * @example
+ * generateApiKey("1234567890") // { raw: "1234567890", hashed: "84d898...<sha256 hash>..." }
+ * generateApiKey() // { raw: "randomBase64urlString", hashed: "sha256 hash of it" }
+ */
+export function generateApiKey(rawKeyOverride?: string): { raw: string; hashed: string } {
+    // 32 bytes random -> base64url
+    const raw = rawKeyOverride || crypto.randomBytes(32).toString("base64url");
+    const hashed = crypto.createHash("sha256").update(raw).digest("hex");
+    return { raw, hashed };
+}
+
+/**
+ * Splits a search content into an array of search terms by spaces
+ * @param searchContent The search content to split
+ * @returns An array of search terms
+ */
+export function splitSearchTerms(searchContent: string): string[] {
+    return searchContent.trim().split(/\s+/).filter((term) => term.length > 0);
 }

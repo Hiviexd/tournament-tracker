@@ -21,6 +21,7 @@ import TournamentDetailsPage from "../pages/TournamentDetailsPage";
 import QuotesPage from "../pages/QuotesPage";
 import TemplatesPage from "../pages/TemplatesPage";
 import DashboardPage from "../pages/DashboardPage";
+import ApiKeysPage from "../pages/ApiKeysPage";
 
 interface RouteConfig {
     path: string;
@@ -236,6 +237,13 @@ const routes: RouteConfig[] = [
         title: "Quotes",
         icon: "quote-left",
         permissions: ["committee"],
+    },
+    {
+        path: "/keys",
+        page: <ApiKeysPage />,
+        title: "API Keys",
+        icon: "key",
+        permissions: ["dev"],
     },
     {
         path: "*",

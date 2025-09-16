@@ -3,6 +3,7 @@ import express from "express";
 import TournamentsController from "../controllers/TournamentsController";
 import auth from "../middlewares/auth";
 import { createUploadMiddleware, handleUpload } from "../middlewares/upload";
+import { requireScopes } from "../middlewares/authenticateRequest";
 
 const tournamentsRouter = express.Router();
 
@@ -11,9 +12,9 @@ const tournamentBadgeUpload = createUploadMiddleware({
     allowedTypes: ["image/jpeg", "image/png"],
 });
 
-tournamentsRouter.get("/", auth.optionalAuth, TournamentsController.index);
+tournamentsRouter.get("/", requireScopes(["tournaments:read"]), auth.optionalAuth, TournamentsController.index);
 tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, TournamentsController.create);
-tournamentsRouter.get("/:tournamentId", auth.optionalAuth, TournamentsController.getTournament);
+tournamentsRouter.get("/:tournamentId", requireScopes(["tournaments:read"]), auth.optionalAuth, TournamentsController.getTournament);
 tournamentsRouter.put("/:tournamentId/edit", auth.isLoggedIn, TournamentsController.edit);
 tournamentsRouter.patch(
     "/:tournamentId/assignReviewers",

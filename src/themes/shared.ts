@@ -101,6 +101,11 @@ export const baseComponents: MantineThemeComponents = {
             },
         },
     },
+    Tabs: {
+        defaultProps: {
+            color: "primary.6",
+        },
+    },
     TagsInput: {
         styles: {
             pill: {

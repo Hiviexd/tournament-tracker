@@ -8,6 +8,7 @@ import SettingsModal from "../../modals/SettingsModal";
 import LoginButton from "../buttons/LoginButton";
 import DebugModal from "../../modals/DebugModal";
 import { Link } from "react-router-dom";
+import utils from "../../../../utils";
 
 interface IProps {
     user: IUser | null;
@@ -43,22 +44,26 @@ export default function UserMenu({ user }: IProps) {
                 <Menu.Dropdown>
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>
                     {user.isCommittee && (
-                        <Menu.Item component={Link} to="/dashboard" leftSection={<FontAwesomeIcon icon="table-columns" />}>
+                        <Menu.Item
+                            component={Link}
+                            to="/dashboard"
+                            leftSection={<FontAwesomeIcon icon="table-columns" />}>
                             Dashboard
                         </Menu.Item>
                     )}
-                    <Menu.Item component={Link} to={`/tournaments?host=${user.osuId}&state=all`} leftSection={<FontAwesomeIcon icon="trophy" />}>
+                    <Menu.Item
+                        component={Link}
+                        to={`/tournaments?host=${user.osuId}&state=all`}
+                        leftSection={<FontAwesomeIcon icon="trophy" />}>
                         Your Tournaments
                     </Menu.Item>
                     {user.isCommittee && <Menu.Divider />}
                     <Menu.Item onClick={openCustomize} leftSection={<FontAwesomeIcon icon="palette" />}>
                         Customize Theme
                     </Menu.Item>
-                    {user.isCommittee && (
-                        <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
-                            Settings
-                        </Menu.Item>
-                    )}
+                    <Menu.Item onClick={openSettings} leftSection={<FontAwesomeIcon icon="cog" />}>
+                        Settings
+                    </Menu.Item>
                     {user.isDev && (
                         <Menu.Item onClick={openDebug} leftSection={<FontAwesomeIcon icon="bug" />}>
                             Debug
@@ -66,8 +71,12 @@ export default function UserMenu({ user }: IProps) {
                     )}
                     <Menu.Divider />
                     <Menu.Item
-                        onClick={() => {
-                            window.location.href = "/api/auth/logout";
+                        onClick={async () => {
+                            await utils.apiCall({
+                                method: "post",
+                                url: "/api/auth/logout",
+                            });
+                            window.location.href = "/";
                         }}
                         color="danger"
                         leftSection={<FontAwesomeIcon icon="sign-out-alt" />}>

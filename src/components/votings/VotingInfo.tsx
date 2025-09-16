@@ -129,7 +129,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                 <Text size="sm" mb="sm">
                     Are you sure you want to clear all submitted votes?
                 </Text>
-                <AlertText text="Only use this if you intend to delete the vote afterwards." type="warning" />
+                <AlertText type="warning">Only use this if you intend to delete the vote afterwards.</AlertText>
             </>
         );
         if (

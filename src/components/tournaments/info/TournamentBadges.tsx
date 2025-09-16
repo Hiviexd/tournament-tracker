@@ -224,7 +224,9 @@ export default function TournamentBadges({ tournament }: IProps) {
             </Group>
 
             {user?.isCommitteeOrAdmin && badges.length > 0 && !validateBadges(badges) && (
-                <AlertText size="xs" type="warning" text="Badges need to be re-uploaded to enable the awards manager" />
+                <AlertText size="xs" type="warning">
+                    Badges need to be re-uploaded to enable the awards manager.
+                </AlertText>
             )}
 
             <Group gap="xs" align="start">

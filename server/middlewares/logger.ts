@@ -47,9 +47,14 @@ morgan.token("method-colored", (req) => {
 });
 
 
-morgan.token("username-colored", (req: any) => {
-    const username = req.session?.username || "Unknown";
+morgan.token("username-colored", (req: any, res: any) => {
+    const username = req.session?.username || res.locals?.user?.username || "Unknown";
     return utils.consoleStyles(username, username === "Unknown" ? ["dim"] : ["cyan", "dim"]);
+});
+
+morgan.token("auth-method-colored", (req: any, res: any) => {
+    const authMethod = res.locals?.authMethod || "Unknown";
+    return utils.consoleStyles(authMethod, authMethod === "Unknown" ? ["dim"] : ["magenta", "dim"]);
 });
 
 // Not working due to Cloudflare reverse proxy, I don't wan't to deal with that for now
@@ -63,5 +68,5 @@ export const logger = morgan(
     `:time-colored — :method-colored ${utils.consoleStyles(":url", [
         "yellow",
         "bold",
-    ])} :status-colored — :username-colored — ${utils.consoleStyles(":response-time ms", ["magenta"])}`
+    ])} :status-colored — :username-colored — :auth-method-colored — ${utils.consoleStyles(":response-time ms", ["magenta"])}`
 );

@@ -14,28 +14,22 @@ import {
     Highlight,
     Alert,
     Title,
-    type MantineRadius
+    type MantineRadius,
+    Flex,
+    Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useMappoolCompliance } from "../hooks/useBeatmaps";
-import { IBeatmap } from "../../interfaces/OsuApi";
+import { useValidateBeatmaps } from "../hooks/useComplianceApi";
 import BeatmapCard from "../components/compliance/BeatmapCard";
 import ResultSection from "../components/compliance/ResultSection";
 import MarkdownText from "../components/common/MarkdownText";
+import SignInBanner from "../components/common/SignInBanner";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../store/atoms";
 import utils from "../../utils";
-
-interface IBeatmapWithNotes extends IBeatmap {
-    notes: string | null;
-}
-
-interface ComplianceData {
-    message: string;
-    allowed: IBeatmap[];
-    partial: IBeatmapWithNotes[];
-    disallowed: IBeatmap[];
-    errors: string[];
-}
+import { IValidateBeatmapsResponse, IValidationResult } from "../../interfaces/ComplianceApi";
+import AlertText from "../components/common/AlertText";
 
 interface IProps {
     header?: string;
@@ -43,9 +37,10 @@ interface IProps {
 }
 
 export default function MappoolCompliancePage({ header, radius = "sm" }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const [input, setInput] = useState("");
     const [opened, { close, open }] = useDisclosure(false);
-    const { mutate: checkCompliance, isPending, data } = useMappoolCompliance(input);
+    const { mutate: validateBeatmaps, isPending, data } = useValidateBeatmaps(input);
 
     const infoText = `This tool helps with ensuring your mappool is in compliance with official [tournament support rules](https://osu.ppy.sh/wiki/en/Tournaments/Official_support) regarding which beatmaps may be used in officially-supported osu! tournaments by checking beatmaps against the [osu! content usage permissions](https://osu.ppy.sh/wiki/en/Rules/Content_usage_permissions#artist-permissions).
 
@@ -54,10 +49,10 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
 
     const handleSubmit = () => {
         if (!input.trim()) return;
-        checkCompliance();
+        validateBeatmaps();
     };
 
-    const statusAlert = (complianceData: ComplianceData) => {
+    const statusAlert = (complianceData: IValidateBeatmapsResponse) => {
         if (complianceData.disallowed.length === 0 && complianceData.partial.length === 0) {
             return (
                 <Alert
@@ -117,7 +112,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
         </Stack>
     );
 
-    const complianceData = data as ComplianceData | undefined;
+    const complianceData = data as IValidateBeatmapsResponse | undefined;
 
     return (
         <Stack gap="lg">
@@ -141,7 +136,19 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         </Popover>{" "}
                         (not beatmapset) IDs and/or full URLs into the text area below.
                     </Text>
+                    <AlertText type="info" size="md">
+                        <Text>
+                            If you want to use this tool directly in your mappooling sheet (via the API), consult this{" "}
+                            <Anchor
+                                href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
+                                target="_blank">
+                                wiki page guide
+                            </Anchor>
+                            .
+                        </Text>
+                    </AlertText>
                     <Divider />
+                    {!user && <SignInBanner />}
                     <Textarea
                         label="Beatmap IDs"
                         description="Enter beatmap IDs, and/or URLs. Separators like spaces, commas, and newlines are supported."
@@ -150,6 +157,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         resize="vertical"
                         value={input}
                         onChange={(e) => setInput(e.currentTarget.value)}
+                        disabled={!user}
                     />
                     <Button
                         onClick={handleSubmit}
@@ -171,16 +179,21 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         {statusAlert(complianceData)}
                         {complianceData.errors.length > 0 && (
                             <ResultSection
-                                title="Failed to Check"
+                                title="Failed Checks"
                                 color="gray"
                                 icon="exclamation-triangle"
                                 items={complianceData.errors}
                                 renderItem={(id) => (
-                                    <Card key={id} shadow="sm" p="md" bg="primary.10">
-                                        <Group>
-                                            <FontAwesomeIcon icon="exclamation-triangle" />
-                                            <Text>Failed to fetch beatmap id: {id}</Text>
-                                        </Group>
+                                    <Card key={id} radius="md" shadow="sm" p="md" bg="primary.10">
+                                        <Flex align="flex-start" gap="xs">
+                                            <Text>
+                                                <FontAwesomeIcon
+                                                    icon="exclamation-triangle"
+                                                    color="var(--mantine-color-gray-4)"
+                                                />
+                                            </Text>
+                                            <Text c="gray">Failed to fetch beatmap ID: {id}</Text>
+                                        </Flex>
                                     </Card>
                                 )}
                             />
@@ -190,15 +203,17 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             color="danger"
                             icon="times-circle"
                             items={complianceData.disallowed}
-                            renderItem={(beatmap) => <BeatmapCard key={beatmap.id} beatmap={beatmap} />}
+                            renderItem={(beatmap: IValidationResult) => (
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} />
+                            )}
                         />
                         <ResultSection
                             title="Potentially Disallowed Beatmaps"
                             color="warning"
                             icon="exclamation-circle"
                             items={complianceData.partial}
-                            renderItem={(beatmap) => (
-                                <BeatmapCard key={beatmap.id} beatmap={beatmap} notes={beatmap.notes} />
+                            renderItem={(beatmap: IValidationResult) => (
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} notes={beatmap.notes} />
                             )}
                         />
                         <ResultSection
@@ -206,7 +221,9 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                             color="success"
                             icon="check-circle"
                             items={complianceData.allowed}
-                            renderItem={(beatmap) => <BeatmapCard key={beatmap.id} beatmap={beatmap} />}
+                            renderItem={(beatmap: IValidationResult) => (
+                                <BeatmapCard key={beatmap.beatmapsetId} beatmap={beatmap} />
+                            )}
                         />
                     </Stack>
                 )
