@@ -20,8 +20,6 @@ class GlobalSearchController {
 
             const tournamentSearchQuery = TournamentService.createSearchQuery(searchContent);
 
-            console.log(searchType, searchContent);
-
             // Perform searches based on type
             const [tournaments, votings, tickets, reports, articles, resources] = await Promise.all([
                 GlobalSearchService.searchTournaments(searchType, tournamentSearchQuery),
