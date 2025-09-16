@@ -47,7 +47,7 @@ export default function UsersPage() {
                             variant="light"
                             onClick={openEmailsModal}
                             leftSection={<FontAwesomeIcon icon="envelope" />}>
-                            Show emails list
+                            Emails list
                         </Button>
                         <Button variant="light" onClick={openCycleBag} leftSection={<FontAwesomeIcon icon="rotate" />}>
                             Cycle Assignments
