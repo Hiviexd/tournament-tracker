@@ -47,7 +47,7 @@ export default function LogsTable({ logs }: IProps) {
                                     </Text>
                                 </Table.Td>
                                 <Table.Td>
-                                    <MarkdownText content={log.action} />
+                                    <MarkdownText content={log.action} size="sm" />
                                 </Table.Td>
                             </Table.Tr>
                         ))}
