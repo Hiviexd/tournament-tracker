@@ -1,5 +1,8 @@
 import { ITicket } from "../../interfaces/Ticket";
 import { IUser } from "../../interfaces/User";
+import utils from "../../utils";
+import Message from "../models/messageModel";
+import { IMessage } from "../../interfaces/Message";
 
 class TicketService {
     /**
@@ -21,6 +24,23 @@ class TicketService {
         }
 
         return ticket;
+    }
+
+    /**
+     * Searches for messages by content
+     * @param search The search string to process
+     * @returns An array of message IDs
+     */
+    public async searchMessageContent(search: string): Promise<IMessage[]> {
+        const searchTerms = utils.splitSearchTerms(search);
+
+        const messages = await Message.find({
+            $and: searchTerms.map((term) => ({
+                $or: [{ content: { $regex: term, $options: "i" } }],
+            })),
+        }).distinct("_id");
+
+        return messages;
     }
 }
 

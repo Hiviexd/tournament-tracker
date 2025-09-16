@@ -63,11 +63,7 @@ class TicketsController {
             const searchTerm = needsContentSearch ? (content as string).trim() : (title as string).trim();
 
             // Find messages that match the content search
-            const matchingMessages = await Message.find({
-                content: new RegExp(searchTerm, "i"),
-                isNote: { $ne: true },
-                event: { $exists: false },
-            }).distinct("_id");
+            const matchingMessages = await TicketService.searchMessageContent(searchTerm);
 
             // Find tickets that contain these messages
             if (needsUnifiedSearch) {
