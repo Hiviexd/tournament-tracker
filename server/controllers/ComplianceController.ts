@@ -16,7 +16,10 @@ class ComplianceController {
             return res.status(400).json({ error: "No valid beatmap IDs found" });
         }
 
-        const data = await ComplianceApiService.validateBeatmaps(Array.from(beatmapIds));
+        const user = res.locals!.user!;
+
+        const data = await ComplianceApiService.validateBeatmaps(Array.from(beatmapIds), user);
+
         if ("statusCode" in data) {
             return res.status(data.statusCode).json({ error: `${data.error} — ${data.message}` });
         }

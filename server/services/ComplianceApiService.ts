@@ -1,9 +1,10 @@
 import axios, { AxiosRequestConfig } from "axios";
 import config from "../../config.json";
 import { IComplianceApiResponse } from "../../interfaces/ComplianceApi";
+import { IUser } from "../../interfaces/User";
 
 export default class ComplianceApiService {
-    static async validateBeatmaps(beatmapIds: (string | number)[]) {
+    static async validateBeatmaps(beatmapIds: (string | number)[], user: IUser) {
         if (
             !config.complianceApi ||
             !config.complianceApi.url ||
@@ -30,6 +31,10 @@ export default class ComplianceApiService {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36",
                 "Accept-Language": "en-US,en;q=0.9",
                 "Content-Type": "application/json",
+                "X-User-Meta": JSON.stringify({
+                    osuId: user.osuId,
+                    username: user.username,
+                }),
             },
             data: beatmapIds,
         };
