@@ -23,11 +23,13 @@ class GlobalSearchService {
             return [];
         }
 
+        const effectiveLimit = searchType === "tournament" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
+
         return tournamentSearchQuery.$and
             ? await Tournament.find({ $and: tournamentSearchQuery.$and })
                   .select("_id name type status isActive")
                   .sort({ createdAt: -1 })
-                  .limit(DEFAULT_LIMIT)
+                  .limit(effectiveLimit)
                   .lean()
             : [];
     }
@@ -43,6 +45,8 @@ class GlobalSearchService {
         if (searchType && searchType !== "voting") {
             return [];
         }
+
+        const effectiveLimit = searchType === "voting" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
 
         // split search content by spaces
         const searchTerms = utils.splitSearchTerms(searchContent);
@@ -64,7 +68,7 @@ class GlobalSearchService {
         return await Voting.find(query)
             .select("_id title category isActive duration createdAt assignedGroups")
             .sort({ createdAt: -1 })
-            .limit(DEFAULT_LIMIT);
+            .limit(effectiveLimit);
     }
 
     /**
@@ -74,6 +78,8 @@ class GlobalSearchService {
         if (searchType && searchType !== "ticket") {
             return [];
         }
+
+        const effectiveLimit = searchType === "ticket" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
@@ -95,7 +101,7 @@ class GlobalSearchService {
         })
             .select("_id title isActive assignedGroup")
             .sort({ createdAt: -1 })
-            .limit(DEFAULT_LIMIT)
+            .limit(effectiveLimit)
             .lean();
     }
 
@@ -106,6 +112,8 @@ class GlobalSearchService {
         if (searchType && searchType !== "report") {
             return [];
         }
+
+        const effectiveLimit = searchType === "report" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
@@ -126,7 +134,7 @@ class GlobalSearchService {
         })
             .select("_id title isActive assignedGroup targetUser targetTournamentName")
             .sort({ createdAt: -1 })
-            .limit(DEFAULT_LIMIT)
+            .limit(effectiveLimit)
             .lean();
     }
 
@@ -138,6 +146,8 @@ class GlobalSearchService {
             return [];
         }
 
+        const effectiveLimit = searchType === "article" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
+
         const searchTerms = utils.splitSearchTerms(searchContent);
 
         return await Article.find({
@@ -147,7 +157,7 @@ class GlobalSearchService {
         })
             .select("_id title slug")
             .sort({ createdAt: -1 })
-            .limit(DEFAULT_LIMIT)
+            .limit(effectiveLimit)
             .lean();
     }
 
@@ -159,6 +169,8 @@ class GlobalSearchService {
             return [];
         }
 
+        const effectiveLimit = searchType === "resource" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
+
         const searchTerms = utils.splitSearchTerms(searchContent);
 
         return await Resource.find({
@@ -168,7 +180,7 @@ class GlobalSearchService {
         })
             .select("_id title category link")
             .sort({ createdAt: -1 })
-            .limit(DEFAULT_LIMIT)
+            .limit(effectiveLimit)
             .lean();
     }
 }
