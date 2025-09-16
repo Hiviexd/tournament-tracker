@@ -98,6 +98,12 @@ class ApiKeysController {
         }
         return res.json({ message: "API key revoked!" });
     }
+
+    /** GET all API keys */
+    public async getAll(req: Request, res: Response) {
+        const apiKeys = await ApiKeyService.getAllKeys();
+        return res.json({ apiKeys });
+    }
 }
 
 export default new ApiKeysController();

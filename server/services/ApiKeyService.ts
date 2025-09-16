@@ -112,4 +112,55 @@ export default class ApiKeyService {
         if (found) return found;
         return null;
     }
+
+    /**
+     * Gets all API keys grouped by user
+     * @returns all API keys
+     */
+    static async getAllKeys(): Promise<{ user: IUser; apiKeys: IApiKey[] }[]> {
+        const keys = await ApiKey.find({})
+            .select("-hashedKey")
+            .sort({ lastUsedAt: -1, createdAt: -1 })
+            .populate("user");
+
+        // group results by user, where it's an array of the following object: { user: IUser, apiKeys: IApiKey[] }
+        const groupedByUser = new Map<string, { user: IUser; apiKeys: IApiKey[] }>();
+
+        for (const key of keys) {
+            const userId = key.user._id.toString();
+
+            if (!groupedByUser.has(userId)) {
+                groupedByUser.set(userId, {
+                    user: key.user,
+                    apiKeys: [],
+                });
+            }
+
+            groupedByUser.get(userId)!.apiKeys.push(key);
+        }
+
+        // Sort each user's API keys so active (non-revoked) key comes first
+        const result = Array.from(groupedByUser.values());
+        result.forEach((userGroup) => {
+            userGroup.apiKeys.sort((a, b) => {
+                // Active (non-revoked) keys first
+                const aActive = !a.revokedAt;
+                const bActive = !b.revokedAt;
+
+                if (aActive && !bActive) return -1;
+                if (!aActive && bActive) return 1;
+
+                // If both are same status, sort by lastUsedAt then createdAt (most recent first)
+                if (a.lastUsedAt && b.lastUsedAt) {
+                    return new Date(b.lastUsedAt).getTime() - new Date(a.lastUsedAt).getTime();
+                }
+                if (a.lastUsedAt && !b.lastUsedAt) return -1;
+                if (!a.lastUsedAt && b.lastUsedAt) return 1;
+
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+        });
+
+        return result;
+    }
 }
