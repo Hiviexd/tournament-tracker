@@ -149,6 +149,9 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                     </AlertText>
                     <Divider />
                     {!user && <SignInBanner />}
+                    <Alert color="warning" title="Warning" icon={<FontAwesomeIcon icon="exclamation-triangle" />}>
+                        Tool is temporarily disabled while we investigate some issues — please check back later!
+                    </Alert>
                     <Textarea
                         label="Beatmap IDs"
                         description="Enter beatmap IDs, and/or URLs. Separators like spaces, commas, and newlines are supported."
@@ -157,13 +160,13 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                         resize="vertical"
                         value={input}
                         onChange={(e) => setInput(e.currentTarget.value)}
-                        disabled={!user}
+                        disabled={!user || !user?.isAdmin}
                     />
                     <Button
                         onClick={handleSubmit}
                         loading={isPending}
                         leftSection={<FontAwesomeIcon icon="check" />}
-                        disabled={!input.trim()}>
+                        disabled={!input.trim() || !user || !user?.isAdmin}>
                         Check Compliance
                     </Button>
                 </Stack>
