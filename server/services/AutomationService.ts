@@ -535,27 +535,25 @@ class AutomationService {
             ) {
                 overdueReviews.push({ tournament, daysSinceReview, missingReviewers });
 
-                // If we're on the 3rd ping onwards, ping a random committee member (who's also active)
-                if (daysSinceReview >= 15) {
-                    const targetGroup = tournament.type === "tournament" ? "tc" : "cc";
-                    let thirdUser: IUser | null = null;
+                // Ping a random non-assigned, active committee member for visibility
+                const targetGroup = tournament.type === "tournament" ? "tc" : "cc";
+                let thirdUser: IUser | null = null;
 
-                    const [randomUser]: IUser[] = await User.aggregate([
-                        {
-                            $match: {
-                                groups: targetGroup,
-                                isActiveReviewer: true,
-                                _id: { $nin: tournament.assignedReviewers },
-                            },
+                const [randomUser]: IUser[] = await User.aggregate([
+                    {
+                        $match: {
+                            groups: targetGroup,
+                            isActiveReviewer: true,
+                            _id: { $nin: tournament.assignedReviewers },
                         },
-                        { $sample: { size: 1 } }, // get 1 random user
-                    ]);
+                    },
+                    { $sample: { size: 1 } }, // get 1 random user
+                ]);
 
-                    thirdUser = randomUser ?? null;
+                thirdUser = randomUser ?? null;
 
-                    if (thirdUser) {
-                        usersToPing.push(thirdUser.discordId || thirdUser.username);
-                    }
+                if (thirdUser) {
+                    usersToPing.push(thirdUser.discordId || thirdUser.username);
                 }
 
                 const fields: IDiscordField[] = [
@@ -577,16 +575,13 @@ class AutomationService {
                             "dateTime"
                         )})`,
                     },
-                ];
-
-                if (daysSinceReview >= 15) {
-                    fields.push({
+                    {
                         name: "Note",
-                        value: `This is the third reminder ping onwards. A random committee member(<@${
-                            usersToPing[usersToPing.length - 1]
-                        }>) has been pinged for awareness.`,
-                    });
-                }
+                        value: `A random committee member (<@${
+                            thirdUser?.discordId || thirdUser?.username
+                        }>) has been added to the thread for visibility.`,
+                    },
+                ];
 
                 await DiscordService.sendUserHighlightWebhook({
                     users: usersToPing,
