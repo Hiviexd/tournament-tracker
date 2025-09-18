@@ -93,6 +93,9 @@ jobs:
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
+                      # load .bashrc
+                      source ~/.bashrc
+
                       # Pull latest changes
                       cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
 
