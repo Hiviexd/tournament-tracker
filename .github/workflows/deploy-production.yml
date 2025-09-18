@@ -27,7 +27,7 @@ jobs:
                       echo "skip=false" >> "$GITHUB_OUTPUT"
                   fi
               env:
-                GITHUB_EVENT_HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  GITHUB_EVENT_HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
     deploy:
         needs: check-deploy
@@ -64,10 +64,10 @@ jobs:
                           sudo apt-get install -y nodejs
                       fi
 
-                      # Check Yarn
-                      if ! command -v yarn &> /dev/null; then
-                          echo "Installing Yarn..."
-                          npm install -g yarn
+                      # Check pnpm
+                      if ! command -v pnpm &> /dev/null; then
+                          echo "Installing pnpm..."
+                          npm install -g pnpm
                       fi
 
                       # PM2 check
@@ -115,15 +115,15 @@ jobs:
                       fi
 
                       echo "Installing dependencies..."
-                      yarn install
+                      pnpm install
 
                       # Build both frontend and backend
                       echo "Building project..."
-                      yarn build
+                      pnpm build
 
                       # Reload service
                       echo "Reloading service..."
-                      pm2 reload tcomm || pm2 start "yarn prod" --name tcomm
+                      pm2 reload tcomm || pm2 start "pnpm prod" --name tcomm
 
                       # Ensure it's running
                       sleep 5

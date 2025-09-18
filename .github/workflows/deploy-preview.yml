@@ -62,10 +62,10 @@ jobs:
                           sudo apt-get install -y nodejs
                       fi
 
-                      # Check Yarn
-                      if ! command -v yarn &> /dev/null; then
-                          echo "Installing Yarn..."
-                          npm install -g yarn
+                      # Check pnpm
+                      if ! command -v pnpm &> /dev/null; then
+                          echo "Installing pnpm..."
+                          npm install -g pnpm
                       fi
 
                       # PM2 check
@@ -131,7 +131,7 @@ jobs:
                       fi
 
                       echo "Installing dependencies..."
-                      yarn install
+                      pnpm install
 
                       # Stop pm2 process
                       # needed to avoid memory issues
@@ -140,21 +140,21 @@ jobs:
 
                       # Build frontend
                       echo "Building frontend..."
-                      if ! yarn build-client-preview; then
+                      if ! pnpm build-client-preview; then
                           echo "❌ Frontend build failed!"
                           exit 1
                       fi
 
                       # Build backend
                       echo "Building backend..."
-                      if ! yarn build-server-preview; then
+                      if ! pnpm build-server-preview; then
                           echo "❌ Backend build failed!"
                           exit 1
                       fi
 
                       # Reload service
                       echo "Reloading preview service..."
-                      pm2 reload tcomm-preview || pm2 start "yarn preview" --name tcomm-preview
+                      pm2 reload tcomm-preview || pm2 start "pnpm preview" --name tcomm-preview
 
                       # Ensure it's running
                       sleep 5

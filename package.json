@@ -13,8 +13,8 @@
         "preview-dev-server": "cross-env NODE_ENV=preview ts-node-dev --respawn --transpile-only --no-notify --project server/tsconfig.json server/app.ts",
         "preview": "cross-env NODE_ENV=preview PORT=8089 node ./dist/server/app.js",
         "prod": "cross-env NODE_ENV=production PORT=8088 node ./dist/server/app.js",
-        "build": "yarn build-client && yarn build-server",
-        "build-preview": "yarn build-client-preview && yarn build-server-preview",
+        "build": "pnpm build-client && pnpm build-server",
+        "build-preview": "pnpm build-client-preview && pnpm build-server-preview",
         "build-client": "vite build",
         "build-client-preview": "vite build --mode preview",
         "build-server": "cross-env NODE_ENV=production tsc --project server/tsconfig.json",
@@ -112,5 +112,5 @@
         "vite": "^5.2.0",
         "vitest": "1.6.0"
     },
-    "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+    "packageManager": "pnpm@10.17.0"
 }
