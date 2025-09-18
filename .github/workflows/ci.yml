@@ -15,14 +15,19 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.17.0
+
             - name: Setup Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
+                  cache: "pnpm"
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: pnpm install --frozen-lockfile
 
             - name: Setup config files for CI
               run: |
@@ -30,15 +35,15 @@ jobs:
                   cp checklist.example.json checklist.json
 
             - name: Run ESLint
-              run: yarn lint
+              run: pnpm lint
 
             - name: Run TypeScript check
-              run: yarn tsc
+              run: pnpm tsc
 
             - name: Run tests
-              run: yarn test:run
+              run: pnpm test:run
 
             - name: Build project
               run: |
-                  yarn build-client
-                  yarn build-server
+                  pnpm build-client
+                  pnpm build-server

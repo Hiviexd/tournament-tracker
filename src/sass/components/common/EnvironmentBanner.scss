@@ -1,7 +1,7 @@
-@import "../../mixins.scss";
+@use "../../mixins.scss";
 
 .environment-banner {
-    @include glass-bg(var(--environment-banner-background), false);
+    @include mixins.glass-bg(var(--environment-banner-background), false);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
     position: fixed;

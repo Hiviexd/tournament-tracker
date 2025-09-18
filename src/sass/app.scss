@@ -1,34 +1,34 @@
 /* Components */
 
-@import "Layout.scss";
-@import "components/common/Header.scss";
-@import "components/common/EnvironmentBanner.scss";
-@import "components/common/SpotlightAction.scss";
+@use "Layout.scss";
+@use "components/common/Header.scss";
+@use "components/common/EnvironmentBanner.scss";
+@use "components/common/SpotlightAction.scss";
 
-@import "components/common/MarkdownText.scss";
-@import "components/common/UserCard.scss";
-@import "components/common/GameModeIcon.scss";
-@import "components/common/AttachmentDisplay.scss";
-@import "components/common/FeatureCard.scss";
-@import "components/common/TextEditor.scss";
-@import "components/common/CountryFlag.scss";
-@import "components/common/SearchButton.scss";
+@use "components/common/MarkdownText.scss";
+@use "components/common/UserCard.scss";
+@use "components/common/GameModeIcon.scss";
+@use "components/common/AttachmentDisplay.scss";
+@use "components/common/FeatureCard.scss";
+@use "components/common/TextEditor.scss";
+@use "components/common/CountryFlag.scss";
+@use "components/common/SearchButton.scss";
 
-@import "components/votings/VotingInfo.scss";
-@import "components/votings/VotingCard.scss";
+@use "components/votings/VotingInfo.scss";
+@use "components/votings/VotingCard.scss";
 
-@import "components/tournaments/TournamentCard.scss";
+@use "components/tournaments/TournamentCard.scss";
 
-@import "components/tickets/TicketCard.scss";
-@import "components/tickets/TicketInfo.scss";
+@use "components/tickets/TicketCard.scss";
+@use "components/tickets/TicketInfo.scss";
 
-@import "components/previewer/NewsBannersTab.scss";
-@import "components/previewer/OsuProfile.scss";
-@import "components/previewer/InGameBannersTab.scss";
+@use "components/previewer/NewsBannersTab.scss";
+@use "components/previewer/OsuProfile.scss";
+@use "components/previewer/InGameBannersTab.scss";
 
-@import "components/compliance/BeatmapCard.scss";
+@use "components/compliance/BeatmapCard.scss";
 
-@import "mixins.scss";
+@use "mixins.scss";
 
 /* Fonts */
 
@@ -108,7 +108,7 @@
     }
 
     .mantine-Notification-root {
-        @include glass-bg(var(--notification-color));
+        @include mixins.glass-bg(var(--notification-color));
 
         &:before {
             background-color: var(--mantine-color-white) !important;
