@@ -26,6 +26,11 @@ mongoose.plugin((schema) => {
 const app = express();
 const MongoStore = MongoStoreSession(session);
 
+// Behind Cloudflare (or any reverse proxy), trust the proxy so req.ip and
+// express-rate-limit use the correct client IP from X-Forwarded-For
+// TODO: possibly limit to Cloudflare's IPs only
+app.set("trust proxy", true);
+
 // SEO
 import { handleCrawlers } from "./middlewares/seo";
 
