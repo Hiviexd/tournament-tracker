@@ -12,9 +12,7 @@ export const useVersion = () => {
             }),
         // Disable caching
         gcTime: 0,
-        // Check for updates in the background
         refetchInterval: 3 * 60 * 1000, // Every 3 minutes
-        refetchIntervalInBackground: true,
         // Don't show stale data while refetching
         staleTime: 0,
     });
