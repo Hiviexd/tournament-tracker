@@ -1,4 +1,5 @@
 import rateLimit from "express-rate-limit";
+import { enqueueRateLimitAlert } from "../../utils/rateLimitAlerts";
 
 export const csrfTokenFetchLimiter = rateLimit({
     windowMs: 60 * 1000,
@@ -24,21 +25,39 @@ export const apiKeyManagementLimiter = rateLimit({
 export const sessionRateLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 500, // 500 requests per minute
-    message: { error: "Rate limit exceeded" },
+    message: { error: "Rate limit exceeded! Please wait a minute and try again." },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => {
-        return req.session?.mongoId as string || req.ip || "unknown";
+        return (req.session?.mongoId as string) || req.ip || "unknown";
     },
     skip: (req, res) => res.locals?.authMethod === "apiKey", // skip if API key
+    handler: (req, res, _next, options) => {
+        try {
+            enqueueRateLimitAlert({
+                type: "session",
+                ip: req.ip || "unknown",
+                path: req.originalUrl || req.path || "unknown",
+                method: req.method,
+                identifier: (req.session?.mongoId as string) || undefined,
+                username: req.session?.username || undefined,
+                osuId: req.session?.osuId ? String(req.session.osuId) : undefined,
+            });
+        } catch {
+            console.error("Error enqueuing rate limit alert");
+        }
+        const status = (options as any)?.statusCode ?? 429;
+        const body = (options as any)?.message ?? { error: "Rate limit exceeded! Please wait a minute and try again." };
+        res.status(status).json(body);
+    },
 });
 
 // API key rate limiter
 export const apiKeyRateLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 100, // 100 requests per 10 minutes
-    message: { error: "Rate limit exceeded" },
+    message: { error: "Rate limit exceeded! (>100 requests in 10 minutes)" },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
@@ -46,4 +65,24 @@ export const apiKeyRateLimiter = rateLimit({
         return (req.headers["authorization"] as string) || req.ip || "unknown";
     },
     skip: (req, res) => res.locals?.authMethod !== "apiKey", // apply only to API keys
+    handler: (req, res, _next, options) => {
+        try {
+            const rawAuth = (req.headers["authorization"] as string) || "";
+            const masked = rawAuth ? `${rawAuth.slice(0, 6)}…(${rawAuth.length})` : undefined;
+            enqueueRateLimitAlert({
+                type: "apiKey",
+                ip: req.ip || "unknown",
+                path: req.originalUrl || req.path || "unknown",
+                method: req.method,
+                identifier: masked,
+                username: res.locals?.user?.username || undefined,
+                osuId: res.locals?.user?.osuId ? String(res.locals.user.osuId) : undefined,
+            });
+        } catch {
+            console.error("Error enqueuing rate limit alert");
+        }
+        const status = (options as any)?.statusCode ?? 429;
+        const body = (options as any)?.message ?? { error: "Rate limit exceeded! (>100 requests in 10 minutes)" };
+        res.status(status).json(body);
+    },
 });
