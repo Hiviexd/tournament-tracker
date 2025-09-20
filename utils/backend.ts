@@ -255,17 +255,13 @@ export const consoleStyles = (text: string, styleNames: StyleName[]) => {
  * @returns Object with sanitized ASCII filename and properly encoded UTF-8 version
  */
 export function sanitizeFilename(filename: string): { ascii: string; encoded: string } {
-    // Remove or replace unsafe characters for ASCII version
-    const ascii = filename
-        .trim()
-        // Replace smart quotes and other problematic quotes
-        .replace(/[""'']/g, '"')
-        .replace(/[''’]/g, "'")
-        // Remove leading/trailing underscores and dots
-        .replace(/^[._]+|[._]+$/g, "");
+    const trimmed = filename.trim();
 
-    // Create RFC 5987 encoded version for UTF-8 support
-    const encoded = `UTF-8''${encodeURIComponent(filename.trim())}`;
+    // ASCII-safe fallback: only letters, numbers, -, _, .
+    const ascii = trimmed.replace(/[^a-zA-Z0-9-_.]+/g, "_");
+
+    // RFC 5987 encoded UTF-8 version for headers
+    const encoded = `UTF-8''${encodeURIComponent(trimmed)}`;
 
     return { ascii, encoded };
 }
@@ -291,5 +287,8 @@ export function generateApiKey(rawKeyOverride?: string): { raw: string; hashed: 
  * @returns An array of search terms
  */
 export function splitSearchTerms(searchContent: string): string[] {
-    return searchContent.trim().split(/\s+/).filter((term) => term.length > 0);
+    return searchContent
+        .trim()
+        .split(/\s+/)
+        .filter((term) => term.length > 0);
 }
