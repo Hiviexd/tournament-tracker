@@ -134,6 +134,7 @@ export default function ReportForm() {
         <Stack gap="md">
             <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
                 <MarkdownText
+                    size="sm"
                     content={`Reports are used to notify committee members about concerning behavior from tournament participants or issues with tournament organization.
 
 Reports are **private** and only visible to you and committee members.
