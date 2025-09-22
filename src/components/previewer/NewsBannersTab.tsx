@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Text, Stack, Paper, Center, Button, Modal, Group } from "@mantine/core";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
@@ -32,6 +32,7 @@ export default function NewsBannersTab() {
     const [searchParams] = useSearchParams();
     const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
     const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+    const currentUrlRef = useRef<string | null>(null);
     const [opened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
     // Handle file drop
@@ -86,10 +87,11 @@ export default function NewsBannersTab() {
                     const file = item.getAsFile();
                     if (file) {
                         // Clean up previous URL if it exists
-                        if (currentUrl) {
-                            URL.revokeObjectURL(currentUrl);
+                        if (currentUrlRef.current) {
+                            URL.revokeObjectURL(currentUrlRef.current);
                         }
                         const url = URL.createObjectURL(file);
+                        currentUrlRef.current = url;
                         setCurrentUrl(url);
                         setPreview((prev) => ({
                             ...prev,
@@ -104,26 +106,27 @@ export default function NewsBannersTab() {
 
         window.addEventListener("paste", handlePaste);
         return () => window.removeEventListener("paste", handlePaste);
-    }, [currentUrl, searchParams]);
+    }, [searchParams]);
 
     // Clean up object URLs when component unmounts
     useEffect(() => {
         return () => {
-            if (currentUrl) {
-                URL.revokeObjectURL(currentUrl);
+            if (currentUrlRef.current) {
+                URL.revokeObjectURL(currentUrlRef.current);
             }
         };
-    }, [currentUrl]);
+    }, []);
 
     // Reset to default image
     const handleReset = useCallback(() => {
         // Clean up current URL if it exists
-        if (currentUrl) {
-            URL.revokeObjectURL(currentUrl);
+        if (currentUrlRef.current) {
+            URL.revokeObjectURL(currentUrlRef.current);
+            currentUrlRef.current = null;
             setCurrentUrl(null);
         }
         setPreview(DEFAULT_PREVIEW);
-    }, [currentUrl]);
+    }, []);
 
     const HomepageLoggedInBannerPreview = () => {
         return (
