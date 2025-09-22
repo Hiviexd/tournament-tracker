@@ -34,15 +34,13 @@ export default function InGameBannersTab() {
 
     const [preview, setPreview] = useState<BannerPreview>(DEFAULT_PREVIEW);
 
-    // Update background when mode changes
-    useEffect(() => {
-        if (!preview.isLocalBackground) {
-            setPreview((prev) => ({
-                ...prev,
-                backgroundUrl: isLazer ? defaultLazerBackground : defaultStableBackground,
-            }));
+    // Compute background URL based on current state
+    const backgroundUrl = useMemo(() => {
+        if (preview.isLocalBackground) {
+            return preview.backgroundUrl;
         }
-    }, [isLazer, preview.isLocalBackground]);
+        return isLazer ? defaultLazerBackground : defaultStableBackground;
+    }, [preview.isLocalBackground, preview.backgroundUrl, isLazer]);
 
     // Handle banner drop
     const onBannerDrop = useCallback(
@@ -313,7 +311,7 @@ export default function InGameBannersTab() {
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        backgroundImage: `url(${preview.backgroundUrl})`,
+                        backgroundImage: `url(${backgroundUrl})`,
                         backgroundPosition: "center bottom",
                         backgroundSize: "cover",
                     }}

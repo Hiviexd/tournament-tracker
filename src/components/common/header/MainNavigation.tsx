@@ -2,7 +2,7 @@ import { Menu, Button, Group } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useMemo } from "react";
 import { routes } from "../../../base/header.config";
 import utils from "../../../../utils";
 import { IUser } from "../../../../interfaces/User";
@@ -18,32 +18,22 @@ export default function MainNavigation({ user }: IProps) {
         const mainRoute = routes.find((route) => route.link === location.pathname);
         if (mainRoute) return mainRoute.title;
 
-        const parentByPrefix = routes.find(
-            (route) => route.link && location.pathname.startsWith(route.link)
-        );
+        const parentByPrefix = routes.find((route) => route.link && location.pathname.startsWith(route.link));
         if (parentByPrefix) return parentByPrefix.title;
 
-        const parentByNestedLink = routes.find((route) =>
-            route.links?.some((link) => link.link === location.pathname)
-        );
+        const parentByNestedLink = routes.find((route) => route.links?.some((link) => link.link === location.pathname));
         if (parentByNestedLink) return parentByNestedLink.title;
 
         return null;
     }, [location.pathname]);
 
-    const [selectedRoute, setSelectedRoute] = useState<string | null>(getSelectedRoute());
-
-    useEffect(() => {
-        setSelectedRoute(getSelectedRoute());
-    }, [getSelectedRoute]);
+    const selectedRoute = useMemo(() => getSelectedRoute(), [getSelectedRoute]);
 
     const visibleRoutes = routes
         .filter((route) => utils.hasRequiredPermissions(user, route.permissions))
         .map((route) => ({
             ...route,
-            links: route.links?.filter((link) =>
-                utils.hasRequiredPermissions(user, link.permissions)
-            ),
+            links: route.links?.filter((link) => utils.hasRequiredPermissions(user, link.permissions)),
         }));
 
     return (
@@ -54,9 +44,7 @@ export default function MainNavigation({ user }: IProps) {
                         <Button
                             variant={selectedRoute === route.title ? "light" : "subtle"}
                             rightSection={
-                                route.links && route.links?.length > 0 ? (
-                                    <FontAwesomeIcon icon="caret-down" />
-                                ) : null
+                                route.links && route.links?.length > 0 ? <FontAwesomeIcon icon="caret-down" /> : null
                             }
                             component={route.link ? Link : undefined}
                             to={route.link || "#"}>
@@ -70,9 +58,7 @@ export default function MainNavigation({ user }: IProps) {
                                     key={menuLink.title}
                                     component={Link}
                                     to={menuLink.link || "#"}
-                                    leftSection={
-                                        <FontAwesomeIcon icon={menuLink.icon as IconProp} />
-                                    }>
+                                    leftSection={<FontAwesomeIcon icon={menuLink.icon as IconProp} />}>
                                     {menuLink.title}
                                 </Menu.Item>
                             ))}
