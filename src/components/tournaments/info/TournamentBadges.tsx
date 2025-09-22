@@ -45,7 +45,7 @@ const BadgeImage = ({ badge, index }: { badge: { url: string }; index: number })
 export default function TournamentBadges({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingBadges, setIsEditingBadges] = useState(false);
-    const uploadBadgesMutation = useUploadBadges(tournament._id);
+    const uploadBadgesMutation = useUploadBadges(tournament.id);
     const { files, handleFileChange, clearFiles } = useFileUpload();
     const [awardsManagerOpened, { toggle: toggleAwardsManager }] = useDisclosure(false);
     const [profilePreviewOpened, { open: openProfilePreview, close: closeProfilePreview }] = useDisclosure(false);

@@ -35,7 +35,7 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
 
     const renderUserRows = (users: IUser[]) => {
         return users.map((user) => (
-            <Table.Tr key={user._id}>
+            <Table.Tr key={user.id}>
                 <Table.Td>
                     <UserDisplay user={user} />
                 </Table.Td>

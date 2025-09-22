@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 import { UserGroup, IUser } from "./User";
 import { IVote } from "./Vote";
 import { IAttachment } from "./Attachment";
@@ -52,7 +52,9 @@ export interface IVotingCreateResponse {
     voting: IVoting;
 }
 
-export interface IVoting extends Document {
+export interface IVoting {
+    _id: Types.ObjectId;
+    id: string;
     author: IUser;
     category: VotingCategory;
     assignedGroups: UserGroup[];

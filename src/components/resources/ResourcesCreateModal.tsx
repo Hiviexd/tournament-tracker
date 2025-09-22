@@ -89,7 +89,7 @@ export default function ResourcesCreateModal({ opened, onClose, defaultType = "c
                     <UserSearch
                         label="Author"
                         placeholder="Select optional author..."
-                        onChange={(value) => form.setFieldValue("author", value?.id)}
+                        onChange={(value) => form.setFieldValue("author", value?.id || "")}
                         error={form.errors.author}
                         allowUserCreation
                     />

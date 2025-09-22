@@ -1,6 +1,6 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
-import { VotingQueryParams, VotingListQuery, IVoting } from "../../interfaces/Voting";
+import { VotingQueryParams, VotingListQuery } from "../../interfaces/Voting";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
@@ -23,7 +23,6 @@ const DEFAULT_POPULATE = [
         },
     },
     { path: "targetUser", select: "username osuId groups coverUrl country" },
-    { path: "targetTournament", select: "name" },
     { path: "attachments", select: "originalName url size type" },
     { path: "abstainedUsers", select: "username osuId groups coverUrl country" },
 ];
@@ -82,9 +81,7 @@ class VotingsController {
 
         // Censor votings for non-committee members
         if (!user || !user.isCommitteeOrAdmin) {
-            votings = votings.map((voting) =>
-                VotingService.censorVotingForNonCommittee(voting)
-            ) as unknown as IVoting[];
+            votings = votings.map((voting) => VotingService.censorVotingForNonCommittee(voting));
         }
 
         res.json({
@@ -196,8 +193,8 @@ class VotingsController {
             voting.attachments = await UploadService.handleFileUploads(
                 files,
                 FILE_UPLOAD_CATEGORY,
-                voting._id,
-                author._id
+                voting.id,
+                author.id
             );
         }
 
@@ -286,7 +283,7 @@ class VotingsController {
             return res.status(400).json({ message: "Vote is not active!" });
         }
 
-        if (voting.abstainedUsers?.includes(author._id)) {
+        if (voting.abstainedUsers?.some((abstainedUser) => abstainedUser._id.equals(author._id))) {
             return res.status(400).json({ error: "You are abstained from this vote!" });
         }
 
@@ -381,10 +378,11 @@ class VotingsController {
                 break;
         }
 
-        let vote = voting.votes.find((vote) => vote.author.equals(author._id));
+        const existingVote = voting.votes.find((vote) => vote.author._id.equals(author._id));
+        let vote;
         let isNewVote = false;
 
-        if (!vote) {
+        if (!existingVote) {
             vote = new Vote({
                 author,
                 comment,
@@ -392,11 +390,17 @@ class VotingsController {
             });
             isNewVote = true;
         } else {
-            vote.comment = comment;
-            vote.data = data;
+            // Find and update the existing vote document
+            vote = await Vote.findById(existingVote._id);
+            if (vote) {
+                vote.comment = comment;
+                vote.data = data;
+            }
         }
 
-        await vote.save();
+        if (vote) {
+            await vote.save();
+        }
 
         if (isNewVote) {
             voting.votes.push(vote);
@@ -529,7 +533,7 @@ class VotingsController {
             return res.status(400).json({ error: "Cannot delete voting with votes!" });
         }
 
-        await voting.remove();
+        await voting.deleteOne();
 
         res.json({
             message: "Vote deleted successfully!",
@@ -642,7 +646,7 @@ class VotingsController {
         const user = res.locals!.user!;
 
         // check if user already submitted a vote
-        if (voting.votes.some((vote) => vote.author.equals(user._id))) {
+        if (voting.votes.some((vote) => vote.author._id.equals(user._id))) {
             return res.status(400).json({ error: "You have already submitted a vote!" });
         }
 

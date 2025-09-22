@@ -47,8 +47,8 @@ interface IProps {
 }
 
 export default function VotingForm({ voting, user }: IProps) {
-    const submitVoteMutation = useSubmitVote(voting._id);
-    const toggleAbstentionMutation = useToggleAbstention(voting._id);
+    const submitVoteMutation = useSubmitVote(voting.id);
+    const toggleAbstentionMutation = useToggleAbstention(voting.id);
     const confirmModal = useConfirmModal();
 
     const userVote = voting.votes.find((vote) => vote.author._id === user._id);

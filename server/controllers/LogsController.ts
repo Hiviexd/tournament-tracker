@@ -20,7 +20,7 @@ class LogsController {
 
         if (reqQuery.user && reqQuery.user.length) {
             const userDoc = await User.findByUsernameOrOsuId(reqQuery.user);
-            dbQuery.user = userDoc || null;
+            dbQuery.user = userDoc || undefined;
             dbQuery.isSystemLog = false;
         }
         if (reqQuery.category) dbQuery.category = reqQuery.category;
@@ -32,11 +32,7 @@ class LogsController {
         const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [logs, total] = await Promise.all([
-            Log.find(dbQuery)
-                .skip(skip)
-                .limit(DEFAULT_LIMIT)
-                .sort({ createdAt: -1 })
-                .populate(DEFAULT_POPULATE),
+            Log.find(dbQuery).skip(skip).limit(DEFAULT_LIMIT).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE),
             Log.countDocuments(dbQuery),
         ]);
 

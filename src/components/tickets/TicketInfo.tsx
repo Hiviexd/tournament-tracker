@@ -45,9 +45,9 @@ export default function TicketInfo({ ticket }: IProps) {
     const [threadId, setThreadId] = useState(ticket.threadId);
     const [isUpdatingThreadId, setIsUpdatingThreadId] = useState(false);
 
-    const toggleStatusMutation = useToggleStatus(ticket._id);
-    const updateThreadIdMutation = useUpdateThreadId(ticket._id);
-    const snoozeTicketMutation = useSnoozeTicket(ticket._id);
+    const toggleStatusMutation = useToggleStatus(ticket.id);
+    const updateThreadIdMutation = useUpdateThreadId(ticket.id);
+    const snoozeTicketMutation = useSnoozeTicket(ticket.id);
     const confirmModal = useConfirmModal();
 
     const threadLink = `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId ?? ""}`;

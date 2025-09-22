@@ -7,7 +7,7 @@ interface IProps {
 }
 
 export default function ReviewStats({ user }: IProps) {
-    const { data: stats, isLoading } = useReviewStats(user._id);
+    const { data: stats, isLoading } = useReviewStats(user.id);
 
     if (!user.isCommittee) return null;
 

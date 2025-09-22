@@ -15,7 +15,7 @@ interface IProps {
 
 export default function BadgeManager({ user, committee }: IProps) {
     const [loggedInUser] = useAtom(loggedInUserAtom);
-    const updateBadgeMutation = useUpdateUserBadge(user._id || "");
+    const updateBadgeMutation = useUpdateUserBadge(user.id || "");
 
     const isValidBadge = user.badgeValue > 0 && user.badgeValue <= 10;
     const eligibleBadgeYears = utils.getYearsFromDays(committee === "tc" ? user.tcDuration : user.ccDuration);
@@ -23,7 +23,7 @@ export default function BadgeManager({ user, committee }: IProps) {
     const handleBadgeUpdate = async (increment: boolean) => {
         try {
             await updateBadgeMutation.mutateAsync({
-                userId: user._id,
+                userId: user.id,
                 increment,
             });
         } catch (error) {

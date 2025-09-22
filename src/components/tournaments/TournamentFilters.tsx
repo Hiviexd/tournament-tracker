@@ -129,7 +129,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("state", value)}
                         data={stateOptions}
                         clearable
-                        disabled={viewMode === "review" || searchInput !== ""}
+                        disabled={viewMode === "review" || searchInput !== "" || values.host !== ""}
                     />
                 </SimpleGrid>
 

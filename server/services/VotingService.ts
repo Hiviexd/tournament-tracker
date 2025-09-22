@@ -4,9 +4,10 @@ import { IUser } from "@interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@interfaces/Vote";
 import utils from "../../utils";
+import { Document } from "mongoose";
 
 class VotingService {
-    public censorVotingForNonCommittee(voting: IVoting) {
+    public censorVotingForNonCommittee(voting: Document & IVoting) {
         const publicVoting = voting.toObject();
         publicVoting.author = undefined as unknown as IUser;
         publicVoting.description = "";

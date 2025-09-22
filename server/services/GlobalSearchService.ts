@@ -10,7 +10,6 @@ import { IResource } from "../../interfaces/Resource";
 import Article from "../models/articleModel";
 import { IArticle } from "../../interfaces/Article";
 import utils from "../../utils";
-import { IMessage } from "../../interfaces/Message";
 
 const DEFAULT_LIMIT = 5 as const;
 
@@ -83,11 +82,11 @@ class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
-        let matchingMessages: IMessage[] = [];
+        let messageIds: string[] = [];
 
         // Only search messages if searchType is specified, given this query is kinda expensive
         if (searchType === "ticket") {
-            matchingMessages = await TicketService.searchMessageContent(searchContent);
+            messageIds = await TicketService.searchMessageContent(searchContent);
         }
 
         return await Ticket.find({
@@ -95,7 +94,7 @@ class GlobalSearchService {
             $and: searchTerms.map((term) => ({
                 $or: [
                     { title: { $regex: term, $options: "i" } },
-                    ...(searchType === "ticket" ? [{ messages: { $in: matchingMessages } }] : []),
+                    ...(searchType === "ticket" ? [{ messages: { $in: messageIds } }] : []),
                 ],
             })),
         })
@@ -117,10 +116,10 @@ class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
-        let matchingMessages: IMessage[] = [];
+        let messageIds: string[] = [];
 
         if (searchType === "report") {
-            matchingMessages = await TicketService.searchMessageContent(searchContent);
+            messageIds = await TicketService.searchMessageContent(searchContent);
         }
 
         return await Ticket.find({
@@ -128,7 +127,7 @@ class GlobalSearchService {
             $and: searchTerms.map((term) => ({
                 $or: [
                     { title: { $regex: term, $options: "i" } },
-                    ...(searchType === "report" ? [{ messages: { $in: matchingMessages } }] : []),
+                    ...(searchType === "report" ? [{ messages: { $in: messageIds } }] : []),
                 ],
             })),
         })

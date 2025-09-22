@@ -25,7 +25,7 @@ class ApiKeysController {
             isElevated,
         });
 
-        await LogService.generate(res.locals!.user!._id, `Created API key: **${apiKey.name}**`, "api_key");
+        await LogService.generate(res.locals!.user!.id, `Created API key: **${apiKey.name}**`, "api_key");
 
         await DiscordService.sendWebhook({
             embeds: [
@@ -38,7 +38,9 @@ class ApiKeysController {
             webhook: "dev",
         });
 
-        return res.status(201).json({ message: "API key created!", key: rawKey, apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
+        return res
+            .status(201)
+            .json({ message: "API key created!", key: rawKey, apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
     }
 
     /** GET key metadata (no secret) */
@@ -58,7 +60,7 @@ class ApiKeysController {
 
         const apiKey = await ApiKeyService.updateKey(res.locals!.user!, { scopes });
 
-        await LogService.generate(res.locals!.user!._id, `Updated API key scopes: **${apiKey.name}**`, "api_key");
+        await LogService.generate(res.locals!.user!.id, `Updated API key scopes: **${apiKey.name}**`, "api_key");
 
         await DiscordService.sendWebhook({
             embeds: [
@@ -84,7 +86,7 @@ class ApiKeysController {
     public async revoke(req: Request, res: Response) {
         const result = await ApiKeyService.revokeKey(res.locals!.user!);
         if (result.apiKey && !result.alreadyRevoked) {
-            await LogService.generate(res.locals!.user!._id, `Revoked API key: **${result.apiKey.name}**`, "api_key");
+            await LogService.generate(res.locals!.user!.id, `Revoked API key: **${result.apiKey.name}**`, "api_key");
             await DiscordService.sendWebhook({
                 embeds: [
                     {

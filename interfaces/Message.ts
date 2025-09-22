@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 import { IUser } from "./User";
 import { IAttachment } from "./Attachment";
 
@@ -9,7 +9,9 @@ export interface IMessageFormData extends FormData {
     attachments?: File[];
 }
 
-export interface IMessage extends Document {
+export interface IMessage {
+    _id: Types.ObjectId;
+    id: string;
     author: IUser;
     content: string;
     isCommittee: boolean;

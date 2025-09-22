@@ -23,6 +23,9 @@ mongoose.plugin((schema) => {
     });
 });
 
+// Make queries strict like in v5
+mongoose.set("strictQuery", true);
+
 const app = express();
 const MongoStore = MongoStoreSession(session);
 
@@ -53,12 +56,7 @@ const payloadErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
 app.use(payloadErrorHandler);
 
 // database
-mongoose.connect(config.connection, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-});
+mongoose.connect(config.connection);
 const database = mongoose.connection;
 
 database.on(

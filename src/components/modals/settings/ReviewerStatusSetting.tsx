@@ -5,7 +5,7 @@ import { useToggleReviewerStatus } from "../../../hooks/useUsers";
 
 export default function ReviewerStatusSetting() {
     const [user] = useAtom(loggedInUserAtom);
-    const toggleReviewerMutation = useToggleReviewerStatus(user?._id || "");
+    const toggleReviewerMutation = useToggleReviewerStatus(user?.id || "");
 
     if (!user?.isCommittee) return null;
 

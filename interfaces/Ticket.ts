@@ -1,6 +1,5 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 import { UserGroup, IUser } from "./User";
-import { ITournament } from "./Tournament";
 import { IMessage } from "./Message";
 
 export type TicketType = "ticket" | "report";
@@ -28,7 +27,9 @@ export interface ITicketCreateResponse {
     ticket: ITicket;
 }
 
-export interface ITicket extends Document {
+export interface ITicket {
+    _id: Types.ObjectId;
+    id: string;
     author: IUser;
     type: TicketType;
     assignedGroup: UserGroup;
@@ -36,15 +37,12 @@ export interface ITicket extends Document {
     messages: IMessage[];
     isActive: boolean;
     targetUser?: IUser;
-    targetTournament?: ITournament;
+    targetTournamentName?: string;
+    targetTournamentLink?: string;
     threadId?: string;
     createdAt: Date;
     updatedAt: Date;
     snoozedUntil?: Date;
-
-    // temporary until tournaments model is used
-    targetTournamentName?: string;
-    targetTournamentLink?: string;
 
     // virtuals
     isReport: boolean;

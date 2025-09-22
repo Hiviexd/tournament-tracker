@@ -30,7 +30,7 @@ interface IProps {
 }
 
 export default function VotingEditModal({ voting, opened, onClose }: IProps) {
-    const updateVotingMutation = useUpdateVoting(voting._id);
+    const updateVotingMutation = useUpdateVoting(voting.id);
     const [newOption, setNewOption] = useState("");
     const [editorKey, setEditorKey] = useState(0);
     const hasVotes = voting.votes.length > 0;

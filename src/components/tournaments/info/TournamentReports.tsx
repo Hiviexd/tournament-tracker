@@ -32,7 +32,7 @@ export default function TournamentReports({ reports }: IProps) {
                 )}
                 {reports.map((report) => (
                     <Card
-                        key={report._id}
+                        key={report.id}
                         p="sm"
                         radius="sm"
                         component="a"

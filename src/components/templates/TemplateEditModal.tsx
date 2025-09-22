@@ -15,8 +15,8 @@ interface IProps {
 }
 
 export default function TemplateEditModal({ opened, onClose, template }: IProps) {
-    const updateTemplateMutation = useUpdateTemplate(template?._id || "");
-    const deleteTemplateMutation = useDeleteTemplate(template?._id || "");
+    const updateTemplateMutation = useUpdateTemplate(template?.id || "");
+    const deleteTemplateMutation = useDeleteTemplate(template?.id || "");
     const autoSaveKey = `template-edit-${template?._id || "new"}-content`;
     const confirmModal = useConfirmModal();
 

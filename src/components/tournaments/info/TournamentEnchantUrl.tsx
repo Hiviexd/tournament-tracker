@@ -17,7 +17,7 @@ export default function TournamentEnchantUrl({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingEnchantUrl, setIsEditingEnchantUrl] = useState(false);
     const [enchantUrl, setEnchantUrl] = useState(tournament.enchantUrl || "");
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleEnchantUrlSave = async () => {
         if (!utils.isEnchantTicketLink(enchantUrl)) {

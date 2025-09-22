@@ -20,7 +20,7 @@ export default function TournamentDates({ tournament }: IProps) {
     );
     const [endDate, setEndDate] = useState<Date | null>(tournament.endDate ? new Date(tournament.endDate) : null);
 
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleSaveDates = async () => {
         if (startDate && endDate) {

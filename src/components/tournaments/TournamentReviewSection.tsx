@@ -25,16 +25,16 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     const [reviewer1, setReviewer1] = useState<string>("");
     const [reviewer2, setReviewer2] = useState<string>("");
 
-    const assignReviewersMutation = useAssignReviewers(tournament._id);
-    const reassignReviewerMutation = useReassignReviewer(tournament._id);
+    const assignReviewersMutation = useAssignReviewers(tournament.id);
+    const reassignReviewerMutation = useReassignReviewer(tournament.id);
     const { data: committeeUsers } = useCommitteeUsers();
 
     // Check if current user is a committee member and an assigned reviewer
     const isUserAssignedReviewer =
-        user?.isCommittee && tournament.assignedReviewers?.some((reviewer) => reviewer._id === user._id);
+        user?.isCommittee && tournament.assignedReviewers?.some((reviewer) => reviewer.id === user.id);
 
     // Check if current user is the tournament host
-    const isUserHost = user?._id === tournament.host._id;
+    const isUserHost = user?.id === tournament.host.id;
 
     // Check if current user is a committee member or admin
     const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
@@ -68,17 +68,17 @@ export default function TournamentReviewSection({ tournament }: IProps) {
         const reviewerGroup = tournament.type === "tournament" ? "tc" : "cc";
 
         // Get the current reviewer IDs to exclude
-        const currentReviewerIds = tournament.assignedReviewers?.map((reviewer) => reviewer._id) || [];
+        const currentReviewerIds = tournament.assignedReviewers?.map((reviewer) => reviewer.id) || [];
 
         return committeeUsers
             .filter(
                 (user) =>
                     user.groups.includes(reviewerGroup) &&
-                    !currentReviewerIds.includes(user._id) &&
+                    !currentReviewerIds.includes(user.id) &&
                     user.isActiveReviewer
             )
             .map((user) => ({
-                value: user._id,
+                value: user.id,
                 label: user.username,
             }));
     };
@@ -134,7 +134,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 <Stack gap="md">
                                     <Group gap="md">
                                         {tournament.assignedReviewers.map((reviewer) => (
-                                            <UserCard static key={reviewer._id} user={reviewer} fullWidth={isMobile} />
+                                            <UserCard static key={reviewer.id} user={reviewer} fullWidth={isMobile} />
                                         ))}
                                     </Group>
 
@@ -142,7 +142,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                         <Group>
                                             <Select
                                                 label="Reviewer 1"
-                                                key={tournament.assignedReviewers[0]._id}
+                                                key={tournament.assignedReviewers[0].id}
                                                 placeholder="Select new reviewer"
                                                 data={getCommitteeOptions()}
                                                 value={reviewer1}
@@ -154,7 +154,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                                 color="success"
                                                 onClick={() =>
                                                     handleReassignReviewer(
-                                                        tournament.assignedReviewers![0]._id,
+                                                        tournament.assignedReviewers![0].id,
                                                         reviewer1,
                                                         true
                                                     )
@@ -170,7 +170,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                         <Group>
                                             <Select
                                                 label="Reviewer 2"
-                                                key={tournament.assignedReviewers[1]._id}
+                                                key={tournament.assignedReviewers[1].id}
                                                 placeholder="Select new reviewer"
                                                 data={getCommitteeOptions()}
                                                 value={reviewer2}
@@ -182,7 +182,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                                 color="success"
                                                 onClick={() =>
                                                     handleReassignReviewer(
-                                                        tournament.assignedReviewers![1]._id,
+                                                        tournament.assignedReviewers![1].id,
                                                         reviewer2,
                                                         false
                                                     )
@@ -200,7 +200,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 <Group gap="md">
                                     {/* Reviewer Display */}
                                     {tournament.assignedReviewers.map((reviewer) => (
-                                        <UserCard static key={reviewer._id} user={reviewer} fullWidth={isMobile} />
+                                        <UserCard static key={reviewer.id} user={reviewer} fullWidth={isMobile} />
                                     ))}
                                 </Group>
                             )}
@@ -212,7 +212,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                     <Stack gap="md">
                                         {tournament.reviews.map((review) => (
                                             <TournamentReviewCard
-                                                key={review._id}
+                                                key={review.id}
                                                 tournament={tournament}
                                                 review={review}
                                             />
@@ -246,7 +246,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                             <Title order={4}>Reviews</Title>
                             <Stack gap="md">
                                 {tournament.reviews.map((review) => (
-                                    <TournamentReviewCard key={review._id} tournament={tournament} review={review} />
+                                    <TournamentReviewCard key={review.id} tournament={tournament} review={review} />
                                 ))}
                             </Stack>
                         </>

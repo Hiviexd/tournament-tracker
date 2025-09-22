@@ -17,7 +17,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
         const reviewer = tournament.assignedReviewers?.[reviewerIndex];
         if (!reviewer) return null;
 
-        const review = tournament.reviews.find((r) => r.author?._id === reviewer._id);
+        const review = tournament.reviews.find((r) => r.author?.id === reviewer.id);
         if (!review) {
             return (
                 <Group gap="xs">
@@ -66,10 +66,10 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
                     <Table.Tbody>
                         {sortedTournaments.map((tournament) => {
                             return (
-                                <Table.Tr key={tournament._id}>
+                                <Table.Tr key={tournament.id}>
                                     <Table.Td>
                                         <Text fw={500} truncate>
-                                            <Link to={`/tournaments/${tournament._id}`}>
+                                            <Link to={`/tournaments/${tournament.id}`}>
                                                 {_.truncate(tournament.name, { length: 45 })}
                                             </Link>
                                         </Text>

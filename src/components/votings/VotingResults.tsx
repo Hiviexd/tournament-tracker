@@ -112,7 +112,7 @@ export default function VotingResults({ voting, user }: IProps) {
                                     </Text>
                                     <List ml="md">
                                         {voting.abstainedUsers?.map((user) => (
-                                            <List.Item key={user._id}>
+                                            <List.Item key={user.id}>
                                                 <UserLink user={user} size="sm" />
                                             </List.Item>
                                         ))}
@@ -121,7 +121,7 @@ export default function VotingResults({ voting, user }: IProps) {
                             ) : null}
                             <Stack gap="md">
                                 {filteredVotes.map((vote) => (
-                                    <VoteCard key={vote._id} vote={vote} options={voting.options} />
+                                    <VoteCard key={vote.id} vote={vote} options={voting.options} />
                                 ))}
                             </Stack>
                         </Collapse>

@@ -53,7 +53,7 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                         {tournamentsNeedingReview.length > 0 ? (
                             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                                 {tournamentsNeedingReview.map((tournament) => (
-                                    <TournamentCard key={tournament._id} tournament={tournament} />
+                                    <TournamentCard key={tournament.id} tournament={tournament} />
                                 ))}
                             </SimpleGrid>
                         ) : (
@@ -76,7 +76,7 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                         {otherTournaments.length > 0 ? (
                             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                                 {otherTournaments.map((tournament) => (
-                                    <TournamentCard key={tournament._id} tournament={tournament} />
+                                    <TournamentCard key={tournament.id} tournament={tournament} />
                                 ))}
                             </SimpleGrid>
                         ) : (

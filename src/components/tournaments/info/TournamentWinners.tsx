@@ -21,10 +21,10 @@ export default function TournamentWinners({ tournament }: IProps) {
     const [winners, setWinners] = useState<IUser[]>(tournament.winners || []);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const userSearchRef = useRef<UserSearchRef>(null);
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleSave = async () => {
-        await editTournamentMutation.mutateAsync({ winners: winners.map((winner) => winner._id) });
+        await editTournamentMutation.mutateAsync({ winners: winners.map((winner) => winner) });
         setIsEditing(false);
     };
 
@@ -43,7 +43,7 @@ export default function TournamentWinners({ tournament }: IProps) {
     };
 
     const handleRemoveWinner = (winnerId: string) => {
-        setWinners(winners.filter((w) => w._id !== winnerId));
+        setWinners(winners.filter((w) => w.id !== winnerId));
     };
 
     return (
@@ -98,9 +98,9 @@ export default function TournamentWinners({ tournament }: IProps) {
                         <Pill.Group>
                             {winners.map((winner) => (
                                 <Pill
-                                    key={winner._id}
+                                    key={winner.id}
                                     withRemoveButton
-                                    onRemove={() => handleRemoveWinner(winner._id)}
+                                    onRemove={() => handleRemoveWinner(winner.id)}
                                     styles={{
                                         root: {
                                             backgroundColor: "var(--mantine-color-primary-light)",
@@ -155,7 +155,7 @@ export default function TournamentWinners({ tournament }: IProps) {
                     {winners.length > 0 ? (
                         <List spacing="4" size="sm">
                             {winners.map((winner) => (
-                                <List.Item key={winner._id}>
+                                <List.Item key={winner.id}>
                                     <Text size="sm">
                                         <UserLink user={winner} />
                                     </Text>

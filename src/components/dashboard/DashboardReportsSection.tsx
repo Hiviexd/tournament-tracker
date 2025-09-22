@@ -21,7 +21,7 @@ export default function DashboardReportsSection({ reports }: IProps) {
             {reports.length > 0 ? (
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                     {reports.map((report) => (
-                        <TicketCard key={report._id} ticket={report} />
+                        <TicketCard key={report.id} ticket={report} />
                     ))}
                 </SimpleGrid>
             ) : (

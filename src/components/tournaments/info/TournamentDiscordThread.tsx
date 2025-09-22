@@ -17,7 +17,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [threadId, setThreadId] = useState(tournament.threadId);
     const [isEditingThreadId, setIsEditingThreadId] = useState(false);
-    const updateThreadIdMutation = useUpdateThreadId(tournament._id);
+    const updateThreadIdMutation = useUpdateThreadId(tournament.id);
 
     const handleUpdateThreadId = async () => {
         await updateThreadIdMutation.mutateAsync(threadId ?? "");

@@ -163,7 +163,7 @@ export default function VotingListPage() {
             ) : (
                 <Stack gap="md">
                     {data.votings.map((voting: IVoting) => (
-                        <VotingCard key={voting._id} voting={voting} />
+                        <VotingCard key={voting.id} voting={voting} />
                     ))}
                 </Stack>
             )}

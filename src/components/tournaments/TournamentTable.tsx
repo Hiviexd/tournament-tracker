@@ -54,7 +54,7 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                     <Table.Tbody>
                         {tournaments.map((tournament) => {
                             return (
-                                <Table.Tr key={tournament._id}>
+                                <Table.Tr key={tournament.id}>
                                     <Table.Td>
                                         <TournamentTypeBadge type={tournament.type} />
                                     </Table.Td>

@@ -131,7 +131,7 @@ class ArticlesController {
             return res.status(404).json({ error: "Article not found" });
         }
 
-        await article.remove();
+        await article.deleteOne();
 
         res.json({
             message: "Article deleted successfully",

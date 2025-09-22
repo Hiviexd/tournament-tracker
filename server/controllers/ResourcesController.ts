@@ -112,7 +112,7 @@ class ResourcesController {
             await resource.save();
 
             // Log the creation
-            await LogService.generate(user._id, `Created resource: **${title}**`, "resource");
+            await LogService.generate(user.id, `Created resource: **${title}**`, "resource");
 
             return res.json({
                 resource: resource.populate(DEFAULT_POPULATE),
@@ -155,7 +155,7 @@ class ResourcesController {
             await resource.save();
 
             // Log the edit
-            await LogService.generate(user._id, `Edited resource: **${title}**`, "resource");
+            await LogService.generate(user.id, `Edited resource: **${title}**`, "resource");
 
             return res.json({
                 resource: resource.populate(DEFAULT_POPULATE),
@@ -178,9 +178,9 @@ class ResourcesController {
                 return res.status(404).json({ error: "Resource not found" });
             }
 
-            await resource.delete();
+            await resource.deleteOne();
 
-            await LogService.generate(user._id, `Deleted resource: **${resource.title}**`, "resource");
+            await LogService.generate(user.id, `Deleted resource: **${resource.title}**`, "resource");
 
             return res.json({ message: "Resource deleted successfully!" });
         } catch (error) {

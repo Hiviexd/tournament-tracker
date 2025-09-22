@@ -12,7 +12,7 @@ export default function QuotesPage() {
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
     const { data: quotes = [], isLoading } = useAllQuotes();
-    const createQuoteMutation = useCreateQuote(selectedUser?.id, quote ?? undefined);
+    const createQuoteMutation = useCreateQuote(selectedUser?.id || "", quote);
 
     const LoadingState = () => (
         <ScrollArea>
