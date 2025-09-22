@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 
 interface UseAutoSaveOptions {
@@ -15,29 +15,32 @@ export function clearAutoSavedValue(key: string): void {
     }
 }
 
-export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }: UseAutoSaveOptions) {
+export function useAutoSave({ key, initialValue = "", debounceMs = 500 }: UseAutoSaveOptions) {
     // Try to get saved value from localStorage, fallback to initialValue
-    const [value, setValue] = useState(() => {
+    const [value, setValueInternal] = useState(() => {
         const saved = localStorage.getItem(key);
         return saved ?? initialValue;
     });
-    const [isSaved, setIsSaved] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
+    const [state, setState] = useState({ isSaved: false, isTyping: false });
 
     // Track the last saved value to prevent unnecessary saves
     const lastSavedValueRef = useRef<string | null>(null);
 
     const [debouncedValue] = useDebouncedValue(value, debounceMs);
 
-    // Detect when user is typing (value changes)
-    useEffect(() => {
-        // If value changes and it's different from the last saved value, user is typing
-        if (value !== lastSavedValueRef.current) {
-            setIsTyping(true);
-            // Hide the saved indicator while typing
-            setIsSaved(false);
-        }
-    }, [value]);
+    // Custom setValue that handles state transitions directly
+    const setValue = useCallback(
+        (newValue: string | ((prev: string) => string)) => {
+            const resolvedValue = typeof newValue === "function" ? newValue(value) : newValue;
+            setValueInternal(resolvedValue);
+
+            // If value changes and it's different from the last saved value, user is typing
+            if (resolvedValue !== lastSavedValueRef.current) {
+                setState({ isSaved: false, isTyping: true });
+            }
+        },
+        [value]
+    );
 
     // Save to localStorage when debounced value changes
     useEffect(() => {
@@ -50,28 +53,23 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 500, onSave }
         localStorage.setItem(key, debouncedValue);
         lastSavedValueRef.current = debouncedValue;
 
-        // Call onSave callback if provided
-        onSave?.(debouncedValue);
-
         // Show saved indicator and mark that we're no longer typing
-        setIsSaved(true);
-        setIsTyping(false);
-    }, [debouncedValue, key, onSave]);
+        setState({ isSaved: true, isTyping: false });
+    }, [debouncedValue, key]);
 
     // Clear saved value
-    const clear = () => {
-        setValue("");
+    const clear = useCallback(() => {
+        setValueInternal("");
         clearAutoSavedValue(key);
-        setIsSaved(false);
-        setIsTyping(false);
+        setState({ isSaved: false, isTyping: false });
         lastSavedValueRef.current = null;
-    };
+    }, [key]);
 
     return {
         value,
         setValue,
         clear,
-        isSaved,
-        isTyping,
+        isSaved: state.isSaved,
+        isTyping: state.isTyping,
     };
 }
