@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, Stack, TextInput, Switch, Select, Button, Group, Alert, Title, Divider, Box } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useCreateArticle } from "../hooks/useArticle";
@@ -14,13 +14,9 @@ export default function CreateArticlePage() {
     const { mutate: createArticle, isPending } = useCreateArticle();
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
-    const [isPublic, setIsPublic] = useState(false);
     const [type, setType] = useState<ArticleType>("documentation");
+    const [isPublic] = useState(false);
     const autoSaveKey = "create-article-content";
-
-    useEffect(() => {
-        setIsPublic(type === "resource");
-    }, [type]);
 
     const handleSubmit = () => {
         createArticle(
