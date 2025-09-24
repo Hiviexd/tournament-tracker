@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
 import {
@@ -373,9 +374,10 @@ class TournamentsController {
         if (assignedReviewersType === "cc") {
             // assign all of CC
             if (usersToExclude.length > 0) {
+                const excludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
                 reviewers = await User.find({
                     groups: { $in: ["cc"] },
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: excludeObjectIds },
                 }).sort("username");
             } else {
                 reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
