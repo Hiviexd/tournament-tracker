@@ -32,7 +32,7 @@ export default function TournamentVotings({ votings }: IProps) {
                 )}
                 {votings.map((voting) => (
                     <Card
-                        key={voting._id}
+                        key={voting.id}
                         p="sm"
                         radius="sm"
                         component="a"

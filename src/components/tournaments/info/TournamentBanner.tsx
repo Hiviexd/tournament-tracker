@@ -14,7 +14,7 @@ export default function TournamentBanner({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingBannerUrl, setIsEditingBannerUrl] = useState(false);
     const [bannerUrl, setBannerUrl] = useState(tournament.bannerUrl || "");
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleBannerUrlSave = async () => {
         await editTournamentMutation.mutateAsync({ bannerUrl });
@@ -38,7 +38,7 @@ export default function TournamentBanner({ tournament }: IProps) {
                         title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
-                ) : user?.isCommitteeOrAdmin || tournament.host._id === user?._id ? (
+                ) : user?.isCommitteeOrAdmin || tournament.host.id === user?.id ? (
                     <ActionIcon
                         variant="subtle"
                         onClick={() => setIsEditingBannerUrl(true)}

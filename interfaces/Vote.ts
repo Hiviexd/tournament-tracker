@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 import { IUser } from "./User";
 
 export type VoteType = VariableVote | BinaryVote | ClassicVote | RankedChoiceVote | BinaryStrictVote;
@@ -42,9 +42,12 @@ export interface BinaryStrictVote {
     score: number; // from -1 to 1
 }
 
-export interface IVote extends Document {
+export interface IVote {
+    _id: Types.ObjectId;
+    id: string;
     author: IUser;
     comment?: string;
     data: VoteType;
     createdAt: Date;
+    updatedAt: Date;
 }

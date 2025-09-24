@@ -74,7 +74,7 @@ class AuthController {
         const userLookup = await User.findOne({ osuId: userResponse.id });
         const user = await UserService.createOrUpdateUser(userResponse, userLookup);
 
-        req.session.mongoId = user._id;
+        req.session.mongoId = user.id;
         req.session.osuId = user.osuId;
         req.session.username = user.username;
 

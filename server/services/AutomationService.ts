@@ -284,7 +284,7 @@ class AutomationService {
             .populate("targetUser", "username osuId");
 
         const staleTickets: ITicket[] = [];
-        const ticketsToUpdate: ITicket[] = [];
+        const ticketsToUpdate: any[] = [];
 
         for (const ticket of activeTickets) {
             const now = moment();

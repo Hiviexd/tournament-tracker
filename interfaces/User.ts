@@ -1,5 +1,5 @@
 import { IOsuCountry } from "./OsuApi";
-import { Document, Model, DocumentQuery } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm" | "dev";
 
@@ -27,7 +27,9 @@ export interface UpdateBadgeRequest {
     increment: boolean;
 }
 
-export interface IUser extends Document {
+export interface IUser {
+    _id: Types.ObjectId;
+    id: string;
     osuId: number;
     username: string;
     groups: UserGroup[];
@@ -39,6 +41,8 @@ export interface IUser extends Document {
     country?: IOsuCountry;
     badgeValue: number;
     email?: string;
+    createdAt: Date;
+    updatedAt: Date;
 
     // virtuals
     avatarUrl: string;
@@ -55,5 +59,5 @@ export interface IUser extends Document {
 }
 
 export interface IUserStatics extends Model<IUser> {
-    findByUsernameOrOsuId: (user: string | number) => DocumentQuery<IUser, IUser>;
+    findByUsernameOrOsuId: (user: string | number) => Promise<IUser | null>;
 }

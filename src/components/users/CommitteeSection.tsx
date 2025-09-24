@@ -47,7 +47,7 @@ export default function CommitteeSection({ onSelect, showBadges = false }: IProp
     const UserGrid = ({ users }: { users: IUser[] }) => (
         <Flex wrap="wrap" gap="md" justify="center">
             {users.map((user) => (
-                <UserCard key={user._id} user={user} onSelect={onSelect} showBadges={showBadges} />
+                <UserCard key={user.id} user={user} onSelect={onSelect} showBadges={showBadges} />
             ))}
         </Flex>
     );

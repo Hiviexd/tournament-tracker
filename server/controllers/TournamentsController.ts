@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
 import {
@@ -121,8 +122,8 @@ class TournamentsController {
             query.isActive = true;
         }
 
-        // if search is not empty, remove query.isActive; we want to show all tournaments
-        if (search) delete query.isActive;
+        // if search or host is not empty, remove query.isActive; we want to show all tournaments
+        if (search || host) delete query.isActive;
 
         if (showAllAssignedReviews === "true" && user && user.isCommittee) {
             if (query.$and) {
@@ -286,7 +287,7 @@ class TournamentsController {
         res.json({ message: "Tournament created successfully!", tournament });
 
         // logging
-        await LogService.generate(currentUser._id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
+        await LogService.generate(currentUser.id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
         await TournamentService.addTournamentLog(
             tournament,
             currentUser,
@@ -373,9 +374,10 @@ class TournamentsController {
         if (assignedReviewersType === "cc") {
             // assign all of CC
             if (usersToExclude.length > 0) {
+                const excludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
                 reviewers = await User.find({
                     groups: { $in: ["cc"] },
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: excludeObjectIds },
                 }).sort("username");
             } else {
                 reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
@@ -399,7 +401,7 @@ class TournamentsController {
         );
 
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Assigned reviewers to **${tournament.name}**: ${reviewers
                 .map((r) => `[**${r.username}**](${r.osuProfileUrl})`)
                 .join(", ")}`,
@@ -449,7 +451,7 @@ class TournamentsController {
 
         // allow tournamenthosts to only edit banner
         let actioner = currentUser;
-        if (!actioner.isCommittee && tournament.host.equals(currentUser)) {
+        if (!actioner.isCommittee && tournament.host._id.equals(currentUser._id)) {
             actioner = tournament.host;
 
             if (forumUrl || startDate || endDate || status || isActive || winners) {
@@ -495,7 +497,7 @@ class TournamentsController {
                 `Updated forum URL: **${forumUrl}**`,
                 "link"
             );
-            await LogService.generate(currentUser._id, `Updated forum URL for **${tournament.name}**`, "tournament");
+            await LogService.generate(currentUser.id, `Updated forum URL for **${tournament.name}**`, "tournament");
         }
 
         if (enchantUrl) {
@@ -506,7 +508,7 @@ class TournamentsController {
                 "link"
             );
             await LogService.generate(
-                currentUser._id,
+                currentUser.id,
                 `Updated Enchant ticket URL for **${tournament.name}**`,
                 "tournament"
             );
@@ -522,7 +524,7 @@ class TournamentsController {
                 "calendar"
             );
             await LogService.generate(
-                currentUser._id,
+                currentUser.id,
                 `Updated start and end date for **${tournament.name}**`,
                 "tournament"
             );
@@ -535,12 +537,12 @@ class TournamentsController {
                 `Updated tags: ${tags.map((tag: string) => `\`${tag}\``).join(", ")}`,
                 "tag"
             );
-            await LogService.generate(actioner._id, `Updated tags for **${tournament.name}**`, "tournament");
+            await LogService.generate(actioner.id, `Updated tags for **${tournament.name}**`, "tournament");
         }
 
         if (bannerUrl) {
             await TournamentService.addTournamentLog(tournament, actioner, `Updated banner`, "image");
-            await LogService.generate(actioner._id, `Updated banner for **${tournament.name}**`, "tournament");
+            await LogService.generate(actioner.id, `Updated banner for **${tournament.name}**`, "tournament");
         }
 
         if (winners) {
@@ -555,7 +557,7 @@ class TournamentsController {
                     .join(", ")}`,
                 "trophy"
             );
-            await LogService.generate(currentUser._id, `Updated winners for **${tournament.name}**`, "tournament");
+            await LogService.generate(currentUser.id, `Updated winners for **${tournament.name}**`, "tournament");
         }
 
         if (status) {
@@ -566,7 +568,7 @@ class TournamentsController {
                 `Updated status to **${_.startCase(status)}**`,
                 "flag"
             );
-            await LogService.generate(currentUser._id, `Updated status for **${tournament.name}**`, "tournament");
+            await LogService.generate(currentUser.id, `Updated status for **${tournament.name}**`, "tournament");
 
             // osu! message
             let message = `The official support status of your tournament **${
@@ -643,11 +645,7 @@ class TournamentsController {
                 `${isActive ? "Unarchived" : "Archived"} tournament`,
                 "archive"
             );
-            await LogService.generate(
-                currentUser._id,
-                `Updated active status for **${tournament.name}**`,
-                "tournament"
-            );
+            await LogService.generate(currentUser.id, `Updated active status for **${tournament.name}**`, "tournament");
 
             // Discord
             const embed = {
@@ -743,7 +741,7 @@ class TournamentsController {
         );
 
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Reassigned reviewer for **${tournament.name}** from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
             "tournament"
         );
@@ -804,7 +802,7 @@ class TournamentsController {
             return res.status(400).json({ error: "Invalid checklist" });
         }
 
-        let review = tournament.reviews.find((review) => review.author!.equals(res.locals!.user!._id));
+        let review = tournament.reviews.find((review) => review.author!._id.equals(res.locals!.user!._id));
         let isNewReview = false;
 
         if (!review) {
@@ -833,7 +831,7 @@ class TournamentsController {
         if (isNewReview) {
             // logging
             await TournamentService.addTournamentLog(tournament, currentUser, `Submitted review`, "check-to-slot");
-            await LogService.generate(currentUser._id, `Submitted review for **${tournament.name}**`, "tournament");
+            await LogService.generate(currentUser.id, `Submitted review for **${tournament.name}**`, "tournament");
         }
 
         // Discord
@@ -939,8 +937,8 @@ class TournamentsController {
             note.attachments = await UploadService.handleFileUploads(
                 invalidFiles.map((item) => item.file),
                 FILE_UPLOAD_CATEGORY,
-                tournament._id,
-                currentUser._id
+                tournament.id,
+                currentUser.id
             );
 
             await note.save();
@@ -954,7 +952,7 @@ class TournamentsController {
                 "sticky-note"
             );
             await LogService.generate(
-                currentUser._id,
+                currentUser.id,
                 `Created note for failed badge uploads for **${tournament.name}**`,
                 "tournament"
             );
@@ -989,15 +987,15 @@ class TournamentsController {
             const badges = await UploadService.handleFileUploads(
                 validFiles,
                 FILE_UPLOAD_CATEGORY,
-                tournament._id,
-                currentUser._id
+                tournament.id,
+                currentUser.id
             );
 
             tournament.badges = badges;
 
             // logging for successful uploads
             await TournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
-            await LogService.generate(currentUser._id, `Uploaded badges for **${tournament.name}**`, "tournament");
+            await LogService.generate(currentUser.id, `Uploaded badges for **${tournament.name}**`, "tournament");
         }
 
         await tournament.save();
@@ -1139,7 +1137,7 @@ class TournamentsController {
                 "link"
             );
             await LogService.generate(
-                currentUser._id,
+                currentUser.id,
                 `Updated Discord thread ID for **${tournament.name}**`,
                 "tournament"
             );
@@ -1188,8 +1186,8 @@ class TournamentsController {
             note.attachments = await UploadService.handleFileUploads(
                 files,
                 FILE_UPLOAD_CATEGORY,
-                tournament._id,
-                currentUser._id
+                tournament.id,
+                currentUser.id
             );
         }
 
@@ -1202,7 +1200,7 @@ class TournamentsController {
 
         // logging
         await TournamentService.addTournamentLog(tournament, currentUser, `Created note`, "sticky-note");
-        await LogService.generate(currentUser._id, `Created note for **${tournament.name}**`, "tournament");
+        await LogService.generate(currentUser.id, `Created note for **${tournament.name}**`, "tournament");
 
         // Discord
         const fields: IDiscordField[] = [

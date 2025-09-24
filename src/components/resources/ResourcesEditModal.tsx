@@ -14,8 +14,8 @@ interface IProps {
 }
 
 export default function ResourcesEditModal({ opened, onClose, resource }: IProps) {
-    const updateResourceMutation = useUpdateResource(resource?._id || "");
-    const deleteResourceMutation = useDeleteResource(resource?._id || "");
+    const updateResourceMutation = useUpdateResource(resource?.id || "");
+    const deleteResourceMutation = useDeleteResource(resource?.id || "");
     const confirmModal = useConfirmModal();
 
     const form = useForm({
@@ -117,7 +117,7 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
                     <UserSearch
                         label="Author"
                         placeholder="Input new author..."
-                        onChange={(value) => form.setFieldValue("author", value?.id)}
+                        onChange={(value) => form.setFieldValue("author", value?.id || "")}
                         error={form.errors.author}
                         allowUserCreation
                     />

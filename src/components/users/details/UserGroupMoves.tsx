@@ -8,12 +8,12 @@ interface IProps {
 }
 
 export default function UserGroupMoves({ user }: IProps) {
-    const updateUserGroupsMutation = useUpdateUserGroups(user._id || "");
+    const updateUserGroupsMutation = useUpdateUserGroups(user.id || "");
 
     const handleMove = async (group: string, join: boolean) => {
         try {
             await updateUserGroupsMutation.mutateAsync({
-                userId: user._id,
+                userId: user.id,
                 group,
                 join,
             });

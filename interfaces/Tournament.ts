@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 import { IUser } from "./User";
 import { IAttachment } from "./Attachment";
 import { IReview } from "./Review";
@@ -20,7 +20,7 @@ export type TournamentStatus =
 
 export interface TournamentQueryParams {
     modes?: { $in: GameMode[] };
-    host?: IUser;
+    host?: Types.ObjectId;
     type?: TournamentType;
     status?: TournamentStatus;
     isActive?: boolean;
@@ -51,7 +51,9 @@ export interface ITournamentCreateResponse {
     tournament: ITournament;
 }
 
-export interface ITournament extends Document {
+export interface ITournament {
+    _id: Types.ObjectId;
+    id: string;
     name: string;
     modes: GameMode[];
     startDate: Date | null;

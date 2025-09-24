@@ -24,7 +24,7 @@ export default function UserCard({
 
     return (
         <Card
-            key={user._id}
+            key={user.id}
             shadow="sm"
             p="md"
             bg="primary.10"

@@ -158,7 +158,7 @@ class TicketsController {
         }
 
         // Case 2: If it's a report, only allow access to admins, committee members, or the author
-        if (!ticket.isTicket && user && !(user.isCommitteeOrAdmin || ticket.author.equals(user._id))) {
+        if (!ticket.isTicket && user && !(user.isCommitteeOrAdmin || ticket.author._id.equals(user._id))) {
             return res.status(403).json({ error: "Not authorized to view this ticket" });
         }
 
@@ -248,17 +248,17 @@ class TicketsController {
         initialMessage.attachments = await UploadService.handleFileUploads(
             files,
             FILE_UPLOAD_CATEGORY,
-            ticket._id,
-            author._id
+            ticket.id,
+            author.id
         );
 
         await initialMessage.save();
-        ticket.messages.push(initialMessage._id);
+        ticket.messages.push(initialMessage.id);
         await ticket.save();
 
         // Logger
         await LogService.generate(
-            author._id,
+            author.id,
             `Created a new ${type}: [**${ticket.title}**](${config.baseUrl}/${type}s/${ticket._id})`,
             "ticket"
         );
@@ -322,7 +322,7 @@ class TicketsController {
         const files = req.files as Express.Multer.File[];
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
-        const senderIsTicketAuthor = ticket.author.id === currentUser.id;
+        const senderIsTicketAuthor = ticket.author._id.equals(currentUser._id);
 
         // Authorization checks
         if (!currentUser.isCommittee && !senderIsTicketAuthor) {
@@ -349,12 +349,12 @@ class TicketsController {
         newMessage.attachments = await UploadService.handleFileUploads(
             files,
             FILE_UPLOAD_CATEGORY,
-            ticket._id,
-            currentUser._id
+            ticket.id,
+            currentUser.id
         );
 
         await newMessage.save();
-        ticket.messages.push(newMessage._id);
+        ticket.messages.push(newMessage.id);
 
         // unsnooze ticket
         if (ticket.snoozedUntil) {
@@ -398,7 +398,7 @@ class TicketsController {
 
         // Logger
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket"
         );
@@ -461,7 +461,7 @@ class TicketsController {
         });
 
         await eventMessage.save();
-        ticket.messages.push(eventMessage._id);
+        ticket.messages.push(eventMessage.id);
 
         await ticket.save();
 
@@ -472,7 +472,7 @@ class TicketsController {
 
         // Logger
         await LogService.generate(
-            user._id,
+            user.id,
             `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${
                 ticket.type
             }s/${ticket._id})`,
@@ -514,7 +514,7 @@ class TicketsController {
 
             // Logger
             await LogService.generate(
-                user._id,
+                user.id,
                 `Updated thread ID for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${
                     ticket._id
                 }) to "${threadId ?? "t-committee"}"`,
@@ -558,7 +558,7 @@ class TicketsController {
 
         // Logger
         await LogService.generate(
-            user._id,
+            user.id,
             `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket"
         );

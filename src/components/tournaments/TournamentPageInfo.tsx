@@ -30,8 +30,8 @@ interface IProps {
 
 export default function TournamentPageInfo({ tournament, reports, votings }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const editTournamentMutation = useEditTournament(tournament._id);
-    const deleteTournamentMutation = useDeleteTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
+    const deleteTournamentMutation = useDeleteTournament(tournament.id);
     const navigate = useNavigate();
     const confirmModal = useConfirmModal();
 

@@ -14,7 +14,7 @@ export default function TournamentTags({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingTags, setIsEditingTags] = useState(false);
     const [tags, setTags] = useState(tournament.tags || []);
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleTagsSave = async () => {
         const lowerCaseTags = tags.map((tag) => tag.toLowerCase());

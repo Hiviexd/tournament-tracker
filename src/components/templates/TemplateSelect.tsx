@@ -62,7 +62,7 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
     const options = filteredAndGroupedTemplates.map(({ category, templates }) => (
         <Combobox.Group label={category} key={category}>
             {templates.map((template) => (
-                <Combobox.Option key={template._id} value={template._id} onClick={() => handleTemplateSelect(template)}>
+                <Combobox.Option key={template.id} value={template.id} onClick={() => handleTemplateSelect(template)}>
                     <HoverCard position="left" shadow="md" offset={11} withArrow>
                         <HoverCard.Target>
                             <Box>

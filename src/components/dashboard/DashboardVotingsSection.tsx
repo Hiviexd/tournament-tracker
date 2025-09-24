@@ -57,7 +57,7 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                         {votingsNeedingVote.length > 0 ? (
                             <Stack gap="md">
                                 {votingsNeedingVote.map((voting) => (
-                                    <VotingCard key={voting._id} voting={voting} />
+                                    <VotingCard key={voting.id} voting={voting} />
                                 ))}
                             </Stack>
                         ) : (
@@ -80,7 +80,7 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                         {otherVotings.length > 0 ? (
                             <Stack gap="md">
                                 {otherVotings.map((voting) => (
-                                    <VotingCard key={voting._id} voting={voting} />
+                                    <VotingCard key={voting.id} voting={voting} />
                                 ))}
                             </Stack>
                         ) : (

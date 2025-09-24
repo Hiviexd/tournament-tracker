@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function DiscordIdSetting() {
     const [user] = useAtom(loggedInUserAtom);
     const [discordId, setDiscordId] = useState(user?.discordId || "");
-    const updateDiscordId = useUpdateDiscordId(user?._id || "");
+    const updateDiscordId = useUpdateDiscordId(user?.id || "");
 
     const handleSubmit = async () => {
         try {

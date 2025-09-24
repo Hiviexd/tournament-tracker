@@ -287,7 +287,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     {form.values.category === "user" && (
                         <UserSearch
                             label="Target User"
-                            onChange={(value) => form.setFieldValue("targetUserId", value?.id)}
+                            onChange={(value) => form.setFieldValue("targetUserId", value?.id || "")}
                             error={form.errors.targetUserId}
                             required
                             allowUserCreation

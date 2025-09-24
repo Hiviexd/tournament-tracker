@@ -286,7 +286,7 @@ export default function TournamentListPage() {
                     ) : (
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                             {data.tournaments.map((tournament: ITournament) => (
-                                <TournamentCard key={tournament._id} tournament={tournament} />
+                                <TournamentCard key={tournament.id} tournament={tournament} />
                             ))}
                         </SimpleGrid>
                     )}

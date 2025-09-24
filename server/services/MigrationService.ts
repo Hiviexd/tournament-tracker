@@ -97,7 +97,7 @@ class MigrationService {
                     $push: { votes: newVote._id },
                 });
 
-                console.log(`Migrated vote by ${user.username} for voting ${voting.title}`);
+                console.log(`Migrated vote by ${user?.username} for voting ${voting.title}`);
             }
 
             console.log(`Migrated voting ${voting.title}`);
@@ -212,7 +212,7 @@ class MigrationService {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge._id);
+                    badgeIds.push(badge._id as any);
                 }
                 if (row.BADGE2) {
                     const badge2 = await new Attachment({
@@ -225,7 +225,7 @@ class MigrationService {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge2._id);
+                    badgeIds.push(badge2._id as any);
                 }
                 if (row.BADGE3) {
                     const badge3 = await new Attachment({
@@ -238,7 +238,7 @@ class MigrationService {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge3._id);
+                    badgeIds.push(badge3._id as any);
                 }
 
                 // Update tournament with badges
@@ -276,7 +276,7 @@ class MigrationService {
                         checklist: this.constructChecklist(row.TYPE),
                         createdAt,
                     }).save();
-                    reviews.push(review1._id);
+                    reviews.push(review1._id as any);
                     console.log(`Migrated review 1 for ${row["T-NAME"]}`);
                 }
                 if (row["P2 VERDICT"] && assignedReviewers[1]) {
@@ -286,7 +286,7 @@ class MigrationService {
                         checklist: this.constructChecklist(row.TYPE),
                         createdAt,
                     }).save();
-                    reviews.push(review2._id);
+                    reviews.push(review2._id as any);
                     console.log(`Migrated review 2 for ${row["T-NAME"]}`);
                 }
 

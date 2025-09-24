@@ -51,10 +51,10 @@ interface IProps {
 export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [descriptionType, setDescriptionType] = useState<"private" | "public">("private");
-    const toggleStatusMutation = useToggleVotingStatus(voting._id);
-    const togglePublicMutation = useToggleVotingPublic(voting._id);
-    const deleteVotingMutation = useDeleteVoting(voting._id);
-    const clearVotesMutation = useClearVotes(voting._id);
+    const toggleStatusMutation = useToggleVotingStatus(voting.id);
+    const togglePublicMutation = useToggleVotingPublic(voting.id);
+    const deleteVotingMutation = useDeleteVoting(voting.id);
+    const clearVotesMutation = useClearVotes(voting.id);
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
 
@@ -294,7 +294,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     </Text>
                                     <Group gap="sm">
                                         {voting.attachments.map((attachment) => (
-                                            <AttachmentDisplay key={attachment._id} attachment={attachment} />
+                                            <AttachmentDisplay key={attachment.id} attachment={attachment} />
                                         ))}
                                     </Group>
                                 </Stack>
@@ -319,6 +319,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 color="warning"
                                 onClick={handleToggleStatus}
                                 loading={toggleStatusMutation.isPending}
+                                disabled={!voting.isActive && voting.isPublic}
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
                                 {voting.isActive ? "Conclude" : "Reopen"}
                             </Button>

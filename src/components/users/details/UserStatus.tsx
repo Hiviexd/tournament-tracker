@@ -8,11 +8,11 @@ interface IProps {
 }
 
 export default function UserStatus({ user }: IProps) {
-    const syncUserMutation = useSyncUser(user._id || "");
+    const syncUserMutation = useSyncUser(user.id || "");
 
     const handleSync = async () => {
         try {
-            await syncUserMutation.mutateAsync(user._id);
+            await syncUserMutation.mutateAsync();
         } catch (error) {
             console.error("Failed to sync user: " + error);
         }

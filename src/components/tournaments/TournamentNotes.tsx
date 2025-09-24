@@ -25,7 +25,7 @@ export default function TournamentNotes({ tournament }: IProps) {
     const [submissionCount, setSubmissionCount] = useState(0);
     const [opened, { toggle }] = useDisclosure(false);
     const { files, handleFileChange, clearFiles } = useFileUpload();
-    const createNoteMutation = useCreateNote(tournament._id);
+    const createNoteMutation = useCreateNote(tournament.id);
     const autoSaveKey = `tournament-note-${tournament._id}`;
 
     const validateNote = (note: string): string | null => {
@@ -85,11 +85,11 @@ export default function TournamentNotes({ tournament }: IProps) {
                 {tournament.notes && tournament.notes.length > 0 ? (
                     <Stack gap="md">
                         {tournament.notes.map((note) => (
-                            <TicketMessage key={note._id} message={note} showTrueAuthor={true} />
+                            <TicketMessage key={note.id} message={note} showTrueAuthor={true} />
                         ))}
                     </Stack>
                 ) : (
-                    <Text key={tournament._id} c="dimmed" size="sm" fs="italic">
+                    <Text key={tournament.id} c="dimmed" size="sm" fs="italic">
                         No notes yet...
                     </Text>
                 )}
@@ -109,7 +109,7 @@ export default function TournamentNotes({ tournament }: IProps) {
                                     <TextLengthIndicator length={content.length} maxLength={8000} />
                                 </Box>
                                 <TextEditor
-                                    key={`${tournament._id}-${submissionCount}`}
+                                    key={`${tournament.id}-${submissionCount}`}
                                     value={content}
                                     onChange={handleContentChange}
                                     placeholder="Type your note..."

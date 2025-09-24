@@ -10,8 +10,10 @@ import { Types } from "mongoose";
  * @returns A mock user object with default values and overrides applied
  */
 export function createMockUser(overrides: Partial<IUser> = {}): IUser {
+    const _id = new Types.ObjectId();
     const defaultUser = {
-        _id: new Types.ObjectId(),
+        _id,
+        id: _id.toString(),
         osuId: Math.floor(Math.random() * 1000000) + 1000,
         username: `TestUser${Math.floor(Math.random() * 1000)}`,
         groups: ["user"] as UserGroup[],
@@ -24,6 +26,8 @@ export function createMockUser(overrides: Partial<IUser> = {}): IUser {
             name: "United States",
         } as IOsuCountry,
         coverUrl: "https://example.com/cover.jpg",
+        createdAt: new Date(),
+        updatedAt: new Date(),
 
         // Mock virtuals
         avatarUrl: "https://example.com/avatar.jpg",

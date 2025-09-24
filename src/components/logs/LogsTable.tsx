@@ -25,7 +25,7 @@ export default function LogsTable({ logs }: IProps) {
                     </Table.Thead>
                     <Table.Tbody>
                         {logs.map((log) => (
-                            <Table.Tr key={log._id}>
+                            <Table.Tr key={log.id}>
                                 <Table.Td>
                                     <Tooltip label={moment(log.createdAt).format("LLL")}>
                                         <span>{moment(log.createdAt).fromNow()}</span>

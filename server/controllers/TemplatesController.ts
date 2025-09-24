@@ -42,7 +42,7 @@ class TemplatesController {
 
         // Logger
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Created template **${template.name}** in category **${template.category}**`,
             "ticket"
         );
@@ -86,7 +86,7 @@ class TemplatesController {
 
         // Logger
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Updated template **${template.name}** in category **${template.category}**`,
             "ticket"
         );
@@ -99,7 +99,7 @@ class TemplatesController {
 
         const template = await Template.findById(id).orFail();
 
-        await template.remove();
+        await template.deleteOne();
 
         res.json({
             message: "Template deleted successfully!",
@@ -107,7 +107,7 @@ class TemplatesController {
 
         // Logger
         await LogService.generate(
-            currentUser._id,
+            currentUser.id,
             `Deleted template **${template.name}** from category **${template.category}**`,
             "ticket"
         );

@@ -110,7 +110,7 @@ export default function TemplatesPage() {
                                 <Divider />
                                 <Stack gap="md">
                                     {templates.map((template) => (
-                                        <Group key={template._id} justify="space-between" align="flex-start">
+                                        <Group key={template.id} justify="space-between" align="flex-start">
                                             <Stack gap="xs" style={{ flex: 1 }}>
                                                 <Text fw={500}>{template.name}</Text>
                                                 <Text size="sm" c="dimmed" lineClamp={2}>

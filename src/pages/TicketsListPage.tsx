@@ -175,7 +175,7 @@ export default function TicketsListPage() {
                 <Stack gap="md">
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                         {data.tickets.map((ticket: ITicket) => (
-                            <TicketCard key={ticket._id} ticket={ticket} />
+                            <TicketCard key={ticket.id} ticket={ticket} />
                         ))}
                     </SimpleGrid>
 

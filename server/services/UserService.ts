@@ -4,6 +4,7 @@ import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
 import OsuApiService from "./OsuApiService";
 import LogService from "./LogService";
+import { Document, Types } from "mongoose";
 
 class UserService {
     /**
@@ -11,7 +12,10 @@ class UserService {
      * @param userResponse - osu! API response
      * @param existingUser - optional existing user to update
      */
-    public async createOrUpdateUser(userResponse: IOsuUser, existingUser: IUser | null = null): Promise<IUser> {
+    public async createOrUpdateUser(
+        userResponse: IOsuUser,
+        existingUser: (Document & IUser) | null = null
+    ): Promise<Document & IUser> {
         const osuId = userResponse.id;
         const username = userResponse.username;
         const groups = ["user"];
@@ -102,8 +106,11 @@ class UserService {
             isActiveReviewer: true,
         };
 
+        // Convert string IDs to ObjectIds for MongoDB queries
+        const excludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
+
         // Add exclusion filter if users to exclude are provided
-        let excludeQuery = usersToExclude.length > 0 ? { ...baseQuery, _id: { $nin: usersToExclude } } : baseQuery;
+        let excludeQuery = usersToExclude.length > 0 ? { ...baseQuery, _id: { $nin: excludeObjectIds } } : baseQuery;
 
         const totalUsersCount = await User.countDocuments(excludeQuery);
 
@@ -123,8 +130,10 @@ class UserService {
             // if there's 1 user, assign them and add them to the exclude list
             if (users.length === 1) {
                 selectedUsers.push(users[0]);
-                usersToExclude.push(users[0]._id);
-                excludeQuery = { ...baseQuery, _id: { $nin: usersToExclude } };
+                usersToExclude.push(users[0].id);
+                // Re-convert updated exclude list to ObjectIds
+                const updatedExcludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
+                excludeQuery = { ...baseQuery, _id: { $nin: updatedExcludeObjectIds } };
             }
 
             // Reset only relevant users

@@ -83,11 +83,12 @@ export default function TicketForm() {
     return (
         <Stack gap="md">
             <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
-                <MarkdownText content="Tickets are used to reach out directly to the Tournament/Contest Committee. Whether you have a simple question or need help with a specific issue, open up a ticket!" />
+                <MarkdownText size="sm" content="Tickets are used to reach out directly to the Tournament/Contest Committee. Whether you have a simple question or need help with a specific issue, open up a ticket!" />
             </Alert>
 
             <Alert color="warning" title="Warning" icon={<FontAwesomeIcon icon="exclamation-triangle" />}>
                 <MarkdownText
+                    size="sm"
                     content={`Tickets and their conversations are visible to the public! This is to provide an archive for users to look through when researching a specific issue or topic.
 
 Try searching for your issue in the [**Tickets listing**](/tickets) before creating a new ticket!

@@ -21,7 +21,7 @@ export default function DashboardTicketsSection({ tickets }: IProps) {
             {tickets.length > 0 ? (
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                     {tickets.map((ticket) => (
-                        <TicketCard key={ticket._id} ticket={ticket} />
+                        <TicketCard key={ticket.id} ticket={ticket} />
                     ))}
                 </SimpleGrid>
             ) : (

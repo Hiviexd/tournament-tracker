@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { Types } from "mongoose";
 import UserService from "../../services/UserService";
 import User from "../../models/userModel";
 import { createMockTCUsers, createMockCCUsers } from "../utils/users";
@@ -85,12 +86,12 @@ describe("UserService", () => {
                 expect(mockUser.countDocuments).toHaveBeenCalledWith({
                     groups: { $in: ["tc"] },
                     isActiveReviewer: true,
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                 });
                 expect(mockUser.find).toHaveBeenCalledWith({
                     groups: { $in: ["tc"] },
                     isActiveReviewer: true,
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                     inBag: true,
                 });
             });
@@ -122,7 +123,7 @@ describe("UserService", () => {
                     {
                         groups: { $in: ["tc"] },
                         isActiveReviewer: true,
-                        _id: { $nin: [mockTCUsers[0]._id] },
+                        _id: { $nin: [new Types.ObjectId(mockTCUsers[0].id)] },
                     },
                     { $set: { inBag: true } }
                 );
@@ -163,7 +164,7 @@ describe("UserService", () => {
                     {
                         groups: { $in: ["tc"] },
                         isActiveReviewer: true,
-                        _id: { $nin: usersToExclude },
+                        _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                     },
                     { $set: { inBag: true } }
                 );
@@ -205,7 +206,7 @@ describe("UserService", () => {
                 expect(mockUser.countDocuments).toHaveBeenCalledWith({
                     groups: { $in: ["tc"] },
                     isActiveReviewer: true,
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                 });
                 expect(mockUser.find).not.toHaveBeenCalled();
                 expect(mockUser.updateMany).not.toHaveBeenCalled();
@@ -261,7 +262,7 @@ describe("UserService", () => {
                 expect(mockUser.countDocuments).toHaveBeenCalledWith({
                     groups: { $in: ["cc"] },
                     isActiveReviewer: true,
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                 });
             });
         });
@@ -302,7 +303,7 @@ describe("UserService", () => {
                 expect(mockUser.countDocuments).toHaveBeenCalledWith({
                     groups: { $in: ["tc"] },
                     isActiveReviewer: true,
-                    _id: { $nin: usersToExclude },
+                    _id: { $nin: usersToExclude.map((id) => new Types.ObjectId(id)) },
                 });
             });
 

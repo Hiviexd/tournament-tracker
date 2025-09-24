@@ -1,6 +1,6 @@
 import { ITournament } from "@interfaces/Tournament";
 import { IUser } from "@interfaces/User";
-import { LeanDocument } from "mongoose";
+import { FlattenMaps } from "mongoose";
 import { IReview } from "@interfaces/Review";
 import { ITicket } from "@interfaces/Ticket";
 import { IVoting } from "@interfaces/Voting";
@@ -15,7 +15,7 @@ class TournamentService {
      * @param user - The user who performed the action
      * @param action - The action to add to the log
      */
-    public async addTournamentLog(tournament: ITournament, user: IUser, action: string, icon: string = "history") {
+    public async addTournamentLog(tournament: any, user: IUser, action: string, icon: string = "history") {
         tournament.logs.push({
             user,
             action,
@@ -31,9 +31,9 @@ class TournamentService {
      * Removes sensitive fields from non-committee users
      */
     public sanitizeTournamentListing(
-        tournament: LeanDocument<ITournament>,
+        tournament: FlattenMaps<ITournament>,
         user: IUser | undefined
-    ): LeanDocument<ITournament> {
+    ): FlattenMaps<ITournament> {
         if (!user || !user.isCommitteeOrAdmin) {
             const sanitized = { ...tournament };
             sanitized.reviews = [];
@@ -51,7 +51,7 @@ class TournamentService {
     /**
      * Censors reviews from non-committee users
      */
-    public censorTournamentReviews(tournament: ITournament, user: IUser | undefined) {
+    public censorTournamentReviews<T extends ITournament>(tournament: T, user: IUser | undefined) {
         if (!user || !user.isCommitteeOrAdmin) {
             // outright clear the reviews array if the user is not the tournament host, or if the status is not changesRequested
             if (!user || !tournament.host._id.equals(user._id) || tournament.status !== "changesRequested") {

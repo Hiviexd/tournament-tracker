@@ -94,7 +94,7 @@ export function useToggleReviewerStatus(userId: string) {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            if (loggedInUser?._id === userId) {
+            if (loggedInUser?.id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
                 setLoggedInUser(res.user as IUser);
@@ -120,7 +120,7 @@ export function useUpdateUserGroups(userId: string) {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["logs"] });
-            if (selectedUser?._id === userId) {
+            if (selectedUser?.id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
             }
@@ -145,7 +145,7 @@ export function useUpdateUserBadge(userId: string) {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["logs"] });
-            if (selectedUser?._id === userId) {
+            if (selectedUser?.id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
             }
@@ -168,7 +168,7 @@ export function useSyncUser(userId: string) {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            if (selectedUser?._id === userId) {
+            if (selectedUser?.id === userId) {
                 const res = data as { message: string; user: IUser };
                 setSelectedUser(res.user as IUser);
             }
@@ -192,7 +192,7 @@ export function useUpdateDiscordId(userId: string) {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            if (loggedInUser?._id === userId) {
+            if (loggedInUser?.id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
                 setLoggedInUser(res.user as IUser);
@@ -217,7 +217,7 @@ export function useUpdateEmail(userId: string) {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            if (loggedInUser?._id === userId) {
+            if (loggedInUser?.id === userId) {
                 queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
                 const res = data as { message: string; user: IUser };
                 setLoggedInUser(res.user as IUser);

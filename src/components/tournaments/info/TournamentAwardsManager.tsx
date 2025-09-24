@@ -169,7 +169,7 @@ const WinnerRow = ({ winnerData, index, badges, form }: WinnerRowProps) => {
 };
 
 export default function TournamentAwardsManager({ opened, onClose, tournament }: IProps) {
-    const downloadBadgesMutation = useDownloadBadges(tournament._id);
+    const downloadBadgesMutation = useDownloadBadges(tournament.id);
     const badges = tournament.badges || [];
     const [generatedCommands, setGeneratedCommands] = useState<string[]>([]);
 
@@ -187,8 +187,8 @@ export default function TournamentAwardsManager({ opened, onClose, tournament }:
 
     // Update form values when tournament data changes
     if (opened) {
-        const currentWinners = form.values.winners.map((w) => w.winner._id);
-        const newWinners = tournament.winners?.map((w) => w._id) || [];
+        const currentWinners = form.values.winners.map((w) => w.winner.id);
+        const newWinners = tournament.winners?.map((w) => w.id) || [];
 
         // Only update if winners have changed
         if (JSON.stringify(currentWinners) !== JSON.stringify(newWinners)) {
@@ -253,7 +253,7 @@ export default function TournamentAwardsManager({ opened, onClose, tournament }:
 
     const handleDownloadBadges = async () => {
         const filenames = form.values.winners.map((winnerData) => ({
-            badgeId: badges[winnerData.badgeIndex]._id,
+            badgeId: badges[winnerData.badgeIndex].id,
             filename: winnerData.filename,
         }));
         console.log(filenames);
@@ -276,7 +276,7 @@ export default function TournamentAwardsManager({ opened, onClose, tournament }:
                         <Table.Tbody>
                             {form.values.winners.map((winnerData, index) => (
                                 <WinnerRow
-                                    key={winnerData.winner._id}
+                                    key={winnerData.winner.id}
                                     winnerData={winnerData}
                                     index={index}
                                     badges={badges}

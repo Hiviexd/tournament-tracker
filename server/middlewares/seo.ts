@@ -91,7 +91,7 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
             const id = matchResult.params[route.modelId];
             const Model = modelMap[route.model] as Model<any>;
 
-            let defaultPopulate = {};
+            let defaultPopulate: any = null;
             if (route.model === "Tournament") {
                 defaultPopulate = { path: "host", select: "username" };
             }
@@ -102,7 +102,9 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
                 defaultPopulate = { path: "author", select: "username" };
             }
 
-            const data = await Model.findById(id).populate(defaultPopulate).lean();
+            const data = defaultPopulate
+                ? await Model.findById(id).populate(defaultPopulate).lean()
+                : await Model.findById(id).lean();
             if (data && route.getMetadata) {
                 const customMetadata = route.getMetadata(data);
 
@@ -113,7 +115,12 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
                     };
                 }
 
-                const titleFormat = formatTitle(route.name, false, data.name || data.title, customMetadata.title);
+                const titleFormat = formatTitle(
+                    route.name,
+                    false,
+                    (data as any).name || (data as any).title,
+                    customMetadata.title
+                );
 
                 return {
                     ...customMetadata,

@@ -17,7 +17,7 @@ type ChecklistState = Record<string, boolean>;
 
 export default function TournamentReviewInput({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
-    const userReview = tournament.reviews?.find((review) => review.author?._id === user?._id);
+    const userReview = tournament.reviews?.find((review) => review.author?.id === user?.id);
     const autoSaveKey = `tournament-review-${tournament._id}`;
     const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
@@ -45,7 +45,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
     const [comment, setComment] = useState(userReview?.comment ?? "");
     const [decision, setDecision] = useState<"approve" | "changesRequested" | "deny" | null>(userReview?.vote ?? null);
 
-    const submitReviewMutation = useSubmitReview(tournament._id);
+    const submitReviewMutation = useSubmitReview(tournament.id);
 
     // Get all possible checklist items
     const allItems = REVIEW_CHECKLIST.flatMap((category) => category.items);
@@ -57,7 +57,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     const handleSubmitReview = async () => {
         const reviewData = {
-            tournamentId: tournament._id,
+            tournamentId: tournament.id,
             checklist: Object.entries(checkedState).map(([item, checked]) => ({
                 item,
                 checked,

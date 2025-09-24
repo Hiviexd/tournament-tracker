@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function EmailSetting() {
     const [user] = useAtom(loggedInUserAtom);
     const [email, setEmail] = useState(user?.email || "");
-    const updateEmail = useUpdateEmail(user?._id || "");
+    const updateEmail = useUpdateEmail(user?.id || "");
 
     const handleSubmit = async () => {
         try {

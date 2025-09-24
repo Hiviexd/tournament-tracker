@@ -17,7 +17,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingForumUrl, setIsEditingForumUrl] = useState(false);
     const [forumUrl, setForumUrl] = useState(tournament.forumUrl || "");
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleForumUrlSave = async () => {
         if (!utils.isOsuForumLink(forumUrl)) {

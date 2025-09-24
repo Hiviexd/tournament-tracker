@@ -29,7 +29,7 @@ export default function TournamentStatus({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatusType>(tournament.status);
-    const editTournamentMutation = useEditTournament(tournament._id);
+    const editTournamentMutation = useEditTournament(tournament.id);
     const confirmModal = useConfirmModal();
 
     const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
