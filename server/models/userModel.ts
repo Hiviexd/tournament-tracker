@@ -1,7 +1,39 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
-import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
+import { IInfringement, IUser, IUserStatics, InfringementType, UserGroup } from "../../interfaces/User";
 import utils from "../../utils";
+import _ from "lodash";
+
+const InfringementSchema = new Schema<IInfringement>(
+    {
+        type: {
+            type: String,
+            required: true,
+            enum: Object.values(InfringementType),
+        },
+        duration: { type: Number, required: true },
+        reason: { type: String, required: true },
+        threadId: { type: String },
+    },
+    { _id: false, timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+);
+
+InfringementSchema.virtual("isNote").get(function (this: IInfringement) {
+    return this.type === InfringementType.NOTE;
+});
+
+InfringementSchema.virtual("isIndefinite").get(function (this: IInfringement) {
+    return this.duration === -1;
+});
+
+InfringementSchema.virtual("typeString").get(function (this: IInfringement) {
+    return _.startCase(this.type);
+});
+
+InfringementSchema.virtual("expiresAt").get(function (this: IInfringement) {
+    if (this.duration <= 0) return null;
+    return this.createdAt ? moment(this.createdAt).add(this.duration, "days").toDate() : null;
+});
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
@@ -25,6 +57,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         },
         badgeValue: { type: Number, default: 0 },
         email: { type: String },
+        infringements: [InfringementSchema],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -72,6 +105,35 @@ UserSchema.virtual("tcDuration").get(function (this: IUser) {
 UserSchema.virtual("ccDuration").get(function (this: IUser) {
     return getDuration(this, "cc");
 });
+
+UserSchema.virtual("activeInfringement").get(function (this: IUser) {
+    if (!this.infringements || this.infringements.length === 0) return null;
+
+    // if there's an infringement with a duration of -1, return it
+    const indefiniteInfringement = this.infringements.find((infringement) => infringement.duration === -1);
+    if (indefiniteInfringement) return indefiniteInfringement;
+
+    // check if createdAt + duration is in the future
+    const now = new Date();
+
+    const activeInfringement = this.infringements
+        .filter(
+            (infringement) =>
+                infringement.type !== InfringementType.NOTE &&
+                infringement.type !== InfringementType.WARNING &&
+                infringement.type !== InfringementType.PROBATION &&
+                infringement.expiresAt! > now
+        ) // filter out non-punishments and expired punishments
+        .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0]; // get the latest infringement
+
+    return activeInfringement;
+});
+
+UserSchema.virtual("latestAction").get(function (this: IUser) {
+    if (!this.infringements || this.infringements.length === 0) return null;
+    return this.infringements.sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0];
+});
+
 
 UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, userInput: string | number) {
     const osuId = parseInt(userInput as string, 10);

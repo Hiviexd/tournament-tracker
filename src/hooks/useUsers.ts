@@ -252,3 +252,45 @@ export function useCycleBag() {
         },
     });
 }
+
+export function useUsersWithInfringements() {
+    return useQuery({
+        queryKey: ["usersWithInfringements"],
+        queryFn: () =>
+            utils.apiCall<IUser[]>({
+                method: "get",
+                url: "/api/users/watchlist",
+            }),
+    });
+}
+
+export function useAddInfringement() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (data: {
+            userId: string;
+            type: string;
+            duration: number;
+            reason: string;
+            threadId?: string;
+        }) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/users/${data.userId}/addInfringement`,
+                data: {
+                    type: data.type,
+                    duration: data.duration,
+                    reason: data.reason,
+                    threadId: data.threadId,
+                },
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["usersWithInfringements"] });
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+        },
+    });
+}

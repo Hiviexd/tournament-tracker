@@ -1,4 +1,4 @@
-import { IUser, UserListQuery } from "../../interfaces/User";
+import { InfringementType, IUser, UserListQuery } from "../../interfaces/User";
 import User from "../models/userModel";
 import utils from "../../utils";
 import UserService from "../services/UserService";
@@ -100,9 +100,7 @@ class UsersController {
 
         const committee = await User.find(query).orFail();
 
-        const sanitizedCommittee = committee.map((user) =>
-            UserService.sanitizeUser(user, currentUser)
-        );
+        const sanitizedCommittee = committee.map((user) => UserService.sanitizeUser(user, currentUser));
 
         res.json(sanitizedCommittee);
     }
@@ -418,9 +416,52 @@ class UsersController {
 
         await LogService.generate(
             req.session.mongoId!,
-            `Cycled tournament reviewers and got: ${reviewers.map((u) => `[**${u.username}**](${u.osuProfileUrl})`).join(", ")}`,
+            `Cycled tournament reviewers and got: ${reviewers
+                .map((u) => `[**${u.username}**](${u.osuProfileUrl})`)
+                .join(", ")}`,
             "user"
         );
+    }
+
+    /** GET users with infringements */
+    public async getUsersWithInfringements(req: Request, res: Response) {
+        const users = await User.find({ infringements: { $exists: true, $ne: [] } });
+        res.json(users);
+    }
+
+    /** POST add infringement */
+    public async addInfringement(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { type, duration, reason, threadId } = req.body;
+
+        console.log(type, duration, reason, threadId);
+
+        if (!Object.values(InfringementType).includes(type)) {
+            return res.status(400).json({ error: "Invalid infringement type" });
+        }
+
+        const isNotPunishment =
+            type === InfringementType.NOTE || type === InfringementType.WARNING || type === InfringementType.PROBATION;
+
+        // duration should be either -1, more than 0, or 0 AND the type is note or warning
+        if (duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
+            return res.status(400).json({ error: "Invalid duration" });
+        }
+
+        if (!reason || typeof reason !== "string" || reason?.trim() === "") {
+            return res.status(400).json({ error: "Reason is required and must be a non-empty string" });
+        }
+
+        if ((threadId && typeof threadId !== "string") || threadId?.trim() === "") {
+            return res.status(400).json({ error: "Thread ID must be a non-empty string" });
+        }
+
+        const user = await User.findById(userId).orFail();
+
+        user.infringements.push({ type, duration, reason, threadId });
+        await user.save();
+
+        res.json({ message: "Infringement added successfully!" });
     }
 }
 
