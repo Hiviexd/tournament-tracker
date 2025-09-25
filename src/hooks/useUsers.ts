@@ -253,13 +253,14 @@ export function useCycleBag() {
     });
 }
 
-export function useUsersWithInfringements() {
+export function useUsersWithInfringements(params?: { userInput?: string; infringementType?: string }) {
     return useQuery({
-        queryKey: ["usersWithInfringements"],
+        queryKey: ["usersWithInfringements", params],
         queryFn: () =>
             utils.apiCall<IUser[]>({
                 method: "get",
                 url: "/api/users/watchlist",
+                params,
             }),
     });
 }

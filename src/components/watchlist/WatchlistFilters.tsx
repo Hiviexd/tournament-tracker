@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import { Card, Group, Stack, Select, TextInput, ActionIcon, Tooltip } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+import { Card, Select, SimpleGrid, Stack } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { InfringementType } from "../../../interfaces/User";
-import utils from "../../../utils";
+import { InfringementType, IUser } from "../../../interfaces/User";
+import UserSearch from "../common/UserSearch";
+import _ from "lodash";
 
 interface FilterValues {
     user: string;
@@ -16,110 +15,42 @@ interface IProps {
 }
 
 export default function WatchlistFilters({ values, onChange }: IProps) {
-    const [searchInput, setSearchInput] = useState(values.user);
-    const [debouncedSearchInput] = useDebouncedValue(searchInput, 300);
+    const infringementTypeOptions = [
+        { value: InfringementType.NOTE, label: _.startCase(InfringementType.NOTE) },
+        { value: InfringementType.WARNING, label: _.startCase(InfringementType.WARNING) },
+        { value: InfringementType.PROBATION, label: _.startCase(InfringementType.PROBATION) },
+        { value: InfringementType.TOURNAMENT_BAN, label: _.startCase(InfringementType.TOURNAMENT_BAN) },
+        { value: InfringementType.HOSTING_BAN, label: _.startCase(InfringementType.HOSTING_BAN) },
+        { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
+    ];
 
     const handleChange = (key: keyof FilterValues, value: any) => {
         onChange({ ...values, [key]: value });
     };
 
-    // Update the filter values when debounced search changes
-    useEffect(() => {
-        if (debouncedSearchInput !== values.user) {
-            handleChange("user", debouncedSearchInput);
-        }
-    }, [debouncedSearchInput, values.user]);
-
-    const infringementTypeOptions = [
-        { value: "", label: "All Types" },
-        { value: InfringementType.NOTE, label: "Note" },
-        { value: InfringementType.WARNING, label: "Warning" },
-        { value: InfringementType.PROBATION, label: "Probation" },
-        { value: InfringementType.TOURNAMENT_BAN, label: "Tournament Ban" },
-        { value: InfringementType.HOSTING_BAN, label: "Hosting Ban" },
-        { value: InfringementType.STAFFING_BAN, label: "Staffing Ban" },
-    ];
-
-    const handleUserSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.currentTarget.value;
-        setSearchInput(value);
+    const handleUserChange = (user: IUser | null) => {
+        handleChange("user", user ? user.osuId.toString() : "");
     };
-
-    const handleExportCsv = async () => {
-        try {
-            const response = await utils.apiCall({
-                method: "get",
-                url: "/api/users/watchlist/export",
-                params: {
-                    user: values.user || undefined,
-                    infringementType: values.infringementType || undefined,
-                },
-                responseType: "blob",
-            });
-
-            if (response) {
-                const url = window.URL.createObjectURL(new Blob([response]));
-                const link = document.createElement("a");
-                link.href = url;
-                link.setAttribute("download", `watchlist-${new Date().toISOString().split("T")[0]}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(url);
-            }
-        } catch (error) {
-            console.error("Failed to export CSV:", error);
-        }
-    };
-
-    const handleClearFilters = () => {
-        setSearchInput("");
-        onChange({
-            user: "",
-            infringementType: "",
-        });
-    };
-
-    const hasActiveFilters = values.user || values.infringementType;
 
     return (
-        <Card shadow="sm" p="lg">
+        <Card shadow="sm" p="md">
             <Stack gap="md">
-                <Group grow align="flex-end">
-                    <TextInput
-                        label="Search by user"
-                        placeholder="Username or osu! ID..."
-                        value={searchInput}
-                        onChange={handleUserSearch}
-                        leftSection={<FontAwesomeIcon icon="search" />}
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <UserSearch
+                        placeholder="Search by user..."
+                        leftSection={<FontAwesomeIcon icon="user" />}
+                        onChange={handleUserChange}
+                        width="100%"
                     />
-
                     <Select
-                        label="Infringement Type"
-                        placeholder="Filter by type..."
+                        placeholder="Filter by infringement type"
+                        leftSection={<FontAwesomeIcon icon="exclamation-triangle" />}
                         data={infringementTypeOptions}
                         value={values.infringementType}
                         onChange={(value) => handleChange("infringementType", value || "")}
                         clearable
-                        searchable
                     />
-
-                    <Group gap="xs">
-                        {hasActiveFilters && (
-                            <Tooltip label="Clear all filters">
-                                <ActionIcon variant="light" color="gray" onClick={handleClearFilters} size="lg">
-                                    <FontAwesomeIcon icon="times" />
-                                </ActionIcon>
-                            </Tooltip>
-                        )}
-
-                        <Tooltip label="Export as CSV">
-                            <ActionIcon variant="light" color="blue" onClick={handleExportCsv} size="lg">
-                                <FontAwesomeIcon icon="download" />
-                            </ActionIcon>
-                        </Tooltip>
-                    </Group>
-                </Group>
+                </SimpleGrid>
             </Stack>
         </Card>
     );

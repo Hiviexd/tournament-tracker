@@ -1,4 +1,4 @@
-import { InfringementType, IUser, UserListQuery } from "../../interfaces/User";
+import { InfringementType, IUser, UserListQuery, WatchlistQuery } from "../../interfaces/User";
 import User from "../models/userModel";
 import utils from "../../utils";
 import UserService from "../services/UserService";
@@ -423,9 +423,25 @@ class UsersController {
         );
     }
 
-    /** GET users with infringements */
-    public async getUsersWithInfringements(req: Request, res: Response) {
-        const users = await User.find({ infringements: { $exists: true, $ne: [] } });
+    /** GET watchlist */
+    public async getWatchlist(req: Request, res: Response) {
+        const reqQuery = req.query as WatchlistQuery;
+        const query: any = { infringements: { $exists: true, $ne: [] } };
+
+        if (reqQuery.userInput) {
+            const userInput = utils.escapeUsername(reqQuery.userInput);
+            if (utils.isNumeric(userInput)) {
+                query.osuId = parseInt(userInput, 10);
+            } else {
+                query.username = { $regex: userInput, $options: "i" };
+            }
+        }
+
+        if (reqQuery.infringementType) {
+            query["infringements.type"] = reqQuery.infringementType;
+        }
+
+        const users = await User.find(query);
         res.json(users);
     }
 

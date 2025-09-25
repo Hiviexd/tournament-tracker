@@ -90,3 +90,8 @@ export interface IInfringement {
     typeString?: string;
     expiresAt?: Date;
 }
+
+export interface WatchlistQuery {
+    userInput?: string;
+    infringementType?: InfringementType;
+}

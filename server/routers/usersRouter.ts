@@ -10,7 +10,7 @@ usersRouter.get("/", auth.optionalAuth, UsersController.index);
 usersRouter.get("/me", requireScopes(["users:read"]), auth.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
-usersRouter.get("/watchlist", auth.isLoggedIn, auth.isCommittee, UsersController.getUsersWithInfringements);
+usersRouter.get("/watchlist", auth.isLoggedIn, auth.isCommittee, UsersController.getWatchlist);
 usersRouter.get("/:userInput", auth.optionalAuth, UsersController.getUser);
 usersRouter.get("/:userInput/osu", auth.isLoggedIn, UsersController.getOsuUserInfo);
 usersRouter.patch(

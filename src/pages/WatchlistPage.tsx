@@ -48,36 +48,25 @@ export default function WatchlistPage() {
         });
     };
 
-    const { data: users, isLoading, error } = useUsersWithInfringements();
+    // Create API params from filters
+    const apiParams = useMemo(() => {
+        const params: { userInput?: string; infringementType?: string } = {};
 
-    // Filter users based on current filters
-    const filteredUsers = useMemo(() => {
-        if (!users) return [];
+        if (filters.user) {
+            params.userInput = filters.user;
+        }
 
-        return users.filter((user) => {
-            // Filter by user search
-            if (filters.user) {
-                const searchTerm = filters.user.toLowerCase();
-                const matchesUsername = user.username.toLowerCase().includes(searchTerm);
-                const matchesOsuId = user.osuId.toString().includes(searchTerm);
-                if (!matchesUsername && !matchesOsuId) {
-                    return false;
-                }
-            }
+        if (filters.infringementType) {
+            params.infringementType = filters.infringementType;
+        }
 
-            // Filter by infringement type
-            if (filters.infringementType) {
-                const hasMatchingInfringement = user.infringements.some(
-                    (infringement) => infringement.type === filters.infringementType
-                );
-                if (!hasMatchingInfringement) {
-                    return false;
-                }
-            }
+        return Object.keys(params).length > 0 ? params : undefined;
+    }, [filters]);
 
-            return true;
-        });
-    }, [users, filters]);
+    const { data: users, isLoading, error } = useUsersWithInfringements(apiParams);
+
+    // No need for frontend filtering since backend handles it
+    const filteredUsers = users || [];
 
     const LoadingState = () => (
         <Card shadow="sm" p="lg">
@@ -86,7 +75,7 @@ export default function WatchlistPage() {
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>User</Table.Th>
-                            <Table.Th>Infringement</Table.Th>
+                            <Table.Th>Active Infringement</Table.Th>
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
                         </Table.Tr>
@@ -142,7 +131,7 @@ export default function WatchlistPage() {
                             <Table.Thead>
                                 <Table.Tr>
                                     <Table.Th>User</Table.Th>
-                                    <Table.Th>Infringement</Table.Th>
+                                    <Table.Th>Active Infringement</Table.Th>
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
                                 </Table.Tr>
