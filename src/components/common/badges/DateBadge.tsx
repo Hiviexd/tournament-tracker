@@ -10,6 +10,7 @@ interface IDateBadgeProps {
     dangerAge?: number; // Days before danger color
     variant?: BadgeVariant;
     size?: MantineSize;
+    color?: string;
 }
 
 export default function DateBadge({
@@ -19,6 +20,7 @@ export default function DateBadge({
     variant = "light",
     staticColor = false,
     size = "md",
+    color,
 }: IDateBadgeProps) {
     const getColor = () => {
         if (staticColor) return "gray";
@@ -31,7 +33,7 @@ export default function DateBadge({
 
     return (
         <Tooltip label={moment(date).format("LLL")}>
-            <Badge variant={variant} color={getColor()} size={size}>
+            <Badge variant={variant} color={color || getColor()} size={size}>
                 <FontAwesomeIcon icon="clock" /> {utils.getShortRelativeTime(date)}
             </Badge>
         </Tooltip>
