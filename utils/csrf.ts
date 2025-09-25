@@ -22,8 +22,6 @@ async function fetchCsrfToken(): Promise<string | null> {
         store.set(csrfTokenAtom, token);
         store.set(csrfLoadingAtom, false);
 
-        console.log("CSRF token fetched:", token);
-
         return token;
     } catch (error: any) {
         const errorMessage = error.response?.data?.error || "Failed to fetch CSRF token";
