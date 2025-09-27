@@ -81,6 +81,7 @@ export interface IInfringement {
     duration: number;
     reason: string;
     threadId?: string;
+    enchantUrl?: string;
     createdAt?: Date;
     updatedAt?: Date;
 

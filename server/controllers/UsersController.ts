@@ -453,7 +453,7 @@ class UsersController {
     /** POST add infringement */
     public async addInfringement(req: Request, res: Response) {
         const { userId } = req.params;
-        const { type, duration, reason, threadId } = req.body;
+        const { type, duration, reason, threadId, enchantUrl } = req.body;
 
         if (!Object.values(InfringementType).includes(type)) {
             return res.status(400).json({ error: "Invalid infringement type" });
@@ -475,11 +475,15 @@ class UsersController {
             return res.status(400).json({ error: "Thread ID must be a non-empty string" });
         }
 
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
+            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
+        }
+
         const extractedThreadId = utils.extractDiscordThreadId(threadId) || undefined;
 
         const user = await User.findById(userId).orFail();
 
-        user.infringements.push({ type, duration, reason, threadId: extractedThreadId });
+        user.infringements.push({ type, duration, reason, threadId: extractedThreadId, enchantUrl });
         await user.save();
 
         res.json({ message: "Infringement added successfully!", user });

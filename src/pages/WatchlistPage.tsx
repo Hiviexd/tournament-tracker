@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Stack, Table, ScrollArea, Card, Skeleton, Button } from "@mantine/core";
+import { Stack, Table, ScrollArea, Card, Skeleton, Button, Tooltip, ActionIcon } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString } from "nuqs";
 import { useWatchlist } from "../hooks/useUsers";
@@ -109,6 +109,7 @@ export default function WatchlistPage() {
                             <Table.Th>Active Infringement</Table.Th>
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
+                            <Table.Th ta="center">Enchant</Table.Th>
                             {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
@@ -126,6 +127,9 @@ export default function WatchlistPage() {
                                 </Table.Td>
                                 <Table.Td>
                                     <Skeleton height={20} width={80} />
+                                </Table.Td>
+                                <Table.Td>
+                                    <Skeleton height={20} width={40} />
                                 </Table.Td>
                                 <Table.Td ta="center">
                                     <Skeleton height={20} width={40} />
@@ -176,6 +180,7 @@ export default function WatchlistPage() {
                                     <Table.Th>Active Infringement</Table.Th>
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
+                                    <Table.Th ta="center">Enchant</Table.Th>
                                     {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                                 </Table.Tr>
                             </Table.Thead>
@@ -199,6 +204,27 @@ export default function WatchlistPage() {
                                             <InfringementExpirationBadge
                                                 infringement={user.activeInfringement || user.latestAction}
                                             />
+                                        </Table.Td>
+                                        <Table.Td ta="center">
+                                            {user.activeInfringement?.enchantUrl || user.latestAction?.enchantUrl ? (
+                                                <Tooltip label="Open Enchant ticket">
+                                                    <ActionIcon
+                                                        variant="subtle"
+                                                        onClick={() =>
+                                                            window.open(
+                                                                user.activeInfringement?.enchantUrl ||
+                                                                    user.latestAction?.enchantUrl,
+                                                                "_blank"
+                                                            )
+                                                        }
+                                                        color="primary"
+                                                        size="md">
+                                                        <FontAwesomeIcon icon="envelope" size="sm" />
+                                                    </ActionIcon>
+                                                </Tooltip>
+                                            ) : (
+                                                "-"
+                                            )}
                                         </Table.Td>
                                         {loggedInUser?.isCommitteeOrAdmin && (
                                             <Table.Td ta="center">

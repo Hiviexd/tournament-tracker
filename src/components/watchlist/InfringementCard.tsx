@@ -1,4 +1,4 @@
-import { Stack, Card, Group, Text, Badge  } from "@mantine/core";
+import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip } from "@mantine/core";
 import { IInfringement } from "../../../interfaces/User";
 import InfringementBadge from "../common/badges/InfringementBadge";
 import InfringementDurationBadge from "../common/badges/InfringementDurationBadge";
@@ -7,6 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import DateBadge from "../common/badges/DateBadge";
 import config from "../../../config.json";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     infringement: IInfringement;
@@ -61,14 +62,28 @@ export default function InfringementCard({ infringement, isActive }: IProps) {
                         )}
                     </Group>
 
-                    {infringement.threadId && (
-                        <CopyActionIcon
-                            value={getDiscordThreadLink(infringement.threadId)}
-                            tooltip="Copy Discord thread link"
-                            size="sm"
-                            color="primary"
-                        />
-                    )}
+                    <Group gap={4}>
+                        {infringement.enchantUrl && (
+                            <Tooltip label="Open Enchant ticket">
+                                <ActionIcon
+                                    variant="subtle"
+                                    onClick={() => window.open(infringement.enchantUrl, "_blank")}
+                                    color="primary"
+                                    size="md">
+                                    <FontAwesomeIcon icon="envelope" size="sm" />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+
+                        {infringement.threadId && (
+                            <CopyActionIcon
+                                value={getDiscordThreadLink(infringement.threadId)}
+                                tooltip="Copy Discord thread link"
+                                size="md"
+                                color="primary"
+                            />
+                        )}
+                    </Group>
                 </Group>
             </Stack>
         </Card>

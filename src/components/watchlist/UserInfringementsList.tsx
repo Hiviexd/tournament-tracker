@@ -28,7 +28,7 @@ export default function UserInfringementsList({ user }: IProps) {
     return (
         <Stack gap="md">
             <Group gap="xs" align="baseline">
-                <Text size="lg" fw={600}>
+                <Text size="lg" fw={600} className="header-border-left">
                     Infringements
                 </Text>
                 <Badge variant="light" color="primary">
@@ -38,7 +38,7 @@ export default function UserInfringementsList({ user }: IProps) {
 
             {activeInfringement && (
                 <>
-                    <Text size="md" fw={500}>
+                    <Text size="md" fw={500} className="header-border-left">
                         Active Infringement
                     </Text>
                     <InfringementCard infringement={activeInfringement} isActive={true} />
@@ -48,7 +48,7 @@ export default function UserInfringementsList({ user }: IProps) {
             {historicalInfringements.length > 0 && (
                 <>
                     {activeInfringement && <Divider />}
-                    <Text size="md" fw={500}>
+                    <Text size="md" fw={500} className="header-border-left">
                         Infringement History
                     </Text>
                     <Stack gap="sm">

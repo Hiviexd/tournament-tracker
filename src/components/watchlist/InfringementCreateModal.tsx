@@ -7,6 +7,7 @@ import { useAddInfringement } from "../../hooks/useUsers";
 import { InfringementType, IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import _ from "lodash";
+import utils from "../../../utils";
 
 interface IProps {
     opened: boolean;
@@ -27,6 +28,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             isIndefinite: false,
             reason: "",
             threadId: "",
+            enchantUrl: "",
         },
         validate: {
             userId: (value) => {
@@ -41,6 +43,14 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             reason: (value) => {
                 if (!value || value.trim() === "") return "Reason is required";
                 if (value.trim().length < 4) return "Reason must be at least 4 characters";
+                return null;
+            },
+            threadId: (value) => {
+                if (value && value?.trim() === "") return "Thread ID must be a non-empty string";
+                return null;
+            },
+            enchantUrl: (value) => {
+                if (value && !utils.isEnchantTicketLink(value)) return "Invalid Enchant ticket URL format";
                 return null;
             },
         },
@@ -79,6 +89,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                 duration,
                 reason: values.reason.trim(),
                 threadId: values.threadId.trim() || undefined,
+                enchantUrl: values.enchantUrl.trim() || undefined,
             });
 
             handleClose();
@@ -173,6 +184,12 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                         label="Thread ID"
                         placeholder="Discord thread ID (optional)"
                         {...form.getInputProps("threadId")}
+                    />
+
+                    <TextInput
+                        label="Enchant URL"
+                        placeholder="Enchant ticket URL (optional)"
+                        {...form.getInputProps("enchantUrl")}
                     />
 
                     <Group justify="flex-end" mt="md">

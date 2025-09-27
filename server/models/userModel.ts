@@ -14,6 +14,7 @@ const InfringementSchema = new Schema<IInfringement>(
         duration: { type: Number, required: true },
         reason: { type: String, required: true },
         threadId: { type: String },
+        enchantUrl: { type: String },
     },
     { _id: false, timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

@@ -278,6 +278,7 @@ export function useAddInfringement() {
             duration: number;
             reason: string;
             threadId?: string;
+            enchantUrl?: string;
         }) => {
             const response = await utils.apiCall({
                 method: "post",
@@ -287,6 +288,7 @@ export function useAddInfringement() {
                     duration: data.duration,
                     reason: data.reason,
                     threadId: data.threadId,
+                    enchantUrl: data.enchantUrl,
                 },
             });
             return utils.handleMutationResponse(response);
