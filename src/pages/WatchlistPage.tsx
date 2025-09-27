@@ -13,8 +13,8 @@ import InfringementBadge from "../components/common/badges/InfringementBadge";
 import InfringementDurationBadge from "../components/common/badges/InfringementDurationBadge";
 import InfringementExpirationBadge from "../components/common/badges/InfringementExpirationBadge";
 import CopyActionIcon from "../components/common/buttons/CopyActionIcon";
-import { useAtom, useSetAtom } from "jotai";
-import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
+import { useSetAtom } from "jotai";
+import { selectedUserAtom } from "../store/atoms";
 import config from "../../config.json";
 import { useSearchParams } from "react-router-dom";
 
@@ -25,7 +25,6 @@ interface FilterValues {
 
 export default function WatchlistPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [loggedInUser] = useAtom(loggedInUserAtom);
     const setSelectedUser = useSetAtom(selectedUserAtom);
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -110,7 +109,7 @@ export default function WatchlistPage() {
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
                             <Table.Th ta="center">Enchant</Table.Th>
-                            {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
+                            <Table.Th ta="center">Thread</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -134,11 +133,9 @@ export default function WatchlistPage() {
                                 <Table.Td ta="center">
                                     <Skeleton height={20} width={40} />
                                 </Table.Td>
-                                {loggedInUser?.isCommitteeOrAdmin && (
-                                    <Table.Td ta="center">
-                                        <Skeleton height={20} width={40} />
-                                    </Table.Td>
-                                )}
+                                <Table.Td ta="center">
+                                    <Skeleton height={20} width={40} />
+                                </Table.Td>
                             </Table.Tr>
                         ))}
                     </Table.Tbody>
@@ -181,7 +178,7 @@ export default function WatchlistPage() {
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
                                     <Table.Th ta="center">Enchant</Table.Th>
-                                    {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
+                                    <Table.Th ta="center">Thread</Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
@@ -226,23 +223,20 @@ export default function WatchlistPage() {
                                                 "-"
                                             )}
                                         </Table.Td>
-                                        {loggedInUser?.isCommitteeOrAdmin && (
-                                            <Table.Td ta="center">
-                                                {(user.activeInfringement || user.latestAction)?.threadId ? (
-                                                    <CopyActionIcon
-                                                        value={getDiscordThreadLink(
-                                                            (user.activeInfringement || user.latestAction)?.threadId ||
-                                                                ""
-                                                        )}
-                                                        tooltip="Copy Discord thread link"
-                                                        size="md"
-                                                        color="primary"
-                                                    />
-                                                ) : (
-                                                    "-"
-                                                )}
-                                            </Table.Td>
-                                        )}
+                                        <Table.Td ta="center">
+                                            {(user.activeInfringement || user.latestAction)?.threadId ? (
+                                                <CopyActionIcon
+                                                    value={getDiscordThreadLink(
+                                                        (user.activeInfringement || user.latestAction)?.threadId || ""
+                                                    )}
+                                                    tooltip="Copy Discord thread link"
+                                                    size="md"
+                                                    color="primary"
+                                                />
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </Table.Td>
                                     </Table.Tr>
                                 ))}
                             </Table.Tbody>
