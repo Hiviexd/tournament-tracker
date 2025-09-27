@@ -12,8 +12,8 @@ import TournamentEnchantUrl from "./info/TournamentEnchantUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import TournamentBanner from "./info/TournamentBanner";
 import TournamentWinners from "./info/TournamentWinners";
-import TournamentReports from "./info/TournamentReports";
-import TournamentVotings from "./info/TournamentVotings";
+import ReportsMiniSection from "../common/ReportsMiniSection";
+import VotingsMiniSection from "../common/VotingsMiniSection";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import _ from "lodash";
@@ -109,8 +109,8 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     <TournamentForumUrl tournament={tournament} />
                     {user?.isCommitteeOrAdmin && <TournamentEnchantUrl tournament={tournament} />}
                     {user?.isCommitteeOrAdmin && <TournamentDiscordThread tournament={tournament} />}
-                    {user?.isCommitteeOrAdmin && <TournamentReports reports={reports} />}
-                    {user?.isCommitteeOrAdmin && <TournamentVotings votings={votings} />}
+                    {user?.isCommitteeOrAdmin && <ReportsMiniSection reports={reports} />}
+                    {user?.isCommitteeOrAdmin && <VotingsMiniSection votings={votings} />}
                     <TournamentWinners tournament={tournament} />
                     <TournamentTags tournament={tournament} />
                 </SimpleGrid>

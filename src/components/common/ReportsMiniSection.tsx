@@ -1,24 +1,27 @@
 import { Stack, Text, Card, Group, Badge, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ITicket } from "../../../../interfaces/Ticket";
-import UserLink from "../../common/UserLink";
-import DateBadge from "../../common/badges/DateBadge";
-import { TruncatedText } from "../../common/TruncatedText";
+import { ITicket } from "../../../interfaces/Ticket";
+import UserLink from "./UserLink";
+import DateBadge from "./badges/DateBadge";
+import { TruncatedText } from "./TruncatedText";
 
 interface IProps {
     reports: ITicket[];
+    hideTooltip?: boolean;
 }
 
-export default function TournamentReports({ reports }: IProps) {
+export default function ReportsMiniSection({ reports, hideTooltip = false }: IProps) {
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500} className="header-border-left">
                     Reports
                 </Text>
-                <Tooltip multiline w={232} label="Only shows reports matching the tournament's name or forum URL">
-                    <FontAwesomeIcon icon="exclamation-circle" size="sm" style={{ opacity: 0.6 }} />
-                </Tooltip>
+                {!hideTooltip && (
+                    <Tooltip multiline w={232} label="Only shows reports matching the tournament's name or forum URL">
+                        <FontAwesomeIcon icon="exclamation-circle" size="sm" style={{ opacity: 0.6 }} />
+                    </Tooltip>
+                )}
                 <Badge color={reports.length > 0 ? "red" : "gray"} variant="light" size="sm">
                     {reports.length}
                 </Badge>
