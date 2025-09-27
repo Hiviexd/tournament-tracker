@@ -34,13 +34,13 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             },
             type: (value) => (!value ? "Infringement type is required" : null),
             duration: (value) => {
-                if (disableDuration) return null;
+                if (disableDuration || form.values.isIndefinite) return null;
                 if (value < 1) return "Duration cannot be less than 1";
                 return null;
             },
             reason: (value) => {
                 if (!value || value.trim() === "") return "Reason is required";
-                if (value.trim().length < 10) return "Reason must be at least 10 characters";
+                if (value.trim().length < 4) return "Reason must be at least 4 characters";
                 return null;
             },
         },
