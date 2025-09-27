@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Stack, Table, ScrollArea, Card, Skeleton, Button, ActionIcon, Popover } from "@mantine/core";
+import { Stack, Table, ScrollArea, Card, Skeleton, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString } from "nuqs";
 import { useUsersWithInfringements } from "../hooks/useUsers";
@@ -12,7 +12,6 @@ import EmptyState from "../components/common/EmptyState";
 import InfringementBadge from "../components/common/badges/InfringementBadge";
 import InfringementDurationBadge from "../components/common/badges/InfringementDurationBadge";
 import InfringementExpirationBadge from "../components/common/badges/InfringementExpirationBadge";
-import MarkdownText from "../components/common/MarkdownText";
 import CopyActionIcon from "../components/common/buttons/CopyActionIcon";
 import { useAtom, useSetAtom } from "jotai";
 import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
@@ -110,7 +109,6 @@ export default function WatchlistPage() {
                             <Table.Th>Active Infringement</Table.Th>
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
-                            <Table.Th ta="center">Reason</Table.Th>
                             {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
@@ -178,7 +176,6 @@ export default function WatchlistPage() {
                                     <Table.Th>Active Infringement</Table.Th>
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
-                                    <Table.Th ta="center">Reason</Table.Th>
                                     {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                                 </Table.Tr>
                             </Table.Thead>
@@ -203,26 +200,6 @@ export default function WatchlistPage() {
                                                 infringement={user.activeInfringement || user.latestAction}
                                             />
                                         </Table.Td>
-                                        <Table.Td ta="center">
-                                            {(user.activeInfringement || user.latestAction)?.reason && (
-                                                <Popover width={300} position="left" withArrow shadow="md">
-                                                    <Popover.Target>
-                                                        <ActionIcon variant="subtle" color="info" size="sm">
-                                                            <FontAwesomeIcon icon="sticky-note" size="xs" />
-                                                        </ActionIcon>
-                                                    </Popover.Target>
-                                                    <Popover.Dropdown>
-                                                        <MarkdownText
-                                                            content={
-                                                                (user.activeInfringement || user.latestAction)
-                                                                    ?.reason || ""
-                                                            }
-                                                            size="sm"
-                                                        />
-                                                    </Popover.Dropdown>
-                                                </Popover>
-                                            )}
-                                        </Table.Td>
                                         {loggedInUser?.isCommitteeOrAdmin && (
                                             <Table.Td ta="center">
                                                 {(user.activeInfringement || user.latestAction)?.threadId ? (
@@ -232,7 +209,7 @@ export default function WatchlistPage() {
                                                                 ""
                                                         )}
                                                         tooltip="Copy Discord thread link"
-                                                        size="sm"
+                                                        size="md"
                                                         color="primary"
                                                     />
                                                 ) : (
