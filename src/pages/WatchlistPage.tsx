@@ -102,7 +102,7 @@ export default function WatchlistPage() {
     const LoadingState = () => (
         <Card shadow="sm" p="lg">
             <ScrollArea>
-                <Table>
+                <Table miw={{ base: 1200, md: 800 }}>
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>User</Table.Th>
@@ -169,7 +169,7 @@ export default function WatchlistPage() {
             ) : (
                 <Card shadow="sm" p="lg">
                     <ScrollArea>
-                        <Table>
+                        <Table miw={{ base: 1200, md: 800 }}>
                             <Table.Thead>
                                 <Table.Tr>
                                     <Table.Th>User</Table.Th>
