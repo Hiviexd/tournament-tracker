@@ -1119,9 +1119,7 @@ class TournamentsController {
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        if (threadId.includes("https://discord.com/channels/")) {
-            threadId = threadId.split("/").pop();
-        }
+        threadId = utils.extractDiscordThreadId(threadId);
 
         if (threadId !== tournament.threadId) {
             tournament.threadId = threadId;

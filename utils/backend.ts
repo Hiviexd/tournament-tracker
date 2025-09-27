@@ -292,3 +292,17 @@ export function splitSearchTerms(searchContent: string): string[] {
         .split(/\s+/)
         .filter((term) => term.length > 0);
 }
+
+/**
+ * Extracts a Discord thread ID from a string
+ * @param input The input string to extract the thread ID from
+ * @returns The extracted thread ID or `null` if no thread ID is found
+ */
+export function extractDiscordThreadId(input: string | null): string | null {
+    let output = input;
+    if (input && input.includes("https://discord.com/channels/")) {
+        output = input.split("/").pop() || null;
+    }
+
+    return output || null;
+}
