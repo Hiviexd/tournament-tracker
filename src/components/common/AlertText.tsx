@@ -1,4 +1,4 @@
-import { Flex, Text, type MantineSize } from "@mantine/core";
+import { Text, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
@@ -17,20 +17,9 @@ export default function AlertText({ children, type, size = "sm", icon }: IProps)
         info: "circle-info",
     };
 
-    if (typeof children === "string") {
-        return (
-            <Text fw={500} size={size} c={type}>
-                <FontAwesomeIcon icon={icon ?? (IconTypeMap[type] as IconProp)} /> {children}
-            </Text>
-        );
-    }
-
     return (
-        <Flex align="flex-start" gap="xs" c={type}>
-            <Text fw={500} size={size}>
-                <FontAwesomeIcon icon={icon ?? (IconTypeMap[type] as IconProp)} />
-            </Text>
-            {children}
-        </Flex>
+        <Text fw={500} size={size} c={type}>
+            <FontAwesomeIcon icon={icon ?? (IconTypeMap[type] as IconProp)} /> {children}
+        </Text>
     );
 }
