@@ -42,6 +42,11 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                             <Table w="fit-content">{children}</Table>
                         </ScrollArea>
                     ),
+                    li: ({ children }) => (
+                        <Text size={size} component="li" style={{ margin: 0 }}>
+                            {children}
+                        </Text>
+                    ),
                 }}>
                 {content}
             </ReactMarkdown>
