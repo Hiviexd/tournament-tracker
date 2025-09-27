@@ -470,9 +470,11 @@ class UsersController {
             return res.status(400).json({ error: "Thread ID must be a non-empty string" });
         }
 
+        const extractedThreadId = utils.extractDiscordThreadId(threadId) || undefined;
+
         const user = await User.findById(userId).orFail();
 
-        user.infringements.push({ type, duration, reason, threadId });
+        user.infringements.push({ type, duration, reason, threadId: extractedThreadId });
         await user.save();
 
         res.json({ message: "Infringement added successfully!", user });
