@@ -161,7 +161,7 @@ const TextEditor = forwardRef<TextEditorRef, IProps>(
                     view={{
                         menu: true,
                         md: true,
-                        html: true, // false to switch to markdown input only, true to switch to split view
+                        html: false, // false to switch to markdown input only, true to switch to split view
                     }}
                     canView={{
                         menu: true,
