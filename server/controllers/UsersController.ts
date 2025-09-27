@@ -554,8 +554,6 @@ class UsersController {
             ]),
         ]);
 
-        console.log(reports, votings);
-
         res.json({ reports, votings });
     }
 }
