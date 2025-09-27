@@ -5,8 +5,8 @@ import UserSearch from "../common/UserSearch";
 import _ from "lodash";
 
 interface FilterValues {
-    user: string;
-    infringementType: InfringementType | "";
+    search: string;
+    type: InfringementType | "";
 }
 
 interface IProps {
@@ -29,7 +29,7 @@ export default function WatchlistFilters({ values, onChange }: IProps) {
     };
 
     const handleUserChange = (user: IUser | null) => {
-        handleChange("user", user ? user.osuId.toString() : "");
+        handleChange("search", user ? user.osuId.toString() : "");
     };
 
     return (
@@ -46,8 +46,8 @@ export default function WatchlistFilters({ values, onChange }: IProps) {
                         placeholder="Filter by infringement type"
                         leftSection={<FontAwesomeIcon icon="exclamation-triangle" />}
                         data={infringementTypeOptions}
-                        value={values.infringementType}
-                        onChange={(value) => handleChange("infringementType", value || "")}
+                        value={values.type}
+                        onChange={(value) => handleChange("type", value || "")}
                         clearable
                     />
                 </SimpleGrid>

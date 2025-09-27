@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Stack, Table, ScrollArea, Card, Skeleton, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString } from "nuqs";
-import { useUsersWithInfringements } from "../hooks/useUsers";
+import { useWatchlist } from "../hooks/useUsers";
 import { InfringementType, IUser } from "../../interfaces/User";
 import WatchlistFilters from "../components/watchlist/WatchlistFilters";
 import UserDisplay from "../components/common/UserDisplay";
@@ -19,8 +19,8 @@ import config from "../../config.json";
 import { useSearchParams } from "react-router-dom";
 
 interface FilterValues {
-    user: string;
-    infringementType: InfringementType | "";
+    search: string;
+    type: InfringementType | "";
 }
 
 export default function WatchlistPage() {
@@ -36,7 +36,7 @@ export default function WatchlistPage() {
     const handleUserWatchlistModalClose = () => {
         setSearchParams((prev) => {
             const newParams = new URLSearchParams(prev);
-            newParams.delete("userId");
+            newParams.delete("user");
             return newParams;
         });
         setSelectedUser(null);
@@ -46,7 +46,7 @@ export default function WatchlistPage() {
         setSelectedUser(user);
         setSearchParams((prev) => {
             const newParams = new URLSearchParams(prev);
-            newParams.set("userId", user.osuId.toString());
+            newParams.set("user", user.osuId.toString());
             return newParams;
         });
     };
@@ -54,8 +54,8 @@ export default function WatchlistPage() {
     // Define query state parsers with default values
     const [queryState, setQueryState] = useQueryStates(
         {
-            user: parseAsString.withDefault(""),
-            infringementType: parseAsString.withDefault(""),
+            search: parseAsString.withDefault(""),
+            type: parseAsString.withDefault(""),
         },
         {
             // Only include non-default values in URL
@@ -66,16 +66,16 @@ export default function WatchlistPage() {
     // Create filters object for WatchlistFilters component
     const filters: FilterValues = useMemo(
         () => ({
-            user: queryState.user,
-            infringementType: queryState.infringementType as InfringementType | "",
+            search: queryState.search,
+            type: queryState.type as InfringementType | "",
         }),
-        [queryState.user, queryState.infringementType]
+        [queryState.search, queryState.type]
     );
 
     const handleFilterChange = (newFilters: FilterValues) => {
         setQueryState({
-            user: newFilters.user,
-            infringementType: newFilters.infringementType,
+            search: newFilters.search,
+            type: newFilters.type,
         });
     };
 
@@ -83,18 +83,18 @@ export default function WatchlistPage() {
     const apiParams = useMemo(() => {
         const params: { userInput?: string; infringementType?: string } = {};
 
-        if (filters.user) {
-            params.userInput = filters.user;
+        if (filters.search) {
+            params.userInput = filters.search;
         }
 
-        if (filters.infringementType) {
-            params.infringementType = filters.infringementType;
+        if (filters.type) {
+            params.infringementType = filters.type;
         }
 
         return Object.keys(params).length > 0 ? params : undefined;
     }, [filters]);
 
-    const { data: users, isLoading, error } = useUsersWithInfringements(apiParams);
+    const { data: users, isLoading, error } = useWatchlist(apiParams);
 
     // No need for frontend filtering since backend handles it
     const filteredUsers = users || [];
@@ -145,7 +145,7 @@ export default function WatchlistPage() {
 
     return (
         <Stack gap="md">
-            <UserWatchlistModal userId={searchParams.get("userId")} onClose={handleUserWatchlistModalClose} />
+            <UserWatchlistModal userId={searchParams.get("user")} onClose={handleUserWatchlistModalClose} />
 
             <WatchlistFilters values={filters} onChange={handleFilterChange} />
 
