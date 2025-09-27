@@ -253,9 +253,9 @@ export function useCycleBag() {
     });
 }
 
-export function useUsersWithInfringements(params?: { userInput?: string; infringementType?: string }) {
+export function useWatchlist(params?: { userInput?: string; infringementType?: string }) {
     return useQuery({
-        queryKey: ["usersWithInfringements", params],
+        queryKey: ["watchlist", params],
         queryFn: () =>
             utils.apiCall<IUser[]>({
                 method: "get",
@@ -292,7 +292,7 @@ export function useAddInfringement() {
         onSuccess: (responseData, variables) => {
             const userId = variables.userId;
 
-            queryClient.invalidateQueries({ queryKey: ["usersWithInfringements"] });
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["user", userId] });
