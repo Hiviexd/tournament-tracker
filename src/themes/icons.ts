@@ -108,6 +108,7 @@ import {
     faKey,
     faUserClock,
     faUserGear,
+    faGavel,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -220,5 +221,6 @@ export default function loadIcons() {
         faKey,
         faUserClock,
         faUserGear,
+        faGavel,
     );
 }

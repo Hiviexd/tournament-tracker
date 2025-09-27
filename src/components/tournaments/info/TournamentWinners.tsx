@@ -157,7 +157,7 @@ export default function TournamentWinners({ tournament }: IProps) {
                             {winners.map((winner) => (
                                 <List.Item key={winner.id}>
                                     <Text size="sm">
-                                        <UserLink user={winner} />
+                                        <UserLink user={winner} displayActiveInfringement />
                                     </Text>
                                 </List.Item>
                             ))}

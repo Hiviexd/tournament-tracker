@@ -72,7 +72,7 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                     </Table.Td>
 
                                     <Table.Td>
-                                        <UserLink user={tournament.host} fw={500} />
+                                        <UserLink user={tournament.host} fw={500} displayActiveInfringement />
                                     </Table.Td>
 
                                     <Table.Td>
