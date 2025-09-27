@@ -119,8 +119,8 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" verticalSpacing="lg">
                             {isLoadingRelatedReportsAndVotings ? (
                                 <>
-                                    <Skeleton height={50} radius="sm" mb="md" />
-                                    <Skeleton height={50} radius="sm" mb="md" />
+                                    <Skeleton height={46} radius="sm" />
+                                    <Skeleton height={46} radius="sm" />
                                 </>
                             ) : (
                                 <>
