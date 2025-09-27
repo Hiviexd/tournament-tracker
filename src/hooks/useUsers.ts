@@ -3,6 +3,8 @@ import utils from "../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
 import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interfaces/User";
+import { ITicket } from "../../interfaces/Ticket";
+import { IVoting } from "../../interfaces/Voting";
 
 export function useUsers(search: string, limit?: number) {
     return useQuery({
@@ -304,5 +306,17 @@ export function useAddInfringement() {
                 }
             }
         },
+    });
+}
+
+export function useRelatedReportsAndVotings(userId: string) {
+    return useQuery({
+        queryKey: ["relatedReportsAndVotings", userId],
+        queryFn: () =>
+            utils.apiCall<{ reports: ITicket[]; votings: IVoting[] }>({
+                method: "get",
+                url: `/api/users/${userId}/relatedReportsAndVotings`,
+            }),
+        enabled: !!userId,
     });
 }

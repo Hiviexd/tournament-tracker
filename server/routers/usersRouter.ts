@@ -11,6 +11,7 @@ usersRouter.get("/me", requireScopes(["users:read"]), auth.isLoggedIn, UsersCont
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
 usersRouter.get("/watchlist", auth.isLoggedIn, auth.isCommittee, UsersController.getWatchlist);
+usersRouter.get("/:userId/relatedReportsAndVotings", auth.isLoggedIn, auth.isCommittee, UsersController.getRelatedReportsAndVotings);
 usersRouter.get("/:userInput", auth.optionalAuth, UsersController.getUser);
 usersRouter.get("/:userInput/osu", auth.isLoggedIn, UsersController.getOsuUserInfo);
 usersRouter.patch(

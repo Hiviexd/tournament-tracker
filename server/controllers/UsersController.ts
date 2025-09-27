@@ -11,6 +11,8 @@ import Tournament from "../models/tournamentModel";
 import _ from "lodash";
 import { IDiscordField } from "../../interfaces/Discord";
 import moment from "moment";
+import Ticket from "../models/ticketModel";
+import Voting from "../models/votingModel";
 
 class UsersController {
     /** GET logged in user */
@@ -528,6 +530,29 @@ class UsersController {
                 },
             ],
         });
+    }
+
+    /** GET related reports and votings */
+    public async getRelatedReportsAndVotings(req: Request, res: Response) {
+        const { userId } = req.params;
+        const user = await User.findByUsernameOrOsuId(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const [reports, votings] = await Promise.all([
+            Ticket.find({ type: "report", targetUser: user._id }).populate([
+                { path: "author", select: "username osuId groups coverUrl country" },
+            ]),
+            Voting.find({ category: "user", targetUser: user._id }).populate([
+                { path: "author", select: "username osuId groups coverUrl country" },
+            ]),
+        ]);
+
+        console.log(reports, votings);
+
+        res.json({ reports, votings });
     }
 }
 

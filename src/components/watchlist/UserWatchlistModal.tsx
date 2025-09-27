@@ -1,14 +1,16 @@
-import { Modal, Stack, Skeleton, Divider, Button } from "@mantine/core";
+import { Modal, Stack, Skeleton, Divider, Button, SimpleGrid } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 import { selectedUserAtom } from "../../store/atoms";
-import { useUser } from "../../hooks/useUsers";
+import { useUser, useRelatedReportsAndVotings } from "../../hooks/useUsers";
 import UserCard from "../common/UserCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import InfringementCreateModal from "./InfringementCreateModal";
 import UserInfringementsList from "./UserInfringementsList";
+import ReportsMiniSection from "../common/ReportsMiniSection";
+import VotingsMiniSection from "../common/VotingsMiniSection";
 
 interface IProps {
     userId: string | null;
@@ -29,6 +31,9 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
         enabled: shouldFetch,
         retry: false,
     });
+
+    const { data: relatedReportsAndVotings, isLoading: isLoadingRelatedReportsAndVotings } =
+        useRelatedReportsAndVotings(userId ?? "");
 
     const [opened, { open, close }] = useDisclosure(false);
 
@@ -110,6 +115,20 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
                             fullWidth>
                             Add Infringement
                         </Button>
+
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" verticalSpacing="lg">
+                            {isLoadingRelatedReportsAndVotings ? (
+                                <>
+                                    <Skeleton height={50} radius="sm" mb="md" />
+                                    <Skeleton height={50} radius="sm" mb="md" />
+                                </>
+                            ) : (
+                                <>
+                                    <ReportsMiniSection reports={relatedReportsAndVotings?.reports} hideTooltip />
+                                    <VotingsMiniSection votings={relatedReportsAndVotings?.votings} hideTooltip />
+                                </>
+                            )}
+                        </SimpleGrid>
 
                         <Divider />
 
