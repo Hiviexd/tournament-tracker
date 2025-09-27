@@ -441,7 +441,7 @@ class UsersController {
             query["infringements.type"] = reqQuery.infringementType;
         }
 
-        const users = await User.find(query);
+        const users = await User.find(query).sort({ updatedAt: -1 });
         res.json(users);
     }
 
@@ -449,8 +449,6 @@ class UsersController {
     public async addInfringement(req: Request, res: Response) {
         const { userId } = req.params;
         const { type, duration, reason, threadId } = req.body;
-
-        console.log(type, duration, reason, threadId);
 
         if (!Object.values(InfringementType).includes(type)) {
             return res.status(400).json({ error: "Invalid infringement type" });
@@ -477,7 +475,7 @@ class UsersController {
         user.infringements.push({ type, duration, reason, threadId });
         await user.save();
 
-        res.json({ message: "Infringement added successfully!" });
+        res.json({ message: "Infringement added successfully!", user });
     }
 }
 

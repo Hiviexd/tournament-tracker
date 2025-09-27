@@ -1,24 +1,27 @@
 import { Modal, TextInput, Stack, Select, NumberInput, Button, Group, Text, Checkbox, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useEffect } from "react";
 import UserSearch from "../common/UserSearch";
 import TextEditor from "../common/TextEditor";
 import { useAddInfringement } from "../../hooks/useUsers";
-import { InfringementType } from "../../../interfaces/User";
+import { InfringementType, IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import _ from "lodash";
 
 interface IProps {
     opened: boolean;
     onClose: () => void;
+    preselectedUser?: IUser | null;
 }
 
-export default function InfringementCreateModal({ opened, onClose }: IProps) {
+export default function InfringementCreateModal({ opened, onClose, preselectedUser }: IProps) {
+    const preselectedUserId = preselectedUser?.id;
     const addInfringementMutation = useAddInfringement();
     const autoSaveKey = "infringement-create-reason";
 
     const form = useForm({
         initialValues: {
-            userId: "",
+            userId: preselectedUserId || "",
             type: "" as InfringementType,
             duration: 0,
             isIndefinite: false,
@@ -26,7 +29,9 @@ export default function InfringementCreateModal({ opened, onClose }: IProps) {
             threadId: "",
         },
         validate: {
-            userId: (value) => (!value ? "User is required" : null),
+            userId: (value) => {
+                return !value ? "User is required" : null;
+            },
             type: (value) => (!value ? "Infringement type is required" : null),
             duration: (value) => {
                 if (disableDuration) return null;
@@ -40,6 +45,14 @@ export default function InfringementCreateModal({ opened, onClose }: IProps) {
             },
         },
     });
+
+    // Update form when preSelectedUserId changes
+    useEffect(() => {
+        if (preselectedUserId) {
+            form.setFieldValue("userId", preselectedUserId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [preselectedUserId]); // Cannot add form to dependencies to avoid infinite loop
 
     const disableDuration =
         form.values.type === InfringementType.NOTE ||
@@ -56,7 +69,6 @@ export default function InfringementCreateModal({ opened, onClose }: IProps) {
     ];
 
     const handleSubmit = async (values: typeof form.values) => {
-        console.log(values);
         try {
             let duration = values.isIndefinite ? -1 : values.duration;
             if (disableDuration) duration = 0;
@@ -77,6 +89,10 @@ export default function InfringementCreateModal({ opened, onClose }: IProps) {
 
     const handleClose = () => {
         form.reset();
+        // Reset userId to preSelected if available
+        if (preselectedUserId) {
+            form.setFieldValue("userId", preselectedUserId);
+        }
         clearAutoSavedValue(autoSaveKey);
         onClose();
     };
@@ -89,16 +105,23 @@ export default function InfringementCreateModal({ opened, onClose }: IProps) {
     };
 
     return (
-        <Modal opened={opened} onClose={handleClose} title="Add Infringement" size="xl">
+        <Modal
+            key={`infringement-create-${preselectedUserId || "new"}`}
+            opened={opened}
+            onClose={handleClose}
+            title="Add Infringement"
+            size="xl">
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
-                    <UserSearch
-                        label="User"
-                        onChange={(user) => form.setFieldValue("userId", user?.id || "")}
-                        error={form.errors.userId}
-                        required
-                        allowUserCreation
-                    />
+                    {!preselectedUserId && (
+                        <UserSearch
+                            label="User"
+                            onChange={(user) => form.setFieldValue("userId", user?.id || "")}
+                            error={form.errors.userId}
+                            required
+                            allowUserCreation
+                        />
+                    )}
 
                     <Select
                         label="Infringement Type"

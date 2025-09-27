@@ -1,16 +1,23 @@
 import { useMemo, useState } from "react";
-import { Stack, Table, ScrollArea, Card, Skeleton, Button } from "@mantine/core";
+import { Stack, Table, ScrollArea, Card, Skeleton, Button, ActionIcon, Popover } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString } from "nuqs";
 import { useUsersWithInfringements } from "../hooks/useUsers";
-import { InfringementType } from "../../interfaces/User";
+import { InfringementType, IUser } from "../../interfaces/User";
 import WatchlistFilters from "../components/watchlist/WatchlistFilters";
-import UserLink from "../components/common/UserLink";
+import UserDisplay from "../components/common/UserDisplay";
 import InfringementCreateModal from "../components/watchlist/InfringementCreateModal";
+import UserWatchlistModal from "../components/watchlist/UserWatchlistModal";
 import EmptyState from "../components/common/EmptyState";
 import InfringementBadge from "../components/common/badges/InfringementBadge";
 import InfringementDurationBadge from "../components/common/badges/InfringementDurationBadge";
 import InfringementExpirationBadge from "../components/common/badges/InfringementExpirationBadge";
+import MarkdownText from "../components/common/MarkdownText";
+import CopyActionIcon from "../components/common/buttons/CopyActionIcon";
+import { useAtom, useSetAtom } from "jotai";
+import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
+import config from "../../config.json";
+import { useSearchParams } from "react-router-dom";
 
 interface FilterValues {
     user: string;
@@ -19,6 +26,31 @@ interface FilterValues {
 
 export default function WatchlistPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [loggedInUser] = useAtom(loggedInUserAtom);
+    const setSelectedUser = useSetAtom(selectedUserAtom);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const getDiscordThreadLink = (threadId: string) => {
+        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
+    };
+
+    const handleUserWatchlistModalClose = () => {
+        setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.delete("userId");
+            return newParams;
+        });
+        setSelectedUser(null);
+    };
+
+    const handleUserSelect = (user: IUser) => {
+        setSelectedUser(user);
+        setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set("userId", user.osuId.toString());
+            return newParams;
+        });
+    };
 
     // Define query state parsers with default values
     const [queryState, setQueryState] = useQueryStates(
@@ -78,6 +110,8 @@ export default function WatchlistPage() {
                             <Table.Th>Active Infringement</Table.Th>
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
+                            <Table.Th ta="center">Reason</Table.Th>
+                            {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -95,6 +129,14 @@ export default function WatchlistPage() {
                                 <Table.Td>
                                     <Skeleton height={20} width={80} />
                                 </Table.Td>
+                                <Table.Td ta="center">
+                                    <Skeleton height={20} width={40} />
+                                </Table.Td>
+                                {loggedInUser?.isCommitteeOrAdmin && (
+                                    <Table.Td ta="center">
+                                        <Skeleton height={20} width={40} />
+                                    </Table.Td>
+                                )}
                             </Table.Tr>
                         ))}
                     </Table.Tbody>
@@ -105,6 +147,8 @@ export default function WatchlistPage() {
 
     return (
         <Stack gap="md">
+            <UserWatchlistModal userId={searchParams.get("userId")} onClose={handleUserWatchlistModalClose} />
+
             <WatchlistFilters values={filters} onChange={handleFilterChange} />
 
             <Button
@@ -134,13 +178,15 @@ export default function WatchlistPage() {
                                     <Table.Th>Active Infringement</Table.Th>
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
+                                    <Table.Th ta="center">Reason</Table.Th>
+                                    {loggedInUser?.isCommitteeOrAdmin && <Table.Th ta="center">Thread</Table.Th>}
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
                                 {filteredUsers.map((user) => (
                                     <Table.Tr key={user.id}>
                                         <Table.Td>
-                                            <UserLink user={user} />
+                                            <UserDisplay user={user} onClick={() => handleUserSelect(user)} />
                                         </Table.Td>
                                         <Table.Td>
                                             <InfringementBadge
@@ -157,6 +203,43 @@ export default function WatchlistPage() {
                                                 infringement={user.activeInfringement || user.latestAction}
                                             />
                                         </Table.Td>
+                                        <Table.Td ta="center">
+                                            {(user.activeInfringement || user.latestAction)?.reason && (
+                                                <Popover width={300} position="left" withArrow shadow="md">
+                                                    <Popover.Target>
+                                                        <ActionIcon variant="subtle" color="info" size="sm">
+                                                            <FontAwesomeIcon icon="sticky-note" size="xs" />
+                                                        </ActionIcon>
+                                                    </Popover.Target>
+                                                    <Popover.Dropdown>
+                                                        <MarkdownText
+                                                            content={
+                                                                (user.activeInfringement || user.latestAction)
+                                                                    ?.reason || ""
+                                                            }
+                                                            size="sm"
+                                                        />
+                                                    </Popover.Dropdown>
+                                                </Popover>
+                                            )}
+                                        </Table.Td>
+                                        {loggedInUser?.isCommitteeOrAdmin && (
+                                            <Table.Td ta="center">
+                                                {(user.activeInfringement || user.latestAction)?.threadId ? (
+                                                    <CopyActionIcon
+                                                        value={getDiscordThreadLink(
+                                                            (user.activeInfringement || user.latestAction)?.threadId ||
+                                                                ""
+                                                        )}
+                                                        tooltip="Copy Discord thread link"
+                                                        size="sm"
+                                                        color="primary"
+                                                    />
+                                                ) : (
+                                                    "-"
+                                                )}
+                                            </Table.Td>
+                                        )}
                                     </Table.Tr>
                                 ))}
                             </Table.Tbody>

@@ -267,6 +267,7 @@ export function useUsersWithInfringements(params?: { userInput?: string; infring
 
 export function useAddInfringement() {
     const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
 
     return useMutation({
         mutationFn: async (data: {
@@ -288,10 +289,20 @@ export function useAddInfringement() {
             });
             return utils.handleMutationResponse(response);
         },
-        onSuccess: () => {
+        onSuccess: (responseData, variables) => {
+            const userId = variables.userId;
+
             queryClient.invalidateQueries({ queryKey: ["usersWithInfringements"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+
+            if (selectedUser?.id === userId) {
+                const res = responseData as { message: string; user: IUser };
+                if (res.user) {
+                    setSelectedUser(res.user);
+                }
+            }
         },
     });
 }
