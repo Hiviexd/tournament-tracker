@@ -2,21 +2,32 @@ import { Anchor, AnchorProps, Text, HoverCard } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import UserCard from "./UserCard";
 
-interface IPropTypes extends Omit<AnchorProps, "href"> {
+interface IPropTypes extends Omit<AnchorProps, "href" | "onClick"> {
     user?: IUser;
     username?: string;
     asText?: boolean;
     disablePopover?: boolean;
+    onClick?: () => void;
 }
 
-export default function UserLink({ user, username, asText, disablePopover = false, ...props }: IPropTypes) {
+export default function UserLink({ user, username, asText, disablePopover = false, onClick, ...props }: IPropTypes) {
     const handleLinkClick = (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (onClick) {
+            e.preventDefault(); // Prevent navigation when onClick is provided
+            onClick();
+        }
     };
 
     if (asText) {
         return (
-            <Text component="span" fw={props.fw ?? 700} c={props.c ?? "white"} {...props}>
+            <Text
+                component="span"
+                fw={props.fw ?? 700}
+                c={props.c ?? "white"}
+                onClick={onClick ? handleLinkClick : undefined}
+                style={{ cursor: onClick ? "pointer" : "default" }}
+                {...props}>
                 {username ?? user?.username}
             </Text>
         );
@@ -29,8 +40,9 @@ export default function UserLink({ user, username, asText, disablePopover = fals
                     {...props}
                     fw={props.fw ?? 700}
                     onClick={handleLinkClick}
-                    href={`https://osu.ppy.sh/users/${user?.osuId}`}
-                    target="_blank">
+                    href={onClick ? undefined : `https://osu.ppy.sh/users/${user?.osuId}`}
+                    target={onClick ? undefined : "_blank"}
+                    style={{ cursor: "pointer" }}>
                     {user?.username ?? "Unknown"}
                 </Anchor>
             </HoverCard.Target>
