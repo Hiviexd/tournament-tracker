@@ -8,6 +8,9 @@ import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
+import _ from "lodash";
+import { IDiscordField } from "../../interfaces/Discord";
+import moment from "moment";
 
 class UsersController {
     /** GET logged in user */
@@ -478,6 +481,53 @@ class UsersController {
         await user.save();
 
         res.json({ message: "Infringement added successfully!", user });
+
+        // Logging
+        await LogService.generate(
+            req.session.mongoId!,
+            `Added **${_.startCase(type)}** infringement to [**${user.username}**](https://osu.ppy.sh/users/${
+                user.osuId
+            })`,
+            "user"
+        );
+
+        // Build fields
+        const fields: IDiscordField[] = [];
+
+        if (duration !== 0) {
+            fields.push({
+                name: "Duration",
+                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
+            });
+        }
+
+        fields.push({
+            name: "Reason",
+            value: utils.shorten(reason, 1024),
+        });
+
+        const typeColorMap: { [key in InfringementType]: number } = {
+            [InfringementType.NOTE]: webhookColors.lightBlue,
+            [InfringementType.WARNING]: webhookColors.yellow,
+            [InfringementType.PROBATION]: webhookColors.orange,
+            [InfringementType.TOURNAMENT_BAN]: webhookColors.red,
+            [InfringementType.HOSTING_BAN]: webhookColors.red,
+            [InfringementType.STAFFING_BAN]: webhookColors.red,
+        };
+
+        // Discord webhook
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: duration === -1 ? webhookColors.darkRed : typeColorMap[type],
+                    description: `Added **${_.startCase(type)}** to [**${user.username}**](https://osu.ppy.sh/users/${
+                        user.osuId
+                    })`,
+                    fields,
+                },
+            ],
+        });
     }
 }
 
