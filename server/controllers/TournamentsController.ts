@@ -29,11 +29,12 @@ import utils from "../../utils";
 import { IDiscordField } from "../../interfaces/Discord";
 import { ITicket } from "../../interfaces/Ticket";
 import { IVoting } from "../../interfaces/Voting";
+import { InfringementType } from "../../interfaces/User";
 
 const defaultPopulate = [
     {
         path: "host",
-        select: "username osuId groups coverUrl country",
+        select: "username osuId groups coverUrl country infringements",
     },
     {
         path: "assignedReviewers",
@@ -75,7 +76,7 @@ const defaultPopulate = [
     },
     {
         path: "winners",
-        select: "username osuId groups coverUrl country",
+        select: "username osuId groups coverUrl country infringements",
     },
 ];
 
@@ -468,6 +469,13 @@ class TournamentsController {
         if (endDate) tournament.endDate = endDate;
         if (tags) tournament.tags = tags.map((tag: string) => tag.toLowerCase());
         if (status) {
+            // Block "badgeApproved" status if host has an active infringement
+            if (status === "badgeApproved" && tournament.host.activeInfringement) {
+                return res.status(400).json({
+                    error: `Cannot approve badges for host with an active ${tournament.host.activeInfringement.typeString}!`,
+                });
+            }
+
             if (excludedStatusesOsu.includes(status)) {
                 shouldSendOsuMessage = false;
             }
@@ -483,7 +491,20 @@ class TournamentsController {
         }
         if (isActive !== undefined) tournament.isActive = isActive;
         if (typeof bannerUrl === "string") tournament.bannerUrl = bannerUrl;
-        if (winners) tournament.winners = winners;
+        if (winners) {
+            const winnersWithActiveTournamentBan = winners.filter(
+                (winner) =>
+                    winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
+            );
+            if (winnersWithActiveTournamentBan.length > 0) {
+                return res.status(400).json({
+                    error: `Cannot add winners with active tournament bans! (${winnersWithActiveTournamentBan
+                        .map((winner) => `${winner.username}`)
+                        .join(", ")})`,
+                });
+            }
+            tournament.winners = winners;
+        }
 
         await tournament.save();
 
