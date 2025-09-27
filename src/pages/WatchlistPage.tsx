@@ -185,7 +185,7 @@ export default function WatchlistPage() {
                                 {filteredUsers.map((user) => (
                                     <Table.Tr key={user.id}>
                                         <Table.Td>
-                                            <UserDisplay user={user} onClick={() => handleUserSelect(user)} />
+                                            <UserDisplay user={user} onClick={() => handleUserSelect(user)} disablePopover />
                                         </Table.Td>
                                         <Table.Td>
                                             <InfringementBadge
