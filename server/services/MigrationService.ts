@@ -346,7 +346,6 @@ class MigrationService {
             for (const tournament of tournamentsToMigrate) {
                 try {
                     // Convert single host to hosts array
-                    // @ts-expect-error - tournament.host is a thing pre-migration
                     const hostId = tournament.host;
                     if (hostId) {
                         // Set the hosts array with the single host
