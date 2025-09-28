@@ -18,7 +18,7 @@ class UsersController {
     /** GET logged in user */
     public getSelf(_: Request, res: Response) {
         const user = res.locals!.user!;
-        res.json(user);
+        res.json(UserService.sanitizeUser(user, user));
     }
 
     /** GET users listing */
