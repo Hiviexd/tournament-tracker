@@ -22,7 +22,6 @@ const TournamentSchema = new Schema<ITournament>(
         forumUrl: { type: String },
         bannerUrl: { type: String },
         threadId: { type: String },
-        host: { type: Schema.Types.ObjectId, ref: "User" },
         hosts: {
             type: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
             validate: {

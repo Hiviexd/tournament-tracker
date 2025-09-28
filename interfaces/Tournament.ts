@@ -60,7 +60,6 @@ export interface ITournament {
     endDate: Date | null;
     forumUrl: string;
     threadId?: string;
-    host?: IUser;
     hosts: IUser[];
     type: TournamentType;
     status: TournamentStatus;
