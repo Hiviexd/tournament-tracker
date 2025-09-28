@@ -53,7 +53,7 @@ export default function UserMenu({ user }: IProps) {
                     )}
                     <Menu.Item
                         component={Link}
-                        to={`/tournaments?host=${user.osuId}&state=all`}
+                        to={`/tournaments?host=${user.osuId}`}
                         leftSection={<FontAwesomeIcon icon="trophy" />}>
                         Your Tournaments
                     </Menu.Item>
