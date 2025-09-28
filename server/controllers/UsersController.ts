@@ -483,6 +483,18 @@ class UsersController {
 
         const user = await User.findById(userId).orFail();
 
+        // if user has an active infringement, and new infringement is not a punishment, expire it today
+        if (user.activeInfringement && !isNotPunishment) {
+            const targetInfringement = user.infringements.find(
+                (infringement) => infringement.id === user.activeInfringement?.id
+            );
+
+            if (targetInfringement) {
+                const daysSinceCreation = moment().diff(moment(targetInfringement.createdAt), "days");
+                targetInfringement.duration = daysSinceCreation;
+            }
+        }
+
         user.infringements.push({ type, duration, reason, threadId: extractedThreadId, enchantUrl });
         await user.save();
 
