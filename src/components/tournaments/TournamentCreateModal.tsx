@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
 import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -6,6 +7,8 @@ import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/
 import UserSearch from "../common/UserSearch";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
+import AlertText from "../common/AlertText";
+import { IUser } from "../../../interfaces/User";
 
 interface IProps {
     opened: boolean;
@@ -14,6 +17,7 @@ interface IProps {
 
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
+    const [selectedHost, setSelectedHost] = useState<IUser | null>(null);
     const navigate = useNavigate();
 
     const form = useForm({
@@ -59,6 +63,11 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         },
     });
 
+    const handleSelectHost = (host: IUser | null) => {
+        setSelectedHost(host);
+        form.setFieldValue("hostId", host?.id || "");
+    };
+
     const handleSubmit = async (values) => {
         try {
             const res = await createTournamentMutation.mutateAsync(values);
@@ -99,13 +108,23 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         withAsterisk
                     />
 
-                    <UserSearch
-                        label="Host"
-                        onChange={(user) => form.setFieldValue("hostId", user?.id || "")}
-                        error={form.errors.hostId}
-                        required
-                        allowUserCreation
-                    />
+                    <Stack gap="xs">
+                        <UserSearch
+                            label="Host"
+                            onChange={(user) => handleSelectHost(user || null)}
+                            error={form.errors.hostId}
+                            required
+                            allowUserCreation
+                        />
+
+                        {selectedHost?.activeInfringement && (
+                            <AlertText size="xs" type="danger">
+                                {selectedHost.username} has an{" "}
+                                {selectedHost.activeInfringement.isIndefinite ? "indefinite" : "active"}{" "}
+                                {selectedHost.activeInfringement.typeString}!
+                            </AlertText>
+                        )}
+                    </Stack>
 
                     <MultiSelect
                         label="Game Modes"
@@ -170,7 +189,10 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         <Button variant="subtle" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={createTournamentMutation.isPending}>
+                        <Button
+                            type="submit"
+                            loading={createTournamentMutation.isPending}
+                            disabled={!!selectedHost?.activeInfringement}>
                             Create Tournament
                         </Button>
                     </Group>

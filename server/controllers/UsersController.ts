@@ -1,4 +1,4 @@
-import { IUser, UserListQuery } from "../../interfaces/User";
+import { InfringementType, IUser, UserListQuery, WatchlistQuery } from "../../interfaces/User";
 import User from "../models/userModel";
 import utils from "../../utils";
 import UserService from "../services/UserService";
@@ -8,12 +8,17 @@ import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
+import _ from "lodash";
+import { IDiscordField } from "../../interfaces/Discord";
+import moment from "moment";
+import Ticket from "../models/ticketModel";
+import Voting from "../models/votingModel";
 
 class UsersController {
     /** GET logged in user */
     public getSelf(_: Request, res: Response) {
         const user = res.locals!.user!;
-        res.json(user);
+        res.json(UserService.sanitizeUser(user, user));
     }
 
     /** GET users listing */
@@ -100,9 +105,7 @@ class UsersController {
 
         const committee = await User.find(query).orFail();
 
-        const sanitizedCommittee = committee.map((user) =>
-            UserService.sanitizeUser(user, currentUser)
-        );
+        const sanitizedCommittee = committee.map((user) => UserService.sanitizeUser(user, currentUser));
 
         res.json(sanitizedCommittee);
     }
@@ -418,9 +421,247 @@ class UsersController {
 
         await LogService.generate(
             req.session.mongoId!,
-            `Cycled tournament reviewers and got: ${reviewers.map((u) => `[**${u.username}**](${u.osuProfileUrl})`).join(", ")}`,
+            `Cycled tournament reviewers and got: ${reviewers
+                .map((u) => `[**${u.username}**](${u.osuProfileUrl})`)
+                .join(", ")}`,
             "user"
         );
+    }
+
+    /** GET watchlist */
+    public async getWatchlist(req: Request, res: Response) {
+        const reqQuery = req.query as WatchlistQuery;
+        const query: any = { infringements: { $exists: true, $ne: [] } };
+
+        if (reqQuery.userInput) {
+            const userInput = utils.escapeUsername(reqQuery.userInput);
+            if (utils.isNumeric(userInput)) {
+                query.osuId = parseInt(userInput, 10);
+            } else {
+                query.username = { $regex: userInput, $options: "i" };
+            }
+        }
+
+        if (reqQuery.infringementType) {
+            query["infringements.type"] = reqQuery.infringementType;
+        }
+
+        const users = await User.find(query).sort({ updatedAt: -1 });
+        res.json(users);
+    }
+
+    /** POST add infringement */
+    public async addInfringement(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { type, duration, reason, threadId, enchantUrl } = req.body;
+
+        if (!Object.values(InfringementType).includes(type)) {
+            return res.status(400).json({ error: "Invalid infringement type" });
+        }
+
+        const isNotPunishment =
+            type === InfringementType.NOTE || type === InfringementType.WARNING || type === InfringementType.PROBATION;
+
+        // duration should be either -1, more than 0, or 0 AND the type is note or warning
+        if (duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
+            return res.status(400).json({ error: "Invalid duration" });
+        }
+
+        if (!reason || typeof reason !== "string" || reason?.trim() === "") {
+            return res.status(400).json({ error: "Reason is required and must be a non-empty string" });
+        }
+
+        if ((threadId && typeof threadId !== "string") || threadId?.trim() === "") {
+            return res.status(400).json({ error: "Thread ID must be a non-empty string" });
+        }
+
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
+            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
+        }
+
+        const extractedThreadId = utils.extractDiscordThreadId(threadId) || undefined;
+
+        const user = await User.findById(userId).orFail();
+
+        // if user has an active infringement, and new infringement is not a punishment, expire it today
+        if (user.activeInfringement && !isNotPunishment) {
+            const targetInfringement = user.infringements.find(
+                (infringement) => infringement.id === user.activeInfringement?.id
+            );
+
+            if (targetInfringement) {
+                const daysSinceCreation = moment().diff(moment(targetInfringement.createdAt), "days");
+                targetInfringement.duration = daysSinceCreation;
+            }
+        }
+
+        user.infringements.push({ type, duration, reason, threadId: extractedThreadId, enchantUrl });
+        await user.save();
+
+        res.json({ message: "Infringement added successfully!", user });
+
+        // Logging
+        await LogService.generate(
+            req.session.mongoId!,
+            `Added **${_.startCase(type)}** infringement to [**${user.username}**](${user.osuProfileUrl})`,
+            "user"
+        );
+
+        // Build fields
+        const fields: IDiscordField[] = [];
+
+        if (duration !== 0) {
+            fields.push({
+                name: "Duration",
+                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
+            });
+        }
+
+        fields.push({
+            name: "Reason",
+            value: utils.shorten(reason, 1024),
+        });
+
+        const typeColorMap: { [key in InfringementType]: number } = {
+            [InfringementType.NOTE]: webhookColors.lightBlue,
+            [InfringementType.WARNING]: webhookColors.yellow,
+            [InfringementType.PROBATION]: webhookColors.orange,
+            [InfringementType.TOURNAMENT_BAN]: webhookColors.red,
+            [InfringementType.HOSTING_BAN]: webhookColors.red,
+            [InfringementType.STAFFING_BAN]: webhookColors.red,
+        };
+
+        // Discord webhook
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: duration === -1 ? webhookColors.darkRed : typeColorMap[type],
+                    description: `Added **${_.startCase(type)}** to [**${user.username}**](${user.osuProfileUrl})`,
+                    fields,
+                    footer: {
+                        text: `ID: ${user.infringements[user.infringements.length - 1].id}`,
+                    },
+                },
+            ],
+        });
+    }
+
+    /** PATCH update infringement */
+    public async updateInfringement(req: Request, res: Response) {
+        const { userId, infringementId } = req.params;
+        const { duration, reason, threadId, enchantUrl } = req.body;
+
+        if (reason && (typeof reason !== "string" || reason?.trim() === "")) {
+            return res.status(400).json({ error: "Reason must be a non-empty string" });
+        }
+
+        if (threadId && (typeof threadId !== "string" || threadId?.trim() === "")) {
+            return res.status(400).json({ error: "Thread ID must be a non-empty string" });
+        }
+
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
+            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
+        }
+
+        const user = await User.findById(userId).orFail();
+
+        const infringement = user.infringements.find((infringement) => infringement.id === infringementId);
+
+        if (!infringement) {
+            return res.status(404).json({ error: "Infringement not found" });
+        }
+
+        const isNotPunishment =
+            infringement.type === InfringementType.NOTE ||
+            infringement.type === InfringementType.WARNING ||
+            infringement.type === InfringementType.PROBATION;
+
+        if (duration && duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
+            return res.status(400).json({ error: "Invalid duration" });
+        }
+
+        infringement.duration = duration;
+        infringement.reason = reason;
+        infringement.threadId = utils.extractDiscordThreadId(threadId) || undefined;
+        infringement.enchantUrl = enchantUrl;
+
+        await user.save();
+
+        res.json({ message: "Infringement updated successfully!", user });
+
+        // Logging
+        await LogService.generate(
+            req.session.mongoId!,
+            `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
+            "user"
+        );
+
+        // Discord webhook
+        const fields: IDiscordField[] = [];
+
+        if (duration) {
+            fields.push({
+                name: "Duration",
+                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
+            });
+        }
+
+        if (reason) {
+            fields.push({
+                name: "Reason",
+                value: utils.shorten(reason, 1024),
+            });
+        }
+
+        if (threadId) {
+            fields.push({
+                name: "Thread ID",
+                value: threadId,
+            });
+        }
+
+        if (enchantUrl) {
+            fields.push({
+                name: "Enchant URL",
+                value: enchantUrl,
+            });
+        }
+
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.blue,
+                    description: `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
+                    fields,
+                    footer: {
+                        text: `ID: ${infringement.id}`,
+                    },
+                },
+            ],
+        });
+    }
+
+    /** GET related reports and votings */
+    public async getRelatedReportsAndVotings(req: Request, res: Response) {
+        const { userId } = req.params;
+        const user = await User.findByUsernameOrOsuId(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const [reports, votings] = await Promise.all([
+            Ticket.find({ type: "report", targetUser: user._id }).populate([
+                { path: "author", select: "username osuId groups coverUrl country" },
+            ]),
+            Voting.find({ category: "user", targetUser: user._id }).populate([
+                { path: "author", select: "username osuId groups coverUrl country" },
+            ]),
+        ]);
+
+        res.json({ reports, votings });
     }
 }
 

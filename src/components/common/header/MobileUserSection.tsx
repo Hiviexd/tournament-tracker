@@ -28,7 +28,7 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
 
     const handleYourTournaments = () => {
         onClose();
-        navigate(`/tournaments?host=${user?.osuId}&state=all`);
+        navigate(`/tournaments?host=${user?.osuId}`);
     };
 
     const handleCustomize = () => {

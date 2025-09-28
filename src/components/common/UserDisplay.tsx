@@ -13,6 +13,7 @@ interface IPropTypes {
     asText?: boolean;
     disablePopover?: boolean;
     showCountryFlag?: boolean;
+    onClick?: () => void;
 }
 
 export default function UserDisplay({
@@ -24,6 +25,7 @@ export default function UserDisplay({
     tooltips,
     disablePopover = false,
     showCountryFlag = false,
+    onClick,
 }: IPropTypes) {
     let userGroups: BadgedUserGroup[] | null;
 
@@ -33,9 +35,22 @@ export default function UserDisplay({
         userGroups = null;
     }
 
+    const handleClick = (e: React.MouseEvent) => {
+        if (onClick) {
+            e.stopPropagation();
+            onClick();
+        }
+    };
+
     return (
         <Group align="center" gap="sm">
-            <Avatar src={avatarUrl ?? user?.avatarUrl} size={40} radius="md" />
+            <Avatar
+                src={avatarUrl ?? user?.avatarUrl}
+                size={40}
+                radius="md"
+                onClick={handleClick}
+                style={{ cursor: onClick ? "pointer" : "default" }}
+            />
             <Stack gap={2}>
                 <UserLink
                     user={user}
@@ -43,6 +58,7 @@ export default function UserDisplay({
                     asText={!!username || asText}
                     c="white"
                     disablePopover={disablePopover}
+                    onClick={onClick ? () => onClick() : undefined}
                 />
                 <Group gap="0.5rem" align="center">
                     {showCountryFlag && user?.country && <CountryFlag country={user.country} />}

@@ -41,6 +41,7 @@ export interface IUser {
     country?: IOsuCountry;
     badgeValue: number;
     email?: string;
+    infringements: IInfringement[];
     createdAt: Date;
     updatedAt: Date;
 
@@ -56,8 +57,44 @@ export interface IUser {
     isCommitteeOrAdmin: boolean;
     tcDuration: number;
     ccDuration: number;
+    latestAction?: IInfringement;
+    activeInfringement?: IInfringement;
 }
 
 export interface IUserStatics extends Model<IUser> {
     findByUsernameOrOsuId: (user: string | number) => Promise<IUser | null>;
+}
+
+// infringements
+
+export enum InfringementType {
+    NOTE = "note",
+    WARNING = "warning",
+    PROBATION = "probation",
+    TOURNAMENT_BAN = "tournament_ban",
+    HOSTING_BAN = "hosting_ban",
+    STAFFING_BAN = "staffing_ban",
+}
+
+export interface IInfringement {
+    _id?: Types.ObjectId;
+    id?: string;
+    type: InfringementType;
+    duration: number;
+    reason: string;
+    threadId?: string;
+    enchantUrl?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+
+    // virtuals
+    isNote?: boolean;
+    isIndefinite?: boolean;
+    typeString?: string;
+    expiresAt?: Date;
+}
+
+export interface WatchlistQuery {
+    userInput?: string;
+    infringementType?: InfringementType;
 }

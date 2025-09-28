@@ -154,8 +154,9 @@ class UserService {
     }
 
     /**
-     * * Sanitize user data based on user permissions
-     * * Removes email from non-committee users
+     * * Removes the following from non-committee users:
+     * * email
+     * * infringements
      * @param targetUser - the user to sanitize
      * @param actor - the user who is receiving the user data
      * @returns the sanitized user
@@ -163,6 +164,9 @@ class UserService {
     public sanitizeUser(targetUser: IUser, actor: IUser | undefined): IUser {
         if (!actor || !actor.isCommitteeOrAdmin) {
             targetUser.email = undefined;
+            targetUser.infringements = [];
+            targetUser.activeInfringement = undefined;
+            targetUser.latestAction = undefined;
         }
 
         return targetUser;

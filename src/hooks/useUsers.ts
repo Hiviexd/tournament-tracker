@@ -3,6 +3,8 @@ import utils from "../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
 import { IUser, UpdateUserGroupsRequest, UpdateBadgeRequest } from "../../interfaces/User";
+import { ITicket } from "../../interfaces/Ticket";
+import { IVoting } from "../../interfaces/Voting";
 
 export function useUsers(search: string, limit?: number) {
     return useQuery({
@@ -250,5 +252,116 @@ export function useCycleBag() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
         },
+    });
+}
+
+export function useWatchlist(params?: { userInput?: string; infringementType?: string }) {
+    return useQuery({
+        queryKey: ["watchlist", params],
+        queryFn: () =>
+            utils.apiCall<IUser[]>({
+                method: "get",
+                url: "/api/users/watchlist",
+                params,
+            }),
+    });
+}
+
+export function useAddInfringement() {
+    const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (data: {
+            userId: string;
+            type: string;
+            duration: number;
+            reason: string;
+            threadId?: string;
+            enchantUrl?: string;
+        }) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/users/${data.userId}/addInfringement`,
+                data: {
+                    type: data.type,
+                    duration: data.duration,
+                    reason: data.reason,
+                    threadId: data.threadId,
+                    enchantUrl: data.enchantUrl,
+                },
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: (responseData, variables) => {
+            const userId = variables.userId;
+
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+
+            if (selectedUser?.id === userId) {
+                const res = responseData as { message: string; user: IUser };
+                if (res.user) {
+                    setSelectedUser(res.user);
+                }
+            }
+        },
+    });
+}
+
+export function useUpdateInfringement() {
+    const queryClient = useQueryClient();
+    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (data: {
+            userId: string;
+            infringementId: string;
+            duration: number;
+            reason: string;
+            threadId?: string;
+            enchantUrl?: string;
+        }) => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${data.userId}/updateInfringement/${data.infringementId}`,
+                data: {
+                    duration: data.duration,
+                    reason: data.reason,
+                    threadId: data.threadId,
+                    enchantUrl: data.enchantUrl,
+                },
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: (responseData, variables) => {
+            const userId = variables.userId;
+
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+
+            if (selectedUser?.id === userId) {
+                const res = responseData as { message: string; user: IUser };
+                if (res.user) {
+                    setSelectedUser(res.user);
+                }
+            }
+        },
+    });
+}
+
+export function useRelatedReportsAndVotings(userId: string) {
+    return useQuery({
+        queryKey: ["relatedReportsAndVotings", userId],
+        queryFn: () =>
+            utils.apiCall<{ reports: ITicket[]; votings: IVoting[] }>({
+                method: "get",
+                url: `/api/users/${userId}/relatedReportsAndVotings`,
+            }),
+        enabled: !!userId,
     });
 }

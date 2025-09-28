@@ -149,6 +149,11 @@ export const seoRoutes: SEORoute[] = [
         name: "Dashboard",
         description: "Catch up on what needs your attention in the team.",
     },
+    {
+        path: "/watchlist",
+        name: "Watchlist",
+        description: "Track user infringements.",
+    },
 ];
 
 export const defaultMetadata: SEOMetadata = {

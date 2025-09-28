@@ -1,6 +1,7 @@
 import { Anchor, ScrollArea, Table, Text, type MantineSize } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 
@@ -19,7 +20,7 @@ export default function MarkdownText({ content, className, allowHtml = false, si
     return (
         <div className={`markdown-content ${className || ""}`}>
             <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkBreaks]}
                 rehypePlugins={allowHtml ? [rehypeRaw, rehypeSlug] : [rehypeSlug]}
                 components={{
                     p: ({ children }) => (
@@ -41,6 +42,11 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                         <ScrollArea>
                             <Table w="fit-content">{children}</Table>
                         </ScrollArea>
+                    ),
+                    li: ({ children }) => (
+                        <Text size={size} component="li" style={{ margin: 0 }}>
+                            {children}
+                        </Text>
                     ),
                 }}>
                 {content}

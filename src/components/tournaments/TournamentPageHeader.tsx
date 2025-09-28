@@ -56,7 +56,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
                 </Group>
 
                 <Text size="sm" c="dimmed">
-                    Hosted by <UserLink user={tournament.host} />
+                    Hosted by <UserLink user={tournament.host} displayActiveInfringement />
                 </Text>
 
                 <Group gap="xs" justify="space-between">

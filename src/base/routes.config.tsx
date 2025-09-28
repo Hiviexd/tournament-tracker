@@ -22,6 +22,7 @@ import QuotesPage from "../pages/QuotesPage";
 import TemplatesPage from "../pages/TemplatesPage";
 import DashboardPage from "../pages/DashboardPage";
 import ApiKeysPage from "../pages/ApiKeysPage";
+import WatchlistPage from "../pages/WatchlistPage";
 
 interface RouteConfig {
     path: string;
@@ -244,6 +245,13 @@ const routes: RouteConfig[] = [
         title: "API Keys",
         icon: "key",
         permissions: ["dev"],
+    },
+    {
+        path: "/watchlist",
+        page: <WatchlistPage />,
+        title: "Watchlist",
+        icon: "user-shield",
+        permissions: ["committee"],
     },
     {
         path: "*",

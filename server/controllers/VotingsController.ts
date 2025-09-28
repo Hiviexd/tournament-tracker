@@ -262,6 +262,7 @@ class VotingsController {
             description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             color: webhookColors.lightYellow,
             fields,
+            footer: { text: `ID: ${voting._id}` },
         };
 
         await DiscordService.sendRoleHighlightWebhook({

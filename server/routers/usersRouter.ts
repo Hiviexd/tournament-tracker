@@ -10,6 +10,8 @@ usersRouter.get("/", auth.optionalAuth, UsersController.index);
 usersRouter.get("/me", requireScopes(["users:read"]), auth.isLoggedIn, UsersController.getSelf);
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
+usersRouter.get("/watchlist", auth.isLoggedIn, auth.isCommittee, UsersController.getWatchlist);
+usersRouter.get("/:userId/relatedReportsAndVotings", auth.isLoggedIn, auth.isCommittee, UsersController.getRelatedReportsAndVotings);
 usersRouter.get("/:userInput", auth.optionalAuth, UsersController.getUser);
 usersRouter.get("/:userInput/osu", auth.isLoggedIn, UsersController.getOsuUserInfo);
 usersRouter.patch(
@@ -25,5 +27,7 @@ usersRouter.patch("/:userId/updateDiscordId", auth.isLoggedIn, auth.isCommittee,
 usersRouter.patch("/:userId/updateEmail", auth.isLoggedIn, auth.isCommittee, UsersController.updateEmail);
 usersRouter.get("/:userId/reviewStats", auth.isLoggedIn, auth.isCommittee, UsersController.getReviewStats);
 usersRouter.patch("/cycleBag", auth.isLoggedIn, auth.isAdmin, UsersController.cycleBag);
+usersRouter.post("/:userId/addInfringement", auth.isLoggedIn, auth.isCommittee, UsersController.addInfringement);
+usersRouter.patch("/:userId/updateInfringement/:infringementId", auth.isLoggedIn, auth.isCommittee, UsersController.updateInfringement);
 
 export default usersRouter;
