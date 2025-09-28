@@ -7,6 +7,7 @@ import { IVoting } from "@interfaces/Voting";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
 import utils from "../../utils";
+import UserService from "./UserService";
 
 class TournamentService {
     /**
@@ -32,9 +33,9 @@ class TournamentService {
      */
     public sanitizeTournamentListing(
         tournament: FlattenMaps<ITournament>,
-        user: IUser | undefined
+        actor: IUser | undefined
     ): FlattenMaps<ITournament> {
-        if (!user || !user.isCommitteeOrAdmin) {
+        if (!actor || !actor.isCommitteeOrAdmin) {
             const sanitized = { ...tournament };
             sanitized.reviews = [];
             sanitized.assignedReviewers = [];
@@ -42,6 +43,11 @@ class TournamentService {
             sanitized.enchantUrl = undefined;
             sanitized.notes = [];
             sanitized.logs = [];
+
+            // sanitize host and winners with UserService
+            sanitized.host = UserService.sanitizeUser(sanitized.host, actor);
+            sanitized.winners = sanitized.winners?.map((winner) => UserService.sanitizeUser(winner, actor));
+
             return sanitized;
         }
 
