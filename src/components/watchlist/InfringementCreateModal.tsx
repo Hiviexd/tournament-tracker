@@ -1,6 +1,6 @@
 import { Modal, TextInput, Stack, Select, NumberInput, Button, Group, Text, Checkbox, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import UserSearch from "../common/UserSearch";
 import TextEditor from "../common/TextEditor";
 import { useAddInfringement } from "../../hooks/useUsers";
@@ -8,6 +8,8 @@ import { InfringementType, IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import _ from "lodash";
 import utils from "../../../utils";
+import { useConfirmModal } from "../../hooks/useModals";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     opened: boolean;
@@ -16,9 +18,12 @@ interface IProps {
 }
 
 export default function InfringementCreateModal({ opened, onClose, preselectedUser }: IProps) {
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(preselectedUser || null);
     const preselectedUserId = preselectedUser?.id;
+
     const addInfringementMutation = useAddInfringement();
     const autoSaveKey = "infringement-create-reason";
+    const confirmModal = useConfirmModal();
 
     const form = useForm({
         initialValues: {
@@ -36,7 +41,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             },
             type: (value) => (!value ? "Infringement type is required" : null),
             duration: (value) => {
-                if (disableDuration || form.values.isIndefinite) return null;
+                if (isNotPunishment || form.values.isIndefinite) return null;
                 if (value < 1) return "Duration cannot be less than 1";
                 return null;
             },
@@ -64,7 +69,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [preselectedUserId]); // Cannot add form to dependencies to avoid infinite loop
 
-    const disableDuration =
+    const isNotPunishment =
         form.values.type === InfringementType.NOTE ||
         form.values.type === InfringementType.WARNING ||
         form.values.type === InfringementType.PROBATION;
@@ -78,10 +83,28 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
     ];
 
+    const handleSelectUser = (user: IUser | null) => {
+        setSelectedUser(user);
+        form.setFieldValue("userId", user?.id || "");
+    };
+
     const handleSubmit = async (values: typeof form.values) => {
         try {
             let duration = values.isIndefinite ? -1 : values.duration;
-            if (disableDuration) duration = 0;
+            if (isNotPunishment) duration = 0;
+
+            let confirmed = true;
+            const activeInfringement = preselectedUser?.activeInfringement || selectedUser?.activeInfringement;
+            if (activeInfringement && !isNotPunishment) {
+                confirmed = await confirmModal({
+                    title: "Add Infringement",
+                    text: `This user has an active ${activeInfringement.typeString}. Adding a new infringement will expire the active one. Are you sure you want to add this infringement?`,
+                    confirmText: "Add Infringement",
+                    confirmProps: { color: "primary", leftSection: <FontAwesomeIcon icon="gavel" /> },
+                });
+            }
+
+            if (!confirmed) return;
 
             await addInfringementMutation.mutateAsync({
                 userId: values.userId,
@@ -127,7 +150,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                     {!preselectedUserId && (
                         <UserSearch
                             label="User"
-                            onChange={(user) => form.setFieldValue("userId", user?.id || "")}
+                            onChange={handleSelectUser}
                             error={form.errors.userId}
                             required
                             allowUserCreation
@@ -143,7 +166,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                         {...form.getInputProps("type")}
                     />
 
-                    {!disableDuration && (
+                    {!isNotPunishment && (
                         <Stack gap="xs">
                             <NumberInput
                                 label="Duration (in days)"
