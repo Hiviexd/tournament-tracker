@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
-import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
+import {
+    Modal,
+    TextInput,
+    Stack,
+    Select,
+    MultiSelect,
+    Button,
+    Group,
+    LoadingOverlay,
+    TagsInput,
+    Pill,
+    ActionIcon,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
-import UserSearch from "../common/UserSearch";
+import UserSearch, { UserSearchRef } from "../common/UserSearch";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
 import AlertText from "../common/AlertText";
 import { IUser } from "../../../interfaces/User";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { notifications } from "@mantine/notifications";
 
 interface IProps {
     opened: boolean;
@@ -17,13 +31,15 @@ interface IProps {
 
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
+    const [selectedHosts, setSelectedHosts] = useState<IUser[]>([]);
     const [selectedHost, setSelectedHost] = useState<IUser | null>(null);
+    const userSearchRef = useRef<UserSearchRef>(null);
     const navigate = useNavigate();
 
     const form = useForm({
         initialValues: {
             name: "",
-            hostId: "",
+            hostIds: [] as string[],
             modes: [] as GameMode[],
             type: "" as TournamentType,
             status: "" as TournamentStatus,
@@ -40,7 +56,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                 if (!utils.isLatinScriptOnly(value)) return "Name must be in Latin script (no Cyrillic, Chinese, etc.)";
                 return null;
             },
-            hostId: (value) => (!value ? "Host is required" : null),
+            hostIds: (value) => (value.length === 0 ? "At least one host is required" : null),
             modes: (value) => (value.length === 0 ? "At least one game mode is required" : null),
             type: (value) => (!value ? "Type is required" : null),
             forumUrl: (value) => {
@@ -63,15 +79,40 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         },
     });
 
-    const handleSelectHost = (host: IUser | null) => {
-        setSelectedHost(host);
-        form.setFieldValue("hostId", host?.id || "");
+    const handleAddHost = (host: IUser) => {
+        if (!selectedHosts.some((h) => h._id === host._id)) {
+            const newHosts = [...selectedHosts, host];
+            setSelectedHosts(newHosts);
+            form.setFieldValue(
+                "hostIds",
+                newHosts.map((h) => h.id)
+            );
+            setSelectedHost(null);
+            userSearchRef.current?.clearSelection();
+        } else {
+            notifications.show({
+                title: "User already in list",
+                message: "This user is already in the list of hosts",
+                color: "red",
+            });
+        }
+    };
+
+    const handleRemoveHost = (hostId: string) => {
+        const newHosts = selectedHosts.filter((h) => h.id !== hostId);
+        setSelectedHosts(newHosts);
+        form.setFieldValue(
+            "hostIds",
+            newHosts.map((h) => h.id)
+        );
     };
 
     const handleSubmit = async (values) => {
         try {
             const res = await createTournamentMutation.mutateAsync(values);
             form.reset();
+            setSelectedHosts([]);
+            setSelectedHost(null);
             onClose();
             navigate(`/tournaments/${res.tournament._id}`);
         } catch (error) {
@@ -109,19 +150,66 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                     />
 
                     <Stack gap="xs">
-                        <UserSearch
-                            label="Host"
-                            onChange={(user) => handleSelectHost(user || null)}
-                            error={form.errors.hostId}
-                            required
-                            allowUserCreation
-                        />
+                        <label style={{ fontWeight: 500, fontSize: "14px" }}>
+                            Hosts <span style={{ color: "var(--mantine-color-red-filled)" }}>*</span>
+                        </label>
 
-                        {selectedHost?.activeInfringement && (
+                        {selectedHosts.length > 0 ? (
+                            <Pill.Group>
+                                {selectedHosts.map((host) => (
+                                    <Pill
+                                        key={host.id}
+                                        withRemoveButton
+                                        onRemove={() => handleRemoveHost(host.id)}
+                                        styles={{
+                                            root: {
+                                                backgroundColor: "var(--mantine-color-primary-light)",
+                                                color: "var(--mantine-color-primary-light-color)",
+                                            },
+                                            label: { fontWeight: 700 },
+                                        }}>
+                                        {host.username}
+                                    </Pill>
+                                ))}
+                            </Pill.Group>
+                        ) : null}
+
+                        <Group align="center" gap="xs" w="100%" wrap="nowrap">
+                            <UserSearch
+                                ref={userSearchRef}
+                                onChange={setSelectedHost}
+                                onEnterWhenSelected={() => {
+                                    if (selectedHost) {
+                                        handleAddHost(selectedHost);
+                                    }
+                                }}
+                                placeholder="Search for a host to add..."
+                                allowUserCreation
+                            />
+                            <ActionIcon
+                                variant="light"
+                                onClick={() => {
+                                    if (selectedHost) {
+                                        handleAddHost(selectedHost);
+                                    }
+                                }}
+                                color="success"
+                                size="lg"
+                                disabled={!selectedHost}
+                                title="Add host">
+                                <FontAwesomeIcon icon="plus" />
+                            </ActionIcon>
+                        </Group>
+
+                        {form.errors.hostIds && (
+                            <div style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                {form.errors.hostIds}
+                            </div>
+                        )}
+
+                        {selectedHosts.some((host) => host.activeInfringement) && (
                             <AlertText size="xs" type="danger">
-                                {selectedHost.username} has an{" "}
-                                {selectedHost.activeInfringement.isIndefinite ? "indefinite" : "active"}{" "}
-                                {selectedHost.activeInfringement.typeString}!
+                                Some hosts have active infringements!
                             </AlertText>
                         )}
                     </Stack>
@@ -192,7 +280,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         <Button
                             type="submit"
                             loading={createTournamentMutation.isPending}
-                            disabled={!!selectedHost?.activeInfringement}>
+                            disabled={selectedHosts.some((host) => host.activeInfringement)}>
                             Create Tournament
                         </Button>
                     </Group>

@@ -44,8 +44,8 @@ class TournamentService {
             sanitized.notes = [];
             sanitized.logs = [];
 
-            // sanitize host and winners with UserService
-            sanitized.host = UserService.sanitizeUser(sanitized.host, actor);
+            // sanitize hosts and winners with UserService
+            sanitized.hosts = sanitized.hosts?.map((host) => UserService.sanitizeUser(host, actor));
             sanitized.winners = sanitized.winners?.map((winner) => UserService.sanitizeUser(winner, actor));
 
             return sanitized;
@@ -55,12 +55,16 @@ class TournamentService {
     }
 
     /**
-     * Censors reviews from non-committee users
+     * Censor data from a given tournament
+     * This is different from the one above because we have special handling for reviews
+     * maybe we can just use this one after all?
      */
-    public censorTournamentReviews<T extends ITournament>(tournament: T, user: IUser | undefined) {
+    public censorTournamentData<T extends ITournament>(tournament: T, user: IUser | undefined) {
         if (!user || !user.isCommitteeOrAdmin) {
-            // outright clear the reviews array if the user is not the tournament host, or if the status is not changesRequested
-            if (!user || !tournament.host._id.equals(user._id) || tournament.status !== "changesRequested") {
+            // outright clear the reviews array if the user is not a tournament host, or if the status is not changesRequested
+            const isHost = user && tournament.hosts && tournament.hosts.some((host) => host._id.equals(user._id));
+
+            if (!user || !isHost || tournament.status !== "changesRequested") {
                 tournament.reviews = [];
             } else {
                 // Censor reviews
@@ -72,6 +76,13 @@ class TournamentService {
                     });
                 }
             }
+            tournament.hosts = tournament.hosts?.map((host) => UserService.sanitizeUser(host, user));
+            tournament.winners = tournament.winners?.map((winner) => UserService.sanitizeUser(winner, user));
+            tournament.assignedReviewers = [];
+            tournament.threadId = undefined;
+            tournament.enchantUrl = undefined;
+            tournament.notes = [];
+            tournament.logs = [];
         }
 
         return tournament;

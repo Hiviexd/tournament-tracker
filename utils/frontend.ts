@@ -1,3 +1,4 @@
+import React from "react";
 import { IUser } from "../interfaces/User";
 import {
     IVote,
@@ -390,4 +391,52 @@ export const apiCall = async <T = any>({
  */
 export function isExternalLink(link: string): boolean {
     return link.startsWith("http") || link.startsWith("//") || link.startsWith("mailto:") || link.startsWith("tel:");
+}
+
+/**
+ * Formats a list of React elements using Intl.ListFormat logic
+ * @param elements Array of React elements to format
+ * @param options Optional formatting options
+ * @returns Array of React elements with proper separators
+ */
+export function formatElementsList(
+    elements: React.ReactNode[],
+    options: { style?: "long" | "short" | "narrow"; type?: "conjunction" | "disjunction" | "unit" } = {}
+): React.ReactNode[] {
+    if (!elements || elements.length === 0) return [];
+    if (elements.length === 1) return elements;
+
+    const { style = "long", type = "conjunction" } = options;
+    const formatter = new (Intl as any).ListFormat("en", { style, type });
+
+    const result: React.ReactNode[] = [];
+
+    if (elements.length === 2) {
+        // For 2 items: "A and B" or "A or B"
+        const sampleFormatted = formatter.format(["A", "B"]);
+        const separator = sampleFormatted.replace("A", "").replace("B", "").trim();
+
+        result.push(elements[0]);
+        result.push(` ${separator} `);
+        result.push(elements[1]);
+    } else {
+        // For 3+ items: "A, B, and C"
+        const sampleFormatted = formatter.format(["A", "B", "C"]);
+        // Extract the pattern between B and C
+        const bToCPattern = sampleFormatted.substring(sampleFormatted.indexOf("B") + 1, sampleFormatted.indexOf("C"));
+
+        for (let i = 0; i < elements.length; i++) {
+            result.push(elements[i]);
+
+            if (i < elements.length - 2) {
+                // Regular separator (comma)
+                result.push(", ");
+            } else if (i === elements.length - 2) {
+                // Last separator (", and" or similar)
+                result.push(bToCPattern);
+            }
+        }
+    }
+
+    return result;
 }

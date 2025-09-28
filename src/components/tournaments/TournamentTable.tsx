@@ -12,6 +12,7 @@ import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TruncatedText } from "../common/TruncatedText";
+import utils from "../../../utils";
 
 interface IProps {
     tournaments: ITournament[];
@@ -72,7 +73,22 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                                     </Table.Td>
 
                                     <Table.Td>
-                                        <UserLink user={tournament.host} fw={500} displayActiveInfringement />
+                                        {tournament.hosts.length === 1 ? (
+                                            <UserLink user={tournament.hosts[0]} fw={500} displayActiveInfringement />
+                                        ) : (
+                                            <Group gap={4} align="center">
+                                                <UserLink
+                                                    user={tournament.hosts[0]}
+                                                    fw={500}
+                                                    displayActiveInfringement
+                                                />
+                                                <Tooltip label={utils.formatHostsList(tournament.hosts)}>
+                                                    <Text size="xs" c="dimmed" style={{ lineHeight: "normal" }}>
+                                                        +{tournament.hosts.length - 1}
+                                                    </Text>
+                                                </Tooltip>
+                                            </Group>
+                                        )}
                                     </Table.Td>
 
                                     <Table.Td>

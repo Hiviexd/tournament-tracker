@@ -22,7 +22,15 @@ const TournamentSchema = new Schema<ITournament>(
         forumUrl: { type: String },
         bannerUrl: { type: String },
         threadId: { type: String },
-        host: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        hosts: {
+            type: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
+            validate: {
+                validator(hosts: any[]) {
+                    return hosts && hosts.length > 0;
+                },
+                message: "At least one host is required",
+            },
+        },
         type: { type: String, required: true },
         status: { type: String, required: true },
         isActive: { type: Boolean, default: true },

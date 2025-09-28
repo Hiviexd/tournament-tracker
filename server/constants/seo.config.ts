@@ -2,6 +2,7 @@ import TournamentModel from "../models/tournamentModel";
 import VotingModel from "../models/votingModel";
 import TicketModel from "../models/ticketModel";
 import _ from "lodash";
+import utils from "../../utils";
 
 interface SEORoute {
     path: string;
@@ -37,7 +38,7 @@ export const seoRoutes: SEORoute[] = [
         model: "Tournament",
         modelId: "tournamentId",
         getMetadata: (tournament) => ({
-            description: `${_.capitalize(tournament.type)} hosted by ${tournament.host.username}`,
+            description: `${_.capitalize(tournament.type)} hosted by ${utils.formatHostsList(tournament.hosts)}`,
             image: tournament.bannerUrl,
         }),
     },
@@ -97,7 +98,10 @@ export const seoRoutes: SEORoute[] = [
         getMetadata: (ticket) => {
             return {
                 title: `${ticket.title} - ${_.capitalize(ticket.type)} Details`,
-                description: ticket.type === "ticket" ? `Ticket created by ${ticket.author.username}`: `View and discuss this report.`,
+                description:
+                    ticket.type === "ticket"
+                        ? `Ticket created by ${ticket.author.username}`
+                        : `View and discuss this report.`,
             };
         },
     },

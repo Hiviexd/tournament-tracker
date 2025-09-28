@@ -58,7 +58,7 @@ export default function UserLink({
                     href={onClick ? undefined : `https://osu.ppy.sh/users/${user?.osuId}`}
                     target={onClick ? undefined : "_blank"}
                     style={{ cursor: "pointer" }}>
-                    {user?.username ?? "Unknown"}{" "}
+                    {user?.username ?? "Unknown"}
                     {displayActiveInfringement && user?.activeInfringement && (
                         <BanIconBadge infringement={user?.activeInfringement} />
                     )}

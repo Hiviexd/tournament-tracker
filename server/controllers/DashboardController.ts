@@ -6,7 +6,7 @@ import { IDashboardResponse } from "../../interfaces/Dashboard";
 
 const TOURNAMENT_POPULATE = [
     {
-        path: "host",
+        path: "hosts",
         select: "username osuId groups coverUrl country",
     },
     {

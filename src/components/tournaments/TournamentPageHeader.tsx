@@ -5,6 +5,7 @@ import DateBadge from "../common/badges/DateBadge";
 import UserLink from "../common/UserLink";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import { useImageLoad } from "../../hooks/useImageLoad";
+import utils from "../../../utils";
 
 interface IProps {
     tournament: ITournament;
@@ -15,6 +16,12 @@ export default function TournamentPageHeader({ tournament }: IProps) {
 
     // Use fallback image if there's an error or no banner URL
     const bannerImageUrl = error || !tournament.bannerUrl ? "/assets/default-banner.jpg" : tournament.bannerUrl;
+
+    const userLinkElements = tournament.hosts.map((host) => (
+        <UserLink key={host.id} user={host} displayActiveInfringement />
+    ));
+
+    const formattedUserLinks = utils.formatElementsList(userLinkElements);
 
     return (
         <Card shadow="sm" p="0" radius="md">
@@ -56,7 +63,7 @@ export default function TournamentPageHeader({ tournament }: IProps) {
                 </Group>
 
                 <Text size="sm" c="dimmed">
-                    Hosted by <UserLink user={tournament.host} displayActiveInfringement />
+                    Hosted by {formattedUserLinks}
                 </Text>
 
                 <Group gap="xs" justify="space-between">
