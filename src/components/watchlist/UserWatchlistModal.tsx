@@ -116,7 +116,7 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
                             Add Infringement
                         </Button>
 
-                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" verticalSpacing="lg">
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" verticalSpacing="lg" mt="xs">
                             {isLoadingRelatedReportsAndVotings ? (
                                 <>
                                     <Skeleton height={46} radius="sm" />
