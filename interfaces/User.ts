@@ -77,6 +77,8 @@ export enum InfringementType {
 }
 
 export interface IInfringement {
+    _id?: Types.ObjectId;
+    id?: string;
     type: InfringementType;
     duration: number;
     reason: string;

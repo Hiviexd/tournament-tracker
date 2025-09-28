@@ -2,7 +2,6 @@ import { Stack, Text, Divider, Badge, Group } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import InfringementCard from "./InfringementCard";
 import EmptyState from "../common/EmptyState";
-import _ from "lodash";
 
 interface IProps {
     user: IUser;
@@ -13,7 +12,8 @@ export default function UserInfringementsList({ user }: IProps) {
 
     // Exclude active infringement
     const historicalInfringements = user.infringements
-        .filter((infringement) => !_.isEqual(activeInfringement, infringement))
+        // filter by id
+        .filter((infringement) => infringement.id !== activeInfringement?.id)
         .sort((a, b) => {
             // Sort by creation date (most recent first)
             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;

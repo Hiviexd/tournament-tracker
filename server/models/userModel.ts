@@ -16,7 +16,7 @@ const InfringementSchema = new Schema<IInfringement>(
         threadId: { type: String },
         enchantUrl: { type: String },
     },
-    { _id: false, timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+    { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 InfringementSchema.virtual("isNote").get(function (this: IInfringement) {
@@ -134,7 +134,6 @@ UserSchema.virtual("latestAction").get(function (this: IUser) {
     if (!this.infringements || this.infringements.length === 0) return null;
     return this.infringements.sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0];
 });
-
 
 UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, userInput: string | number) {
     const osuId = parseInt(userInput as string, 10);
