@@ -17,6 +17,7 @@ import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import config from "../../config.json";
 import { useSearchParams } from "react-router-dom";
+import InfringementReasonHoverCard from "../components/watchlist/InfringementReasonHoverCard";
 
 interface FilterValues {
     search: string;
@@ -108,6 +109,7 @@ export default function WatchlistPage() {
                             <Table.Th>Active Infringement</Table.Th>
                             <Table.Th>Duration</Table.Th>
                             <Table.Th>Expiration</Table.Th>
+                            <Table.Th ta="center">Reason</Table.Th>
                             <Table.Th ta="center">Enchant</Table.Th>
                             <Table.Th ta="center">Thread</Table.Th>
                         </Table.Tr>
@@ -128,7 +130,13 @@ export default function WatchlistPage() {
                                     <Skeleton height={20} width={80} />
                                 </Table.Td>
                                 <Table.Td>
+                                    <Skeleton height={20} width={100} />
+                                </Table.Td>
+                                <Table.Td ta="center">
                                     <Skeleton height={20} width={40} />
+                                </Table.Td>
+                                <Table.Td>
+                                    <Skeleton height={20} width={100} />
                                 </Table.Td>
                                 <Table.Td ta="center">
                                     <Skeleton height={20} width={40} />
@@ -177,6 +185,7 @@ export default function WatchlistPage() {
                                     <Table.Th>Active Infringement</Table.Th>
                                     <Table.Th>Duration</Table.Th>
                                     <Table.Th>Expiration</Table.Th>
+                                    <Table.Th ta="center">Reason</Table.Th>
                                     <Table.Th ta="center">Enchant</Table.Th>
                                     <Table.Th ta="center">Thread</Table.Th>
                                 </Table.Tr>
@@ -185,7 +194,11 @@ export default function WatchlistPage() {
                                 {filteredUsers.map((user) => (
                                     <Table.Tr key={user.id}>
                                         <Table.Td>
-                                            <UserDisplay user={user} onClick={() => handleUserSelect(user)} disablePopover />
+                                            <UserDisplay
+                                                user={user}
+                                                onClick={() => handleUserSelect(user)}
+                                                disablePopover
+                                            />
                                         </Table.Td>
                                         <Table.Td>
                                             <InfringementBadge
@@ -199,6 +212,11 @@ export default function WatchlistPage() {
                                         </Table.Td>
                                         <Table.Td>
                                             <InfringementExpirationBadge
+                                                infringement={user.activeInfringement || user.latestAction}
+                                            />
+                                        </Table.Td>
+                                        <Table.Td ta="center">
+                                            <InfringementReasonHoverCard
                                                 infringement={user.activeInfringement || user.latestAction}
                                             />
                                         </Table.Td>
