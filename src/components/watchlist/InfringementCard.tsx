@@ -1,4 +1,4 @@
-import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip } from "@mantine/core";
+import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip, Divider } from "@mantine/core";
 import { IInfringement } from "../../../interfaces/User";
 import InfringementBadge from "../common/badges/InfringementBadge";
 import InfringementDurationBadge from "../common/badges/InfringementDurationBadge";
@@ -12,53 +12,83 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface IProps {
     infringement: IInfringement;
     isActive: boolean;
+    onEdit?: (infringement: IInfringement) => void;
 }
 
-export default function InfringementCard({ infringement, isActive }: IProps) {
+export default function InfringementCard({ infringement, isActive, onEdit }: IProps) {
     const getDiscordThreadLink = (threadId: string) => {
         return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
+    };
+
+    const handleEdit = () => {
+        onEdit?.(infringement);
+    };
+
+    const cardContent = (mobileAlign: "flex-start" | "flex-end") => {
+        return (
+            <>
+                <Stack gap="xs">
+                    <Group gap="xs">
+                        <InfringementBadge infringement={infringement} size="sm" />
+                        {isActive && (
+                            <Badge variant="light" color="green" size="sm">
+                                Active
+                            </Badge>
+                        )}
+                    </Group>
+                    {infringement.reason && <MarkdownText content={infringement.reason} size="sm" />}
+                </Stack>
+                <Stack gap="xs" align={mobileAlign} style={{ flexShrink: 0 }}>
+                    <Group gap={6} align="center" wrap="nowrap">
+                        <Text size="xs" c="dimmed">
+                            Duration:
+                        </Text>
+                        <InfringementDurationBadge infringement={infringement} size="sm" />
+                    </Group>
+                    <Group gap={6} align="center" wrap="nowrap">
+                        <Text size="xs" c="dimmed">
+                            Expires:
+                        </Text>
+                        <InfringementExpirationBadge infringement={infringement} size="sm" />
+                    </Group>
+                </Stack>
+            </>
+        );
     };
 
     return (
         <Card key={`${infringement.type}-${infringement.createdAt}`} bg="primary.10" shadow="sm" p="md" radius="md">
             <Stack gap="sm">
-                <Group justify="space-between" align="flex-start" wrap="nowrap">
-                    <Stack gap="xs">
-                        <Group gap="xs">
-                            <InfringementBadge infringement={infringement} size="sm" />
-                            {isActive && (
-                                <Badge variant="light" color="green" size="sm">
-                                    Active
-                                </Badge>
-                            )}
-                        </Group>
-                        {infringement.reason && <MarkdownText content={infringement.reason} size="sm" />}
-                    </Stack>
-                    <Stack gap="xs" align="flex-end" style={{ flexShrink: 0 }}>
-                        <Group gap={6} align="center" wrap="nowrap">
-                            <Text size="xs" c="dimmed">
-                                Duration:
-                            </Text>
-                            <InfringementDurationBadge infringement={infringement} size="sm" />
-                        </Group>
-                        <Group gap={6} align="center" wrap="nowrap">
-                            <Text size="xs" c="dimmed">
-                                Expires:
-                            </Text>
-                            <InfringementExpirationBadge infringement={infringement} size="sm" />
-                        </Group>
-                    </Stack>
+                {/* Desktop version */}
+                <Group visibleFrom="sm" justify="space-between" align="flex-start" wrap="nowrap">
+                    {cardContent("flex-end")}
                 </Group>
+
+                {/* Mobile version */}
+                <Stack hiddenFrom="sm" justify="space-between" align="flex-start">
+                    {cardContent("flex-start")}
+                </Stack>
 
                 <Group justify="space-between" align="center">
                     <Group gap="xs">
                         {infringement.createdAt && (
-                            <Group gap={5}>
+                            <Group gap={6}>
                                 <Text size="xs" c="dimmed">
                                     Created:
                                 </Text>
                                 <DateBadge date={infringement.createdAt} size="xs" staticColor />
                             </Group>
+                        )}
+                        {infringement.updatedAt && infringement.updatedAt > infringement.createdAt! && (
+                            <>
+                                <Divider orientation="vertical" />
+                                <Group gap={6}>
+                                    <Text size="xs" c="dimmed">
+                                        Updated:
+                                    </Text>
+                                    <DateBadge date={infringement.updatedAt} size="xs" staticColor />
+                                </Group>
+                            </>
                         )}
                     </Group>
 
@@ -82,6 +112,17 @@ export default function InfringementCard({ infringement, isActive }: IProps) {
                                 size="md"
                                 color="primary"
                             />
+                        )}
+                        {onEdit && (
+                            <Tooltip label="Edit infringement">
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="info"
+                                    onClick={handleEdit}
+                                    aria-label="Edit infringement">
+                                    <FontAwesomeIcon icon="edit" />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
                     </Group>
                 </Group>

@@ -28,5 +28,6 @@ usersRouter.patch("/:userId/updateEmail", auth.isLoggedIn, auth.isCommittee, Use
 usersRouter.get("/:userId/reviewStats", auth.isLoggedIn, auth.isCommittee, UsersController.getReviewStats);
 usersRouter.patch("/cycleBag", auth.isLoggedIn, auth.isAdmin, UsersController.cycleBag);
 usersRouter.post("/:userId/addInfringement", auth.isLoggedIn, auth.isCommittee, UsersController.addInfringement);
+usersRouter.patch("/:userId/updateInfringement/:infringementId", auth.isLoggedIn, auth.isCommittee, UsersController.updateInfringement);
 
 export default usersRouter;

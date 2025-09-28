@@ -503,9 +503,7 @@ class UsersController {
         // Logging
         await LogService.generate(
             req.session.mongoId!,
-            `Added **${_.startCase(type)}** infringement to [**${user.username}**](https://osu.ppy.sh/users/${
-                user.osuId
-            })`,
+            `Added **${_.startCase(type)}** infringement to [**${user.username}**](${user.osuProfileUrl})`,
             "user"
         );
 
@@ -539,10 +537,107 @@ class UsersController {
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
                     color: duration === -1 ? webhookColors.darkRed : typeColorMap[type],
-                    description: `Added **${_.startCase(type)}** to [**${user.username}**](https://osu.ppy.sh/users/${
-                        user.osuId
-                    })`,
+                    description: `Added **${_.startCase(type)}** to [**${user.username}**](${user.osuProfileUrl})`,
                     fields,
+                    footer: {
+                        text: `ID: ${user.infringements[user.infringements.length - 1].id}`,
+                    },
+                },
+            ],
+        });
+    }
+
+    /** PATCH update infringement */
+    public async updateInfringement(req: Request, res: Response) {
+        const { userId, infringementId } = req.params;
+        const { duration, reason, threadId, enchantUrl } = req.body;
+
+        if (reason && (typeof reason !== "string" || reason?.trim() === "")) {
+            return res.status(400).json({ error: "Reason must be a non-empty string" });
+        }
+
+        if (threadId && (typeof threadId !== "string" || threadId?.trim() === "")) {
+            return res.status(400).json({ error: "Thread ID must be a non-empty string" });
+        }
+
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
+            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
+        }
+
+        const user = await User.findById(userId).orFail();
+
+        const infringement = user.infringements.find((infringement) => infringement.id === infringementId);
+
+        if (!infringement) {
+            return res.status(404).json({ error: "Infringement not found" });
+        }
+
+        const isNotPunishment =
+            infringement.type === InfringementType.NOTE ||
+            infringement.type === InfringementType.WARNING ||
+            infringement.type === InfringementType.PROBATION;
+
+        if (duration && duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
+            return res.status(400).json({ error: "Invalid duration" });
+        }
+
+        infringement.duration = duration;
+        infringement.reason = reason;
+        infringement.threadId = utils.extractDiscordThreadId(threadId) || undefined;
+        infringement.enchantUrl = enchantUrl;
+
+        await user.save();
+
+        res.json({ message: "Infringement updated successfully!", user });
+
+        // Logging
+        await LogService.generate(
+            req.session.mongoId!,
+            `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
+            "user"
+        );
+
+        // Discord webhook
+        const fields: IDiscordField[] = [];
+
+        if (duration) {
+            fields.push({
+                name: "Duration",
+                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
+            });
+        }
+
+        if (reason) {
+            fields.push({
+                name: "Reason",
+                value: utils.shorten(reason, 1024),
+            });
+        }
+
+        if (threadId) {
+            fields.push({
+                name: "Thread ID",
+                value: threadId,
+            });
+        }
+
+        if (enchantUrl) {
+            fields.push({
+                name: "Enchant URL",
+                value: enchantUrl,
+            });
+        }
+
+        await DiscordService.sendWebhook({
+            embeds: [
+                {
+                    author: DiscordService.defaultWebhookAuthor(req.session),
+                    color: webhookColors.blue,
+                    description: `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
+                    fields,
+                    footer: {
+                        text: `ID: ${infringement.id}`,
+                    },
                 },
             ],
         });
