@@ -321,6 +321,69 @@ class MigrationService {
         console.log("Tournament migration completed");
     }
 
+    public async migrateSingleHostToMultipleHosts() {
+        if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
+        console.log(
+            utils.consoleStyles("⚠  Migrating tournaments from single host to multiple hosts", [
+                "orange",
+                "bold",
+                "underline",
+            ])
+        );
+
+        try {
+            // Find all tournaments that still have the old 'host' field instead of 'hosts'
+            const tournamentsToMigrate = await Tournament.find({
+                host: { $exists: true },
+                hosts: { $exists: false },
+            });
+
+            console.log(`Found ${tournamentsToMigrate.length} tournaments to migrate`);
+
+            let migratedCount = 0;
+            let errorCount = 0;
+
+            for (const tournament of tournamentsToMigrate) {
+                try {
+                    // Convert single host to hosts array
+                    // @ts-expect-error - tournament.host is a thing pre-migration
+                    const hostId = tournament.host;
+                    if (hostId) {
+                        // Set the hosts array with the single host
+                        await Tournament.updateOne(
+                            { _id: tournament._id },
+                            {
+                                $set: { hosts: [hostId] },
+                                $unset: { host: 1 },
+                            }
+                        );
+                        migratedCount++;
+                        console.log(`✓ Migrated tournament: ${tournament.name}`);
+                    } else {
+                        console.warn(`⚠ Tournament ${tournament.name} has no host, skipping`);
+                    }
+                } catch (error) {
+                    console.error(`✗ Failed to migrate tournament ${tournament.name}:`, error);
+                    errorCount++;
+                }
+            }
+
+            console.log(`\n✓ Migration completed successfully!`);
+            console.log(`  - Migrated: ${migratedCount} tournaments`);
+            console.log(`  - Errors: ${errorCount} tournaments`);
+
+            // Verification step
+            const verificationCount = await Tournament.countDocuments({ hosts: { $exists: true, $size: { $gte: 1 } } });
+            const oldFormatCount = await Tournament.countDocuments({ host: { $exists: true } });
+
+            console.log(`\n📊 Verification:`);
+            console.log(`  - Tournaments with hosts array: ${verificationCount}`);
+            console.log(`  - Tournaments with old host field: ${oldFormatCount}`);
+        } catch (error) {
+            console.error("Migration failed:", error);
+        }
+    }
+
     // ? utils
 
     private constructModes(row: ICsvTournament): string[] {

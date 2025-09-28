@@ -113,6 +113,7 @@ export default class OsuBotService extends OsuApiService {
             finalUserIds.push(...userIds);
         } else if (fallbackId) {
             console.log("Non-production environment detected, sending osu! announcement to fallback ID: " + fallbackId);
+            console.log("OG User IDs: " + userIds);
             finalUserIds.push(fallbackId);
         } else {
             console.log("Non-production environment detected, but no fallback ID provided. Skipping osu! announcement.");

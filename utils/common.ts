@@ -277,3 +277,21 @@ export function parseSearchQuery(
 
     return result;
 }
+
+/**
+ * Formats a list of hosts using Intl.ListFormat for natural language display
+ * @param hosts Array of user objects with username property
+ * @param options Optional formatting options
+ * @returns Formatted string like "Host1, Host2, and Host3"
+ */
+export function formatHostsList(
+    hosts: { username: string; osuProfileUrl?: string }[],
+    options: { style?: "long" | "short" | "narrow"; type?: "conjunction" | "disjunction" | "unit", mdLinks?: boolean } = {}
+): string {
+    if (!hosts || hosts.length === 0) return "";
+
+    const { style = "long", type = "conjunction", mdLinks = false } = options;
+    const formatter = new (Intl as any).ListFormat("en", { style, type });
+
+    return formatter.format(hosts.map((host) => mdLinks ? `[**${host.username}**](${host.osuProfileUrl})` : host.username));
+}

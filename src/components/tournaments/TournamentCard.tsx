@@ -65,7 +65,15 @@ export default function TournamentCard({ tournament }: IProps) {
                     </Badge>
                 </Group>
 
-                <UserDisplay user={tournament.host} />
+                {tournament.hosts.length === 1 ? (
+                    <UserDisplay user={tournament.hosts[0]} />
+                ) : (
+                    <Group gap="xl" align="center">
+                        {tournament.hosts.map((host) => (
+                            <UserDisplay key={host.id} user={host} />
+                        ))}
+                    </Group>
+                )}
 
                 {/* badges */}
                 <Group gap="xs">

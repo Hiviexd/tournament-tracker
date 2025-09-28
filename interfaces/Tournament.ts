@@ -20,7 +20,7 @@ export type TournamentStatus =
 
 export interface TournamentQueryParams {
     modes?: { $in: GameMode[] };
-    host?: Types.ObjectId;
+    hosts?: { $in: Types.ObjectId[] };
     type?: TournamentType;
     status?: TournamentStatus;
     isActive?: boolean;
@@ -60,7 +60,8 @@ export interface ITournament {
     endDate: Date | null;
     forumUrl: string;
     threadId?: string;
-    host: IUser;
+    host?: IUser;
+    hosts: IUser[];
     type: TournamentType;
     status: TournamentStatus;
     isActive: boolean;

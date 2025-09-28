@@ -33,8 +33,8 @@ export default function TournamentReviewSection({ tournament }: IProps) {
     const isUserAssignedReviewer =
         user?.isCommittee && tournament.assignedReviewers?.some((reviewer) => reviewer.id === user.id);
 
-    // Check if current user is the tournament host
-    const isUserHost = user?.id === tournament.host.id;
+    // Check if current user is a tournament host
+    const isUserHost = user && tournament.hosts.some((host) => host.id === user.id);
 
     // Check if current user is a committee member or admin
     const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;

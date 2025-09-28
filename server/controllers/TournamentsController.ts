@@ -33,7 +33,7 @@ import { InfringementType } from "../../interfaces/User";
 
 const defaultPopulate = [
     {
-        path: "host",
+        path: "hosts",
         select: "username osuId groups coverUrl country infringements",
     },
     {
@@ -103,7 +103,7 @@ class TournamentsController {
         if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
             const hostUser = await User.findByUsernameOrOsuId(host as string);
-            if (hostUser) query.host = hostUser._id;
+            if (hostUser) query.hosts = { $in: [hostUser._id] };
         }
         if (type) query.type = type as TournamentType;
         if (status) query.status = status as TournamentStatus;
@@ -230,7 +230,7 @@ class TournamentsController {
             .populate(defaultPopulate)
             .orFail();
 
-        tournament = TournamentService.censorTournamentReviews(tournament, res.locals!.user);
+        tournament = TournamentService.censorTournamentData(tournament, res.locals!.user);
 
         let reports: ITicket[] = [];
         let votings: IVoting[] = [];
@@ -248,10 +248,21 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostId, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags } = req.body;
+        const { name, hostIds, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags } = req.body;
         const currentUser = res.locals!.user!;
 
-        const host = await User.findById(hostId).orFail();
+        // Handle both single hostId (legacy) and multiple hostIds
+        const hostIdArray = Array.isArray(hostIds) ? hostIds : hostIds ? [hostIds] : [];
+
+        if (hostIdArray.length === 0) {
+            return res.status(400).json({ error: "At least one host is required" });
+        }
+
+        const hosts = await User.find({ _id: { $in: hostIdArray } });
+
+        if (hosts.length !== hostIdArray.length) {
+            return res.status(400).json({ error: "One or more host IDs are invalid" });
+        }
 
         const status: TournamentStatus = "supportRequestReceived";
 
@@ -267,11 +278,20 @@ class TournamentsController {
             return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
         }
 
+        // Check for active infringements on any host
+        const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
+        if (hostsWithInfringements.length > 0) {
+            const hostnames = hostsWithInfringements.map((host) => host.username).join(", ");
+            return res.status(400).json({
+                error: `Cannot create tournament with hosts that have active infringements: ${hostnames}`,
+            });
+        }
+
         const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
 
         const tournament = new Tournament({
             name,
-            host,
+            hosts: hosts.map((host) => host._id),
             modes,
             type,
             status,
@@ -297,15 +317,15 @@ class TournamentsController {
         );
 
         // Discord
+        const hostsList = utils.formatHostsList(hosts, { mdLinks: true });
         const embed = {
             author: DiscordService.defaultWebhookAuthor(req.session),
             color: webhookColors.green,
             description: `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             fields: [
                 {
-                    name: "Host",
-                    value: `[**${host.username}**](${host.osuProfileUrl})`,
-                    inline: true,
+                    name: hosts.length === 1 ? "Host" : "Hosts",
+                    value: hostsList,
                 },
                 {
                     name: "Start Date",
@@ -349,7 +369,7 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const tournament = await Tournament.findById(tournamentId).populate("host winners").orFail();
+        const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
@@ -360,8 +380,10 @@ class TournamentsController {
 
         const usersToExclude: string[] = [];
 
-        if (tournament.host) {
-            usersToExclude.push(tournament.host._id.toString());
+        if (tournament.hosts && tournament.hosts.length > 0) {
+            tournament.hosts.forEach((host) => {
+                usersToExclude.push(host._id.toString());
+            });
         }
 
         if (tournament.winners && tournament.winners.length > 0) {
@@ -397,15 +419,13 @@ class TournamentsController {
         await TournamentService.addTournamentLog(
             tournament,
             currentUser,
-            `Assigned reviewers: ${reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", ")}`,
+            `Assigned reviewers: ${utils.formatHostsList(reviewers, { mdLinks: true })}`,
             "users"
         );
 
         await LogService.generate(
             currentUser.id,
-            `Assigned reviewers to **${tournament.name}**: ${reviewers
-                .map((r) => `[**${r.username}**](${r.osuProfileUrl})`)
-                .join(", ")}`,
+            `Assigned reviewers to **${tournament.name}**: ${utils.formatHostsList(reviewers, { mdLinks: true })}`,
             "tournament"
         );
 
@@ -450,10 +470,12 @@ class TournamentsController {
             return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
-        // allow tournamenthosts to only edit banner
+        // allow tournament hosts to only edit banner
         let actioner = currentUser;
-        if (!actioner.isCommittee && tournament.host._id.equals(currentUser._id)) {
-            actioner = tournament.host;
+        const isHost = tournament.hosts && tournament.hosts.some((host) => host._id.equals(currentUser._id));
+
+        if (!actioner.isCommittee && isHost) {
+            actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
             if (forumUrl || startDate || endDate || status || isActive || winners) {
                 return res.status(403).json({ error: "Hosts can only edit banner!" });
@@ -469,11 +491,15 @@ class TournamentsController {
         if (endDate) tournament.endDate = endDate;
         if (tags) tournament.tags = tags.map((tag: string) => tag.toLowerCase());
         if (status) {
-            // Block "badgeApproved" status if host has an active infringement
-            if (status === "badgeApproved" && tournament.host.activeInfringement) {
-                return res.status(400).json({
-                    error: `Cannot approve badges for host with an active ${tournament.host.activeInfringement.typeString}!`,
-                });
+            // Block "badgeApproved" status if any host has an active infringement
+            if (status === "badgeApproved") {
+                const hostsWithInfringements = tournament.hosts.filter((host) => host.activeInfringement);
+                if (hostsWithInfringements.length > 0) {
+                    const hostnames = utils.formatHostsList(hostsWithInfringements);
+                    return res.status(400).json({
+                        error: `Cannot approve badges for hosts with active infringements: ${hostnames}`,
+                    });
+                }
             }
 
             if (excludedStatusesOsu.includes(status)) {
@@ -498,9 +524,9 @@ class TournamentsController {
             );
             if (winnersWithActiveTournamentBan.length > 0) {
                 return res.status(400).json({
-                    error: `Cannot add winners with active tournament bans! (${winnersWithActiveTournamentBan
-                        .map((winner) => `${winner.username}`)
-                        .join(", ")})`,
+                    error: `Cannot add winners with active tournament bans: ${utils.formatHostsList(
+                        winnersWithActiveTournamentBan
+                    )}`,
                 });
             }
             tournament.winners = winners;
@@ -611,8 +637,10 @@ class TournamentsController {
             }
 
             if (shouldSendOsuMessage) {
+                // Send message to all hosts
+                const hostOsuIds = tournament.hosts.map((host) => host.osuId);
                 await OsuBotService.sendAnnouncement(
-                    [tournament.host.osuId],
+                    hostOsuIds,
                     {
                         channel: {
                             name: `Tournament Status Update`,
