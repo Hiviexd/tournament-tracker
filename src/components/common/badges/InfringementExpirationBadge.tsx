@@ -28,14 +28,14 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
 
     // Get color based on days until expiration
     const getColor = () => {
-        if (daysUntilExpiration < 0) return "gray"; // Expired
+        if (expirationDate.isBefore(now)) return "gray"; // Expired
         if (daysUntilExpiration <= 7) return "success"; // Less than a week
         if (daysUntilExpiration <= 30) return "warning"; // Less than a month
         return "red"; // More than a month
     };
 
     const getText = () => {
-        if (daysUntilExpiration < 0) return "Expired";
+        if (expirationDate.isBefore(now)) return "Expired";
         return expirationDate.fromNow();
     };
 
