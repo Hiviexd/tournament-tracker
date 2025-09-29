@@ -11,6 +11,8 @@ interface IProps {
 }
 
 export default function VotingsMiniSection({ votings, hideTooltip = false }: IProps) {
+    if (!votings) return null;
+
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
