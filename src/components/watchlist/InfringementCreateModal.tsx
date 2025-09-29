@@ -1,4 +1,5 @@
-import { Modal, TextInput, Stack, Select, NumberInput, Button, Group, Text, Checkbox, Box } from "@mantine/core";
+import { Modal, TextInput, Stack, Select, Button, Group, Text, Checkbox, Box } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState, useEffect } from "react";
 import UserSearch from "../common/UserSearch";
@@ -10,6 +11,7 @@ import _ from "lodash";
 import utils from "../../../utils";
 import { useConfirmModal } from "../../hooks/useModals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import moment from "moment";
 
 interface IProps {
     opened: boolean;
@@ -29,7 +31,8 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         initialValues: {
             userId: preselectedUserId || "",
             type: "" as InfringementType,
-            duration: 0,
+            startDate: new Date(),
+            endDate: null as Date | null,
             isIndefinite: false,
             reason: "",
             threadId: "",
@@ -40,9 +43,17 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                 return !value ? "User is required" : null;
             },
             type: (value) => (!value ? "Infringement type is required" : null),
-            duration: (value) => {
+            startDate: (value) => {
+                if (isNotPunishment) return null;
+                if (!value) return "Start date is required for punishments";
+                return null;
+            },
+            endDate: (value) => {
                 if (isNotPunishment || form.values.isIndefinite) return null;
-                if (value < 1) return "Duration cannot be less than 1";
+                if (!value) return "End date is required for finite punishments";
+                if (form.values.startDate && value <= form.values.startDate) {
+                    return "End date must be after start date";
+                }
                 return null;
             },
             reason: (value) => {
@@ -90,9 +101,6 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
     const handleSubmit = async (values: typeof form.values) => {
         try {
-            let duration = values.isIndefinite ? -1 : values.duration;
-            if (isNotPunishment) duration = 0;
-
             let confirmed = true;
             const activeInfringement = preselectedUser?.activeInfringement || selectedUser?.activeInfringement;
             if (activeInfringement && !isNotPunishment) {
@@ -106,14 +114,23 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
             if (!confirmed) return;
 
-            await addInfringementMutation.mutateAsync({
+            const payload: any = {
                 userId: values.userId,
                 type: values.type,
-                duration,
                 reason: values.reason.trim(),
                 threadId: values.threadId.trim() || undefined,
                 enchantUrl: values.enchantUrl.trim() || undefined,
-            });
+            };
+
+            // Add dates for punishments
+            if (!isNotPunishment) {
+                payload.startDate = values.startDate;
+                if (!values.isIndefinite && values.endDate) {
+                    payload.endDate = values.endDate;
+                }
+            }
+
+            await addInfringementMutation.mutateAsync(payload);
 
             handleClose();
         } catch (error) {
@@ -127,6 +144,9 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         if (preselectedUserId) {
             form.setFieldValue("userId", preselectedUserId);
         }
+        // Reset dates
+        form.setFieldValue("startDate", new Date());
+        form.setFieldValue("endDate", null);
         clearAutoSavedValue(autoSaveKey);
         onClose();
     };
@@ -134,7 +154,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
     const handleIndefiniteChange = (checked: boolean) => {
         form.setFieldValue("isIndefinite", checked);
         if (checked) {
-            form.setFieldValue("duration", 0);
+            form.setFieldValue("endDate", null);
         }
     };
 
@@ -168,13 +188,26 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
                     {!isNotPunishment && (
                         <Stack gap="xs">
-                            <NumberInput
-                                label="Duration (in days)"
-                                placeholder="Enter duration..."
+                            <DateInput
+                                label="Start Date"
+                                placeholder="Select start date..."
                                 required
-                                min={0}
+                                clearable
+                                {...form.getInputProps("startDate")}
+                            />
+
+                            <DateInput
+                                label="End Date"
+                                placeholder="Select end date..."
+                                required={!form.values.isIndefinite}
                                 disabled={form.values.isIndefinite}
-                                {...form.getInputProps("duration")}
+                                clearable
+                                minDate={
+                                    form.values.startDate
+                                        ? moment(form.values.startDate).add(1, "day").toDate()
+                                        : undefined
+                                }
+                                {...form.getInputProps("endDate")}
                             />
 
                             <Checkbox

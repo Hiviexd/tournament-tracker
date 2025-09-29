@@ -1,4 +1,5 @@
-import { Modal, TextInput, Stack, NumberInput, Button, Group, Text, Checkbox, Box } from "@mantine/core";
+import { Modal, TextInput, Stack, Button, Group, Text, Checkbox, Box } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
 import TextEditor from "../common/TextEditor";
@@ -6,6 +7,7 @@ import { useUpdateInfringement } from "../../hooks/useUsers";
 import { InfringementType, IInfringement } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import utils from "../../../utils";
+import moment from "moment";
 
 interface IProps {
     opened: boolean;
@@ -25,16 +27,25 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
 
     const form = useForm({
         initialValues: {
-            duration: infringement?.duration === -1 ? 0 : infringement?.duration || 0,
-            isIndefinite: infringement?.duration === -1,
+            startDate: infringement?.startDate ? new Date(infringement.startDate) : new Date(),
+            endDate: infringement?.endDate ? new Date(infringement.endDate) : null,
+            isIndefinite: infringement?.isIndefinite || false,
             reason: infringement?.reason || "",
             threadId: infringement?.threadId || "",
             enchantUrl: infringement?.enchantUrl || "",
         },
         validate: {
-            duration: (value) => {
+            startDate: (value) => {
+                if (isNotPunishment) return null;
+                if (!value) return "Start date is required for punishments";
+                return null;
+            },
+            endDate: (value) => {
                 if (isNotPunishment || form.values.isIndefinite) return null;
-                if (value < 1) return "Duration cannot be less than 1";
+                if (!value) return "End date is required for finite punishments";
+                if (form.values.startDate && value <= form.values.startDate) {
+                    return "End date must be after start date";
+                }
                 return null;
             },
             reason: (value) => {
@@ -57,8 +68,9 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
     useEffect(() => {
         if (infringement) {
             form.setValues({
-                duration: infringement.duration === -1 ? 0 : infringement.duration || 0,
-                isIndefinite: infringement.duration === -1,
+                startDate: infringement.startDate ? new Date(infringement.startDate) : new Date(),
+                endDate: infringement.endDate ? new Date(infringement.endDate) : null,
+                isIndefinite: infringement.isIndefinite || false,
                 reason: infringement.reason || "",
                 threadId: infringement.threadId || "",
                 enchantUrl: infringement.enchantUrl || "",
@@ -71,17 +83,25 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
         if (!infringement) return;
 
         try {
-            let duration = values.isIndefinite ? -1 : values.duration;
-            if (isNotPunishment) duration = 0;
-
-            await updateInfringementMutation.mutateAsync({
+            const payload: any = {
                 userId,
                 infringementId: infringement.id!,
-                duration,
                 reason: values.reason.trim(),
                 threadId: values.threadId.trim() || undefined,
                 enchantUrl: values.enchantUrl.trim() || undefined,
-            });
+            };
+
+            // Add dates for punishments
+            if (!isNotPunishment) {
+                payload.startDate = values.startDate;
+                if (!values.isIndefinite && values.endDate) {
+                    payload.endDate = values.endDate;
+                } else if (values.isIndefinite) {
+                    payload.endDate = null;
+                }
+            }
+
+            await updateInfringementMutation.mutateAsync(payload);
 
             handleClose();
         } catch (error) {
@@ -98,27 +118,36 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
     const handleIndefiniteChange = (checked: boolean) => {
         form.setFieldValue("isIndefinite", checked);
         if (checked) {
-            form.setFieldValue("duration", 0);
+            form.setFieldValue("endDate", null);
         }
     };
 
     return (
-        <Modal
-            opened={opened}
-            onClose={handleClose}
-            title="Edit Infringement"
-            size="xl">
+        <Modal opened={opened} onClose={handleClose} title="Edit Infringement" size="xl">
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
                     {!isNotPunishment && (
                         <Stack gap="xs">
-                            <NumberInput
-                                label="Duration (in days)"
-                                placeholder="Enter duration..."
+                            <DateInput
+                                label="Start Date"
+                                placeholder="Select start date..."
                                 required
-                                min={0}
+                                clearable
+                                {...form.getInputProps("startDate")}
+                            />
+
+                            <DateInput
+                                label="End Date"
+                                placeholder="Select end date..."
+                                required={!form.values.isIndefinite}
                                 disabled={form.values.isIndefinite}
-                                {...form.getInputProps("duration")}
+                                clearable
+                                minDate={
+                                    form.values.startDate
+                                        ? moment(form.values.startDate).add(1, "day").toDate()
+                                        : undefined
+                                }
+                                {...form.getInputProps("endDate")}
                             />
 
                             <Checkbox

@@ -80,7 +80,9 @@ export interface IInfringement {
     _id?: Types.ObjectId;
     id?: string;
     type: InfringementType;
-    duration: number;
+    // duration: number;
+    startDate?: Date;
+    endDate?: Date;
     reason: string;
     threadId?: string;
     enchantUrl?: string;
@@ -91,7 +93,8 @@ export interface IInfringement {
     isNote?: boolean;
     isIndefinite?: boolean;
     typeString?: string;
-    expiresAt?: Date;
+    isPunishment?: boolean;
+    isExpired?: boolean;
 }
 
 export interface WatchlistQuery {

@@ -275,7 +275,8 @@ export function useAddInfringement() {
         mutationFn: async (data: {
             userId: string;
             type: string;
-            duration: number;
+            startDate: Date;
+            endDate: Date;
             reason: string;
             threadId?: string;
             enchantUrl?: string;
@@ -285,7 +286,8 @@ export function useAddInfringement() {
                 url: `/api/users/${data.userId}/addInfringement`,
                 data: {
                     type: data.type,
-                    duration: data.duration,
+                    startDate: data.startDate,
+                    endDate: data.endDate,
                     reason: data.reason,
                     threadId: data.threadId,
                     enchantUrl: data.enchantUrl,
@@ -319,7 +321,8 @@ export function useUpdateInfringement() {
         mutationFn: async (data: {
             userId: string;
             infringementId: string;
-            duration: number;
+            startDate: Date;
+            endDate: Date;
             reason: string;
             threadId?: string;
             enchantUrl?: string;
@@ -328,7 +331,8 @@ export function useUpdateInfringement() {
                 method: "patch",
                 url: `/api/users/${data.userId}/updateInfringement/${data.infringementId}`,
                 data: {
-                    duration: data.duration,
+                    startDate: data.startDate,
+                    endDate: data.endDate,
                     reason: data.reason,
                     threadId: data.threadId,
                     enchantUrl: data.enchantUrl,

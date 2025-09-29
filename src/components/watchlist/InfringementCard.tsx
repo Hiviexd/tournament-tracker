@@ -1,4 +1,4 @@
-import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip, Divider } from "@mantine/core";
+import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip, Divider, ThemeIcon } from "@mantine/core";
 import { IInfringement } from "../../../interfaces/User";
 import InfringementBadge from "../common/badges/InfringementBadge";
 import InfringementDurationBadge from "../common/badges/InfringementDurationBadge";
@@ -15,7 +15,7 @@ interface IProps {
     onEdit?: (infringement: IInfringement) => void;
 }
 
-export default function InfringementCard({ infringement, isActive, onEdit }: IProps) {
+export default function InfringementCard({ infringement, onEdit }: IProps) {
     const getDiscordThreadLink = (threadId: string) => {
         return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
     };
@@ -30,27 +30,31 @@ export default function InfringementCard({ infringement, isActive, onEdit }: IPr
                 <Stack gap="xs">
                     <Group gap="xs">
                         <InfringementBadge infringement={infringement} size="sm" />
-                        {isActive && (
-                            <Badge variant="light" color="green" size="sm">
-                                Active
+                        {infringement.isPunishment && (
+                            <Badge variant="light" color={infringement.isExpired ? "gray" : "green"} size="sm">
+                                {infringement.isExpired ? "Expired" : "Active"}
                             </Badge>
                         )}
                     </Group>
                     {infringement.reason && <MarkdownText content={infringement.reason} size="sm" />}
                 </Stack>
                 <Stack gap="xs" align={mobileAlign} style={{ flexShrink: 0 }}>
-                    <Group gap={6} align="center" wrap="nowrap">
-                        <Text size="xs" c="dimmed">
-                            Duration:
-                        </Text>
-                        <InfringementDurationBadge infringement={infringement} size="sm" />
-                    </Group>
-                    <Group gap={6} align="center" wrap="nowrap">
-                        <Text size="xs" c="dimmed">
-                            Expires:
-                        </Text>
-                        <InfringementExpirationBadge infringement={infringement} size="sm" />
-                    </Group>
+                    {infringement.startDate && infringement.endDate && (
+                        <Group gap={6} align="center" wrap="nowrap">
+                            <Text size="xs" c="dimmed">
+                                Duration:
+                            </Text>
+                            <InfringementDurationBadge infringement={infringement} size="sm" />
+                        </Group>
+                    )}
+                    {infringement.endDate && (
+                        <Group gap={6} align="center" wrap="nowrap">
+                            <Text size="xs" c="dimmed">
+                                Expires:
+                            </Text>
+                            <InfringementExpirationBadge infringement={infringement} size="sm" />
+                        </Group>
+                    )}
                 </Stack>
             </>
         );
@@ -93,6 +97,13 @@ export default function InfringementCard({ infringement, isActive, onEdit }: IPr
                     </Group>
 
                     <Group gap={4}>
+                        {infringement.isPunishment && !infringement.enchantUrl && (
+                            <Tooltip label="Missing Email Ticket">
+                                <ThemeIcon className="animation-pulse" variant="light" color="danger" size="md">
+                                    <FontAwesomeIcon icon="envelope" size="sm" />
+                                </ThemeIcon>
+                            </Tooltip>
+                        )}
                         {infringement.enchantUrl && (
                             <Tooltip label="Open Enchant ticket">
                                 <ActionIcon
