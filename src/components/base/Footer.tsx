@@ -51,7 +51,7 @@ export default function Footer() {
                 <Popover position="top" withArrow shadow="md">
                     <Popover.Target>
                         <Button variant="subtle" size="sm" leftSection={<FontAwesomeIcon icon="code" />}>
-                            Commit History
+                            Activity
                         </Button>
                     </Popover.Target>
                     <Popover.Dropdown w="fit-content">
