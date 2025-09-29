@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import Voting from "../models/votingModel";
 import Ticket from "../models/ticketModel";
+import User from "../models/userModel";
 import { IDashboardResponse } from "../../interfaces/Dashboard";
+import { InfringementType } from "../../interfaces/User";
 
 const TOURNAMENT_POPULATE = [
     {
@@ -91,11 +93,39 @@ class DashboardController {
             .sort({ createdAt: -1 })
             .populate(TICKET_POPULATE);
 
+        // query non-note infringements that don't have an enchantUrl
+        const users = await User.find({
+            infringements: {
+                $elemMatch: {
+                    type: {
+                        $in: [
+                            InfringementType.HOSTING_BAN,
+                            InfringementType.STAFFING_BAN,
+                            InfringementType.TOURNAMENT_BAN,
+                            InfringementType.PROBATION,
+                            InfringementType.WARNING,
+                        ],
+                    },
+                    enchantUrl: { $exists: false },
+                },
+            },
+        }).sort({ createdAt: -1 });
+
+        // go through each user, and remove note infringements and any infringements that have an enchantUrl
+        const filteredUsers = users.map((user) => {
+            const userObject = typeof user.toObject === "function" ? user.toObject() : user;
+            userObject.infringements = (userObject.infringements || []).filter(
+                (i) => i.type !== InfringementType.NOTE && i.enchantUrl === undefined
+            );
+            return userObject;
+        });
+
         const response: IDashboardResponse = {
             tournaments,
             votings,
             reports,
             tickets,
+            users: filteredUsers,
         };
 
         res.json(response);

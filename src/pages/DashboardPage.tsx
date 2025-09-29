@@ -7,6 +7,7 @@ import DashboardTournamentsSection from "../components/dashboard/DashboardTourna
 import DashboardVotingsSection from "../components/dashboard/DashboardVotingsSection";
 import DashboardReportsSection from "../components/dashboard/DashboardReportsSection";
 import DashboardTicketsSection from "../components/dashboard/DashboardTicketsSection";
+import DashboardInfringementsSection from "../components/dashboard/DashboardInfringementsSection";
 
 export default function DashboardPage() {
     const [user] = useAtom(loggedInUserAtom);
@@ -20,7 +21,7 @@ export default function DashboardPage() {
         return <EmptyState icon="home" title="Error loading dashboard" description="Try refreshing the page" />;
     }
 
-    const { tournaments, votings, tickets, reports } = data;
+    const { tournaments, votings, tickets, reports, users } = data;
 
     return (
         <Stack gap="xl">
@@ -48,6 +49,8 @@ export default function DashboardPage() {
                     <DashboardReportsSection reports={reports} />
                     <Divider />
                     <DashboardTicketsSection tickets={tickets} />
+                    <Divider />
+                    <DashboardInfringementsSection users={users} />
                 </>
             ) : (
                 <EmptyState
