@@ -15,7 +15,7 @@ export default function InfringementDurationBadge({ infringement, variant = "lig
     }
 
     // Don't render if duration is 0
-    if (infringement.duration === 0) {
+    if (!infringement.startDate && !infringement.endDate) {
         return (
             <Badge variant={variant} color="gray.6" size={size} leftSection={<FontAwesomeIcon icon="times-circle" />}>
                 N/A
@@ -24,7 +24,7 @@ export default function InfringementDurationBadge({ infringement, variant = "lig
     }
 
     // Handle indefinite duration
-    if (infringement.duration === -1) {
+    if (infringement.isIndefinite) {
         return (
             <Badge variant={variant} color="danger" size={size} leftSection={<FontAwesomeIcon icon="times-circle" />}>
                 Indefinite
@@ -32,17 +32,19 @@ export default function InfringementDurationBadge({ infringement, variant = "lig
         );
     }
 
+    const duration = moment(infringement.endDate).diff(moment(infringement.startDate), "days");
+
     // Get color based on duration
     const getColor = () => {
-        if (infringement.duration <= 30) return "yellow";
-        if (infringement.duration <= 180) return "orange";
+        if (duration <= 30) return "yellow";
+        if (duration <= 180) return "orange";
         return "red";
     };
 
-    const durationText = moment.duration(infringement.duration, "days").humanize();
+    const durationText = moment.duration(duration, "days").humanize();
 
     return (
-        <Tooltip label={`${infringement.duration} days`}>
+        <Tooltip label={`${moment(infringement.startDate).format("MMM D, YYYY")} — ${moment(infringement.endDate).format("MMM D, YYYY")}`}>
             <Badge variant={variant} color={getColor()} size={size} leftSection={<FontAwesomeIcon icon="clock" />}>
                 {durationText}
             </Badge>

@@ -11,7 +11,8 @@ const InfringementSchema = new Schema<IInfringement>(
             required: true,
             enum: Object.values(InfringementType),
         },
-        duration: { type: Number, required: true },
+        startDate: { type: Date },
+        endDate: { type: Date },
         reason: { type: String, required: true },
         threadId: { type: String },
         enchantUrl: { type: String },
@@ -23,17 +24,24 @@ InfringementSchema.virtual("isNote").get(function (this: IInfringement) {
     return this.type === InfringementType.NOTE;
 });
 
+InfringementSchema.virtual("isPunishment").get(function (this: IInfringement) {
+    return (
+        this.type !== InfringementType.NOTE &&
+        this.type !== InfringementType.WARNING &&
+        this.type !== InfringementType.PROBATION
+    );
+});
+
 InfringementSchema.virtual("isIndefinite").get(function (this: IInfringement) {
-    return this.duration === -1;
+    return this.startDate && !this.endDate;
+});
+
+InfringementSchema.virtual("isExpired").get(function (this: IInfringement) {
+    return this.endDate && this.endDate < new Date();
 });
 
 InfringementSchema.virtual("typeString").get(function (this: IInfringement) {
     return _.startCase(this.type);
-});
-
-InfringementSchema.virtual("expiresAt").get(function (this: IInfringement) {
-    if (this.duration <= 0) return null;
-    return this.createdAt ? moment(this.createdAt).add(this.duration, "days").toDate() : null;
 });
 
 const UserSchema = new Schema<IUser, IUserStatics>(
@@ -110,21 +118,12 @@ UserSchema.virtual("ccDuration").get(function (this: IUser) {
 UserSchema.virtual("activeInfringement").get(function (this: IUser) {
     if (!this.infringements || this.infringements.length === 0) return null;
 
-    // if there's an infringement with a duration of -1, return it
-    const indefiniteInfringement = this.infringements.find((infringement) => infringement.duration === -1);
+    // if there's an infringement with a indefinite duration, return it
+    const indefiniteInfringement = this.infringements.find((infringement) => infringement.isIndefinite);
     if (indefiniteInfringement) return indefiniteInfringement;
 
-    // check if createdAt + duration is in the future
-    const now = new Date();
-
     const activeInfringement = this.infringements
-        .filter(
-            (infringement) =>
-                infringement.type !== InfringementType.NOTE &&
-                infringement.type !== InfringementType.WARNING &&
-                infringement.type !== InfringementType.PROBATION &&
-                infringement.expiresAt! > now
-        ) // filter out non-punishments and expired punishments
+        .filter((infringement) => infringement.isPunishment && !infringement.isExpired)
         .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0]; // get the latest infringement
 
     return activeInfringement;

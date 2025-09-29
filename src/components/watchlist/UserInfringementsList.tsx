@@ -60,7 +60,6 @@ export default function UserInfringementsList({ user }: IProps) {
                     </Text>
                     <InfringementCard
                         infringement={activeInfringement}
-                        isActive={true}
                         onEdit={handleEditInfringement}
                     />
                 </>
@@ -77,7 +76,6 @@ export default function UserInfringementsList({ user }: IProps) {
                             <InfringementCard
                                 key={`${infringement.type}-${infringement.createdAt}`}
                                 infringement={infringement}
-                                isActive={false}
                                 onEdit={handleEditInfringement}
                             />
                         ))}

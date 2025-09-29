@@ -14,7 +14,7 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
         return null;
     }
 
-    if (infringement.duration <= 0) {
+    if (!infringement.endDate || infringement.isIndefinite) {
         return (
             <Badge variant={variant} color="gray.6" size={size} leftSection={<FontAwesomeIcon icon="times-circle" />}>
                 N/A
@@ -22,27 +22,21 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
         );
     }
 
-    const expirationDate = moment(infringement.expiresAt);
     const now = moment();
-    const daysUntilExpiration = expirationDate.diff(now, "days");
+    const daysUntilExpiration = moment(infringement.endDate).diff(now, "days");
 
     // Get color based on days until expiration
     const getColor = () => {
-        if (expirationDate.isBefore(now)) return "gray"; // Expired
+        if (infringement.isExpired) return "gray"; // Expired
         if (daysUntilExpiration <= 7) return "success"; // Less than a week
         if (daysUntilExpiration <= 30) return "warning"; // Less than a month
         return "red"; // More than a month
     };
 
-    const getText = () => {
-        if (expirationDate.isBefore(now)) return "Expired";
-        return expirationDate.fromNow();
-    };
-
     return (
-        <Tooltip label={expirationDate.format("LLL")}>
+        <Tooltip label={moment(infringement.endDate).format("LLL")}>
             <Badge variant={variant} color={getColor()} size={size} leftSection={<FontAwesomeIcon icon="calendar" />}>
-                {getText()}
+                {moment(infringement.endDate).fromNow()}
             </Badge>
         </Tooltip>
     );

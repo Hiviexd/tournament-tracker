@@ -1,4 +1,4 @@
-import { InfringementType, IUser, UserListQuery, WatchlistQuery } from "../../interfaces/User";
+import { IInfringement, InfringementType, IUser, UserListQuery, WatchlistQuery } from "../../interfaces/User";
 import User from "../models/userModel";
 import utils from "../../utils";
 import UserService from "../services/UserService";
@@ -453,7 +453,7 @@ class UsersController {
     /** POST add infringement */
     public async addInfringement(req: Request, res: Response) {
         const { userId } = req.params;
-        const { type, duration, reason, threadId, enchantUrl } = req.body;
+        const { type, startDate, endDate, reason, threadId, enchantUrl } = req.body;
 
         if (!Object.values(InfringementType).includes(type)) {
             return res.status(400).json({ error: "Invalid infringement type" });
@@ -462,9 +462,21 @@ class UsersController {
         const isNotPunishment =
             type === InfringementType.NOTE || type === InfringementType.WARNING || type === InfringementType.PROBATION;
 
-        // duration should be either -1, more than 0, or 0 AND the type is note or warning
-        if (duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
-            return res.status(400).json({ error: "Invalid duration" });
+        // Validate dates for punishments
+        if (!isNotPunishment) {
+            if (startDate && !moment(startDate).isValid()) {
+                return res.status(400).json({ error: "Invalid start date format" });
+            }
+
+            if (endDate) {
+                if (!moment(endDate).isValid()) {
+                    return res.status(400).json({ error: "Invalid end date format" });
+                }
+
+                if (startDate && moment(endDate).isBefore(moment(startDate))) {
+                    return res.status(400).json({ error: "End date must be after start date" });
+                }
+            }
         }
 
         if (!reason || typeof reason !== "string" || reason?.trim() === "") {
@@ -483,19 +495,34 @@ class UsersController {
 
         const user = await User.findById(userId).orFail();
 
-        // if user has an active infringement, and new infringement is not a punishment, expire it today
+        // if user has an active infringement, and new infringement is a punishment, expire it today
         if (user.activeInfringement && !isNotPunishment) {
             const targetInfringement = user.infringements.find(
                 (infringement) => infringement.id === user.activeInfringement?.id
             );
 
             if (targetInfringement) {
-                const daysSinceCreation = moment().diff(moment(targetInfringement.createdAt), "days");
-                targetInfringement.duration = daysSinceCreation;
+                targetInfringement.endDate = new Date();
             }
         }
 
-        user.infringements.push({ type, duration, reason, threadId: extractedThreadId, enchantUrl });
+        // Create infringement object with dates
+        const infringementData: Partial<IInfringement> = {
+            type,
+            reason,
+            threadId: extractedThreadId,
+            enchantUrl,
+        };
+
+        // Add dates for punishments, set startDate to now if not provided
+        if (!isNotPunishment) {
+            infringementData.startDate = startDate ? new Date(startDate) : new Date();
+            if (endDate) {
+                infringementData.endDate = new Date(endDate);
+            }
+        }
+
+        user.infringements.push(infringementData as IInfringement);
         await user.save();
 
         res.json({ message: "Infringement added successfully!", user });
@@ -510,11 +537,21 @@ class UsersController {
         // Build fields
         const fields: IDiscordField[] = [];
 
-        if (duration !== 0) {
-            fields.push({
-                name: "Duration",
-                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
-            });
+        if (!isNotPunishment) {
+            if (startDate && endDate) {
+                const humanizedDuration = moment.duration(moment(endDate).diff(moment(startDate))).humanize();
+                fields.push({
+                    name: "Duration",
+                    value: `${moment(startDate).format("MMM D, YYYY")} — ${moment(endDate).format(
+                        "MMM D, YYYY"
+                    )} (${humanizedDuration})`,
+                });
+            } else if (startDate) {
+                fields.push({
+                    name: "Duration",
+                    value: "Indefinite",
+                });
+            }
         }
 
         fields.push({
@@ -531,12 +568,14 @@ class UsersController {
             [InfringementType.STAFFING_BAN]: webhookColors.red,
         };
 
+        const isIndefinite = !isNotPunishment && !endDate;
+
         // Discord webhook
         await DiscordService.sendWebhook({
             embeds: [
                 {
                     author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: duration === -1 ? webhookColors.darkRed : typeColorMap[type],
+                    color: isIndefinite ? webhookColors.darkRed : typeColorMap[type],
                     description: `Added **${_.startCase(type)}** to [**${user.username}**](${user.osuProfileUrl})`,
                     fields,
                     footer: {
@@ -550,7 +589,7 @@ class UsersController {
     /** PATCH update infringement */
     public async updateInfringement(req: Request, res: Response) {
         const { userId, infringementId } = req.params;
-        const { duration, reason, threadId, enchantUrl } = req.body;
+        const { startDate, endDate, reason, threadId, enchantUrl } = req.body;
 
         if (reason && (typeof reason !== "string" || reason?.trim() === "")) {
             return res.status(400).json({ error: "Reason must be a non-empty string" });
@@ -577,14 +616,39 @@ class UsersController {
             infringement.type === InfringementType.WARNING ||
             infringement.type === InfringementType.PROBATION;
 
-        if (duration && duration < 1 && duration !== -1 && duration === 0 && !isNotPunishment) {
-            return res.status(400).json({ error: "Invalid duration" });
+        // Validate dates for punishments
+        if (!isNotPunishment) {
+            if (startDate && !moment(startDate).isValid()) {
+                return res.status(400).json({ error: "Invalid start date format" });
+            }
+
+            if (endDate) {
+                if (!moment(endDate).isValid()) {
+                    return res.status(400).json({ error: "Invalid end date format" });
+                }
+
+                if (startDate && moment(endDate).isBefore(moment(startDate))) {
+                    return res.status(400).json({ error: "End date must be after start date" });
+                }
+            }
         }
 
-        infringement.duration = duration;
-        infringement.reason = reason;
-        infringement.threadId = utils.extractDiscordThreadId(threadId) || undefined;
-        infringement.enchantUrl = enchantUrl;
+        // Update infringement fields
+        if (startDate !== undefined) {
+            infringement.startDate = startDate ? new Date(startDate) : undefined;
+        }
+        if (endDate !== undefined) {
+            infringement.endDate = endDate ? new Date(endDate) : undefined;
+        }
+        if (reason !== undefined) {
+            infringement.reason = reason;
+        }
+        if (threadId !== undefined) {
+            infringement.threadId = utils.extractDiscordThreadId(threadId) || undefined;
+        }
+        if (enchantUrl !== undefined) {
+            infringement.enchantUrl = enchantUrl;
+        }
 
         await user.save();
 
@@ -600,11 +664,23 @@ class UsersController {
         // Discord webhook
         const fields: IDiscordField[] = [];
 
-        if (duration) {
-            fields.push({
-                name: "Duration",
-                value: duration > 0 ? moment.duration(duration, "days").humanize() : "Indefinite",
-            });
+        if (!isNotPunishment && (startDate !== undefined || endDate !== undefined)) {
+            if (infringement.startDate && infringement.endDate) {
+                const humanizedDuration = moment
+                    .duration(moment(infringement.endDate).diff(moment(infringement.startDate)))
+                    .humanize();
+                fields.push({
+                    name: "Duration",
+                    value: `${moment(infringement.startDate).format("MMM D, YYYY")} — ${moment(
+                        infringement.endDate
+                    ).format("MMM D, YYYY")} (${humanizedDuration})`,
+                });
+            } else if (infringement.startDate) {
+                fields.push({
+                    name: "Duration",
+                    value: "Indefinite",
+                });
+            }
         }
 
         if (reason) {

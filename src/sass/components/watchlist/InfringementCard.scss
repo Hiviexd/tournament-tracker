@@ -1,0 +1,14 @@
+.infringement-card {
+    text-decoration: none !important;
+    position: relative;
+    overflow: hidden;
+
+    &[data-clickable="true"] {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: translateY(-4px);
+        }
+    }
+}

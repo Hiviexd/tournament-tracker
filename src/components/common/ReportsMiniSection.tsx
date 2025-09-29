@@ -11,6 +11,8 @@ interface IProps {
 }
 
 export default function ReportsMiniSection({ reports, hideTooltip = false }: IProps) {
+    if (!reports) return null;
+
     return (
         <Stack gap={5}>
             <Group gap="xs" align="center">
