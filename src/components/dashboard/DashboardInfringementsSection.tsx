@@ -49,7 +49,7 @@ export default function DashboardInfringementsSection({ users }: IProps) {
             {users.length === 0 && (
                 <EmptyState
                     height={100}
-                    icon="trophy"
+                    icon="user-shield"
                     title={`All infringements are clear!`}
                     description="some placeholder text change this later"
                 />

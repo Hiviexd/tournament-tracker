@@ -40,7 +40,11 @@ export default function DashboardPage() {
             </Card>
 
             {/* Dashboard Sections */}
-            {tournaments.length > 0 || votings.length > 0 || tickets.length > 0 || reports.length > 0 ? (
+            {tournaments.length > 0 ||
+            votings.length > 0 ||
+            tickets.length > 0 ||
+            reports.length > 0 ||
+            users.length > 0 ? (
                 <>
                     <DashboardTournamentsSection tournaments={tournaments} user={user} />
                     <Divider />
