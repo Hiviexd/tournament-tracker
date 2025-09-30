@@ -462,16 +462,41 @@ class TournamentsController {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
 
-        const { forumUrl, startDate, endDate, status, isActive, bannerUrl, winners, enchantUrl, tags } = req.body;
+        const {
+            name,
+            hostIds,
+            modes,
+            type,
+            forumUrl,
+            startDate,
+            endDate,
+            status,
+            isActive,
+            bannerUrl,
+            winners,
+            enchantUrl,
+            tags,
+        } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         const oldStatus = tournament.status;
+        const oldName = tournament.name;
+        const oldType = tournament.type;
 
         // only allow editing the following if tournament is inactive:
         // - banner
         // - tags
-        if (!tournament.isActive && isActive === undefined && !bannerUrl && !tags) {
+        if (
+            !tournament.isActive &&
+            isActive === undefined &&
+            !bannerUrl &&
+            !tags &&
+            !name &&
+            !hostIds &&
+            !modes &&
+            !type
+        ) {
             return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
@@ -482,13 +507,75 @@ class TournamentsController {
         if (!actioner.isCommittee && isHost) {
             actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
-            if (forumUrl || startDate || endDate || status || isActive || winners) {
+            if (name || hostIds || modes || type || forumUrl || startDate || endDate || status || isActive || winners) {
                 return res.status(403).json({ error: "Hosts can only edit banner!" });
             }
         }
 
         let shouldSendOsuMessage = true;
         const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
+
+        // Validate and update name
+        if (name !== undefined) {
+            if (!name) {
+                return res.status(400).json({ error: "Name is required" });
+            }
+            if (!utils.isLatinScriptOnly(name)) {
+                return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
+            }
+            tournament.name = name;
+        }
+
+        // Validate and update hosts
+        if (hostIds !== undefined) {
+            if (!Array.isArray(hostIds) || hostIds.length === 0) {
+                return res.status(400).json({ error: "At least one host is required" });
+            }
+
+            const hostsUnordered = await User.find({ _id: { $in: hostIds } });
+
+            if (hostsUnordered.length !== hostIds.length) {
+                return res.status(400).json({ error: "One or more host IDs are invalid" });
+            }
+
+            // Preserve the order of hosts based on hostIds
+            const hosts = hostIds
+                .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
+                .filter((host) => host !== undefined) as typeof hostsUnordered;
+
+            // Check for active infringements on any host
+            const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
+            if (hostsWithInfringements.length > 0) {
+                const hostnames = hostsWithInfringements.map((host) => host.username).join(", ");
+                return res.status(400).json({
+                    error: `Cannot set hosts that have active infringements: ${hostnames}`,
+                });
+            }
+
+            tournament.hosts = hosts.map((host) => host._id) as any;
+        }
+
+        // Validate and update modes (admin only)
+        if (modes !== undefined) {
+            if (!currentUser.isAdmin) {
+                return res.status(403).json({ error: "Only admins can change game modes" });
+            }
+            if (!Array.isArray(modes) || modes.length === 0) {
+                return res.status(400).json({ error: "At least one game mode is required" });
+            }
+            tournament.modes = modes;
+        }
+
+        // Validate and update type (admin only)
+        if (type !== undefined) {
+            if (!currentUser.isAdmin) {
+                return res.status(403).json({ error: "Only admins can change tournament type" });
+            }
+            if (!["tournament", "contest"].includes(type)) {
+                return res.status(400).json({ error: "Invalid tournament type" });
+            }
+            tournament.type = type;
+        }
 
         if (forumUrl) tournament.forumUrl = forumUrl;
         if (enchantUrl) tournament.enchantUrl = enchantUrl;
@@ -542,6 +629,48 @@ class TournamentsController {
         res.json({ message: "Tournament updated successfully!" });
 
         // logging
+        if (name && name !== oldName) {
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated name from **${oldName}** to **${name}**`,
+                "pen-to-square"
+            );
+            await LogService.generate(currentUser.id, `Updated name for **${tournament.name}**`, "tournament");
+        }
+
+        if (hostIds) {
+            // Re-fetch to get populated hosts
+            const updatedTournament = await Tournament.findById(tournamentId).populate("hosts").orFail();
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated hosts: ${utils.formatHostsList(updatedTournament.hosts, { mdLinks: true })}`,
+                "users"
+            );
+            await LogService.generate(currentUser.id, `Updated hosts for **${tournament.name}**`, "tournament");
+        }
+
+        if (modes) {
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated game modes: ${modes.map((mode) => utils.formatGameMode(mode)).join(", ")}`,
+                "gamepad"
+            );
+            await LogService.generate(currentUser.id, `Updated game modes for **${tournament.name}**`, "tournament");
+        }
+
+        if (type && type !== oldType) {
+            await TournamentService.addTournamentLog(
+                tournament,
+                currentUser,
+                `Updated type from **${_.startCase(oldType)}** to **${_.startCase(type)}**`,
+                "pen-to-square"
+            );
+            await LogService.generate(currentUser.id, `Updated type for **${tournament.name}**`, "tournament");
+        }
+
         if (forumUrl) {
             await TournamentService.addTournamentLog(
                 tournament,

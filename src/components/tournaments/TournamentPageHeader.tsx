@@ -1,4 +1,4 @@
-import { Card, Title, Group, Stack, Badge, Text, Loader } from "@mantine/core";
+import { Card, Title, Group, Stack, Badge, Text, Loader, ActionIcon } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import GameModeIcon from "../common/GameModeIcon";
 import DateBadge from "../common/badges/DateBadge";
@@ -6,12 +6,19 @@ import UserLink from "../common/UserLink";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import { useImageLoad } from "../../hooks/useImageLoad";
 import utils from "../../../utils";
+import { useState } from "react";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import TournamentInfoEditModal from "./TournamentInfoEditModal";
 
 interface IProps {
     tournament: ITournament;
 }
 
 export default function TournamentPageHeader({ tournament }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const [editModalOpened, setEditModalOpened] = useState(false);
     const { loading, error } = useImageLoad(tournament.bannerUrl);
 
     // Use fallback image if there's an error or no banner URL
@@ -54,9 +61,19 @@ export default function TournamentPageHeader({ tournament }: IProps) {
             </div>
             <Stack gap="md" p="lg">
                 <Group justify="space-between" align="center">
-                    <Stack gap={5}>
+                    <Group gap="xs" align="center">
                         <Title order={2}>{tournament.name}</Title>
-                    </Stack>
+                        {user?.isCommittee && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setEditModalOpened(true)}
+                                color="info"
+                                title="Edit tournament info"
+                                size="lg">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        )}
+                    </Group>
                     <Badge color={tournament.isActive ? "success" : "gray"} variant="light">
                         {tournament.isActive ? "Active" : "Archived"}
                     </Badge>
@@ -77,6 +94,12 @@ export default function TournamentPageHeader({ tournament }: IProps) {
                     </Text>
                 </Group>
             </Stack>
+
+            <TournamentInfoEditModal
+                tournament={tournament}
+                opened={editModalOpened}
+                onClose={() => setEditModalOpened(false)}
+            />
         </Card>
     );
 }
