@@ -1,17 +1,23 @@
-# Tournament Tracker
+# [Tournament Tracker](https://tcomm.hivie.tn/)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker) ![GitHub last commit](https://img.shields.io/github/last-commit/Hiviexd/tournament-tracker) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Hiviexd/tournament-tracker/deploy-production.yml) ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m798812390-8b85ac6ef54622c9cfbd1301)
 
 The one-stop shop for all official osu! tournament correspondence and information!
 
+## API Usage
+
+Please refer to the [API documentation](https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation) for more information.
+
+For a guide on how to use the Mappool Compliance API in your mappooling sheets, consult [this wiki article](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage).
+
 ## Development
 
 ### Prerequisites
 
-- Node v18+
+- Node v22 (LTS)
+- pnpm
 - MongoDB
 - [Cloudflare R2 Object Storage bucket](https://www.cloudflare.com/developer-platform/products/r2/) for storing uploaded files (optional)
-- yarn
 - an osu! API v2 client
 
 ### Setup
@@ -19,10 +25,10 @@ The one-stop shop for all official osu! tournament correspondence and informatio
 - Clone the repository
 - Set up a MongoDB database
 - Set up a Cloudflare R2 bucket (optional)
-- Run `yarn`
+- Run `pnpm install`
 - Set up `config.json` from `config.example.json` with the following fields:
-  - `connection`: MongoDB connection string
-  - `session`: session string, can be anything
+  - `connection`: MongoDB connection URL
+  - `session`: session string, grab a random string from [here](https://www.random.org/strings/?num=10&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new)
   - `baseUrl`: base URL of the website
   - `automation`: boolean for whether to run automation jobs or not
   - `osuApp`: credentials for the osu! API v2 client
@@ -31,8 +37,8 @@ The one-stop shop for all official osu! tournament correspondence and informatio
   - `r2`: the Cloudflare R2 bucket's credentials (optional)
   - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
 - Set up `checklist.json` from `checklist.example.json`
-- Run `yarn dev`, the project will be served in `http://localhost:8088`
-- If you need automation jobs to run when the project starts, use `yarn dev-automation` instead
+- Run `pnpm dev`, the project will be served in `http://localhost:8088`
+- If you need automation jobs to run when the project starts, use `pnpm dev-automation` instead
 
 ### Commit message flags
 
@@ -44,9 +50,3 @@ This is purely for self-documentation purposes.
 ### References
 
 - [DeepWiki Overview](https://deepwiki.com/Hiviexd/tournament-tracker)
-
-## API
-
-Please refer to the [API documentation](https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation) for more information.
-
-For a guide on how to use the Mappool Compliance API in your mappooling sheets, consult [this wiki article](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage).
