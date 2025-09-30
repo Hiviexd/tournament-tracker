@@ -26,25 +26,24 @@ export default function DashboardInfringementsSection({ users }: IProps) {
                 </Badge>
             </Group>
 
-            {users.length > 0 &&
-                users.map((user) => (
-                    <Card key={user.id} shadow="sm" p="lg">
-                        <Stack gap="sm">
-                            <UserDisplay user={user} />
-                            {user.infringements.length > 0 && (
-                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                                    {user.infringements.map((infringement) => (
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                {users.length > 0 &&
+                    users.map((user) => (
+                        <Card key={user.id} shadow="sm" p="lg">
+                            <Stack gap="sm">
+                                <UserDisplay user={user} />
+                                {user.infringements.length > 0 &&
+                                    user.infringements.map((infringement) => (
                                         <InfringementCard
                                             key={infringement.id}
                                             infringement={infringement}
                                             userToNavigateTo={user.osuId}
                                         />
                                     ))}
-                                </SimpleGrid>
-                            )}
-                        </Stack>
-                    </Card>
-                ))}
+                            </Stack>
+                        </Card>
+                    ))}
+            </SimpleGrid>
 
             {users.length === 0 && (
                 <EmptyState
