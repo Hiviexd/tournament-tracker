@@ -258,11 +258,16 @@ class TournamentsController {
             return res.status(400).json({ error: "At least one host is required" });
         }
 
-        const hosts = await User.find({ _id: { $in: hostIdArray } });
+        const hostsUnordered = await User.find({ _id: { $in: hostIdArray } });
 
-        if (hosts.length !== hostIdArray.length) {
+        if (hostsUnordered.length !== hostIdArray.length) {
             return res.status(400).json({ error: "One or more host IDs are invalid" });
         }
+
+        // Preserve the order of hosts based on hostIdArray
+        const hosts = hostIdArray
+            .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
+            .filter((host) => host !== undefined) as typeof hostsUnordered;
 
         const status: TournamentStatus = "supportRequestReceived";
 
