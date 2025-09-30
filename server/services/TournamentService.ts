@@ -1,13 +1,22 @@
-import { ITournament } from "@interfaces/Tournament";
-import { IUser } from "@interfaces/User";
+import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
+import { IUser, InfringementType } from "../../interfaces/User";
 import { FlattenMaps } from "mongoose";
-import { IReview } from "@interfaces/Review";
-import { ITicket } from "@interfaces/Ticket";
-import { IVoting } from "@interfaces/Voting";
+import { IReview } from "../../interfaces/Review";
+import { ITicket } from "../../interfaces/Ticket";
+import { IVoting } from "../../interfaces/Voting";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
 import utils from "../../utils";
 import UserService from "./UserService";
+import Tournament from "../models/tournamentModel";
+import User from "../models/userModel";
+import LogService from "./LogService";
+import OsuBotService from "./OsuBotService";
+import DiscordService from "./DiscordService";
+import webhookColors from "../constants/webhookColors";
+import config from "../../config.json";
+import _ from "lodash";
+import moment from "moment";
 
 class TournamentService {
     /**
@@ -208,6 +217,397 @@ class TournamentService {
                 };
             }),
         };
+    }
+
+    /**
+     * Update tournament name
+     */
+    public async updateName(tournament: ITournament, name: string, currentUser: IUser): Promise<{ error?: string }> {
+        if (!name) {
+            return { error: "Name is required" };
+        }
+        if (!utils.isLatinScriptOnly(name)) {
+            return { error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" };
+        }
+
+        const oldName = tournament.name;
+        tournament.name = name;
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated name from **${oldName}** to **${name}**`,
+            "pen-to-square"
+        );
+        await LogService.generate(currentUser.id, `Updated name for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament hosts
+     */
+    public async updateHosts(tournament: ITournament, hostIds: string[], currentUser: IUser): Promise<{ error?: string }> {
+        if (!Array.isArray(hostIds) || hostIds.length === 0) {
+            return { error: "At least one host is required" };
+        }
+
+        const hostsUnordered = await User.find({ _id: { $in: hostIds } });
+
+        if (hostsUnordered.length !== hostIds.length) {
+            return { error: "One or more host IDs are invalid" };
+        }
+
+        // Preserve the order of hosts based on hostIds
+        const hosts = hostIds
+            .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
+            .filter((host) => host !== undefined) as typeof hostsUnordered;
+
+        // Check for active infringements on any host
+        const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
+        if (hostsWithInfringements.length > 0) {
+            const hostnames = hostsWithInfringements.map((host) => host.username).join(", ");
+            return { error: `Cannot set hosts that have active infringements: ${hostnames}` };
+        }
+
+        tournament.hosts = hosts;
+
+        // Re-fetch to get populated hosts for logging
+        const updatedTournament = await Tournament.findById(tournament._id).populate("hosts").orFail();
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated hosts: ${utils.formatHostsList(updatedTournament.hosts, { mdLinks: true })}`,
+            "users"
+        );
+        await LogService.generate(currentUser.id, `Updated hosts for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament game modes (admin only)
+     */
+    public async updateModes(tournament: ITournament, modes: GameMode[], currentUser: IUser): Promise<{ error?: string }> {
+        if (!currentUser.isAdmin) {
+            return { error: "Only admins can change game modes" };
+        }
+        if (!Array.isArray(modes) || modes.length === 0) {
+            return { error: "At least one game mode is required" };
+        }
+
+        tournament.modes = modes;
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated game modes: ${modes.map((mode) => utils.formatGameMode(mode)).join(", ")}`,
+            "gamepad"
+        );
+        await LogService.generate(currentUser.id, `Updated game modes for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament type (admin only)
+     */
+    public async updateType(tournament: ITournament, type: TournamentType, currentUser: IUser): Promise<{ error?: string }> {
+        if (!currentUser.isAdmin) {
+            return { error: "Only admins can change tournament type" };
+        }
+        if (!["tournament", "contest"].includes(type)) {
+            return { error: "Invalid tournament type" };
+        }
+
+        const oldType = tournament.type;
+        tournament.type = type;
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated type from **${_.startCase(oldType)}** to **${_.startCase(type)}**`,
+            "pen-to-square"
+        );
+        await LogService.generate(currentUser.id, `Updated type for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update forum URL
+     */
+    public async updateForumUrl(tournament: ITournament, forumUrl: string, currentUser: IUser): Promise<{ error?: string }> {
+        if (!utils.isOsuForumLink(forumUrl)) {
+            return { error: "Invalid osu! forum URL" };
+        }
+
+        tournament.forumUrl = forumUrl;
+
+        await this.addTournamentLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
+        await LogService.generate(currentUser.id, `Updated forum URL for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update Enchant URL
+     */
+    public async updateEnchantUrl(
+        tournament: ITournament,
+        enchantUrl: string,
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
+        if (!utils.isEnchantTicketLink(enchantUrl)) {
+            return { error: "Invalid Enchant ticket URL" };
+        }
+
+        tournament.enchantUrl = enchantUrl;
+
+        await this.addTournamentLog(tournament, currentUser, `Updated Enchant ticket URL: **${enchantUrl}**`, "link");
+        await LogService.generate(
+            currentUser.id,
+            `Updated Enchant ticket URL for **${tournament.name}**`,
+            "tournament"
+        );
+
+        return {};
+    }
+
+    /**
+     * Update tournament dates
+     */
+    public async updateDates(
+        tournament: ITournament,
+        startDate: Date,
+        endDate: Date,
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
+        if (startDate && endDate && startDate > endDate) {
+            return { error: "Start date must be before end date" };
+        }
+
+        tournament.startDate = startDate;
+        tournament.endDate = endDate;
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
+                "YYYY-MM-DD"
+            )}**`,
+            "calendar"
+        );
+        await LogService.generate(
+            currentUser.id,
+            `Updated start and end date for **${tournament.name}**`,
+            "tournament"
+        );
+
+        return {};
+    }
+
+    /**
+     * Update tournament tags
+     */
+    public async updateTags(tournament: ITournament, tags: string[], actioner: IUser): Promise<{ error?: string }> {
+        tournament.tags = tags.map((tag: string) => tag.toLowerCase());
+
+        await this.addTournamentLog(
+            tournament,
+            actioner,
+            `Updated tags: ${tags.map((tag: string) => `\`${tag}\``).join(", ")}`,
+            "tag"
+        );
+        await LogService.generate(actioner.id, `Updated tags for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament banner
+     */
+    public async updateBanner(tournament: ITournament, bannerUrl: string, actioner: IUser): Promise<{ error?: string }> {
+        tournament.bannerUrl = bannerUrl;
+
+        await this.addTournamentLog(tournament, actioner, `Updated banner`, "image");
+        await LogService.generate(actioner.id, `Updated banner for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament winners
+     */
+    public async updateWinners(tournament: ITournament, winners: IUser[], currentUser: IUser): Promise<{ error?: string }> {
+        const winnersWithActiveTournamentBan = winners.filter(
+            (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
+        );
+        if (winnersWithActiveTournamentBan.length > 0) {
+            return {
+                error: `Cannot add winners with active tournament bans: ${utils.formatHostsList(
+                    winnersWithActiveTournamentBan
+                )}`,
+            };
+        }
+
+        tournament.winners = winners;
+
+        // Need to re-fetch because tournament.winners is depopulated after update
+        const winnerUsers = await User.find({ _id: { $in: winners } }).select("username osuId");
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated winners: ${winnerUsers.map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`).join(", ")}`,
+            "trophy"
+        );
+        await LogService.generate(currentUser.id, `Updated winners for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update tournament status
+     */
+    public async updateStatus(
+        tournament: ITournament,
+        status: TournamentStatus,
+        currentUser: IUser,
+        sessionData: any
+    ): Promise<{ error?: string }> {
+        const oldStatus = tournament.status;
+
+        // Block "badgeApproved" status if any host has an active infringement
+        if (status === "badgeApproved") {
+            const hostsWithInfringements = tournament.hosts.filter((host: IUser) => host.activeInfringement);
+            if (hostsWithInfringements.length > 0) {
+                const hostnames = utils.formatHostsList(hostsWithInfringements);
+                return { error: `Cannot approve badges for hosts with active infringements: ${hostnames}` };
+            }
+        }
+
+        tournament.status = status;
+
+        if (status === "reviewOngoing") {
+            tournament.startedReviewAt = new Date();
+        }
+
+        // Logging
+        await this.addTournamentLog(tournament, currentUser, `Updated status to **${_.startCase(status)}**`, "flag");
+        await LogService.generate(currentUser.id, `Updated status for **${tournament.name}**`, "tournament");
+
+        // osu! message
+        const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
+        let shouldSendOsuMessage = !excludedStatusesOsu.includes(status);
+
+        if (status === "reviewOngoing" && oldStatus === "onHold") {
+            shouldSendOsuMessage = false;
+        }
+
+        if (shouldSendOsuMessage) {
+            let message = `The official support status of your tournament **${
+                tournament.name
+            }** has been updated to **${_.startCase(
+                status
+            )}**.\n\n[View your tournament in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
+                tournament._id
+            }).`;
+
+            if (status === "screeningConcluded") {
+                message += `\n\nPlease check your email for more information about potentially screened-out players.`;
+            } else if (status === "changesRequested") {
+                message += `\n\nPlease check your email for more information about the changes requested, or visit the [Tournament Tracker](${config.baseUrl}/tournaments/${tournament._id}) for a brief overview of the changes.`;
+            } else if (status === "badgeApproved") {
+                message += `\n\nCongratulations! Your tournament has been approved for badge support! You will receive an email with more information soon.`;
+            } else if (status === "badgeRejected") {
+                message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
+            }
+
+            const hostOsuIds = tournament.hosts.map((host: IUser) => host.osuId);
+            await OsuBotService.sendAnnouncement(
+                hostOsuIds,
+                {
+                    channel: {
+                        name: `Tournament Status Update`,
+                        description: `Update regarding: ${tournament.name}`,
+                    },
+                    content: message,
+                },
+                currentUser.osuId
+            );
+        }
+
+        // Discord
+        const excludedStatusesDiscord = ["supportRequestReceived", "screeningConcluded", "reviewOngoing"];
+
+        if (!excludedStatusesDiscord.includes(status) || (status === "reviewOngoing" && oldStatus === "onHold")) {
+            let embedColor = webhookColors.orange;
+
+            if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
+            if (status === "screeningConcluded") embedColor = webhookColors.blue;
+            if (status === "changesRequested") embedColor = webhookColors.yellow;
+            if (status === "onHold") embedColor = webhookColors.darkPink;
+            if (status === "badgeApproved") embedColor = webhookColors.lightGreen;
+            if (status === "badgeRejected") embedColor = webhookColors.lightRed;
+            if (status === "noBadgeRequested") embedColor = webhookColors.gray;
+
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(sessionData),
+                color: embedColor,
+                description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+                fields: [
+                    {
+                        name: "New Status",
+                        value: `${_.startCase(status)}`,
+                    },
+                ],
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+                threadId: tournament.threadId,
+            });
+        }
+
+        return {};
+    }
+
+    /**
+     * Update tournament active status
+     */
+    public async updateIsActive(
+        tournament: ITournament,
+        isActive: boolean,
+        currentUser: IUser,
+        sessionData: any
+    ): Promise<{ error?: string }> {
+        tournament.isActive = isActive;
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `${isActive ? "Unarchived" : "Archived"} tournament`,
+            "archive"
+        );
+        await LogService.generate(currentUser.id, `Updated active status for **${tournament.name}**`, "tournament");
+
+        // Discord
+        const embed = {
+            author: DiscordService.defaultWebhookAuthor(sessionData),
+            color: isActive ? webhookColors.gray : webhookColors.black,
+            description: `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${tournament.name}**](${
+                config.baseUrl
+            }/tournaments/${tournament._id})`,
+        };
+
+        await DiscordService.sendWebhook({
+            embeds: [embed],
+            threadId: tournament.threadId,
+        });
+
+        return {};
     }
 }
 

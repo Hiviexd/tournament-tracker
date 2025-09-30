@@ -24,12 +24,10 @@ import DiscordService from "../services/DiscordService";
 import webhookColors from "../constants/webhookColors";
 import config from "../../config.json";
 import Message from "../models/messageModel";
-import OsuBotService from "../services/OsuBotService";
 import utils from "../../utils";
 import { IDiscordField } from "../../interfaces/Discord";
 import { ITicket } from "../../interfaces/Ticket";
 import { IVoting } from "../../interfaces/Voting";
-import { InfringementType } from "../../interfaces/User";
 
 const defaultPopulate = [
     {
@@ -480,18 +478,13 @@ class TournamentsController {
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        const oldStatus = tournament.status;
-        const oldName = tournament.name;
-        const oldType = tournament.type;
-
-        // only allow editing the following if tournament is inactive:
-        // - banner
-        // - tags
+        // Check if tournament is archived and no allowed fields are being edited
         if (
             !tournament.isActive &&
             isActive === undefined &&
             !bannerUrl &&
             !tags &&
+            !winners &&
             !name &&
             !hostIds &&
             !modes &&
@@ -500,350 +493,83 @@ class TournamentsController {
             return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
-        // allow tournament hosts to only edit banner
+        // Determine who is making the edit
         let actioner = currentUser;
         const isHost = tournament.hosts && tournament.hosts.some((host) => host._id.equals(currentUser._id));
 
         if (!actioner.isCommittee && isHost) {
             actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
+            // Hosts can only edit banner
             if (name || hostIds || modes || type || forumUrl || startDate || endDate || status || isActive || winners) {
                 return res.status(403).json({ error: "Hosts can only edit banner!" });
             }
         }
 
-        let shouldSendOsuMessage = true;
-        const excludedStatusesOsu = ["supportRequestReceived", "screeningConcluded", "onHold"];
-
-        // Validate and update name
+        // Update fields using service methods
         if (name !== undefined) {
-            if (!name) {
-                return res.status(400).json({ error: "Name is required" });
-            }
-            if (!utils.isLatinScriptOnly(name)) {
-                return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
-            }
-            tournament.name = name;
+            const result = await TournamentService.updateName(tournament, name, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
         }
 
-        // Validate and update hosts
         if (hostIds !== undefined) {
-            if (!Array.isArray(hostIds) || hostIds.length === 0) {
-                return res.status(400).json({ error: "At least one host is required" });
-            }
-
-            const hostsUnordered = await User.find({ _id: { $in: hostIds } });
-
-            if (hostsUnordered.length !== hostIds.length) {
-                return res.status(400).json({ error: "One or more host IDs are invalid" });
-            }
-
-            // Preserve the order of hosts based on hostIds
-            const hosts = hostIds
-                .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
-                .filter((host) => host !== undefined) as typeof hostsUnordered;
-
-            // Check for active infringements on any host
-            const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
-            if (hostsWithInfringements.length > 0) {
-                const hostnames = hostsWithInfringements.map((host) => host.username).join(", ");
-                return res.status(400).json({
-                    error: `Cannot set hosts that have active infringements: ${hostnames}`,
-                });
-            }
-
-            tournament.hosts = hosts.map((host) => host._id) as any;
+            const result = await TournamentService.updateHosts(tournament, hostIds, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
         }
 
-        // Validate and update modes (admin only)
         if (modes !== undefined) {
-            if (!currentUser.isAdmin) {
-                return res.status(403).json({ error: "Only admins can change game modes" });
-            }
-            if (!Array.isArray(modes) || modes.length === 0) {
-                return res.status(400).json({ error: "At least one game mode is required" });
-            }
-            tournament.modes = modes;
+            const result = await TournamentService.updateModes(tournament, modes, currentUser);
+            if (result.error) return res.status(403).json({ error: result.error });
         }
 
-        // Validate and update type (admin only)
         if (type !== undefined) {
-            if (!currentUser.isAdmin) {
-                return res.status(403).json({ error: "Only admins can change tournament type" });
-            }
-            if (!["tournament", "contest"].includes(type)) {
-                return res.status(400).json({ error: "Invalid tournament type" });
-            }
-            tournament.type = type;
+            const result = await TournamentService.updateType(tournament, type, currentUser);
+            if (result.error) return res.status(403).json({ error: result.error });
         }
 
-        if (forumUrl) tournament.forumUrl = forumUrl;
-        if (enchantUrl) tournament.enchantUrl = enchantUrl;
-        if (startDate) tournament.startDate = startDate;
-        if (endDate) tournament.endDate = endDate;
-        if (tags) tournament.tags = tags.map((tag: string) => tag.toLowerCase());
-        if (status) {
-            // Block "badgeApproved" status if any host has an active infringement
-            if (status === "badgeApproved") {
-                const hostsWithInfringements = tournament.hosts.filter((host) => host.activeInfringement);
-                if (hostsWithInfringements.length > 0) {
-                    const hostnames = utils.formatHostsList(hostsWithInfringements);
-                    return res.status(400).json({
-                        error: `Cannot approve badges for hosts with active infringements: ${hostnames}`,
-                    });
-                }
-            }
-
-            if (excludedStatusesOsu.includes(status)) {
-                shouldSendOsuMessage = false;
-            }
-            if (status === "reviewOngoing" && tournament.status === "onHold") {
-                shouldSendOsuMessage = false;
-            }
-
-            tournament.status = status;
-
-            if (status === "reviewOngoing") {
-                tournament.startedReviewAt = new Date();
-            }
+        if (forumUrl) {
+            const result = await TournamentService.updateForumUrl(tournament, forumUrl, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
         }
-        if (isActive !== undefined) tournament.isActive = isActive;
-        if (typeof bannerUrl === "string") tournament.bannerUrl = bannerUrl;
+
+        if (enchantUrl) {
+            const result = await TournamentService.updateEnchantUrl(tournament, enchantUrl, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (startDate && endDate) {
+            const result = await TournamentService.updateDates(tournament, startDate, endDate, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (tags) {
+            const result = await TournamentService.updateTags(tournament, tags, actioner);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (typeof bannerUrl === "string") {
+            const result = await TournamentService.updateBanner(tournament, bannerUrl, actioner);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
         if (winners) {
-            const winnersWithActiveTournamentBan = winners.filter(
-                (winner) =>
-                    winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
-            );
-            if (winnersWithActiveTournamentBan.length > 0) {
-                return res.status(400).json({
-                    error: `Cannot add winners with active tournament bans: ${utils.formatHostsList(
-                        winnersWithActiveTournamentBan
-                    )}`,
-                });
-            }
-            tournament.winners = winners;
+            const result = await TournamentService.updateWinners(tournament, winners, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (status) {
+            const result = await TournamentService.updateStatus(tournament, status, currentUser, req.session);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (isActive !== undefined) {
+            const result = await TournamentService.updateIsActive(tournament, isActive, currentUser, req.session);
+            if (result.error) return res.status(400).json({ error: result.error });
         }
 
         await tournament.save();
 
         res.json({ message: "Tournament updated successfully!" });
-
-        // logging
-        if (name && name !== oldName) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated name from **${oldName}** to **${name}**`,
-                "pen-to-square"
-            );
-            await LogService.generate(currentUser.id, `Updated name for **${tournament.name}**`, "tournament");
-        }
-
-        if (hostIds) {
-            // Re-fetch to get populated hosts
-            const updatedTournament = await Tournament.findById(tournamentId).populate("hosts").orFail();
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated hosts: ${utils.formatHostsList(updatedTournament.hosts, { mdLinks: true })}`,
-                "users"
-            );
-            await LogService.generate(currentUser.id, `Updated hosts for **${tournament.name}**`, "tournament");
-        }
-
-        if (modes) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated game modes: ${modes.map((mode) => utils.formatGameMode(mode)).join(", ")}`,
-                "gamepad"
-            );
-            await LogService.generate(currentUser.id, `Updated game modes for **${tournament.name}**`, "tournament");
-        }
-
-        if (type && type !== oldType) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated type from **${_.startCase(oldType)}** to **${_.startCase(type)}**`,
-                "pen-to-square"
-            );
-            await LogService.generate(currentUser.id, `Updated type for **${tournament.name}**`, "tournament");
-        }
-
-        if (forumUrl) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated forum URL: **${forumUrl}**`,
-                "link"
-            );
-            await LogService.generate(currentUser.id, `Updated forum URL for **${tournament.name}**`, "tournament");
-        }
-
-        if (enchantUrl) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated Enchant ticket URL: **${enchantUrl}**`,
-                "link"
-            );
-            await LogService.generate(
-                currentUser.id,
-                `Updated Enchant ticket URL for **${tournament.name}**`,
-                "tournament"
-            );
-        }
-
-        if (startDate && endDate) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
-                    "YYYY-MM-DD"
-                )}**`,
-                "calendar"
-            );
-            await LogService.generate(
-                currentUser.id,
-                `Updated start and end date for **${tournament.name}**`,
-                "tournament"
-            );
-        }
-
-        if (tags) {
-            await TournamentService.addTournamentLog(
-                tournament,
-                actioner,
-                `Updated tags: ${tags.map((tag: string) => `\`${tag}\``).join(", ")}`,
-                "tag"
-            );
-            await LogService.generate(actioner.id, `Updated tags for **${tournament.name}**`, "tournament");
-        }
-
-        if (bannerUrl) {
-            await TournamentService.addTournamentLog(tournament, actioner, `Updated banner`, "image");
-            await LogService.generate(actioner.id, `Updated banner for **${tournament.name}**`, "tournament");
-        }
-
-        if (winners) {
-            // Need to re-fetch because tournament.winners is depopulated after update
-            const winnerUsers = await User.find({ _id: { $in: winners } }).select("username osuId");
-
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated winners: ${winnerUsers
-                    .map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`)
-                    .join(", ")}`,
-                "trophy"
-            );
-            await LogService.generate(currentUser.id, `Updated winners for **${tournament.name}**`, "tournament");
-        }
-
-        if (status) {
-            // logging
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `Updated status to **${_.startCase(status)}**`,
-                "flag"
-            );
-            await LogService.generate(currentUser.id, `Updated status for **${tournament.name}**`, "tournament");
-
-            // osu! message
-            let message = `The official support status of your tournament **${
-                tournament.name
-            }** has been updated to **${_.startCase(
-                status
-            )}**.\n\n[View your tournament in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
-                tournament._id
-            }).`;
-
-            if (status === "screeningConcluded") {
-                message += `\n\nPlease check your email for more information about potentially screened-out players.`;
-            } else if (status === "changesRequested") {
-                message += `\n\nPlease check your email for more information about the changes requested, or visit the [Tournament Tracker](${config.baseUrl}/tournaments/${tournament._id}) for a brief overview of the changes.`;
-            } else if (status === "badgeApproved") {
-                message += `\n\nCongratulations! Your tournament has been approved for badge support! You will receive an email with more information soon.`;
-            } else if (status === "badgeRejected") {
-                message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
-            }
-
-            if (shouldSendOsuMessage) {
-                // Send message to all hosts
-                const hostOsuIds = tournament.hosts.map((host) => host.osuId);
-                await OsuBotService.sendAnnouncement(
-                    hostOsuIds,
-                    {
-                        channel: {
-                            name: `Tournament Status Update`,
-                            description: `Update regarding: ${tournament.name}`,
-                        },
-                        content: message,
-                    },
-                    currentUser.osuId
-                );
-            }
-
-            // Discord
-            const excludedStatusesDiscord = ["supportRequestReceived", "screeningConcluded", "reviewOngoing"];
-
-            if (!excludedStatusesDiscord.includes(status) || (status === "reviewOngoing" && oldStatus === "onHold")) {
-                let embedColor = webhookColors.orange;
-
-                // Change color based on status
-                if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
-                if (status === "screeningConcluded") embedColor = webhookColors.blue;
-                if (status === "changesRequested") embedColor = webhookColors.yellow;
-                if (status === "onHold") embedColor = webhookColors.darkPink;
-                if (status === "badgeApproved") embedColor = webhookColors.lightGreen;
-                if (status === "badgeRejected") embedColor = webhookColors.lightRed;
-                if (status === "noBadgeRequested") embedColor = webhookColors.gray;
-
-                const embed = {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: embedColor,
-                    description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-                    fields: [
-                        {
-                            name: "New Status",
-                            value: `${_.startCase(status)}`,
-                        },
-                    ],
-                };
-
-                await DiscordService.sendWebhook({
-                    embeds: [embed],
-                    threadId: tournament.threadId,
-                });
-            }
-        }
-
-        if (isActive !== undefined) {
-            // logging
-            await TournamentService.addTournamentLog(
-                tournament,
-                currentUser,
-                `${isActive ? "Unarchived" : "Archived"} tournament`,
-                "archive"
-            );
-            await LogService.generate(currentUser.id, `Updated active status for **${tournament.name}**`, "tournament");
-
-            // Discord
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: isActive ? webhookColors.gray : webhookColors.black,
-                description: `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${tournament.name}**](${
-                    config.baseUrl
-                }/tournaments/${tournament._id})`,
-            };
-
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: tournament.threadId,
-            });
-        }
     }
 
     /** POST reassign reviewer */
