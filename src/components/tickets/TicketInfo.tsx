@@ -31,6 +31,7 @@ import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
 import { useConfirmModal } from "../../hooks/useModals";
 import AlertText from "../common/AlertText";
 import { useMediaQuery } from "@mantine/hooks";
+import ReportEditModal from "./ReportEditModal";
 
 interface IProps {
     ticket: ITicket;
@@ -44,6 +45,8 @@ export default function TicketInfo({ ticket }: IProps) {
 
     const [threadId, setThreadId] = useState(ticket.threadId);
     const [isUpdatingThreadId, setIsUpdatingThreadId] = useState(false);
+    const [editModalOpened, setEditModalOpened] = useState(false);
+    const isEditableReport = ticket.isReport && !ticket.isActive && user?.isCommitteeOrAdmin;
 
     const toggleStatusMutation = useToggleStatus(ticket.id);
     const updateThreadIdMutation = useUpdateThreadId(ticket.id);
@@ -154,17 +157,39 @@ export default function TicketInfo({ ticket }: IProps) {
                 </Group>
                 {ticket.targetUser && (
                     <Stack gap="xs">
-                        <Title order={5}>Reported User</Title>
+                        <Group align="center">
+                            <Title order={5}>Reported User</Title>
+                            {isEditableReport && (
+                                <ActionIcon
+                                    variant="subtle"
+                                    onClick={() => setEditModalOpened(true)}
+                                    color="info"
+                                    title="Edit report target">
+                                    <FontAwesomeIcon icon="pen-to-square" />
+                                </ActionIcon>
+                            )}
+                        </Group>
                         <UserCard static user={ticket.targetUser} onSelect={handleUserCardClick} fullWidth={isMobile} />
                     </Stack>
                 )}
                 {ticket.targetTournamentName && (
-                    <Text fw={700}>
-                        Reported Tournament:{" "}
-                        <Anchor href={ticket.targetTournamentLink} target="_blank">
-                            {ticket.targetTournamentName}
-                        </Anchor>
-                    </Text>
+                    <Group align="center">
+                        <Text fw={700}>
+                            Reported Tournament:{" "}
+                            <Anchor href={ticket.targetTournamentLink} target="_blank">
+                                {ticket.targetTournamentName}
+                            </Anchor>
+                        </Text>
+                        {isEditableReport && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => setEditModalOpened(true)}
+                                color="info"
+                                title="Edit report target">
+                                <FontAwesomeIcon icon="pen-to-square" />
+                            </ActionIcon>
+                        )}
+                    </Group>
                 )}
                 {user?.isCommittee && (
                     <Stack gap="xs">
@@ -253,6 +278,10 @@ export default function TicketInfo({ ticket }: IProps) {
                     </Stack>
                 )}
             </Stack>
+
+            {isEditableReport && (
+                <ReportEditModal ticket={ticket} opened={editModalOpened} onClose={() => setEditModalOpened(false)} />
+            )}
         </Card>
     );
 }

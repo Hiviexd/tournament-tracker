@@ -120,3 +120,26 @@ export function useSnoozeTicket(ticketId: string) {
         },
     });
 }
+
+export function useEditTicket(ticketId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (data: {
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+        }) => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tickets/${ticketId}/edit`,
+                data,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+            queryClient.invalidateQueries({ queryKey: ["tickets"] });
+        },
+    });
+}

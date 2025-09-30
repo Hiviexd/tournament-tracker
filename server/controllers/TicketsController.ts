@@ -579,6 +579,130 @@ class TicketsController {
             threadId: ticket.threadId,
         });
     }
+
+    /** PATCH edit report target */
+    public async editReport(req: Request, res: Response) {
+        const currentUser = res.locals!.user!;
+        const { ticketId } = req.params;
+        const { targetUserId, targetTournamentName, targetTournamentLink } = req.body;
+
+        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
+
+        // Only allow editing reports
+        if (ticket.type !== "report") {
+            return res.status(400).json({ error: "Only reports can be edited" });
+        }
+
+        // Only allow editing if the report is closed
+        if (ticket.isActive) {
+            return res.status(400).json({ error: "Cannot edit an active report." });
+        }
+
+        // Validate that we're editing either user OR tournament, not both
+        const isEditingUser = targetUserId !== undefined;
+        const isEditingTournament = targetTournamentName !== undefined || targetTournamentLink !== undefined;
+
+        if (isEditingUser && isEditingTournament) {
+            return res.status(400).json({ error: "Cannot set both target user and target tournament" });
+        }
+
+        if (!isEditingUser && !isEditingTournament) {
+            return res.status(400).json({ error: "Must provide either target user or target tournament" });
+        }
+
+        // Handle user report
+        if (isEditingUser) {
+            const targetUser = await User.findById(targetUserId).orFail();
+
+            ticket.targetUser = targetUser;
+            ticket.targetTournamentName = undefined;
+            ticket.targetTournamentLink = undefined;
+
+            // update title to change the first word to "User"
+            ticket.title = ticket.title.replace(/^[^ ]+/, "User");
+
+            await ticket.save();
+
+            // Logger
+            await LogService.generate(
+                currentUser.id,
+                `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id}) to user **${targetUser.username}**`,
+                "ticket"
+            );
+
+            // Discord
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.orange,
+                description: `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
+                fields: [
+                    {
+                        name: "New Target User",
+                        value: `[**${targetUser.username}**](https://osu.ppy.sh/users/${targetUser.osuId})`,
+                    },
+                ],
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+                threadId: ticket.threadId,
+            });
+        }
+
+        // Handle tournament report
+        if (isEditingTournament) {
+            if (!targetTournamentName || !targetTournamentLink) {
+                return res.status(400).json({ error: "Both tournament name and link are required" });
+            }
+
+            const sanitizedTournamentName = targetTournamentName.trim();
+            const sanitizedTournamentLink = targetTournamentLink.trim();
+
+            if (sanitizedTournamentName.length < 3 || sanitizedTournamentName.length > 120) {
+                return res.status(400).json({ error: "Tournament name must be between 3 and 120 characters" });
+            }
+
+            if (!utils.isOsuForumLink(sanitizedTournamentLink)) {
+                return res.status(400).json({ error: "Invalid tournament forum link" });
+            }
+
+            ticket.targetUser = undefined;
+            ticket.targetTournamentName = sanitizedTournamentName;
+            ticket.targetTournamentLink = sanitizedTournamentLink;
+
+            // update title to change the first word to "Tournament"
+            ticket.title = ticket.title.replace(/^[^ ]+/, ticket.assignedGroup === "cc" ? "Contest" : "Tournament");
+
+            await ticket.save();
+
+            // Logger
+            await LogService.generate(
+                currentUser.id,
+                `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id}) to tournament **${sanitizedTournamentName}**`,
+                "ticket"
+            );
+
+            // Discord
+            const embed = {
+                author: DiscordService.defaultWebhookAuthor(req.session),
+                color: webhookColors.orange,
+                description: `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
+                fields: [
+                    {
+                        name: "New Target Tournament",
+                        value: `[**${sanitizedTournamentName}**](${sanitizedTournamentLink})`,
+                    },
+                ],
+            };
+
+            await DiscordService.sendWebhook({
+                embeds: [embed],
+                threadId: ticket.threadId,
+            });
+        }
+
+        res.json({ message: "Report updated successfully!" });
+    }
 }
 
 export default new TicketsController();
