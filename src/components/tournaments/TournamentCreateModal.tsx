@@ -1,28 +1,13 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
-import {
-    Modal,
-    TextInput,
-    Stack,
-    Select,
-    MultiSelect,
-    Button,
-    Group,
-    LoadingOverlay,
-    TagsInput,
-    Pill,
-    ActionIcon,
-} from "@mantine/core";
+import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
-import UserSearch, { UserSearchRef } from "../common/UserSearch";
+import MultipleUsersInput from "../common/MultipleUsersInput";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
-import AlertText from "../common/AlertText";
 import { IUser } from "../../../interfaces/User";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { notifications } from "@mantine/notifications";
 
 interface IProps {
     opened: boolean;
@@ -32,8 +17,6 @@ interface IProps {
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
     const [selectedHosts, setSelectedHosts] = useState<IUser[]>([]);
-    const [selectedHost, setSelectedHost] = useState<IUser | null>(null);
-    const userSearchRef = useRef<UserSearchRef>(null);
     const navigate = useNavigate();
 
     const form = useForm({
@@ -79,31 +62,11 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         },
     });
 
-    const handleAddHost = (host: IUser) => {
-        if (!selectedHosts.some((h) => h._id === host._id)) {
-            const newHosts = [...selectedHosts, host];
-            setSelectedHosts(newHosts);
-            form.setFieldValue(
-                "hostIds",
-                newHosts.map((h) => h.id)
-            );
-            setSelectedHost(null);
-            userSearchRef.current?.clearSelection();
-        } else {
-            notifications.show({
-                title: "User already in list",
-                message: "This user is already in the list of hosts",
-                color: "red",
-            });
-        }
-    };
-
-    const handleRemoveHost = (hostId: string) => {
-        const newHosts = selectedHosts.filter((h) => h.id !== hostId);
-        setSelectedHosts(newHosts);
+    const handleHostsChange = (hosts: IUser[]) => {
+        setSelectedHosts(hosts);
         form.setFieldValue(
             "hostIds",
-            newHosts.map((h) => h.id)
+            hosts.map((h) => h.id)
         );
     };
 
@@ -112,7 +75,6 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             const res = await createTournamentMutation.mutateAsync(values);
             form.reset();
             setSelectedHosts([]);
-            setSelectedHost(null);
             onClose();
             navigate(`/tournaments/${res.tournament._id}`);
         } catch (error) {
@@ -149,70 +111,16 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         withAsterisk
                     />
 
-                    <Stack gap="xs">
-                        <label style={{ fontWeight: 500, fontSize: "14px" }}>
-                            Hosts <span style={{ color: "var(--mantine-color-red-filled)" }}>*</span>
-                        </label>
-
-                        {selectedHosts.length > 0 ? (
-                            <Pill.Group>
-                                {selectedHosts.map((host) => (
-                                    <Pill
-                                        key={host.id}
-                                        withRemoveButton
-                                        onRemove={() => handleRemoveHost(host.id)}
-                                        styles={{
-                                            root: {
-                                                backgroundColor: "var(--mantine-color-primary-light)",
-                                                color: "var(--mantine-color-primary-light-color)",
-                                            },
-                                            label: { fontWeight: 700 },
-                                        }}>
-                                        {host.username}
-                                    </Pill>
-                                ))}
-                            </Pill.Group>
-                        ) : null}
-
-                        <Group align="center" gap="xs" w="100%" wrap="nowrap">
-                            <UserSearch
-                                ref={userSearchRef}
-                                onChange={setSelectedHost}
-                                onEnterWhenSelected={() => {
-                                    if (selectedHost) {
-                                        handleAddHost(selectedHost);
-                                    }
-                                }}
-                                placeholder="Search for a host to add..."
-                                allowUserCreation
-                            />
-                            <ActionIcon
-                                variant="light"
-                                onClick={() => {
-                                    if (selectedHost) {
-                                        handleAddHost(selectedHost);
-                                    }
-                                }}
-                                color="success"
-                                size="lg"
-                                disabled={!selectedHost}
-                                title="Add host">
-                                <FontAwesomeIcon icon="plus" />
-                            </ActionIcon>
-                        </Group>
-
-                        {form.errors.hostIds && (
-                            <div style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
-                                {form.errors.hostIds}
-                            </div>
-                        )}
-
-                        {selectedHosts.some((host) => host.activeInfringement) && (
-                            <AlertText size="xs" type="danger">
-                                Some hosts have active infringements!
-                            </AlertText>
-                        )}
-                    </Stack>
+                    <MultipleUsersInput
+                        value={selectedHosts}
+                        onChange={handleHostsChange}
+                        label="Hosts"
+                        placeholder="Search for a host to add..."
+                        required
+                        error={form.errors.hostIds as string}
+                        allowUserCreation
+                        showActiveInfringementWarning
+                    />
 
                     <MultiSelect
                         label="Game Modes"

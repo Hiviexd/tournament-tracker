@@ -35,6 +35,11 @@ export default function FileUploadInput({
 
     return (
         <FileInput
+            styles={{
+                placeholder: {
+                    fontSize: "var(--mantine-font-size-sm)",
+                },
+            }}
             accept={accept.join(",")}
             multiple={options?.maxFiles === 1 ? false : true}
             leftSection={<FontAwesomeIcon icon="upload" />}
