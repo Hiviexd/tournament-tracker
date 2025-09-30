@@ -135,6 +135,7 @@ export default function ResourcesPage() {
             {type === "community" && (
                 <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
                     <MarkdownText
+                        size="sm"
                         content={`If you want a resource to be added here, please contact a member of the Tournament Committee, or open [**a ticket**](/tickets/create).`}
                     />
                 </Alert>
