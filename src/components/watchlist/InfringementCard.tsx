@@ -46,7 +46,7 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
                     {infringement.reason && <MarkdownText content={infringement.reason} size="sm" />}
                 </Stack>
                 <Stack gap="xs" align={mobileAlign} style={{ flexShrink: 0 }}>
-                    {infringement.startDate && infringement.endDate && (
+                    {infringement.startDate && (
                         <Group gap={6} align="center" wrap="nowrap">
                             <Text size="xs" c="dimmed">
                                 Duration:
