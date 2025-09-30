@@ -4,6 +4,7 @@ import { useUpdateVoting } from "../../hooks/useVotings";
 import { IVoting } from "../../../interfaces/Voting";
 import { VOTE_COLORS } from "../../constants";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
+import utils from "../../../utils";
 
 // Mantine
 import {
@@ -18,10 +19,12 @@ import {
     Pill,
     Box,
     Checkbox,
+    Select,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TextEditor from "../common/TextEditor";
+import UserSearch from "../common/UserSearch";
 
 interface IProps {
     voting: IVoting;
@@ -46,6 +49,10 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             options: [...voting.options],
             type: voting.type,
             allowNeutralVotes: voting.allowNeutralVotes,
+            category: voting.category,
+            targetUserId: voting.targetUser?.id || "",
+            targetTournamentName: voting.targetTournamentName || "",
+            targetTournamentLink: voting.targetTournamentLink || "",
         },
         validate: {
             title: (value) => {
@@ -76,6 +83,24 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                     if (!form.values.allowNeutralVotes && value.length !== 2) {
                         return "Binary strict votes without neutral must have exactly 2 options";
                     }
+                }
+                return null;
+            },
+            category: (value) => (!value ? "Category is required" : null),
+            targetUserId: (value, values) => (values.category === "user" && !value ? "Target user is required" : null),
+            targetTournamentName: (value, values) => {
+                if (values.category === "tournament") {
+                    if (!value || !value.trim()) return "Tournament name is required";
+                    if (value.length < 5) return "Tournament name must be at least 5 characters";
+                    if (value.length > 120) return "Tournament name cannot exceed 120 characters";
+                    if (value && !values.targetTournamentLink) return "Forum URL is required for tournament reports";
+                }
+                return null;
+            },
+            targetTournamentLink: (value, values) => {
+                if (values.category === "tournament") {
+                    if (!value) return "Forum URL is required";
+                    if (!utils.isOsuForumLink(value)) return "Invalid osu! forum URL format";
                 }
                 return null;
             },
@@ -138,6 +163,12 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
         form.validate();
     };
 
+    const categoryOptions = [
+        { value: "discussion", label: "Discussion" },
+        { value: "tournament", label: "Tournament" },
+        { value: "user", label: "User" },
+    ];
+
     return (
         <Modal opened={opened} onClose={onClose} title="Edit Vote" size="xl">
             <form onSubmit={form.onSubmit(handleSubmit)} style={{ position: "relative" }}>
@@ -149,6 +180,46 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                             withAsterisk
                             {...form.getInputProps("title")}
                         />
+                    )}
+
+                    {!voting.isActive && (
+                        <>
+                            <Select
+                                label="Category"
+                                placeholder="Select vote category"
+                                data={categoryOptions}
+                                withAsterisk
+                                {...form.getInputProps("category")}
+                            />
+
+                            {form.values.category === "user" && (
+                                <UserSearch
+                                    label="Target User"
+                                    onChange={(value) => form.setFieldValue("targetUserId", value?.id || "")}
+                                    error={form.errors.targetUserId}
+                                    required
+                                    allowUserCreation
+                                    preloadUser={voting.targetUser?.id}
+                                />
+                            )}
+
+                            {form.values.category === "tournament" && (
+                                <>
+                                    <TextInput
+                                        label="Tournament Name"
+                                        placeholder="Enter tournament name..."
+                                        {...form.getInputProps("targetTournamentName")}
+                                        withAsterisk
+                                    />
+                                    <TextInput
+                                        label="Tournament Forum URL"
+                                        placeholder="https://osu.ppy.sh/community/forums/topics/..."
+                                        {...form.getInputProps("targetTournamentLink")}
+                                        withAsterisk
+                                    />
+                                </>
+                            )}
+                        </>
                     )}
                     <Box>
                         {voting.isActive && (

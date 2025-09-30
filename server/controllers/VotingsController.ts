@@ -492,9 +492,43 @@ class VotingsController {
     /** POST update voting */
     public async updateVoting(req: Request, res: Response) {
         const votingId = req.params.votingId;
-        const { title, description, duration, options, publicDescription, allowNeutralVotes } = req.body;
+        const {
+            title,
+            description,
+            duration,
+            options,
+            publicDescription,
+            allowNeutralVotes,
+            category,
+            targetUserId,
+            targetTournamentName,
+            targetTournamentLink,
+        } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
+
+        if (!voting.isActive) {
+            if (category) {
+                voting.category = category;
+
+                if (category === "user" && targetUserId) {
+                    // user vote - assign user and clear tournament details
+                    voting.targetUser = await User.findById(targetUserId).orFail();
+                    voting.targetTournamentName = undefined;
+                    voting.targetTournamentLink = undefined;
+                } else if (category === "tournament" && targetTournamentName && targetTournamentLink) {
+                    // tournament vote - assign tournament details and clear user details
+                    voting.targetTournamentName = targetTournamentName;
+                    voting.targetTournamentLink = targetTournamentLink;
+                    voting.targetUser = undefined;
+                } else if (category === "discussion") {
+                    // discussion vote - clear all details
+                    voting.targetUser = undefined;
+                    voting.targetTournamentName = undefined;
+                    voting.targetTournamentLink = undefined;
+                }
+            }
+        }
 
         voting.title = title;
         voting.description = description;
