@@ -533,7 +533,7 @@ class UsersController {
             `Added **${_.startCase(type)}** infringement to [**${user.username}**](${user.osuProfileUrl})`,
             "user"
         );
-        /* temp disable discord webhook
+
         // Build fields
         const fields: IDiscordField[] = [];
 
@@ -584,7 +584,6 @@ class UsersController {
                 },
             ],
         });
-        */
     }
 
     /** PATCH update infringement */
@@ -662,6 +661,7 @@ class UsersController {
             "user"
         );
 
+        /* disable per team request
         // Discord webhook
         const fields: IDiscordField[] = [];
 
@@ -718,6 +718,7 @@ class UsersController {
                 },
             ],
         });
+        */
     }
 
     /** GET related reports and votings */
