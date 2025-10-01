@@ -18,7 +18,7 @@ export default function DashboardPage() {
         return (
             <Stack gap="xl">
                 <Alert color="danger" title="Error" icon={<FontAwesomeIcon icon="times-circle" />}>
-                    You're banned until I rank up in office.
+                    You're banned until I rank up in office. No dopamine for you.
                 </Alert>
             </Stack>
         );
