@@ -12,6 +12,7 @@ class VotingService {
         publicVoting.author = undefined as unknown as IUser;
         publicVoting.description = "";
         publicVoting.attachments = [];
+        publicVoting.abstainedUsers = [];
         publicVoting.votes = publicVoting.votes.map((vote) => ({
             ...vote,
             comment: undefined,
