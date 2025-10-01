@@ -1,9 +1,10 @@
-import { Stack, Title, Group, Text, Badge } from "@mantine/core";
+import { Stack, Title, Group, Text, Badge, Collapse, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
+import { useDisclosure } from "@mantine/hooks";
 
 interface IProps {
     votings: IVoting[];
@@ -37,14 +38,24 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
     const votingsNeedingVote = votings.filter((voting) => checkVotingNeedsVote(voting, user));
     const otherVotings = votings.filter((voting) => !checkVotingNeedsVote(voting, user));
 
+    const [opened, { toggle }] = useDisclosure(votingsNeedingVote.length > 0);
+
     return (
         <Stack gap="md">
-            <Title order={3} className="header-border-left">
-                Votes
-            </Title>
+            <Group align="center" gap="xs">
+                <Title order={3} className="header-border-left">
+                    Votes
+                </Title>
+                <Badge color={votingsNeedingVote.length ? "orange" : "gray"} variant="light">
+                    {votingsNeedingVote.length + otherVotings.length}
+                </Badge>
+                <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
+                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
+                </Button>
+            </Group>
 
             {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
-                <>
+                <Collapse in={opened}>
                     <Stack gap="sm">
                         <Group align="center" gap="xs">
                             <Title order={4} c={votingsNeedingVote.length > 0 ? "orange" : "white"}>
@@ -92,7 +103,7 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                             </Group>
                         )}
                     </Stack>
-                </>
+                </Collapse>
             ) : (
                 <EmptyState
                     height={100}

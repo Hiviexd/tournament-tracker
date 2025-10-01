@@ -23,6 +23,13 @@ export default function DashboardPage() {
 
     const { tournaments, votings, tickets, reports, users } = data;
 
+    const isEmpty =
+        tournaments.length === 0 &&
+        votings.length === 0 &&
+        tickets.length === 0 &&
+        reports.length === 0 &&
+        users.length === 0;
+
     return (
         <Stack gap="xl">
             {/* Welcome Section */}
@@ -40,21 +47,33 @@ export default function DashboardPage() {
             </Card>
 
             {/* Dashboard Sections */}
-            {tournaments.length > 0 ||
-            votings.length > 0 ||
-            tickets.length > 0 ||
-            reports.length > 0 ||
-            users.length > 0 ? (
+            {!isEmpty ? (
                 <>
-                    <DashboardTournamentsSection tournaments={tournaments} user={user} />
-                    <Divider />
-                    <DashboardVotingsSection votings={votings} user={user} />
-                    <Divider />
-                    <DashboardReportsSection reports={reports} />
-                    <Divider />
-                    <DashboardTicketsSection tickets={tickets} />
-                    <Divider />
-                    <DashboardInfringementsSection users={users} />
+                    {users.length > 0 && (
+                        <>
+                            <DashboardInfringementsSection users={users} />
+                            <Divider />
+                        </>
+                    )}
+                    {tournaments.length > 0 && (
+                        <>
+                            <DashboardTournamentsSection tournaments={tournaments} user={user} />
+                            <Divider />
+                        </>
+                    )}
+                    {votings.length > 0 && (
+                        <>
+                            <DashboardVotingsSection votings={votings} user={user} />
+                            <Divider />
+                        </>
+                    )}
+                    {reports.length > 0 && (
+                        <>
+                            <DashboardReportsSection reports={reports} />
+                            <Divider />
+                        </>
+                    )}
+                    {tickets.length > 0 && <DashboardTicketsSection tickets={tickets} />}
                 </>
             ) : (
                 <EmptyState
