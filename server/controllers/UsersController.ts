@@ -9,7 +9,7 @@ import LogService from "../services/LogService";
 import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import _ from "lodash";
-// import { IDiscordField } from "../../interfaces/Discord";
+import { IDiscordField } from "../../interfaces/Discord";
 import moment from "moment";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
@@ -662,8 +662,6 @@ class UsersController {
             "user"
         );
 
-        /* temp disable discord webhook
-
         // Discord webhook
         const fields: IDiscordField[] = [];
 
@@ -720,7 +718,6 @@ class UsersController {
                 },
             ],
         });
-        */
     }
 
     /** GET related reports and votings */
