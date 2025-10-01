@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, SimpleGrid, Badge, Button, Collapse } from "@mantine/core";
+import { Stack, Title, Group, Text, SimpleGrid, Badge, Button, Collapse, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
@@ -42,9 +42,20 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                 <Title order={3} className="header-border-left">
                     {_.capitalize(typeString)}
                 </Title>
-                <Badge color={tournamentsNeedingReview.length ? "orange" : "gray"} variant="light">
-                    {tournamentsNeedingReview.length + otherTournaments.length}
-                </Badge>
+                {tournamentsNeedingReview.length > 0 && (
+                    <Tooltip label="Needs Your Review">
+                        <Badge color="orange" variant="light">
+                            {tournamentsNeedingReview.length}
+                        </Badge>
+                    </Tooltip>
+                )}
+                {otherTournaments.length > 0 && (
+                    <Tooltip label={`Other Assigned ${_.capitalize(typeString)}`}>
+                        <Badge color="gray" variant="light">
+                            {otherTournaments.length}
+                        </Badge>
+                    </Tooltip>
+                )}
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
                     <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
                 </Button>
@@ -52,52 +63,54 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
 
             {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
                 <Collapse in={opened}>
-                    <Stack gap="sm">
-                        <Group align="center" gap="xs">
-                            <Title order={4} c={tournamentsNeedingReview.length > 0 ? "orange" : "white"}>
-                                Needs Your Review
-                            </Title>
-                            <Badge color={tournamentsNeedingReview.length > 0 ? "orange" : "gray"} variant="light">
-                                {tournamentsNeedingReview.length}
-                            </Badge>
-                        </Group>
-                        {tournamentsNeedingReview.length > 0 ? (
-                            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                                {tournamentsNeedingReview.map((tournament) => (
-                                    <TournamentCard key={tournament.id} tournament={tournament} />
-                                ))}
-                            </SimpleGrid>
-                        ) : (
-                            <Group gap="xs" pl="md">
-                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                                <Text size="sm" c="dimmed">
-                                    All clear!
-                                </Text>
+                    <Stack gap="lg">
+                        <Stack gap="sm">
+                            <Group align="center" gap="xs">
+                                <Title order={4} c={tournamentsNeedingReview.length > 0 ? "orange" : "white"}>
+                                    Needs Your Review
+                                </Title>
+                                <Badge color={tournamentsNeedingReview.length > 0 ? "orange" : "gray"} variant="light">
+                                    {tournamentsNeedingReview.length}
+                                </Badge>
                             </Group>
-                        )}
-                    </Stack>
+                            {tournamentsNeedingReview.length > 0 ? (
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                    {tournamentsNeedingReview.map((tournament) => (
+                                        <TournamentCard key={tournament.id} tournament={tournament} />
+                                    ))}
+                                </SimpleGrid>
+                            ) : (
+                                <Group gap="xs" pl="md">
+                                    <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                    <Text size="sm" c="dimmed">
+                                        All clear!
+                                    </Text>
+                                </Group>
+                            )}
+                        </Stack>
 
-                    <Stack gap="sm">
-                        <Group align="center" gap="xs">
-                            <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
-                            <Badge color="gray" variant="light">
-                                {otherTournaments.length}
-                            </Badge>
-                        </Group>
-                        {otherTournaments.length > 0 ? (
-                            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                                {otherTournaments.map((tournament) => (
-                                    <TournamentCard key={tournament.id} tournament={tournament} />
-                                ))}
-                            </SimpleGrid>
-                        ) : (
-                            <Group gap="xs" pl="md">
-                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                                <Text size="sm" c="dimmed">
-                                    All clear!
-                                </Text>
+                        <Stack gap="sm">
+                            <Group align="center" gap="xs">
+                                <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
+                                <Badge color="gray" variant="light">
+                                    {otherTournaments.length}
+                                </Badge>
                             </Group>
-                        )}
+                            {otherTournaments.length > 0 ? (
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                    {otherTournaments.map((tournament) => (
+                                        <TournamentCard key={tournament.id} tournament={tournament} />
+                                    ))}
+                                </SimpleGrid>
+                            ) : (
+                                <Group gap="xs" pl="md">
+                                    <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                    <Text size="sm" c="dimmed">
+                                        All clear!
+                                    </Text>
+                                </Group>
+                            )}
+                        </Stack>
                     </Stack>
                 </Collapse>
             ) : (

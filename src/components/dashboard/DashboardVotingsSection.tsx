@@ -1,4 +1,4 @@
-import { Stack, Title, Group, Text, Badge, Collapse, Button } from "@mantine/core";
+import { Stack, Title, Group, Text, Badge, Collapse, Button, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
@@ -46,9 +46,20 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                 <Title order={3} className="header-border-left">
                     Votes
                 </Title>
-                <Badge color={votingsNeedingVote.length ? "orange" : "gray"} variant="light">
-                    {votingsNeedingVote.length + otherVotings.length}
-                </Badge>
+                {votingsNeedingVote.length > 0 && (
+                    <Tooltip label="Needs Your Vote">
+                        <Badge color="orange" variant="light">
+                            {votingsNeedingVote.length}
+                        </Badge>
+                    </Tooltip>
+                )}
+                {otherVotings.length > 0 && (
+                    <Tooltip label="Other Active Votes">
+                        <Badge color="gray" variant="light">
+                            {otherVotings.length}
+                        </Badge>
+                    </Tooltip>
+                )}
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
                     <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
                 </Button>
@@ -56,52 +67,54 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
 
             {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
                 <Collapse in={opened}>
-                    <Stack gap="sm">
-                        <Group align="center" gap="xs">
-                            <Title order={4} c={votingsNeedingVote.length > 0 ? "orange" : "white"}>
-                                Needs Your Vote
-                            </Title>
-                            <Badge color={votingsNeedingVote.length > 0 ? "orange" : "gray"} variant="light">
-                                {votingsNeedingVote.length}
-                            </Badge>
-                        </Group>
-                        {votingsNeedingVote.length > 0 ? (
-                            <Stack gap="md">
-                                {votingsNeedingVote.map((voting) => (
-                                    <VotingCard key={voting.id} voting={voting} />
-                                ))}
-                            </Stack>
-                        ) : (
-                            <Group gap="xs" pl="md">
-                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                                <Text size="sm" c="dimmed">
-                                    All clear!
-                                </Text>
+                    <Stack gap="lg">
+                        <Stack gap="sm">
+                            <Group align="center" gap="xs">
+                                <Title order={4} c={votingsNeedingVote.length > 0 ? "orange" : "white"}>
+                                    Needs Your Vote
+                                </Title>
+                                <Badge color={votingsNeedingVote.length > 0 ? "orange" : "gray"} variant="light">
+                                    {votingsNeedingVote.length}
+                                </Badge>
                             </Group>
-                        )}
-                    </Stack>
+                            {votingsNeedingVote.length > 0 ? (
+                                <Stack gap="md">
+                                    {votingsNeedingVote.map((voting) => (
+                                        <VotingCard key={voting.id} voting={voting} />
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Group gap="xs" pl="md">
+                                    <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                    <Text size="sm" c="dimmed">
+                                        All clear!
+                                    </Text>
+                                </Group>
+                            )}
+                        </Stack>
 
-                    <Stack gap="sm">
-                        <Group align="center" gap="xs">
-                            <Title order={4}>Other Active Votes</Title>
-                            <Badge color="gray" variant="light">
-                                {otherVotings.length}
-                            </Badge>
-                        </Group>
-                        {otherVotings.length > 0 ? (
-                            <Stack gap="md">
-                                {otherVotings.map((voting) => (
-                                    <VotingCard key={voting.id} voting={voting} />
-                                ))}
-                            </Stack>
-                        ) : (
-                            <Group gap="xs" pl="md">
-                                <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
-                                <Text size="sm" c="dimmed">
-                                    All clear!
-                                </Text>
+                        <Stack gap="sm">
+                            <Group align="center" gap="xs">
+                                <Title order={4}>Other Active Votes</Title>
+                                <Badge color="gray" variant="light">
+                                    {otherVotings.length}
+                                </Badge>
                             </Group>
-                        )}
+                            {otherVotings.length > 0 ? (
+                                <Stack gap="md">
+                                    {otherVotings.map((voting) => (
+                                        <VotingCard key={voting.id} voting={voting} />
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Group gap="xs" pl="md">
+                                    <FontAwesomeIcon icon="check-double" style={{ opacity: 0.5 }} />
+                                    <Text size="sm" c="dimmed">
+                                        All clear!
+                                    </Text>
+                                </Group>
+                            )}
+                        </Stack>
                     </Stack>
                 </Collapse>
             ) : (
