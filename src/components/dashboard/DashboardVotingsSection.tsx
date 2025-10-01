@@ -60,13 +60,20 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                         </Badge>
                     </Tooltip>
                 )}
+                {votingsNeedingVote.length === 0 && otherVotings.length === 0 && (
+                    <Tooltip label="No Votes Assigned">
+                        <Badge color="gray" variant="light">
+                            0
+                        </Badge>
+                    </Tooltip>
+                )}
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
                     <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
                 </Button>
             </Group>
 
-            {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
-                <Collapse in={opened}>
+            <Collapse in={opened}>
+                {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
                     <Stack gap="lg">
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
@@ -116,15 +123,15 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                             )}
                         </Stack>
                     </Stack>
-                </Collapse>
-            ) : (
-                <EmptyState
-                    height={100}
-                    icon="vote-yea"
-                    title="All votes are clear!"
-                    description="Go play some osu!, annoy Albion, or do what you do best."
-                />
-            )}
+                ) : (
+                    <EmptyState
+                        height={100}
+                        icon="vote-yea"
+                        title="All votes are clear!"
+                        description="Go play some osu!, annoy Albion, or do what you do best."
+                    />
+                )}
+            </Collapse>
         </Stack>
     );
 }

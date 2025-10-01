@@ -56,13 +56,20 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                         </Badge>
                     </Tooltip>
                 )}
+                {tournamentsNeedingReview.length === 0 && otherTournaments.length === 0 && (
+                    <Tooltip label={`No ${_.capitalize(typeString)} Assigned`}>
+                        <Badge color="gray" variant="light">
+                            0
+                        </Badge>
+                    </Tooltip>
+                )}
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
                     <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
                 </Button>
             </Group>
 
-            {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
-                <Collapse in={opened}>
+            <Collapse in={opened}>
+                {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
                     <Stack gap="lg">
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
@@ -112,15 +119,15 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                             )}
                         </Stack>
                     </Stack>
-                </Collapse>
-            ) : (
-                <EmptyState
-                    height={100}
-                    icon="trophy"
-                    title={`All ${typeString} are clear!`}
-                    description="Hello shdewz, we meet again."
-                />
-            )}
+                ) : (
+                    <EmptyState
+                        height={100}
+                        icon="trophy"
+                        title={`All ${typeString} are clear!`}
+                        description="Hello shdewz, we meet again."
+                    />
+                )}
+            </Collapse>
         </Stack>
     );
 }

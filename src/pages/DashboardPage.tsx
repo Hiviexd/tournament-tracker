@@ -49,31 +49,15 @@ export default function DashboardPage() {
             {/* Dashboard Sections */}
             {!isEmpty ? (
                 <>
-                    {users.length > 0 && (
-                        <>
-                            <DashboardInfringementsSection users={users} />
-                            <Divider />
-                        </>
-                    )}
-                    {tournaments.length > 0 && (
-                        <>
-                            <DashboardTournamentsSection tournaments={tournaments} user={user} />
-                            <Divider />
-                        </>
-                    )}
-                    {votings.length > 0 && (
-                        <>
-                            <DashboardVotingsSection votings={votings} user={user} />
-                            <Divider />
-                        </>
-                    )}
-                    {reports.length > 0 && (
-                        <>
-                            <DashboardReportsSection reports={reports} />
-                            <Divider />
-                        </>
-                    )}
-                    {tickets.length > 0 && <DashboardTicketsSection tickets={tickets} />}
+                    <DashboardInfringementsSection users={users} />
+                    <Divider />
+                    <DashboardTournamentsSection tournaments={tournaments} user={user} />
+                    <Divider />
+                    <DashboardVotingsSection votings={votings} user={user} />
+                    <Divider />
+                    <DashboardReportsSection reports={reports} />
+                    <Divider />
+                    <DashboardTicketsSection tickets={tickets} />
                 </>
             ) : (
                 <EmptyState
