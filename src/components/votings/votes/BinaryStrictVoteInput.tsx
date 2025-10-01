@@ -8,7 +8,7 @@ interface IProps {
     allowNeutralVotes?: boolean;
 }
 
-export default function BinaryStrictVoteInput({ value, onChange, allowNeutralVotes = true }: IProps) {
+export default function BinaryStrictVoteInput({ options, value, onChange, allowNeutralVotes = true }: IProps) {
     const handleChange = (scoreStr: string) => {
         const score = parseInt(scoreStr);
         onChange({
@@ -24,9 +24,9 @@ export default function BinaryStrictVoteInput({ value, onChange, allowNeutralVot
             </Text>
             <Radio.Group value={value?.score?.toString() || ""} onChange={handleChange}>
                 <Stack gap="xs">
-                    <Radio value="1" label="Agree" color="success" />
-                    {allowNeutralVotes && <Radio value="0" label="Neutral" color="yellow" />}
-                    <Radio value="-1" label="Disagree" color="red" />
+                    <Radio value="1" label={options[0]} color="success" />
+                    {allowNeutralVotes && <Radio value="0" label={options[1]} color="yellow" />}
+                    <Radio value="-1" label={options[allowNeutralVotes ? 2 : 1]} color="red" />
                 </Stack>
             </Radio.Group>
         </Stack>

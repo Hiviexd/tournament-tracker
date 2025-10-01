@@ -50,10 +50,11 @@ export const BADGE_SUPPORT_OPTIONS = [
 export const VOTE_PRESETS = {
     userAddition: {
         type: "binary-strict" as const,
-        options: ["Approve", "Oppose"],
+        options: ["Support", "Oppose"],
         duration: 4,
         allowNeutralVotes: false,
-        forceFullParticipation: false,
+        forceFullParticipation: true,
+        binaryStrictPassThreshold: 80,
     },
     tournamentBans: {
         type: "ranked-choice" as const,
@@ -61,6 +62,7 @@ export const VOTE_PRESETS = {
         duration: 3,
         allowNeutralVotes: true,
         forceFullParticipation: false,
+        binaryStrictPassThreshold: 50,
     },
     badgeSupport: {
         type: "ranked-choice" as const,
@@ -68,13 +70,15 @@ export const VOTE_PRESETS = {
         duration: 3,
         allowNeutralVotes: true,
         forceFullParticipation: false,
+        binaryStrictPassThreshold: 50,
     },
     topThreeBadgeSupport: {
         type: "binary-strict" as const,
-        options: ["Approve", "Oppose"],
+        options: ["Support", "Oppose"],
         duration: 4,
         allowNeutralVotes: false,
         forceFullParticipation: true,
+        binaryStrictPassThreshold: 80,
     },
 } as const;
 

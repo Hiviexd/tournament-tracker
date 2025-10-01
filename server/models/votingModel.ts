@@ -32,6 +32,7 @@ const VotingSchema = new Schema<IVoting>(
         concludedAt: { type: Date },
         allowNeutralVotes: { type: Boolean, default: true },
         abstainedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+        binaryStrictPassThreshold: { type: Number, default: 50 },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

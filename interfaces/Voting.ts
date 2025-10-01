@@ -77,6 +77,7 @@ export interface IVoting {
     publicDescription?: string;
     allowNeutralVotes: boolean;
     abstainedUsers?: IUser[];
+    binaryStrictPassThreshold?: number;
 
     // virtuals
     deadline: Date;

@@ -138,6 +138,10 @@ class VotingService {
             }
 
             case "binary-strict": {
+                const agreeOption = voting.options[0];
+                const disagreeOption = voting.allowNeutralVotes ? voting.options[2] : voting.options[1];
+                const neutralOption = voting.allowNeutralVotes ? voting.options[1] : null;
+
                 const binaryStrictVotes = voting.votes.filter(
                     (v): v is IVote & { data: BinaryStrictVote } => v.data.type === "binary-strict"
                 );
@@ -158,15 +162,18 @@ class VotingService {
                     voting.votes.length > 0 ? Math.round((distribution.neutral / voting.votes.length) * 100) : 0;
 
                 // Determine winner (excluding neutrals)
-                let winner = "Tie";
-                if (distribution.agree > distribution.disagree) winner = "Agree";
-                else if (distribution.disagree > distribution.agree) winner = "Disagree";
+                let winner = "idk man blame hivie if you see this";
+                const passPercentage = voting.binaryStrictPassThreshold || 50;
+                if (distribution.agree === distribution.disagree) winner = "🏳️ Tie";
+                else if (agreePercentage >= passPercentage) winner = `✅ ${agreeOption}`;
+                else winner = `❌ ${disagreeOption}`;
 
-                let resultsText = `**Agree**: ${agreePercentage}% (${distribution.agree}/${nonNeutralVotes})\n`;
-                resultsText += `**Disagree**: ${disagreePercentage}% (${distribution.disagree}/${nonNeutralVotes})`;
+                let resultsText = `**Pass Threshold**: ${passPercentage}%\n\n`;
+                resultsText += `**${agreeOption}**: ${agreePercentage}% (${distribution.agree}/${nonNeutralVotes})\n`;
+                resultsText += `**${disagreeOption}**: ${disagreePercentage}% (${distribution.disagree}/${nonNeutralVotes})`;
 
                 if (distribution.neutral > 0) {
-                    resultsText += `\n**Neutral**: ${neutralPercentage}% (${distribution.neutral}/${voting.votes.length}) *(excluded from result)*`;
+                    resultsText += `\n**${neutralOption}**: ${neutralPercentage}% (${distribution.neutral}/${voting.votes.length}) *(excluded from result)*`;
                 }
 
                 fields.push(
@@ -186,7 +193,7 @@ class VotingService {
                     },
                     {
                         name: "Winner",
-                        value: `🏆 **${winner}**`,
+                        value: winner,
                     }
                 );
                 break;

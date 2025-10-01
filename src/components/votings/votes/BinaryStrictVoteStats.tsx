@@ -12,6 +12,11 @@ interface IProps {
 
 export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFilter }: IProps) {
     const totalVotes = voting.votes.length;
+
+    const agreeOption = voting.options[0];
+    const disagreeOption = voting.allowNeutralVotes ? voting.options[2] : voting.options[1];
+    const neutralOption = voting.allowNeutralVotes ? voting.options[1] : null;
+
     const binaryStrictVotes = voting.votes.filter(
         (v): v is typeof v & { data: BinaryStrictVote } => v.data.type === "binary-strict"
     );
@@ -30,21 +35,23 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
 
     // Exclude neutral votes for winner calculation
     const nonNeutralVotes = distribution.agree + distribution.disagree;
+    const passPercentage = voting.binaryStrictPassThreshold || 50;
     const agreePercentage = nonNeutralVotes > 0 ? (distribution.agree / nonNeutralVotes) * 100 : 0;
     const disagreePercentage = nonNeutralVotes > 0 ? (distribution.disagree / nonNeutralVotes) * 100 : 0;
     const neutralPercentage = totalVotes > 0 ? (distribution.neutral / totalVotes) * 100 : 0;
 
     // Determine winner (excluding neutrals)
     const getWinner = () => {
-        if (distribution.agree > distribution.disagree) return "agree";
-        if (distribution.disagree > distribution.agree) return "disagree";
-        return "tie";
+        if (distribution.agree === distribution.disagree) return "tie";
+        if (agreePercentage >= passPercentage) return "agree";
+        return "disagree";
     };
 
     const getResultColor = (winner: string) => {
-        if (winner === "agree") return { text: "Agree", icon: "check-circle", color: "var(--mantine-color-success-6)" };
+        if (winner === "agree")
+            return { text: agreeOption, icon: "check-circle", color: "var(--mantine-color-success-6)" };
         if (winner === "disagree")
-            return { text: "Disagree", icon: "times-circle", color: "var(--mantine-color-red-6)" };
+            return { text: disagreeOption, icon: "times-circle", color: "var(--mantine-color-red-6)" };
         return { text: "Tie", icon: "exclamation-triangle", color: "var(--mantine-color-orange-6)" };
     };
 
@@ -58,6 +65,11 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                         ({nonNeutralVotes} non-neutral)
                     </Text>
                 )}
+            </Group>
+
+            <Group align="center" gap="xs">
+                <Text fw={500}>Pass Threshold:</Text>
+                <Text c="dimmed">{passPercentage}%</Text>
             </Group>
 
             {nonNeutralVotes > 0 && (
@@ -84,7 +96,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                                 </ActionIcon>
                             )}
                             <Text size="sm" fw={500}>
-                                Agree
+                                {agreeOption}
                             </Text>
                             {getWinner() === "agree" && (
                                 <FontAwesomeIcon icon="check" color="var(--mantine-color-success-6)" />
@@ -114,7 +126,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                                 </ActionIcon>
                             )}
                             <Text size="sm" fw={500}>
-                                Disagree
+                                {disagreeOption}
                             </Text>
                             {getWinner() === "disagree" && (
                                 <FontAwesomeIcon icon="check" color="var(--mantine-color-success-6)" />
@@ -142,7 +154,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                                         </ActionIcon>
                                     )}
                                     <Text size="sm" fw={500} c="gray.6">
-                                        Neutral (excluded from result)
+                                        {neutralOption} (excluded from result)
                                     </Text>
                                 </Group>
                                 <Text size="sm" c="dimmed">

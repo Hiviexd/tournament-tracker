@@ -19,7 +19,7 @@ const DEFAULT_POPULATE = [
         path: "votes",
         populate: {
             path: "author",
-            select: "username osuId groups coverUrl",
+            select: "username osuId groups coverUrl country",
         },
     },
     { path: "targetUser", select: "username osuId groups coverUrl country" },
@@ -127,6 +127,7 @@ class VotingsController {
             type,
             allowNeutralVotes,
             forceFullParticipation,
+            binaryStrictPassThreshold,
         } = req.body;
         const files = req.files as Express.Multer.File[];
 
@@ -159,6 +160,7 @@ class VotingsController {
             options,
             requiredVotes,
             allowNeutralVotes: neutralVotesSettingOverride,
+            binaryStrictPassThreshold: type === "binary-strict" ? binaryStrictPassThreshold : undefined,
         });
 
         if (category === "user") {
@@ -254,6 +256,13 @@ class VotingsController {
             fields.push({
                 name: "Participation Requirement",
                 value: forceFullParticipationBool ? "100%" : "75%",
+            });
+        }
+
+        if (voting.type === "binary-strict") {
+            fields.push({
+                name: "Pass Threshold",
+                value: `${voting.binaryStrictPassThreshold}%`,
             });
         }
 

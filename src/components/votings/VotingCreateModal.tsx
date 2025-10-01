@@ -50,12 +50,13 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             assignedGroups: [] as UserGroup[],
             duration: 3,
             type: "classic" as VotingType,
-            options: ["Agree", "Disagree"],
+            options: ["Support", "Oppose"],
             allowNeutralVotes: true,
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
             forceFullParticipation: false,
+            binaryStrictPassThreshold: 50,
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
@@ -156,7 +157,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             group: "Clear Outcome Voting (for decisions)",
             items: [
                 { value: "classic", label: "Classic (Single Choice)" },
-                { value: "binary-strict", label: "Strict Binary (Agree/Neutral/Disagree)" },
+                { value: "binary-strict", label: "Strict Binary (Support/Neutral/Oppose)" },
                 { value: "ranked-choice", label: "Ranked Choice (Schulze Method)" },
             ],
         },
@@ -186,6 +187,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             form.setFieldValue("duration", selectedPreset.duration);
             form.setFieldValue("allowNeutralVotes", selectedPreset.allowNeutralVotes);
             form.setFieldValue("forceFullParticipation", selectedPreset.forceFullParticipation);
+            form.setFieldValue("binaryStrictPassThreshold", selectedPreset.binaryStrictPassThreshold);
         }
     };
 
@@ -194,9 +196,12 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             // Check if we already have custom options (likely from a preset)
             if (skipIfCustomOptions) {
                 const currentOptions = form.values.options;
-                const isDefaultOptions = allowNeutralVotes
-                    ? currentOptions.length === 3 && currentOptions.join(",") === "Agree,Neutral,Disagree"
-                    : currentOptions.length === 2 && currentOptions.join(",") === "Agree,Disagree";
+                // Check if current options match either default configuration
+                const isDefaultTwoOptions =
+                    currentOptions.length === 2 && currentOptions.join(",") === "Support,Oppose";
+                const isDefaultThreeOptions =
+                    currentOptions.length === 3 && currentOptions.join(",") === "Support,Neutral,Oppose";
+                const isDefaultOptions = isDefaultTwoOptions || isDefaultThreeOptions;
 
                 if (!isDefaultOptions && currentOptions.length > 0) {
                     return; // Don't override custom options
@@ -204,12 +209,12 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             }
 
             if (allowNeutralVotes) {
-                form.setFieldValue("options", ["Agree", "Neutral", "Disagree"]);
+                form.setFieldValue("options", ["Support", "Neutral", "Oppose"]);
             } else {
-                form.setFieldValue("options", ["Agree", "Disagree"]);
+                form.setFieldValue("options", ["Support", "Oppose"]);
             }
         } else if (form.values.options.length === 0) {
-            form.setFieldValue("options", ["Agree", "Disagree"]);
+            form.setFieldValue("options", ["Support", "Oppose"]);
         }
     };
 
@@ -235,8 +240,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 return "Binary voting allows users to vote between 2 options using a score ranging from -5 to +5, with the green option being +5 and the red option being -5.";
             case "binary-strict":
                 return form.values.allowNeutralVotes
-                    ? "Binary strict voting presents 3 options: Agree, Neutral, and Disagree. Neutral votes are excluded from the final result calculation."
-                    : "Binary strict voting presents 2 options: Agree and Disagree. No neutral option is available.";
+                    ? "Binary strict voting presents 3 options: Support, Neutral, and Oppose. Neutral votes are excluded from the final result calculation."
+                    : "Binary strict voting presents 2 options: Support and Oppose. No neutral option is available.";
             case "variable":
                 return "Variable voting allows users to rate each option with a score ranging from -5 to +5.";
             case "ranked-choice":
@@ -335,6 +340,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     />
 
                     <Select
+                        label="Vote Preset"
+                        placeholder="Select a preset configuration"
+                        data={presetOptions}
+                        onChange={(value) => handlePresetChange(value || "")}
+                        clearable
+                    />
+
+                    <Select
                         label="Vote Type"
                         placeholder="Select vote type"
                         data={typeOptions}
@@ -348,19 +361,24 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         form.values.type === "variable" ||
                         form.values.type === "binary-strict") && (
                         <Checkbox
-                            label="Allow neutral (0 score) votes"
+                            label="Allow neutral votes"
                             checked={form.values.allowNeutralVotes}
                             onChange={handleAllowNeutralVotesChange}
                         />
                     )}
 
-                    <Select
-                        label="Vote Preset"
-                        placeholder="Select a preset configuration"
-                        data={presetOptions}
-                        onChange={(value) => handlePresetChange(value || "")}
-                        clearable
-                    />
+                    {form.values.type === "binary-strict" && (
+                        <NumberInput
+                            label="Pass threshold"
+                            placeholder="Enter pass threshold"
+                            suffix="%"
+                            min={0}
+                            max={100}
+                            defaultValue={50}
+                            withAsterisk
+                            {...form.getInputProps("binaryStrictPassThreshold")}
+                        />
+                    )}
 
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>

@@ -257,7 +257,7 @@ export default function VotingForm({ voting, user }: IProps) {
                     <Group justify="flex-end">
                         {!voting.allowNeutralVotes && hasNeutralVote(voteData) && (
                             <Text size="xs" c="danger">
-                                Neutral (0 score) votes are not allowed
+                                Neutral votes are not allowed
                             </Text>
                         )}
                         {!isAbstained && (

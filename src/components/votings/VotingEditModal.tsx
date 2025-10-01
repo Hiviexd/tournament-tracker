@@ -357,7 +357,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
 
                     {(form.values.type === "binary" || form.values.type === "variable") && (
                         <Checkbox
-                            label="Allow neutral (0 score) votes"
+                            label="Allow neutral votes"
                             checked={form.values.allowNeutralVotes}
                             onChange={(event) => form.setFieldValue("allowNeutralVotes", event.currentTarget.checked)}
                         />
