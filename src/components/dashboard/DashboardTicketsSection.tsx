@@ -12,7 +12,7 @@ interface IProps {
 export default function DashboardTicketsSection({ tickets }: IProps) {
     const [opened, { toggle }] = useDisclosure(tickets.length > 0);
     return (
-        <Stack gap="md">
+        <Stack gap="md" mb="sm">
             <Group align="center" gap="xs">
                 <Title order={3} className="header-border-left">
                     Tickets
