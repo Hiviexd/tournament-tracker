@@ -1,4 +1,4 @@
-import { Stack, Title, Text, Card, SimpleGrid, Group, Skeleton, Divider, Avatar } from "@mantine/core";
+import { Stack, Title, Text, Card, SimpleGrid, Group, Skeleton, Divider, Avatar, Alert } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import { useDashboard } from "../hooks/useDashboard";
@@ -8,10 +8,20 @@ import DashboardVotingsSection from "../components/dashboard/DashboardVotingsSec
 import DashboardReportsSection from "../components/dashboard/DashboardReportsSection";
 import DashboardTicketsSection from "../components/dashboard/DashboardTicketsSection";
 import DashboardInfringementsSection from "../components/dashboard/DashboardInfringementsSection";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function DashboardPage() {
     const [user] = useAtom(loggedInUserAtom);
     const { data, isLoading, isError } = useDashboard();
+
+    if (user?.username === "Albionthegreat")
+        return (
+            <Stack gap="xl">
+                <Alert color="danger" title="Error" icon={<FontAwesomeIcon icon="times-circle" />}>
+                    You're banned until I rank up in office.
+                </Alert>
+            </Stack>
+        );
 
     if (isLoading) {
         return <LoadingState />;
