@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { isEqual } from "lodash";
+import _ from "lodash";
 import utils from "../../utils";
 import { routes, IRoute } from "../base/header.config";
 import { ITournament } from "../../interfaces/Tournament";
@@ -180,7 +180,7 @@ export function useSearchHistory(): {
 
     const addSearchItem = (item: ISearchItem) => {
         // Dedupe items
-        const filtered = lastSearches.filter((search) => !isEqual(search, item));
+        const filtered = lastSearches.filter((search) => !_.isEqual(search, item));
 
         // Add the new item at the beginning and limit to 4 items
         const newSearches = [item, ...filtered].slice(0, 4);
