@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { isEqual } from "lodash";
 import utils from "../../utils";
 import { routes, IRoute } from "../base/header.config";
 import { ITournament } from "../../interfaces/Tournament";
@@ -8,6 +9,7 @@ import { IArticle } from "../../interfaces/Article";
 import { IResource } from "../../interfaces/Resource";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
+import { useLocalPreference } from "./useLocalPreferences";
 
 export interface ISearchItem {
     object: Partial<ITournament | IVoting | ITicket | IArticle | IResource | IRoute>;
@@ -159,5 +161,39 @@ export function useGlobalSearch(query: string) {
         results: searchResults,
         isLoading,
         error,
+    };
+}
+
+/**
+ * Hook to manage search history in localStorage, maintaining a maximum of 4 items
+ * @returns {Object} - An object containing the last searches, a function to add a search item, and a function to clear the search history
+ * @returns {ISearchItem[]} lastSearches - The last 4 searches
+ * @returns {Function} addSearchItem - A function to add a search item
+ * @returns {Function} clearLastSearches - A function to clear the search history
+ */
+export function useSearchHistory(): {
+    lastSearches: ISearchItem[];
+    addSearchItem: (item: ISearchItem) => void;
+    clearLastSearches: () => void;
+} {
+    const [lastSearches, setLastSearches] = useLocalPreference<ISearchItem[]>("lastSearches", []);
+
+    const addSearchItem = (item: ISearchItem) => {
+        // Dedupe items
+        const filtered = lastSearches.filter((search) => !isEqual(search, item));
+
+        // Add the new item at the beginning and limit to 4 items
+        const newSearches = [item, ...filtered].slice(0, 4);
+        setLastSearches(newSearches);
+    };
+
+    const clearLastSearches = () => {
+        setLastSearches([]);
+    };
+
+    return {
+        lastSearches,
+        addSearchItem,
+        clearLastSearches,
     };
 }

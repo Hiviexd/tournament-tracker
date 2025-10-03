@@ -1,9 +1,9 @@
-import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap, Kbd, Group } from "@mantine/core";
+import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap, Kbd, Group, Button } from "@mantine/core";
 import { Spotlight as MantineSpotlight } from "@mantine/spotlight";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ISearchItem, useGlobalSearch } from "../../hooks/useGlobalSearch";
+import { ISearchItem, useGlobalSearch, useSearchHistory } from "../../hooks/useGlobalSearch";
 import SpotlightAction from "./spotlight/SpotlightAction";
 import { useNavigate } from "react-router-dom";
 import utils from "../../../utils";
@@ -16,6 +16,7 @@ export default function Spotlight() {
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const { results, isLoading, error } = useGlobalSearch(debouncedSearch);
+    const { lastSearches, addSearchItem, clearLastSearches } = useSearchHistory();
 
     const navigate = useNavigate();
 
@@ -49,6 +50,9 @@ export default function Spotlight() {
     };
 
     const handleSelectOption = (result: ISearchItem) => {
+        addSearchItem(result);
+        setSearch("");
+
         if (utils.isExternalLink(result.link)) {
             window.open(result.link, "_blank");
         } else {
@@ -105,6 +109,27 @@ export default function Spotlight() {
                             </MantineSpotlight.ActionsGroup>
                         ))}
                     </>
+                )}
+                {!isLoading && results.length === 0 && lastSearches.length > 0 && debouncedSearch.length === 0 && (
+                    <MantineSpotlight.ActionsGroup label="Recent Searches">
+                        {lastSearches.map((searchItem, index) => (
+                            <SpotlightAction
+                                key={`${searchItem.type}-${searchItem.link}-${index}`}
+                                searchItem={searchItem}
+                                onClick={() => handleSelectOption(searchItem)}
+                            />
+                        ))}
+                        <Group justify="center" mx="sm" mt="xs">
+                            <Button
+                                size="xs"
+                                color="danger"
+                                variant="light"
+                                leftSection={<FontAwesomeIcon icon="trash" />}
+                                onClick={clearLastSearches}>
+                                Clear
+                            </Button>
+                        </Group>
+                    </MantineSpotlight.ActionsGroup>
                 )}
                 {!isLoading && results.length === 0 && (
                     <MantineSpotlight.Empty>
