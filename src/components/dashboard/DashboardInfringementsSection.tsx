@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Stack, Title, SimpleGrid, Card, Group, Badge, Button, Collapse, Tooltip } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
@@ -11,7 +12,7 @@ interface IProps {
 }
 
 export default function DashboardInfringementsSection({ users }: IProps) {
-    const totalInfringementsCount = users.reduce((acc, user) => acc + user.infringements.length, 0);
+    const totalInfringementsCount = useRef(users.reduce((acc, user) => acc + user.infringements.length, 0));
 
     const [opened, { toggle }] = useDisclosure(users.length > 0);
 
@@ -22,8 +23,8 @@ export default function DashboardInfringementsSection({ users }: IProps) {
                     Infringements
                 </Title>
                 <Tooltip label="Needs Email">
-                    <Badge color="orange" variant="light">
-                        {totalInfringementsCount}
+                    <Badge color={totalInfringementsCount.current > 0 ? "orange" : "gray"} variant="light">
+                        {totalInfringementsCount.current}
                     </Badge>
                 </Tooltip>
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
@@ -33,14 +34,16 @@ export default function DashboardInfringementsSection({ users }: IProps) {
 
             <Collapse in={opened}>
                 <Stack gap="sm">
-                    <Group align="center" gap="xs">
-                        <Title order={4} c="orange">
-                            Needs Email
-                        </Title>
-                        <Badge color="orange" variant="light">
-                            {totalInfringementsCount}
-                        </Badge>
-                    </Group>
+                    {users.length > 0 && (
+                        <Group align="center" gap="xs">
+                            <Title order={4} c="orange">
+                                Needs Email
+                            </Title>
+                            <Badge color="orange" variant="light">
+                                {totalInfringementsCount.current}
+                            </Badge>
+                        </Group>
+                    )}
 
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                         {users.length > 0 &&
