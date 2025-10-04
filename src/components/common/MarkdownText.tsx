@@ -24,7 +24,7 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                 rehypePlugins={allowHtml ? [rehypeRaw, rehypeSlug] : [rehypeSlug]}
                 components={{
                     p: ({ children }) => (
-                        <Text size={size} component="p" style={{ margin: 0 }}>
+                        <Text size={size} component="p">
                             {children}
                         </Text>
                     ),
