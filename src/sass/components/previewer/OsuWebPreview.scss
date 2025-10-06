@@ -1,0 +1,152 @@
+// Pixel-perfect recreation of osu! website styling
+.osu-web-preview {
+    font-family: 'Torus', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    background-color: #18171c !important;
+    padding: 40px;
+    border-radius: 8px;
+    width: 100%;
+    min-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    ::selection {
+        background-color: #5639ac;
+    }
+
+    .header-section {
+        height: 55px;
+        background-color: #221f2e;
+        padding-left: 50px;
+        padding-right: 50px;
+        display: flex;
+        align-items: center;
+        font-size: 20px !important;
+        color: #ffffff;
+
+        .header-section-icon {
+            width: 40px;
+            margin-right: 10px;
+            flex: none;
+            align-self: stretch;
+            background-image: url(https://osu.ppy.sh/assets/images/home.03d09fb9.svg);
+            background-position: 50%;
+            background-repeat: no-repeat;
+            background-size: 75%;
+        }
+    }
+
+    .header-nav {
+        padding-left: 50px;
+        padding-right: 50px;
+        background-color: hsl(255, 20%, 20%);
+        overflow: visible;
+
+        .header-nav-list {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 15px 0;
+            font-size: 14px;
+            position: relative;
+            width: fit-content;
+
+            &::before {
+                background-color: hsl(255, 100%, 70%);
+                bottom: 0;
+                content: "";
+                height: 1px;
+                position: absolute;
+                width: 100%;
+            }
+
+            .header-nav-item {
+                .header-nav-link {
+                    color: hsl(255, 40%, 75%);
+                    position: relative;
+                    text-decoration: none;
+
+                    &.active {
+                        color: #ffffff;
+
+                        &::before {
+                            background-color: hsl(255, 100%, 70%);
+                            border-radius: 1000px;
+                            content: "";
+                            bottom: -20px;
+                            height: 5px;
+                            width: 100%;
+                            position: absolute;
+                            z-index: 3;
+                        }
+                    }
+
+                    .fake-bold {
+                        font-weight: 700;
+                    }
+                }
+            }
+        }
+    }
+
+    .banner-section {
+        height: 120px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        &::before {
+            content: "";
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+
+            background: var(--banner-url);
+            background-position: 50%;
+            background-size: cover;
+            filter: blur(50px);
+
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        &::after {
+            background-image: linear-gradient(to top, hsla(255, 10%, 15%, 0%), hsl(255, 10%, 15%));
+            content: "";
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+
+            z-index: 2;
+            box-sizing: border-box;
+        }
+
+
+    }
+
+    .banner-image {
+        cursor: pointer;
+        width: 100% !important;
+        max-height: 120px !important;
+        height: auto !important;
+        object-fit: contain;
+        object-position: center;
+        vertical-align: bottom;
+        line-height: 0;
+        z-index: 3;
+    }
+
+
+    .content-section {
+        height: 106px;
+        width: 100%;
+        background-color: #221f2e;
+        z-index: 0;
+    }
+}

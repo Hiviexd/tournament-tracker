@@ -6,6 +6,7 @@ import defaultStableBackground from "/assets/default-bg-stable.jpg";
 import defaultLazerBackground from "/assets/default-bg-lazer.jpg";
 import utils from "../../../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import OsuWebPreview from "./OsuWebPreview";
 
 interface BannerPreview {
     bannerUrl: string;
@@ -19,6 +20,7 @@ export default function InGameBannersTab() {
     const [currentBackgroundUrl, setCurrentBackgroundUrl] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [isLazer, setIsLazer] = useState(false);
+    const [previewMode, setPreviewMode] = useState<"stable" | "lazer" | "web">("stable");
     const bannerImageRef = useRef<HTMLImageElement>(null);
     const animationRef = useRef<number | null>(null);
 
@@ -277,11 +279,15 @@ export default function InGameBannersTab() {
                 <SegmentedControl
                     color="primary"
                     withItemsBorders={false}
-                    value={isLazer ? "lazer" : "stable"}
-                    onChange={(value) => setIsLazer(value === "lazer")}
+                    value={previewMode}
+                    onChange={(value) => {
+                        setPreviewMode(value as "stable" | "lazer" | "web");
+                        setIsLazer(value === "lazer");
+                    }}
                     data={[
                         { label: "osu!(stable)", value: "stable" },
                         { label: "osu!(lazer)", value: "lazer" },
+                        { label: "osu!(web)", value: "web" },
                     ]}
                     styles={{
                         root: {
@@ -294,86 +300,90 @@ export default function InGameBannersTab() {
             </Flex>
 
             {/* Preview section */}
-            <div
-                className="ingame-preview"
-                style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "240px",
-                    overflow: "hidden",
-                    borderRadius: "6px",
-                }}>
-                {/* Background Image */}
+            {previewMode === "web" ? (
+                <OsuWebPreview bannerUrl={preview.bannerUrl} />
+            ) : (
                 <div
+                    className="ingame-preview"
                     style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
+                        position: "relative",
                         width: "100%",
-                        height: "100%",
-                        backgroundImage: `url(${backgroundUrl})`,
-                        backgroundPosition: "center bottom",
-                        backgroundSize: "cover",
-                    }}
-                />
+                        height: "240px",
+                        overflow: "hidden",
+                        borderRadius: "6px",
+                    }}>
+                    {/* Background Image */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            backgroundImage: `url(${backgroundUrl})`,
+                            backgroundPosition: "center bottom",
+                            backgroundSize: "cover",
+                        }}
+                    />
 
-                {/* Darkening Overlay */}
-                {!isLazer && (
+                    {/* Darkening Overlay */}
+                    {!isLazer && (
+                        <div
+                            style={{
+                                position: "absolute",
+                                bottom: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "120px",
+                                background: "rgba(0, 0, 0, 0.36)",
+                            }}
+                        />
+                    )}
+
+                    {/* Banner Image */}
                     <div
                         style={{
                             position: "absolute",
                             bottom: 0,
-                            left: 0,
-                            width: "100%",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: "100vh",
+                            maxWidth: "100vh",
+                            textAlign: "center",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "flex-end",
                             height: "120px",
-                            background: "rgba(0, 0, 0, 0.36)",
+                            justifyContent: "center",
+                            pointerEvents: "auto",
                         }}
-                    />
-                )}
-
-                {/* Banner Image */}
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: "100vh",
-                        maxWidth: "100vh",
-                        textAlign: "center",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "flex-end",
-                        height: "120px",
-                        justifyContent: "center",
-                        pointerEvents: "auto",
-                    }}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                    className={`banner-container ${isLazer ? "lazer-mode" : "stable-mode"}`}>
-                    <img
-                        ref={bannerImageRef}
-                        src={preview.bannerUrl}
-                        alt="In-game banner"
-                        style={{
-                            maxWidth: "100%",
-                            maxHeight: "120px",
-                            objectFit: "contain",
-                            transform: isLazer ? `scale(${isHovered ? 1.05 : 1})` : undefined,
-                            transformOrigin: "bottom center",
-                            transition: isLazer
-                                ? isHovered
-                                    ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
-                                    : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)"
-                                : undefined,
-                            filter: isHovered && isLazer ? "brightness(1.1)" : "brightness(1)",
-                            display: "block",
-                            marginBottom: 0,
-                        }}
-                        className={`banner-image ${isLazer ? "lazer-mode" : "stable-mode"}`}
-                    />
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        className={`banner-container ${isLazer ? "lazer-mode" : "stable-mode"}`}>
+                        <img
+                            ref={bannerImageRef}
+                            src={preview.bannerUrl}
+                            alt="In-game banner"
+                            style={{
+                                maxWidth: "100%",
+                                maxHeight: "120px",
+                                objectFit: "contain",
+                                transform: isLazer ? `scale(${isHovered ? 1.05 : 1})` : undefined,
+                                transformOrigin: "bottom center",
+                                transition: isLazer
+                                    ? isHovered
+                                        ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
+                                        : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)"
+                                    : undefined,
+                                filter: isHovered && isLazer ? "brightness(1.1)" : "brightness(1)",
+                                display: "block",
+                                marginBottom: 0,
+                            }}
+                            className={`banner-image ${isLazer ? "lazer-mode" : "stable-mode"}`}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </Stack>
     );
 }
