@@ -144,11 +144,20 @@ app.use("/api/*", (req, res) => {
 const DIST_ENVS = ["production", "preview"];
 
 if (DIST_ENVS.includes(process.env.NODE_ENV || "")) {
-    app.use(express.static(path.join(__dirname, "../../dist")));
+    const clientDist = path.join(__dirname, "../../client");
 
-    // exclude API routes
+    // serve static frontend files
+    app.use(express.static(clientDist));
+
+    // fallback to index.html for SPA routes, exclude /api/*
     app.get(/^(?!\/api\/).*/, (req, res) => {
-        res.sendFile(path.join(__dirname, "../../dist/index.html"));
+        const indexFile = path.join(clientDist, "index.html");
+
+        res.sendFile(indexFile, (err) => {
+            if (err) {
+                res.status(500).send("Internal Server Error");
+            }
+        });
     });
 }
 

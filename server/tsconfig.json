@@ -4,7 +4,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "baseUrl": "./",
-        "outDir": "../dist",
+        "outDir": "../dist/server",
         "strict": true,
         "noImplicitAny": false,
         "esModuleInterop": true,
