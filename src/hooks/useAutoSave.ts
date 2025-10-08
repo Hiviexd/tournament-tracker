@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 
-interface UseAutoSaveOptions {
+interface UseAutoSaveOptions<T = string> {
     key: string;
-    initialValue?: string;
+    initialValue?: T;
     debounceMs?: number;
-    onSave?: (value: string) => void;
+    onSave?: (value: T) => void;
+    serialize?: (value: T) => string;
+    deserialize?: (value: string) => T;
 }
 
 // Utility function to clear any autosaved value by key
@@ -15,11 +17,22 @@ export function clearAutoSavedValue(key: string): void {
     }
 }
 
-export function useAutoSave({ key, initialValue = "", debounceMs = 500 }: UseAutoSaveOptions) {
+export function useAutoSave<T = string>({
+    key,
+    initialValue = "" as T,
+    debounceMs = 500,
+    serialize = (value: T) => String(value),
+    deserialize = (value: string) => value as T,
+}: UseAutoSaveOptions<T>) {
     // Try to get saved value from localStorage, fallback to initialValue
-    const [value, setValueInternal] = useState(() => {
-        const saved = localStorage.getItem(key);
-        return saved ?? initialValue;
+    const [value, setValueInternal] = useState<T>(() => {
+        try {
+            const saved = localStorage.getItem(key);
+            return saved ? deserialize(saved) : initialValue;
+        } catch (error) {
+            console.warn(`Failed to deserialize autosaved value for key "${key}":`, error);
+            return initialValue;
+        }
     });
     const [state, setState] = useState({ isSaved: false, isTyping: false });
 
@@ -28,42 +41,45 @@ export function useAutoSave({ key, initialValue = "", debounceMs = 500 }: UseAut
 
     const [debouncedValue] = useDebouncedValue(value, debounceMs);
 
+    const serializedDebouncedValue = useMemo(() => serialize(debouncedValue), [debouncedValue, serialize]);
+
     // Custom setValue that handles state transitions directly
     const setValue = useCallback(
-        (newValue: string | ((prev: string) => string)) => {
-            const resolvedValue = typeof newValue === "function" ? newValue(value) : newValue;
+        (newValue: T | ((prev: T) => T)) => {
+            const resolvedValue = typeof newValue === "function" ? (newValue as (prev: T) => T)(value) : newValue;
             setValueInternal(resolvedValue);
 
             // If value changes and it's different from the last saved value, user is typing
-            if (resolvedValue !== lastSavedValueRef.current) {
+            const serializedValue = serialize(resolvedValue);
+            if (serializedValue !== lastSavedValueRef.current) {
                 setState({ isSaved: false, isTyping: true });
             }
         },
-        [value]
+        [value, serialize]
     );
 
     // Save to localStorage when debounced value changes
     useEffect(() => {
         // Only skip if the value is exactly the same as last saved
-        if (debouncedValue === lastSavedValueRef.current) {
+        if (serializedDebouncedValue === lastSavedValueRef.current) {
             return;
         }
 
         // Save to localStorage
-        localStorage.setItem(key, debouncedValue);
-        lastSavedValueRef.current = debouncedValue;
+        localStorage.setItem(key, serializedDebouncedValue);
+        lastSavedValueRef.current = serializedDebouncedValue;
 
         // Show saved indicator and mark that we're no longer typing
         setState({ isSaved: true, isTyping: false });
-    }, [debouncedValue, key]);
+    }, [serializedDebouncedValue, key]);
 
     // Clear saved value
     const clear = useCallback(() => {
-        setValueInternal("");
+        setValueInternal(initialValue);
         clearAutoSavedValue(key);
         setState({ isSaved: false, isTyping: false });
         lastSavedValueRef.current = null;
-    }, [key]);
+    }, [key, initialValue]);
 
     return {
         value,

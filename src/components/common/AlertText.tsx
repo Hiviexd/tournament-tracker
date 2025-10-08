@@ -1,4 +1,4 @@
-import { Text, type MantineSize, Group } from "@mantine/core";
+import { Text, type MantineSize, Flex } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp, SizeProp } from "@fortawesome/fontawesome-svg-core";
 
@@ -18,11 +18,15 @@ export default function AlertText({ children, type, size = "sm", icon }: IProps)
     };
 
     return (
-        <Group gap={8} c={type}>
-            <FontAwesomeIcon icon={icon ?? (IconTypeMap[type] as IconProp)} size={size as SizeProp} />
+        <Flex gap={8} c={type} align="flex-start">
+            <FontAwesomeIcon
+                icon={icon ?? (IconTypeMap[type] as IconProp)}
+                size={size as SizeProp}
+                style={{ marginTop: "3px" }}
+            />
             <Text span fw={500} size={size}>
                 {children}
             </Text>
-        </Group>
+        </Flex>
     );
 }
