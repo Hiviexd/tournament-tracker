@@ -1,4 +1,5 @@
-import { Stack, Checkbox, Radio, Group, Button, Text, Alert } from "@mantine/core";
+import { Stack, Checkbox, Radio, Group, Button, Text, Alert, Collapse } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { ITournament } from "../../../interfaces/Tournament";
 import { useState, useMemo, useCallback } from "react";
 import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
@@ -124,6 +125,8 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         return hasChecklistChanges || hasCommentChanges || hasDecisionChanges;
     }, [checkedState, comment, decision, userReview, getDefaultChecklistState]);
 
+    const [opened, { toggle }] = useDisclosure(hasUnsavedChanges);
+
     return (
         <Stack gap="md">
             <ReviewStatusBanner tournament={tournament} user={user} />
@@ -136,41 +139,50 @@ export default function TournamentReviewInput({ tournament }: IProps) {
                 />
             )}
 
-            <Text component="label" fw={500} size="sm">
-                Review Checklist
-            </Text>
-            <Text size="xs" c="dimmed">
-                If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
-            </Text>
-
-            <Checkbox
-                label="Select All"
-                checked={allChecked}
-                indeterminate={indeterminate}
-                onChange={(event) => handleSelectAllChange(event.currentTarget.checked)}
-                size="sm"
-                mb="xs"
-            />
-
-            {REVIEW_CHECKLIST.map((category) => (
-                <Stack key={category.category} gap="xs">
-                    <Text fw={400} size="sm" c="dimmed" className="header-border-left">
-                        {category.category}
+            <Group align="center" gap="xs" mt="xs">
+                <Text component="label" fw={700} size="md">
+                    Review Checklist
+                </Text>
+                <Button radius={1000} size="compact-xs" variant="light" onClick={toggle}>
+                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
+                </Button>
+            </Group>
+            <Collapse in={opened}>
+                <Stack gap="md">
+                    <Text size="xs" c="dimmed">
+                        If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
                     </Text>
-                    {category.items.map((item) => (
-                        <Checkbox
-                            key={item}
-                            label={item}
-                            ml="md"
-                            checked={checkedState[item]}
-                            onChange={(event) => handleCheckboxChange(item, event.currentTarget.checked)}
-                        />
+
+                    <Checkbox
+                        label="Select All"
+                        checked={allChecked}
+                        indeterminate={indeterminate}
+                        onChange={(event) => handleSelectAllChange(event.currentTarget.checked)}
+                        size="sm"
+                        mb="xs"
+                    />
+
+                    {REVIEW_CHECKLIST.map((category) => (
+                        <Stack key={category.category} gap="xs">
+                            <Text fw={400} size="sm" c="dimmed" className="header-border-left">
+                                {category.category}
+                            </Text>
+                            {category.items.map((item) => (
+                                <Checkbox
+                                    key={item}
+                                    label={item}
+                                    ml="md"
+                                    checked={checkedState[item]}
+                                    onChange={(event) => handleCheckboxChange(item, event.currentTarget.checked)}
+                                />
+                            ))}
+                        </Stack>
                     ))}
                 </Stack>
-            ))}
+            </Collapse>
 
             <Stack gap="xs" mt="md">
-                <Text component="label" fw={500} size="sm">
+                <Text component="label" fw={700} size="md">
                     Review Comments
                 </Text>
                 <TextEditor
