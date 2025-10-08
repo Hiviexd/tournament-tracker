@@ -1,6 +1,6 @@
-import { Stack, Checkbox, Radio, Group, Button, Text } from "@mantine/core";
+import { Stack, Checkbox, Radio, Group, Button, Text, Alert } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSubmitReview } from "../../hooks/useTournaments";
@@ -8,6 +8,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import TextEditor from "../common/TextEditor";
 import ReviewStatusBanner from "../common/banners/ReviewStatusBanner";
+import { useAutoSave, clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 interface IProps {
     tournament: ITournament;
@@ -19,10 +20,11 @@ export default function TournamentReviewInput({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const userReview = tournament.reviews?.find((review) => review.author?.id === user?.id);
     const autoSaveKey = `tournament-review-${tournament._id}`;
+    const checklistAutoSaveKey = `tournament-review-checklist-${tournament._id}`;
     const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
-    // Initialize state with existing review data or defaults
-    const [checkedState, setCheckedState] = useState<ChecklistState>(() => {
+    // Initialize default state
+    const getDefaultChecklistState = useCallback((): ChecklistState => {
         const initialState: ChecklistState = {};
 
         // First set all items to false
@@ -40,6 +42,15 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         }
 
         return initialState;
+    }, [REVIEW_CHECKLIST, userReview?.checklist]);
+
+    // Use autosave hook for checklist state
+    const { value: checkedState, setValue: setCheckedState } = useAutoSave<ChecklistState>({
+        key: checklistAutoSaveKey,
+        initialValue: getDefaultChecklistState(),
+        debounceMs: 100,
+        serialize: (value) => JSON.stringify(value),
+        deserialize: (value) => JSON.parse(value),
     });
 
     const [comment, setComment] = useState(userReview?.comment ?? "");
@@ -60,13 +71,16 @@ export default function TournamentReviewInput({ tournament }: IProps) {
             tournamentId: tournament.id,
             checklist: Object.entries(checkedState).map(([item, checked]) => ({
                 item,
-                checked,
+                checked: Boolean(checked),
             })),
             comment,
             vote: decision!,
         };
 
         await submitReviewMutation.mutateAsync(reviewData);
+
+        // Clear autosaved checklist data after successful submission
+        clearAutoSavedValue(checklistAutoSaveKey);
     };
 
     const handleCheckboxChange = (item: string, checked: boolean) => {
@@ -86,9 +100,42 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     const isSubmitDisabled = !decision || (decision !== "deny" && Object.values(checkedState).every((v) => !v));
 
+    // Check for unsaved changes
+    const hasUnsavedChanges = useMemo(() => {
+        if (!userReview) {
+            // If no existing review, check if there are any changes from default state
+            const defaultState = getDefaultChecklistState();
+            const hasChecklistChanges = JSON.stringify(checkedState) !== JSON.stringify(defaultState);
+            const hasCommentChanges = comment.trim() !== "";
+            const hasDecisionChanges = decision !== null;
+            return hasChecklistChanges || hasCommentChanges || hasDecisionChanges;
+        }
+
+        // If existing review, compare current state with saved state
+        const savedChecklist = userReview.checklist.reduce((acc, item) => {
+            acc[item.item] = item.checked;
+            return acc;
+        }, {} as ChecklistState);
+
+        const hasChecklistChanges = JSON.stringify(checkedState) !== JSON.stringify(savedChecklist);
+        const hasCommentChanges = comment !== (userReview.comment || "");
+        const hasDecisionChanges = decision !== userReview.vote;
+
+        return hasChecklistChanges || hasCommentChanges || hasDecisionChanges;
+    }, [checkedState, comment, decision, userReview, getDefaultChecklistState]);
+
     return (
         <Stack gap="md">
             <ReviewStatusBanner tournament={tournament} user={user} />
+
+            {hasUnsavedChanges && (
+                <Alert
+                    color="yellow"
+                    icon={<FontAwesomeIcon icon="exclamation-triangle" />}
+                    title="You have unsaved changes. Your progress is automatically saved locally."
+                />
+            )}
+
             <Text component="label" fw={500} size="sm">
                 Review Checklist
             </Text>
