@@ -144,11 +144,11 @@ app.use("/api/*", (req, res) => {
 const DIST_ENVS = ["production", "preview"];
 
 if (DIST_ENVS.includes(process.env.NODE_ENV || "")) {
-    app.use(express.static(path.join(__dirname, "../../dist")));
+    app.use(express.static(path.join(__dirname, "../../dist/client")));
 
     // exclude API routes
     app.get(/^(?!\/api\/).*/, (req, res) => {
-        res.sendFile(path.join(__dirname, "../../dist/index.html"));
+        res.sendFile(path.join(__dirname, "../../dist/client/index.html"));
     });
 }
 
