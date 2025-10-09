@@ -2,6 +2,9 @@ import { Box, Group, Text, ActionIcon, Tooltip, Progress } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../../interfaces/Voting";
 import { VOTE_COLORS } from "../../../constants";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useMemo } from "react";
 
 interface IProps {
     voting: IVoting;
@@ -10,6 +13,9 @@ interface IProps {
 }
 
 export default function ClassicVoteStats({ voting, onFilterChange, activeFilter }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const canFilter = useMemo(() => user?.isCommitteeOrAdmin && onFilterChange, [user, onFilterChange]);
+
     const totalVotes = voting.votes.length;
 
     const handleFilterClick = (index: number) => {
@@ -42,7 +48,7 @@ export default function ClassicVoteStats({ voting, onFilterChange, activeFilter 
                     <Box key={index}>
                         <Group justify="space-between" mb={4}>
                             <Group gap="xs">
-                                {onFilterChange && (
+                                {canFilter && (
                                     <ActionIcon
                                         size="sm"
                                         variant={isActive ? "filled" : "subtle"}

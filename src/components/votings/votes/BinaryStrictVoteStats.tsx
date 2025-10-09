@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "../../../../interfaces/Voting";
 import { BinaryStrictVote } from "../../../../interfaces/Vote";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../../../store/atoms";
+import { useMemo } from "react";
 
 interface IProps {
     voting: IVoting;
@@ -11,6 +14,9 @@ interface IProps {
 }
 
 export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFilter }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const canFilter = useMemo(() => user?.isCommitteeOrAdmin && onFilterChange, [user, onFilterChange]);
+
     const totalVotes = voting.votes.length;
 
     const agreeOption = voting.options[0];
@@ -86,7 +92,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                 <Box>
                     <Group justify="space-between" mb={4}>
                         <Group gap="xs">
-                            {onFilterChange && (
+                            {canFilter && (
                                 <ActionIcon
                                     size="sm"
                                     variant={activeFilter === 0 ? "filled" : "subtle"}
@@ -110,7 +116,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
 
                     <Group justify="space-between" mb={4}>
                         <Group gap="xs">
-                            {onFilterChange && (
+                            {canFilter && (
                                 <ActionIcon
                                     size="sm"
                                     variant={activeFilter === (voting.allowNeutralVotes ? 2 : 1) ? "filled" : "subtle"}
@@ -142,7 +148,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                         <>
                             <Group justify="space-between" mt="md" mb={4}>
                                 <Group gap="xs">
-                                    {onFilterChange && (
+                                    {canFilter && (
                                         <ActionIcon
                                             size="sm"
                                             variant={activeFilter === 1 ? "filled" : "subtle"}
