@@ -23,14 +23,19 @@ const getRankedChoiceScoreColor = (score: number, separator: string = ".") => {
     return `${color}${separator}${level}`;
 };
 
-const getBinaryStrictDisplay = (score: number) => {
+const getBinaryStrictDisplay = (score: number, options: string[], allowNeutralVotes: boolean) => {
+    console.log(options, allowNeutralVotes);
+    const agreeOption = options[0];
+    const disagreeOption = allowNeutralVotes ? options[2] : options[1];
+    const neutralOption = allowNeutralVotes ? options[1] : null;
+
     switch (score) {
         case 1:
-            return { label: "Agree", color: "success" };
+            return { label: agreeOption, color: "success" };
         case 0:
-            return { label: "Neutral", color: "gray" };
+            return { label: neutralOption, color: "gray" };
         case -1:
-            return { label: "Disagree", color: "danger" };
+            return { label: disagreeOption, color: "danger" };
         default:
             return { label: "Unknown", color: "gray" };
     }
@@ -56,9 +61,10 @@ const getRankedChoiceDisplay = (score: number) => {
 interface IProps {
     vote: IVote;
     options: string[];
+    allowNeutralVotes: boolean;
 }
 
-export default function VoteCard({ vote, options }: IProps) {
+export default function VoteCard({ vote, options, allowNeutralVotes }: IProps) {
     const getVoteBorderColor = () => {
         let color = "var(--mantine-color-primary-6)";
 
@@ -70,7 +76,7 @@ export default function VoteCard({ vote, options }: IProps) {
                 color = `var(--mantine-color-${getScoreColor(vote.data.score, "-")})`;
                 break;
             case "binary-strict":
-                color = `var(--mantine-color-${getBinaryStrictDisplay(vote.data.score).color}-6)`;
+                color = `var(--mantine-color-${getBinaryStrictDisplay(vote.data.score, options, allowNeutralVotes).color}-6)`;
                 break;
             case "variable": {
                 const avgScore = vote.data.scores.reduce((sum, s) => sum + s.score, 0) / vote.data.scores.length;
@@ -111,8 +117,8 @@ export default function VoteCard({ vote, options }: IProps) {
 
             case "binary-strict":
                 return (
-                    <Badge size="lg" variant="light" color={getBinaryStrictDisplay(vote.data.score).color}>
-                        {getBinaryStrictDisplay(vote.data.score).label}
+                    <Badge size="lg" variant="light" color={getBinaryStrictDisplay(vote.data.score, options, allowNeutralVotes).color}>
+                        {getBinaryStrictDisplay(vote.data.score, options, allowNeutralVotes).label}
                     </Badge>
                 );
 

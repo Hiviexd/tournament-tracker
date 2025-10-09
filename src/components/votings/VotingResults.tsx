@@ -121,7 +121,7 @@ export default function VotingResults({ voting, user }: IProps) {
                             ) : null}
                             <Stack gap="md">
                                 {filteredVotes.map((vote) => (
-                                    <VoteCard key={vote.id} vote={vote} options={voting.options} />
+                                    <VoteCard key={vote.id} vote={vote} options={voting.options} allowNeutralVotes={voting.allowNeutralVotes} />
                                 ))}
                             </Stack>
                         </Collapse>
