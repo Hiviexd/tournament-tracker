@@ -24,7 +24,6 @@ const getRankedChoiceScoreColor = (score: number, separator: string = ".") => {
 };
 
 const getBinaryStrictDisplay = (score: number, options: string[], allowNeutralVotes: boolean) => {
-    console.log(options, allowNeutralVotes);
     const agreeOption = options[0];
     const disagreeOption = allowNeutralVotes ? options[2] : options[1];
     const neutralOption = allowNeutralVotes ? options[1] : null;
