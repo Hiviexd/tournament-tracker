@@ -3,6 +3,7 @@ import { Card, Group, Stack, Text, Badge, Tooltip, Anchor } from "@mantine/core"
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
+import { useMemo } from "react";
 
 // Types
 import { ITicket } from "../../../interfaces/Ticket";
@@ -43,16 +44,23 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
         return null;
     };
 
-    const getStatusColor = (): string => {
+    const getStatusColor = useMemo((): string => {
         if (!ticket.isActive) return "danger";
 
         const updatedDays = moment().diff(moment(ticket.lastResponseAt), "days");
         if (updatedDays >= 10) return "danger";
         if (updatedDays >= 7) return "warning";
         return "success";
-    };
+    }, [ticket.isActive, ticket.lastResponseAt]);
 
-    const messageCount = ticket.messages.filter((message) => !message.isNote).length;
+    const messageCount = useMemo(() => ticket.messages.filter((message) => !message.isNote).length, [ticket.messages]);
+
+    // dim if the status color is not success and the last non-note message is isCommittee
+    const shouldDim = useMemo(() => {
+        if (!ticket.isActive) return false;
+        const lastMessage = ticket.messages.filter((message) => !message.isNote)[ticket.messages.length - 1];
+        return getStatusColor !== "success" && lastMessage?.isCommittee;
+    }, [ticket.messages, getStatusColor, ticket.isActive]);
 
     return (
         <Card
@@ -63,11 +71,12 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             radius="md"
             className="ticket-card"
             data-active={ticket.isActive}
+            data-dim={shouldDim}
             style={
                 ticket.isActive
                     ? {
-                        ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
-                    }
+                          ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor}-6)`,
+                      }
                     : undefined
             }>
             <Stack gap="md" justify="space-between" h="100%">

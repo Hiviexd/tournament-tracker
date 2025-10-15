@@ -30,6 +30,10 @@
         background: var(--mantine-color-primary-11);
     }
 
+    &[data-dim="true"] {
+        opacity: 0.5;
+    }
+
     > * {
         position: relative;
         z-index: 1;
