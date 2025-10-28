@@ -18,9 +18,11 @@ vi.mock("lodash", () => ({
     default: {
         sampleSize: vi.fn(),
         isEqual: vi.fn(),
+        shuffle: vi.fn(),
     },
     sampleSize: vi.fn(),
     isEqual: vi.fn(),
+    shuffle: vi.fn(),
 }));
 
 const mockUser = User as any;

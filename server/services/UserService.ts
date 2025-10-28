@@ -146,7 +146,10 @@ class UserService {
             });
         }
 
-        selectedUsers.push(..._.sampleSize(users, selectedUsers.length === 0 ? 2 : 1));
+        // shuffle users to ensure random pairings
+        const shuffledUsers = _.shuffle(users);
+
+        selectedUsers.push(..._.sampleSize(shuffledUsers, selectedUsers.length === 0 ? 2 : 1));
 
         await User.updateMany({ _id: { $in: selectedUsers.map((user) => user._id) } }, { $set: { inBag: false } });
 
