@@ -97,6 +97,7 @@
         "@typescript-eslint/parser": "^7.2.0",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/ui": "3.2.4",
+        "babel-plugin-react-compiler": "^1.0.0",
         "country-flag-icons": "^1.5.18",
         "csv-parse": "^5.6.0",
         "eslint": "^8.57.0",
