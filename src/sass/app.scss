@@ -233,9 +233,25 @@ a {
     }
 }
 
-/* Triangles background */
 body {
     background-color: var(--mantine-color-primary-11);
+
+    &:after {
+        background:
+            linear-gradient(180deg, color-mix(in srgb, var(--mantine-color-primary-11) 60%, var(--mantine-color-primary-filled)) -70%, transparent 150%),
+            url("/assets/triangles.png") repeat-x top center;
+        background-size: cover, auto;
+        mask: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
+        -webkit-mask: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
+        content: "";
+        position: fixed;
+        width: 100%;
+        height: 100px;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
 
     &:before {
         background-image: url("/assets/triangles.png");
@@ -247,6 +263,7 @@ body {
         left: 0;
         content: "";
         z-index: -1;
+        pointer-events: none;
     }
 }
 
