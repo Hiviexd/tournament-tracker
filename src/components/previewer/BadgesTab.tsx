@@ -41,7 +41,7 @@ export default function BadgesTab({ skeleton }: IProps) {
         },
         avatar_url: "https://a.ppy.sh/3",
         profile_colour: "#E45678",
-        title: "Grilled Dodongo",
+        title: "Troublenugget",
         support_level: 3,
         groups: [
             {
