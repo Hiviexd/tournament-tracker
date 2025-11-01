@@ -43,6 +43,7 @@ export const BADGE_SUPPORT_OPTIONS = [
     "Debadge tournament",
     "Approve badge + warning",
     "Approve badge + hosting probation",
+    "Approve badge + hosting ban",
     "Approve badge + staffing ban",
     "Approve badge",
 ] as const;
