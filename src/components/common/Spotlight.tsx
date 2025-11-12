@@ -1,4 +1,4 @@
-import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap, Kbd, Group, Button } from "@mantine/core";
+import { Stack, Text, Skeleton, Alert, Code, List, FocusTrap, Kbd, Group, ActionIcon } from "@mantine/core";
 import { Spotlight as MantineSpotlight } from "@mantine/spotlight";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState } from "react";
@@ -111,7 +111,20 @@ export default function Spotlight() {
                     </>
                 )}
                 {!isLoading && results.length === 0 && lastSearches.length > 0 && debouncedSearch.length === 0 && (
-                    <MantineSpotlight.ActionsGroup label="Recent Searches">
+                    <Stack gap="0" mt="md">
+                        <Group gap="5" align="center">
+                            <Text size="xs" fw={700} c="dimmed" pl="md">
+                                RECENT SEARCHES
+                            </Text>
+                            <ActionIcon
+                                size="xs"
+                                color="danger"
+                                variant="subtle"
+                                title="Clear recent searches"
+                                onClick={clearLastSearches}>
+                                <FontAwesomeIcon icon="trash" size="xs" />
+                            </ActionIcon>
+                        </Group>
                         {lastSearches.map((searchItem, index) => (
                             <SpotlightAction
                                 key={`${searchItem.type}-${searchItem.link}-${index}`}
@@ -119,17 +132,7 @@ export default function Spotlight() {
                                 onClick={() => handleSelectOption(searchItem)}
                             />
                         ))}
-                        <Group justify="center" mx="sm" mt="xs">
-                            <Button
-                                size="xs"
-                                color="danger"
-                                variant="light"
-                                leftSection={<FontAwesomeIcon icon="trash" />}
-                                onClick={clearLastSearches}>
-                                Clear
-                            </Button>
-                        </Group>
-                    </MantineSpotlight.ActionsGroup>
+                    </Stack>
                 )}
                 {!isLoading && results.length === 0 && (
                     <MantineSpotlight.Empty>
