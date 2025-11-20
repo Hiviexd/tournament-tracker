@@ -24,8 +24,6 @@ import CopyButton from "../../common/buttons/CopyButton";
 import DateBadge from "../../common/badges/DateBadge";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
-import AlertText from "../../common/AlertText";
-import MarkdownText from "../../common/MarkdownText";
 
 export default function ApiKeySection() {
     const [user] = useAtom(loggedInUserAtom);
@@ -55,6 +53,11 @@ export default function ApiKeySection() {
     const [isEditingScopes, setIsEditingScopes] = useState(false);
 
     const hasActiveKey = useMemo(() => !!meta && !meta.revokedAt, [meta]);
+
+    const hasComplianceScope = useMemo(
+        () => meta?.scopes.includes(AvailableApiScopes.COMPLIANCE_READ) ?? false,
+        [meta]
+    );
 
     const handleCreateKey = async () => {
         const res = await createKeyMutation.mutateAsync({
@@ -120,13 +123,35 @@ export default function ApiKeySection() {
                         </Alert>
                     )}
 
-                    <Text size="sm" fw={600} mb="md">
-                        Refer to{" "}
-                        <Anchor href={DOCS_URL} target="_blank">
-                            the documentation
-                        </Anchor>{" "}
-                        for more information.
-                    </Text>
+                    <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
+                        <Text size="sm" fw={600}>
+                            Refer to{" "}
+                            <Anchor fw={700} href={DOCS_URL} target="_blank">
+                                the API documentation
+                            </Anchor>{" "}
+                            for more information.
+                        </Text>
+                    </Alert>
+
+                    {hasComplianceScope && (
+                        <Alert color="yellow" title="Important" icon={<FontAwesomeIcon icon="warning" />}>
+                            <Text size="sm">
+                                If you're using the Compliance API in your mappooling sheets, consult this{" "}
+                                <Anchor
+                                    fw={700}
+                                    href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
+                                    target="_blank">
+                                    wiki page guide
+                                </Anchor>
+                                .
+                            </Text>
+                            <br />
+                            <Text size="sm" fw={700}>
+                                Please try to invoke the API as little as possible to avoid rate limiting (i.e. check
+                                maps in bulk, not one by one), else you'll get an angry DM from Hivie &gt;:(
+                            </Text>
+                        </Alert>
+                    )}
 
                     <Table>
                         <Table.Tbody>
@@ -245,20 +270,30 @@ export default function ApiKeySection() {
             ) : (
                 <form onSubmit={form.onSubmit(handleCreateKey)}>
                     <Stack gap="xs">
-                        <Text size="sm">You can create one API key to access certain endpoints programmatically.</Text>
-                        <Text size="sm" fw={600}>
-                            Refer to{" "}
-                            <Anchor fw={600} href={DOCS_URL} target="_blank">
-                                the documentation
-                            </Anchor>{" "}
-                            for more information.
-                        </Text>
-                        <AlertText type="info" size="sm">
-                            <MarkdownText
-                                size="sm"
-                                content="If you only care about using the Compliance API in your mappooling sheets, consult this [wiki page guide](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage)."
-                            />
-                        </AlertText>
+                        <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
+                            <Text size="sm">
+                                You can create one API key to access certain endpoints programmatically.
+                            </Text>
+                            <Text size="sm" fw={600}>
+                                Refer to{" "}
+                                <Anchor fw={700} href={DOCS_URL} target="_blank">
+                                    the documentation
+                                </Anchor>{" "}
+                                for more information.
+                            </Text>
+                        </Alert>
+                        <Alert color="success" title="Note" icon={<FontAwesomeIcon icon="lightbulb" />}>
+                            <Text size="sm">
+                                If you only care about using the Compliance API in your mappooling sheets, consult this{" "}
+                                <Anchor
+                                    fw={700}
+                                    href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
+                                    target="_blank">
+                                    wiki page guide
+                                </Anchor>
+                                .
+                            </Text>
+                        </Alert>
                         <TextInput
                             label="Name"
                             placeholder="Enter project name"
