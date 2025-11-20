@@ -13,6 +13,7 @@ import {
     Checkbox,
     Pill,
     ActionIcon,
+    Table,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useApiKeyMeta, useCreateApiKey, useUpdateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
@@ -127,109 +128,109 @@ export default function ApiKeySection() {
                         for more information.
                     </Text>
 
-                    <Text size="sm">
-                        <Text span fw={600}>
-                            Name:
-                        </Text>{" "}
-                        <Code>{meta?.name ?? "-"}</Code>
-                    </Text>
-                    <Text size="sm">
-                        <Text span fw={600}>
-                            Created:
-                        </Text>{" "}
-                        <DateBadge date={meta?.createdAt} size="sm" staticColor />
-                    </Text>
-                    <Group gap="xs" align="flex-start">
-                        <Text size="sm" fw={600}>
-                            Scopes:
-                        </Text>
-                        {isEditingScopes ? (
-                            <Stack gap="xs" style={{ flex: 1 }}>
-                                <MultiSelect
-                                    placeholder="Select scopes"
-                                    data={Object.values(AvailableApiScopes)}
-                                    {...form.getInputProps("scopes")}
-                                    size="sm"
-                                />
-                                <Group gap="xs">
-                                    <Button
-                                        size="xs"
-                                        variant="light"
-                                        color="success"
-                                        leftSection={<FontAwesomeIcon icon="floppy-disk" />}
-                                        loading={updateKeyMutation.isPending}
-                                        disabled={form.values.scopes.length === 0}
-                                        onClick={handleUpdateScopes}>
-                                        Save
-                                    </Button>
-                                    <Button
-                                        size="xs"
-                                        variant="subtle"
-                                        color="red"
-                                        leftSection={<FontAwesomeIcon icon="times" />}
-                                        onClick={handleCancelEdit}>
-                                        Cancel
-                                    </Button>
-                                </Group>
-                            </Stack>
-                        ) : (
-                            <Group gap="xs" style={{ flex: 1 }}>
-                                <Pill.Group>
-                                    {meta?.scopes.map((scope) => (
-                                        <Pill key={scope}>{scope}</Pill>
-                                    ))}
-                                </Pill.Group>
-                                <ActionIcon
-                                    size="sm"
-                                    variant="subtle"
-                                    color="info"
-                                    title="Edit scopes"
-                                    onClick={handleEditScopes}>
-                                    <FontAwesomeIcon icon="edit" size="xs" />
-                                </ActionIcon>
-                            </Group>
-                        )}
-                    </Group>
-                    <Text size="sm">
-                        <Text span fw={600}>
-                            Last used:
-                        </Text>{" "}
-                        {meta?.lastUsedAt ? (
-                            <DateBadge date={meta.lastUsedAt} size="sm" staticColor />
-                        ) : (
-                            <Text span size="sm" c="dimmed">
-                                Never
-                            </Text>
-                        )}
-                    </Text>
-                    <Text size="sm">
-                        <Text span fw={600}>
-                            Times used:
-                        </Text>{" "}
-                        {meta?.timesUsed ? (
-                            <Text span size="sm">
-                                <Code>{meta.timesUsed}</Code>
-                            </Text>
-                        ) : (
-                            <Text span size="sm" c="dimmed">
-                                Never
-                            </Text>
-                        )}
-                    </Text>
-                    <Text size="sm">
-                        <Text span fw={600}>
-                            Last route used:
-                        </Text>{" "}
-                        {meta?.lastRouteUsed ? (
-                            <Text span size="sm">
-                                <Code>{meta.lastRouteUsed}</Code>
-                            </Text>
-                        ) : (
-                            <Text span size="sm" c="dimmed">
-                                Never
-                            </Text>
-                        )}
-                    </Text>
+                    <Table>
+                        <Table.Tbody>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600, width: "30%" }}>Name</Table.Td>
+                                <Table.Td>
+                                    <Code>{meta?.name ?? "-"}</Code>
+                                </Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600 }}>Created</Table.Td>
+                                <Table.Td>
+                                    <DateBadge date={meta?.createdAt} size="sm" staticColor />
+                                </Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600 }}>Scopes</Table.Td>
+                                <Table.Td>
+                                    {isEditingScopes ? (
+                                        <Stack gap="xs">
+                                            <MultiSelect
+                                                placeholder="Select scopes"
+                                                data={Object.values(AvailableApiScopes)}
+                                                {...form.getInputProps("scopes")}
+                                                size="sm"
+                                            />
+                                            <Group gap="xs">
+                                                <Button
+                                                    size="xs"
+                                                    variant="light"
+                                                    color="success"
+                                                    leftSection={<FontAwesomeIcon icon="floppy-disk" />}
+                                                    loading={updateKeyMutation.isPending}
+                                                    disabled={form.values.scopes.length === 0}
+                                                    onClick={handleUpdateScopes}>
+                                                    Save
+                                                </Button>
+                                                <Button
+                                                    size="xs"
+                                                    variant="subtle"
+                                                    color="red"
+                                                    leftSection={<FontAwesomeIcon icon="times" />}
+                                                    onClick={handleCancelEdit}>
+                                                    Cancel
+                                                </Button>
+                                            </Group>
+                                        </Stack>
+                                    ) : (
+                                        <Group gap="xs">
+                                            <Pill.Group>
+                                                {meta?.scopes.map((scope) => (
+                                                    <Pill key={scope}>{scope}</Pill>
+                                                ))}
+                                            </Pill.Group>
+                                            <ActionIcon
+                                                size="sm"
+                                                variant="subtle"
+                                                color="info"
+                                                title="Edit scopes"
+                                                onClick={handleEditScopes}>
+                                                <FontAwesomeIcon icon="edit" size="xs" />
+                                            </ActionIcon>
+                                        </Group>
+                                    )}
+                                </Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600 }}>Last used</Table.Td>
+                                <Table.Td>
+                                    {meta?.lastUsedAt ? (
+                                        <DateBadge date={meta.lastUsedAt} size="sm" staticColor />
+                                    ) : (
+                                        <Text size="sm" c="dimmed">
+                                            Never
+                                        </Text>
+                                    )}
+                                </Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600 }}>Times used</Table.Td>
+                                <Table.Td>
+                                    {meta?.timesUsed ? (
+                                        <Code>{meta.timesUsed}</Code>
+                                    ) : (
+                                        <Text size="sm" c="dimmed">
+                                            Never
+                                        </Text>
+                                    )}
+                                </Table.Td>
+                            </Table.Tr>
+                            <Table.Tr>
+                                <Table.Td style={{ fontWeight: 600 }}>Last route used</Table.Td>
+                                <Table.Td>
+                                    {meta?.lastRouteUsed ? (
+                                        <Code>{meta.lastRouteUsed}</Code>
+                                    ) : (
+                                        <Text size="sm" c="dimmed">
+                                            Never
+                                        </Text>
+                                    )}
+                                </Table.Td>
+                            </Table.Tr>
+                        </Table.Tbody>
+                    </Table>
                     <Group mt="xs">
                         <Button
                             color="red"
