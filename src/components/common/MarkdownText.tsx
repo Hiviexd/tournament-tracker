@@ -4,7 +4,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
-import { visit } from "unist-util-visit";
+// import { visit } from "unist-util-visit";
 
 interface IProps {
     content: string;
@@ -17,6 +17,8 @@ interface IProps {
 
 // Custom plugin to disable setext headings (--- immediately after text)
 // TODO: move this to a separate file
+// ! FIXME: current implementation breaks all `h2` headings — disabled for now
+/*
 function remarkDisableSetextHeadings() {
     return (tree: any) => {
         visit(tree, "heading", (node: any, index: number | undefined, parent: any) => {
@@ -37,12 +39,13 @@ function remarkDisableSetextHeadings() {
         });
     };
 }
+*/
 
 export default function MarkdownText({ content, className, allowHtml = false, size }: IProps) {
     return (
         <div className={`markdown-content ${className || ""}`}>
             <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkBreaks, remarkDisableSetextHeadings]}
+                remarkPlugins={[remarkGfm, remarkBreaks]}
                 rehypePlugins={allowHtml ? [rehypeRaw, rehypeSlug] : [rehypeSlug]}
                 components={{
                     p: ({ children }) => (
