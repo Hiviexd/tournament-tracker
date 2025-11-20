@@ -14,7 +14,7 @@ export default function DocumentationListPage() {
 
                 {/* Documentation Cards Grid Skeleton */}
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                    {Array(8)
+                    {Array(9)
                         .fill(0)
                         .map((_, index) => (
                             <Card key={index} shadow="sm" p="xl" radius="md" className="feature-card">
