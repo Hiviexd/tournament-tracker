@@ -1023,10 +1023,13 @@ class TournamentsController {
                     `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`
                 );
 
-            await new WebhookBuilder()
-                .addEmbed(embed)
-                .setThreadId(tournament.threadId!)
-                .send();
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+            if (tournament.threadId && tournament.threadId.length) {
+                webhookBuilder.setThreadId(tournament.threadId);
+            }
+
+            await webhookBuilder.send();
         } else {
             res.json({ message: "Thread ID is already set!" });
         }
