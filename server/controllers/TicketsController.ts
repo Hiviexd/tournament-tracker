@@ -4,9 +4,9 @@ import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
 import LogService from "../services/LogService";
-import { IDiscordField } from "../../interfaces/Discord";
-import DiscordService from "../services/DiscordService";
-import webhookColors from "../constants/webhookColors";
+import { EmbedBuilder } from "../services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../services/discord/WebhookBuilder";
+import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import utils from "../../utils";
 import TicketService from "../services/TicketService";
@@ -264,51 +264,43 @@ class TicketsController {
         );
 
         // Discord webhook
-        const roles: string[] = [];
+        const roles: ("tournament" | "contest")[] = [];
 
         if (ticket.assignedGroup === "tc") roles.push("tournament");
         if (ticket.assignedGroup === "cc") roles.push("contest");
 
-        const fields: IDiscordField[] = [];
+        const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
+
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(type === "report" ? DiscordUtils.webhookColors.lightRed : DiscordUtils.webhookColors.blue)
+            .setTitle(embedTitle)
+            .setUrl(`${config.baseUrl}/${type}s/${ticket._id}`)
+            .setFooter(`ID: ${ticket._id}`);
 
         if (type === "report") {
             if (targetUserId) {
-                fields.push({
-                    name: "Target User",
-                    value: `[**${ticket.targetUser?.username}**](https://osu.ppy.sh/users/${ticket.targetUser?.osuId})`,
-                });
+                embed.addField(
+                    "Target User",
+                    `[**${ticket.targetUser?.username}**](https://osu.ppy.sh/users/${ticket.targetUser?.osuId})`
+                );
             } else {
-                fields.push({
-                    name: "Target Tournament",
-                    value: `[**${targetTournamentName}**](${targetTournamentLink})`,
-                });
+                embed.addField("Target Tournament", `[**${targetTournamentName}**](${targetTournamentLink})`);
             }
         }
 
-        fields.push({ name: "Message", value: utils.shorten(message, 512) });
+        embed.addField("Message", utils.shorten(message, 512));
 
         if (initialMessage.attachments?.length) {
-            fields.push(utils.getAttachmentsField(initialMessage.attachments)!);
+            const attachmentsField = utils.getAttachmentsField(initialMessage.attachments)!;
+            embed.addField(attachmentsField.name, attachmentsField.value, attachmentsField.inline);
         }
 
-        const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
-
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: type === "report" ? webhookColors.lightRed : webhookColors.blue,
-            title: embedTitle,
-            url: `${config.baseUrl}/${type}s/${ticket._id}`,
-            fields,
-            footer: {
-                text: `ID: ${ticket._id}`,
-            },
-        };
-
-        await DiscordService.sendRoleHighlightWebhook({
-            roles,
-            embeds: [embed],
-            message: `New ${_.capitalize(type)}`,
-        });
+        await new WebhookBuilder()
+            .addEmbed(embed)
+            .addRoles(roles)
+            .setMessage(`New ${_.capitalize(type)}`)
+            .send();
 
         res.json({ message: `${_.capitalize(type)} created successfully!`, ticket });
     }
@@ -403,18 +395,6 @@ class TicketsController {
             "ticket"
         );
 
-        // Discord
-        const fields: IDiscordField[] = [
-            {
-                name: isNote ? "Note" : "Message",
-                value: utils.shorten(content, 512),
-            },
-        ];
-
-        if (newMessage.attachments?.length) {
-            fields.push(utils.getAttachmentsField(newMessage.attachments)!);
-        }
-
         // ping the committee members who sent messages in the ticket when the message is from the ticket author
         const committeeMembers = new Set<string>();
 
@@ -426,20 +406,30 @@ class TicketsController {
             });
         }
 
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: isNote ? webhookColors.lightBlue : webhookColors.darkBlue,
-            description: `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
-                config.baseUrl
-            }/${ticket.type}s/${ticket._id})`,
-            fields,
-        };
+        // Discord
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(isNote ? DiscordUtils.webhookColors.lightBlue : DiscordUtils.webhookColors.darkBlue)
+            .setDescription(
+                `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
+                    config.baseUrl
+                }/${ticket.type}s/${ticket._id})`
+            );
 
-        await DiscordService.sendUserHighlightWebhook({
-            users: Array.from(committeeMembers),
-            embeds: [embed],
-            threadId: ticket.threadId,
-        });
+        embed.addField(isNote ? "Note" : "Message", utils.shorten(content, 512));
+
+        if (newMessage.attachments?.length) {
+            const attachmentsField = utils.getAttachmentsField(newMessage.attachments)!;
+            embed.addField(attachmentsField.name, attachmentsField.value, attachmentsField.inline);
+        }
+
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed).addUsers(Array.from(committeeMembers));
+
+        if (ticket.threadId) {
+            webhookBuilder.setThreadId(ticket.threadId);
+        }
+
+        await webhookBuilder.send();
 
         const response = isNote ? "Added a note successfully!" : "Message sent successfully!";
 
@@ -480,18 +470,20 @@ class TicketsController {
         );
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: ticket.isActive ? webhookColors.gray : webhookColors.black,
-            description: `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${
-                config.baseUrl
-            }/${ticket.type}s/${ticket._id})`,
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(ticket.isActive ? DiscordUtils.webhookColors.gray : DiscordUtils.webhookColors.black)
+            .setDescription(
+                `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${
+                    ticket.type
+                }s/${ticket._id})`
+            );
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-            threadId: ticket.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+        if (ticket.threadId) {
+            webhookBuilder.setThreadId(ticket.threadId);
+        }
+        await webhookBuilder.send();
     }
 
     /** POST update thread ID */
@@ -520,22 +512,22 @@ class TicketsController {
             );
 
             // Discord
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.white,
-                description: `Updated webhook location for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
-                fields: [
-                    {
-                        name: "New Location",
-                        value: `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`,
-                    },
-                ],
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.white)
+                .setDescription(
+                    `Updated webhook location for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`
+                )
+                .addField(
+                    "New Location",
+                    `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`
+                );
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: ticket.threadId,
-            });
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+            if (ticket.threadId) {
+                webhookBuilder.setThreadId(ticket.threadId);
+            }
+            await webhookBuilder.send();
         } else {
             res.json({ message: "Thread ID is already set!" });
         }
@@ -562,22 +554,19 @@ class TicketsController {
         );
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: webhookColors.purple,
-            description: `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
-            fields: [
-                {
-                    name: "Snoozed until",
-                    value: utils.discordTimestamp(sevenDaysFromNow, "dateTime"),
-                },
-            ],
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.purple)
+            .setDescription(
+                `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`
+            )
+            .addField("Snoozed until", utils.discordTimestamp(sevenDaysFromNow, "dateTime"));
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-            threadId: ticket.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+        if (ticket.threadId) {
+            webhookBuilder.setThreadId(ticket.threadId);
+        }
+        await webhookBuilder.send();
     }
 
     /** PATCH edit report target */
@@ -631,22 +620,22 @@ class TicketsController {
             );
 
             // Discord
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.orange,
-                description: `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
-                fields: [
-                    {
-                        name: "New Target User",
-                        value: `[**${targetUser.username}**](https://osu.ppy.sh/users/${targetUser.osuId})`,
-                    },
-                ],
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.orange)
+                .setDescription(
+                    `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`
+                )
+                .addField(
+                    "New Target User",
+                    `[**${targetUser.username}**](https://osu.ppy.sh/users/${targetUser.osuId})`
+                );
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: ticket.threadId,
-            });
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+            if (ticket.threadId) {
+                webhookBuilder.setThreadId(ticket.threadId);
+            }
+            await webhookBuilder.send();
         }
 
         // Handle tournament report
@@ -683,22 +672,19 @@ class TicketsController {
             );
 
             // Discord
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.orange,
-                description: `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
-                fields: [
-                    {
-                        name: "New Target Tournament",
-                        value: `[**${sanitizedTournamentName}**](${sanitizedTournamentLink})`,
-                    },
-                ],
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.orange)
+                .setDescription(
+                    `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`
+                )
+                .addField("New Target Tournament", `[**${sanitizedTournamentName}**](${sanitizedTournamentLink})`);
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: ticket.threadId,
-            });
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+            if (ticket.threadId) {
+                webhookBuilder.setThreadId(ticket.threadId);
+            }
+            await webhookBuilder.send();
         }
 
         res.json({ message: "Report updated successfully!" });

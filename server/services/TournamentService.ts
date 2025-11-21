@@ -12,8 +12,9 @@ import Tournament from "../models/tournamentModel";
 import User from "../models/userModel";
 import LogService from "./LogService";
 import OsuBotService from "./OsuBotService";
-import DiscordService from "./DiscordService";
-import webhookColors from "../constants/webhookColors";
+import { WebhookBuilder } from "./discord/WebhookBuilder";
+import { EmbedBuilder } from "./discord/EmbedBuilder";
+import DiscordUtils from "./discord/DiscordUtils";
 import config from "../../config.json";
 import _ from "lodash";
 import moment from "moment";
@@ -247,7 +248,11 @@ class TournamentService {
     /**
      * Update tournament hosts
      */
-    public async updateHosts(tournament: ITournament, hostIds: string[], currentUser: IUser): Promise<{ error?: string }> {
+    public async updateHosts(
+        tournament: ITournament,
+        hostIds: string[],
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
         if (!Array.isArray(hostIds) || hostIds.length === 0) {
             return { error: "At least one host is required" };
         }
@@ -289,7 +294,11 @@ class TournamentService {
     /**
      * Update tournament game modes (admin only)
      */
-    public async updateModes(tournament: ITournament, modes: GameMode[], currentUser: IUser): Promise<{ error?: string }> {
+    public async updateModes(
+        tournament: ITournament,
+        modes: GameMode[],
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
         if (!currentUser.isAdmin) {
             return { error: "Only admins can change game modes" };
         }
@@ -313,7 +322,11 @@ class TournamentService {
     /**
      * Update tournament type (admin only)
      */
-    public async updateType(tournament: ITournament, type: TournamentType, currentUser: IUser): Promise<{ error?: string }> {
+    public async updateType(
+        tournament: ITournament,
+        type: TournamentType,
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
         if (!currentUser.isAdmin) {
             return { error: "Only admins can change tournament type" };
         }
@@ -338,7 +351,11 @@ class TournamentService {
     /**
      * Update forum URL
      */
-    public async updateForumUrl(tournament: ITournament, forumUrl: string, currentUser: IUser): Promise<{ error?: string }> {
+    public async updateForumUrl(
+        tournament: ITournament,
+        forumUrl: string,
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
         if (!utils.isOsuForumLink(forumUrl)) {
             return { error: "Invalid osu! forum URL" };
         }
@@ -428,7 +445,11 @@ class TournamentService {
     /**
      * Update tournament banner
      */
-    public async updateBanner(tournament: ITournament, bannerUrl: string, actioner: IUser): Promise<{ error?: string }> {
+    public async updateBanner(
+        tournament: ITournament,
+        bannerUrl: string,
+        actioner: IUser
+    ): Promise<{ error?: string }> {
         tournament.bannerUrl = bannerUrl;
 
         await this.addTournamentLog(tournament, actioner, `Updated banner`, "image");
@@ -440,7 +461,11 @@ class TournamentService {
     /**
      * Update tournament winners
      */
-    public async updateWinners(tournament: ITournament, winners: IUser[], currentUser: IUser): Promise<{ error?: string }> {
+    public async updateWinners(
+        tournament: ITournament,
+        winners: IUser[],
+        currentUser: IUser
+    ): Promise<{ error?: string }> {
         const winnersWithActiveTournamentBan = winners.filter(
             (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
         );
@@ -507,11 +532,11 @@ class TournamentService {
         }
 
         if (shouldSendOsuMessage) {
-            let message = `The official support status of your tournament **${
+            let message = `The official support status of your ${tournament.type}: **${
                 tournament.name
             }** has been updated to **${_.startCase(
                 status
-            )}**.\n\n[View your tournament in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
+            )}**.\n\n[View your ${tournament.type} in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
                 tournament._id
             }).`;
 
@@ -520,9 +545,9 @@ class TournamentService {
             } else if (status === "changesRequested") {
                 message += `\n\nPlease check your email for more information about the changes requested, or visit the [Tournament Tracker](${config.baseUrl}/tournaments/${tournament._id}) for a brief overview of the changes.`;
             } else if (status === "badgeApproved") {
-                message += `\n\nCongratulations! Your tournament has been approved for badge support! You will receive an email with more information soon.`;
+                message += `\n\nCongratulations! Your ${tournament.type} has been approved for badge support! You will receive an email with more information soon.`;
             } else if (status === "badgeRejected") {
-                message += `\n\nUnfortunately, your tournament has been rejected for badge support. You will receive an email with more information soon.`;
+                message += `\n\nUnfortunately, your ${tournament.type} has been rejected for badge support. You will receive an email with more information soon.`;
             }
 
             const hostOsuIds = tournament.hosts.map((host: IUser) => host.osuId);
@@ -530,7 +555,7 @@ class TournamentService {
                 hostOsuIds,
                 {
                     channel: {
-                        name: `Tournament Status Update`,
+                        name: `${_.capitalize(tournament.type)} Status Update`,
                         description: `Update regarding: ${tournament.name}`,
                     },
                     content: message,
@@ -543,32 +568,31 @@ class TournamentService {
         const excludedStatusesDiscord = ["supportRequestReceived", "screeningConcluded", "reviewOngoing"];
 
         if (!excludedStatusesDiscord.includes(status) || (status === "reviewOngoing" && oldStatus === "onHold")) {
-            let embedColor = webhookColors.orange;
+            let embedColor = DiscordUtils.webhookColors.orange;
 
-            if (status === "supportRequestReceived") embedColor = webhookColors.lightPurple;
-            if (status === "screeningConcluded") embedColor = webhookColors.blue;
-            if (status === "changesRequested") embedColor = webhookColors.yellow;
-            if (status === "onHold") embedColor = webhookColors.darkPink;
-            if (status === "badgeApproved") embedColor = webhookColors.lightGreen;
-            if (status === "badgeRejected") embedColor = webhookColors.lightRed;
-            if (status === "noBadgeRequested") embedColor = webhookColors.gray;
+            if (status === "supportRequestReceived") embedColor = DiscordUtils.webhookColors.lightPurple;
+            if (status === "screeningConcluded") embedColor = DiscordUtils.webhookColors.blue;
+            if (status === "changesRequested") embedColor = DiscordUtils.webhookColors.yellow;
+            if (status === "onHold") embedColor = DiscordUtils.webhookColors.darkPink;
+            if (status === "badgeApproved") embedColor = DiscordUtils.webhookColors.lightGreen;
+            if (status === "badgeRejected") embedColor = DiscordUtils.webhookColors.lightRed;
+            if (status === "noBadgeRequested") embedColor = DiscordUtils.webhookColors.gray;
 
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(sessionData),
-                color: embedColor,
-                description: `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-                fields: [
-                    {
-                        name: "New Status",
-                        value: `${_.startCase(status)}`,
-                    },
-                ],
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(sessionData))
+                .setColor(embedColor)
+                .setDescription(
+                    `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                )
+                .addField("New Status", `${_.startCase(status)}`);
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: tournament.threadId,
-            });
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+            if (tournament.threadId && tournament.threadId.length > 0) {
+                webhookBuilder.setThreadId(tournament.threadId);
+            }
+
+            await webhookBuilder.send();
         }
 
         return {};
@@ -594,18 +618,22 @@ class TournamentService {
         await LogService.generate(currentUser.id, `Updated active status for **${tournament.name}**`, "tournament");
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(sessionData),
-            color: isActive ? webhookColors.gray : webhookColors.black,
-            description: `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${tournament.name}**](${
-                config.baseUrl
-            }/tournaments/${tournament._id})`,
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(sessionData))
+            .setColor(isActive ? DiscordUtils.webhookColors.gray : DiscordUtils.webhookColors.black)
+            .setDescription(
+                `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${tournament.name}**](${
+                    config.baseUrl
+                }/tournaments/${tournament._id})`
+            );
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-            threadId: tournament.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+        if (tournament.threadId && tournament.threadId.length > 0) {
+            webhookBuilder.setThreadId(tournament.threadId);
+        }
+
+        await webhookBuilder.send();
 
         return {};
     }

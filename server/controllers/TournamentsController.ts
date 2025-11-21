@@ -20,12 +20,12 @@ import TournamentService from "../services/TournamentService";
 import LogService from "../services/LogService";
 import _ from "lodash";
 import moment from "moment";
-import DiscordService from "../services/DiscordService";
-import webhookColors from "../constants/webhookColors";
+import { EmbedBuilder } from "../services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../services/discord/WebhookBuilder";
+import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import Message from "../models/messageModel";
 import utils from "../../utils";
-import { IDiscordField } from "../../interfaces/Discord";
 import { ITicket } from "../../interfaces/Ticket";
 import { IVoting } from "../../interfaces/Voting";
 
@@ -321,50 +321,29 @@ class TournamentsController {
 
         // Discord
         const hostsList = utils.formatHostsList(hosts, { mdLinks: true });
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: webhookColors.green,
-            description: `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-            fields: [
-                {
-                    name: hosts.length === 1 ? "Host" : "Hosts",
-                    value: hostsList,
-                },
-                {
-                    name: "Start Date",
-                    value: moment(tournament.startDate).format("YYYY-MM-DD"),
-                    inline: true,
-                },
-                {
-                    name: "End Date",
-                    value: moment(tournament.endDate).format("YYYY-MM-DD"),
-                    inline: true,
-                },
-                {
-                    name: "Game Mode",
-                    value: tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "),
-                    inline: true,
-                },
-                {
-                    name: "Forum URL",
-                    value: tournament.forumUrl.length ? tournament.forumUrl : "*None*",
-                },
-                {
-                    name: "Search Tags",
-                    value:
-                        tournament.tags && tournament.tags.length
-                            ? tournament.tags.map((tag) => `\`${tag}\``).join(", ")
-                            : "*None*",
-                },
-            ],
-            image: {
-                url: tournament.bannerUrl || "",
-            },
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.green)
+            .setDescription(
+                `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
+            .addField("Start Date", moment(tournament.startDate).format("YYYY-MM-DD"), true)
+            .addField("End Date", moment(tournament.endDate).format("YYYY-MM-DD"), true)
+            .addField("Game Mode", tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "), true)
+            .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
+            .addField(
+                "Search Tags",
+                tournament.tags && tournament.tags.length
+                    ? tournament.tags.map((tag) => `\`${tag}\``).join(", ")
+                    : "*None*"
+            );
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-        });
+        if (tournament.bannerUrl) {
+            embed.setImage(tournament.bannerUrl);
+        }
+
+        await new WebhookBuilder().addEmbed(embed).send();
     }
 
     /** POST assign reviewers */
@@ -435,24 +414,24 @@ class TournamentsController {
         // Discord
         const usersToPing = reviewers.map((r) => r.discordId || r.username);
 
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: webhookColors.orange,
-            description: `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-            fields: [
-                {
-                    name: "Reviewers",
-                    value: reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", "),
-                },
-            ],
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.orange)
+            .setDescription(
+                `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .addField("Reviewers", reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", "));
 
-        await DiscordService.sendUserHighlightWebhook({
-            users: usersToPing,
-            embeds: [embed],
-            message: `New ${_.capitalize(tournament.type)} Review`,
-            threadId: tournament.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder()
+            .addEmbed(embed)
+            .addUsers(usersToPing)
+            .setMessage(`New ${_.capitalize(tournament.type)} Review`);
+
+        if (tournament.threadId) {
+            webhookBuilder.setThreadId(tournament.threadId);
+        }
+
+        await webhookBuilder.send();
     }
 
     /** POST edit tournament */
@@ -660,30 +639,25 @@ class TournamentsController {
             oldReviewer.discordId || oldReviewer.username,
             newReviewer.discordId || newReviewer.username,
         ];
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            color: webhookColors.lightOrange,
-            description: `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-            fields: [
-                {
-                    name: "Old Reviewer",
-                    value: `[**${oldReviewer.username}**](${oldReviewer.osuProfileUrl})`,
-                    inline: true,
-                },
-                {
-                    name: "New Reviewer",
-                    value: `[**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
-                    inline: true,
-                },
-            ],
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.lightOrange)
+            .setDescription(
+                `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .addField("Old Reviewer", `[**${oldReviewer.username}**](${oldReviewer.osuProfileUrl})`, true)
+            .addField("New Reviewer", `[**${newReviewer.username}**](${newReviewer.osuProfileUrl})`, true);
 
-        await DiscordService.sendUserHighlightWebhook({
-            users: usersToPing,
-            embeds: [embed],
-            message: "Tournament Review Reassignment",
-            threadId: tournament.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder()
+            .addEmbed(embed)
+            .addUsers(usersToPing)
+            .setMessage("Tournament Review Reassignment");
+
+        if (tournament.threadId) {
+            webhookBuilder.setThreadId(tournament.threadId);
+        }
+
+        await webhookBuilder.send();
     }
 
     /** POST submit review */
@@ -744,10 +718,10 @@ class TournamentsController {
         }
 
         // Discord
-        let color = webhookColors.lightBlue;
-        if (vote === "changesRequested") color = webhookColors.yellow;
-        if (vote === "deny") color = webhookColors.lightRed;
-        if (vote === "approve") color = webhookColors.lightGreen;
+        let color = DiscordUtils.webhookColors.lightBlue;
+        if (vote === "changesRequested") color = DiscordUtils.webhookColors.yellow;
+        if (vote === "deny") color = DiscordUtils.webhookColors.lightRed;
+        if (vote === "approve") color = DiscordUtils.webhookColors.lightGreen;
 
         let emoji = "❔";
         if (vote === "changesRequested") emoji = "🔄";
@@ -757,35 +731,25 @@ class TournamentsController {
         // get count of false checklist items, iterate through the review.checklist and count the checked: false items
         const falseCount = review.checklist.filter((item) => !item.checked).length;
 
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `${isNewReview ? "Submitted a" : "Updated their"} review for ${tournament.type}: [**${
-                tournament.name
-            }**](${config.baseUrl}/tournaments/${tournament._id})`,
-            color,
-            fields: [
-                {
-                    name: "Decision",
-                    value: `${emoji} ${_.startCase(vote)}`,
-                    inline: true,
-                },
-                {
-                    name: "Checklist Issues",
-                    value: `${falseCount > 0 ? "⚠️" : "🎉"} ${falseCount}`,
-                    inline: true,
-                },
-                {
-                    name: "Comment",
-                    value: comment.trim().length > 0 ? utils.shorten(comment, 512) : "*No comment provided...*",
-                },
-            ],
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setDescription(
+                `${isNewReview ? "Submitted a" : "Updated their"} review for ${tournament.type}: [**${
+                    tournament.name
+                }**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .setColor(color)
+            .addField("Decision", `${emoji} ${_.startCase(vote)}`, true)
+            .addField("Checklist Issues", `${falseCount > 0 ? "⚠️" : "🎉"} ${falseCount}`, true)
+            .addField("Comment", comment.trim().length > 0 ? utils.shorten(comment, 512) : "*No comment provided...*");
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-            notification: "silent",
-            threadId: tournament.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed).setNotification("silent");
+
+        if (tournament.threadId) {
+            webhookBuilder.setThreadId(tournament.threadId);
+        }
+
+        await webhookBuilder.send();
     }
 
     /** POST upload badges */
@@ -867,28 +831,26 @@ class TournamentsController {
             );
 
             // Discord notification for failed badges note
-            const fields: IDiscordField[] = [
-                {
-                    name: "Note",
-                    value: utils.shorten(noteContent, 512),
-                },
-            ];
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setDescription(
+                    `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                )
+                .setColor(DiscordUtils.webhookColors.yellow)
+                .addField("Note", utils.shorten(noteContent, 512));
 
             if (note.attachments?.length) {
-                fields.push(utils.getAttachmentsField(note.attachments)!);
+                const attachmentsField = utils.getAttachmentsField(note.attachments)!;
+                embed.addField(attachmentsField.name, attachmentsField.value, attachmentsField.inline);
             }
 
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-                color: webhookColors.yellow,
-                fields,
-            };
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: tournament.threadId,
-            });
+            if (tournament.threadId && tournament.threadId.length > 0) {
+                webhookBuilder.setThreadId(tournament.threadId);
+            }
+
+            await webhookBuilder.send();
         }
 
         // Upload only valid badges
@@ -1050,22 +1012,21 @@ class TournamentsController {
             );
 
             // discord
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.white,
-                description: `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-                fields: [
-                    {
-                        name: "New Location",
-                        value: `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`,
-                    },
-                ],
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.white)
+                .setDescription(
+                    `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                )
+                .addField(
+                    "New Location",
+                    `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`
+                );
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-                threadId: tournament.threadId,
-            });
+            await new WebhookBuilder()
+                .addEmbed(embed)
+                .setThreadId(tournament.threadId!)
+                .send();
         } else {
             res.json({ message: "Thread ID is already set!" });
         }
@@ -1110,27 +1071,26 @@ class TournamentsController {
         await LogService.generate(currentUser.id, `Created note for **${tournament.name}**`, "tournament");
 
         // Discord
-        const fields: IDiscordField[] = [
-            {
-                name: "Note",
-                value: utils.shorten(content, 512),
-            },
-        ];
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setDescription(
+                `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .setColor(DiscordUtils.webhookColors.blue)
+            .addField("Note", utils.shorten(content, 512));
 
         if (note.attachments?.length) {
-            fields.push(utils.getAttachmentsField(note.attachments)!);
+            const attachmentsField = utils.getAttachmentsField(note.attachments)!;
+            embed.addField(attachmentsField.name, attachmentsField.value, attachmentsField.inline);
         }
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
-            color: webhookColors.blue,
-            fields,
-        };
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-            threadId: tournament.threadId,
-        });
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+        if (tournament.threadId && tournament.threadId.length > 0) {
+            webhookBuilder.setThreadId(tournament.threadId);
+        }
+
+        await webhookBuilder.send();
     }
 
     /** POST delete tournament */

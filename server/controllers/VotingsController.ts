@@ -3,9 +3,9 @@ import Vote from "../models/voteModel";
 import { VotingQueryParams, VotingListQuery } from "../../interfaces/Voting";
 import User from "../models/userModel";
 import { IUser } from "../../interfaces/User";
-import { IDiscordField } from "@interfaces/Discord";
-import DiscordService from "../services/DiscordService";
-import webhookColors from "../constants/webhookColors";
+import { EmbedBuilder } from "../services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../services/discord/WebhookBuilder";
+import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import LogService from "../services/LogService";
 import utils from "../../utils";
@@ -215,70 +215,50 @@ class VotingsController {
         );
 
         // Discord
-        const roles: string[] = [];
-        const fields: IDiscordField[] = [];
+        const roles: ("tournament" | "contest")[] = [];
 
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");
 
-        fields.push({
-            name: "Deadline",
-            value: `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(
-                voting.deadline,
-                "dateTime"
-            )})`,
-        });
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setDescription(
+                `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`
+            )
+            .setColor(DiscordUtils.webhookColors.lightYellow)
+            .setFooter(`ID: ${voting._id}`)
+            .addField(
+                "Deadline",
+                `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(voting.deadline, "dateTime")})`
+            );
 
         if (voting.targetUser) {
-            fields.push({
-                name: "Target User",
-                value: `[**${voting.targetUser.username}**](https://osu.ppy.sh/users/${voting.targetUser.osuId})`,
-            });
+            embed.addField(
+                "Target User",
+                `[**${voting.targetUser.username}**](https://osu.ppy.sh/users/${voting.targetUser.osuId})`
+            );
         }
 
         if (voting.targetTournamentName && voting.targetTournamentLink) {
-            fields.push({
-                name: "Target Tournament",
-                value: `[**${voting.targetTournamentName}**](${voting.targetTournamentLink})`,
-            });
+            embed.addField("Target Tournament", `[**${voting.targetTournamentName}**](${voting.targetTournamentLink})`);
         }
 
-        fields.push({
-            name: "Description",
-            value: utils.shorten(voting.description, 1024),
-        });
+        embed.addField("Description", utils.shorten(voting.description, 1024));
 
         if (voting.attachments?.length) {
-            fields.push(utils.getAttachmentsField(voting.attachments)!);
+            const attachmentsField = utils.getAttachmentsField(voting.attachments)!;
+            embed.addField(attachmentsField.name, attachmentsField.value, attachmentsField.inline);
         }
 
         if (forceFullParticipation) {
-            fields.push({
-                name: "Participation Requirement",
-                value: forceFullParticipationBool ? "100%" : "75%",
-            });
+            embed.addField("Participation Requirement", forceFullParticipationBool ? "100%" : "75%");
         }
 
         if (voting.type === "binary-strict") {
-            fields.push({
-                name: "Pass Threshold",
-                value: `${voting.binaryStrictPassThreshold}%`,
-            });
+            embed.addField("Pass Threshold", `${voting.binaryStrictPassThreshold}%`);
         }
 
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-            color: webhookColors.lightYellow,
-            fields,
-            footer: { text: `ID: ${voting._id}` },
-        };
-
-        await DiscordService.sendRoleHighlightWebhook({
-            roles,
-            embeds: [embed],
-            message: "New Vote",
-        });
+        await new WebhookBuilder().addEmbed(embed).addRoles(roles).setMessage("New Vote").send();
     }
 
     /** POST submit vote */
@@ -433,17 +413,15 @@ class VotingsController {
             // Discord
             // ! Disabled per team request
             /*
-            await DiscordService.sendWebhook(
-                [
-                    {
-                        author: DiscordService.defaultWebhookAuthor(req.session),
-                        description: `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                        color: webhookColors.lightGreen,
-                    },
-                ],
-                undefined,
-                "silent"
-            );
+            await new WebhookBuilder()
+                .addEmbed(
+                    new EmbedBuilder()
+                        .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                        .setDescription(`Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
+                        .setColor(DiscordUtils.webhookColors.lightGreen)
+                )
+                .setNotification("silent")
+                .send();
             */
         }
     }
@@ -474,27 +452,24 @@ class VotingsController {
         if (!voting.isActive) {
             const fields = VotingService.generateDiscordVotingResults(voting);
 
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                color: webhookColors.darkYellow,
-                description: `Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                fields,
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.darkYellow)
+                .setDescription(`Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`);
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-            });
+            for (const field of fields) {
+                embed.addField(field.name, field.value, field.inline);
+            }
+
+            await new WebhookBuilder().addEmbed(embed).send();
         } else {
             // Voting resumed
-            const embed = {
-                author: DiscordService.defaultWebhookAuthor(req.session),
-                description: `Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-                color: webhookColors.yellow,
-            };
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setDescription(`Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
+                .setColor(DiscordUtils.webhookColors.yellow);
 
-            await DiscordService.sendWebhook({
-                embeds: [embed],
-            });
+            await new WebhookBuilder().addEmbed(embed).send();
         }
     }
 
@@ -591,15 +566,14 @@ class VotingsController {
         );
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-            color: webhookColors.darkRed,
-        };
-
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setDescription(`Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
+                    .setColor(DiscordUtils.webhookColors.darkRed)
+            )
+            .send();
     }
 
     /** POST toggle voting public */
@@ -628,17 +602,16 @@ class VotingsController {
         );
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
-                voting.isPublic ? "available for **public** viewing" : "private"
-            }`,
-            color: voting.isPublic ? webhookColors.lightPurple : webhookColors.darkPurple,
-        };
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setDescription(
+                `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
+                    voting.isPublic ? "available for **public** viewing" : "private"
+                }`
+            )
+            .setColor(voting.isPublic ? DiscordUtils.webhookColors.lightPurple : DiscordUtils.webhookColors.darkPurple);
 
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-        });
+        await new WebhookBuilder().addEmbed(embed).send();
     }
 
     /** POST delete all votes from a voting */
@@ -666,15 +639,16 @@ class VotingsController {
         );
 
         // Discord
-        const embed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-            color: webhookColors.red,
-        };
-
-        await DiscordService.sendWebhook({
-            embeds: [embed],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setDescription(
+                        `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`
+                    )
+                    .setColor(DiscordUtils.webhookColors.red)
+            )
+            .send();
     }
 
     /** PATCH toggle abstention */
@@ -739,20 +713,19 @@ class VotingsController {
         );
 
         // Discord
-        const mainEmbed = {
-            author: DiscordService.defaultWebhookAuthor(req.session),
-            description: `${isAbstained ? "Abstained" : "Removed abstention"} from vote: [**${voting.title}**](${
-                config.baseUrl
-            }/votes/${voting._id})`,
-            color: isAbstained ? webhookColors.darkGray : webhookColors.white,
-            footer: {
-                text: `Required votes: ${originalRequiredVotes} → ${voting.requiredVotes}`,
-            },
-        };
-
-        await DiscordService.sendWebhook({
-            embeds: [mainEmbed],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setDescription(
+                        `${isAbstained ? "Abstained" : "Removed abstention"} from vote: [**${voting.title}**](${
+                            config.baseUrl
+                        }/votes/${voting._id})`
+                    )
+                    .setColor(isAbstained ? DiscordUtils.webhookColors.darkGray : DiscordUtils.webhookColors.white)
+                    .setFooter(`Required votes: ${originalRequiredVotes} → ${voting.requiredVotes}`)
+            )
+            .send();
     }
 }
 
