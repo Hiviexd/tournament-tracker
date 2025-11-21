@@ -20,39 +20,32 @@ export default class DiscordUtils {
      */
     /* eslint-disable key-spacing */
     public static readonly webhookColors = {
-        darkRed: this.parseColor("#861615"), // deleteVoting
-        red: this.parseColor("#EE2629"),
-        lightRed: this.parseColor("#FF7373"), // create report
-
-        darkOrange: this.parseColor("#CE5310"),
-        orange: this.parseColor("#f57e2a"),
+        darkRed    : this.parseColor("#861615"),   // deleteVoting
+        red        : this.parseColor("#EE2629"),
+        lightRed   : this.parseColor("#FF7373"),   // create report
+        darkOrange : this.parseColor("#CE5310"),
+        orange     : this.parseColor("#f57e2a"),
         lightOrange: this.parseColor("#EEA578"),
-
-        darkYellow: this.parseColor("#ffac00"), // toggleVotingStatus
-        yellow: this.parseColor("#ffc85a"), // toggleVotingStatus
-        lightYellow: this.parseColor("#FFFF55"), // createVoting
-
-        darkGreen: this.parseColor("#22A522"),
-        green: this.parseColor("#42D63E"),
-        lightGreen: this.parseColor("#1df27d"), // submitVote
-
-        darkBlue: this.parseColor("#304989"), // send ticket message
-        blue: this.parseColor("#008cff"), // create ticket
-        lightBlue: this.parseColor("#83E3FF"), // add ticket note
-
-        darkPurple: this.parseColor("#721C6F"),
-        purple: this.parseColor("#8240A8"),
+        darkYellow : this.parseColor("#ffac00"),   // toggleVotingStatus
+        yellow     : this.parseColor("#ffc85a"),   // toggleVotingStatus
+        lightYellow: this.parseColor("#FFFF55"),   // createVoting
+        darkGreen  : this.parseColor("#22A522"),
+        green      : this.parseColor("#42D63E"),
+        lightGreen : this.parseColor("#1df27d"),   // submitVote
+        darkBlue   : this.parseColor("#304989"),   // send ticket message
+        blue       : this.parseColor("#008cff"),   // create ticket
+        lightBlue  : this.parseColor("#83E3FF"),   // add ticket note
+        darkPurple : this.parseColor("#721C6F"),
+        purple     : this.parseColor("#8240A8"),
         lightPurple: this.parseColor("#AA7FF1"),
-
-        darkPink: this.parseColor("#FF40A8"),
-        pink: this.parseColor("#FF8ECC"),
-        lightPink: this.parseColor("#FFB3C4"),
-
-        white: this.parseColor("#EFEFEF"),
-        brown: this.parseColor("#91582A"),
-        gray: this.parseColor("#9E9E9E"),
-        darkGray: this.parseColor("#424242"),
-        black: this.parseColor("#272727"),
+        darkPink   : this.parseColor("#FF40A8"),
+        pink       : this.parseColor("#FF8ECC"),
+        lightPink  : this.parseColor("#FFB3C4"),
+        white      : this.parseColor("#EFEFEF"),
+        brown      : this.parseColor("#91582A"),
+        gray       : this.parseColor("#9E9E9E"),
+        darkGray   : this.parseColor("#424242"),
+        black      : this.parseColor("#272727"),
     };
 
     /**
