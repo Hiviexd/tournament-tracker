@@ -12,10 +12,10 @@ export class WebhookBuilder {
     private embeds: IDiscordEmbed[] = [];
     private location: "main" | "dev" = "main";
     private threadId?: string;
-    private notification?: "silent" | "normal" = "normal";
+    private notification: "silent" | "normal" = "normal";
     private users: string[] = [];
     private roles: string[] = [];
-    private message?: string = "";
+    private message: string = "";
 
     /**
      * Add an embed to the webhook (accepts EmbedBuilder or IDiscordEmbed)
