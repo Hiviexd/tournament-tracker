@@ -2,17 +2,18 @@ import { IInfringement, InfringementType, IUser, UserListQuery, WatchlistQuery }
 import User from "../models/userModel";
 import utils from "../../utils";
 import UserService from "../services/UserService";
-import DiscordService from "../services/DiscordService";
+import { EmbedBuilder } from "../services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../services/discord/WebhookBuilder";
+import DiscordUtils from "../services/discord/DiscordUtils";
 import OsuApiService from "../services/OsuApiService";
-import webhookColors from "../constants/webhookColors";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
 import Tournament from "../models/tournamentModel";
 import _ from "lodash";
-import { IDiscordField } from "../../interfaces/Discord";
 import moment from "moment";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
+import config from "../../config.json";
 
 class UsersController {
     /** GET logged in user */
@@ -120,16 +121,17 @@ class UsersController {
             return res.status(404).json({ error: "User not found" });
         }
 
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.blue,
-                    description: `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`,
-                },
-            ],
-            webhook: "dev",
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.blue)
+                    .setDescription(
+                        `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`
+                    )
+            )
+            .setLocation("dev")
+            .send();
 
         res.json({ message: "User created successfully!", user });
     }
@@ -149,17 +151,18 @@ class UsersController {
             "user"
         );
 
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.orange,
-                    description: `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
-                        user.isActiveReviewer ? "active" : "inactive"
-                    }** reviewer`,
-                },
-            ],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.orange)
+                    .setDescription(
+                        `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
+                            user.isActiveReviewer ? "active" : "inactive"
+                        }** reviewer`
+                    )
+            )
+            .send();
 
         res.json({
             message: `Set activity status as ${user.isActiveReviewer ? "active" : "inactive"}!`,
@@ -220,17 +223,18 @@ class UsersController {
         );
 
         // Discord webhook
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: join ? webhookColors.lightGreen : webhookColors.lightRed,
-                    description: `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${
-                        user.osuId
-                    }) ${join ? "to" : "from"} the **${groupName}**`,
-                },
-            ],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(join ? DiscordUtils.webhookColors.lightGreen : DiscordUtils.webhookColors.lightRed)
+                    .setDescription(
+                        `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
+                            join ? "to" : "from"
+                        } the **${groupName}**`
+                    )
+            )
+            .send();
 
         res.json({
             message: `User ${join ? "added to" : "removed from"} the **${groupName}** successfully!`,
@@ -267,15 +271,16 @@ class UsersController {
         );
 
         // Discord webhook notification
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.orange,
-                    description: `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
-                },
-            ],
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.orange)
+                    .setDescription(
+                        `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`
+                    )
+            )
+            .send();
 
         return res.json({
             message: `Badge level updated to ${user.badgeValue}`,
@@ -530,60 +535,45 @@ class UsersController {
         // Logging
         await LogService.generate(
             req.session.mongoId!,
-            `Added **${_.startCase(type)}** infringement to [**${user.username}**](${user.osuProfileUrl})`,
+            `Added **${_.startCase(type)}** infringement to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
             "user"
         );
 
-        // Build fields
-        const fields: IDiscordField[] = [];
-
-        if (!isNotPunishment) {
-            if (startDate && endDate) {
-                const humanizedDuration = moment.duration(moment(endDate).diff(moment(startDate))).humanize();
-                fields.push({
-                    name: "Duration",
-                    value: `${moment(startDate).format("MMM D, YYYY")} — ${moment(endDate).format(
-                        "MMM D, YYYY"
-                    )} (${humanizedDuration})`,
-                });
-            } else if (startDate) {
-                fields.push({
-                    name: "Duration",
-                    value: "Indefinite",
-                });
-            }
-        }
-
-        fields.push({
-            name: "Reason",
-            value: utils.shorten(reason, 1024),
-        });
-
         const typeColorMap: { [key in InfringementType]: number } = {
-            [InfringementType.NOTE]: webhookColors.lightBlue,
-            [InfringementType.WARNING]: webhookColors.yellow,
-            [InfringementType.PROBATION]: webhookColors.orange,
-            [InfringementType.TOURNAMENT_BAN]: webhookColors.red,
-            [InfringementType.HOSTING_BAN]: webhookColors.red,
-            [InfringementType.STAFFING_BAN]: webhookColors.red,
+            [InfringementType.NOTE]: DiscordUtils.webhookColors.lightBlue,
+            [InfringementType.WARNING]: DiscordUtils.webhookColors.yellow,
+            [InfringementType.PROBATION]: DiscordUtils.webhookColors.orange,
+            [InfringementType.TOURNAMENT_BAN]: DiscordUtils.webhookColors.red,
+            [InfringementType.HOSTING_BAN]: DiscordUtils.webhookColors.red,
+            [InfringementType.STAFFING_BAN]: DiscordUtils.webhookColors.red,
         };
 
         const isIndefinite = !isNotPunishment && !endDate;
 
         // Discord webhook
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: isIndefinite ? webhookColors.darkRed : typeColorMap[type],
-                    description: `Added **${_.startCase(type)}** to [**${user.username}**](${user.osuProfileUrl})`,
-                    fields,
-                    footer: {
-                        text: `ID: ${user.infringements[user.infringements.length - 1].id}`,
-                    },
-                },
-            ],
-        });
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(isIndefinite ? DiscordUtils.webhookColors.darkRed : typeColorMap[type])
+            .setDescription(`Added **${_.startCase(type)}** to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`)
+            .setFooter(`ID: ${user.infringements[user.infringements.length - 1].id}`);
+
+        if (!isNotPunishment) {
+            if (startDate && endDate) {
+                const humanizedDuration = moment.duration(moment(endDate).diff(moment(startDate))).humanize();
+                embed.addField(
+                    "Duration",
+                    `${moment(startDate).format("MMM D, YYYY")} — ${moment(endDate).format(
+                        "MMM D, YYYY"
+                    )} (${humanizedDuration})`
+                );
+            } else if (startDate) {
+                embed.addField("Duration", "Indefinite");
+            }
+        }
+
+        embed.addField("Reason", utils.shorten(reason, 1024));
+
+        await new WebhookBuilder().addEmbed(embed).send();
     }
 
     /** PATCH update infringement */
@@ -657,7 +647,7 @@ class UsersController {
         // Logging
         await LogService.generate(
             req.session.mongoId!,
-            `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
+            `Updated **${infringement.typeString}** infringement of [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
             "user"
         );
 
@@ -705,19 +695,19 @@ class UsersController {
             });
         }
 
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.blue,
-                    description: `Updated **${infringement.typeString}** infringement of [**${user.username}**](${user.osuProfileUrl})`,
-                    fields,
-                    footer: {
-                        text: `ID: ${infringement.id}`,
-                    },
-                },
-            ],
-        });
+        const updateEmbed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.blue)
+            .setDescription(`Updated **${infringement.typeString}** infringement of [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`)
+            .setFooter(`ID: ${infringement.id}`);
+
+        for (const field of fields) {
+            updateEmbed.addField(field.name, field.value, field.inline);
+        }
+
+        await new WebhookBuilder()
+            .addEmbed(updateEmbed)
+            .send();
         */
     }
 

@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import ApiKeyService from "../services/ApiKeyService";
 import { AvailableApiScopes } from "../../interfaces/ApiKey";
 import LogService from "../services/LogService";
-import DiscordService from "../services/DiscordService";
-import webhookColors from "../constants/webhookColors";
+import { EmbedBuilder } from "../services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../services/discord/WebhookBuilder";
+import DiscordUtils from "../services/discord/DiscordUtils";
 
 class ApiKeysController {
     /** POST create API key (single per user) - returns raw key once */
@@ -27,16 +28,15 @@ class ApiKeysController {
 
         await LogService.generate(res.locals!.user!.id, `Created API key: **${apiKey.name}**`, "api_key");
 
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.white,
-                    description: `Created new API key: **${apiKey.name}**`,
-                },
-            ],
-            webhook: "dev",
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.white)
+                    .setDescription(`Created new API key: **${apiKey.name}**`)
+            )
+            .setLocation("dev")
+            .send();
 
         return res
             .status(201)
@@ -62,22 +62,16 @@ class ApiKeysController {
 
         await LogService.generate(res.locals!.user!.id, `Updated API key scopes: **${apiKey.name}**`, "api_key");
 
-        await DiscordService.sendWebhook({
-            embeds: [
-                {
-                    author: DiscordService.defaultWebhookAuthor(req.session),
-                    color: webhookColors.blue,
-                    description: `Updated API key scopes: **${apiKey.name}**`,
-                    fields: [
-                        {
-                            name: "New Scopes",
-                            value: scopes.map((scope) => `\`${scope}\``).join(", "),
-                        },
-                    ],
-                },
-            ],
-            webhook: "dev",
-        });
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.blue)
+                    .setDescription(`Updated API key scopes: **${apiKey.name}**`)
+                    .addField("New Scopes", scopes.map((scope) => `\`${scope}\``).join(", "))
+            )
+            .setLocation("dev")
+            .send();
 
         return res.json({ message: "API key scopes updated!", apiKey: { ...apiKey.toObject(), hashedKey: undefined } });
     }
@@ -87,16 +81,15 @@ class ApiKeysController {
         const result = await ApiKeyService.revokeKey(res.locals!.user!);
         if (result.apiKey && !result.alreadyRevoked) {
             await LogService.generate(res.locals!.user!.id, `Revoked API key: **${result.apiKey.name}**`, "api_key");
-            await DiscordService.sendWebhook({
-                embeds: [
-                    {
-                        author: DiscordService.defaultWebhookAuthor(req.session),
-                        color: webhookColors.darkRed,
-                        description: `Revoked API key: **${result.apiKey.name}**`,
-                    },
-                ],
-                webhook: "dev",
-            });
+            await new WebhookBuilder()
+                .addEmbed(
+                    new EmbedBuilder()
+                        .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                        .setColor(DiscordUtils.webhookColors.darkRed)
+                        .setDescription(`Revoked API key: **${result.apiKey.name}**`)
+                )
+                .setLocation("dev")
+                .send();
         }
         return res.json({ message: "API key revoked!" });
     }

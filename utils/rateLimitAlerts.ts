@@ -1,5 +1,6 @@
-import DiscordService from "../server/services/DiscordService";
-import webhookColors from "../server/constants/webhookColors";
+import { EmbedBuilder } from "../server/services/discord/EmbedBuilder";
+import { WebhookBuilder } from "../server/services/discord/WebhookBuilder";
+import DiscordUtils from "../server/services/discord/DiscordUtils";
 
 export type RateLimitAlert = {
     type: "session" | "apiKey";
@@ -100,21 +101,21 @@ async function flushRateLimitAlerts() {
         if (topSessionUsers) fields.push({ name: "Top session users", value: topSessionUsers });
         if (topApiKeyUsers) fields.push({ name: "Top API key users", value: topApiKeyUsers });
 
-        const embeds = [
-            {
-                color: webhookColors.orange,
-                title: "⚠️ Rate limit alerts",
-                fields,
-                timestamp: new Date(),
-            },
-        ];
+        const embed = new EmbedBuilder()
+            .setColor(DiscordUtils.webhookColors.orange)
+            .setTitle("⚠️ Rate limit alerts")
+            .setTimestamp();
 
-        await DiscordService.sendUserHighlightWebhook({
-            users: [DISCORD_USER_ID],
-            message: "Rate limit alerts",
-            embeds,
-            webhook: "dev",
-        });
+        for (const field of fields) {
+            embed.addField(field.name, field.value, field.inline);
+        }
+
+        await new WebhookBuilder()
+            .addEmbed(embed)
+            .addUsers([DISCORD_USER_ID])
+            .setMessage("Rate limit alerts")
+            .setLocation("dev")
+            .send();
     } catch {
         // Ignore errors to avoid crashing background flusher
         console.error("Error flushing rate limit alerts");
