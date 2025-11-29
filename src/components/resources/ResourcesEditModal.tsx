@@ -14,8 +14,8 @@ interface IProps {
 }
 
 export default function ResourcesEditModal({ opened, onClose, resource }: IProps) {
-    const updateResourceMutation = useUpdateResource(resource?.id || "");
-    const deleteResourceMutation = useDeleteResource(resource?.id || "");
+    const updateResourceMutation = useUpdateResource(resource?._id.toString() || "");
+    const deleteResourceMutation = useDeleteResource(resource?._id.toString() || "");
     const confirmModal = useConfirmModal();
 
     const form = useForm({

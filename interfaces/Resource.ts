@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import { IUser } from "./User";
 
 export type ResourceCategory = "discord" | "tool" | "guide" | "spreadsheet" | "article";
@@ -24,6 +24,8 @@ export interface IResourceFormData {
 export type ResourceFormData = Partial<IResource> & FormData;
 
 export interface IResource extends Document {
+    _id: Types.ObjectId;
+    id: string;
     title: string;
     description: string;
     author?: IUser;
