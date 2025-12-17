@@ -1,10 +1,12 @@
-import { Modal, Stack, Group, Button, Text, Alert } from "@mantine/core";
+import { Modal, Stack, Group, Button, Text, Alert, Switch } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateTheme } from "../../themes";
 import { HueSlider, Checkbox, Divider, Select } from "@mantine/core";
 import { DEFAULT_HUE, COLORBLIND_MODES, ColorblindMode, DEFAULT_COLORBLIND_MODE } from "../../constants";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
+import { useSetAtom } from "jotai";
+import { seasonalEffectsAtom } from "../../store/atoms";
 
 interface IProps {
     opened: boolean;
@@ -22,6 +24,9 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
     const [initialHue, setInitialHue] = useState(Number(DEFAULT_HUE));
     const [initialIsGreyscale, setInitialIsGreyscale] = useState(false);
     const [initialColorblindMode, setInitialColorblindMode] = useState<ColorblindMode>(DEFAULT_COLORBLIND_MODE);
+
+    const [seasonalEffects, setSeasonalEffects] = useLocalPreference<boolean>("seasonal_effects", true);
+    const setSeasonalEffectsAtom = useSetAtom(seasonalEffectsAtom);
 
     useEffect(() => {
         // Set initial values for comparison only when modal opens
@@ -65,10 +70,30 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
         }
     };
 
+    const handleSeasonalEffectsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSeasonalEffects(event.currentTarget.checked);
+        setSeasonalEffectsAtom(event.currentTarget.checked);
+    };
+
     return (
         <Modal opened={opened} onClose={onClose} title="Customize Theme" size="md">
             <Stack>
                 <Divider />
+
+                <Group justify="space-between">
+                    <div>
+                        <Text size="sm" fw={500}>
+                            Seasonal Effects
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                            Enable seasonal effects on the website (e.g. snow, etc.)
+                        </Text>
+                    </div>
+                    <Switch
+                        checked={seasonalEffects}
+                        onChange={handleSeasonalEffectsChange}
+                    />
+                </Group>
 
                 {/* Colorblind Mode Selection */}
                 <Select

@@ -8,6 +8,7 @@ import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
 import Spotlight from "./components/common/Spotlight";
+import SnowOverlay from "./components/base/SnowOverlay";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                     <ModalsProvider>
                         <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                             <ReactScan />
+                            <SnowOverlay />
                             <Notifications />
                             <Router>
                                 <Spotlight />
