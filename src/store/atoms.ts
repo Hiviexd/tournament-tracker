@@ -14,6 +14,7 @@ export const selectedUserAtom = atom<IUser | null>(null);
 export const tournamentViewModeAtom = atom<"cards" | "table" | "review">(
     getSavedPreference("tournaments_view_mode", "cards")
 );
+export const seasonalEffectsAtom = atom<boolean>(getSavedPreference<boolean>("seasonal_effects", true));
 
 /* Auth */
 export const csrfTokenAtom = atom<string | null>(null);

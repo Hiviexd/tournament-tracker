@@ -146,6 +146,9 @@ importers:
       react-router-dom:
         specifier: ^6.23.0
         version: 6.30.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-snow-overlay:
+        specifier: ^1.0.12
+        version: 1.0.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       recharts:
         specifier: ^3.2.0
         version: 3.2.1(@types/react@19.1.13)(react-dom@19.1.1(react@19.1.1))(react-is@18.3.1)(react@19.1.1)(redux@5.0.1)
@@ -3638,6 +3641,13 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: '>=16.8'
+
+  react-snow-overlay@1.0.12:
+    resolution: {integrity: sha512-uZSXqV9bUblfQaRltYMbYtDQC4fUL/H3+cZi/OprKJd/VC2ojG/fDdeFhFv9HpNE4cjl9tDr/LggxKOe+dfX5Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   react-style-singleton@2.2.3:
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
@@ -8513,6 +8523,11 @@ snapshots:
     dependencies:
       '@remix-run/router': 1.23.0
       react: 19.1.1
+
+  react-snow-overlay@1.0.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
 
   react-style-singleton@2.2.3(@types/react@19.1.13)(react@19.1.1):
     dependencies:
