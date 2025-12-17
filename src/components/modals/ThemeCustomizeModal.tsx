@@ -80,19 +80,17 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
             <Stack>
                 <Divider />
 
+                {/* Seasonal Effects */}
                 <Group justify="space-between">
                     <div>
                         <Text size="sm" fw={500}>
                             Seasonal Effects
                         </Text>
                         <Text size="xs" c="dimmed">
-                            Enable seasonal effects on the website (e.g. snow, etc.)
+                            Enable seasonal effects on the website (December snow, etc.)
                         </Text>
                     </div>
-                    <Switch
-                        checked={seasonalEffects}
-                        onChange={handleSeasonalEffectsChange}
-                    />
+                    <Switch checked={seasonalEffects} onChange={handleSeasonalEffectsChange} />
                 </Group>
 
                 {/* Colorblind Mode Selection */}
