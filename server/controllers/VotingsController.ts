@@ -282,8 +282,12 @@ class VotingsController {
             return res.status(400).json({ error: "Vote type does not match voting type!" });
         }
 
+        // We want comments to always be required now.
+        // Keeping previous logic commented out for preservation
+        const requiresComment = true;
+
+        /*
         const isExtremeVote = (value: number) => Math.abs(value) >= 4;
-        let requiresComment = false;
 
         // Check if comment is required based on vote type and values
         switch (data.type) {
@@ -294,9 +298,10 @@ class VotingsController {
                 requiresComment = data.scores.some((s) => isExtremeVote(s.score));
                 break;
         }
+        */
 
         if (requiresComment && (!comment || comment.trim().length === 0)) {
-            return res.status(400).json({ error: "Comment is required for extreme votes (-5/-4 or 4/5)" });
+            return res.status(400).json({ error: "Vote comment is required." });
         }
 
         // Validate vote data based on type

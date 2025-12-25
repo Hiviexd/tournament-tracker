@@ -24,7 +24,13 @@ import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import VoteStatusBanner from "../common/banners/VoteStatusBanner";
 import { useConfirmModal } from "../../hooks/useModals";
 
+// Keeping previous logic commented out for preservation
+// This was for determining if a comment is required based on the vote value and whether it's "extreme" enough to require a comment.
+// Now we want comments to always be required.
+
+/*
 const isExtremeVote = (value: number) => Math.abs(value) >= 4;
+*/
 
 const hasNeutralVote = (voteData: VoteType): boolean => {
     switch (voteData.type) {
@@ -63,6 +69,11 @@ export default function VotingForm({ voting, user }: IProps) {
         [voting.abstainedUsers, user._id]
     );
 
+    // We want comments to always be required now.
+    // Keeping previous logic commented out for preservation
+    const isCommentRequired = true;
+
+    /*
     const isCommentRequired = useMemo(() => {
         switch (voteData.type) {
             // Very explicit with declaration for my own sanity
@@ -78,6 +89,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 return false;
         }
     }, [voteData]);
+    */
 
     const isSubmitDisabled = useMemo(() => {
         if (isAbstained) {
@@ -223,11 +235,7 @@ export default function VotingForm({ voting, user }: IProps) {
                                 value={comment}
                                 disabled={isAbstained}
                                 onChange={setComment}
-                                placeholder={
-                                    isCommentRequired
-                                        ? "Please explain your extreme vote (-5/-4 or 4/5)"
-                                        : "Add a comment to your vote..."
-                                }
+                                placeholder="Add a comment to your vote..."
                                 minHeight={120}
                                 maxHeight={300}
                                 className={isCommentRequired && !comment.trim() ? "error" : ""}
@@ -235,7 +243,7 @@ export default function VotingForm({ voting, user }: IProps) {
                             />
                             {isCommentRequired && !comment.trim() && (
                                 <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
-                                    Comment is required for extreme votes
+                                    Comment is required
                                 </Box>
                             )}
                         </Box>
