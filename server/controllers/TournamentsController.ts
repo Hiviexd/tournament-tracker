@@ -121,8 +121,8 @@ class TournamentsController {
             query.isActive = true;
         }
 
-        // if search or host is not empty, remove query.isActive; we want to show all tournaments
-        if (search || host) delete query.isActive;
+        // if search, host, or status is not empty, remove query.isActive; we want to show all tournaments
+        if (search || host || status) delete query.isActive;
 
         if (showAllAssignedReviews === "true" && user && user.isCommittee) {
             if (query.$and) {

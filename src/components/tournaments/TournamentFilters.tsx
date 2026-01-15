@@ -77,6 +77,8 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         { value: "archived", label: "Archived" },
     ];
 
+    const disableStateFilter = viewMode === "review" || searchInput !== "" || values.host !== "" || values.status !== "";
+
     return (
         <Card shadow="sm" p="md">
             <Stack gap="md">
@@ -129,7 +131,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("state", value)}
                         data={stateOptions}
                         clearable
-                        disabled={viewMode === "review" || searchInput !== "" || values.host !== ""}
+                        disabled={disableStateFilter}
                     />
                 </SimpleGrid>
 
