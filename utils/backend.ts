@@ -116,12 +116,21 @@ export function getAttachmentsField(attachments: IAttachment[]): IDiscordField |
  * @returns The username if valid, otherwise `null`
  */
 export function validateOsuProfileLink(input: string): string | null {
-    const urlPattern = /^(?:https?:\/\/)?osu\.ppy\.sh\/users\/([\w\-[\]]+)\/?$/i;
+    const urlPattern = /^(?:https?:\/\/)?osu\.ppy\.sh\/users\/([\w\-[\]]+)(?:\/.*)?$/i;
 
     const urlMatch = input.match(urlPattern);
 
     if (urlMatch) {
         const value = urlMatch[1];
+        return value;
+    }
+
+    // Handle cases like "14102976/osu" or "username/taiko"
+    const simplePattern = /^([\w\-[\]]+)\/.*$/;
+    const simpleMatch = input.match(simplePattern);
+
+    if (simpleMatch) {
+        const value = simpleMatch[1];
         return value;
     }
 
