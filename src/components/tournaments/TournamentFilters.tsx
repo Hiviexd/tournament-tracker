@@ -73,11 +73,9 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     ];
 
     const stateOptions = [
-        { value: "all", label: "All Tournaments" },
+        { value: "active", label: "Active" },
         { value: "archived", label: "Archived" },
     ];
-
-    const disableStateFilter = viewMode === "review" || searchInput !== "" || values.host !== "" || values.status !== "";
 
     return (
         <Card shadow="sm" p="md">
@@ -131,7 +129,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         onChange={(value) => handleChange("state", value)}
                         data={stateOptions}
                         clearable
-                        disabled={disableStateFilter}
+                        disabled={viewMode === "review"}
                     />
                 </SimpleGrid>
 

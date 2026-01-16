@@ -106,23 +106,11 @@ class TournamentsController {
         if (type) query.type = type as TournamentType;
         if (status) query.status = status as TournamentStatus;
 
-        if (state === "archived" || state === "concluded") {
-            // Show only archived tournaments
-            query.isActive = false;
-        } else if (state === "all" || state === "active") {
-            // "all" = show both active and archived, "active" = backward compatibility
-            if (state === "active") {
-                // Handle old "active" parameter for backward compatibility
-                query.isActive = true;
-            }
-            // For "all", don't add isActive filter to show both
-        } else {
-            // Default behavior: show only active tournaments
+        if (state === "active") {
             query.isActive = true;
+        } else if (state === "archived" || state === "concluded") {
+            query.isActive = false;
         }
-
-        // if search, host, or status is not empty, remove query.isActive; we want to show all tournaments
-        if (search || host || status) delete query.isActive;
 
         if (showAllAssignedReviews === "true" && user && user.isCommittee) {
             if (query.$and) {
