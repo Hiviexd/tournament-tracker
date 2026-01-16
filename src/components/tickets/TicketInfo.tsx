@@ -194,66 +194,74 @@ export default function TicketInfo({ ticket }: IProps) {
                 {user?.isCommittee && (
                     <Stack gap="xs">
                         <Divider my="xs" />
-                        <Group gap="xs">
-                            <Text size="sm" fw={700}>
-                                Discord Thread ID:
-                            </Text>
-                            {isUpdatingThreadId ? (
-                                <FocusTrap active={isUpdatingThreadId}>
-                                    <Input
-                                        placeholder="Thread ID..."
-                                        size="xs"
-                                        value={threadId}
-                                        onChange={(e) => setThreadId(e.target.value)}
-                                        onFocus={(event) => event.target.select()}
-                                    />
-                                </FocusTrap>
-                            ) : (
-                                <Text size="sm">
-                                    {ticket.threadId ? (
-                                        <Anchor href={threadLink} target="_blank">
-                                            {ticket.threadId}
-                                        </Anchor>
-                                    ) : (
-                                        <Text c="dimmed">#t-committee</Text>
-                                    )}
+                        <Stack gap="xs">
+                            <Group gap="xs">
+                                <Text size="sm" fw={700}>
+                                    Discord Thread ID:
                                 </Text>
-                            )}
-                            {isUpdatingThreadId ? (
-                                <Group gap="xs">
-                                    <ActionIcon
-                                        size="sm"
-                                        variant="subtle"
-                                        color="success"
-                                        onClick={handleUpdateThreadId}
-                                        loading={updateThreadIdMutation.isPending}>
-                                        <FontAwesomeIcon icon="floppy-disk" size="sm" />
-                                    </ActionIcon>
-                                    <ActionIcon
-                                        size="sm"
-                                        variant="subtle"
-                                        color="danger"
-                                        onClick={() => setIsUpdatingThreadId(false)}>
-                                        <FontAwesomeIcon icon="xmark" size="sm" />
-                                    </ActionIcon>
-                                </Group>
-                            ) : (
-                                <Group gap="xs">
-                                    <Tooltip label="Update Thread ID">
+                                {isUpdatingThreadId ? (
+                                    <FocusTrap active={isUpdatingThreadId}>
+                                        <Input
+                                            placeholder="Thread ID..."
+                                            size="xs"
+                                            value={threadId}
+                                            onChange={(e) => setThreadId(e.target.value)}
+                                            onFocus={(event) => event.target.select()}
+                                        />
+                                    </FocusTrap>
+                                ) : (
+                                    <Text size="sm">
+                                        {ticket.threadId ? (
+                                            <Anchor href={threadLink} target="_blank">
+                                                {ticket.threadId}
+                                            </Anchor>
+                                        ) : (
+                                            <Text c="dimmed">#t-committee</Text>
+                                        )}
+                                    </Text>
+                                )}
+                                {isUpdatingThreadId ? (
+                                    <Group gap="xs">
                                         <ActionIcon
                                             size="sm"
-                                            color="info"
                                             variant="subtle"
-                                            onClick={() => setIsUpdatingThreadId(true)}>
-                                            <FontAwesomeIcon icon="pen-to-square" size="sm" />
+                                            color="success"
+                                            onClick={handleUpdateThreadId}
+                                            loading={updateThreadIdMutation.isPending}>
+                                            <FontAwesomeIcon icon="floppy-disk" size="sm" />
                                         </ActionIcon>
-                                    </Tooltip>
-                                    {ticket.threadId && (
-                                        <CopyActionIcon value={threadLink} tooltip="Copy Thread Link" size="sm" />
-                                    )}
-                                </Group>
+                                        <ActionIcon
+                                            size="sm"
+                                            variant="subtle"
+                                            color="danger"
+                                            onClick={() => setIsUpdatingThreadId(false)}>
+                                            <FontAwesomeIcon icon="xmark" size="sm" />
+                                        </ActionIcon>
+                                    </Group>
+                                ) : (
+                                    <Group gap="xs">
+                                        <Tooltip label="Update Thread ID">
+                                            <ActionIcon
+                                                size="sm"
+                                                color="info"
+                                                variant="subtle"
+                                                onClick={() => setIsUpdatingThreadId(true)}>
+                                                <FontAwesomeIcon icon="pen-to-square" size="sm" />
+                                            </ActionIcon>
+                                        </Tooltip>
+                                        {ticket.threadId && (
+                                            <CopyActionIcon value={threadLink} tooltip="Copy Thread Link" size="sm" />
+                                        )}
+                                    </Group>
+                                )}
+                            </Group>
+                            {!ticket.threadId && (
+                                <AlertText type="warning">
+                                    Discord thread is not set! Make sure to set it to the thread where the {ticket.type}{" "}
+                                    is being discussed.
+                                </AlertText>
                             )}
-                        </Group>
+                        </Stack>
                         <Group gap="xs">
                             <Button
                                 onClick={handleToggleStatus}
