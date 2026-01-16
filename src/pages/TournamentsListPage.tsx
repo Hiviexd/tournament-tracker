@@ -279,6 +279,16 @@ export default function TournamentListPage() {
                 <EmptyState hasError={false} />
             ) : (
                 <Stack gap="md">
+                    {data.pages > 1 && (
+                        <Group justify="center">
+                            <Pagination
+                                value={queryState.page}
+                                onChange={handlePageChange}
+                                total={data.pages}
+                                color="primary"
+                            />
+                        </Group>
+                    )}
                     {viewMode === "review" ? (
                         <TournamentReviewBoard tournaments={data.tournaments} />
                     ) : viewMode === "table" ? (
@@ -291,13 +301,12 @@ export default function TournamentListPage() {
                         </SimpleGrid>
                     )}
                     {data.pages > 1 && (
-                        <Group justify="center" mt="xs">
+                        <Group justify="center">
                             <Pagination
                                 value={queryState.page}
                                 onChange={handlePageChange}
                                 total={data.pages}
                                 color="primary"
-                                mt="sm"
                             />
                         </Group>
                     )}
