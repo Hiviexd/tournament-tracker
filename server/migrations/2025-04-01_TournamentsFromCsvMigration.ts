@@ -1,15 +1,7 @@
-// base imports
+import BaseMigration from "./BaseMigration";
 import fs from "fs";
 import path from "path";
 import csv from "csv-parse";
-
-// voting migration imports
-import Voting from "../models/votingModel";
-import Vote from "../models/voteModel";
-import User from "../models/userModel";
-import utils from "../../utils";
-
-// tournament migration imports
 import Attachment from "../models/attachmentModel";
 import Tournament from "../models/tournamentModel";
 import Review from "../models/reviewModel";
@@ -18,103 +10,48 @@ import mongoose from "mongoose";
 import UserService from "../services/UserService";
 import OsuBotService from "../services/OsuBotService";
 import { IReviewChecklistItem } from "../../interfaces/Review";
+import checklist from "../../checklist.json";
 
 const FALLBACK_HOST_OSU_ID = "37548950";
 const FALLBACK_FORUM_URL = "https://osu.ppy.sh/community/forums/topics/1715676";
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
-import checklist from "../../checklist.json";
-
 const TC_REVIEW_CHECKLIST = checklist.tc;
 const CC_REVIEW_CHECKLIST = checklist.cc;
 
-class MigrationService {
-    public async migratePif2Votings() {
-        if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
-        console.log(utils.consoleStyles("⚠  Migrating pif2 votings", ["orange", "bold", "underline"]));
+interface ICsvTournament {
+    "DATE-RECEIVED": string;
+    "END-DATE": string;
+    "F-LINK": string;
+    "T-NAME": string;
+    TYPE: "tournament" | "contest";
+    HOST: string;
+    osu: string;
+    mania: string;
+    taiko: string;
+    catch: string;
+    BADGE: string;
+    BADGE2?: string;
+    BADGE3?: string;
+    STATUS: string;
+    NOTIF?: string;
+    THREAD?: string;
+    P1?: string;
+    P2?: string;
+    "P1 VERDICT"?: string;
+    "P2 VERDICT"?: string;
+}
 
-        const votings = [] as IPif2Voting[];
+export default class TournamentsFromCsvMigration extends BaseMigration {
+    name = "TournamentsFromCsv";
+    description = "Migrating tournaments from CSV";
 
-        for (const voting of votings) {
-            const author = await User.findByUsernameOrOsuId(voting.user.osu_id);
-            const requiredVotes = voting.votes.length;
-            const isActive = false;
-            const category = "discussion";
-            const assignedGroups = ["tc"];
-            const title = voting.title;
-            const description = voting.description;
-            const duration = 3;
-            const type = "classic";
-            const options = voting.voting_options.map((option) => option.option);
-
-            const deadline = new Date(voting.deadline);
-            const createdAt = new Date(deadline.getTime() - duration * 24 * 60 * 60 * 1000);
-
-            const newVoting = await new Voting({
-                author,
-                category,
-                assignedGroups,
-                title,
-                description,
-                duration,
-                type,
-                options,
-                requiredVotes,
-                createdAt,
-                updatedAt: deadline,
-                concludedAt: deadline,
-                isActive,
-            }).save();
-
-            // Create a map of option IDs to their indices
-            const optionIdToIndex = new Map(voting.voting_options.map((opt, index) => [opt.id, index]));
-
-            // insert votes
-            for (const vote of voting.votes) {
-                const user = await User.findByUsernameOrOsuId(vote.user.osu_id);
-
-                // Get the index of the selected option
-                const optionIndex = optionIdToIndex.get(vote.voting_option_id);
-
-                if (optionIndex === undefined) {
-                    console.error(
-                        `Could not find option index for vote option ID ${vote.voting_option_id} in voting ${voting.id}`
-                    );
-                    continue;
-                }
-
-                const newVote = await new Vote({
-                    author: user,
-                    comment: vote.comment,
-                    data: {
-                        type,
-                        option: optionIndex,
-                    },
-                }).save();
-
-                // Add vote to voting
-                await Voting.findByIdAndUpdate(newVoting._id, {
-                    $push: { votes: newVote._id },
-                });
-
-                console.log(`Migrated vote by ${user?.username} for voting ${voting.title}`);
-            }
-
-            console.log(`Migrated voting ${voting.title}`);
-        }
-
-        console.log("Migration completed");
-    }
-
-    public async migrateTournamentsFromCsv() {
-        if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
-        console.log(utils.consoleStyles("⚠  Migrating tournaments from CSV", ["orange", "bold", "underline"]));
-
+    protected async execute(): Promise<void> {
+        // This should probably change, but 99% chance we won't ever run this again so /shrug
         const csvFilePath = path.join(__dirname, "../constants/tournaments.csv");
 
         if (!fs.existsSync(csvFilePath)) {
-            console.error(`CSV file not found at ${csvFilePath}`);
-            return;
+            throw new Error(`CSV file not found at ${csvFilePath}`);
         }
 
         const fileContent = fs.readFileSync(csvFilePath, "utf-8");
@@ -122,8 +59,7 @@ class MigrationService {
         // Get access token for user creation
         const accessToken = await OsuBotService.getPublicBotToken();
         if (typeof accessToken !== "string") {
-            console.error(`Failed to get public bot token`);
-            return;
+            throw new Error("Failed to get public bot token");
         }
 
         // Parse CSV file
@@ -141,7 +77,7 @@ class MigrationService {
                 const createdAt = new Date(row["DATE-RECEIVED"]);
 
                 if (!row["DATE-RECEIVED"] || isNaN(createdAt.getTime())) {
-                    console.error(`Invalid or missing DATE-RECEIVED for tournament ${row["T-NAME"]}`);
+                    this.log(`Invalid or missing DATE-RECEIVED for tournament ${row["T-NAME"]}`);
                     continue;
                 }
 
@@ -152,13 +88,13 @@ class MigrationService {
 
                 if (!row["END-DATE"]) {
                     // If END-DATE is missing, use DATE-RECEIVED for both start and end dates
-                    console.log(`Missing END-DATE for tournament ${row["T-NAME"]}, using DATE-RECEIVED`);
+                    this.log(`Missing END-DATE for tournament ${row["T-NAME"]}, using DATE-RECEIVED`);
                     endDate = new Date(createdAt);
                     startDate = new Date(createdAt);
                 } else {
                     endDate = new Date(row["END-DATE"]);
                     if (isNaN(endDate.getTime())) {
-                        console.error(`Invalid END-DATE format for tournament ${row["T-NAME"]}`);
+                        this.log(`Invalid END-DATE format for tournament ${row["T-NAME"]}`);
                         continue;
                     }
                     // Ensure endDate has time component
@@ -172,13 +108,13 @@ class MigrationService {
                 // Find or create host first as we need it for attachments and messages
                 let host = await UserService.findOrCreateUser(accessToken, row.HOST);
                 if (!host) {
-                    console.log(
+                    this.log(
                         `Failed to find/create host ${row.HOST} for tournament ${row["T-NAME"]}, using fallback host`
                     );
                     host = await UserService.findOrCreateUser(accessToken, FALLBACK_HOST_OSU_ID);
-                    console.log(`Fallback host: ${host?.username}`);
+                    this.log(`Fallback host: ${host?.username}`);
                     if (!host) {
-                        console.error(`Failed to find/create fallback host for tournament ${row["T-NAME"]}`);
+                        this.log(`Failed to find/create fallback host for tournament ${row["T-NAME"]}`);
                         continue;
                     }
                 }
@@ -277,7 +213,7 @@ class MigrationService {
                         createdAt,
                     }).save();
                     reviews.push(review1._id as any);
-                    console.log(`Migrated review 1 for ${row["T-NAME"]}`);
+                    this.log(`Migrated review 1 for ${row["T-NAME"]}`);
                 }
                 if (row["P2 VERDICT"] && assignedReviewers[1]) {
                     const review2 = await new Review({
@@ -287,7 +223,7 @@ class MigrationService {
                         createdAt,
                     }).save();
                     reviews.push(review2._id as any);
-                    console.log(`Migrated review 2 for ${row["T-NAME"]}`);
+                    this.log(`Migrated review 2 for ${row["T-NAME"]}`);
                 }
 
                 // Add note if provided
@@ -312,79 +248,12 @@ class MigrationService {
                     ...(note && { $push: { notes: note._id } }),
                 });
 
-                console.log(`Migrated tournament ${row["T-NAME"]}`);
+                this.log(`Migrated tournament ${row["T-NAME"]}`);
             } catch (error) {
-                console.error(`Failed to migrate tournament ${row["T-NAME"]}:`, error);
+                this.log(`Failed to migrate tournament ${row["T-NAME"]}: ${error}`);
             }
         }
-
-        console.log("Tournament migration completed");
     }
-
-    public async migrateSingleHostToMultipleHosts() {
-        if (!process.env.MIGRATION || process.env.MIGRATION !== "true") return;
-        console.log(
-            utils.consoleStyles("⚠  Migrating tournaments from single host to multiple hosts", [
-                "orange",
-                "bold",
-                "underline",
-            ])
-        );
-
-        try {
-            // Find all tournaments that still have the old 'host' field instead of 'hosts'
-            const tournamentsToMigrate = await Tournament.find({
-                host: { $exists: true },
-                hosts: { $exists: false },
-            });
-
-            console.log(`Found ${tournamentsToMigrate.length} tournaments to migrate`);
-
-            let migratedCount = 0;
-            let errorCount = 0;
-
-            for (const tournament of tournamentsToMigrate) {
-                try {
-                    // Convert single host to hosts array
-                    // @ts-expect-error - tournament.host was a thing pre-migration
-                    const hostId = tournament.host;
-                    if (hostId) {
-                        // Set the hosts array with the single host
-                        await Tournament.updateOne(
-                            { _id: tournament._id },
-                            {
-                                $set: { hosts: [hostId] },
-                                $unset: { host: 1 },
-                            }
-                        );
-                        migratedCount++;
-                        console.log(`✓ Migrated tournament: ${tournament.name}`);
-                    } else {
-                        console.warn(`⚠ Tournament ${tournament.name} has no host, skipping`);
-                    }
-                } catch (error) {
-                    console.error(`✗ Failed to migrate tournament ${tournament.name}:`, error);
-                    errorCount++;
-                }
-            }
-
-            console.log(`\n✓ Migration completed successfully!`);
-            console.log(`  - Migrated: ${migratedCount} tournaments`);
-            console.log(`  - Errors: ${errorCount} tournaments`);
-
-            // Verification step
-            const verificationCount = await Tournament.countDocuments({ hosts: { $exists: true, $size: { $gte: 1 } } });
-            const oldFormatCount = await Tournament.countDocuments({ host: { $exists: true } });
-
-            console.log(`\n📊 Verification:`);
-            console.log(`  - Tournaments with hosts array: ${verificationCount}`);
-            console.log(`  - Tournaments with old host field: ${oldFormatCount}`);
-        } catch (error) {
-            console.error("Migration failed:", error);
-        }
-    }
-
-    // ? utils
 
     private constructModes(row: ICsvTournament): string[] {
         const modes: string[] = [];
@@ -439,69 +308,3 @@ class MigrationService {
         return true;
     }
 }
-
-interface IPif2Vote {
-    comment?: string | null;
-    user_id: number;
-    discussion_id: number;
-    voting_option_id: number;
-    user: {
-        id: number;
-        username: string;
-        osu_id: number;
-    };
-    voting_option: {
-        id: number;
-        discussion_id: number;
-        option: string;
-    };
-}
-
-interface IPif2VotingOption {
-    id: number;
-    discussion_id: number;
-    option: string;
-}
-
-interface IPif2User {
-    id: number;
-    username: string;
-    osu_id: number;
-}
-
-interface IPif2Voting {
-    id: number;
-    user_id: number;
-    description: string;
-    title: string;
-    deadline: string;
-    participant_threshold: number;
-    user: IPif2User;
-    voting_options: IPif2VotingOption[];
-    votes: IPif2Vote[];
-}
-
-interface ICsvTournament {
-    "DATE-RECEIVED": string;
-    "END-DATE": string;
-    "F-LINK": string;
-    "T-NAME": string;
-    TYPE: "tournament" | "contest";
-    HOST: string;
-    osu: string;
-    mania: string;
-    taiko: string;
-    catch: string;
-    BADGE: string;
-    BADGE2?: string;
-    BADGE3?: string;
-    STATUS: string;
-    NOTIF?: string;
-    THREAD?: string;
-    P1?: string;
-    P2?: string;
-    "P1 VERDICT"?: string;
-    "P2 VERDICT"?: string;
-}
-
-export default new MigrationService();

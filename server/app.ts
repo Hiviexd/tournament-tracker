@@ -214,9 +214,6 @@ const mode =
 
 app.set("port", port);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import MigrationService from "./services/MigrationService";
-
 app.listen(port, async () => {
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
@@ -241,11 +238,6 @@ app.listen(port, async () => {
     // Load and start jobs
     await JobLoader.loadJobs();
     JobLoader.startAll();
-
-    // Run migrations by adding/uncommenting the needed migration and running `yarn dev-migration`
-    // MigrationService.migratePif2Votings();
-    // MigrationService.migrateTournamentsFromCsv();
-    // MigrationService.migrateSingleHostToMultipleHosts();
 });
 
 export default app;

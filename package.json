@@ -5,7 +5,6 @@
     "scripts": {
         "dev": "run-p -rl dev-server dev-client",
         "dev:automation": "cross-env AUTOMATION_DEBUG=true run-p -rl dev-server dev-client",
-        "dev-migration": "cross-env MIGRATION=true run-p -rl dev-server dev-client",
         "dev-client": "cross-env NODE_ENV=development vite --mode development",
         "dev-server": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --no-notify --project server/tsconfig.json server/app.ts",
         "preview-dev": "run-p -rl preview-dev-client preview-dev-server",
@@ -24,7 +23,8 @@
         "test": "cd server && vitest",
         "test:run": "cd server && vitest run",
         "test:ui": "cd server && vitest --ui",
-        "test:coverage": "cd server && vitest run --coverage"
+        "test:coverage": "cd server && vitest run --coverage",
+        "migrate": "ts-node-dev --project server/tsconfig.json server/migrate.ts"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.750.0",
