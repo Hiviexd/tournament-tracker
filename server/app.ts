@@ -8,7 +8,7 @@ import "express-async-errors";
 import { logger } from "./middlewares/logger";
 import path from "path";
 import utils from "../utils";
-import AutomationService from "./services/AutomationService";
+import JobLoader from "./jobs/JobLoader";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
@@ -217,7 +217,7 @@ app.set("port", port);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import MigrationService from "./services/MigrationService";
 
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
     console.log(
@@ -238,8 +238,9 @@ app.listen(port, () => {
         );
     console.log("└──────────────────────────────────────────────────────────┘");
 
-    // Start automation service
-    AutomationService.start();
+    // Load and start jobs
+    await JobLoader.loadJobs();
+    JobLoader.startAll();
 
     // Run migrations by adding/uncommenting the needed migration and running `yarn dev-migration`
     // MigrationService.migratePif2Votings();

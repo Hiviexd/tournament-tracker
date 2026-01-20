@@ -38,7 +38,7 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
   - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
 - Set up `checklist.json` from `checklist.example.json`
 - Run `pnpm dev`, the project will be served in `http://localhost:8088`
-- If you need automation jobs to run when the project starts, use `pnpm dev-automation` instead
+- If you need automation jobs to run when the project starts, use `pnpm dev:automation` instead
 
 ### Commit message flags
 

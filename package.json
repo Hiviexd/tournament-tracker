@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "scripts": {
         "dev": "run-p -rl dev-server dev-client",
-        "dev-automation": "cross-env AUTOMATION_DEBUG=true run-p -rl dev-server dev-client",
+        "dev:automation": "cross-env AUTOMATION_DEBUG=true run-p -rl dev-server dev-client",
         "dev-migration": "cross-env MIGRATION=true run-p -rl dev-server dev-client",
         "dev-client": "cross-env NODE_ENV=development vite --mode development",
         "dev-server": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --no-notify --project server/tsconfig.json server/app.ts",
