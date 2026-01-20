@@ -28,7 +28,7 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
 - Run `pnpm install`
 - Set up `config.json` from `config.example.json` with the following fields:
   - `connection`: MongoDB connection URL
-  - `session`: session string, grab a random string from [here](https://www.random.org/strings/?num=10&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new)
+  - `session`: session string, grab a random string from [this website](https://www.random.org/strings/?num=10&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new)
   - `baseUrl`: base URL of the website
   - `automation`: boolean for whether to run automation jobs or not
   - `osuApp`: credentials for the osu! API v2 client
