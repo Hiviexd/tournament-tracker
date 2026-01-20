@@ -30,15 +30,7 @@ if (!migrationName) {
         })
         .catch(() => process.exit(1));
 } else {
-    // Connect to database
-    const connectionString =
-        process.env.NODE_ENV === "production"
-            ? config.connectionProd
-            : process.env.NODE_ENV === "preview"
-            ? config.connectionPreview
-            : config.connection;
-
-    mongoose.connect(connectionString);
+    mongoose.connect(config.connection);
     const database = mongoose.connection;
 
     database.on(
