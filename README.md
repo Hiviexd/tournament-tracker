@@ -38,7 +38,18 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
   - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
 - Set up `checklist.json` from `checklist.example.json`
 - Run `pnpm dev`, the project will be served in `http://localhost:8088`
-- If you need automation jobs to run when the project starts, use `pnpm dev:automation` instead
+
+### Automation jobs
+
+If you need all automation jobs to run when the project starts, use `pnpm dev:automation`.
+
+For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/server/jobs/README.md) page.
+
+### Migrations
+
+For running a specific migration, run `pnpm migrate <migration-name>`. You can list all available migrations by running `pnpm migrate`.
+
+For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/server/migrations/README.md) page.
 
 ### Commit message flags
 
