@@ -150,7 +150,7 @@ jobs:
 
                       # Build backend
                       echo "Building backend..."
-                      if ! pnpm build-server-preview; then
+                      if ! pnpm build-server; then
                           echo "❌ Backend build failed!"
                           exit 1
                       fi

@@ -1,11 +1,37 @@
-import { readdir } from "fs/promises";
-import { join } from "path";
+import { readdir, access } from "fs/promises";
+import { join, dirname, basename } from "path";
+import { fileURLToPath, pathToFileURL } from "url";
 import config from "../../config.json";
 import BaseJob from "./BaseJob";
 import utils from "../../utils";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 class JobLoader {
     private jobs: BaseJob[] = [];
+
+    /**
+     * Determines the correct jobs directory based on the environment:
+     * - Development (tsx): __dirname is server/jobs/ (already in jobs dir)
+     * - Production (bundled): __dirname is dist/server/ (need to append jobs/)
+     */
+    private async getJobsDir(): Promise<string> {
+        // Check if we're already in a jobs directory (development with tsx)
+        if (basename(__dirname) === "jobs") {
+            return __dirname;
+        }
+
+        // Otherwise, look in jobs/ subdirectory (production bundled build)
+        const jobsSubdir = join(__dirname, "jobs");
+        try {
+            await access(jobsSubdir);
+            return jobsSubdir;
+        } catch {
+            // Fallback to current directory
+            return __dirname;
+        }
+    }
 
     public async loadJobs(): Promise<void> {
         if (!config.automation) {
@@ -13,7 +39,7 @@ class JobLoader {
             return;
         }
 
-        const jobsDir = join(__dirname);
+        const jobsDir = await this.getJobsDir();
         const files = await readdir(jobsDir);
 
         // Filter for job files (ends with Job.ts or Job.js, excluding BaseJob and JobLoader)
@@ -23,7 +49,7 @@ class JobLoader {
                 file !== "BaseJob.ts" &&
                 file !== "BaseJob.js" &&
                 file !== "JobLoader.ts" &&
-                file !== "JobLoader.js"
+                file !== "JobLoader.js",
         );
 
         for (const file of jobFiles) {
@@ -35,35 +61,30 @@ class JobLoader {
                 let module;
                 let modulePath;
 
-                // Try .ts first
+                // Try .js first for production, then .ts for development
+                // (use pathToFileURL for Windows compatibility)
                 try {
-                    modulePath = `${basePath}.ts`;
-                    module = await import(modulePath);
-                } catch (tsError) {
-                    // Fall back to .js
+                    modulePath = `${basePath}.js`;
+                    module = await import(pathToFileURL(modulePath).href);
+                } catch (jsError) {
+                    // Fall back to .ts for development
                     try {
-                        modulePath = `${basePath}.js`;
-                        module = await import(modulePath);
-                    } catch (jsError) {
-                        // Last resort: try without extension (some setups handle this)
-                        try {
-                            modulePath = basePath;
-                            module = await import(modulePath);
-                        } catch (noExtError) {
-                            throw tsError;
-                        }
+                        modulePath = `${basePath}.ts`;
+                        module = await import(pathToFileURL(modulePath).href);
+                    } catch (tsError) {
+                        throw jsError;
                     }
                 }
 
                 // Get the default export or first export that extends BaseJob
-                const JobClass = module.default || Object.values(module).find((exp: any) => exp.prototype instanceof BaseJob);
+                const JobClass =
+                    module.default || Object.values(module).find((exp: any) => exp.prototype instanceof BaseJob);
 
                 if (!JobClass) {
                     console.warn(
-                        utils.consoleStyles(
-                            `⚠ Skipping ${file}: No default export or BaseJob extension found`,
-                            ["yellow"]
-                        )
+                        utils.consoleStyles(`⚠ Skipping ${file}: No default export or BaseJob extension found`, [
+                            "yellow",
+                        ]),
                     );
                     continue;
                 }
@@ -72,14 +93,14 @@ class JobLoader {
                 const job = new JobClass();
                 if (!(job instanceof BaseJob)) {
                     console.warn(
-                        utils.consoleStyles(`⚠ Skipping ${file}: Export is not a BaseJob instance`, ["yellow"])
+                        utils.consoleStyles(`⚠ Skipping ${file}: Export is not a BaseJob instance`, ["yellow"]),
                     );
                     continue;
                 }
 
                 this.jobs.push(job);
                 console.log(
-                    utils.consoleStyles(`✓ Loaded job "${job.name}" with schedule "${job.schedule}"`, ["green"])
+                    utils.consoleStyles(`✓ Loaded job "${job.name}" with schedule "${job.schedule}"`, ["green"]),
                 );
             } catch (error) {
                 console.error(utils.consoleStyles(`✗ Failed to load job from ${file}:`, ["red", "bold"]));
@@ -87,9 +108,7 @@ class JobLoader {
             }
         }
 
-        console.log(
-            utils.consoleStyles(`✓ Loaded ${this.jobs.length} job(s)`, ["green", "bold", "underline"])
-        );
+        console.log(utils.consoleStyles(`✓ Loaded ${this.jobs.length} job(s)`, ["green", "bold", "underline"]));
     }
 
     public startAll(): void {
