@@ -110,24 +110,6 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
                             )}
                         </Stack>
 
-                        {inactiveReviewerTournaments.length > 0 && (
-                            <Stack gap="sm">
-                                <Group align="center" gap="xs">
-                                    <Title order={4} c="red">
-                                        Has Inactive Reviewer
-                                    </Title>
-                                    <Badge color="red" variant="light">
-                                        {inactiveReviewerTournaments.length}
-                                    </Badge>
-                                </Group>
-                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                                    {inactiveReviewerTournaments.map((tournament) => (
-                                        <TournamentCard key={tournament.id} tournament={tournament} />
-                                    ))}
-                                </SimpleGrid>
-                            </Stack>
-                        )}
-
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
                                 <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
