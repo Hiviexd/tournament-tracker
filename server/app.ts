@@ -148,7 +148,7 @@ app.use("/api/*", (req, res) => {
 const DIST_ENVS = ["production", "preview"];
 
 if (DIST_ENVS.includes(process.env.NODE_ENV || "")) {
-    const clientDist = path.join(__dirname, "../../client");
+    const clientDist = path.join(__dirname, "../client");
 
     // serve static frontend files
     app.use(express.static(clientDist));
