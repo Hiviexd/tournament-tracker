@@ -9,10 +9,11 @@ import { useDisclosure } from "@mantine/hooks";
 
 interface IProps {
     tournaments: ITournament[];
+    inactiveReviewerTournaments: ITournament[];
     user: IUser | null;
 }
 
-export default function DashboardTournamentsSection({ tournaments, user }: IProps) {
+export default function DashboardTournamentsSection({ tournaments, inactiveReviewerTournaments, user }: IProps) {
     const typeString = user?.isTournamentCommittee ? "tournaments" : "contests";
 
     const checkTournamentNeedsReview = (tournament: ITournament, user: IUser | null): boolean => {
@@ -34,7 +35,9 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
     const tournamentsNeedingReview = tournaments.filter((tournament) => checkTournamentNeedsReview(tournament, user));
     const otherTournaments = tournaments.filter((tournament) => !checkTournamentNeedsReview(tournament, user));
 
-    const [opened, { toggle }] = useDisclosure(tournamentsNeedingReview.length > 0);
+    const [opened, { toggle }] = useDisclosure(
+        tournamentsNeedingReview.length > 0 || inactiveReviewerTournaments.length > 0,
+    );
 
     return (
         <Stack gap="md">
@@ -49,6 +52,13 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                         </Badge>
                     </Tooltip>
                 )}
+                {inactiveReviewerTournaments.length > 0 && (
+                    <Tooltip label="Has Inactive Reviewer">
+                        <Badge color="red" variant="light">
+                            {inactiveReviewerTournaments.length}
+                        </Badge>
+                    </Tooltip>
+                )}
                 {otherTournaments.length > 0 && (
                     <Tooltip label={`Other Assigned ${_.capitalize(typeString)}`}>
                         <Badge color="gray" variant="light">
@@ -56,20 +66,24 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                         </Badge>
                     </Tooltip>
                 )}
-                {tournamentsNeedingReview.length === 0 && otherTournaments.length === 0 && (
-                    <Tooltip label={`No ${_.capitalize(typeString)} Assigned`}>
-                        <Badge color="gray" variant="light">
-                            0
-                        </Badge>
-                    </Tooltip>
-                )}
+                {tournamentsNeedingReview.length === 0 &&
+                    inactiveReviewerTournaments.length === 0 &&
+                    otherTournaments.length === 0 && (
+                        <Tooltip label={`No ${_.capitalize(typeString)} Assigned`}>
+                            <Badge color="gray" variant="light">
+                                0
+                            </Badge>
+                        </Tooltip>
+                    )}
                 <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
                     <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
                 </Button>
             </Group>
 
             <Collapse in={opened}>
-                {tournamentsNeedingReview.length > 0 || otherTournaments.length > 0 ? (
+                {tournamentsNeedingReview.length > 0 ||
+                inactiveReviewerTournaments.length > 0 ||
+                otherTournaments.length > 0 ? (
                     <Stack gap="lg">
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
@@ -96,6 +110,24 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                             )}
                         </Stack>
 
+                        {inactiveReviewerTournaments.length > 0 && (
+                            <Stack gap="sm">
+                                <Group align="center" gap="xs">
+                                    <Title order={4} c="red">
+                                        Has Inactive Reviewer
+                                    </Title>
+                                    <Badge color="red" variant="light">
+                                        {inactiveReviewerTournaments.length}
+                                    </Badge>
+                                </Group>
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                    {inactiveReviewerTournaments.map((tournament) => (
+                                        <TournamentCard key={tournament.id} tournament={tournament} />
+                                    ))}
+                                </SimpleGrid>
+                            </Stack>
+                        )}
+
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
                                 <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
@@ -118,6 +150,24 @@ export default function DashboardTournamentsSection({ tournaments, user }: IProp
                                 </Group>
                             )}
                         </Stack>
+
+                        {inactiveReviewerTournaments.length > 0 && (
+                            <Stack gap="sm">
+                                <Group align="center" gap="xs">
+                                    <Title order={4} c="red">
+                                        Has Inactive Reviewer
+                                    </Title>
+                                    <Badge color="red" variant="light">
+                                        {inactiveReviewerTournaments.length}
+                                    </Badge>
+                                </Group>
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                    {inactiveReviewerTournaments.map((tournament) => (
+                                        <TournamentCard key={tournament.id} tournament={tournament} />
+                                    ))}
+                                </SimpleGrid>
+                            </Stack>
+                        )}
                     </Stack>
                 ) : (
                     <EmptyState

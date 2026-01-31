@@ -21,10 +21,11 @@ export default function DashboardPage() {
         return <EmptyState icon="home" title="Error loading dashboard" description="Try refreshing the page" />;
     }
 
-    const { tournaments, votings, tickets, reports, users } = data;
+    const { tournaments, inactiveReviewerTournaments, votings, tickets, reports, users } = data;
 
     const isEmpty =
         tournaments.length === 0 &&
+        inactiveReviewerTournaments.length === 0 &&
         votings.length === 0 &&
         tickets.length === 0 &&
         reports.length === 0 &&
@@ -51,7 +52,11 @@ export default function DashboardPage() {
                 <>
                     <DashboardInfringementsSection users={users} />
                     <Divider />
-                    <DashboardTournamentsSection tournaments={tournaments} user={user} />
+                    <DashboardTournamentsSection
+                        tournaments={tournaments}
+                        inactiveReviewerTournaments={inactiveReviewerTournaments}
+                        user={user}
+                    />
                     <Divider />
                     <DashboardVotingsSection votings={votings} user={user} />
                     <Divider />

@@ -4,7 +4,7 @@ import Voting from "../models/votingModel";
 import Ticket from "../models/ticketModel";
 import User from "../models/userModel";
 import { IDashboardResponse } from "../../interfaces/Dashboard";
-import { InfringementType } from "../../interfaces/User";
+import { InfringementType, IUser } from "../../interfaces/User";
 
 const TOURNAMENT_POPULATE = [
     {
@@ -58,14 +58,23 @@ class DashboardController {
     public async index(_: Request, res: Response) {
         const user = res.locals!.user;
 
-        // query tournaments that the user is involved in
-        const tournaments = await Tournament.find({
-            assignedReviewers: user?._id,
+        const allReviewTournaments = await Tournament.find({
             status: { $in: ["reviewOngoing", "changesRequested"] },
             isActive: true,
+            type: user?.isTournamentCommittee ? "tournament" : "contest",
         })
             .sort({ startedReviewAt: 1 })
             .populate(TOURNAMENT_POPULATE);
+
+        // filter tournaments assigned to the user
+        const userAssignedTournaments = allReviewTournaments.filter((tournament) =>
+            tournament.assignedReviewers?.some((reviewer: IUser) => reviewer._id.equals(user?._id)),
+        );
+
+        // filter tournaments that have inactive reviewers assigned
+        const inactiveReviewerTournaments = allReviewTournaments.filter((tournament) =>
+            tournament.assignedReviewers?.some((reviewer: IUser) => reviewer.isActiveReviewer === false),
+        );
 
         // query active votings that the user is involved in
         const votings = await Voting.find({
@@ -115,13 +124,14 @@ class DashboardController {
         const filteredUsers = users.map((user) => {
             const userObject = typeof user.toObject === "function" ? user.toObject() : user;
             userObject.infringements = (userObject.infringements || []).filter(
-                (i) => i.type !== InfringementType.NOTE && i.enchantUrl === undefined
+                (i) => i.type !== InfringementType.NOTE && i.enchantUrl === undefined,
             );
             return userObject;
         });
 
         const response: IDashboardResponse = {
-            tournaments,
+            tournaments: userAssignedTournaments,
+            inactiveReviewerTournaments,
             votings,
             reports,
             tickets,
