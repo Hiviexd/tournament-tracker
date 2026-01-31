@@ -36,7 +36,7 @@ const defaultPopulate = [
     },
     {
         path: "assignedReviewers",
-        select: "username osuId groups coverUrl isActiveReviewer country",
+        select: "username osuId groups coverUrl isActiveReviewer country discordId email",
     },
     {
         path: "reviews",

@@ -200,7 +200,7 @@ export default function TournamentReviewSection({ tournament }: IProps) {
                                 <Group gap="md">
                                     {/* Reviewer Display */}
                                     {tournament.assignedReviewers.map((reviewer) => (
-                                        <UserCard static key={reviewer.id} user={reviewer} fullWidth={isMobile} />
+                                        <UserCard static showBadges key={reviewer.id} user={reviewer} fullWidth={isMobile} />
                                     ))}
                                 </Group>
                             )}
