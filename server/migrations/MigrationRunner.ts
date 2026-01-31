@@ -1,6 +1,10 @@
 import { readdir } from "fs/promises";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath, pathToFileURL } from "url";
 import BaseMigration from "./BaseMigration";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class MigrationRunner {
     /**
@@ -30,12 +34,10 @@ class MigrationRunner {
 
         if (!migrationFile) {
             const available = await this.listAvailable();
-            throw new Error(
-                `Migration "${name}" not found. Available migrations: ${available.join(", ")}`
-            );
+            throw new Error(`Migration "${name}" not found. Available migrations: ${available.join(", ")}`);
         }
 
-        // Try both .ts and .js extensions
+        // Try both .ts and .js extensions (use pathToFileURL for Windows compatibility)
         const fileWithoutExt = migrationFile.replace(/\.(ts|js)$/, "");
         const basePath = join(migrationsDir, fileWithoutExt);
 
@@ -43,15 +45,15 @@ class MigrationRunner {
         try {
             // Try .ts first (for development)
             try {
-                module = await import(`${basePath}.ts`);
+                module = await import(pathToFileURL(`${basePath}.ts`).href);
             } catch (tsError) {
                 // Fall back to .js (for production)
                 try {
-                    module = await import(`${basePath}.js`);
+                    module = await import(pathToFileURL(`${basePath}.js`).href);
                 } catch (jsError) {
                     // Last resort: try without extension
                     try {
-                        module = await import(basePath);
+                        module = await import(pathToFileURL(basePath).href);
                     } catch (noExtError) {
                         throw tsError;
                     }
@@ -75,9 +77,7 @@ class MigrationRunner {
 
         // Verify the name matches
         if (migration.name !== name) {
-            throw new Error(
-                `Migration name mismatch: expected "${name}", got "${migration.name}"`
-            );
+            throw new Error(`Migration name mismatch: expected "${name}", got "${migration.name}"`);
         }
 
         return migration;
@@ -94,7 +94,13 @@ class MigrationRunner {
 
         for (const file of files) {
             const name = this.extractMigrationName(file);
-            if (name && file !== "BaseMigration.ts" && file !== "BaseMigration.js" && file !== "MigrationRunner.ts" && file !== "MigrationRunner.js") {
+            if (
+                name &&
+                file !== "BaseMigration.ts" &&
+                file !== "BaseMigration.js" &&
+                file !== "MigrationRunner.ts" &&
+                file !== "MigrationRunner.js"
+            ) {
                 migrations.push(name);
             }
         }

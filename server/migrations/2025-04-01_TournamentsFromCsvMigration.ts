@@ -1,7 +1,11 @@
 import BaseMigration from "./BaseMigration";
 import fs from "fs";
-import path from "path";
-import csv from "csv-parse";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+import { parse as parseCsv } from "csv-parse";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 import Attachment from "../models/attachmentModel";
 import Tournament from "../models/tournamentModel";
 import Review from "../models/reviewModel";
@@ -63,7 +67,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
         }
 
         // Parse CSV file
-        const parser = csv.parse(fileContent, {
+        const parser = parseCsv(fileContent, {
             columns: true,
             skip_empty_lines: true,
             trim: true,
@@ -109,7 +113,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                 let host = await UserService.findOrCreateUser(accessToken, row.HOST);
                 if (!host) {
                     this.log(
-                        `Failed to find/create host ${row.HOST} for tournament ${row["T-NAME"]}, using fallback host`
+                        `Failed to find/create host ${row.HOST} for tournament ${row["T-NAME"]}, using fallback host`,
                     );
                     host = await UserService.findOrCreateUser(accessToken, FALLBACK_HOST_OSU_ID);
                     this.log(`Fallback host: ${host?.username}`);

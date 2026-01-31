@@ -6,13 +6,17 @@ import MongoStoreSession from "connect-mongo";
 import config from "../config.json";
 import "express-async-errors";
 import { logger } from "./middlewares/logger";
-import path from "path";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 import utils from "../utils";
 import JobLoader from "./jobs/JobLoader";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Return the "new" updated object by default when doing findByIdAndUpdate
 mongoose.plugin((schema) => {
@@ -61,7 +65,7 @@ const database = mongoose.connection;
 
 database.on(
     "error",
-    console.error.bind(console, utils.consoleStyles("✗ Database connection error", ["red", "underline"]))
+    console.error.bind(console, utils.consoleStyles("✗ Database connection error", ["red", "underline"])),
 );
 database.once("open", function () {
     console.log(utils.consoleStyles("✓ Database connected", ["green", "bold", "underline"]));
@@ -76,7 +80,7 @@ app.use(
         cookie: {
             sameSite: "lax",
         },
-    })
+    }),
 );
 
 // routes
@@ -209,8 +213,8 @@ const mode =
     process.env.AUTOMATION_DEBUG === "true"
         ? "Auto-start Automation Jobs"
         : process.env.MIGRATION === "true"
-        ? "Run Migrations"
-        : null;
+          ? "Run Migrations"
+          : null;
 
 app.set("port", port);
 
@@ -219,19 +223,19 @@ app.listen(port, async () => {
     console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
     console.log(
         `│   ${utils.consoleStyles("Port:", ["dim"])} ${utils.consoleStyles(port, ["cyan"])}${" ".repeat(
-            49 - port.length
-        )}│`
+            49 - port.length,
+        )}│`,
     );
     console.log(
         `│   ${utils.consoleStyles("Environment:", ["dim"])} ${environmentStyled}${" ".repeat(
-            42 - environmentString.length
-        )}│`
+            42 - environmentString.length,
+        )}│`,
     );
     if (mode)
         console.log(
             `│   ${utils.consoleStyles("Mode:", ["dim"])} ${utils.consoleStyles(mode, ["orange", "bold"])}${" ".repeat(
-                49 - mode.length
-            )}│`
+                49 - mode.length,
+            )}│`,
         );
     console.log("└──────────────────────────────────────────────────────────┘");
 
