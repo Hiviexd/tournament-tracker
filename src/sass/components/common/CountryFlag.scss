@@ -7,19 +7,18 @@
     .country-flag {
         display: flex;
         align-items: center;
-        width: auto;
+        width: fit-content;
         height: 1.2em;
         position: relative;
         filter: saturate(1.1);
         border-radius: 3px;
 
         svg {
-            width: 100%;
+            width: auto;
             height: 100%;
             position: relative;
             z-index: 1;
             border-radius: 3px;
-
         }
 
         &::after {
