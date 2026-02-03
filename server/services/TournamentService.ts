@@ -360,7 +360,10 @@ class TournamentService {
             return { error: "Invalid osu! forum URL" };
         }
 
-        tournament.forumUrl = forumUrl;
+        // remove query parameters from forum url
+        const cleanForumUrl = forumUrl?.split("?")[0] ?? forumUrl;
+
+        tournament.forumUrl = cleanForumUrl;
 
         await this.addTournamentLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
         await LogService.generate(currentUser.id, `Updated forum URL for **${tournament.name}**`, "tournament");

@@ -280,13 +280,16 @@ class TournamentsController {
 
         const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
 
+        // remove query parameters from forum url
+        const cleanForumUrl = forumUrl?.split("?")[0] ?? forumUrl;
+
         const tournament = new Tournament({
             name,
             hosts: hosts.map((host) => host._id),
             modes,
             type,
             status,
-            forumUrl,
+            forumUrl: cleanForumUrl,
             startDate,
             endDate,
             bannerUrl,
