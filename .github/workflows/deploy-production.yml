@@ -126,7 +126,7 @@ jobs:
 
                       # Reload service
                       echo "Reloading service..."
-                      pm2 reload tcomm || pm2 start "pnpm prod" --name tcomm
+                      pm2 reload scripts/ecosystem.production.config.cjs || pm2 start scripts/ecosystem.production.config.cjs
 
                       # Ensure it's running
                       sleep 5
