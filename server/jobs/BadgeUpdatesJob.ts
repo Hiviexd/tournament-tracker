@@ -18,15 +18,11 @@ export default class BadgeUpdatesJob extends BaseJob {
             groups: { $in: ["tc", "cc"] },
         });
 
-        const hivie = await User.findByUsernameOrOsuId(14102976);
-        const chillier = await User.findByUsernameOrOsuId(9501251);
-
-        if (!hivie?.discordId || !chillier?.discordId) {
-            console.error("Could not find Discord IDs for badge managers");
-            return;
-        }
-
-        const usersToPing = [hivie.discordId, chillier.discordId];
+        const usersToPing = [
+            "341321481390784512", // Hivie
+            "140893290647126017", // ChillierPear
+            "181817053596876800", // Albionthegreat
+        ];
 
         for (const user of activeCommitteeMembers) {
             const tcYears = utils.getYearsFromDays(user.tcDuration);
@@ -45,7 +41,7 @@ export default class BadgeUpdatesJob extends BaseJob {
             const badgeEmbed = new EmbedBuilder()
                 .setColor(DiscordUtils.webhookColors.orange)
                 .setDescription(
-                    `[**${user.username}**](${config.baseUrl}/users?id=${user.osuId}) needs a badge update!`
+                    `[**${user.username}**](${config.baseUrl}/users?id=${user.osuId}) needs a badge update!`,
                 )
                 .addField("Current Badge", user.badgeValue.toString(), true)
                 .addField("Eligible Years", years.toString(), true)
@@ -60,7 +56,7 @@ export default class BadgeUpdatesJob extends BaseJob {
                 `Sent badge update requests for users: ${badgeUpdates
                     .map((u) => `[**${u.username}**](${config.baseUrl}/users?id=${u.osuId})`)
                     .join(", ")}`,
-                "user"
+                "user",
             );
         }
 
