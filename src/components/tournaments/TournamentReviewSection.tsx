@@ -10,6 +10,7 @@ import { useState } from "react";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import { useMediaQuery } from "@mantine/hooks";
+import { IUser } from "../../../interfaces/User";
 
 interface IProps {
     tournament: ITournament;
@@ -72,14 +73,14 @@ export default function TournamentReviewSection({ tournament }: IProps) {
 
         return committeeUsers
             .filter(
-                (user) =>
-                    user.groups.includes(reviewerGroup) &&
-                    !currentReviewerIds.includes(user.id) &&
-                    user.isActiveReviewer
+                (committeeUser: IUser) =>
+                    committeeUser.groups.includes(reviewerGroup) && // is in relevant group
+                    !currentReviewerIds.includes(committeeUser.id) && // is not already a reviewer
+                    (committeeUser.isActiveReviewer || committeeUser.id === user?.id) // is active reviewer or current user
             )
-            .map((user) => ({
-                value: user.id,
-                label: user.username,
+            .map((committeeUser: IUser) => ({
+                value: committeeUser.id,
+                label: committeeUser.username,
             }));
     };
 
