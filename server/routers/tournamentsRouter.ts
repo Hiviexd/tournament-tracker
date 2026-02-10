@@ -29,6 +29,18 @@ tournamentsRouter.patch(
     TournamentsController.reassignReviewer
 );
 tournamentsRouter.patch(
+    "/:tournamentId/addReviewer",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.addReviewer
+);
+tournamentsRouter.patch(
+    "/:tournamentId/removeReviewer",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    TournamentsController.removeReviewer
+);
+tournamentsRouter.patch(
     "/:tournamentId/submitReview",
     auth.isLoggedIn,
     auth.isCommittee,

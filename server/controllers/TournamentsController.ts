@@ -425,6 +425,142 @@ class TournamentsController {
         await webhookBuilder.send();
     }
 
+    /** PATCH add reviewer */
+    public async addReviewer(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+        const { reviewerId } = req.body;
+
+        if (!reviewerId) {
+            return res.status(400).json({ error: "reviewerId is required" });
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
+
+        const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
+            tournament: "tc",
+            contest: "cc",
+        };
+        const requiredGroup = reviewerTypeMap[tournament.type];
+
+        const currentReviewerIds = (tournament.assignedReviewers || []).map((r: any) => r.toString());
+        const usersToExclude: string[] = [...currentReviewerIds];
+        if (tournament.hosts?.length) {
+            tournament.hosts.forEach((host: IUser) => usersToExclude.push(host._id.toString()));
+        }
+        if (tournament.winners?.length) {
+            tournament.winners.forEach((winner: IUser) => usersToExclude.push(winner._id.toString()));
+        }
+
+        const user = await User.findById(reviewerId);
+        if (!user) {
+            return res.status(400).json({ error: "User not found" });
+        }
+        if (!user.groups.includes(requiredGroup)) {
+            return res.status(400).json({
+                error: `${user.username} is not a member of ${requiredGroup.toUpperCase()}`,
+            });
+        }
+        if (usersToExclude.includes(reviewerId)) {
+            return res.status(400).json({ error: `${user.username} is already assigned or excluded` });
+        }
+
+        const existingIds = (tournament.assignedReviewers || []).map((r: any) =>
+            r instanceof Types.ObjectId ? r : r._id
+        );
+        tournament.assignedReviewers = [...existingIds, user._id] as any;
+        await tournament.save();
+
+        if (tournament.type === "tournament") {
+            user.inBag = false;
+            await user.save();
+        }
+
+        res.json({ message: "Reviewer added successfully!" });
+
+        await TournamentService.addTournamentLog(
+            tournament,
+            currentUser,
+            `Added reviewer: [**${user.username}**](${user.osuProfileUrl})`,
+            "users"
+        );
+        await LogService.generate(
+            currentUser.id,
+            `Added reviewer to **${tournament.name}**: [**${user.username}**](${user.osuProfileUrl})`,
+            "tournament"
+        );
+
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.orange)
+            .setDescription(
+                `Added reviewer to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .addField("Added", `[**${user.username}**](${user.osuProfileUrl})`);
+        const webhookBuilder = new WebhookBuilder()
+            .addEmbed(embed)
+            .addUsers([user.discordId || user.username])
+            .setMessage(`Reviewer added to ${_.capitalize(tournament.type)}`);
+        if (tournament.threadId) webhookBuilder.setThreadId(tournament.threadId);
+        await webhookBuilder.send();
+    }
+
+    /** PATCH remove reviewer */
+    public async removeReviewer(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+        const currentUser = res.locals!.user!;
+        const { reviewerId } = req.body;
+
+        if (!reviewerId) {
+            return res.status(400).json({ error: "reviewerId is required" });
+        }
+
+        const tournament = await Tournament.findById(tournamentId).orFail();
+
+        if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
+            return res.status(400).json({ error: "Tournament has no assigned reviewers" });
+        }
+
+        const index = tournament.assignedReviewers.findIndex((r: any) => r.toString() === reviewerId);
+        if (index === -1) {
+            return res.status(400).json({ error: "Reviewer is not assigned to this tournament" });
+        }
+
+        const removedUser = await User.findById(reviewerId).orFail();
+        const updatedReviewers = tournament.assignedReviewers.filter((r: any) => r.toString() !== reviewerId);
+        await Tournament.findByIdAndUpdate(tournamentId, { assignedReviewers: updatedReviewers }, { runValidators: true });
+
+        if (tournament.type === "tournament") {
+            removedUser.inBag = true;
+            await removedUser.save();
+        }
+
+        res.json({ message: "Reviewer removed successfully!" });
+
+        await TournamentService.addTournamentLog(
+            tournament,
+            currentUser,
+            `Removed reviewer: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
+            "user-minus"
+        );
+        await LogService.generate(
+            currentUser.id,
+            `Removed reviewer from **${tournament.name}**: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
+            "tournament"
+        );
+
+        const embed = new EmbedBuilder()
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setColor(DiscordUtils.webhookColors.red)
+            .setDescription(
+                `Removed reviewer from ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+            )
+            .addField("Removed", `[**${removedUser.username}**](${removedUser.osuProfileUrl})`);
+        const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+        if (tournament.threadId) webhookBuilder.setThreadId(tournament.threadId);
+        await webhookBuilder.send();
+    }
+
     /** POST edit tournament */
     public async edit(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;

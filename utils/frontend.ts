@@ -10,7 +10,7 @@ import {
     RankedChoiceVote,
 } from "../interfaces/Vote";
 import { IVoting } from "../interfaces/Voting";
-import { TournamentStatus } from "../interfaces/Tournament";
+import { ITournament, TournamentStatus } from "../interfaces/Tournament";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
@@ -89,6 +89,34 @@ export const getTournamentStatusStyles = (status: TournamentStatus): { color: st
             return { color: "gray", icon: "circle" };
     }
 };
+
+/**
+ * Build Select options for choosing a reviewer: committee users in the correct group (tc/cc),
+ * excluding those already in currentReviewerIds, and including only isActiveReviewer or the current user.
+ */
+export function getReviewerCommitteeOptions(
+    tournament: ITournament,
+    committeeUsers: IUser[] | undefined,
+    currentReviewerIds: string[],
+    currentUserId?: string
+): { value: string; label: string }[] {
+    if (!committeeUsers) return [];
+
+    const reviewerGroup = tournament.type === "tournament" ? "tc" : "cc";
+
+    return committeeUsers
+        .filter(
+            (committeeUser) =>
+                committeeUser.groups.includes(reviewerGroup) &&
+                !currentReviewerIds.includes(committeeUser.id) &&
+                (committeeUser.isActiveReviewer || committeeUser.id === currentUserId)
+        )
+        .map((committeeUser) => ({
+            value: committeeUser.id,
+            label: committeeUser.username,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+}
 
 /**
  * Check if the user has the required permissions to view a component

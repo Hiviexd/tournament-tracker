@@ -103,6 +103,42 @@ export function useReassignReviewer(tournamentId: string) {
     });
 }
 
+export function useAddReviewer(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (reviewerId: string) => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/addReviewer`,
+                data: { reviewerId },
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useRemoveReviewer(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (reviewerId: string) => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/tournaments/${tournamentId}/removeReviewer`,
+                data: { reviewerId },
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
 export function useSubmitReview(tournamentId: string) {
     const queryClient = useQueryClient();
 
