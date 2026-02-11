@@ -174,7 +174,7 @@ export default function TournamentBadges({ tournament }: IProps) {
 
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500} className="header-border-left">
-                    Badges
+                    {"Badge" + (badges.length === 1 ? "" : "s")}
                 </Text>
                 {isEditingBadges ? (
                     <ActionIcon
