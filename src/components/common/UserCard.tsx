@@ -55,26 +55,23 @@ export default function UserCard({
                     {user.isCommittee && showBadges && (
                         <Group gap={2} flex={1} justify="flex-end">
                             {!user.email && (
-                                <Tooltip label="No email">
-                                    <Badge variant="filled" color="primary.11" size="sm">
-                                        <FontAwesomeIcon icon="envelope" color="var(--mantine-color-danger-6)" />
+                                <Tooltip label="No Email">
+                                    <Badge variant="light" color="danger" size="sm">
+                                        <FontAwesomeIcon icon="envelope" />
                                     </Badge>
                                 </Tooltip>
                             )}
                             {(!user.discordId || !user.discordId.length) && (
                                 <Tooltip label="No Discord ID">
-                                    <Badge variant="filled" color="primary.11" size="sm">
-                                        <FontAwesomeIcon icon="id-card" color="var(--mantine-color-danger-6)" />
+                                    <Badge variant="light" color="danger" size="sm">
+                                        <FontAwesomeIcon icon="id-card" />
                                     </Badge>
                                 </Tooltip>
                             )}
                             {!user.isActiveReviewer && (
                                 <Tooltip label="Inactive Reviewer">
-                                    <Badge variant="filled" color="primary.11" size="sm">
-                                        <FontAwesomeIcon
-                                            icon="magnifying-glass"
-                                            color="var(--mantine-color-danger-6)"
-                                        />
+                                    <Badge variant="light" color="danger" size="sm">
+                                        <FontAwesomeIcon icon="magnifying-glass" />
                                     </Badge>
                                 </Tooltip>
                             )}
