@@ -37,7 +37,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
         const isGreyscale = getSavedPreference<boolean>("greyscale", false);
         const colorblindMode = getSavedPreference<"none" | "deuteranopia" | "protanopia" | "tritanopia">(
             "colorblindMode",
-            "none"
+            "none",
         );
 
         // For colorblind modes, use the same colors as the actual themes
@@ -105,7 +105,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                             </Flex>
                         </Container>
                         {
-                            <Container p={20} fluid>
+                            <Container px={{ base: 10, sm: 20 }} py={20} fluid>
                                 {page}
                             </Container>
                         }
