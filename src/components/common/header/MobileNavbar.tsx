@@ -25,7 +25,12 @@ export default function MobileNavbar({ opened, onClose }: IProps) {
             <Transition mounted={opened} transition="slide-left" duration={200}>
                 {(styles) => (
                     <AppShell.Navbar py="md" px="md" hiddenFrom="md" style={styles}>
-                        <AppShell.Section grow>
+                        <AppShell.Section
+                            grow
+                            style={{
+                                overflowY: "auto",
+                                overscrollBehavior: "contain",
+                            }}>
                             <Stack gap="md">
                                 <MobileUserSection
                                     onClose={onClose}
