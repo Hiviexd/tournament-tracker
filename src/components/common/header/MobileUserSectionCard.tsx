@@ -38,7 +38,7 @@ export default function MobileUserSectionCard({ user, opened, onClick }: IProps)
                 {/* content */}
                 <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
                     <Group justify="space-between" align="center">
-                        <UserDisplay user={user} />
+                        <UserDisplay user={user} showCountryFlag />
                         <FontAwesomeIcon
                             icon="caret-down"
                             style={{
