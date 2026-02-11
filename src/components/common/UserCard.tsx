@@ -47,38 +47,36 @@ export default function UserCard({
             />
 
             <div className="user-card-tint" />
-            <div className="user-card-content">
-                <Group gap="xs" justify="space-between">
-                    <UserDisplay user={user} tooltips="top" disablePopover showCountryFlag />
+            <Group className="user-card-content" gap="xs" justify="space-between">
+                <UserDisplay user={user} tooltips="top" disablePopover showCountryFlag />
 
-                    {/* warning badges */}
-                    {user.isCommittee && showBadges && (
-                        <Group gap={2} flex={1} justify="flex-end">
-                            {!user.email && (
-                                <Tooltip label="No Email">
-                                    <Badge variant="light" color="danger" size="sm">
-                                        <FontAwesomeIcon icon="envelope" />
-                                    </Badge>
-                                </Tooltip>
-                            )}
-                            {(!user.discordId || !user.discordId.length) && (
-                                <Tooltip label="No Discord ID">
-                                    <Badge variant="light" color="danger" size="sm">
-                                        <FontAwesomeIcon icon="id-card" />
-                                    </Badge>
-                                </Tooltip>
-                            )}
-                            {!user.isActiveReviewer && (
-                                <Tooltip label="Inactive Reviewer">
-                                    <Badge variant="light" color="danger" size="sm">
-                                        <FontAwesomeIcon icon="magnifying-glass" />
-                                    </Badge>
-                                </Tooltip>
-                            )}
-                        </Group>
-                    )}
-                </Group>
-            </div>
+                {/* warning badges */}
+                {user.isCommittee && showBadges && (
+                    <Group gap={2} flex={1} justify="flex-end">
+                        {!user.email && (
+                            <Tooltip label="No Email">
+                                <Badge variant="light" color="danger" size="sm">
+                                    <FontAwesomeIcon icon="envelope" />
+                                </Badge>
+                            </Tooltip>
+                        )}
+                        {(!user.discordId || !user.discordId.length) && (
+                            <Tooltip label="No Discord ID">
+                                <Badge variant="light" color="danger" size="sm">
+                                    <FontAwesomeIcon icon="id-card" />
+                                </Badge>
+                            </Tooltip>
+                        )}
+                        {!user.isActiveReviewer && (
+                            <Tooltip label="Inactive Reviewer">
+                                <Badge variant="light" color="danger" size="sm">
+                                    <FontAwesomeIcon icon="magnifying-glass" />
+                                </Badge>
+                            </Tooltip>
+                        )}
+                    </Group>
+                )}
+            </Group>
         </Card>
     );
 }
