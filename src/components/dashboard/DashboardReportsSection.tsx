@@ -1,9 +1,9 @@
-import { Stack, Title, Group, SimpleGrid, Badge, Collapse, Button, Tooltip } from "@mantine/core";
+import { Stack, Title, Group, SimpleGrid, Badge, Collapse, Tooltip } from "@mantine/core";
 import TicketCard from "../tickets/TicketCard";
 import { ITicket } from "../../../interfaces/Ticket";
 import EmptyState from "../common/EmptyState";
 import { useDisclosure } from "@mantine/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 
 interface IProps {
     reports: ITicket[];
@@ -22,9 +22,7 @@ export default function DashboardReportsSection({ reports }: IProps) {
                         {reports.length}
                     </Badge>
                 </Tooltip>
-                <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
-                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
-                </Button>
+                <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
             <Collapse in={opened}>
                 {reports.length > 0 ? (

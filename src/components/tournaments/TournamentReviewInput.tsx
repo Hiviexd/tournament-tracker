@@ -4,6 +4,7 @@ import { ITournament } from "../../../interfaces/Tournament";
 import { useState, useMemo, useCallback } from "react";
 import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 import { useSubmitReview } from "../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
@@ -143,9 +144,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
                 <Text component="label" fw={700} size="md">
                     Review Checklist
                 </Text>
-                <Button radius={1000} size="compact-xs" variant="light" onClick={toggle}>
-                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
-                </Button>
+                <ExpandButton radius={1000} size="compact-xs" variant="light" expanded={opened} onClick={toggle} />
             </Group>
             <Collapse in={opened}>
                 <Stack gap="md">

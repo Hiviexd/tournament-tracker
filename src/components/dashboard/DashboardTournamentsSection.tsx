@@ -1,5 +1,6 @@
-import { Stack, Title, Group, Text, SimpleGrid, Badge, Button, Collapse, Tooltip } from "@mantine/core";
+import { Stack, Title, Group, Text, SimpleGrid, Badge, Collapse, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
@@ -75,9 +76,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
                             </Badge>
                         </Tooltip>
                     )}
-                <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
-                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
-                </Button>
+                <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
             <Collapse in={opened}>

@@ -1,5 +1,6 @@
 import { Card, Stack, Group, Button, Box, Title, Text, Collapse, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 import { useState } from "react";
 import { useCreateNote } from "../../hooks/useTournaments";
 import { useAtom } from "jotai";
@@ -73,12 +74,9 @@ export default function TournamentNotes({ tournament }: IProps) {
             <Stack gap="xl">
                 <Group justify="space-between" align="center">
                     <Title order={3}>Notes</Title>
-                    <Button
-                        variant="subtle"
-                        onClick={toggle}
-                        rightSection={<FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />}>
+                    <ExpandButton variant="subtle" expanded={opened} onClick={toggle}>
                         {opened ? "Hide Input" : "Show Input"}
-                    </Button>
+                    </ExpandButton>
                 </Group>
 
                 {/* Notes */}

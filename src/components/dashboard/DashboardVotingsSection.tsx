@@ -1,5 +1,6 @@
-import { Stack, Title, Group, Text, Badge, Collapse, Button, Tooltip } from "@mantine/core";
+import { Stack, Title, Group, Text, Badge, Collapse, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 import VotingCard from "../votings/VotingCard";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
@@ -67,9 +68,7 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                         </Badge>
                     </Tooltip>
                 )}
-                <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
-                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
-                </Button>
+                <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
             <Collapse in={opened}>

@@ -1,4 +1,4 @@
-import { Stack, Group, Text, Timeline, Card, Button, Title, Collapse, Tooltip } from "@mantine/core";
+import { Stack, Group, Text, Timeline, Card, Title, Collapse, Tooltip } from "@mantine/core";
 import { ITournament } from "../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
@@ -6,6 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import MarkdownText from "../common/MarkdownText";
 import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import ExpandButton from "../common/buttons/ExpandButton";
 
 interface IProps {
     tournament: ITournament;
@@ -43,12 +44,9 @@ export default function TournamentLogs({ tournament }: IProps) {
                         </Title>
                     </Group>
 
-                    <Button
-                        variant="subtle"
-                        onClick={toggle}
-                        rightSection={<FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />}>
+                    <ExpandButton variant="subtle" expanded={opened} onClick={toggle}>
                         {opened ? "Hide Logs" : "Show Logs"}
-                    </Button>
+                    </ExpandButton>
                 </Group>
 
                 <Collapse in={opened}>

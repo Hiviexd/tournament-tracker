@@ -4,10 +4,11 @@ import { IVoting } from "../../../interfaces/Voting";
 import { IVote } from "../../../interfaces/Vote";
 
 // Mantine
-import { Card, Stack, Title, Divider, Collapse, Group, Button, Text, List } from "@mantine/core";
+import { Card, Stack, Title, Divider, Collapse, Group, Text, List } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 // Components
+import ExpandButton from "../common/buttons/ExpandButton";
 import VoteCard from "./VoteCard";
 import ClassicVoteStats from "./votes/ClassicVoteStats";
 import BinaryVoteStats from "./votes/BinaryVoteStats";
@@ -15,7 +16,6 @@ import BinaryStrictVoteStats from "./votes/BinaryStrictVoteStats";
 import VariableVoteStats from "./votes/VariableVoteStats";
 import RankedChoiceVoteStats from "./votes/RankedChoiceVoteStats";
 import { IUser } from "@interfaces/User";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import UserLink from "../common/UserLink";
 
 interface IProps {
@@ -97,12 +97,9 @@ export default function VotingResults({ voting, user }: IProps) {
                         <Divider />
                         <Group justify="space-between" align="center">
                             <Text fw={500}>Individual Votes ({filteredVotes.length})</Text>
-                            <Button
-                                variant="subtle"
-                                onClick={toggle}
-                                rightSection={<FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />}>
+                            <ExpandButton variant="subtle" expanded={opened} onClick={toggle}>
                                 {opened ? "Hide Votes" : "Show Votes"}
-                            </Button>
+                            </ExpandButton>
                         </Group>
                         <Collapse in={opened}>
                             {voting.abstainedUsers?.length ? (

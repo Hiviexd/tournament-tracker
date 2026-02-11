@@ -1,11 +1,11 @@
 import { useRef } from "react";
-import { Stack, Title, SimpleGrid, Card, Group, Badge, Button, Collapse, Tooltip } from "@mantine/core";
+import { Stack, Title, SimpleGrid, Card, Group, Badge, Collapse, Tooltip } from "@mantine/core";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
 import InfringementCard from "../watchlist/InfringementCard";
 import UserDisplay from "../common/UserDisplay";
 import { useDisclosure } from "@mantine/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExpandButton from "../common/buttons/ExpandButton";
 
 interface IProps {
     users: IUser[];
@@ -27,9 +27,7 @@ export default function DashboardInfringementsSection({ users }: IProps) {
                         {totalInfringementsCount.current}
                     </Badge>
                 </Tooltip>
-                <Button radius={1000} size="compact-sm" variant="light" onClick={toggle}>
-                    <FontAwesomeIcon icon={opened ? "caret-up" : "caret-down"} />
-                </Button>
+                <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
             <Collapse in={opened}>
