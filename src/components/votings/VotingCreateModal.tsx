@@ -69,13 +69,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 if (values.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
                 }
-                if (values.type === "binary-strict") {
-                    if (values.allowNeutralVotes && value.length !== 3) {
-                        return "Binary strict votes with neutral allowed must have exactly 3 options";
-                    }
-                    if (!values.allowNeutralVotes && value.length !== 2) {
-                        return "Binary strict votes without neutral must have exactly 2 options";
-                    }
+                if (values.type === "binary-strict" && value.length !== 2) {
+                    return "Binary strict votes must have exactly 2 options";
                 }
                 return null;
             },
@@ -137,7 +132,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const handleRemoveOption = (optionToRemove: string) => {
         form.setFieldValue(
             "options",
-            form.values.options.filter((option) => option !== optionToRemove)
+            form.values.options.filter((option) => option !== optionToRemove),
         );
     };
 
@@ -157,7 +152,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             group: "Clear Outcome Voting (for decisions)",
             items: [
                 { value: "classic", label: "Classic (Single Choice)" },
-                { value: "binary-strict", label: "Strict Binary (Support/Neutral/Oppose)" },
+                { value: "binary-strict", label: "Strict Binary (Support/Oppose)" },
                 { value: "ranked-choice", label: "Ranked Choice (Schulze Method)" },
             ],
         },
@@ -191,28 +186,17 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         }
     };
 
-    const setDefaultOptionsForType = (type: VotingType, allowNeutralVotes: boolean, skipIfCustomOptions = false) => {
+    const setDefaultOptionsForType = (type: VotingType, skipIfCustomOptions = false) => {
         if (type === "binary-strict") {
-            // Check if we already have custom options (likely from a preset)
             if (skipIfCustomOptions) {
                 const currentOptions = form.values.options;
-                // Check if current options match either default configuration
                 const isDefaultTwoOptions =
                     currentOptions.length === 2 && currentOptions.join(",") === "Support,Oppose";
-                const isDefaultThreeOptions =
-                    currentOptions.length === 3 && currentOptions.join(",") === "Support,Neutral,Oppose";
-                const isDefaultOptions = isDefaultTwoOptions || isDefaultThreeOptions;
-
-                if (!isDefaultOptions && currentOptions.length > 0) {
+                if (!isDefaultTwoOptions && currentOptions.length > 0) {
                     return; // Don't override custom options
                 }
             }
-
-            if (allowNeutralVotes) {
-                form.setFieldValue("options", ["Support", "Neutral", "Oppose"]);
-            } else {
-                form.setFieldValue("options", ["Support", "Oppose"]);
-            }
+            form.setFieldValue("options", ["Support", "Oppose"]);
         } else if (form.values.options.length === 0) {
             form.setFieldValue("options", ["Support", "Oppose"]);
         }
@@ -222,14 +206,14 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         if (value) {
             const newType = value as VotingType;
             form.setFieldValue("type", newType);
-            setDefaultOptionsForType(newType, form.values.allowNeutralVotes, true);
+            setDefaultOptionsForType(newType, true);
         }
     };
 
     const handleAllowNeutralVotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.currentTarget.checked;
         form.setFieldValue("allowNeutralVotes", newValue);
-        setDefaultOptionsForType(form.values.type, newValue, true);
+        setDefaultOptionsForType(form.values.type, true);
     };
 
     const getVotingMethodDescription = () => {
@@ -239,9 +223,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             case "binary":
                 return "Binary voting allows users to vote between 2 options using a score ranging from -5 to +5, with the green option being +5 and the red option being -5.";
             case "binary-strict":
-                return form.values.allowNeutralVotes
-                    ? "Binary strict voting presents 3 options: Support, Neutral, and Oppose. Neutral votes are excluded from the final result calculation."
-                    : "Binary strict voting presents 2 options: Support and Oppose. No neutral option is available.";
+                return "Binary strict voting presents 2 options: Support and Oppose.";
             case "variable":
                 return "Variable voting allows users to rate each option with a score ranging from -5 to +5.";
             case "ranked-choice":
@@ -357,9 +339,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         error={form.errors.type}
                     />
 
-                    {(form.values.type === "binary" ||
-                        form.values.type === "variable" ||
-                        form.values.type === "binary-strict") && (
+                    {(form.values.type === "binary" || form.values.type === "variable") && (
                         <Checkbox
                             label="Allow neutral votes"
                             checked={form.values.allowNeutralVotes}
@@ -382,7 +362,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
                     <Stack gap="xs">
                         <Text size="sm" fw={500}>
-                            Options {form.values.type === "binary" && "(must be exactly 2)"}
+                            Options{" "}
+                            {(form.values.type === "binary" || form.values.type === "binary-strict") &&
+                                "(must be exactly 2)"}
                         </Text>
                         {form.values.type && (
                             <Text size="xs" c="dimmed" fs="italic" mb="xs">
@@ -423,12 +405,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             error={form.errors.options}
                             disabled={
                                 (form.values.type === "binary" && form.values.options.length >= 2) ||
-                                (form.values.type === "binary-strict" &&
-                                    form.values.allowNeutralVotes &&
-                                    form.values.options.length >= 3) ||
-                                (form.values.type === "binary-strict" &&
-                                    !form.values.allowNeutralVotes &&
-                                    form.values.options.length >= 2)
+                                (form.values.type === "binary-strict" && form.values.options.length >= 2)
                             }
                         />
                     </Stack>
