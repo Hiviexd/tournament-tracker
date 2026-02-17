@@ -26,8 +26,6 @@ export const PREDEFINED_OPTIONS = [
     "I protest this user becoming a member of the team due to major concerns or issues",
 ] as const;
 
-export const USER_ADDITION_OPTIONS = ["Endorse Member", "Protest Member"] as const;
-
 export const TOURNAMENT_OPTIONS = [
     "No action required",
     "Warning",
