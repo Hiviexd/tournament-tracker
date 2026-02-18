@@ -1,4 +1,5 @@
 import { MantineThemeComponents } from "@mantine/core";
+import { normalizeAlertColor, getThemeColor } from "./index";
 
 /**
  * Base theme configuration shared across all themes
@@ -18,6 +19,30 @@ export const baseThemeConfig = {
  * Shared component configurations
  */
 export const baseComponents: MantineThemeComponents = {
+    Alert: {
+        vars: (theme: any, props: { color?: string; variant?: string; autoContrast?: boolean }) => {
+            const normalizedColor = normalizeAlertColor(props?.color, theme.primaryColor);
+            const colors = theme.variantColorResolver({
+                color: normalizedColor,
+                theme,
+                variant: props?.variant ?? "light",
+                autoContrast: props?.autoContrast,
+            });
+            return {
+                root: {
+                    "--alert-bg": colors.background,
+                    "--alert-color": colors.color,
+                    "--alert-bd": colors.border,
+                },
+            };
+        },
+        styles: (theme, props) => {
+            const borderColor = getThemeColor(theme, props?.color as string | undefined);
+            return {
+                root: borderColor ? { borderColor } : {},
+            };
+        },
+    },
     ActionIcon: {
         styles: {
             root: {
