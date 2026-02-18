@@ -21,17 +21,10 @@ export default function ResultSection({ title, color, icon, items, renderItem }:
                     <Title order={4}>{title}</Title>
                     <Badge variant="light">{items.length}</Badge>
                 </Group>
-                {items.length > 0 ? (
+                {items.length > 0 && (
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                         {items.map(renderItem)}
                     </SimpleGrid>
-                ) : (
-                    <Stack justify="center" py="xl">
-                        <FontAwesomeIcon icon="ghost" size="2x" color="gray" />
-                        <Text c="dimmed" ta="center" size="sm">
-                            No beatmaps in this category...
-                        </Text>
-                    </Stack>
                 )}
             </Stack>
         </Card>
