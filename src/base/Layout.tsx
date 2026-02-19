@@ -105,7 +105,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                             </Flex>
                         </Container>
                         {
-                            <Container px={{ base: 10, sm: 20 }} py={20} fluid>
+                            <Container className="layout-body" px={{ base: 10, sm: 20 }} py={20} fluid>
                                 {page}
                             </Container>
                         }
