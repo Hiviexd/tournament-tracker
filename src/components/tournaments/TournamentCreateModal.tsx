@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
-import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
+import { Modal, TextInput, Stack, Select, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
+import MultiSelect from "../common/MultiSelect";
 import MultipleUsersInput from "../common/MultipleUsersInput";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";

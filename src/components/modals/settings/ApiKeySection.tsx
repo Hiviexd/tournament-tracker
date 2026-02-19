@@ -4,7 +4,6 @@ import {
     Button,
     Code,
     Group,
-    MultiSelect,
     Stack,
     Text,
     TextInput,
@@ -15,6 +14,7 @@ import {
     ActionIcon,
     Table,
 } from "@mantine/core";
+import MultiSelect from "../../common/MultiSelect";
 import { useForm } from "@mantine/form";
 import { useApiKeyMeta, useCreateApiKey, useUpdateApiKey, useRevokeApiKey } from "../../../hooks/useApiKeys";
 import { useConfirmModal } from "../../../hooks/useModals";

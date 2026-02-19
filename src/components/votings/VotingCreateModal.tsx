@@ -8,12 +8,12 @@ import utils from "../../../utils";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 //Mantine
+import MultiSelect from "../common/MultiSelect";
 import {
     Modal,
     TextInput,
     Stack,
     Select,
-    MultiSelect,
     NumberInput,
     Button,
     Group,

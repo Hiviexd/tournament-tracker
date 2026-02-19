@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Modal, TextInput, Stack, Select, MultiSelect, Button, Group, LoadingOverlay } from "@mantine/core";
+import { Modal, TextInput, Stack, Select, Button, Group, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import MultiSelect from "../common/MultiSelect";
 import { ITournament } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import MultipleUsersInput from "../common/MultipleUsersInput";
