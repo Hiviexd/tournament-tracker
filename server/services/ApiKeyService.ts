@@ -57,6 +57,20 @@ export default class ApiKeyService {
     }
 
     /**
+     * Revokes a specific API key by id (admin only).
+     * @param keyId - the API key document _id
+     * @returns the revoked key or null if not found / already revoked
+     */
+    static async revokeKeyById(keyId: string): Promise<{ apiKey: IApiKey | null; alreadyRevoked: boolean }> {
+        const apiKey = await ApiKey.findById(keyId).select("-hashedKey").populate("user");
+        if (!apiKey) return { apiKey: null, alreadyRevoked: false };
+        if (apiKey.revokedAt) return { apiKey, alreadyRevoked: true };
+        apiKey.revokedAt = new Date();
+        await apiKey.save();
+        return { apiKey, alreadyRevoked: false };
+    }
+
+    /**
      * Validates an API key for use
      * @param rawKey - the raw API key
      * @returns the user and API key

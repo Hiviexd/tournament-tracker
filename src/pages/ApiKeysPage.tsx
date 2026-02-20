@@ -1,8 +1,10 @@
-import { Title, Accordion, Card, Group, Stack, Text, Badge, Alert, Skeleton, Divider } from "@mantine/core";
+import { Title, Accordion, Card, Group, Stack, Text, Badge, Alert, Skeleton, Divider, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useAllApiKeys } from "../hooks/useApiKeys";
+import { useAllApiKeys, useRevokeApiKeyAdmin } from "../hooks/useApiKeys";
 import UserDisplay from "../components/common/UserDisplay";
 import DateBadge from "../components/common/badges/DateBadge";
+import CopyActionIcon from "../components/common/buttons/CopyActionIcon";
+import { useConfirmModal } from "../hooks/useModals";
 import utils from "../../utils";
 
 const PAGE_TITLE = "View all API keys across all users";
@@ -27,15 +29,7 @@ function ApiKeysPageLayout({ children }: { children: React.ReactNode }) {
     );
 }
 
-function DateRow({
-    label,
-    date,
-    color = "dimmed",
-}: {
-    label: string;
-    date: Date;
-    color?: "dimmed" | "red";
-}) {
+function DateRow({ label, date, color = "dimmed" }: { label: string; date: Date; color?: "dimmed" | "red" }) {
     return (
         <Group gap="xs">
             <Text size="xs" c={color}>
@@ -48,6 +42,8 @@ function DateRow({
 
 export default function ApiKeysPage() {
     const { data: apiKeysData, isLoading, error } = useAllApiKeys();
+    const revokeAdminMutation = useRevokeApiKeyAdmin();
+    const confirmModal = useConfirmModal();
 
     if (isLoading) {
         return (
@@ -83,39 +79,50 @@ export default function ApiKeysPage() {
         );
     }
 
+    const handleRevokeKey = async (apiKey: { _id: unknown; name: string }) => {
+        if (
+            !(await confirmModal({
+                preset: "delete",
+                title: "Revoke API key?",
+                text: `Revoke "${apiKey.name}"? The key will be invalid immediately.`,
+                confirmText: "Revoke",
+            }))
+        )
+            return;
+        await revokeAdminMutation.mutateAsync(String(apiKey._id));
+    };
+
     return (
         <ApiKeysPageLayout>
             <Accordion variant="separated" radius="md">
-                    {apiKeysData.map(({ user, apiKeys }) => (
-                        <Accordion.Item key={user._id} value={user._id}>
-                            <Accordion.Control>
-                                <Group justify="space-between" align="center">
-                                    <UserDisplay user={user} />
-                                    <Badge
-                                        variant="light"
-                                        size="sm"
-                                        leftSection={<FontAwesomeIcon icon="key" />}
-                                        mr="xs">
-                                        {utils.formatCount(apiKeys.length, "key")}
-                                    </Badge>
-                                </Group>
-                            </Accordion.Control>
-                            <Accordion.Panel>
-                                <Stack gap="sm">
-                                    {apiKeys.map((apiKey) => {
-                                        const status = getKeyStatus(apiKey);
-                                        return (
-                                            <Card key={apiKey._id} bg="primary.11" radius="md" padding="md">
+                {apiKeysData.map(({ user, apiKeys }) => (
+                    <Accordion.Item key={user._id} value={user._id}>
+                        <Accordion.Control>
+                            <Group justify="space-between" align="center">
+                                <UserDisplay user={user} />
+                                <Badge variant="light" size="sm" leftSection={<FontAwesomeIcon icon="key" />} mr="xs">
+                                    {utils.formatCount(apiKeys.length, "key")}
+                                </Badge>
+                            </Group>
+                        </Accordion.Control>
+                        <Accordion.Panel>
+                            <Stack gap="sm">
+                                {apiKeys.map((apiKey) => {
+                                    const status = getKeyStatus(apiKey);
+                                    return (
+                                        <Card key={apiKey._id} bg="primary.11" radius="md" padding="md">
                                             <Group justify="space-between" align="flex-start">
                                                 <Stack gap="xs" style={{ flex: 1 }}>
                                                     <Group gap="sm" align="center">
                                                         <Text fw={600} size="sm" className="header-border-left">
                                                             {apiKey.name}
                                                         </Text>
-                                                        <Badge
-                                                            variant="light"
-                                                            color={status.color}
-                                                            size="xs">
+                                                        <CopyActionIcon
+                                                            value={String(apiKey._id)}
+                                                            size="sm"
+                                                            tooltip="Copy key ID"
+                                                        />
+                                                        <Badge variant="light" color={status.color} size="xs">
                                                             {status.text}
                                                         </Badge>
                                                         {apiKey.isElevated && (
@@ -174,7 +181,10 @@ export default function ApiKeysPage() {
                                                 <Stack gap="xs" align="flex-end">
                                                     <DateRow label="Created:" date={new Date(apiKey.createdAt)} />
                                                     {apiKey.lastUsedAt && (
-                                                        <DateRow label="Last used:" date={new Date(apiKey.lastUsedAt)} />
+                                                        <DateRow
+                                                            label="Last used:"
+                                                            date={new Date(apiKey.lastUsedAt)}
+                                                        />
                                                     )}
                                                     {apiKey.revokedAt && (
                                                         <DateRow
@@ -183,15 +193,29 @@ export default function ApiKeysPage() {
                                                             color="red"
                                                         />
                                                     )}
+                                                    {!apiKey.revokedAt && (
+                                                        <Button
+                                                            variant="light"
+                                                            color="red"
+                                                            size="xs"
+                                                            leftSection={<FontAwesomeIcon icon="ban" />}
+                                                            loading={
+                                                                revokeAdminMutation.isPending &&
+                                                                revokeAdminMutation.variables === String(apiKey._id)
+                                                            }
+                                                            onClick={() => handleRevokeKey(apiKey)}>
+                                                            Revoke key
+                                                        </Button>
+                                                    )}
                                                 </Stack>
                                             </Group>
-                                            </Card>
-                                        );
-                                    })}
-                                </Stack>
-                            </Accordion.Panel>
-                        </Accordion.Item>
-                    ))}
+                                        </Card>
+                                    );
+                                })}
+                            </Stack>
+                        </Accordion.Panel>
+                    </Accordion.Item>
+                ))}
             </Accordion>
         </ApiKeysPageLayout>
     );

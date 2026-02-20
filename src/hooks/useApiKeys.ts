@@ -104,3 +104,23 @@ export function useRevokeApiKey() {
         },
     });
 }
+
+/** Admin only: revoke a specific API key by id */
+export function useRevokeApiKeyAdmin() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationKey: ["apiKey", "revokeAdmin"],
+        mutationFn: async (keyId: string) => {
+            const res = await utils.apiCall({
+                method: "post",
+                url: `/api/keys/revoke/${keyId}`,
+            });
+            return utils.handleMutationResponse(res);
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["apiKey", "meta"] });
+            qc.invalidateQueries({ queryKey: ["apiKey", "all"] });
+        },
+    });
+}

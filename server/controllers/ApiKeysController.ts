@@ -94,6 +94,38 @@ class ApiKeysController {
         return res.json({ message: "API key revoked!" });
     }
 
+    /** POST revoke a specific key by id (admin only) */
+    public async revokeById(req: Request, res: Response) {
+        const keyId = req.params.keyId ?? req.body?.keyId;
+        if (!keyId) {
+            return res.status(400).json({ error: "Key ID is required" });
+        }
+        const result = await ApiKeyService.revokeKeyById(keyId);
+        if (!result.apiKey) {
+            return res.status(404).json({ error: "API key not found" });
+        }
+        if (result.alreadyRevoked) {
+            return res.json({ message: "API key was already revoked." });
+        }
+        await LogService.generate(
+            res.locals!.user!.id,
+            `Revoked API key: **${result.apiKey.name}** (admin)`,
+            "api_key"
+        );
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.darkRed)
+                    .setDescription(`Revoked API key: **${result.apiKey.name}**`)
+                    .addField("Owner", `[${result.apiKey.user.username}](${result.apiKey.user.osuProfileUrl})`, true)
+                    .setFooter("admin action")
+            )
+            .setLocation("dev")
+            .send();
+        return res.json({ message: "API key revoked!" });
+    }
+
     /** GET all API keys */
     public async getAll(req: Request, res: Response) {
         const apiKeys = await ApiKeyService.getAllKeys();

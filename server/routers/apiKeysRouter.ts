@@ -11,5 +11,6 @@ router.get("/all", auth.isLoggedIn, auth.isDev, ApiKeysController.getAll);
 router.post("/create", apiKeyManagementLimiter, auth.isLoggedIn, ApiKeysController.create);
 router.put("/update", apiKeyManagementLimiter, auth.isLoggedIn, ApiKeysController.update);
 router.post("/revoke", apiKeyManagementLimiter, auth.isLoggedIn, ApiKeysController.revoke);
+router.post("/revoke/:keyId", apiKeyManagementLimiter, auth.isLoggedIn, auth.isDev, ApiKeysController.revokeById);
 
 export default router;
