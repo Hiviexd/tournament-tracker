@@ -5,83 +5,87 @@ import UserDisplay from "../components/common/UserDisplay";
 import DateBadge from "../components/common/badges/DateBadge";
 import utils from "../../utils";
 
+const PAGE_TITLE = "View all API keys across all users";
+
+function getKeyStatus(apiKey: { revokedAt?: string | null; lastUsedAt?: string | null }) {
+    if (apiKey.revokedAt) return { color: "red" as const, text: "Revoked" };
+    if (!apiKey.lastUsedAt) return { color: "gray" as const, text: "Never Used" };
+    return { color: "green" as const, text: "Active" };
+}
+
+function ApiKeysPageLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <Card shadow="sm" p="lg">
+            <Stack gap="md">
+                <Title order={4} className="header-border-left">
+                    {PAGE_TITLE}
+                </Title>
+                <Divider />
+                {children}
+            </Stack>
+        </Card>
+    );
+}
+
+function DateRow({
+    label,
+    date,
+    color = "dimmed",
+}: {
+    label: string;
+    date: Date;
+    color?: "dimmed" | "red";
+}) {
+    return (
+        <Group gap="xs">
+            <Text size="xs" c={color}>
+                {label}
+            </Text>
+            <DateBadge date={date} size="sm" staticColor />
+        </Group>
+    );
+}
+
 export default function ApiKeysPage() {
     const { data: apiKeysData, isLoading, error } = useAllApiKeys();
 
     if (isLoading) {
         return (
-            <Card shadow="sm" p="lg">
-                <Stack gap="md">
-                    <Title order={4} className="header-border-left">
-                        View all API keys across all users
-                    </Title>
-                    <Divider />
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} height={80} radius="md" />
-                    ))}
-                </Stack>
-            </Card>
+            <ApiKeysPageLayout>
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} height={80} radius="md" />
+                ))}
+            </ApiKeysPageLayout>
         );
     }
 
     if (error) {
         return (
-            <Card shadow="sm" p="lg">
-                <Stack gap="md">
-                    <Title order={4} className="header-border-left">
-                        View all API keys across all users
-                    </Title>
-                    <Divider />
-                    <Alert
-                        variant="light"
-                        color="danger"
-                        title="Error"
-                        icon={<FontAwesomeIcon icon="exclamation-triangle" />}>
-                        Failed to load API keys. Please try again later.
-                    </Alert>
-                </Stack>
-            </Card>
+            <ApiKeysPageLayout>
+                <Alert
+                    variant="light"
+                    color="danger"
+                    title="Error"
+                    icon={<FontAwesomeIcon icon="exclamation-triangle" />}>
+                    Failed to load API keys. Please try again later.
+                </Alert>
+            </ApiKeysPageLayout>
         );
     }
 
     if (!apiKeysData || apiKeysData.length === 0) {
         return (
-            <Card shadow="sm" p="lg">
-                <Stack gap="md">
-                    <Title order={4} className="header-border-left">
-                        View all API keys across all users
-                    </Title>
-                    <Divider />
-                    <Alert variant="light" color="blue" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
-                        No API keys found in the system.
-                    </Alert>
-                </Stack>
-            </Card>
+            <ApiKeysPageLayout>
+                <Alert variant="light" color="blue" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
+                    No API keys found in the system.
+                </Alert>
+            </ApiKeysPageLayout>
         );
     }
 
-    const getKeyStatusColor = (apiKey: any) => {
-        if (apiKey.revokedAt) return "red";
-        if (!apiKey.lastUsedAt) return "gray";
-        return "green";
-    };
-
-    const getKeyStatusText = (apiKey: any) => {
-        if (apiKey.revokedAt) return "Revoked";
-        if (!apiKey.lastUsedAt) return "Never Used";
-        return "Active";
-    };
-
     return (
-        <Card shadow="sm" p="lg">
-            <Stack gap="md">
-                <Title order={4} className="header-border-left">
-                    View all API keys across all users
-                </Title>
-
-                <Divider />
-
-                <Accordion variant="separated" radius="md">
+        <ApiKeysPageLayout>
+            <Accordion variant="separated" radius="md">
                     {apiKeysData.map(({ user, apiKeys }) => (
                         <Accordion.Item key={user._id} value={user._id}>
                             <Accordion.Control>
@@ -98,8 +102,10 @@ export default function ApiKeysPage() {
                             </Accordion.Control>
                             <Accordion.Panel>
                                 <Stack gap="sm">
-                                    {apiKeys.map((apiKey) => (
-                                        <Card key={apiKey._id} bg="primary.11" radius="md" padding="md">
+                                    {apiKeys.map((apiKey) => {
+                                        const status = getKeyStatus(apiKey);
+                                        return (
+                                            <Card key={apiKey._id} bg="primary.11" radius="md" padding="md">
                                             <Group justify="space-between" align="flex-start">
                                                 <Stack gap="xs" style={{ flex: 1 }}>
                                                     <Group gap="sm" align="center">
@@ -108,9 +114,9 @@ export default function ApiKeysPage() {
                                                         </Text>
                                                         <Badge
                                                             variant="light"
-                                                            color={getKeyStatusColor(apiKey)}
+                                                            color={status.color}
                                                             size="xs">
-                                                            {getKeyStatusText(apiKey)}
+                                                            {status.text}
                                                         </Badge>
                                                         {apiKey.isElevated && (
                                                             <Badge variant="light" color="orange" size="xs">
@@ -166,50 +172,27 @@ export default function ApiKeysPage() {
                                                 </Stack>
 
                                                 <Stack gap="xs" align="flex-end">
-                                                    <Group gap="xs">
-                                                        <Text size="xs" c="dimmed">
-                                                            Created:
-                                                        </Text>
-                                                        <DateBadge
-                                                            date={new Date(apiKey.createdAt)}
-                                                            size="sm"
-                                                            staticColor
-                                                        />
-                                                    </Group>
+                                                    <DateRow label="Created:" date={new Date(apiKey.createdAt)} />
                                                     {apiKey.lastUsedAt && (
-                                                        <Group gap="xs">
-                                                            <Text size="xs" c="dimmed">
-                                                                Last used:
-                                                            </Text>
-                                                            <DateBadge
-                                                                date={new Date(apiKey.lastUsedAt)}
-                                                                size="sm"
-                                                                staticColor
-                                                            />
-                                                        </Group>
+                                                        <DateRow label="Last used:" date={new Date(apiKey.lastUsedAt)} />
                                                     )}
                                                     {apiKey.revokedAt && (
-                                                        <Group gap="xs">
-                                                            <Text size="xs" c="red">
-                                                                Revoked:
-                                                            </Text>
-                                                            <DateBadge
-                                                                date={new Date(apiKey.revokedAt)}
-                                                                size="sm"
-                                                                staticColor
-                                                            />
-                                                        </Group>
+                                                        <DateRow
+                                                            label="Revoked:"
+                                                            date={new Date(apiKey.revokedAt)}
+                                                            color="red"
+                                                        />
                                                     )}
                                                 </Stack>
                                             </Group>
-                                        </Card>
-                                    ))}
+                                            </Card>
+                                        );
+                                    })}
                                 </Stack>
                             </Accordion.Panel>
                         </Accordion.Item>
                     ))}
-                </Accordion>
-            </Stack>
-        </Card>
+            </Accordion>
+        </ApiKeysPageLayout>
     );
 }
