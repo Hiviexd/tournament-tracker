@@ -1,4 +1,3 @@
-import moment from "moment";
 import { RankedChoiceVote, RankedChoiceVoteScore } from "../interfaces/Vote";
 import { IUser } from "../interfaces/User";
 
@@ -56,12 +55,12 @@ export function isEnchantTicketLink(link: string): boolean {
 }
 
 /**
- * Get the number of years from a number of days
+ * Get the number of full years from a number of days (365 days = 1 year).
+ * Uses fixed 365-day years so that e.g. 730 days = 2 years for badge eligibility.
  * @param days Number of days
  */
 export function getYearsFromDays(days: number) {
-    const duration = moment.duration(days, "days");
-    return Math.floor(duration.asYears());
+    return Math.floor(days / 365);
 }
 
 /**
