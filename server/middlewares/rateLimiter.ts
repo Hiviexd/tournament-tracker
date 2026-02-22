@@ -1,5 +1,9 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { enqueueRateLimitAlert } from "../../utils/rateLimitAlerts";
+
+function keyFromIp(req: { ip?: string }): string {
+    return req.ip ? ipKeyGenerator(req.ip) : "unknown";
+}
 
 export const csrfTokenFetchLimiter = rateLimit({
     windowMs: 60 * 1000,
@@ -8,7 +12,7 @@ export const csrfTokenFetchLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => req.ip || "unknown",
+    keyGenerator: (req) => keyFromIp(req),
 });
 
 export const apiKeyManagementLimiter = rateLimit({
@@ -18,7 +22,7 @@ export const apiKeyManagementLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => (req.session?.mongoId as string) || req.ip || "unknown",
+    keyGenerator: (req) => (req.session?.mongoId as string) || keyFromIp(req),
 });
 
 // Session-based rate limiter
@@ -29,9 +33,7 @@ export const sessionRateLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => {
-        return (req.session?.mongoId as string) || req.ip || "unknown";
-    },
+    keyGenerator: (req) => (req.session?.mongoId as string) || keyFromIp(req),
     skip: (req, res) => res.locals?.authMethod === "apiKey", // skip if API key
     handler: (req, res, _next, options) => {
         try {
@@ -61,9 +63,7 @@ export const apiKeyRateLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => {
-        return (req.headers["authorization"] as string) || req.ip || "unknown";
-    },
+    keyGenerator: (req) => (req.headers["authorization"] as string) || keyFromIp(req),
     skip: (req, res) => res.locals?.authMethod !== "apiKey", // apply only to API keys
     handler: (req, res, _next, options) => {
         try {

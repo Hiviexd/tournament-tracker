@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 import session from "express-session";
 import MongoStoreSession from "connect-mongo";
 import config from "../config.json";
-import "express-async-errors";
 import { logger } from "./middlewares/logger";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -140,7 +139,7 @@ apiRouter.use("/search", globalSearchRouter);
 app.use("/api", apiRouter);
 
 // 404 handler for API routes
-app.use("/api/*", (req, res) => {
+app.use("/api/*splat", (req, res) => {
     res.status(404).json({ error: "API endpoint not found" });
 });
 
@@ -218,7 +217,8 @@ const mode =
 
 app.set("port", port);
 
-app.listen(port, async () => {
+app.listen(port, async (err?: Error) => {
+    if (err) throw err;
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
     console.log(
