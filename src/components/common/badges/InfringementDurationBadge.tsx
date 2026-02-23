@@ -1,6 +1,6 @@
 import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IInfringement } from "../../../../interfaces/User";
+import { IInfringement } from "../../../../interfaces/Infringement";
 import moment from "moment";
 
 interface IProps {

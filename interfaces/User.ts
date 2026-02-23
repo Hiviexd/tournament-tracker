@@ -1,5 +1,6 @@
 import { IOsuCountry } from "./OsuApi";
 import { Model, Types } from "mongoose";
+import { IInfringement } from "./Infringement";
 
 export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm" | "dev";
 
@@ -63,41 +64,4 @@ export interface IUser {
 
 export interface IUserStatics extends Model<IUser> {
     findByUsernameOrOsuId: (user: string | number) => Promise<IUser | null>;
-}
-
-// infringements
-
-export enum InfringementType {
-    NOTE = "note",
-    WARNING = "warning",
-    PROBATION = "probation",
-    TOURNAMENT_BAN = "tournament_ban",
-    HOSTING_BAN = "hosting_ban",
-    STAFFING_BAN = "staffing_ban",
-}
-
-export interface IInfringement {
-    _id?: Types.ObjectId;
-    id?: string;
-    type: InfringementType;
-    // duration: number;
-    startDate?: Date;
-    endDate?: Date;
-    reason: string;
-    threadId?: string;
-    enchantUrl?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-
-    // virtuals
-    isNote?: boolean;
-    isIndefinite?: boolean;
-    typeString?: string;
-    isPunishment?: boolean;
-    isExpired?: boolean;
-}
-
-export interface WatchlistQuery {
-    userInput?: string;
-    infringementType?: InfringementType;
 }

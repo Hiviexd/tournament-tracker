@@ -32,7 +32,8 @@ import { IVoting } from "../../interfaces/Voting";
 const defaultPopulate = [
     {
         path: "hosts",
-        select: "username osuId groups coverUrl country infringements",
+        select: "username osuId groups coverUrl country",
+        populate: { path: "infringements" },
     },
     {
         path: "assignedReviewers",
@@ -74,7 +75,8 @@ const defaultPopulate = [
     },
     {
         path: "winners",
-        select: "username osuId groups coverUrl country infringements",
+        select: "username osuId groups coverUrl country",
+        populate: { path: "infringements" },
     },
 ];
 

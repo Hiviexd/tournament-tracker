@@ -1,5 +1,5 @@
 import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip, Divider, ThemeIcon } from "@mantine/core";
-import { IInfringement, InfringementType } from "../../../interfaces/User";
+import { IInfringement, InfringementType } from "../../../interfaces/Infringement";
 import InfringementBadge from "../common/badges/InfringementBadge";
 import InfringementDurationBadge from "../common/badges/InfringementDurationBadge";
 import InfringementExpirationBadge from "../common/badges/InfringementExpirationBadge";
@@ -37,7 +37,7 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
                 <Stack gap="xs">
                     <Group gap="xs">
                         <InfringementBadge infringement={infringement} size="sm" />
-                        {infringement.isPunishment && (
+                        {infringement.isTimeBased && (
                             <Badge variant="light" color={infringement.isExpired ? "gray" : "green"} size="sm">
                                 {infringement.isExpired ? "Expired" : "Active"}
                             </Badge>

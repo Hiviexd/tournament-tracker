@@ -1,48 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import moment from "moment";
-import { IInfringement, IUser, IUserStatics, InfringementType, UserGroup } from "../../interfaces/User";
+import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
 import utils from "../../utils";
-import _ from "lodash";
-
-const InfringementSchema = new Schema<IInfringement>(
-    {
-        type: {
-            type: String,
-            required: true,
-            enum: Object.values(InfringementType),
-        },
-        startDate: { type: Date },
-        endDate: { type: Date },
-        reason: { type: String, required: true },
-        threadId: { type: String },
-        enchantUrl: { type: String },
-    },
-    { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
-);
-
-InfringementSchema.virtual("isNote").get(function (this: IInfringement) {
-    return this.type === InfringementType.NOTE;
-});
-
-InfringementSchema.virtual("isPunishment").get(function (this: IInfringement) {
-    return (
-        this.type !== InfringementType.NOTE &&
-        this.type !== InfringementType.WARNING &&
-        this.type !== InfringementType.PROBATION
-    );
-});
-
-InfringementSchema.virtual("isIndefinite").get(function (this: IInfringement) {
-    return this.startDate && !this.endDate;
-});
-
-InfringementSchema.virtual("isExpired").get(function (this: IInfringement) {
-    return this.endDate && this.endDate < new Date();
-});
-
-InfringementSchema.virtual("typeString").get(function (this: IInfringement) {
-    return _.startCase(this.type);
-});
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
@@ -66,10 +25,15 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         },
         badgeValue: { type: Number, default: 0 },
         email: { type: String },
-        infringements: [InfringementSchema],
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+UserSchema.virtual("infringements", {
+    ref: "Infringement",
+    localField: "_id",
+    foreignField: "userId",
+});
 
 UserSchema.virtual("avatarUrl").get(function (this: IUser) {
     return `https://a.ppy.sh/${this.osuId}`;
@@ -118,13 +82,12 @@ UserSchema.virtual("ccDuration").get(function (this: IUser) {
 UserSchema.virtual("activeInfringement").get(function (this: IUser) {
     if (!this.infringements || this.infringements.length === 0) return null;
 
-    // if there's an infringement with a indefinite duration, return it
     const indefiniteInfringement = this.infringements.find((infringement) => infringement.isIndefinite);
     if (indefiniteInfringement) return indefiniteInfringement;
 
     const activeInfringement = this.infringements
-        .filter((infringement) => infringement.isPunishment && !infringement.isExpired)
-        .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0]; // get the latest infringement
+        .filter((infringement) => infringement.isTimeBased && !infringement.isExpired)
+        .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0];
 
     return activeInfringement;
 });

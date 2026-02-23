@@ -1,6 +1,7 @@
 import { Card, Select, SimpleGrid, Stack } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { InfringementType, IUser } from "../../../interfaces/User";
+import { InfringementType } from "../../../interfaces/Infringement";
+import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
 import _ from "lodash";
 
@@ -18,7 +19,6 @@ export default function WatchlistFilters({ values, onChange }: IProps) {
     const infringementTypeOptions = [
         { value: InfringementType.NOTE, label: _.startCase(InfringementType.NOTE) },
         { value: InfringementType.WARNING, label: _.startCase(InfringementType.WARNING) },
-        { value: InfringementType.PROBATION, label: _.startCase(InfringementType.PROBATION) },
         { value: InfringementType.TOURNAMENT_BAN, label: _.startCase(InfringementType.TOURNAMENT_BAN) },
         { value: InfringementType.HOSTING_BAN, label: _.startCase(InfringementType.HOSTING_BAN) },
         { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },

@@ -1,4 +1,4 @@
-import { IInfringement } from "../../../interfaces/User";
+import { IInfringement } from "../../../interfaces/Infringement";
 import { HoverCard, ActionIcon, ScrollArea } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MarkdownText from "../common/MarkdownText";

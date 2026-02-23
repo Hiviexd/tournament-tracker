@@ -1,6 +1,6 @@
 import { Badge, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IInfringement, InfringementType } from "../../../../interfaces/User";
+import { IInfringement, InfringementType } from "../../../../interfaces/Infringement";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface IProps {
@@ -22,10 +22,6 @@ const infringementConfig: Record<InfringementType, IBadgeConfig> = {
     [InfringementType.WARNING]: {
         color: "yellow",
         icon: "exclamation-triangle",
-    },
-    [InfringementType.PROBATION]: {
-        color: "orange",
-        icon: "user-clock",
     },
     [InfringementType.TOURNAMENT_BAN]: {
         color: "red",

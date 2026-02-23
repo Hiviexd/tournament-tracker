@@ -1,5 +1,6 @@
 import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
-import { IUser, InfringementType } from "../../interfaces/User";
+import { IUser } from "../../interfaces/User";
+import { InfringementType } from "../../interfaces/Infringement";
 import { FlattenMaps } from "mongoose";
 import { IReview } from "../../interfaces/Review";
 import { ITicket } from "../../interfaces/Ticket";
@@ -257,7 +258,7 @@ class TournamentService {
             return { error: "At least one host is required" };
         }
 
-        const hostsUnordered = await User.find({ _id: { $in: hostIds } });
+        const hostsUnordered = await User.find({ _id: { $in: hostIds } }).populate("infringements");
 
         if (hostsUnordered.length !== hostIds.length) {
             return { error: "One or more host IDs are invalid" };
@@ -469,7 +470,10 @@ class TournamentService {
         winners: IUser[],
         currentUser: IUser
     ): Promise<{ error?: string }> {
-        const winnersWithActiveTournamentBan = winners.filter(
+        const winnerIds = winners.map((w) => w._id || w);
+        const populatedWinners = await User.find({ _id: { $in: winnerIds } }).populate("infringements");
+
+        const winnersWithActiveTournamentBan = populatedWinners.filter(
             (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
         );
         if (winnersWithActiveTournamentBan.length > 0) {
@@ -482,8 +486,7 @@ class TournamentService {
 
         tournament.winners = winners;
 
-        // Need to re-fetch because tournament.winners is depopulated after update
-        const winnerUsers = await User.find({ _id: { $in: winners } }).select("username osuId");
+        const winnerUsers = populatedWinners;
 
         await this.addTournamentLog(
             tournament,
