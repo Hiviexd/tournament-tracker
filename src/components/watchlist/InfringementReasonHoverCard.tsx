@@ -1,6 +1,6 @@
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { IInfringement } from "../../../interfaces/Infringement";
-import { HoverCard, ActionIcon, ScrollArea, Box } from "@mantine/core";
+import { HoverCard, ActionIcon, ScrollArea } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MarkdownText from "../common/MarkdownText";
 
@@ -10,25 +10,27 @@ interface IProps {
     children?: ReactNode;
 }
 
-/** Wrapper so HoverCard.Target has a ref-capable DOM node (badges don't forward ref). */
-const HoverTarget = forwardRef<HTMLSpanElement, { children: ReactNode }>(function HoverTarget({ children }, ref) {
-    return (
-        <Box component="span" ref={ref} style={{ display: "inline-block", cursor: "default" }}>
-            {children}
-        </Box>
-    );
-});
+/** Native span so HoverCard.Target gets a ref-capable DOM node and receives hover handlers (badges don't forward ref). */
+const HoverTarget = forwardRef<HTMLSpanElement, { children: ReactNode } & HTMLAttributes<HTMLSpanElement>>(
+    function HoverTarget({ children, style, ...props }, ref) {
+        return (
+            <span ref={ref} style={{ display: "inline-block", ...style }} {...props}>
+                {children}
+            </span>
+        );
+    }
+);
 
 export default function InfringementReasonHoverCard({ infringement, children }: IProps) {
     const reasonContent = infringement.reason?.trim() ? infringement.reason : "*No reason provided*";
 
     return (
         <HoverCard
-            position="left"
+            position="top"
             shadow="md"
             withArrow
-            openDelay={200}
-            closeDelay={100}
+            openDelay={150}
+            closeDelay={200}
             styles={{ dropdown: { zIndex: 10000 } }}>
             <HoverCard.Target>
                 {children != null ? (

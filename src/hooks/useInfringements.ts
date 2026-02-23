@@ -35,7 +35,7 @@ export function useWatchlist(params?: {
 
 export function useAddInfringement() {
     const queryClient = useQueryClient();
-    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+    const [, setSelectedUser] = useAtom(selectedUserAtom);
 
     return useMutation({
         mutationFn: async (data: {
@@ -61,9 +61,7 @@ export function useAddInfringement() {
             });
             return utils.handleMutationResponse(response);
         },
-        onSuccess: (responseData, variables) => {
-            const userId = variables.userId;
-
+        onSuccess: (responseData) => {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
@@ -82,7 +80,7 @@ export function useAddInfringement() {
 
 export function useUpdateInfringement() {
     const queryClient = useQueryClient();
-    const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
+    const [, setSelectedUser] = useAtom(selectedUserAtom);
 
     return useMutation({
         mutationFn: async (data: {
@@ -108,9 +106,7 @@ export function useUpdateInfringement() {
             });
             return utils.handleMutationResponse(response);
         },
-        onSuccess: (responseData, variables) => {
-            const userId = variables.userId;
-
+        onSuccess: (responseData) => {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
