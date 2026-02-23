@@ -64,7 +64,8 @@ class UsersController {
             return res.status(404).json({ error: "User not found" });
         }
 
-        const sanitizedUser = UserService.sanitizeUser(user, currentUser);
+        const userWithInfringements = await User.findById(user._id).populate("infringements");
+        const sanitizedUser = UserService.sanitizeUser(userWithInfringements!, currentUser);
 
         res.json(sanitizedUser);
     }

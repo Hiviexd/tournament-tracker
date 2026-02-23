@@ -24,13 +24,16 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
     // If we already have a user in the atom, check if it matches userId
     const selectedUserMatches = userId && selectedUser && selectedUser.osuId.toString() === userId;
 
-    // Only fetch if userId is present AND the selected user doesn't match
-    const shouldFetch = Boolean(userId && !selectedUserMatches);
+    // Always fetch when userId is in URL so we get user with infringements (direct URL or "Open user")
+    const shouldFetch = Boolean(userId);
 
     const { data: fetchedUser, isLoading } = useUser(userId, {
         enabled: shouldFetch,
         retry: false,
     });
+
+    // Prefer fetched user when we have one (has infringements); otherwise use selectedUser from table
+    const displayedUser = (userId && fetchedUser) ? fetchedUser : selectedUser;
 
     const { data: relatedReportsAndVotings, isLoading: isLoadingRelatedReportsAndVotings } =
         useRelatedReportsAndVotings(userId ?? "");
@@ -103,9 +106,9 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
             <Modal opened={opened} onClose={handleClose} title="User Watchlist" size="xl">
                 {isLoading ? (
                     <LoadingState />
-                ) : selectedUser ? (
+                ) : displayedUser ? (
                     <Stack gap="md">
-                        <UserCard user={selectedUser} static fullWidth />
+                        <UserCard user={displayedUser} static fullWidth />
 
                         <Button
                             onClick={() => setIsCreateModalOpen(true)}
@@ -132,7 +135,7 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
 
                         <Divider />
 
-                        <UserInfringementsList user={selectedUser} />
+                        <UserInfringementsList user={displayedUser} />
                     </Stack>
                 ) : null}
             </Modal>
@@ -140,7 +143,7 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
             <InfringementCreateModal
                 opened={isCreateModalOpen}
                 onClose={handleCreateModalClose}
-                preselectedUser={selectedUser}
+                preselectedUser={displayedUser}
             />
         </>
     );

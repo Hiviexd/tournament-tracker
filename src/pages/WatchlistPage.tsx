@@ -1,9 +1,21 @@
-import { useMemo, useState } from "react";
-import { Stack, Table, ScrollArea, Card, Skeleton, Button, Tooltip, ActionIcon } from "@mantine/core";
+import { useEffect, useMemo, useState } from "react";
+import {
+    Stack,
+    Table,
+    ScrollArea,
+    Card,
+    Skeleton,
+    Button,
+    Tooltip,
+    ActionIcon,
+    Group,
+    Badge,
+    Pagination,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQueryStates, parseAsString } from "nuqs";
+import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { useWatchlist } from "../hooks/useInfringements";
-import { InfringementType } from "../../interfaces/Infringement";
+import { InfringementType, IInfringement, TIME_BASED_TYPES } from "../../interfaces/Infringement";
 import { IUser } from "../../interfaces/User";
 import WatchlistFilters from "../components/watchlist/WatchlistFilters";
 import UserDisplay from "../components/common/UserDisplay";
@@ -11,8 +23,6 @@ import InfringementCreateModal from "../components/watchlist/InfringementCreateM
 import UserWatchlistModal from "../components/watchlist/UserWatchlistModal";
 import EmptyState from "../components/common/EmptyState";
 import InfringementBadge from "../components/common/badges/InfringementBadge";
-import InfringementDurationBadge from "../components/common/badges/InfringementDurationBadge";
-import InfringementExpirationBadge from "../components/common/badges/InfringementExpirationBadge";
 import CopyActionIcon from "../components/common/buttons/CopyActionIcon";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
@@ -20,9 +30,54 @@ import config from "../../config.json";
 import { useSearchParams } from "react-router-dom";
 import InfringementReasonHoverCard from "../components/watchlist/InfringementReasonHoverCard";
 
+const WATCHLIST_PAGE_SIZE = 20;
+
 interface FilterValues {
-    search: string;
     type: InfringementType | "";
+}
+
+function isTimeBasedType(i: IInfringement): boolean {
+    return (i.isTimeBased ?? TIME_BASED_TYPES.includes(i.type as InfringementType)) === true;
+}
+
+function isExpiredInfringement(i: IInfringement): boolean {
+    return !!(i.endDate && new Date(i.endDate) < new Date());
+}
+
+/** Primary display priority: latest date-based ban (active over inactive), then latest warning, then latest note. */
+function getPrimaryInfringement(user: IUser): IInfringement | null {
+    const infringements = user?.infringements ?? [];
+    if (infringements.length === 0) return null;
+
+    const byCreatedDesc = (a: IInfringement, b: IInfringement) =>
+        (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+
+    const bans = infringements.filter(isTimeBasedType);
+    if (bans.length > 0) {
+        const sortedBans = [...bans].sort((a, b) => {
+            const aActive = isTimeBasedType(a) && !isExpiredInfringement(a) ? 1 : 0;
+            const bActive = isTimeBasedType(b) && !isExpiredInfringement(b) ? 1 : 0;
+            if (bActive !== aActive) return bActive - aActive;
+            return byCreatedDesc(a, b);
+        });
+        return sortedBans[0];
+    }
+
+    const latestWarning = [...infringements]
+        .filter((i) => i.type === InfringementType.WARNING)
+        .sort(byCreatedDesc)[0];
+    if (latestWarning) return latestWarning;
+
+    const latestNote = [...infringements]
+        .filter((i) => i.type === InfringementType.NOTE)
+        .sort(byCreatedDesc)[0];
+    return latestNote ?? null;
+}
+
+function getReasonInfringement(user: IUser): IInfringement | null {
+    const primary = getPrimaryInfringement(user);
+    if (primary) return primary;
+    return user?.latestAction ?? null;
 }
 
 export default function WatchlistPage() {
@@ -52,65 +107,63 @@ export default function WatchlistPage() {
         });
     };
 
-    // Define query state parsers with default values
     const [queryState, setQueryState] = useQueryStates(
         {
-            search: parseAsString.withDefault(""),
             type: parseAsString.withDefault(""),
+            page: parseAsInteger.withDefault(1),
         },
-        {
-            // Only include non-default values in URL
-            clearOnDefault: true,
-        }
+        { clearOnDefault: true }
     );
 
-    // Create filters object for WatchlistFilters component
     const filters: FilterValues = useMemo(
         () => ({
-            search: queryState.search,
             type: queryState.type as InfringementType | "",
         }),
-        [queryState.search, queryState.type]
+        [queryState.type]
     );
 
     const handleFilterChange = (newFilters: FilterValues) => {
+        const typeChanged = newFilters.type !== filters.type;
         setQueryState({
-            search: newFilters.search,
             type: newFilters.type,
+            page: typeChanged ? 1 : queryState.page,
         });
     };
 
-    // Create API params from filters
-    const apiParams = useMemo(() => {
-        const params: { userInput?: string; infringementType?: string } = {};
+    const apiParams = useMemo(
+        () => ({
+            infringementType: filters.type || undefined,
+            page: queryState.page,
+            limit: WATCHLIST_PAGE_SIZE,
+        }),
+        [filters.type, queryState.page]
+    );
 
-        if (filters.search) {
-            params.userInput = filters.search;
+    const { data, isLoading, error } = useWatchlist(apiParams);
+
+    const users = data?.users ?? [];
+    const totalPages = data?.pages ?? 0;
+
+    useEffect(() => {
+        if (data && queryState.page > data.pages && data.pages > 0) {
+            setQueryState({ page: data.pages });
         }
+    }, [data, queryState.page, setQueryState]);
 
-        if (filters.type) {
-            params.infringementType = filters.type;
-        }
-
-        return Object.keys(params).length > 0 ? params : undefined;
-    }, [filters]);
-
-    const { data: users, isLoading, error } = useWatchlist(apiParams);
-
-    // No need for frontend filtering since backend handles it
-    const filteredUsers = users || [];
+    const handlePageChange = (page: number) => {
+        setQueryState({ page });
+    };
 
     const LoadingState = () => (
         <Card shadow="sm" p="lg">
             <ScrollArea>
-                <Table miw={{ base: 1200, md: 800 }}>
+                <Table miw={{ base: 800, md: 700 }}>
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>User</Table.Th>
-                            <Table.Th>Active Infringement</Table.Th>
-                            <Table.Th>Duration</Table.Th>
-                            <Table.Th>Expiration</Table.Th>
-                            <Table.Th ta="center">Reason</Table.Th>
+                            <Table.Th>Primary</Table.Th>
+                            <Table.Th>Latest action</Table.Th>
+                            <Table.Th>Reason</Table.Th>
                             <Table.Th ta="center">Enchant</Table.Th>
                             <Table.Th ta="center">Thread</Table.Th>
                         </Table.Tr>
@@ -118,33 +171,12 @@ export default function WatchlistPage() {
                     <Table.Tbody>
                         {Array.from({ length: 10 }).map((_, i) => (
                             <Table.Tr key={i}>
-                                <Table.Td>
-                                    <Skeleton height={20} width={120} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={100} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={80} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={80} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={100} />
-                                </Table.Td>
-                                <Table.Td ta="center">
-                                    <Skeleton height={20} width={40} />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Skeleton height={20} width={100} />
-                                </Table.Td>
-                                <Table.Td ta="center">
-                                    <Skeleton height={20} width={40} />
-                                </Table.Td>
-                                <Table.Td ta="center">
-                                    <Skeleton height={20} width={40} />
-                                </Table.Td>
+                                <Table.Td><Skeleton height={20} width={120} /></Table.Td>
+                                <Table.Td><Skeleton height={20} width={100} /></Table.Td>
+                                <Table.Td><Skeleton height={20} width={90} /></Table.Td>
+                                <Table.Td><Skeleton height={20} width={100} /></Table.Td>
+                                <Table.Td ta="center"><Skeleton height={20} width={40} /></Table.Td>
+                                <Table.Td ta="center"><Skeleton height={20} width={40} /></Table.Td>
                             </Table.Tr>
                         ))}
                     </Table.Tbody>
@@ -157,7 +189,7 @@ export default function WatchlistPage() {
         <Stack gap="md">
             <UserWatchlistModal userId={searchParams.get("user")} onClose={handleUserWatchlistModalClose} />
 
-            <WatchlistFilters values={filters} onChange={handleFilterChange} />
+            <WatchlistFilters values={filters} onChange={handleFilterChange} onUserSelect={handleUserSelect as (user: IUser | null) => void} />
 
             <Button
                 onClick={() => setIsCreateModalOpen(true)}
@@ -170,98 +202,120 @@ export default function WatchlistPage() {
 
             {isLoading ? (
                 <LoadingState />
-            ) : !filteredUsers || filteredUsers.length === 0 ? (
+            ) : !users.length ? (
                 <EmptyState
                     icon="user-shield"
                     title="No users found"
                     description={error ? "Try refreshing the page" : "Try adjusting your filters"}
                 />
             ) : (
-                <Card shadow="sm" p="lg">
-                    <ScrollArea>
-                        <Table miw={{ base: 1200, md: 800 }}>
-                            <Table.Thead>
-                                <Table.Tr>
-                                    <Table.Th>User</Table.Th>
-                                    <Table.Th>Active Infringement</Table.Th>
-                                    <Table.Th>Duration</Table.Th>
-                                    <Table.Th>Expiration</Table.Th>
-                                    <Table.Th ta="center">Reason</Table.Th>
-                                    <Table.Th ta="center">Enchant</Table.Th>
-                                    <Table.Th ta="center">Thread</Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                                {filteredUsers.map((user) => (
-                                    <Table.Tr key={user.id}>
-                                        <Table.Td>
-                                            <UserDisplay
-                                                user={user}
-                                                onClick={() => handleUserSelect(user)}
-                                                disablePopover
-                                            />
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <InfringementBadge
-                                                infringement={user.activeInfringement || user.latestAction}
-                                            />
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <InfringementDurationBadge
-                                                infringement={user.activeInfringement || user.latestAction}
-                                            />
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <InfringementExpirationBadge
-                                                infringement={user.activeInfringement || user.latestAction}
-                                            />
-                                        </Table.Td>
-                                        <Table.Td ta="center">
-                                            <InfringementReasonHoverCard
-                                                infringement={user.activeInfringement || user.latestAction}
-                                            />
-                                        </Table.Td>
-                                        <Table.Td ta="center">
-                                            {user.activeInfringement?.enchantUrl || user.latestAction?.enchantUrl ? (
-                                                <Tooltip label="Open Enchant ticket">
-                                                    <ActionIcon
-                                                        variant="subtle"
-                                                        onClick={() =>
-                                                            window.open(
-                                                                user.activeInfringement?.enchantUrl ||
-                                                                    user.latestAction?.enchantUrl,
-                                                                "_blank"
-                                                            )
-                                                        }
-                                                        color="primary"
-                                                        size="md">
-                                                        <FontAwesomeIcon icon="envelope" size="sm" />
-                                                    </ActionIcon>
-                                                </Tooltip>
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </Table.Td>
-                                        <Table.Td ta="center">
-                                            {(user.activeInfringement || user.latestAction)?.threadId ? (
-                                                <CopyActionIcon
-                                                    value={getDiscordThreadLink(
-                                                        (user.activeInfringement || user.latestAction)?.threadId || ""
-                                                    )}
-                                                    tooltip="Copy Discord thread link"
-                                                    size="md"
-                                                    color="primary"
-                                                />
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </Table.Td>
+                <>
+                    <Card shadow="sm" p="lg">
+                        <ScrollArea>
+                            <Table miw={{ base: 800, md: 700 }}>
+                                <Table.Thead>
+                                    <Table.Tr>
+                                        <Table.Th>User</Table.Th>
+                                        <Table.Th>Primary</Table.Th>
+                                        <Table.Th>Latest action</Table.Th>
+                                        <Table.Th>Reason</Table.Th>
+                                        <Table.Th ta="center">Enchant</Table.Th>
+                                        <Table.Th ta="center">Thread</Table.Th>
                                     </Table.Tr>
-                                ))}
-                            </Table.Tbody>
-                        </Table>
-                    </ScrollArea>
-                </Card>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                    {users.map((user) => {
+                                        const primary = getPrimaryInfringement(user);
+                                        const reasonInf = getReasonInfringement(user);
+                                        const latestAction = user.latestAction;
+                                        const enchantUrl = primary?.enchantUrl ?? latestAction?.enchantUrl;
+                                        const threadId = primary?.threadId ?? latestAction?.threadId;
+                                        return (
+                                            <Table.Tr key={user.id}>
+                                                <Table.Td>
+                                                    <UserDisplay
+                                                        user={user}
+                                                        onClick={() => handleUserSelect(user)}
+                                                        disablePopover
+                                                    />
+                                                </Table.Td>
+                                                <Table.Td>
+                                                    {primary ? (
+                                                        <Group gap="xs" wrap="nowrap">
+                                                            <InfringementBadge infringement={primary} size="sm" />
+                                                            {primary.isTimeBased && (
+                                                                <Badge
+                                                                    variant="light"
+                                                                    color={primary.isExpired ? "gray" : "green"}
+                                                                    size="sm">
+                                                                    {primary.isExpired ? "Expired" : "Active"}
+                                                                </Badge>
+                                                            )}
+                                                        </Group>
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </Table.Td>
+                                                <Table.Td>
+                                                    {latestAction ? (
+                                                        <Group gap={4} wrap="nowrap">
+                                                            <InfringementBadge infringement={latestAction} size="sm" />
+                                                        </Group>
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </Table.Td>
+                                                <Table.Td>
+                                                    {reasonInf ? (
+                                                        <InfringementReasonHoverCard infringement={reasonInf} />
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </Table.Td>
+                                                <Table.Td ta="center">
+                                                    {enchantUrl ? (
+                                                        <Tooltip label="Open Enchant ticket">
+                                                            <ActionIcon
+                                                                variant="subtle"
+                                                                onClick={() => window.open(enchantUrl, "_blank")}
+                                                                color="primary"
+                                                                size="md">
+                                                                <FontAwesomeIcon icon="envelope" size="sm" />
+                                                            </ActionIcon>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </Table.Td>
+                                                <Table.Td ta="center">
+                                                    {threadId ? (
+                                                        <CopyActionIcon
+                                                            value={getDiscordThreadLink(threadId)}
+                                                            tooltip="Copy Discord thread link"
+                                                            size="md"
+                                                            color="primary"
+                                                        />
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </Table.Td>
+                                            </Table.Tr>
+                                        );
+                                    })}
+                                </Table.Tbody>
+                            </Table>
+                        </ScrollArea>
+                    </Card>
+                    {totalPages > 1 && (
+                        <Group justify="center">
+                            <Pagination
+                                value={queryState.page}
+                                onChange={handlePageChange}
+                                total={totalPages}
+                            />
+                        </Group>
+                    )}
+                </>
             )}
 
             <InfringementCreateModal opened={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />

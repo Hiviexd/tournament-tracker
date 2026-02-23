@@ -35,9 +35,12 @@ export interface IInfringement {
 }
 
 export interface WatchlistQuery {
-    userInput?: string;
     infringementType?: InfringementType;
+    page?: number;
+    limit?: number;
 }
+
+export const WATCHLIST_DEFAULT_LIMIT = 20;
 
 export interface IInfringementStatics extends Model<IInfringement> {
     findActiveForUser: (userId: string | Types.ObjectId) => Promise<IInfringement | null>;

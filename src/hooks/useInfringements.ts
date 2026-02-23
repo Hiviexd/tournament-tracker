@@ -4,14 +4,31 @@ import { useAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import { IUser } from "../../interfaces/User";
 
-export function useWatchlist(params?: { userInput?: string; infringementType?: string }) {
+export interface WatchlistResponse {
+    users: IUser[];
+    total: number;
+    page: number;
+    pages: number;
+}
+
+export function useWatchlist(params?: {
+    infringementType?: string;
+    page?: number;
+    limit?: number;
+}) {
     return useQuery({
         queryKey: ["watchlist", params],
         queryFn: () =>
-            utils.apiCall<IUser[]>({
+            utils.apiCall<WatchlistResponse>({
                 method: "get",
                 url: "/api/infringements/watchlist",
-                params,
+                params: params
+                    ? {
+                          infringementType: params.infringementType,
+                          page: params.page,
+                          limit: params.limit,
+                      }
+                    : undefined,
             }),
     });
 }
@@ -50,13 +67,14 @@ export function useAddInfringement() {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["user"] });
 
-            if (selectedUser?.id === userId) {
-                const res = responseData as { message: string; user: IUser };
-                if (res.user) {
-                    setSelectedUser(res.user);
-                }
+            const res = responseData as { message: string; user: IUser };
+            if (res.user) {
+                setSelectedUser(res.user);
+                // Update modal's useUser cache (URL uses osuId; key may be id or osuId)
+                queryClient.setQueryData(["user", res.user.osuId.toString()], res.user);
+                if (res.user.id) queryClient.setQueryData(["user", res.user.id], res.user);
             }
         },
     });
@@ -96,13 +114,14 @@ export function useUpdateInfringement() {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
-            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["user"] });
 
-            if (selectedUser?.id === userId) {
-                const res = responseData as { message: string; user: IUser };
-                if (res.user) {
-                    setSelectedUser(res.user);
-                }
+            const res = responseData as { message: string; user: IUser };
+            if (res.user) {
+                setSelectedUser(res.user);
+                // Update modal's useUser cache (URL uses osuId; key may be id or osuId)
+                queryClient.setQueryData(["user", res.user.osuId.toString()], res.user);
+                if (res.user.id) queryClient.setQueryData(["user", res.user.id], res.user);
             }
         },
     });

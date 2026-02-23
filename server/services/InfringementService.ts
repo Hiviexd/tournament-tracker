@@ -2,7 +2,13 @@ import { Types } from "mongoose";
 import moment from "moment";
 import Infringement from "../models/infringementModel";
 import User from "../models/userModel";
-import { IInfringement, InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "../../interfaces/Infringement";
+import {
+    IInfringement,
+    InfringementType,
+    TIME_BASED_TYPES,
+    WatchlistQuery,
+    WATCHLIST_DEFAULT_LIMIT,
+} from "../../interfaces/Infringement";
 import utils from "../../utils";
 
 class InfringementService {
@@ -45,7 +51,7 @@ class InfringementService {
             throw { status: 400, error: "Reason is required and must be a non-empty string" };
         }
 
-        if ((!threadId || typeof threadId !== "string") || threadId?.trim() === "") {
+        if ((threadId && typeof threadId !== "string") || threadId?.trim() === "") {
             throw { status: 400, error: "Thread ID must be a non-empty string" };
         }
 
@@ -53,7 +59,7 @@ class InfringementService {
             throw { status: 400, error: "Invalid Enchant ticket URL format" };
         }
 
-        const extractedThreadId = utils.extractDiscordThreadId(threadId) || undefined;
+        const extractedThreadId = utils.extractDiscordThreadId(threadId ?? null) || undefined;
 
         const user = await User.findById(userId).orFail();
 
@@ -169,35 +175,25 @@ class InfringementService {
             infringementFilter.type = query.infringementType;
         }
 
-        const userFilter: any = {};
-
-        if (query.userInput) {
-            const userInput = utils.escapeUsername(query.userInput);
-            if (utils.isNumeric(userInput)) {
-                userFilter.osuId = parseInt(userInput, 10);
-            } else {
-                userFilter.username = { $regex: userInput, $options: "i" };
-            }
-        }
-
-        // If there's a user filter, find matching users first to intersect
-        let targetUserIds: Types.ObjectId[] | undefined;
-        if (Object.keys(userFilter).length > 0) {
-            const matchingUsers = await User.find(userFilter).select("_id");
-            targetUserIds = matchingUsers.map((u) => u._id);
-            if (targetUserIds.length === 0) return [];
-            infringementFilter.userId = { $in: targetUserIds };
-        }
-
         const userIdsWithInfringements = await Infringement.distinct("userId", infringementFilter);
 
-        if (userIdsWithInfringements.length === 0) return [];
+        if (userIdsWithInfringements.length === 0) {
+            return { users: [], total: 0, page: 1, pages: 0 };
+        }
+
+        const page = Math.max(1, query.page ?? 1);
+        const limit = Math.min(100, Math.max(1, query.limit ?? WATCHLIST_DEFAULT_LIMIT));
+        const total = userIdsWithInfringements.length;
+        const pages = Math.ceil(total / limit);
+        const skip = (page - 1) * limit;
 
         const users = await User.find({ _id: { $in: userIdsWithInfringements } })
-            .populate("infringements")
-            .sort({ updatedAt: -1 });
+            .sort({ updatedAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate("infringements");
 
-        return users;
+        return { users, total, page, pages };
     }
 
     public async getInfringementsNeedingEmail() {

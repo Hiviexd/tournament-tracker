@@ -13,9 +13,14 @@ import config from "../../config.json";
 class InfringementsController {
     /** GET watchlist */
     public async getWatchlist(req: Request, res: Response) {
-        const query = req.query as WatchlistQuery;
-        const users = await InfringementService.getWatchlist(query);
-        res.json(users);
+        const reqQuery = req.query as Record<string, string | undefined>;
+        const query: WatchlistQuery = {
+            infringementType: reqQuery.infringementType as WatchlistQuery["infringementType"],
+            page: reqQuery.page ? parseInt(reqQuery.page, 10) : undefined,
+            limit: reqQuery.limit ? parseInt(reqQuery.limit, 10) : undefined,
+        };
+        const result = await InfringementService.getWatchlist(query);
+        res.json(result);
     }
 
     /** POST add infringement */
