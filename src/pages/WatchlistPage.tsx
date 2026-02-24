@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Stack, Button, Group, Pagination } from "@mantine/core";
+import { Stack, Button, Group, Pagination, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { useWatchlist } from "../hooks/useInfringements";
@@ -116,6 +116,7 @@ export default function WatchlistPage() {
                 />
             ) : (
                 <>
+                    <Divider />
                     {totalPages > 1 && (
                         <Group justify="center">
                             <Pagination
