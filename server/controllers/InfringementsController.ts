@@ -43,7 +43,7 @@ class InfringementsController {
             await LogService.generate(
                 req.session.mongoId!,
                 `Added **${_.startCase(type)}** infringement to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
-                "user"
+                "user",
             );
 
             const isTimeBased = TIME_BASED_TYPES.includes(type);
@@ -62,7 +62,7 @@ class InfringementsController {
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                 .setColor(isIndefinite ? DiscordUtils.webhookColors.darkRed : typeColorMap[type])
                 .setDescription(
-                    `Added **${_.startCase(type)}** to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`
+                    `Added **${_.startCase(type)}** to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
                 )
                 .setFooter(`ID: ${infringement.id}`);
 
@@ -71,9 +71,9 @@ class InfringementsController {
                     const humanizedDuration = moment.duration(moment(endDate).diff(moment(startDate))).humanize();
                     embed.addField(
                         "Duration",
-                        `${moment(startDate).format("MMM D, YYYY")} — ${moment(endDate).format(
-                            "MMM D, YYYY"
-                        )} (${humanizedDuration})`
+                        `${moment(startDate).format("MMM D, YYYY")} – ${moment(endDate).format(
+                            "MMM D, YYYY",
+                        )} (${humanizedDuration})`,
                     );
                 } else if (startDate) {
                     embed.addField("Duration", "Indefinite");
@@ -82,7 +82,13 @@ class InfringementsController {
 
             embed.addField("Reason", utils.shorten(reason, 1024));
 
-            await new WebhookBuilder().addEmbed(embed).send();
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+            if (infringement.threadId) {
+                webhookBuilder.setThreadId(infringement.threadId);
+            }
+
+            await webhookBuilder.send();
         } catch (err: any) {
             if (err.status) {
                 return res.status(err.status).json({ error: err.error });
@@ -110,7 +116,7 @@ class InfringementsController {
             await LogService.generate(
                 req.session.mongoId!,
                 `Updated **${infringement.typeString}** infringement of [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
-                "user"
+                "user",
             );
         } catch (err: any) {
             if (err.status) {
