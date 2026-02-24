@@ -1,6 +1,7 @@
 import { Stack, Text, Divider, Badge, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IInfringement, IUser } from "../../../interfaces/User";
+import { IInfringement } from "../../../interfaces/Infringement";
+import { IUser } from "../../../interfaces/User";
 import InfringementCard from "./InfringementCard";
 import EmptyState from "../common/EmptyState";
 import { useState } from "react";
@@ -11,24 +12,23 @@ interface IProps {
 }
 
 export default function UserInfringementsList({ user }: IProps) {
-    const activeInfringement = user.activeInfringement;
+    const infringements = user?.infringements ?? [];
+    const activeInfringement = user?.activeInfringement;
 
     const [editInfringementModalOpened, { open: openEditInfringementModal, close: closeEditInfringementModal }] =
         useDisclosure(false);
     const [selectedInfringement, setSelectedInfringement] = useState<IInfringement | null>(null);
 
     // Exclude active infringement
-    const historicalInfringements = user.infringements
-        // filter by id
+    const historicalInfringements = infringements
         .filter((infringement) => infringement.id !== activeInfringement?.id)
         .sort((a, b) => {
-            // Sort by creation date (most recent first)
             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return dateB - dateA;
         });
 
-    if (!user.infringements || user.infringements.length === 0) {
+    if (!user || infringements.length === 0) {
         return <EmptyState icon="user-shield" title="No infringements recorded for this user." height={150} />;
     }
 
@@ -49,7 +49,7 @@ export default function UserInfringementsList({ user }: IProps) {
                     Infringements
                 </Text>
                 <Badge variant="light" color="primary">
-                    {user.infringements.length}
+                    {infringements.length}
                 </Badge>
             </Group>
 

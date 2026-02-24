@@ -4,8 +4,9 @@ import { useForm } from "@mantine/form";
 import { useState, useEffect } from "react";
 import UserSearch from "../common/UserSearch";
 import TextEditor from "../common/TextEditor";
-import { useAddInfringement } from "../../hooks/useUsers";
-import { InfringementType, IUser } from "../../../interfaces/User";
+import { useAddInfringement } from "../../hooks/useInfringements";
+import { InfringementType, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
+import { IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import _ from "lodash";
 import utils from "../../../utils";
@@ -44,12 +45,12 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             },
             type: (value) => (!value ? "Infringement type is required" : null),
             startDate: (value) => {
-                if (isNotPunishment) return null;
+                if (isNonTimeBased) return null;
                 if (!value) return "Start date is required for punishments";
                 return null;
             },
             endDate: (value) => {
-                if (isNotPunishment || form.values.isIndefinite) return null;
+                if (isNonTimeBased || form.values.isIndefinite) return null;
                 if (!value) return "End date is required for finite punishments";
                 if (form.values.startDate && value <= form.values.startDate) {
                     return "End date must be after start date";
@@ -80,15 +81,11 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [preselectedUserId]); // Cannot add form to dependencies to avoid infinite loop
 
-    const isNotPunishment =
-        form.values.type === InfringementType.NOTE ||
-        form.values.type === InfringementType.WARNING ||
-        form.values.type === InfringementType.PROBATION;
+    const isNonTimeBased = !TIME_BASED_TYPES.includes(form.values.type);
 
     const infringementTypeOptions = [
         { value: InfringementType.NOTE, label: _.startCase(InfringementType.NOTE) },
         { value: InfringementType.WARNING, label: _.startCase(InfringementType.WARNING) },
-        { value: InfringementType.PROBATION, label: _.startCase(InfringementType.PROBATION) },
         { value: InfringementType.TOURNAMENT_BAN, label: _.startCase(InfringementType.TOURNAMENT_BAN) },
         { value: InfringementType.HOSTING_BAN, label: _.startCase(InfringementType.HOSTING_BAN) },
         { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
@@ -103,7 +100,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         try {
             let confirmed = true;
             const activeInfringement = preselectedUser?.activeInfringement || selectedUser?.activeInfringement;
-            if (activeInfringement && !isNotPunishment) {
+            if (activeInfringement && !isNonTimeBased) {
                 confirmed = await confirmModal({
                     title: "Add Infringement",
                     text: `This user has an active ${activeInfringement.typeString}. Adding a new infringement will expire the active one. Are you sure you want to add this infringement?`,
@@ -123,7 +120,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             };
 
             // Add dates for punishments
-            if (!isNotPunishment) {
+            if (!isNonTimeBased) {
                 payload.startDate = values.startDate;
                 if (!values.isIndefinite && values.endDate) {
                     payload.endDate = values.endDate;
@@ -186,7 +183,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                         {...form.getInputProps("type")}
                     />
 
-                    {!isNotPunishment && (
+                    {!isNonTimeBased && (
                         <Stack gap="xs">
                             <DateInput
                                 label="Start Date"

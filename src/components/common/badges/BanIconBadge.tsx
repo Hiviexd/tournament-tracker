@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip, Badge, type BadgeProps } from "@mantine/core";
-import { IInfringement } from "../../../../interfaces/User";
+import { IInfringement } from "../../../../interfaces/Infringement";
 
 interface IPropTypes extends BadgeProps {
     infringement: IInfringement;

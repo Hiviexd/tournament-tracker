@@ -3,8 +3,8 @@ import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
 import TextEditor from "../common/TextEditor";
-import { useUpdateInfringement } from "../../hooks/useUsers";
-import { InfringementType, IInfringement } from "../../../interfaces/User";
+import { useUpdateInfringement } from "../../hooks/useInfringements";
+import { IInfringement, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import utils from "../../../utils";
 import moment from "moment";
@@ -20,10 +20,7 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
     const updateInfringementMutation = useUpdateInfringement();
     const autoSaveKey = `infringement-edit-reason-${infringement?.id || "new"}`;
 
-    const isNotPunishment =
-        infringement?.type === InfringementType.NOTE ||
-        infringement?.type === InfringementType.WARNING ||
-        infringement?.type === InfringementType.PROBATION;
+    const isNonTimeBased = infringement ? !TIME_BASED_TYPES.includes(infringement.type) : true;
 
     const form = useForm({
         initialValues: {
@@ -36,12 +33,12 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
         },
         validate: {
             startDate: (value) => {
-                if (isNotPunishment) return null;
+                if (isNonTimeBased) return null;
                 if (!value) return "Start date is required for punishments";
                 return null;
             },
             endDate: (value) => {
-                if (isNotPunishment || form.values.isIndefinite) return null;
+                if (isNonTimeBased || form.values.isIndefinite) return null;
                 if (!value) return "End date is required for finite punishments";
                 if (form.values.startDate && value <= form.values.startDate) {
                     return "End date must be after start date";
@@ -92,7 +89,7 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
             };
 
             // Add dates for punishments
-            if (!isNotPunishment) {
+            if (!isNonTimeBased) {
                 payload.startDate = values.startDate;
                 if (!values.isIndefinite && values.endDate) {
                     payload.endDate = values.endDate;
@@ -126,7 +123,7 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
         <Modal opened={opened} onClose={handleClose} title="Edit Infringement" size="xl">
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
-                    {!isNotPunishment && (
+                    {!isNonTimeBased && (
                         <Stack gap="xs">
                             <DateInput
                                 label="Start Date"
