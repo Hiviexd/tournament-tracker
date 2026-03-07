@@ -40,7 +40,7 @@ class VotingsController {
         const dbQuery: VotingQueryParams = {};
         const user = res.locals!.user;
 
-        if (reqQuery.title) dbQuery.title = new RegExp(reqQuery.title, "i");
+        if (reqQuery.title) dbQuery.title = new RegExp(utils.escapeRegexPattern(reqQuery.title), "i");
         if (reqQuery.category) dbQuery.category = reqQuery.category;
         if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
         if (reqQuery.visibility) dbQuery.isPublic = reqQuery.visibility === "public";

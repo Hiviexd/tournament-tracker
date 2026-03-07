@@ -213,7 +213,7 @@ class TournamentService {
 
         return {
             $and: searchTerms.map((term) => {
-                const termRegex = new RegExp(term, "i");
+                const termRegex = new RegExp(utils.escapeRegexPattern(term), "i");
                 return {
                     $or: [{ name: termRegex }, { tags: { $in: [termRegex] } }],
                 };

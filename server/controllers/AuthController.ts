@@ -81,7 +81,24 @@ class AuthController {
         const lastPage = req.session.lastPage || "/";
         req.session.lastPage = undefined;
 
-        res.redirect(lastPage);
+        // Only redirect to same-origin or relative path to prevent open redirect
+        const baseUrl = config.baseUrl?.trim() || "";
+        let redirectTarget = "/";
+        if (lastPage && typeof lastPage === "string") {
+            const trimmed = lastPage.trim();
+            if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+                redirectTarget = trimmed;
+            } else if (baseUrl && trimmed.startsWith(baseUrl)) {
+                try {
+                    const u = new URL(trimmed);
+                    redirectTarget = u.pathname + u.search;
+                } catch {
+                    redirectTarget = "/";
+                }
+            }
+        }
+
+        res.redirect(redirectTarget);
     }
 }
 

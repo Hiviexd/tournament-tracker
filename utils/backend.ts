@@ -32,6 +32,17 @@ export function escapeUsername(username: string) {
     return username.replace(/[()[\]]/g, "\\$&");
 }
 
+/**
+ * Escapes a string for safe use as a literal in a RegExp or MongoDB $regex pattern.
+ * Prevents ReDoS and regex injection when user input is used in patterns.
+ * @param str The raw string (e.g. from req.params, req.query, req.body)
+ * @returns Escaped string safe for new RegExp(str) or { $regex: str }
+ */
+export function escapeRegexPattern(str: string): string {
+    if (typeof str !== "string") return "";
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export const defaultErrorMessage = { error: "Something went wrong!" };
 
 type DiscordTimestampType =

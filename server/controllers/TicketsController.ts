@@ -69,7 +69,7 @@ class TicketsController {
             if (needsUnifiedSearch) {
                 // For tickets: title OR content search
                 const titleMatchingTickets = await Ticket.find({
-                    title: new RegExp(searchTerm, "i"),
+                    title: new RegExp(utils.escapeRegexPattern(searchTerm), "i"),
                 }).distinct("_id");
 
                 const contentMatchingTickets = await Ticket.find({
@@ -107,7 +107,7 @@ class TicketsController {
         } else {
             // Apply title search only if not doing content search
             if (type === "ticket" && title && (title as string).trim().length >= 3) {
-                query.title = new RegExp(title as string, "i");
+                query.title = new RegExp(utils.escapeRegexPattern(title as string), "i");
             }
         }
 
@@ -117,7 +117,7 @@ class TicketsController {
                 if (targetUserDoc) query.targetUser = targetUserDoc._id;
             }
             if (targetTournament) {
-                query.targetTournamentName = new RegExp(targetTournament as string, "i");
+                query.targetTournamentName = new RegExp(utils.escapeRegexPattern(targetTournament as string), "i");
             }
         }
         if (assignedGroup) query.assignedGroup = assignedGroup;

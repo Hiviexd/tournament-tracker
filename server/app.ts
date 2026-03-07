@@ -78,6 +78,7 @@ app.use(
         saveUninitialized: false,
         cookie: {
             sameSite: "lax",
+            httpOnly: true,
         },
     }),
 );
@@ -198,9 +199,13 @@ app.use((err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};
 
-    res.status(statusCode).json({ error: customErrorMessage || err.message || "Something went wrong!" });
+    const isDev = req.app.get("env") === "development";
+    const responseMessage = customErrorMessage || (isDev ? err.message : "Something went wrong!");
 
-    console.log(err);
+    res.status(statusCode).json({ error: responseMessage });
+
+    if (!isDev) console.error(err);
+    else console.log(err);
 });
 
 // server setup

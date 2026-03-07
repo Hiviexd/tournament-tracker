@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Article from "../models/articleModel";
 import LogService from "../services/LogService";
 import config from "../../config.json";
+import utils from "../../utils";
 
 class ArticlesController {
     /** GET article by slug */
@@ -10,7 +11,7 @@ class ArticlesController {
         const user = res.locals!.user;
 
         const query: any = {
-            slug: { $regex: new RegExp(`^${slug}$`, "i") },
+            slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
         };
 
         if (!user?.isCommitteeOrAdmin) {
@@ -80,7 +81,7 @@ class ArticlesController {
         const { title, content } = req.body;
 
         const article = await Article.findOne({
-            slug: { $regex: new RegExp(`^${slug}$`, "i") },
+            slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
         });
 
         if (!article) {
@@ -126,7 +127,7 @@ class ArticlesController {
     public async deleteArticle(req: Request, res: Response) {
         const { slug } = req.params;
 
-        const article = await Article.findOne({ slug: { $regex: new RegExp(`^${slug}$`, "i") } });
+        const article = await Article.findOne({ slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") } });
         if (!article) {
             return res.status(404).json({ error: "Article not found" });
         }

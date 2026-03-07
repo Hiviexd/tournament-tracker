@@ -55,10 +55,10 @@ class GlobalSearchService {
         const query = {
             $and: searchTerms.map((term) => ({
                 $or: [
-                    { title: { $regex: term, $options: "i" } },
+                    { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
                     isCommitteeOrAdmin
-                        ? { description: { $regex: term, $options: "i" } }
-                        : { publicDescription: { $regex: term, $options: "i" } },
+                        ? { description: { $regex: utils.escapeRegexPattern(term), $options: "i" } }
+                        : { publicDescription: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
                 ],
             })),
             ...(isCommitteeOrAdmin ? {} : { isPublic: true, isActive: false }),
@@ -93,7 +93,7 @@ class GlobalSearchService {
             type: "ticket",
             $and: searchTerms.map((term) => ({
                 $or: [
-                    { title: { $regex: term, $options: "i" } },
+                    { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
                     ...(searchType === "ticket" ? [{ messages: { $in: messageIds } }] : []),
                 ],
             })),
@@ -126,7 +126,7 @@ class GlobalSearchService {
             type: "report",
             $and: searchTerms.map((term) => ({
                 $or: [
-                    { title: { $regex: term, $options: "i" } },
+                    { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
                     ...(searchType === "report" ? [{ messages: { $in: messageIds } }] : []),
                 ],
             })),
@@ -151,7 +151,10 @@ class GlobalSearchService {
 
         return await Article.find({
             $and: searchTerms.map((term) => ({
-                $or: [{ title: { $regex: term, $options: "i" } }, { content: { $regex: term, $options: "i" } }],
+                $or: [
+                    { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
+                    { content: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
+                ],
             })),
         })
             .select("_id title slug")
@@ -174,7 +177,7 @@ class GlobalSearchService {
 
         return await Resource.find({
             $and: searchTerms.map((term) => ({
-                $or: [{ title: { $regex: term, $options: "i" } }],
+                $or: [{ title: { $regex: utils.escapeRegexPattern(term), $options: "i" } }],
             })),
         })
             .select("_id title category link")

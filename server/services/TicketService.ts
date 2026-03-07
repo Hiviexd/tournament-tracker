@@ -36,7 +36,7 @@ class TicketService {
         // TODO: Consider using Meilisearch or Atlas Search for this in the future
         const messages = await Message.find({
             $and: searchTerms.map((term) => ({
-                $or: [{ content: { $regex: term, $options: "i" } }],
+                $or: [{ content: { $regex: utils.escapeRegexPattern(term), $options: "i" } }],
             })),
         }).distinct("_id");
 

@@ -18,9 +18,10 @@ class ResourcesController {
 
             // Handle text search (title and description)
             if (search) {
+                const escaped = utils.escapeRegexPattern(search as string);
                 query.$or = [
-                    { title: new RegExp(search as string, "i") },
-                    { description: new RegExp(search as string, "i") },
+                    { title: new RegExp(escaped, "i") },
+                    { description: new RegExp(escaped, "i") },
                 ];
             }
 
