@@ -57,6 +57,7 @@ export default function UserLink({
                     onClick={handleLinkClick}
                     href={onClick ? undefined : `https://osu.ppy.sh/users/${user?.osuId}`}
                     target={onClick ? undefined : "_blank"}
+                    rel={onClick ? undefined : "noopener noreferrer"}
                     style={{ cursor: "pointer" }}>
                     {user?.username ?? "Unknown"}
                     {displayActiveInfringement && user?.activeInfringement && (

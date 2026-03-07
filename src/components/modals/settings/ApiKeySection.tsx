@@ -126,7 +126,7 @@ export default function ApiKeySection() {
                     <Alert color="info" title="Info" icon={<FontAwesomeIcon icon="info-circle" />}>
                         <Text size="sm" fw={600}>
                             Refer to{" "}
-                            <Anchor fw={700} href={DOCS_URL} target="_blank">
+                            <Anchor fw={700} href={DOCS_URL} target="_blank" rel="noopener noreferrer">
                                 the API documentation
                             </Anchor>{" "}
                             for more information.
@@ -140,7 +140,8 @@ export default function ApiKeySection() {
                                 <Anchor
                                     fw={700}
                                     href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     wiki page guide
                                 </Anchor>
                                 .
@@ -276,7 +277,7 @@ export default function ApiKeySection() {
                             </Text>
                             <Text size="sm" fw={600}>
                                 Refer to{" "}
-                                <Anchor fw={700} href={DOCS_URL} target="_blank">
+                                <Anchor fw={700} href={DOCS_URL} target="_blank" rel="noopener noreferrer">
                                     the documentation
                                 </Anchor>{" "}
                                 for more information.
@@ -288,7 +289,8 @@ export default function ApiKeySection() {
                                 <Anchor
                                     fw={700}
                                     href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     wiki page guide
                                 </Anchor>
                                 .

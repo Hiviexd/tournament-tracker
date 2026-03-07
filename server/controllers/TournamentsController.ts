@@ -193,8 +193,8 @@ class TournamentsController {
                 .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
                     tournaments.map((t) =>
-                        TournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user)
-                    )
+                        TournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user),
+                    ),
                 ),
             Tournament.countDocuments(query),
         ]);
@@ -267,6 +267,10 @@ class TournamentsController {
             return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
         }
 
+        if (bannerUrl && !utils.isValidUrl(bannerUrl)) {
+            return res.status(400).json({ error: "Banner URL must be a valid URL" });
+        }
+
         if (name && !utils.isLatinScriptOnly(name)) {
             return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
         }
@@ -309,7 +313,7 @@ class TournamentsController {
             tournament,
             currentUser,
             `Created ${tournament.type}`,
-            tournament.isTournament ? "trophy" : "award"
+            tournament.isTournament ? "trophy" : "award",
         );
 
         // Discord
@@ -318,7 +322,7 @@ class TournamentsController {
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setColor(DiscordUtils.webhookColors.green)
             .setDescription(
-                `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
             .addField("Start Date", moment(tournament.startDate).format("YYYY-MM-DD"), true)
@@ -329,7 +333,7 @@ class TournamentsController {
                 "Search Tags",
                 tournament.tags && tournament.tags.length
                     ? tournament.tags.map((tag) => `\`${tag}\``).join(", ")
-                    : "*None*"
+                    : "*None*",
             );
 
         if (tournament.bannerUrl) {
@@ -395,13 +399,13 @@ class TournamentsController {
             tournament,
             currentUser,
             `Assigned reviewers: ${utils.formatHostsList(reviewers, { mdLinks: true })}`,
-            "users"
+            "users",
         );
 
         await LogService.generate(
             currentUser.id,
             `Assigned reviewers to **${tournament.name}**: ${utils.formatHostsList(reviewers, { mdLinks: true })}`,
-            "tournament"
+            "tournament",
         );
 
         // Discord
@@ -411,7 +415,7 @@ class TournamentsController {
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setColor(DiscordUtils.webhookColors.orange)
             .setDescription(
-                `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField("Reviewers", reviewers.map((r) => `[**${r.username}**](${r.osuProfileUrl})`).join(", "));
 
@@ -468,7 +472,7 @@ class TournamentsController {
         }
 
         const existingIds = (tournament.assignedReviewers || []).map((r: any) =>
-            r instanceof Types.ObjectId ? r : r._id
+            r instanceof Types.ObjectId ? r : r._id,
         );
         tournament.assignedReviewers = [...existingIds, user._id] as any;
         await tournament.save();
@@ -484,19 +488,19 @@ class TournamentsController {
             tournament,
             currentUser,
             `Added reviewer: [**${user.username}**](${user.osuProfileUrl})`,
-            "users"
+            "users",
         );
         await LogService.generate(
             currentUser.id,
             `Added reviewer to **${tournament.name}**: [**${user.username}**](${user.osuProfileUrl})`,
-            "tournament"
+            "tournament",
         );
 
         const embed = new EmbedBuilder()
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setColor(DiscordUtils.webhookColors.orange)
             .setDescription(
-                `Added reviewer to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Added reviewer to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField("Added", `[**${user.username}**](${user.osuProfileUrl})`);
         const webhookBuilder = new WebhookBuilder()
@@ -530,7 +534,11 @@ class TournamentsController {
 
         const removedUser = await User.findById(reviewerId).orFail();
         const updatedReviewers = tournament.assignedReviewers.filter((r: any) => r.toString() !== reviewerId);
-        await Tournament.findByIdAndUpdate(tournamentId, { assignedReviewers: updatedReviewers }, { runValidators: true });
+        await Tournament.findByIdAndUpdate(
+            tournamentId,
+            { assignedReviewers: updatedReviewers },
+            { runValidators: true },
+        );
 
         if (tournament.type === "tournament") {
             removedUser.inBag = true;
@@ -543,19 +551,19 @@ class TournamentsController {
             tournament,
             currentUser,
             `Removed reviewer: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
-            "user-minus"
+            "user-minus",
         );
         await LogService.generate(
             currentUser.id,
             `Removed reviewer from **${tournament.name}**: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
-            "tournament"
+            "tournament",
         );
 
         const embed = new EmbedBuilder()
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setColor(DiscordUtils.webhookColors.red)
             .setDescription(
-                `Removed reviewer from ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Removed reviewer from ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField("Removed", `[**${removedUser.username}**](${removedUser.osuProfileUrl})`);
         const webhookBuilder = new WebhookBuilder().addEmbed(embed);
@@ -700,7 +708,7 @@ class TournamentsController {
 
         // Check if old reviewer is actually assigned
         const oldReviewerIndex = tournament.assignedReviewers.findIndex(
-            (reviewer) => reviewer.toString() === oldReviewerId
+            (reviewer) => reviewer.toString() === oldReviewerId,
         );
 
         if (oldReviewerIndex === -1) {
@@ -736,7 +744,7 @@ class TournamentsController {
         await Tournament.findByIdAndUpdate(
             tournamentId,
             { assignedReviewers: updatedReviewers },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true },
         );
 
         // Update the users' bag
@@ -754,13 +762,13 @@ class TournamentsController {
             tournament,
             currentUser,
             `Reassigned reviewer from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
-            "user-pen"
+            "user-pen",
         );
 
         await LogService.generate(
             currentUser.id,
             `Reassigned reviewer for **${tournament.name}** from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
-            "tournament"
+            "tournament",
         );
 
         // Discord
@@ -772,7 +780,7 @@ class TournamentsController {
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setColor(DiscordUtils.webhookColors.lightOrange)
             .setDescription(
-                `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField("Old Reviewer", `[**${oldReviewer.username}**](${oldReviewer.osuProfileUrl})`, true)
             .addField("New Reviewer", `[**${newReviewer.username}**](${newReviewer.osuProfileUrl})`, true);
@@ -865,7 +873,7 @@ class TournamentsController {
             .setDescription(
                 `${isNewReview ? "Submitted a" : "Updated their"} review for ${tournament.type}: [**${
                     tournament.name
-                }**](${config.baseUrl}/tournaments/${tournament._id})`
+                }**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .setColor(color)
             .addField("Decision", `${emoji} ${_.startCase(vote)}`, true)
@@ -940,7 +948,7 @@ class TournamentsController {
                 invalidFiles.map((item) => item.file),
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,
-                currentUser.id
+                currentUser.id,
             );
 
             await note.save();
@@ -951,19 +959,19 @@ class TournamentsController {
                 tournament,
                 currentUser,
                 `Created note for failed badge uploads`,
-                "sticky-note"
+                "sticky-note",
             );
             await LogService.generate(
                 currentUser.id,
                 `Created note for failed badge uploads for **${tournament.name}**`,
-                "tournament"
+                "tournament",
             );
 
             // Discord notification for failed badges note
             const embed = new EmbedBuilder()
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                 .setDescription(
-                    `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                    `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 )
                 .setColor(DiscordUtils.webhookColors.yellow)
                 .addField("Note", utils.shorten(noteContent, 512));
@@ -988,7 +996,7 @@ class TournamentsController {
                 validFiles,
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,
-                currentUser.id
+                currentUser.id,
             );
 
             tournament.badges = badges;
@@ -1132,12 +1140,12 @@ class TournamentsController {
                 tournament,
                 currentUser,
                 `Updated Discord thread ID: **${threadId && threadId.length ? threadId : "#t-committee"}**`,
-                "link"
+                "link",
             );
             await LogService.generate(
                 currentUser.id,
                 `Updated Discord thread ID for **${tournament.name}**`,
-                "tournament"
+                "tournament",
             );
 
             // discord
@@ -1145,11 +1153,11 @@ class TournamentsController {
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                 .setColor(DiscordUtils.webhookColors.white)
                 .setDescription(
-                    `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                    `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 )
                 .addField(
                     "New Location",
-                    `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`
+                    `<#${threadId && threadId.length ? threadId : config.discord.webhooks.main.channelId}>`,
                 );
 
             const webhookBuilder = new WebhookBuilder().addEmbed(embed);
@@ -1187,7 +1195,7 @@ class TournamentsController {
                 files,
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,
-                currentUser.id
+                currentUser.id,
             );
         }
 
@@ -1206,7 +1214,7 @@ class TournamentsController {
         const embed = new EmbedBuilder()
             .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
             .setDescription(
-                `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .setColor(DiscordUtils.webhookColors.blue)
             .addField("Note", utils.shorten(content, 512));

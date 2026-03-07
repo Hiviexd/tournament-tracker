@@ -40,7 +40,7 @@ export default function CommitHeatmap() {
                 <Text size="sm" fw={500}>
                     Latest commit —{" "}
                     <Tooltip label={commitMessage}>
-                        <Anchor size="sm" fw={500} href={latestCommitLink} target="_blank">
+                        <Anchor size="sm" fw={500} href={latestCommitLink} target="_blank" rel="noopener noreferrer">
                             {latestCommitHash.substring(0, 7)} ({dayjs(latestCommitDate).format("DD MMM, YYYY")})
                         </Anchor>
                     </Tooltip>

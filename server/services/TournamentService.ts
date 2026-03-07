@@ -44,7 +44,7 @@ class TournamentService {
      */
     public sanitizeTournamentListing(
         tournament: FlattenMaps<ITournament>,
-        actor: IUser | undefined
+        actor: IUser | undefined,
     ): FlattenMaps<ITournament> {
         if (!actor || !actor.isCommitteeOrAdmin) {
             const sanitized = { ...tournament };
@@ -167,7 +167,7 @@ class TournamentService {
                 },
                 {
                     targetTournamentName: { $regex: tournament.name, $options: "i" },
-                }
+                },
             );
         }
 
@@ -239,7 +239,7 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated name from **${oldName}** to **${name}**`,
-            "pen-to-square"
+            "pen-to-square",
         );
         await LogService.generate(currentUser.id, `Updated name for **${tournament.name}**`, "tournament");
 
@@ -252,7 +252,7 @@ class TournamentService {
     public async updateHosts(
         tournament: ITournament,
         hostIds: string[],
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (!Array.isArray(hostIds) || hostIds.length === 0) {
             return { error: "At least one host is required" };
@@ -285,7 +285,7 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated hosts: ${utils.formatHostsList(updatedTournament.hosts, { mdLinks: true })}`,
-            "users"
+            "users",
         );
         await LogService.generate(currentUser.id, `Updated hosts for **${tournament.name}**`, "tournament");
 
@@ -298,7 +298,7 @@ class TournamentService {
     public async updateModes(
         tournament: ITournament,
         modes: GameMode[],
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (!currentUser.isAdmin) {
             return { error: "Only admins can change game modes" };
@@ -313,7 +313,7 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated game modes: ${modes.map((mode) => utils.formatGameMode(mode)).join(", ")}`,
-            "gamepad"
+            "gamepad",
         );
         await LogService.generate(currentUser.id, `Updated game modes for **${tournament.name}**`, "tournament");
 
@@ -326,7 +326,7 @@ class TournamentService {
     public async updateType(
         tournament: ITournament,
         type: TournamentType,
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (!currentUser.isAdmin) {
             return { error: "Only admins can change tournament type" };
@@ -342,7 +342,7 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated type from **${_.startCase(oldType)}** to **${_.startCase(type)}**`,
-            "pen-to-square"
+            "pen-to-square",
         );
         await LogService.generate(currentUser.id, `Updated type for **${tournament.name}**`, "tournament");
 
@@ -355,7 +355,7 @@ class TournamentService {
     public async updateForumUrl(
         tournament: ITournament,
         forumUrl: string,
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (!utils.isOsuForumLink(forumUrl)) {
             return { error: "Invalid osu! forum URL" };
@@ -378,7 +378,7 @@ class TournamentService {
     public async updateEnchantUrl(
         tournament: ITournament,
         enchantUrl: string,
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (!utils.isEnchantTicketLink(enchantUrl)) {
             return { error: "Invalid Enchant ticket URL" };
@@ -390,7 +390,7 @@ class TournamentService {
         await LogService.generate(
             currentUser.id,
             `Updated Enchant ticket URL for **${tournament.name}**`,
-            "tournament"
+            "tournament",
         );
 
         return {};
@@ -403,7 +403,7 @@ class TournamentService {
         tournament: ITournament,
         startDate: Date,
         endDate: Date,
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         if (startDate && endDate && startDate > endDate) {
             return { error: "Start date must be before end date" };
@@ -416,14 +416,14 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
-                "YYYY-MM-DD"
+                "YYYY-MM-DD",
             )}**`,
-            "calendar"
+            "calendar",
         );
         await LogService.generate(
             currentUser.id,
             `Updated start and end date for **${tournament.name}**`,
-            "tournament"
+            "tournament",
         );
 
         return {};
@@ -439,7 +439,7 @@ class TournamentService {
             tournament,
             actioner,
             `Updated tags: ${tags.map((tag: string) => `\`${tag}\``).join(", ")}`,
-            "tag"
+            "tag",
         );
         await LogService.generate(actioner.id, `Updated tags for **${tournament.name}**`, "tournament");
 
@@ -452,8 +452,11 @@ class TournamentService {
     public async updateBanner(
         tournament: ITournament,
         bannerUrl: string,
-        actioner: IUser
+        actioner: IUser,
     ): Promise<{ error?: string }> {
+        if (!utils.isValidUrl(bannerUrl)) {
+            return { error: "Banner URL must be a valid URL" };
+        }
         tournament.bannerUrl = bannerUrl;
 
         await this.addTournamentLog(tournament, actioner, `Updated banner`, "image");
@@ -468,18 +471,18 @@ class TournamentService {
     public async updateWinners(
         tournament: ITournament,
         winners: IUser[],
-        currentUser: IUser
+        currentUser: IUser,
     ): Promise<{ error?: string }> {
         const winnerIds = winners.map((w) => w._id || w);
         const populatedWinners = await User.find({ _id: { $in: winnerIds } }).populate("infringements");
 
         const winnersWithActiveTournamentBan = populatedWinners.filter(
-            (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN
+            (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN,
         );
         if (winnersWithActiveTournamentBan.length > 0) {
             return {
                 error: `Cannot add winners with active tournament bans: ${utils.formatHostsList(
-                    winnersWithActiveTournamentBan
+                    winnersWithActiveTournamentBan,
                 )}`,
             };
         }
@@ -492,7 +495,7 @@ class TournamentService {
             tournament,
             currentUser,
             `Updated winners: ${winnerUsers.map((w: IUser) => `[**${w.username}**](${w.osuProfileUrl})`).join(", ")}`,
-            "trophy"
+            "trophy",
         );
         await LogService.generate(currentUser.id, `Updated winners for **${tournament.name}**`, "tournament");
 
@@ -506,7 +509,7 @@ class TournamentService {
         tournament: ITournament,
         status: TournamentStatus,
         currentUser: IUser,
-        sessionData: any
+        sessionData: any,
     ): Promise<{ error?: string }> {
         const oldStatus = tournament.status;
 
@@ -541,7 +544,7 @@ class TournamentService {
             let message = `The official support status of your ${tournament.type}: **${
                 tournament.name
             }** has been updated to **${_.startCase(
-                status
+                status,
             )}**.\n\n[View your ${tournament.type} in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
                 tournament._id
             }).`;
@@ -566,7 +569,7 @@ class TournamentService {
                     },
                     content: message,
                 },
-                currentUser.osuId
+                currentUser.osuId,
             );
         }
 
@@ -588,7 +591,7 @@ class TournamentService {
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(sessionData))
                 .setColor(embedColor)
                 .setDescription(
-                    `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`
+                    `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 )
                 .addField("New Status", `${_.startCase(status)}`);
 
@@ -611,7 +614,7 @@ class TournamentService {
         tournament: ITournament,
         isActive: boolean,
         currentUser: IUser,
-        sessionData: any
+        sessionData: any,
     ): Promise<{ error?: string }> {
         tournament.isActive = isActive;
 
@@ -619,7 +622,7 @@ class TournamentService {
             tournament,
             currentUser,
             `${isActive ? "Unarchived" : "Archived"} tournament`,
-            "archive"
+            "archive",
         );
         await LogService.generate(currentUser.id, `Updated active status for **${tournament.name}**`, "tournament");
 
@@ -630,7 +633,7 @@ class TournamentService {
             .setDescription(
                 `${isActive ? "Unarchived" : "Archived"} ${tournament.type}: [**${tournament.name}**](${
                     config.baseUrl
-                }/tournaments/${tournament._id})`
+                }/tournaments/${tournament._id})`,
             );
 
         const webhookBuilder = new WebhookBuilder().addEmbed(embed);

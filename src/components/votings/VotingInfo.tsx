@@ -282,7 +282,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             {voting.targetTournamentName && (
                                 <Text fw={700}>
                                     Target Tournament:{" "}
-                                    <Anchor href={voting.targetTournamentLink} target="_blank">
+                                    <Anchor href={voting.targetTournamentLink} target="_blank" rel="noopener noreferrer">
                                         {voting.targetTournamentName}
                                     </Anchor>
                                 </Text>

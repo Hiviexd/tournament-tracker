@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 // import { visit } from "unist-util-visit";
 
@@ -46,7 +47,7 @@ export default function MarkdownText({ content, className, allowHtml = false, si
         <div className={`markdown-content ${className || ""}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkBreaks]}
-                rehypePlugins={allowHtml ? [rehypeRaw, rehypeSlug] : [rehypeSlug]}
+                rehypePlugins={allowHtml ? [rehypeRaw, rehypeSanitize, rehypeSlug] : [rehypeSlug]}
                 components={{
                     p: ({ children }) => (
                         <Text size={size} component="p">

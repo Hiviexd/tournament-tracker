@@ -36,6 +36,7 @@ export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
                 <a
                     href={`https://osu.ppy.sh/groups/${group.id}`}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="usergroup-badge"
                     style={{ color: group.colour }}>
                     {userGroupBadgeContent}

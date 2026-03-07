@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Resource from "../models/resourceModel";
 import LogService from "../services/LogService";
 import User from "../models/userModel";
+import utils from "../../utils";
 
 const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl country" }];
 
@@ -66,7 +67,7 @@ class ResourcesController {
                     .exec()
                     .then((resources) =>
                         // Populate after aggregation
-                        Resource.populate(resources, DEFAULT_POPULATE)
+                        Resource.populate(resources, DEFAULT_POPULATE),
                     ),
                 Resource.countDocuments(query),
             ]);
@@ -94,6 +95,10 @@ class ResourcesController {
             // Validate required fields
             if (!title || !description || !category || !type || !link) {
                 return res.status(400).json({ error: "Missing required fields" });
+            }
+
+            if (!utils.isValidUrl(link)) {
+                return res.status(400).json({ error: "Resource link must be a valid URL" });
             }
 
             // Create new resource
@@ -140,6 +145,10 @@ class ResourcesController {
             // Validate required fields
             if (!title || !description || !category || !link) {
                 return res.status(400).json({ error: "Missing required fields" });
+            }
+
+            if (!utils.isValidUrl(link)) {
+                return res.status(400).json({ error: "Resource link must be a valid URL" });
             }
 
             // Update the resource

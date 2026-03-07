@@ -1,10 +1,12 @@
 import { Card, Stack, ScrollArea } from "@mantine/core";
+import utils from "../../../utils";
 
 interface IProps {
     bannerUrl: string;
 }
 
 export default function OsuWebPreview({ bannerUrl }: IProps) {
+    const safeBannerUrl = utils.isValidUrl(bannerUrl) ? bannerUrl : null;
     return (
         <ScrollArea
             type="auto"
@@ -13,7 +15,13 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                 maxWidth: "100%",
                 minHeight: "400px",
             }}>
-            <Card className="osu-web-preview" style={{ "--banner-url": `url(${bannerUrl})` } as React.CSSProperties}>
+            <Card
+                className="osu-web-preview"
+                style={
+                    safeBannerUrl
+                        ? ({ "--banner-url": `url(${safeBannerUrl})` } as React.CSSProperties)
+                        : ({ "--banner-url": "none" } as React.CSSProperties)
+                }>
                 <Stack gap={0}>
                     <div className="header-section">
                         <div className="header-section-icon" />
@@ -22,12 +30,20 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                     <div className="header-nav">
                         <ul className="header-nav-list">
                             <li className="header-nav-item">
-                                <a className="header-nav-link active" href="https://osu.ppy.sh/" target="_blank">
+                                <a
+                                    className="header-nav-link active"
+                                    href="https://osu.ppy.sh/"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     <span className="fake-bold">dashboard</span>
                                 </a>
                             </li>
                             <li className="header-nav-item">
-                                <a className="header-nav-link" href="https://osu.ppy.sh/home/friends" target="_blank">
+                                <a
+                                    className="header-nav-link"
+                                    href="https://osu.ppy.sh/home/friends"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     friends
                                 </a>
                             </li>
@@ -35,7 +51,8 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                                 <a
                                     className="header-nav-link"
                                     href="https://osu.ppy.sh/home/follows/forum_topic"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     watchlists
                                 </a>
                             </li>
@@ -43,7 +60,8 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                                 <a
                                     className="header-nav-link"
                                     href="https://osu.ppy.sh/home/account/edit"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noopener noreferrer">
                                     account settings
                                 </a>
                             </li>
@@ -51,7 +69,15 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                     </div>
                     <div className="banner-section">
                         <div className="banner-blur"></div>
-                        <img src={bannerUrl} alt="banner" className="banner-image" />
+                        {safeBannerUrl ? (
+                            <img src={safeBannerUrl} alt="banner" className="banner-image" />
+                        ) : (
+                            <div
+                                className="banner-image"
+                                style={{ background: "var(--mantine-color-default)" }}
+                                aria-hidden
+                            />
+                        )}
                     </div>
                     <div className="content-section"></div>
                 </Stack>

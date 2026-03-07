@@ -54,7 +54,7 @@ export default function Spotlight() {
         setSearch("");
 
         if (utils.isExternalLink(result.link)) {
-            window.open(result.link, "_blank");
+            window.open(result.link, "_blank", "noopener,noreferrer");
         } else {
             navigate(result.link);
         }

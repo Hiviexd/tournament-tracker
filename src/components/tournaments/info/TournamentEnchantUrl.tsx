@@ -90,7 +90,7 @@ export default function TournamentEnchantUrl({ tournament }: IProps) {
                 <Box>
                     {tournament.enchantUrl ? (
                         <Text size="sm" fw={500}>
-                            <Anchor href={tournament.enchantUrl} target="_blank">
+                            <Anchor href={tournament.enchantUrl} target="_blank" rel="noopener noreferrer">
                                 {tournament.enchantUrl}
                             </Anchor>
                         </Text>

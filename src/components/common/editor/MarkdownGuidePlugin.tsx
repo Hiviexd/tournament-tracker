@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const MarkdownGuidePlugin = () => {
     return (
-        <a className="button button-type-markdown-guide" title="Markdown Guide" href="/markdown" target="_blank">
+        <a className="button button-type-markdown-guide" title="Markdown Guide" href="/markdown" target="_blank" rel="noopener noreferrer">
             <FontAwesomeIcon icon={["fab", "markdown"]} />
         </a>
     );

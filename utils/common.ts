@@ -78,16 +78,39 @@ export function generateBadgeCommand(osuId: number, years: number, badgeValue: n
 }
 
 /**
- * Checks if a URL is valid
+ * Checks if a URL is valid and secure (https)
  * @param url URL to check
  */
 export function isValidUrl(url: string): boolean {
     try {
-        new URL(url);
-        return true;
+        const parsed = new URL(url);
+        return parsed.protocol === "https:";
     } catch (error) {
         return false;
     }
+}
+
+/** Named CSS colors that are safe for inline style (e.g. from osu! API). */
+const SAFE_CSS_NAMED_COLORS = new Set([
+    "transparent", "currentColor", "inherit", "initial", "unset",
+    "black", "white", "red", "green", "blue", "yellow", "orange", "purple", "pink", "gray", "grey"
+]);
+
+/**
+ * Returns a CSS color value safe for use in inline style (e.g. color: ...).
+ * Allows hex (#RGB, #RRGGBB, #RGBA, #RRGGBBAA) and a small allowlist of named colors.
+ * Returns undefined for invalid or potentially injectable input.
+ * @param value Raw color value (e.g. from API)
+ */
+export function sanitizeCssColor(value: string | null | undefined): string | undefined {
+    if (value == null || typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    // Hex: 3, 4, 6, or 8 hex digits
+    if (/^#[\da-fA-F]{3,8}$/.test(trimmed)) return trimmed;
+    // Named color (lowercase match)
+    if (SAFE_CSS_NAMED_COLORS.has(trimmed.toLowerCase())) return trimmed;
+    return undefined;
 }
 
 /**

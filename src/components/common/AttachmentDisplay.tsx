@@ -37,6 +37,7 @@ export default function AttachmentDisplay({ attachment, size = 120 }: IProps) {
             href={attachment.url}
             download={attachment.originalName}
             target="_blank"
+            rel="noopener noreferrer"
             className={`attachment-card ${hovered ? "hovered" : ""}`}
             style={{ width: size, height: size }}
             onMouseEnter={() => setHovered(true)}

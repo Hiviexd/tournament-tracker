@@ -6,6 +6,7 @@ import { LocalBadge } from "../../hooks/useBadgePreviewer";
 import CountryFlag from "../common/CountryFlag";
 import { IOsuUser } from "../../../interfaces/OsuApi";
 import OsuUserGroupBadge from "./OsuUserGroupBadge";
+import utils from "../../../utils";
 
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
@@ -42,7 +43,7 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                 </div>
                 <div className="profile-details">
                     <div className="username-container">
-                        <a className="username" href={`https://osu.ppy.sh/users/${user.id}`} target="_blank">
+                        <a className="username" href={`https://osu.ppy.sh/users/${user.id}`} target="_blank" rel="noopener noreferrer">
                             {user.username}
                         </a>
                         <div className="user-badges">
@@ -67,7 +68,7 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                         </div>
                     </div>
                     {user.title && (
-                        <div className="user-title" style={{ color: user.profile_colour || undefined }}>
+                        <div className="user-title" style={{ color: utils.sanitizeCssColor(user.profile_colour) ?? undefined }}>
                             {user.title}
                         </div>
                     )}

@@ -34,7 +34,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
                 return (
                     <Text fw={700}>
                         Tournament:{" "}
-                        <Anchor onClick={handleLinkClick} href={ticket.targetTournamentLink} target="_blank">
+                        <Anchor onClick={handleLinkClick} href={ticket.targetTournamentLink} target="_blank" rel="noopener noreferrer">
                             {ticket.targetTournamentName}
                         </Anchor>
                     </Text>

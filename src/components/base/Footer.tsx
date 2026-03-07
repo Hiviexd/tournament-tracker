@@ -42,6 +42,7 @@ export default function Footer() {
                     component="a"
                     href={item.href}
                     target="_blank"
+                    rel="noopener noreferrer"
                     leftSection={<FontAwesomeIcon icon={item.icon} />}>
                     {item.label}
                 </Button>

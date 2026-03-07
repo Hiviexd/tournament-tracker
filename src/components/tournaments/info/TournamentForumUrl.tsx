@@ -90,7 +90,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                 <Box>
                     {tournament.forumUrl ? (
                         <Text size="sm" fw={500}>
-                            <Anchor href={tournament.forumUrl} target="_blank">
+                            <Anchor href={tournament.forumUrl} target="_blank" rel="noopener noreferrer">
                                 {tournament.forumUrl}
                             </Anchor>
                         </Text>

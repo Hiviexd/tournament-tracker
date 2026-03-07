@@ -176,7 +176,7 @@ export default function TicketInfo({ ticket }: IProps) {
                     <Group align="center">
                         <Text fw={700}>
                             Reported Tournament:{" "}
-                            <Anchor href={ticket.targetTournamentLink} target="_blank">
+                            <Anchor href={ticket.targetTournamentLink} target="_blank" rel="noopener noreferrer">
                                 {ticket.targetTournamentName}
                             </Anchor>
                         </Text>
@@ -212,7 +212,7 @@ export default function TicketInfo({ ticket }: IProps) {
                                 ) : (
                                     <Text size="sm">
                                         {ticket.threadId ? (
-                                            <Anchor href={threadLink} target="_blank">
+                                            <Anchor href={threadLink} target="_blank" rel="noopener noreferrer">
                                                 {ticket.threadId}
                                             </Anchor>
                                         ) : (

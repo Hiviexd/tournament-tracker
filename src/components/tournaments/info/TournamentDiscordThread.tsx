@@ -88,7 +88,8 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                     {tournament.threadId ? (
                         <Anchor
                             href={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`}
-                            target="_blank">
+                            target="_blank"
+                            rel="noopener noreferrer">
                             {tournament.threadId}
                         </Anchor>
                     ) : (

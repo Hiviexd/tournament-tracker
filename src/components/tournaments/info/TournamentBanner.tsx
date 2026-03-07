@@ -68,7 +68,7 @@ export default function TournamentBanner({ tournament }: IProps) {
                 <Box>
                     {tournament.bannerUrl ? (
                         <Text size="sm" fw={500}>
-                            <Anchor href={tournament.bannerUrl} target="_blank">
+                            <Anchor href={tournament.bannerUrl} target="_blank" rel="noopener noreferrer">
                                 {tournament.bannerUrl}
                             </Anchor>
                         </Text>
