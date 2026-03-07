@@ -5,6 +5,7 @@ import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
+import utils from "../../../utils";
 // import { visit } from "unist-util-visit";
 
 interface IProps {
@@ -42,6 +43,11 @@ function remarkDisableSetextHeadings() {
 }
 */
 
+function proxyImageUrl(src: string | undefined): string | undefined {
+    if (!src || !utils.isValidUrl(src)) return undefined;
+    return `https://wsrv.nl/?url=${encodeURIComponent(src.trim())}`;
+}
+
 export default function MarkdownText({ content, className, allowHtml = false, size }: IProps) {
     return (
         <div className={`markdown-content ${className || ""}`}>
@@ -63,6 +69,14 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                             size={size}>
                             {children}
                         </Anchor>
+                    ),
+                    img: ({ src, alt }) => (
+                        <img
+                            src={proxyImageUrl(src)}
+                            alt={alt ?? ""}
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                        />
                     ),
                     table: ({ children }) => (
                         <ScrollArea>
