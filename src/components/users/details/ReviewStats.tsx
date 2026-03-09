@@ -92,14 +92,15 @@ export default function ReviewStats({ user }: IProps) {
                             <Table.Thead>
                                 <Table.Tr>
                                     <Table.Th>Review</Table.Th>
-                                    <Table.Th>Date assigned</Table.Th>
-                                    <Table.Th ta="center">Date reviewed</Table.Th>
+                                    <Table.Th ta="center">Action</Table.Th>
+                                    <Table.Th ta="center">Reviewed</Table.Th>
                                     <Table.Th ta="center">Timespan</Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
                                 {stats.assignments.map((row: any, index: number) => (
                                     <Table.Tr key={`${row.tournament.id}-${row.dateAssigned}-${index}`}>
+                                        {/* Tournament name */}
                                         <Table.Td>
                                             <Text
                                                 fw={700}
@@ -112,8 +113,9 @@ export default function ReviewStats({ user }: IProps) {
                                                 {row.tournament.name}
                                             </Text>
                                         </Table.Td>
-                                        <Table.Td>
-                                            <Group gap="xs" wrap="nowrap" ta="center">
+                                        {/* Action date */}
+                                        <Table.Td ta="center">
+                                            <Group gap="xs" wrap="nowrap">
                                                 <Tooltip label={row.actionIcon === "add" ? "Assigned" : "Removed"}>
                                                     <FontAwesomeIcon
                                                         icon={row.actionIcon === "add" ? "user-plus" : "user-minus"}
@@ -131,11 +133,13 @@ export default function ReviewStats({ user }: IProps) {
                                                 </Text>
                                             </Group>
                                         </Table.Td>
+                                        {/* Reviewed date */}
                                         <Table.Td ta="center">
                                             <Text size="sm">
                                                 {row.dateReviewed ? dayjs(row.dateReviewed).format("DD MMM") : "—"}
                                             </Text>
                                         </Table.Td>
+                                        {/* Timespan */}
                                         <Table.Td ta="center">
                                             {(() => {
                                                 const days = parseTimespanDays(row.timespan);
