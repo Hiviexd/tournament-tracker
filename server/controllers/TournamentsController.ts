@@ -60,6 +60,13 @@ const defaultPopulate = [
         },
     },
     {
+        path: "reviewHistory",
+        populate: {
+            path: "user",
+            select: "username osuId groups coverUrl country",
+        },
+    },
+    {
         path: "notes",
         select: "content author isNote attachments createdAt",
         populate: [
@@ -390,6 +397,17 @@ class TournamentsController {
 
         tournament.assignedReviewers = reviewers;
 
+        if (!tournament.reviewHistory) tournament.reviewHistory = [];
+        const now = new Date();
+        for (const reviewer of reviewers) {
+            tournament.reviewHistory!.push({
+                user: reviewer._id as Types.ObjectId,
+                action: "initial",
+                createdAt: now,
+                updatedAt: now,
+            });
+        }
+
         await tournament.save();
 
         res.json({ message: "Reviewers assigned successfully!" });
@@ -475,6 +493,16 @@ class TournamentsController {
             r instanceof Types.ObjectId ? r : r._id,
         );
         tournament.assignedReviewers = [...existingIds, user._id] as any;
+
+        if (!tournament.reviewHistory) tournament.reviewHistory = [];
+        const now = new Date();
+        tournament.reviewHistory.push({
+            user: user._id as Types.ObjectId,
+            action: "assign",
+            createdAt: now,
+            updatedAt: now,
+        });
+
         await tournament.save();
 
         if (tournament.type === "tournament") {
@@ -553,6 +581,19 @@ class TournamentsController {
             `Removed reviewer: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
             "user-minus",
         );
+
+        const now = new Date();
+        await Tournament.findByIdAndUpdate(tournamentId, {
+            $push: {
+                reviewHistory: {
+                    user: removedUser._id,
+                    action: "remove",
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            },
+        });
+
         await LogService.generate(
             currentUser.id,
             `Removed reviewer from **${tournament.name}**: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
@@ -764,6 +805,18 @@ class TournamentsController {
             `Reassigned reviewer from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
             "user-pen",
         );
+
+        const now = new Date();
+        await Tournament.findByIdAndUpdate(tournamentId, {
+            $push: {
+                reviewHistory: {
+                    $each: [
+                        { user: oldReviewer._id, action: "remove", createdAt: now, updatedAt: now },
+                        { user: newReviewer._id, action: "assign", createdAt: now, updatedAt: now },
+                    ],
+                },
+            },
+        });
 
         await LogService.generate(
             currentUser.id,
