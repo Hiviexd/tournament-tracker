@@ -6,7 +6,7 @@ interface IProps {
 }
 
 export default function OsuWebPreview({ bannerUrl }: IProps) {
-    const safeBannerUrl = utils.isValidUrl(bannerUrl) ? bannerUrl : null;
+    const safeBannerUrl = utils.isValidUrl(bannerUrl, { allowedProtocols: ["https", "blob"] }) ? bannerUrl : null;
     return (
         <ScrollArea
             type="auto"
@@ -29,7 +29,7 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                     </div>
                     <div className="header-nav">
                         <ul className="header-nav-list">
-                            <li className="header-nav-item">
+                            <li className="header-nav-item" id="preview-nav-dashboard" >
                                 <a
                                     className="header-nav-link active"
                                     href="https://osu.ppy.sh/"
@@ -38,7 +38,7 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                                     <span className="fake-bold">dashboard</span>
                                 </a>
                             </li>
-                            <li className="header-nav-item">
+                            <li className="header-nav-item" id="preview-nav-friends" >
                                 <a
                                     className="header-nav-link"
                                     href="https://osu.ppy.sh/home/friends"
@@ -47,7 +47,7 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                                     friends
                                 </a>
                             </li>
-                            <li className="header-nav-item">
+                            <li className="header-nav-item" id="preview-nav-watchlists" >
                                 <a
                                     className="header-nav-link"
                                     href="https://osu.ppy.sh/home/follows/forum_topic"
@@ -56,7 +56,7 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
                                     watchlists
                                 </a>
                             </li>
-                            <li className="header-nav-item">
+                            <li className="header-nav-item" id="preview-nav-account-settings" >
                                 <a
                                     className="header-nav-link"
                                     href="https://osu.ppy.sh/home/account/edit"

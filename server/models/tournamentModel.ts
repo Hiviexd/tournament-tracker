@@ -50,6 +50,14 @@ const TournamentSchema = new Schema<ITournament>(
         enchantUrl: { type: String },
         startedReviewAt: { type: Date },
         tags: [{ type: String }],
+        reviewHistory: [
+            {
+                user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+                action: { type: String, required: true, enum: ["assign", "remove", "initial"] },
+                createdAt: { type: Date, required: true },
+                updatedAt: { type: Date, required: true },
+            },
+        ],
     },
     {
         timestamps: true,

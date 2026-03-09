@@ -91,7 +91,7 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
     );
 
     return (
-        <Modal opened={opened} onClose={handleClose} title="User Details" size="lg">
+        <Modal opened={opened} onClose={handleClose} title="User Details" size="xl">
             {isLoading ? (
                 <LoadingState />
             ) : selectedUser ? (
@@ -103,7 +103,6 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
                     <UserHistory history={selectedUser.history} />
                     <Divider />
                     <BadgeTracker user={selectedUser} />
-                    <Divider />
                     <ReviewStats user={selectedUser} />
 
                     {loggedInUser!.isAdmin && (

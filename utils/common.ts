@@ -78,13 +78,24 @@ export function generateBadgeCommand(osuId: number, years: number, badgeValue: n
 }
 
 /**
- * Checks if a URL is valid and secure (https)
- * @param url URL to check
+ * Options for {@link isValidUrl}.
  */
-export function isValidUrl(url: string): boolean {
+export interface IsValidUrlOptions {
+    /** Allowed protocols (e.g. `["https", "blob"]`). Defaults to `["https"]` when omitted. */
+    allowedProtocols?: string[];
+}
+
+/**
+ * Checks if a URL is valid and uses an allowed protocol (default: https only).
+ * @param url URL to check
+ * @param options Optional settings; use `allowedProtocols` to allow e.g. `blob:` URLs.
+ */
+export function isValidUrl(url: string, options: IsValidUrlOptions = {}): boolean {
     try {
         const parsed = new URL(url);
-        return parsed.protocol === "https:";
+        const allowed = options.allowedProtocols ?? ["https"];
+        const normalized = allowed.map((p) => (p.endsWith(":") ? p : `${p}:`));
+        return normalized.includes(parsed.protocol);
     } catch (error) {
         return false;
     }

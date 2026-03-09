@@ -46,6 +46,15 @@ export interface ITournamentLog {
     createdAt: Date;
 }
 
+export type ReviewHistoryAction = "assign" | "remove" | "initial";
+
+export interface ITournamentReviewHistoryEntry {
+    user: Types.ObjectId;
+    action: ReviewHistoryAction;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface ITournamentCreateResponse {
     message: string;
     tournament: ITournament;
@@ -75,6 +84,7 @@ export interface ITournament {
     createdAt: Date;
     startedReviewAt?: Date;
     tags?: string[];
+    reviewHistory?: ITournamentReviewHistoryEntry[];
 
     // virtuals
     isTournament: boolean;

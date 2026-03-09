@@ -228,13 +228,13 @@ export function useUpdateEmail(userId: string) {
     });
 }
 
-export function useReviewStats(userId: string) {
+export function useReviewStats(userId: string, days: number = 180) {
     return useQuery({
-        queryKey: ["reviewStats", userId],
+        queryKey: ["reviewStats", userId, days],
         queryFn: () =>
             utils.apiCall({
                 method: "get",
-                url: `/api/users/${userId}/reviewStats`,
+                url: `/api/users/${userId}/reviewStats?days=${days}`,
             }),
         enabled: !!userId,
     });

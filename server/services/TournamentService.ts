@@ -1,4 +1,4 @@
-import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
+import { ITournament, GameMode, TournamentType, TournamentStatus, ITournamentReviewHistoryEntry } from "../../interfaces/Tournament";
 import { IUser } from "../../interfaces/User";
 import { InfringementType } from "../../interfaces/Infringement";
 import { FlattenMaps } from "mongoose";
@@ -54,6 +54,7 @@ class TournamentService {
             sanitized.enchantUrl = undefined;
             sanitized.notes = [];
             sanitized.logs = [];
+            sanitized.reviewHistory = [];
 
             // sanitize hosts and winners with UserService
             sanitized.hosts = sanitized.hosts?.map((host) => UserService.sanitizeUser(host, actor));
@@ -94,6 +95,7 @@ class TournamentService {
             tournament.enchantUrl = undefined;
             tournament.notes = [];
             tournament.logs = [];
+            tournament.reviewHistory = [];
         }
 
         return tournament;
@@ -139,6 +141,125 @@ class TournamentService {
         ]);
 
         return reports;
+    }
+
+    /**
+     * Find tournaments where the user was assigned or removed as reviewer within the last `days` days,
+     * and build assignment rows for the review stats table (date assigned/removed, date reviewed, timespan, action icon).
+     * Includes both assign/initial and remove events so removals are visible.
+     */
+    public async findAssignedTournamentsForUser(
+        user: IUser,
+        days: number,
+    ): Promise<{
+        assignments: Array<{
+            tournament: { id: string; name: string; isActive: boolean };
+            dateAssigned: Date;
+            dateReviewed: Date | null;
+            timespan: string | null;
+            actionIcon: "add" | "remove";
+        }>;
+    }> {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+
+        const tournaments = await Tournament.find({
+            reviewHistory: {
+                $elemMatch: {
+                    user: user._id,
+                    action: { $in: ["assign", "initial", "remove"] },
+                    createdAt: { $gte: cutoff },
+                },
+            },
+        })
+            .populate([
+                {
+                    path: "reviews",
+                    select: "author createdAt",
+                    populate: { path: "author", select: "_id" },
+                },
+            ])
+            .lean();
+
+        const assignments: Array<{
+            tournament: { id: string; name: string; isActive: boolean };
+            dateAssigned: Date;
+            dateReviewed: Date | null;
+            timespan: string | null;
+            actionIcon: "add" | "remove";
+        }> = [];
+
+        const userIdStr = user._id.toString();
+
+        for (const tournament of tournaments) {
+            const reviewHistory = tournament.reviewHistory || [];
+            const assignOrInitialEntries = reviewHistory.filter(
+                (entry: ITournamentReviewHistoryEntry) =>
+                    entry.user.toString() === userIdStr &&
+                    (entry.action === "assign" || entry.action === "initial") &&
+                    new Date(entry.createdAt) >= cutoff,
+            );
+            const removeEntries = reviewHistory.filter(
+                (entry: ITournamentReviewHistoryEntry) =>
+                    entry.user.toString() === userIdStr &&
+                    entry.action === "remove" &&
+                    new Date(entry.createdAt) >= cutoff,
+            );
+
+            const userReview = tournament.reviews?.find(
+                (r: IReview) => r.author && r.author._id.toString() === userIdStr,
+            );
+            const dateReviewed = userReview?.createdAt ? new Date(userReview.createdAt) : null;
+
+            for (const entry of assignOrInitialEntries) {
+                const dateAssigned = new Date(entry.createdAt);
+                const hasLaterRemove = reviewHistory.some(
+                    (e: ITournamentReviewHistoryEntry) =>
+                        e.user.toString() === userIdStr &&
+                        e.action === "remove" &&
+                        new Date(e.createdAt) > dateAssigned,
+                );
+                const actionIcon = hasLaterRemove ? "remove" : "add";
+
+                let timespan: string | null = null;
+                if (dateReviewed) {
+                    const diffMs = dateReviewed.getTime() - dateAssigned.getTime();
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    timespan = diffDays === 0 ? "Same day" : `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+                }
+
+                assignments.push({
+                    tournament: {
+                        id: tournament._id.toString(),
+                        name: tournament.name,
+                        isActive: tournament.isActive ?? true,
+                    },
+                    dateAssigned,
+                    dateReviewed,
+                    timespan,
+                    actionIcon,
+                });
+            }
+
+            for (const entry of removeEntries) {
+                assignments.push({
+                    tournament: {
+                        id: tournament._id.toString(),
+                        name: tournament.name,
+                        isActive: tournament.isActive ?? true,
+                    },
+                    dateAssigned: new Date(entry.createdAt),
+                    dateReviewed: null,
+                    timespan: null,
+                    actionIcon: "remove",
+                });
+            }
+        }
+
+        // Sort by dateAssigned descending (most recent first)
+        assignments.sort((a, b) => b.dateAssigned.getTime() - a.dateAssigned.getTime());
+
+        return { assignments };
     }
 
     /**
