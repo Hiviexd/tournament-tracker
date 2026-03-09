@@ -213,13 +213,6 @@ class TournamentService {
 
             for (const entry of assignOrInitialEntries) {
                 const dateAssigned = new Date(entry.createdAt);
-                const hasLaterRemove = reviewHistory.some(
-                    (e: ITournamentReviewHistoryEntry) =>
-                        e.user.toString() === userIdStr &&
-                        e.action === "remove" &&
-                        new Date(e.createdAt) > dateAssigned,
-                );
-                const actionIcon = hasLaterRemove ? "remove" : "add";
 
                 let timespan: string | null = null;
                 if (dateReviewed) {
@@ -237,7 +230,7 @@ class TournamentService {
                     dateAssigned,
                     dateReviewed,
                     timespan,
-                    actionIcon,
+                    actionIcon: "add",
                 });
             }
 
