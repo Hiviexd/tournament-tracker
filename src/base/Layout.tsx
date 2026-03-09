@@ -74,7 +74,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
             <Helmet>
                 <meta name="theme-color" content={themeColor} />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="mobile-web-app-capable" content="yes" />
             </Helmet>
             <AppShell
                 header={{ height: 70 }}
