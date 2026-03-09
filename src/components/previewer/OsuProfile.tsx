@@ -64,7 +64,7 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                                     <div className="supporter-badge">{renderSupporterHearts()}</div>
                                 </Tooltip>
                             )}
-                            {user.groups && user.groups.map((group) => <OsuUserGroupBadge group={group} />)}
+                            {user.groups && user.groups.map((group) => <OsuUserGroupBadge key={group.id} group={group} />)}
                         </div>
                     </div>
                     {user.title && (
