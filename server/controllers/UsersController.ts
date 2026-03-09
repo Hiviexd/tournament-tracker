@@ -255,7 +255,7 @@ class UsersController {
             user.badgeValue--;
         } else {
             return res.status(400).json({
-                error: increment ? "Badge value cannot exceed 10" : "Badge value cannot be less than 0",
+                error: increment ? "Badge value cannot exceed 10!" : "Badge value cannot be less than 0!",
             });
         }
 
