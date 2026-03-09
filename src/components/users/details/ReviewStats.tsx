@@ -115,7 +115,7 @@ export default function ReviewStats({ user }: IProps) {
                                         </Table.Td>
                                         {/* Action date */}
                                         <Table.Td ta="center">
-                                            <Group gap="xs" wrap="nowrap">
+                                            <Group justify="center" gap="xs" wrap="nowrap">
                                                 <Tooltip label={row.actionIcon === "add" ? "Assigned" : "Removed"}>
                                                     <FontAwesomeIcon
                                                         icon={row.actionIcon === "add" ? "user-plus" : "user-minus"}
