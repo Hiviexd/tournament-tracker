@@ -125,8 +125,8 @@ class UsersController {
                     .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                     .setColor(DiscordUtils.webhookColors.blue)
                     .setDescription(
-                        `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`
-                    )
+                        `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`,
+                    ),
             )
             .setLocation("dev")
             .send();
@@ -146,7 +146,7 @@ class UsersController {
         await LogService.generate(
             req.session.mongoId!,
             `Toggled activity status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
-            "user"
+            "user",
         );
 
         await new WebhookBuilder()
@@ -157,8 +157,8 @@ class UsersController {
                     .setDescription(
                         `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
                             user.isActiveReviewer ? "active" : "inactive"
-                        }** reviewer`
-                    )
+                        }** reviewer`,
+                    ),
             )
             .send();
 
@@ -217,7 +217,7 @@ class UsersController {
             `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
                 join ? "to" : "from"
             } the **${groupName}**`,
-            "user"
+            "user",
         );
 
         // Discord webhook
@@ -229,8 +229,8 @@ class UsersController {
                     .setDescription(
                         `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
                             join ? "to" : "from"
-                        } the **${groupName}**`
-                    )
+                        } the **${groupName}**`,
+                    ),
             )
             .send();
 
@@ -265,7 +265,7 @@ class UsersController {
         await LogService.generate(
             req.session.mongoId!,
             `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
-            "user"
+            "user",
         );
 
         // Discord webhook notification
@@ -275,8 +275,8 @@ class UsersController {
                     .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                     .setColor(DiscordUtils.webhookColors.orange)
                     .setDescription(
-                        `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`
-                    )
+                        `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
+                    ),
             )
             .send();
 
@@ -322,7 +322,7 @@ class UsersController {
         await LogService.generate(
             req.session.mongoId!,
             `Updated Discord ID for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${discordId}`,
-            "user"
+            "user",
         );
 
         res.json({
@@ -348,7 +348,7 @@ class UsersController {
         await LogService.generate(
             req.session.mongoId!,
             `Updated email for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${email}`,
-            "user"
+            "user",
         );
 
         res.json({
@@ -366,9 +366,17 @@ class UsersController {
 
         const { assignments } = await TournamentService.findAssignedTournamentsForUser(user, days);
 
-        const activeReviews = assignments.filter((a) => a.tournament.isActive).length;
-        const totalAssignedLastNDays = assignments.length;
-        const totalSubmittedLastNDays = assignments.filter((a) => a.dateReviewed != null).length;
+        const addAssignments = assignments.filter((a) => a.actionIcon === "add");
+        const tournamentIdsAssigned = new Set(addAssignments.map((a) => a.tournament.id));
+        const addWithReview = addAssignments.filter((a) => a.dateReviewed != null);
+        const tournamentIdsWithReview = new Set(addWithReview.map((a) => a.tournament.id));
+        const activeTournamentIds = new Set(
+            addAssignments.filter((a) => a.tournament.isActive).map((a) => a.tournament.id),
+        );
+
+        const activeReviews = activeTournamentIds.size;
+        const totalAssignedLastNDays = tournamentIdsAssigned.size;
+        const totalSubmittedLastNDays = tournamentIdsWithReview.size;
 
         res.json({
             activeReviews,
@@ -398,7 +406,7 @@ class UsersController {
             `Cycled tournament reviewers and got: ${reviewers
                 .map((u) => `[**${u.username}**](${u.osuProfileUrl})`)
                 .join(", ")}`,
-            "user"
+            "user",
         );
     }
 
