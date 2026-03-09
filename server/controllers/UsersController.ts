@@ -8,7 +8,7 @@ import DiscordUtils from "../services/discord/DiscordUtils";
 import OsuApiService from "../services/OsuApiService";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
-import Tournament from "../models/tournamentModel";
+import TournamentService from "../services/TournamentService";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
 
@@ -360,57 +360,28 @@ class UsersController {
     /** GET review stats */
     public async getReviewStats(req: Request, res: Response) {
         const { userId } = req.params;
+        const rawDays = req.query.days != null ? Number(req.query.days) : 180;
+        const days = Math.min(365, Math.max(1, Math.floor(rawDays)));
         const user = await User.findById(userId).orFail();
 
-        // Get the date 90 days ago
-        const ninetyDaysAgo = new Date();
-        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        const { assignments } = await TournamentService.findAssignedTournamentsForUser(user, days);
 
-        // Find all tournaments where user is assigned as a reviewer
-        const tournaments = await Tournament.find({
-            assignedReviewers: user._id,
-        }).populate([
-            {
-                path: "reviews",
-                select: "author",
-                populate: {
-                    path: "author",
-                    select: "_id username",
-                },
-            },
-        ]);
+        const activeReviews = assignments.filter((a) => a.tournament.isActive).length;
+        const totalAssignedLastNDays = assignments.length;
+        const totalSubmittedLastNDays = assignments.filter((a) => a.dateReviewed != null).length;
 
-        // Calculate statistics
-        const stats = {
-            activeReviews: 0,
-            totalAssignedLast90Days: 0,
-            totalSubmittedLast90Days: 0,
-        };
-
-        for (const tournament of tournaments) {
-            // Skip if no startedReviewAt date
-            if (!tournament.startedReviewAt) continue;
-
-            const startedReviewDate = new Date(tournament.startedReviewAt);
-            const hasUserSubmittedReview = tournament.reviews?.some(
-                (review) => review.author?._id.toString() === user._id.toString()
-            );
-
-            // Count active reviews
-            if (tournament.isActive) {
-                stats.activeReviews++;
-            }
-
-            // Count reviews in last 90 days
-            if (startedReviewDate >= ninetyDaysAgo) {
-                stats.totalAssignedLast90Days++;
-                if (hasUserSubmittedReview) {
-                    stats.totalSubmittedLast90Days++;
-                }
-            }
-        }
-
-        res.json(stats);
+        res.json({
+            activeReviews,
+            totalAssignedLastNDays,
+            totalSubmittedLastNDays,
+            assignments: assignments.map((a) => ({
+                tournament: a.tournament,
+                dateAssigned: a.dateAssigned,
+                dateReviewed: a.dateReviewed,
+                timespan: a.timespan,
+                actionIcon: a.actionIcon,
+            })),
+        });
     }
 
     /** PATCH cycle bag */
