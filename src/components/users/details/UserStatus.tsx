@@ -38,7 +38,13 @@ export default function UserStatus({ user }: IProps) {
                 />
                 <Text size="sm">Active Reviewer: {user.isActiveReviewer ? "Yes" : "No"}</Text>
             </Group>
-
+            <Group gap="xs">
+                <FontAwesomeIcon
+                    icon="vote-yea"
+                    color={user.isActiveVoter ? "var(--mantine-color-success-6)" : "var(--mantine-color-danger-6)"}
+                />
+                <Text size="sm">Active Voter: {user.isActiveVoter ? "Yes" : "No"}</Text>
+            </Group>
             <Group gap="xs">
                 <FontAwesomeIcon
                     icon="user-shield"

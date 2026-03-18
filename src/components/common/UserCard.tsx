@@ -74,6 +74,13 @@ export default function UserCard({
                                 </Badge>
                             </Tooltip>
                         )}
+                        {!user.isActiveVoter && (
+                            <Tooltip label="Inactive Voter">
+                                <Badge variant="light" color="danger" size="sm">
+                                    <FontAwesomeIcon icon="vote-yea" />
+                                </Badge>
+                            </Tooltip>
+                        )}
                     </Group>
                 )}
             </Group>
