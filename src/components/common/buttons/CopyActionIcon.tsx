@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CopyButton, ActionIcon, Tooltip, type DefaultMantineSize, type DefaultMantineColor } from "@mantine/core";
+import { CopyButton, ActionIcon, Tooltip, type DefaultMantineSize, type DefaultMantineColor, type ActionIconVariant } from "@mantine/core";
 
 interface IProps {
     value: string;
     color?: DefaultMantineColor;
     tooltip?: string;
     size?: DefaultMantineSize;
+    variant?: ActionIconVariant;
     onClick?: () => void;
 }
 
-export default function CopyActionIcon({ value, color = "success", tooltip = "Copy", size = "md", onClick }: IProps) {
+export default function CopyActionIcon({ value, color = "success", tooltip = "Copy", size = "md", variant = "subtle", onClick }: IProps) {
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = (copy: () => void) => {
@@ -33,7 +34,7 @@ export default function CopyActionIcon({ value, color = "success", tooltip = "Co
                     <ActionIcon
                         size={size}
                         color={color}
-                        variant={isCopied ? "light" : "subtle"}
+                        variant={isCopied ? "light" : variant}
                         onClick={() => handleCopy(copy)}
                         loading={isCopied ?? copied}
                         loaderProps={{
