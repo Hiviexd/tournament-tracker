@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Button, Card, Text, ActionIcon, Skeleton, Divider, Title } from "@mantine/core";
+import { Stack, Group, Button, Card, Text, ActionIcon, Skeleton, Divider, Title, Alert, Anchor } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTemplates } from "../hooks/useTemplates";
@@ -79,6 +79,11 @@ export default function TemplatesPage() {
 
     return (
         <Stack gap="lg">
+            <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
+                <Text size="sm">
+                    These templates are for ticket/report responses. For email templates, visit <Anchor href="/docs/email-templates">this documentation page</Anchor>.
+                </Text>
+            </Alert>
             <Group justify="space-between" align="center">
                 <Button
                     onClick={openCreate}
@@ -89,6 +94,8 @@ export default function TemplatesPage() {
                     New Template
                 </Button>
             </Group>
+
+            <Divider />
 
             {isLoading ? (
                 <LoadingState />
