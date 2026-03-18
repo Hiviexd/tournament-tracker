@@ -29,7 +29,7 @@ export default function CodeBlock({ children, className, ...props }: IProps) {
     return (
         <pre className={`code-block ${className || ""}`.trim()} {...props}>
             <span className="code-block-copy">
-                <CopyActionIcon value={code} tooltip="Copy" size="lg" color="primary" variant="light" />
+                <CopyActionIcon value={code} color="primary" variant="light" />
             </span>
 
             {Children.toArray(children)}
