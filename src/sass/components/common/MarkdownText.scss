@@ -98,6 +98,12 @@
         word-break: normal;
         max-width: 100%;
 
+        &:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
         code {
             background-color: transparent;
             padding: 0;

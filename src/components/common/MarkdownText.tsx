@@ -6,6 +6,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import utils from "../../../utils";
+import CodeBlock from "./CodeBlock";
 // import { visit } from "unist-util-visit";
 
 interface IProps {
@@ -88,6 +89,11 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                             {children}
                         </Text>
                     ),
+                    pre: (props) => {
+                        const codeBlockProps = { ...props };
+                        delete (codeBlockProps as { node?: unknown }).node;
+                        return <CodeBlock {...codeBlockProps}>{props.children}</CodeBlock>;
+                    },
                 }}>
                 {content}
             </ReactMarkdown>
