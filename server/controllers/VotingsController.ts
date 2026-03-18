@@ -134,10 +134,10 @@ class VotingsController {
         const author = res.locals!.user!;
         let targetUser: IUser;
 
-        // Count only active reviewers in assigned groups
+        // Count only active voters in assigned groups
         const assignedUsersCount = await User.countDocuments({
             groups: { $in: assignedGroups },
-            isActiveReviewer: true,
+            isActiveVoter: true,
         });
 
         const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";

@@ -37,6 +37,7 @@ export interface IUser {
     history: IUserHistory[];
     discordId?: string;
     isActiveReviewer: boolean;
+    isActiveVoter: boolean;
     inBag: boolean;
     coverUrl?: string;
     country?: IOsuCountry;

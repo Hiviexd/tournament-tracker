@@ -19,6 +19,7 @@ usersRouter.patch(
     auth.isCommittee,
     UsersController.toggleReviewerStatus
 );
+usersRouter.patch("/:userId/toggleVoterStatus", auth.isLoggedIn, auth.isCommittee, UsersController.toggleVoterStatus);
 usersRouter.patch("/:userId/groupMove", auth.isLoggedIn, auth.isAdmin, UsersController.updateUserGroups);
 usersRouter.patch("/:userId/updateBadge", auth.isLoggedIn, auth.isAdmin, UsersController.updateBadge);
 usersRouter.patch("/:userId/sync", auth.isLoggedIn, auth.isCommittee, UsersController.syncUser);

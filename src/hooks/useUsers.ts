@@ -105,6 +105,30 @@ export function useToggleReviewerStatus(userId: string) {
     });
 }
 
+export function useToggleVoterStatus(userId: string) {
+    const queryClient = useQueryClient();
+    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: `/api/users/${userId}/toggleVoterStatus`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["user", userId] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            if (loggedInUser?.id === userId) {
+                queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+                const res = data as { message: string; user: IUser };
+                setLoggedInUser(res.user as IUser);
+            }
+        },
+    });
+}
+
 export function useUpdateUserGroups(userId: string) {
     const queryClient = useQueryClient();
     const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);

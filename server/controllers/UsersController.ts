@@ -168,6 +168,40 @@ class UsersController {
         });
     }
 
+    /** POST toggle isActiveVoter */
+    public async toggleVoterStatus(req: Request, res: Response): Promise<void> {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).orFail();
+
+        user.isActiveVoter = !user.isActiveVoter;
+        await user.save();
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `Toggled voting activity status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveVoter}**`,
+            "user",
+        );
+
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setColor(DiscordUtils.webhookColors.lightOrange)
+                    .setDescription(
+                        `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
+                            user.isActiveVoter ? "active" : "inactive"
+                        }** voter`,
+                    ),
+            )
+            .send();
+
+        res.json({
+            message: `Set voting activity status as ${user.isActiveVoter ? "active" : "inactive"}!`,
+            user,
+        });
+    }
+
     /** POST update user group */
     public async updateUserGroups(req: Request, res: Response) {
         const { userId } = req.params;

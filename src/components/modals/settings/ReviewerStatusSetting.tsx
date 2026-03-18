@@ -13,10 +13,10 @@ export default function ReviewerStatusSetting() {
         <Group justify="space-between">
             <div>
                 <Text size="sm" fw={500}>
-                    Activity Status
+                    Reviewer Activity
                 </Text>
                 <Text size="xs" c="dimmed">
-                    Toggle your availability for votes and tournament reviews
+                    Toggle your availability for tournament and contest reviews
                 </Text>
                 {toggleReviewerMutation.error && (
                     <Text size="xs" c="red">

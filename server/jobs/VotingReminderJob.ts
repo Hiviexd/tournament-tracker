@@ -43,7 +43,7 @@ export default class VotingReminderJob extends BaseJob {
             // Get all active users in the assigned groups
             const usersInAssignedGroups = await User.find({
                 groups: { $in: voting.assignedGroups },
-                isActiveReviewer: true,
+                isActiveVoter: true,
             }).select("username osuId discordId groups");
 
             // Get set of user IDs who have already voted or abstained

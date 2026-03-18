@@ -17,6 +17,7 @@ const UserSchema = new Schema<IUser, IUserStatics>(
         ],
         discordId: { type: String },
         isActiveReviewer: { type: Boolean, default: true },
+        isActiveVoter: { type: Boolean, default: true },
         inBag: { type: Boolean, default: true },
         coverUrl: { type: String },
         country: {

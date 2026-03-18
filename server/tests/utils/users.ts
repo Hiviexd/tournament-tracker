@@ -19,6 +19,7 @@ export function createMockUser(overrides: Partial<IUser> = {}): IUser {
         groups: ["user"] as UserGroup[],
         history: [],
         isActiveReviewer: false,
+        isActiveVoter: false,
         inBag: true,
         badgeValue: 0,
         country: {

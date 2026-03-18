@@ -2,6 +2,7 @@ import { Modal, Stack, Tabs } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import ReviewerStatusSetting from "./settings/ReviewerStatusSetting";
+import VoterStatusSetting from "./settings/VoterStatusSetting";
 import DiscordIdSetting from "./settings/DiscordIdSetting";
 import EmailSetting from "./settings/EmailSetting";
 import ApiKeySection from "./settings/ApiKeySection";
@@ -27,6 +28,7 @@ export default function SettingsModal({ opened, onClose }: IProps) {
                     <Tabs.Panel value="preferences" mt="md">
                         <Stack>
                             <ReviewerStatusSetting />
+                            <VoterStatusSetting />
                             <AutomaticTypeFilterSetting />
                             <DiscordIdSetting />
                             <EmailSetting />
