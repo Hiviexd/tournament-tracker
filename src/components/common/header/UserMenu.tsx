@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Avatar } from "@mantine/core";
+import { Menu, Avatar, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHover, useDisclosure } from "@mantine/hooks";
 import { IUser } from "../../../../interfaces/User";
@@ -31,15 +31,21 @@ export default function UserMenu({ user }: IProps) {
 
             <Menu withArrow shadow="md" trigger="hover" opened={menuOpened} onChange={setMenuOpened}>
                 <Menu.Target>
-                    <Avatar
+                    <Box
                         ref={ref}
-                        src={user.avatarUrl}
-                        size="3rem"
-                        className="user-avatar"
-                        style={{
-                            borderColor: hovered || menuOpened ? "var(--mantine-color-primary-4)" : "transparent",
-                        }}
-                    />
+                        component="span"
+                        className="animation-spin"
+                        display="inline-block"
+                        style={{ lineHeight: 0 }}>
+                        <Avatar
+                            src={user.avatarUrl}
+                            size="3rem"
+                            className="user-avatar"
+                            style={{
+                                borderColor: hovered || menuOpened ? "var(--mantine-color-primary-4)" : "transparent",
+                            }}
+                        />
+                    </Box>
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Label>Welcome back, {user.username}!</Menu.Label>

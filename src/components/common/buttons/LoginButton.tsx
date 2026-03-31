@@ -8,7 +8,7 @@ interface IProps extends Omit<ButtonProps, "onClick" | "loading" | "leftSection"
     text?: string;
 }
 
-export default function LoginButton({ size = "md", text = "Login", ...props }: IProps) {
+export default function LoginButton({ size = "md", text = "Login", className, ...props }: IProps) {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [user] = useAtom(loggedInUserAtom);
 
@@ -31,6 +31,7 @@ export default function LoginButton({ size = "md", text = "Login", ...props }: I
             variant="gradient"
             loading={isLoggingIn}
             gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
+            className={["animation-spin", className].filter(Boolean).join(" ")}
             leftSection={
                 <Image
                     src="/assets/logo-osu.svg?20250714"
