@@ -1,4 +1,4 @@
-import { AppShell, Container, Flex, Breadcrumbs } from "@mantine/core";
+import { AppShell, Container, Flex, Breadcrumbs, Alert } from "@mantine/core";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -18,6 +18,7 @@ import EnvironmentBanner from "../components/base/EnvironmentBanner";
 // fontawesome icons
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 
 interface IPropTypes {
     page: React.ReactNode;
@@ -106,6 +107,9 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                         </Container>
                         {
                             <Container className="layout-body" px={{ base: 10, sm: 20 }} py={20} fluid>
+                                <Alert mb="md" title="Announcement" color="indigo" icon={<FontAwesomeIcon icon={faExclamationTriangle} />}>
+                                    Blame Azer.
+                                </Alert>
                                 {page}
                             </Container>
                         }
