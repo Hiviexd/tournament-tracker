@@ -1,4 +1,3 @@
-import { useRef, useEffect, useState, useCallback } from "react";
 import { Stack, Title, Text, Card, SimpleGrid, Group, Badge } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -72,97 +71,15 @@ const features: Feature[] = [
     },
 ];
 
-/** Cursor influence radius; outside this, cards sit still. */
-const FEATURE_REPEL_FALLOFF_PX = 480;
-/** Base max shift (px); scales up slightly with card size for big tiles. */
-const FEATURE_REPEL_MAX_PX = 1080;
-
 export default function HomePage() {
     const [user] = useAtom(loggedInUserAtom);
     const { data: quote, isLoading: isQuoteLoading } = useRandomQuote();
-    const pointerRef = useRef<{ x: number; y: number } | null>(null);
-    const cardRefs = useRef<(HTMLElement | null)[]>([]);
-    const [repelByIndex, setRepelByIndex] = useState<Record<number, { x: number; y: number }>>({});
-    const [hoveredFeatureIndex, setHoveredFeatureIndex] = useState<number | null>(null);
-
-    const computeFeatureRepel = useCallback(() => {
-        const p = pointerRef.current;
-        if (!p) {
-            setRepelByIndex({});
-            return;
-        }
-        const next: Record<number, { x: number; y: number }> = {};
-        features.forEach((_, i) => {
-            const el = cardRefs.current[i];
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const dx = cx - p.x;
-            const dy = cy - p.y;
-            const d = Math.hypot(dx, dy);
-            if (d > FEATURE_REPEL_FALLOFF_PX) {
-                next[i] = { x: 0, y: 0 };
-                return;
-            }
-            // Stronger when close (comical); exponent < 1 keeps mid-range pushy too.
-            const t = (1 - d / FEATURE_REPEL_FALLOFF_PX) ** 0.75;
-            let nx: number;
-            let ny: number;
-            if (d > 0.5) {
-                nx = dx / d;
-                ny = dy / d;
-            } else {
-                // Cursor on the centroid: still shove so the card doesn't "stick"
-                nx = 0;
-                ny = -1;
-            }
-            const sizeBonus = Math.min(56, 0.28 * Math.min(rect.width, rect.height));
-            const maxPush = Math.min(150, FEATURE_REPEL_MAX_PX + sizeBonus);
-            next[i] = {
-                x: nx * maxPush * t,
-                y: ny * maxPush * t,
-            };
-        });
-        setRepelByIndex(next);
-    }, []);
-
-    useEffect(() => {
-        const onMove = (e: MouseEvent) => {
-            pointerRef.current = { x: e.clientX, y: e.clientY };
-            computeFeatureRepel();
-        };
-        const onScrollOrResize = () => computeFeatureRepel();
-        const clearPointer = () => {
-            pointerRef.current = null;
-            setRepelByIndex({});
-        };
-        window.addEventListener("mousemove", onMove);
-        window.addEventListener("scroll", onScrollOrResize, true);
-        window.addEventListener("resize", onScrollOrResize);
-        window.addEventListener("blur", clearPointer);
-        return () => {
-            window.removeEventListener("mousemove", onMove);
-            window.removeEventListener("scroll", onScrollOrResize, true);
-            window.removeEventListener("resize", onScrollOrResize);
-            window.removeEventListener("blur", clearPointer);
-        };
-    }, [computeFeatureRepel]);
 
     const handleUserSelect = (user: IUser) => {
         window.open(user.osuProfileUrl, "_blank");
     };
 
-    const setFeatureCardRef = (index: number) => (el: HTMLElement | null) => {
-        cardRefs.current[index] = el;
-    };
-
     const renderFeatureCard = (feature: Feature, index: number) => {
-        const repel = repelByIndex[index] ?? { x: 0, y: 0 };
-        const hoverLift = !feature.disabled && hoveredFeatureIndex === index;
-        const repelTransform = `translate3d(${repel.x}px, ${repel.y}px, 0)`;
-        const transform = hoverLift ? `${repelTransform} translateY(-4px)` : repelTransform;
-
         const cardContent = (
             <>
                 <Group mb="xs">
@@ -194,10 +111,6 @@ export default function HomePage() {
             radius: "md",
             className: "feature-card",
             "data-disabled": feature.disabled,
-            ref: setFeatureCardRef(index),
-            style: { transform, willChange: "transform" },
-            onMouseEnter: () => setHoveredFeatureIndex(index),
-            onMouseLeave: () => setHoveredFeatureIndex((current) => (current === index ? null : current)),
         };
 
         if (feature.disabled) {

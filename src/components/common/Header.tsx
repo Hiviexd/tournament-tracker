@@ -30,40 +30,16 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
 
     return (
         <AppShell.Header className={`header${blurState ? " scrolled" : ""}`}>
-            <style>{`
-                @keyframes headerRealLogoSpinY {
-                    from {
-                        transform: rotateY(0deg);
-                    }
-                    to {
-                        transform: rotateY(360deg);
-                    }
-                }
-            `}</style>
             <Group h="100%" px="xl">
                 <div className="nav-group">
                     <Group gap="xl">
-                        <Link to="/" style={{ display: "inline-block", lineHeight: 0 }}>
-                            <span
+                        <Link to="/">
+                            <Image
+                                src="/assets/logo-main.svg?20250714"
+                                alt="Logo"
                                 className="logo-image"
-                                style={{
-                                    display: "inline-block",
-                                    lineHeight: 0,
-                                    perspective: "520px",
-                                }}>
-                                <Image
-                                    src="/assets/real-logo.png"
-                                    alt="Logo"
-                                    style={{
-                                        maxWidth: "35px",
-                                        maxHeight: "35px",
-                                        display: "block",
-                                        transformStyle: "preserve-3d",
-                                        transformOrigin: "50% 50%",
-                                        animation: "headerRealLogoSpinY 1.5s linear infinite",
-                                    }}
-                                />
-                            </span>
+                                style={{ maxWidth: "35px", maxHeight: "35px" }}
+                            />
                         </Link>
                         <SearchButton visibleFrom="md" />
                     </Group>
