@@ -1,7 +1,8 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { IInfringement } from "../../../interfaces/Infringement";
-import { HoverCard, ActionIcon, ScrollArea } from "@mantine/core";
+import { HoverCard, ActionIcon, ScrollArea, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import moment from "moment";
 import MarkdownText from "../common/MarkdownText";
 
 interface IProps {
@@ -18,7 +19,7 @@ const HoverTarget = forwardRef<HTMLSpanElement, { children: ReactNode } & HTMLAt
                 {children}
             </span>
         );
-    }
+    },
 );
 
 export default function InfringementReasonHoverCard({ infringement, children }: IProps) {
@@ -44,6 +45,11 @@ export default function InfringementReasonHoverCard({ infringement, children }: 
             <HoverCard.Dropdown bg="primary.10">
                 <ScrollArea.Autosize maw={300} mah={200} scrollbarSize={8}>
                     <MarkdownText content={reasonContent} size="sm" />
+                    {infringement.createdAt ? (
+                        <Text size="xs" c="dimmed" mt="xs">
+                            {moment(infringement.createdAt).fromNow()}
+                        </Text>
+                    ) : null}
                 </ScrollArea.Autosize>
             </HoverCard.Dropdown>
         </HoverCard>
