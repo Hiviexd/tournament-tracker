@@ -169,29 +169,47 @@ class InfringementService {
     }
 
     public async getWatchlist(query: WatchlistQuery) {
-        const infringementFilter: any = {};
+        const infringementFilter: Record<string, unknown> = {};
 
         if (query.infringementType) {
             infringementFilter.type = query.infringementType;
         }
 
-        const userIdsWithInfringements = await Infringement.distinct("userId", infringementFilter);
+        const page = Math.max(1, query.page ?? 1);
+        const limit = Math.min(100, Math.max(1, query.limit ?? WATCHLIST_DEFAULT_LIMIT));
+        const skip = (page - 1) * limit;
 
-        if (userIdsWithInfringements.length === 0) {
+        const [facetResult] = await Infringement.aggregate<{
+            total: { count: number }[];
+            page: { _id: Types.ObjectId; latestInfringementAt: Date }[];
+        }>([
+            { $match: infringementFilter },
+            { $group: { _id: "$userId", latestInfringementAt: { $max: "$createdAt" } } },
+            {
+                $facet: {
+                    total: [{ $count: "count" }],
+                    page: [
+                        { $sort: { latestInfringementAt: -1 } },
+                        { $skip: skip },
+                        { $limit: limit },
+                    ],
+                },
+            },
+        ]);
+
+        const total = facetResult?.total[0]?.count ?? 0;
+
+        if (total === 0) {
             return { users: [], total: 0, page: 1, pages: 0 };
         }
 
-        const page = Math.max(1, query.page ?? 1);
-        const limit = Math.min(100, Math.max(1, query.limit ?? WATCHLIST_DEFAULT_LIMIT));
-        const total = userIdsWithInfringements.length;
         const pages = Math.ceil(total / limit);
-        const skip = (page - 1) * limit;
-
-        const users = await User.find({ _id: { $in: userIdsWithInfringements } })
-            .sort({ updatedAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate("infringements");
+        const orderedIds = facetResult.page.map((row) => row._id);
+        const usersUnordered = await User.find({ _id: { $in: orderedIds } }).populate("infringements");
+        const orderIndex = new Map(orderedIds.map((id, i) => [id.toString(), i]));
+        const users = usersUnordered.sort(
+            (a, b) => (orderIndex.get(a._id.toString()) ?? 0) - (orderIndex.get(b._id.toString()) ?? 0),
+        );
 
         return { users, total, page, pages };
     }
