@@ -98,8 +98,20 @@
         background-color: var(--mantine-color-primary-11) !important;
     }
 
+    /** 
+    * We need this because the Menu component doesn't support changing the default hover color.
+    * To force-enable custom hover colors, add mod="color-override" (which adds a data-color-override attribute) to the Menu.Item.
+     */
     .mantine-Menu-item {
         text-decoration: none !important;
+        transition: background-color 0.1s ease, color 0.1s ease;
+
+        &:hover {
+            &:not([data-color-override]) {
+                background-color: var(--mantine-color-primary-light) !important;
+                color: var(--mantine-color-primary-light-color) !important;
+            }
+        }
     }
 
     /* Notifications */

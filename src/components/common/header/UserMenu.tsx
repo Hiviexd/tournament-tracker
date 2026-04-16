@@ -79,6 +79,7 @@ export default function UserMenu({ user }: IProps) {
                             window.location.href = "/";
                         }}
                         color="danger"
+                        mod="color-override"
                         leftSection={<FontAwesomeIcon icon="sign-out-alt" />}>
                         Log Out
                     </Menu.Item>
