@@ -201,6 +201,16 @@
         background-color: var(--mantine-color-primary-10);
         border: none;
     }
+
+    .mantine-TableOfContents-control {
+        text-decoration: none;
+        transition: background-color 0.1s ease;
+
+        &[data-active] {
+            background-color: var(--mantine-color-primary-light);
+            color: var(--mantine-color-primary-light-color);
+        }
+    }
 }
 
 /* Links */

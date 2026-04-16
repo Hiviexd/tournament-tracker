@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
     Button,
@@ -7,12 +7,13 @@ import {
     Modal,
     Stack,
     Title,
-    Container,
     Skeleton,
     Text,
     Tooltip,
     TextInput,
     ActionIcon,
+    Grid,
+    TableOfContents,
 } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
@@ -32,6 +33,30 @@ const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
     "/resources/community": "community-resources",
 };
 
+function hasMarkdownHeadings(content?: string) {
+    if (!content) {
+        return false;
+    }
+
+    const lines = content.split("\n");
+    let inCodeBlock = false;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed.startsWith("```")) {
+            inCodeBlock = !inCodeBlock;
+            continue;
+        }
+
+        if (!inCodeBlock && /^#{1,6}\s+/.test(trimmed)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export default function ArticlePage() {
     const { slug } = useParams<{ slug: string }>();
     const location = useLocation();
@@ -48,28 +73,50 @@ export default function ArticlePage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editTitle, setEditTitle] = useState("");
     const [editContent, setEditContent] = useState("");
+    const reinitializeTocRef = useRef<() => void>(() => {});
 
     useDocumentTitle(article?.title ? `${article.title} | Article` : "Article | Tournament Tracker");
 
     // disable the title if the article is in the predefined slugs
     const isPredefined = Object.keys(PREDEFINED_ARTICLE_SLUGS).includes(location.pathname);
+    const showToc = article ? hasMarkdownHeadings(article.content) : false;
+
+    useLayoutEffect(() => {
+        if (article?.content) {
+            reinitializeTocRef.current();
+        }
+    }, [article?.content]);
 
     const LoadingState = () => (
-        <Container size="lg">
-            <Stack gap="lg">
-                <Card shadow="sm" p="lg">
-                    <Stack>
-                        <Skeleton height={24} width="40%" />
-                        <Skeleton height={16} />
-                        <Skeleton height={16} />
-                        <Skeleton height={16} width="80%" />
-                        <Skeleton height={24} width="60%" mt="md" />
-                        <Skeleton height={16} />
-                        <Skeleton height={16} width="90%" />
-                    </Stack>
-                </Card>
-            </Stack>
-        </Container>
+        <Stack gap="lg">
+            <Grid gutter="lg" align="flex-start">
+                <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
+                    <Card shadow="sm" p="md">
+                        <Stack gap="xs">
+                            <Skeleton height={14} width="72%" />
+                            <Skeleton height={20} />
+                            <Skeleton height={20} width="92%" />
+                            <Skeleton height={20} width="84%" />
+                            <Skeleton height={20} width="76%" />
+                            <Skeleton height={20} width="68%" />
+                        </Stack>
+                    </Card>
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, md: 9 }}>
+                    <Card shadow="sm" p="lg">
+                        <Stack>
+                            <Skeleton height={24} width="40%" />
+                            <Skeleton height={16} />
+                            <Skeleton height={16} />
+                            <Skeleton height={16} width="80%" />
+                            <Skeleton height={24} width="60%" mt="md" />
+                            <Skeleton height={16} />
+                            <Skeleton height={16} width="90%" />
+                        </Stack>
+                    </Card>
+                </Grid.Col>
+            </Grid>
+        </Stack>
     );
 
     if (isLoading) {
@@ -78,13 +125,11 @@ export default function ArticlePage() {
 
     if (isError || !article || article.error) {
         return (
-            <Container size="lg">
-                <EmptyState
-                    icon="file-alt"
-                    title={isError ? "Error loading article" : "Article not found"}
-                    description={isError ? "Try refreshing the page" : "The article you're looking for doesn't exist"}
-                />
-            </Container>
+            <EmptyState
+                icon="file-alt"
+                title={isError ? "Error loading article" : "Article not found"}
+                description={isError ? "Try refreshing the page" : "The article you're looking for doesn't exist"}
+            />
         );
     }
 
@@ -112,7 +157,7 @@ export default function ArticlePage() {
                 if (data.title && response?.article?.slug && response.article.slug !== articleSlug) {
                     // Handle predefined slugs
                     const predefinedPath = Object.keys(PREDEFINED_ARTICLE_SLUGS).find(
-                        (key) => PREDEFINED_ARTICLE_SLUGS[key] === articleSlug
+                        (key) => PREDEFINED_ARTICLE_SLUGS[key] === articleSlug,
                     );
 
                     if (predefinedPath) {
@@ -142,54 +187,37 @@ export default function ArticlePage() {
     };
 
     return (
-        <Container size="lg">
-            <Stack gap="lg">
-                {!isPredefined && (
-                    <Stack gap="xs">
-                        <Group align="center">
-                            <Title order={2} className="header-border-left">
-                                {article.title}
-                            </Title>
-                            {user?.isCommittee && (
-                                <Group gap="xs">
-                                    <Tooltip label="Edit article">
-                                        <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
-                                            <FontAwesomeIcon icon="edit" />
+        <Stack gap="lg">
+            {!isPredefined && (
+                <Stack gap="xs">
+                    <Group align="center">
+                        <Title order={2} className="header-border-left">
+                            {article.title}
+                        </Title>
+                        {user?.isCommittee && (
+                            <Group gap="xs">
+                                <Tooltip label="Edit article">
+                                    <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
+                                        <FontAwesomeIcon icon="edit" />
+                                    </ActionIcon>
+                                </Tooltip>
+                                {user?.isAdmin && (
+                                    <Tooltip label="Delete article">
+                                        <ActionIcon
+                                            size="md"
+                                            variant="subtle"
+                                            color="danger"
+                                            onClick={handleDelete}
+                                            loading={deleteArticleMutation.isPending}>
+                                            <FontAwesomeIcon icon="trash" />
                                         </ActionIcon>
                                     </Tooltip>
-                                    {user?.isAdmin && (
-                                        <Tooltip label="Delete article">
-                                            <ActionIcon
-                                                size="md"
-                                                variant="subtle"
-                                                color="danger"
-                                                onClick={handleDelete}
-                                                loading={deleteArticleMutation.isPending}>
-                                                <FontAwesomeIcon icon="trash" />
-                                            </ActionIcon>
-                                        </Tooltip>
-                                    )}
-                                </Group>
-                            )}
-                        </Group>
-                        {user?.isCommittee && (
-                            <Group gap="5">
-                                <Text size="xs" c="dimmed">
-                                    Last edited{" "}
-                                    {article.lastEditor && (
-                                        <>
-                                            by <UserLink user={article.lastEditor} />
-                                        </>
-                                    )}
-                                </Text>
-                                <DateBadge date={article.updatedAt} size="sm" staticColor />
+                                )}
                             </Group>
                         )}
-                    </Stack>
-                )}
-                {isPredefined && user?.isCommittee && (
-                    <Group justify="flex-end" align="center">
-                        <Group gap="xs">
+                    </Group>
+                    {user?.isCommittee && (
+                        <Group gap="5">
                             <Text size="xs" c="dimmed">
                                 Last edited{" "}
                                 {article.lastEditor && (
@@ -200,80 +228,132 @@ export default function ArticlePage() {
                             </Text>
                             <DateBadge date={article.updatedAt} size="sm" staticColor />
                         </Group>
-                        <Tooltip label="Edit article">
-                            <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
-                                <FontAwesomeIcon icon="edit" />
+                    )}
+                </Stack>
+            )}
+            {isPredefined && user?.isCommittee && (
+                <Group justify="flex-end" align="center">
+                    <Group gap="xs">
+                        <Text size="xs" c="dimmed">
+                            Last edited{" "}
+                            {article.lastEditor && (
+                                <>
+                                    by <UserLink user={article.lastEditor} />
+                                </>
+                            )}
+                        </Text>
+                        <DateBadge date={article.updatedAt} size="sm" staticColor />
+                    </Group>
+                    <Tooltip label="Edit article">
+                        <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>
+                            <FontAwesomeIcon icon="edit" />
+                        </ActionIcon>
+                    </Tooltip>
+                    {user?.isAdmin && (
+                        <Tooltip label="Delete article">
+                            <ActionIcon
+                                size="md"
+                                variant="subtle"
+                                color="danger"
+                                onClick={handleDelete}
+                                loading={deleteArticleMutation.isPending}>
+                                <FontAwesomeIcon icon="trash" />
                             </ActionIcon>
                         </Tooltip>
-                        {user?.isAdmin && (
-                            <Tooltip label="Delete article">
-                                <ActionIcon
-                                    size="md"
-                                    variant="subtle"
-                                    color="danger"
-                                    onClick={handleDelete}
-                                    loading={deleteArticleMutation.isPending}>
-                                    <FontAwesomeIcon icon="trash" />
-                                </ActionIcon>
-                            </Tooltip>
-                        )}
-                    </Group>
-                )}
+                    )}
+                </Group>
+            )}
 
-                <Card shadow="sm" p="lg">
-                    <MarkdownText
-                        content={article.content}
-                        allowHtml={article.type === "documentation" && !article.isPublic}
-                    />
-                </Card>
-
-                <Modal
-                    opened={isEditModalOpen}
-                    onClose={() => setIsEditModalOpen(false)}
-                    title="Edit Article"
-                    size="xl">
-                    <Stack gap="md">
-                        {!isPredefined && (
-                            <TextInput
-                                label="Title"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.currentTarget.value)}
-                                placeholder="Enter article title..."
-                            />
-                        )}
-
-                        <Stack gap="4">
-                            <Text size="sm" fw={500} mb="0">
-                                Content
+            <Grid gutter="lg" align="flex-start">
+                {showToc && (
+                    <Grid.Col
+                        span={{ base: 12, md: 3 }}
+                        visibleFrom="md"
+                        style={{ position: "sticky", top: "88px", alignSelf: "flex-start" }}>
+                        <Card shadow="sm" p="md" style={{ maxHeight: "calc(100vh - 104px)", overflowY: "auto" }}>
+                            <Text size="sm" fw={600} mb="xs">
+                                Table of contents
                             </Text>
-
-                            <TextEditor
-                                value={editContent}
-                                onChange={setEditContent}
-                                placeholder="Enter article content..."
-                                minHeight={300}
-                                autoSaveKey={`edit-article-${article?._id}`}
+                            <TableOfContents
+                                variant="light"
+                                color="blue"
+                                size="sm"
+                                minDepthToOffset={1}
+                                depthOffset={18}
+                                reinitializeRef={reinitializeTocRef}
+                                scrollSpyOptions={{
+                                    selector: "#article-content :is(h1, h2, h3, h4, h5, h6)",
+                                }}
+                                getControlProps={({ data }) => ({
+                                    component: "a",
+                                    href: `#${data.id}`,
+                                    children: data.value,
+                                    onClick: (event) => {
+                                        event.preventDefault();
+                                        data.getNode().scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "start",
+                                        });
+                                    },
+                                })}
+                            />
+                        </Card>
+                    </Grid.Col>
+                )}
+                <Grid.Col span={{ base: 12, md: showToc ? 9 : 12 }}>
+                    <Card shadow="sm" p="lg">
+                        <div id="article-content">
+                            <MarkdownText
+                                content={article.content}
                                 allowHtml={article.type === "documentation" && !article.isPublic}
                             />
-                        </Stack>
+                        </div>
+                    </Card>
+                </Grid.Col>
+            </Grid>
 
-                        <Group justify="flex-end">
-                            <Button
-                                variant="subtle"
-                                onClick={() => {
-                                    setIsEditModalOpen(false);
-                                    // Clear autosaved content when canceling
-                                    clearAutoSavedValue(`edit-article-${article?._id}`);
-                                }}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleSave} loading={isEditing}>
-                                Save Changes
-                            </Button>
-                        </Group>
+            <Modal opened={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Article" size="xl">
+                <Stack gap="md">
+                    {!isPredefined && (
+                        <TextInput
+                            label="Title"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.currentTarget.value)}
+                            placeholder="Enter article title..."
+                        />
+                    )}
+
+                    <Stack gap="4">
+                        <Text size="sm" fw={500} mb="0">
+                            Content
+                        </Text>
+
+                        <TextEditor
+                            value={editContent}
+                            onChange={setEditContent}
+                            placeholder="Enter article content..."
+                            minHeight={300}
+                            autoSaveKey={`edit-article-${article?._id}`}
+                            allowHtml={article.type === "documentation" && !article.isPublic}
+                        />
                     </Stack>
-                </Modal>
-            </Stack>
-        </Container>
+
+                    <Group justify="flex-end">
+                        <Button
+                            variant="subtle"
+                            onClick={() => {
+                                setIsEditModalOpen(false);
+                                // Clear autosaved content when canceling
+                                clearAutoSavedValue(`edit-article-${article?._id}`);
+                            }}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSave} loading={isEditing}>
+                            Save Changes
+                        </Button>
+                    </Group>
+                </Stack>
+            </Modal>
+        </Stack>
     );
 }
