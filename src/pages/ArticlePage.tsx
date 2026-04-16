@@ -280,13 +280,13 @@ export default function ArticlePage() {
                             </Text>
                             <TableOfContents
                                 variant="light"
-                                color="blue"
                                 size="sm"
                                 minDepthToOffset={1}
                                 depthOffset={18}
                                 reinitializeRef={reinitializeTocRef}
                                 scrollSpyOptions={{
                                     selector: "#article-content :is(h1, h2, h3, h4, h5, h6)",
+                                    offset: 88, // offset added to acocunt for the fixed header
                                 }}
                                 getControlProps={({ data }) => ({
                                     component: "a",

@@ -217,11 +217,6 @@
     .mantine-TableOfContents-control {
         text-decoration: none;
         transition: background-color 0.1s ease;
-
-        &[data-active] {
-            background-color: var(--mantine-color-primary-light);
-            color: var(--mantine-color-primary-light-color);
-        }
     }
 }
 
@@ -337,6 +332,11 @@ html {
 
 .article-toc-scroll::-webkit-scrollbar-thumb:hover {
     background-color: var(--mantine-color-primary-5);
+}
+
+#article-content :is(h1, h2, h3, h4, h5, h6) {
+    /* Offset added to acocunt for the fixed header */
+    scroll-margin-top: 88px;
 }
 
 /* Selection */
