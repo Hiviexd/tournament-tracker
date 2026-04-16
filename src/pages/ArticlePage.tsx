@@ -270,7 +270,11 @@ export default function ArticlePage() {
                         span={{ base: 12, md: 3 }}
                         visibleFrom="md"
                         style={{ position: "sticky", top: "88px", alignSelf: "flex-start" }}>
-                        <Card shadow="sm" p="md" style={{ maxHeight: "calc(100vh - 104px)", overflowY: "auto" }}>
+                        <Card
+                            shadow="sm"
+                            p="md"
+                            className="article-toc-scroll"
+                            style={{ maxHeight: "calc(100vh - 104px)", overflowY: "auto" }}>
                             <Text size="sm" fw={600} mb="xs">
                                 Table of contents
                             </Text>
