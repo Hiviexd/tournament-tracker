@@ -171,7 +171,10 @@ jobs:
 
                       # Build frontend
                       echo "Building frontend..."
-                      if ! pnpm build-client-preview; then
+                      frontend_build_output=$(pnpm build-client-preview 2>&1)
+                      frontend_build_status=$?
+                      echo "$frontend_build_output"
+                      if [[ $frontend_build_status -ne 0 ]] || echo "$frontend_build_output" | grep -Eq '(^|[[:space:]])Killed($|[[:space:]])'; then
                           echo "❌ Frontend build failed!"
                           exit 1
                       fi
@@ -189,7 +192,10 @@ jobs:
 
                       # Build backend
                       echo "Building backend..."
-                      if ! pnpm build-server; then
+                      backend_build_output=$(pnpm build-server 2>&1)
+                      backend_build_status=$?
+                      echo "$backend_build_output"
+                      if [[ $backend_build_status -ne 0 ]] || echo "$backend_build_output" | grep -Eq '(^|[[:space:]])Killed($|[[:space:]])'; then
                           echo "❌ Backend build failed!"
                           exit 1
                       fi

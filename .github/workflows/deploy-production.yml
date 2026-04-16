@@ -149,7 +149,13 @@ jobs:
                       cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
 
                       echo "Building frontend..."
-                      pnpm build-client
+                      frontend_build_output=$(pnpm build-client 2>&1)
+                      frontend_build_status=$?
+                      echo "$frontend_build_output"
+                      if [[ $frontend_build_status -ne 0 ]] || echo "$frontend_build_output" | grep -Eq '(^|[[:space:]])Killed($|[[:space:]])'; then
+                          echo "❌ Frontend build failed."
+                          exit 1
+                      fi
 
             - name: Build Backend
               uses: appleboy/ssh-action@master
@@ -163,7 +169,13 @@ jobs:
                       cd ~/projects/tournament-tracker || { echo "Directory not found"; exit 1; }
 
                       echo "Building backend..."
-                      pnpm build-server
+                      backend_build_output=$(pnpm build-server 2>&1)
+                      backend_build_status=$?
+                      echo "$backend_build_output"
+                      if [[ $backend_build_status -ne 0 ]] || echo "$backend_build_output" | grep -Eq '(^|[[:space:]])Killed($|[[:space:]])'; then
+                          echo "❌ Backend build failed."
+                          exit 1
+                      fi
 
             - name: Reload Process
               uses: appleboy/ssh-action@master
