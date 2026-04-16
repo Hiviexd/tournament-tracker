@@ -1,77 +1,93 @@
-import { Card, Image, Text, Tooltip, Stack, Transition } from "@mantine/core";
+import { Button, Group, Image, Modal, Stack } from "@mantine/core";
+import { Carousel } from "@mantine/carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useState } from "react";
 import { IAttachment } from "../../../interfaces/Attachment";
+import AttachmentItem from "./AttachmentItem";
 
 interface IProps {
-    attachment: IAttachment;
+    attachments: IAttachment[];
     size?: number;
 }
 
-export default function AttachmentDisplay({ attachment, size = 120 }: IProps) {
-    const [hovered, setHovered] = useState(false);
-    const isImage = attachment.type.startsWith("image/");
-    const frameSize = size * 0.7;
+export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const [opened, setOpened] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const modalCardSize = Math.max(size * 2, 220);
 
-    const getFileIcon = (): IconProp => {
-        switch (true) {
-            case attachment.type.includes("zip"):
-            case attachment.type.includes("rar"):
-                return "file-archive";
-            case attachment.type.includes("text"):
-                return "file-alt";
-            default:
-                return "file";
-        }
-    };
-
-    const fileName =
-        attachment.originalName.length > 20
-            ? attachment.originalName.substring(0, 17) + "..."
-            : attachment.originalName;
+    if (!attachments.length) return null;
 
     return (
-        <Card
-            component="a"
-            href={attachment.url}
-            download={attachment.originalName}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`attachment-card ${hovered ? "hovered" : ""}`}
-            style={{ width: size, height: size }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}>
-            <Transition mounted={hovered} transition="fade" duration={200}>
-                {(styles) => (
-                    <div className="download-overlay" style={styles}>
-                        <FontAwesomeIcon icon="download" size="lg" />
-                    </div>
-                )}
-            </Transition>
+        <>
+            <Group gap="sm">
+                {attachments.map((attachment, index) => {
+                    const hovered = hoveredIndex === index;
 
-            <Stack align="center" justify="space-between" h="100%" gap={5}>
-                <Card className="preview-frame" style={{ width: frameSize, height: frameSize }}>
-                    {isImage ? (
-                        <Image
-                            src={attachment.url}
-                            alt={attachment.originalName}
-                            width={frameSize - 16}
-                            height={frameSize - 16}
-                            fit="contain"
-                            radius="sm"
+                    return (
+                        <AttachmentItem
+                            key={attachment.id}
+                            attachment={attachment}
+                            cardSize={size}
+                            hovered={hovered}
+                            onMouseEnter={() => setHoveredIndex(index)}
+                            onMouseLeave={() => setHoveredIndex(null)}
+                            onClick={() => {
+                                setActiveIndex(index);
+                                setOpened(true);
+                            }}
                         />
-                    ) : (
-                        <FontAwesomeIcon icon={getFileIcon()} size="2x" className="file-icon" />
-                    )}
-                </Card>
+                    );
+                })}
+            </Group>
 
-                <Tooltip label={attachment.originalName}>
-                    <Text size="sm" c="dimmed" className="file-name">
-                        {fileName}
-                    </Text>
-                </Tooltip>
-            </Stack>
-        </Card>
+            <Modal
+                opened={opened}
+                onClose={() => setOpened(false)}
+                title={`${activeIndex + 1} / ${attachments.length}`}
+                centered
+                size="80%">
+                <Carousel
+                    withIndicators={attachments.length > 1}
+                    withControls={attachments.length > 1}
+                    initialSlide={activeIndex}
+                    onSlideChange={setActiveIndex}
+                    emblaOptions={{ align: "center", loop: attachments.length > 1 }}>
+                    {attachments.map((attachment) => {
+                        const isImage = attachment.type.startsWith("image/");
+                        const isTextFile = attachment.type.startsWith("text/");
+                        return (
+                            <Carousel.Slide key={attachment.id}>
+                                <Stack gap="md" align="center">
+
+                                    {isImage ? (
+                                        <Image
+                                            src={attachment.url}
+                                            alt={attachment.originalName}
+                                            mah="60vh"
+                                            fit="contain"
+                                            radius="md"
+                                        />
+                                    ) : (
+                                        <Stack align="center" justify="center" gap="sm" mih="60vh">
+                                            <AttachmentItem attachment={attachment} cardSize={modalCardSize} iconSize="3x" />
+                                            <Button
+                                                component="a"
+                                                href={attachment.url}
+                                                download={attachment.originalName}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                leftSection={<FontAwesomeIcon icon={isTextFile ? "up-right-from-square" : "download"} />}>
+                                                {isTextFile ? "Open" : "Download"}
+                                            </Button>
+                                        </Stack>
+                                    )}
+                                </Stack>
+                            </Carousel.Slide>
+                        );
+                    })}
+                </Carousel>
+            </Modal>
+        </>
     );
 }

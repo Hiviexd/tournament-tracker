@@ -79,11 +79,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                     <Text size="sm" c="grey">
                         Attachments
                     </Text>
-                    <Group gap="sm">
-                        {message.attachments.map((attachment) => (
-                            <AttachmentDisplay key={attachment.id} attachment={attachment} />
-                        ))}
-                    </Group>
+                    <AttachmentDisplay attachments={message.attachments} />
                 </Stack>
             )}
         </Stack>

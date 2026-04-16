@@ -2,7 +2,7 @@
     padding: var(--mantine-spacing-xs);
     background: var(--mantine-color-primary-10) !important;
     transition: all 0.2s ease;
-    cursor: pointer;
+    cursor: default;
     position: relative;
     text-decoration: none !important;
 
@@ -11,13 +11,13 @@
         transform: translateY(-2px);
     }
 
-    .download-overlay {
+    .open-overlay {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(var(--mantine-color-primary-filled-rgb), 0.8);
+        background: rgba(var(--mantine-color-primary-filled-rgb), 0.65);
         backdrop-filter: blur(2px);
         display: flex;
         align-items: center;
@@ -31,12 +31,8 @@
         }
     }
 
-    .preview-frame {
-        padding: var(--mantine-spacing-xs);
-        background: var(--mantine-color-primary-11) !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    &.clickable {
+        cursor: pointer;
     }
 
     .file-icon {
@@ -51,4 +47,13 @@
         width: 100%;
         text-align: center;
     }
+}
+
+.attachment-media {
+    box-sizing: border-box;
+    background: var(--mantine-color-primary-10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--mantine-radius-md);
 }

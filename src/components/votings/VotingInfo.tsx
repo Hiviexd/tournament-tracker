@@ -292,11 +292,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     <Text size="sm" c="dimmed">
                                         Attachments
                                     </Text>
-                                    <Group gap="sm">
-                                        {voting.attachments.map((attachment) => (
-                                            <AttachmentDisplay key={attachment.id} attachment={attachment} />
-                                        ))}
-                                    </Group>
+                                    <AttachmentDisplay attachments={voting.attachments} />
                                 </Stack>
                             )}
                         </>
