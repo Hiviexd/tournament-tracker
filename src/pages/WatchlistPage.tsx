@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Stack, Button, Group, Pagination, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
@@ -14,7 +14,6 @@ import EmptyState from "../components/common/EmptyState";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import config from "../../config.json";
-import { useSearchParams } from "react-router-dom";
 import { WATCHLIST_PAGE_SIZE } from "../components/watchlist/watchlistUtils";
 
 interface FilterValues {
@@ -24,36 +23,47 @@ interface FilterValues {
 export default function WatchlistPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const setSelectedUser = useSetAtom(selectedUserAtom);
-    const [searchParams, setSearchParams] = useSearchParams();
+    const previousQueryBeforeUserModalRef = useRef<{ type: string; page: number } | null>(null);
 
     const getDiscordThreadLink = (threadId: string) =>
         `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
-
-    const handleUserWatchlistModalClose = () => {
-        setSearchParams((prev) => {
-            const next = new URLSearchParams(prev);
-            next.delete("user");
-            return next;
-        });
-        setSelectedUser(null);
-    };
-
-    const handleUserSelect = (user: IUser) => {
-        setSelectedUser(user);
-        setSearchParams((prev) => {
-            const next = new URLSearchParams(prev);
-            next.set("user", user.osuId.toString());
-            return next;
-        });
-    };
 
     const [queryState, setQueryState] = useQueryStates(
         {
             type: parseAsString.withDefault(""),
             page: parseAsInteger.withDefault(1),
+            user: parseAsString,
         },
         { clearOnDefault: true },
     );
+
+    const handleUserWatchlistModalClose = () => {
+        if (previousQueryBeforeUserModalRef.current) {
+            setQueryState({
+                ...previousQueryBeforeUserModalRef.current,
+                user: null,
+            });
+            previousQueryBeforeUserModalRef.current = null;
+        } else {
+            setQueryState({ user: null });
+        }
+        setSelectedUser(null);
+    };
+
+    const handleUserSelect = (user: IUser) => {
+        setSelectedUser(user);
+
+        if (!queryState.user) {
+            previousQueryBeforeUserModalRef.current = {
+                type: queryState.type,
+                page: queryState.page,
+            };
+        }
+
+        setQueryState({
+            user: user.osuId.toString(),
+        });
+    };
 
     const filters: FilterValues = useMemo(
         () => ({ type: queryState.type as InfringementType | "" }),
@@ -89,7 +99,7 @@ export default function WatchlistPage() {
 
     return (
         <Stack gap="md">
-            <UserWatchlistModal userId={searchParams.get("user")} onClose={handleUserWatchlistModalClose} />
+            <UserWatchlistModal userId={queryState.user} onClose={handleUserWatchlistModalClose} />
 
             <WatchlistFilters
                 values={filters}
