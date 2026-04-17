@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box, useMantineTheme } from "@mantine/core";
+import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box, useMantineTheme, MantineTheme } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -33,12 +33,12 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         };
     };
 
-    const getBorderColor = (theme: any) => {
+    const getBorderColor = (theme: MantineTheme) => {
         if (message.isCommittee) {
             if (ticket?.assignedGroup === "tc") return theme.colors.warning[6];
             if (ticket?.assignedGroup === "cc") return theme.colors.info[6];
         }
-        return theme.colors.primary[6];
+        return "var(--mantine-color-primary-light-color)";
     };
 
     const MessageContent = ({ mobileNoteIcon = false }: { mobileNoteIcon?: boolean }) => (
