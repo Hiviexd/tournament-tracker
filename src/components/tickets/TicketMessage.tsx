@@ -16,12 +16,17 @@ interface IProps {
     showTrueAuthor: boolean;
 }
 
+// When to use committee identity over the true author
+type CommitteeIdentityDisplay = "always" | "whenMasked";
+
 export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
     const theme = useMantineTheme();
     const mobileNoteIcon = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
-    const getUserDisplayProps = () => {
-        if (message.isCommittee && !showTrueAuthor) {
+    const getUserDisplayProps = (CommitteeIdentityDisplay: CommitteeIdentityDisplay) => {
+        const showCommitteeFacade =
+            message.isCommittee && (CommitteeIdentityDisplay === "always" || !showTrueAuthor);
+        if (showCommitteeFacade) {
             return {
                 username: ticket?.assignedGroup === "tc" ? "Tournament Committee" : "Contest Committee",
                 avatarUrl: "/assets/logo-512.png",
@@ -41,10 +46,16 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
         return "var(--mantine-color-primary-light-color)";
     };
 
-    const MessageContent = ({ mobileNoteIcon = false }: { mobileNoteIcon?: boolean }) => (
+    const MessageContent = ({
+        mobileNoteIcon = false,
+        CommitteeIdentityDisplay,
+    }: {
+        mobileNoteIcon?: boolean;
+        CommitteeIdentityDisplay: CommitteeIdentityDisplay;
+    }) => (
         <Stack gap="sm">
             <Group justify="space-between" align="center">
-                <UserDisplay {...getUserDisplayProps()} />
+                <UserDisplay {...getUserDisplayProps(CommitteeIdentityDisplay)} />
                 <Group gap="xs">
                     <Box visibleFrom="xs">
                         <DateBadge date={message.createdAt} staticColor />
@@ -74,6 +85,12 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
             <Box style={{ overflowWrap: "anywhere" }}>
                 <MarkdownText content={message.content} />
             </Box>
+            {CommitteeIdentityDisplay === "always" && message.isCommittee && showTrueAuthor && (
+                <Text size="xs" c="dimmed">
+                    sent by{" "}
+                    <UserLink user={message.author} fw={700} c="white" />
+                </Text>
+            )}
             {message.attachments && message.attachments.length > 0 && (
                 <Stack mt="lg" gap="sm">
                     <Text size="sm" c="grey">
@@ -94,12 +111,13 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 variant="light"
                 color="info"
                 icon={!mobileNoteIcon && <FontAwesomeIcon icon="sticky-note" />}>
-                <MessageContent mobileNoteIcon={mobileNoteIcon} />
+                <MessageContent mobileNoteIcon={mobileNoteIcon} CommitteeIdentityDisplay="whenMasked" />
             </Alert>
         );
     // Event logs
     } else if (message.event && ticket) {
         const isClosing = message.event === "close";
+        const eventLogUserDisplay = getUserDisplayProps("whenMasked");
         return (
             <Group gap="xs" align="center" mx="lg">
                 <ThemeIcon size="sm" radius="xl" color={isClosing ? "red" : "green"} variant="filled">
@@ -108,8 +126,8 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <Text size="sm" c="dimmed">
                     <UserLink
                         user={message.author}
-                        username={getUserDisplayProps().username}
-                        asText={!!getUserDisplayProps().username}
+                        username={eventLogUserDisplay.username}
+                        asText={!!eventLogUserDisplay.username}
                         c="white"
                     />{" "}
                     {isClosing ? "closed" : "reopened"} this {ticket.isTicket ? "ticket" : "report"}{" "}
@@ -127,7 +145,7 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 style={(theme) => ({
                     borderLeft: `4px solid ${getBorderColor(theme)}`,
                 })}>
-                <MessageContent />
+                <MessageContent CommitteeIdentityDisplay="always" />
             </Card>
         );
     }
