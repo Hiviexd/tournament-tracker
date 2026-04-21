@@ -46,7 +46,12 @@ export default function TournamentBadges({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [isEditingBadges, setIsEditingBadges] = useState(false);
     const uploadBadgesMutation = useUploadBadges(tournament.id);
-    const { files, handleFileChange, clearFiles } = useFileUpload();
+    const serverUploadOptions = {
+        maxFiles: 8,
+        maxSize: 5 * 1024 * 1024, // 5MB
+        allowedTypes: ["image/png"],
+    };
+    const { files, handleFileChange, clearFiles } = useFileUpload(serverUploadOptions);
     const [awardsManagerOpened, { toggle: toggleAwardsManager }] = useDisclosure(false);
     const [profilePreviewOpened, { open: openProfilePreview, close: closeProfilePreview }] = useDisclosure(false);
 
@@ -58,12 +63,6 @@ export default function TournamentBadges({ tournament }: IProps) {
     // check if none of the badges have file size 0
     const validateBadges = (badges: IAttachment[]) => {
         return badges.every((badge) => badge.url.includes(config.r2.baseUrl));
-    };
-
-    const serverUploadOptions = {
-        maxFiles: 8,
-        maxSize: 5 * 1024 * 1024, // 5MB
-        allowedTypes: ["image/png"],
     };
 
     const clientAcceptedTypes = [".png"];
