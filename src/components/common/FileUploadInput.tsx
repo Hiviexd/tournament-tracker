@@ -1,11 +1,10 @@
 import { FileInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useFileUpload } from "../../hooks/useFileUpload";
-import { UseFileUploadOptions } from "../../hooks/useFileUpload";
+import type { UseFileUploadOptions } from "../../hooks/useFileUpload";
 
 interface IProps {
-    value?: File[];
-    onChange?: (files: File[]) => void;
+    value: File[];
+    onChange: (files: File[]) => void;
     label?: string;
     description?: string;
     placeholder?: string;
@@ -24,12 +23,9 @@ export default function FileUploadInput({
     accept = [".jpg", ".png", ".zip", ".rar", ".txt"],
     disabled = false,
 }: IProps) {
-    const { files, handleFileChange } = useFileUpload(options);
-
     const handleChange = (newFiles: File | File[] | null) => {
         if (newFiles) {
-            handleFileChange(Array.isArray(newFiles) ? newFiles : [newFiles]);
-            onChange?.(Array.isArray(newFiles) ? newFiles : [newFiles]);
+            onChange(Array.isArray(newFiles) ? newFiles : [newFiles]);
         }
     };
 
@@ -46,7 +42,7 @@ export default function FileUploadInput({
             label={label}
             description={description}
             placeholder={placeholder}
-            value={value ?? files}
+            value={value}
             onChange={handleChange}
             disabled={disabled}
         />
