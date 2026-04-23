@@ -7,17 +7,18 @@ interface IProps {
     infringement: IInfringement | null;
     variant?: "light" | "filled";
     size?: MantineSize;
+    hideEndsText?: boolean;
 }
 
-export default function InfringementExpirationBadge({ infringement, variant = "light", size = "md" }: IProps) {
+export default function InfringementExpirationBadge({ infringement, variant = "light", size = "md", hideEndsText = false }: IProps) {
     if (!infringement) {
         return null;
     }
 
     if (!infringement.endDate || infringement.isIndefinite) {
         return (
-            <Badge variant={variant} color="gray.6" size={size} leftSection={<FontAwesomeIcon icon="times-circle" />}>
-                N/A
+            <Badge variant={variant} color="danger" size={size} leftSection={<FontAwesomeIcon icon="times-circle" />}>
+                Indefinite
             </Badge>
         );
     }
@@ -36,7 +37,7 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
     return (
         <Tooltip label={moment(infringement.endDate).format("LLL")}>
             <Badge variant={variant} color={getColor()} size={size} leftSection={<FontAwesomeIcon icon="calendar" />}>
-                {moment(infringement.endDate).fromNow()}
+            {hideEndsText ? "" : infringement.isExpired ? "Ended" : "Ends"} {moment(infringement.endDate).fromNow()}
             </Badge>
         </Tooltip>
     );

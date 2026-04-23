@@ -69,7 +69,7 @@ export default function UserInfringementsList({ user }: IProps) {
                 <>
                     {activeInfringement && <Divider />}
                     <Text size="md" fw={500} className="header-border-left">
-                        Infringement History
+                        History
                     </Text>
                     <Stack gap="sm">
                         {historicalInfringements.map((infringement) => (

@@ -59,7 +59,7 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
                             <Text size="xs" c="dimmed">
                                 Expires:
                             </Text>
-                            <InfringementExpirationBadge infringement={infringement} size="sm" />
+                            <InfringementExpirationBadge infringement={infringement} size="sm" hideEndsText />
                         </Group>
                     )}
                 </Stack>
@@ -141,12 +141,12 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
                             />
                         )}
                         {onEdit && (
-                            <Tooltip label="Edit infringement">
+                            <Tooltip label="Edit">
                                 <ActionIcon
                                     variant="subtle"
                                     color="info"
                                     onClick={handleEdit}
-                                    aria-label="Edit infringement">
+                                    aria-label="Edit">
                                     <FontAwesomeIcon icon="edit" />
                                 </ActionIcon>
                             </Tooltip>
