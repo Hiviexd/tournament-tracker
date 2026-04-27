@@ -334,6 +334,33 @@ html {
     background-color: var(--mantine-color-primary-5);
 }
 
+/* ButtonGroup global override */
+.mantine-ButtonGroup-group {
+    display: inline-flex;
+    border: 1px solid color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent);
+    border-radius: var(--mantine-radius-sm);
+    overflow: hidden;
+}
+
+.mantine-ButtonGroup-group > .mantine-Button-root {
+    flex: 1 1 0;
+    min-width: 0;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.mantine-ButtonGroup-group > .mantine-Button-root + .mantine-Button-root {
+    border-left: 1px solid
+        color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent) !important;
+}
+
+/* ButtonGroup full-width variant (opt-in via mod="full-width") */
+.mantine-ButtonGroup-group[data-full-width] {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+}
+
 #article-content :is(h1, h2, h3, h4, h5, h6) {
     /* Offset added to acocunt for the fixed header */
     scroll-margin-top: 88px;

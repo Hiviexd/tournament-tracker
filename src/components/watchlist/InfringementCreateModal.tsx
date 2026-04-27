@@ -14,6 +14,13 @@ import { useConfirmModal } from "../../hooks/useModals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
 
+const DURATION_PRESETS = [
+    { label: "1 month", months: 1 },
+    { label: "3 months", months: 3 },
+    { label: "6 months", months: 6 },
+    { label: "1 year", months: 12 },
+] as const;
+
 interface IProps {
     opened: boolean;
     onClose: () => void;
@@ -155,6 +162,14 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         }
     };
 
+    const applyDurationPreset = (months: number) => {
+        const mStart = form.values.startDate ? moment(form.values.startDate).startOf("day") : moment().startOf("day");
+        const end = mStart.clone().add(months, "months").add(1, "day");
+        form.setFieldValue("startDate", mStart.toDate());
+        form.setFieldValue("isIndefinite", false);
+        form.setFieldValue("endDate", end.toDate());
+    };
+
     return (
         <Modal
             key={`infringement-create-${preselectedUserId || "new"}`}
@@ -185,6 +200,24 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
                     {!isNonTimeBased && (
                         <Stack gap="xs">
+                            <Box>
+                                <Text size="sm" fw={500} mb={6}>
+                                    Duration preset
+                                </Text>
+                                <Button.Group mod="full-width">
+                                    {DURATION_PRESETS.map((preset) => (
+                                        <Button
+                                            key={preset.months}
+                                            type="button"
+                                            size="xs"
+                                            variant="light"
+                                            onClick={() => applyDurationPreset(preset.months)}>
+                                            {preset.label}
+                                        </Button>
+                                    ))}
+                                </Button.Group>
+                            </Box>
+
                             <DateInput
                                 label="Start Date"
                                 placeholder="Select start date..."
