@@ -35,27 +35,49 @@
     .search-content {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         flex: 1;
-        transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        min-width: 0;
+        padding-right: 54px;
     }
 
     &.collapsed .search-content {
-        opacity: 0;
         width: 0 !important;
     }
 
     .search-text {
         white-space: nowrap;
-        margin-right: 10px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 0;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+    }
+
+    &.collapsed .search-text {
+        opacity: 0;
     }
 
     .shortcut {
+        position: absolute;
+        right: var(--mantine-spacing-sm);
+        top: 50%;
+        transform: translateY(-50%);
         font-size: 11px;
         line-height: 1;
         border-radius: var(--mantine-radius-sm);
         font-weight: bold;
         color: var(--mantine-color-primary-light-color);
         white-space: nowrap;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.18s ease;
+        transition-delay: 0.14s;
+    }
+
+    &.collapsed .shortcut {
+        opacity: 0;
+        transition-duration: 0.1s;
+        transition-delay: 0.02s;
     }
 }
