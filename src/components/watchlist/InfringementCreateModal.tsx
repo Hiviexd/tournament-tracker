@@ -1,8 +1,8 @@
 import { Modal, TextInput, Stack, Select, Button, Group, Text, Checkbox, Box } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
-import { useState, useEffect } from "react";
-import UserSearch from "../common/UserSearch";
+import { useState } from "react";
+import MultipleUsersInput from "../common/MultipleUsersInput";
 import TextEditor from "../common/TextEditor";
 import { useAddInfringement } from "../../hooks/useInfringements";
 import { InfringementType, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
@@ -28,7 +28,7 @@ interface IProps {
 }
 
 export default function InfringementCreateModal({ opened, onClose, preselectedUser }: IProps) {
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(preselectedUser || null);
+    const [selectedUsers, setSelectedUsers] = useState<IUser[]>(preselectedUser ? [preselectedUser] : []);
     const preselectedUserId = preselectedUser?.id;
 
     const addInfringementMutation = useAddInfringement();
@@ -37,7 +37,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
     const form = useForm({
         initialValues: {
-            userId: preselectedUserId || "",
+            userIds: preselectedUserId ? [preselectedUserId] : ([] as string[]),
             type: "" as InfringementType,
             startDate: new Date(),
             endDate: null as Date | null,
@@ -47,8 +47,9 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             enchantUrl: "",
         },
         validate: {
-            userId: (value) => {
-                return !value ? "User is required" : null;
+            userIds: (value) => {
+                if (preselectedUserId) return null;
+                return !value || value.length === 0 ? "At least one user is required" : null;
             },
             type: (value) => (!value ? "Infringement type is required" : null),
             startDate: (value) => {
@@ -80,14 +81,6 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         },
     });
 
-    // Update form when preSelectedUserId changes
-    useEffect(() => {
-        if (preselectedUserId) {
-            form.setFieldValue("userId", preselectedUserId);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [preselectedUserId]); // Cannot add form to dependencies to avoid infinite loop
-
     const isNonTimeBased = !TIME_BASED_TYPES.includes(form.values.type);
 
     const infringementTypeOptions = [
@@ -98,19 +91,17 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
     ];
 
-    const handleSelectUser = (user: IUser | null) => {
-        setSelectedUser(user);
-        form.setFieldValue("userId", user?.id || "");
-    };
-
     const handleSubmit = async (values: typeof form.values) => {
         try {
+            const targetUsers = preselectedUser ? [preselectedUser] : selectedUsers;
+            const targetUserIds = preselectedUserId ? [preselectedUserId] : values.userIds;
+
             let confirmed = true;
-            const activeInfringement = preselectedUser?.activeInfringement || selectedUser?.activeInfringement;
-            if (activeInfringement && !isNonTimeBased) {
+            const hasActiveInfringement = targetUsers.some((user) => user.activeInfringement);
+            if (hasActiveInfringement && !isNonTimeBased) {
                 confirmed = await confirmModal({
                     title: "Add Infringement",
-                    text: `This user has an active ${activeInfringement.typeString}. Adding a new infringement will expire the active one. Are you sure you want to add this infringement?`,
+                    text: `Some selected users have active infringements. Adding a new infringement will expire each active one. Are you sure you want to add this infringement?`,
                     confirmText: "Add Infringement",
                     confirmProps: { color: "primary", leftSection: <FontAwesomeIcon icon="gavel" /> },
                 });
@@ -119,7 +110,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             if (!confirmed) return;
 
             const payload: any = {
-                userId: values.userId,
+                userIds: targetUserIds,
                 type: values.type,
                 reason: values.reason.trim(),
                 threadId: values.threadId.trim() || undefined,
@@ -144,10 +135,8 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
 
     const handleClose = () => {
         form.reset();
-        // Reset userId to preSelected if available
-        if (preselectedUserId) {
-            form.setFieldValue("userId", preselectedUserId);
-        }
+        form.setFieldValue("userIds", preselectedUserId ? [preselectedUserId] : []);
+        setSelectedUsers(preselectedUser ? [preselectedUser] : []);
         // Reset dates
         form.setFieldValue("startDate", new Date());
         form.setFieldValue("endDate", null);
@@ -180,12 +169,20 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
                     {!preselectedUserId && (
-                        <UserSearch
-                            label="User"
-                            onChange={handleSelectUser}
-                            error={form.errors.userId}
+                        <MultipleUsersInput
+                            label="Users"
+                            value={selectedUsers}
+                            onChange={(users) => {
+                                setSelectedUsers(users);
+                                form.setFieldValue(
+                                    "userIds",
+                                    users.map((user) => user.id),
+                                );
+                            }}
+                            error={typeof form.errors.userIds === "string" ? form.errors.userIds : undefined}
                             required
                             allowUserCreation
+                            showActiveInfringementWarning
                         />
                     )}
 

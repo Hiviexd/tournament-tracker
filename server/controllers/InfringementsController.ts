@@ -25,28 +25,51 @@ class InfringementsController {
 
     /** POST add infringement */
     public async addInfringement(req: Request, res: Response) {
-        const { userId } = req.params;
-        const { type, startDate, endDate, reason, threadId, enchantUrl } = req.body;
+        const { userIds, type, startDate, endDate, reason, threadId, enchantUrl } = req.body;
 
         try {
-            const { infringement, user } = await InfringementService.addInfringement(userId, {
-                type,
-                startDate,
-                endDate,
-                reason,
-                threadId,
-                enchantUrl,
-            });
-
-            res.json({ message: "Infringement added successfully!", user });
-
-            await LogService.generate(
-                req.session.mongoId!,
-                `Added **${_.startCase(type)}** infringement to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
-                "user",
+            const normalizedUserIds = Array.isArray(userIds) ? userIds : [userIds];
+            const validUserIds = normalizedUserIds.filter(
+                (id): id is string => typeof id === "string" && id.trim() !== "",
             );
 
+            if (validUserIds.length === 0) {
+                return res.status(400).json({ error: "At least one user ID is required" });
+            }
+
+            const addedInfringements: { infringement: any; user: any }[] = [];
+
+            for (const userId of validUserIds) {
+                const result = await InfringementService.addInfringement(userId, {
+                    type,
+                    startDate,
+                    endDate,
+                    reason,
+                    threadId,
+                    enchantUrl,
+                });
+                addedInfringements.push(result);
+
+                await LogService.generate(
+                    req.session.mongoId!,
+                    `Added **${_.startCase(type)}** infringement to [**${result.user.username}**](${config.baseUrl}/watchlist?user=${result.user.osuId})`,
+                    "user",
+                );
+            }
+
+            if (addedInfringements.length === 1) {
+                res.json({ message: "Infringement added successfully!", user: addedInfringements[0].user });
+            } else {
+                res.json({
+                    message: `Infringements added successfully for ${addedInfringements.length} users!`,
+                    users: addedInfringements.map((item) => item.user),
+                });
+            }
+
             const isTimeBased = TIME_BASED_TYPES.includes(type);
+            const firstResult = addedInfringements[0];
+            const firstInfringement = firstResult.infringement;
+            const firstUser = firstResult.user;
 
             const typeColorMap: { [key in InfringementType]: number } = {
                 [InfringementType.NOTE]: DiscordUtils.webhookColors.lightBlue,
@@ -62,9 +85,22 @@ class InfringementsController {
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                 .setColor(isIndefinite ? DiscordUtils.webhookColors.darkRed : typeColorMap[type])
                 .setDescription(
-                    `Added **${_.startCase(type)}** to [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
-                )
-                .setFooter(`ID: ${infringement.id}`);
+                    addedInfringements.length === 1
+                        ? `Added **${_.startCase(type)}** to [**${firstUser.username}**](${config.baseUrl}/watchlist?user=${firstUser.osuId})`
+                        : `Added **${_.startCase(type)}** infringements to **${addedInfringements.length} users**.`,
+                );
+
+            if (addedInfringements.length === 1) {
+                embed.setFooter(`ID: ${firstInfringement.id}`);
+            } else {
+                const usersList = addedInfringements
+                    .map(
+                        (item) =>
+                            `[**${item.user.username}**](${config.baseUrl}/watchlist?user=${item.user.osuId})`,
+                    )
+                    .join(", ");
+                embed.addField("Users", utils.shorten(usersList, 1024));
+            }
 
             if (isTimeBased) {
                 if (startDate && endDate) {
@@ -84,8 +120,8 @@ class InfringementsController {
 
             const webhookBuilder = new WebhookBuilder().addEmbed(embed);
 
-            if (infringement.threadId) {
-                webhookBuilder.setThreadId(infringement.threadId);
+            if (firstInfringement.threadId) {
+                webhookBuilder.setThreadId(firstInfringement.threadId);
             }
 
             await webhookBuilder.send();

@@ -39,7 +39,7 @@ export function useAddInfringement() {
 
     return useMutation({
         mutationFn: async (data: {
-            userId: string;
+            userIds: string[];
             type: string;
             startDate: Date;
             endDate: Date;
@@ -49,8 +49,9 @@ export function useAddInfringement() {
         }) => {
             const response = await utils.apiCall({
                 method: "post",
-                url: `/api/infringements/${data.userId}`,
+                url: "/api/infringements/add",
                 data: {
+                    userIds: data.userIds,
                     type: data.type,
                     startDate: data.startDate,
                     endDate: data.endDate,
@@ -67,13 +68,20 @@ export function useAddInfringement() {
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["user"] });
 
-            const res = responseData as { message: string; user: IUser };
+            const res = responseData as { message: string; user?: IUser; users?: IUser[] };
+
             if (res.user) {
                 setSelectedUser(res.user);
-                // Update modal's useUser cache (URL uses osuId; key may be id or osuId)
-                queryClient.setQueryData(["user", res.user.osuId.toString()], res.user);
-                if (res.user.id) queryClient.setQueryData(["user", res.user.id], res.user);
+            } else if (res.users && res.users.length > 0) {
+                setSelectedUser(res.users[0]);
             }
+
+            const usersToUpdate = res.user ? [res.user] : res.users ?? [];
+            usersToUpdate.forEach((user) => {
+                // Update modal's useUser cache (URL uses osuId; key may be id or osuId)
+                queryClient.setQueryData(["user", user.osuId.toString()], user);
+                if (user.id) queryClient.setQueryData(["user", user.id], user);
+            });
         },
     });
 }
@@ -94,7 +102,7 @@ export function useUpdateInfringement() {
         }) => {
             const response = await utils.apiCall({
                 method: "patch",
-                url: `/api/infringements/${data.infringementId}`,
+                url: `/api/infringements/${data.infringementId}/edit`,
                 data: {
                     userId: data.userId,
                     startDate: data.startDate,
