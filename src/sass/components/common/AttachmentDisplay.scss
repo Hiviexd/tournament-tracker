@@ -57,3 +57,43 @@
     justify-content: center;
     border-radius: var(--mantine-radius-md);
 }
+
+.attachment-modal-content {
+    background: color-mix(in srgb, var(--mantine-color-primary-11) 82%, transparent);
+    backdrop-filter: blur(0.875em);
+    -webkit-backdrop-filter: blur(0.875em);
+}
+
+.attachment-modal-header {
+    background: transparent;
+}
+
+.attachment-carousel-indicators {
+    min-height: 1em;
+}
+
+.attachment-carousel-indicator {
+    width: 0.625em;
+    height: 0.625em;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--mantine-color-primary-2) 38%, transparent);
+    transition: all 180ms ease;
+
+    &[data-active] {
+        background: var(--mantine-color-primary-4);
+        transform: scale(1.2);
+    }
+}
+
+.attachment-carousel-counter {
+    color: var(--mantine-color-primary-1);
+}
+
+.attachment-carousel-viewport {
+    cursor: grab;
+
+    &:active,
+    &.is-dragging {
+        cursor: grabbing;
+    }
+}

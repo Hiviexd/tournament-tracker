@@ -1,4 +1,4 @@
-import { Button, Group, Image, Modal, Stack } from "@mantine/core";
+import { Box, Button, Group, Image, Modal, Stack, Text, UnstyledButton } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -14,6 +14,7 @@ export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [opened, setOpened] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [carouselApi, setCarouselApi] = useState<{ scrollTo: (index: number) => void } | null>(null);
     const modalCardSize = Math.max(size * 2, 220);
 
     if (!attachments.length) return null;
@@ -44,14 +45,19 @@ export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
             <Modal
                 opened={opened}
                 onClose={() => setOpened(false)}
-                title={`${activeIndex + 1} / ${attachments.length}`}
+                title="Attachments"
                 centered
-                size="80%">
+                size="80%"
+                classNames={{
+                    content: "attachment-modal-content",
+                    header: "attachment-modal-header",
+                }}>
                 <Carousel
-                    withIndicators={attachments.length > 1}
                     withControls={attachments.length > 1}
                     initialSlide={activeIndex}
                     onSlideChange={setActiveIndex}
+                    getEmblaApi={setCarouselApi}
+                    classNames={{ viewport: "attachment-carousel-viewport" }}
                     emblaOptions={{ align: "center", loop: attachments.length > 1 }}>
                     {attachments.map((attachment) => {
                         const isImage = attachment.type.startsWith("image/");
@@ -59,7 +65,6 @@ export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
                         return (
                             <Carousel.Slide key={attachment.id}>
                                 <Stack gap="md" align="center">
-
                                     {isImage ? (
                                         <Image
                                             src={attachment.url}
@@ -87,6 +92,26 @@ export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
                         );
                     })}
                 </Carousel>
+
+                {attachments.length > 1 && (
+                    <Group justify="center" gap={8} mt="md" className="attachment-carousel-indicators">
+                        {attachments.map((attachment, index) => (
+                            <UnstyledButton
+                                key={attachment.id}
+                                onClick={() => carouselApi?.scrollTo(index)}
+                                aria-label={`Go to attachment ${index + 1}`}
+                                className="attachment-carousel-indicator"
+                                data-active={index === activeIndex || undefined}
+                            />
+                        ))}
+                    </Group>
+                )}
+
+                <Box mt="xs" className="attachment-carousel-counter-wrap">
+                    <Text ta="center" size="sm" className="attachment-carousel-counter">
+                        {activeIndex + 1} / {attachments.length}
+                    </Text>
+                </Box>
             </Modal>
         </>
     );
