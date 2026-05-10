@@ -1,13 +1,22 @@
 import { IDiscordEmbed, IDiscordAuthor } from "../../../interfaces/Discord";
 import { Session } from "express-session";
 import { EmbedBuilder } from "./EmbedBuilder";
-import { WebhookBuilder } from "./WebhookBuilder";
 import utils from "../../../utils";
+import axios from "axios";
+import config from "../../../config.json";
 
 /**
  * Singleton utility class for Discord webhook operations
  */
 export default class DiscordUtils {
+    private static getWebhookLink(webhookType: "main" | "dev", threadId?: string): string {
+        let url = `https://discord.com/api/webhooks/${config.discord.webhooks[webhookType].id}/${config.discord.webhooks[webhookType].token}`;
+        if (threadId && process.env.NODE_ENV !== "development") {
+            url += `?thread_id=${threadId}`;
+        }
+        return url;
+    }
+
     /**
      * Parse hex color string to number
      */
@@ -99,8 +108,16 @@ export default class DiscordUtils {
             errorEmbed.setAuthor(webhookAuthor);
         }
 
+        const url = this.getWebhookLink("dev", threadId);
+        const content = webhookType ? `Failure source: \`${webhookType}\`` : "";
+
         try {
-            await new WebhookBuilder().addEmbed(errorEmbed).setLocation("dev").send();
+            await axios.post(url, {
+                username: config.discord.username,
+                avatar_url: config.discord.avatar_url,
+                embeds: [errorEmbed.build()],
+                content,
+            });
         } catch (error) {
             // ¯\_(ツ)_/¯
             console.error(error);

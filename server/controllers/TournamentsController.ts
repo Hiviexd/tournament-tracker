@@ -18,6 +18,7 @@ import archiver from "archiver";
 import axios from "axios";
 import TournamentService from "../services/TournamentService";
 import LogService from "../services/LogService";
+import NotificationDispatchService from "../services/NotificationDispatchService";
 import _ from "lodash";
 import moment from "moment";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
@@ -805,12 +806,15 @@ class TournamentsController {
 
         const successes = results.filter((result) => result.success);
         const failures = results.filter((result) => !result.success);
+        const queueStats = await NotificationDispatchService.getQueueStats();
 
         res.json({
             message: `Bulk edit complete: ${successes.length} succeeded, ${failures.length} failed.`,
             successCount: successes.length,
             failureCount: failures.length,
             results,
+            dispatchMode: "queued",
+            notificationQueue: queueStats,
         });
     }
 

@@ -1,9 +1,7 @@
-import axios from "axios";
-import config from "../../../config.json";
 import { IDiscordEmbed } from "../../../interfaces/Discord";
-import utils from "../../../utils";
+import { IDiscordNotificationPayload } from "../../../interfaces/NotificationJob";
 import { EmbedBuilder } from "./EmbedBuilder";
-import DiscordUtils from "./DiscordUtils";
+import NotificationDispatchService from "../NotificationDispatchService";
 
 /**
  * Builder class for configuring and sending Discord webhooks with a fluent API
@@ -79,20 +77,16 @@ export class WebhookBuilder {
         return this;
     }
 
-    /**
-     * Constructs a webhook link
-     */
-    private getWebhookLink(webhookType?: string, threadId?: string): string {
-        let url = `https://discord.com/api/webhooks/`;
-        const type = webhookType || "main";
-
-        url += `${config.discord.webhooks[type].id}/${config.discord.webhooks[type].token}`;
-
-        if (threadId) {
-            url += `?thread_id=${threadId}`;
-        }
-
-        return url;
+    private toPayload(): IDiscordNotificationPayload {
+        return {
+            location: this.location,
+            threadId: this.threadId,
+            notification: this.notification,
+            users: this.users,
+            roles: this.roles as ("tournament" | "contest")[],
+            message: this.message,
+            embeds: this.embeds,
+        };
     }
 
     /**
@@ -103,44 +97,10 @@ export class WebhookBuilder {
             throw new Error("At least one embed is required");
         }
 
-        const url = this.getWebhookLink(this.location, this.threadId);
-
-        let userPings = "";
-        let rolePings = "";
-        let content = "";
-
-        if (this.users.length > 0) {
-            userPings = this.users
-                .map((id) => `<@${id}>`)
-                .join(" ")
-                .trim();
-        }
-
-        if (this.roles.length > 0) {
-            rolePings = this.roles
-                .map((role) => `<@&${config.discord.roles[role]}>`)
-                .join(" ")
-                .trim();
-        }
-
-        content = `${rolePings} ${userPings} ${this.message}`.trim();
-
         try {
-            await axios.post(url, {
-                username: config.discord.username,
-                avatar_url: config.discord.avatar_url,
-                embeds: this.embeds,
-                content,
-                flags: this.notification === "silent" ? 1 << 12 : undefined,
-            });
-            await utils.delay(1000);
+            await NotificationDispatchService.enqueueDiscordWebhook(this.toPayload());
         } catch (error) {
-            await DiscordUtils.sendErrorWebhook(
-                error,
-                { message: this.message, embeds: this.embeds },
-                this.location,
-                this.threadId
-            );
+            console.error("Failed to enqueue Discord webhook job:", error);
         }
     }
 }

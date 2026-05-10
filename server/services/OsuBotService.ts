@@ -1,9 +1,10 @@
-import { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { IOsuBotMessage } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
 import utils from "../../utils";
 import OsuApiService from "./OsuApiService";
+import NotificationDispatchService from "./NotificationDispatchService";
 
 interface TokenInfo {
     expiresAt: Date | null;
@@ -91,13 +92,40 @@ export default class OsuBotService extends OsuApiService {
     }
 
     /**
-     * Sends an announcement to specified users through the osu! chat
+     * Enqueues an announcement to specified users through the osu! chat
      * @param userIds - Array of osu! user IDs to send the announcement to
      * @param message - The message object containing channel info and content
      * @param fallbackId - The osu! user ID to send the announcement to if in dev environment
-     * @returns true if successful, ErrorResponse if failed
+     * @returns true if enqueue succeeds, ErrorResponse if enqueue fails
      */
-    public static async sendAnnouncement(userIds: number[], message: IOsuBotMessage, fallbackId?: number): Promise<true | ErrorResponse> {
+    public static async sendAnnouncement(
+        userIds: number[],
+        message: IOsuBotMessage,
+        fallbackId?: number,
+    ): Promise<true | ErrorResponse> {
+        try {
+            await NotificationDispatchService.enqueueOsuAnnouncement({
+                userIds,
+                message,
+                fallbackId,
+            });
+            return true;
+        } catch (error) {
+            return {
+                error: error instanceof Error ? error.message : "Failed to enqueue osu announcement",
+            };
+        }
+    }
+
+    /**
+     * Sends an announcement to specified users through the osu! chat immediately.
+     * Intended for queue worker dispatch only.
+     */
+    public static async sendAnnouncementDirect(
+        userIds: number[],
+        message: IOsuBotMessage,
+        fallbackId?: number,
+    ): Promise<true | ErrorResponse> {
         const token = await this.getBotToken();
 
         if (typeof token !== "string") {
@@ -138,12 +166,21 @@ export default class OsuBotService extends OsuApiService {
             },
         };
 
-        const response = await this.executeRequest(options);
+        try {
+            await axios(options);
+            return true;
+        } catch (error: any) {
+            const statusCode = error?.response?.status as number | undefined;
+            const messageText =
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to send osu announcement";
 
-        if (OsuApiService.isOsuResponseError(response)) {
-            return response;
+            return {
+                error: String(messageText),
+                statusCode,
+            } as ErrorResponse;
         }
-
-        return true;
     }
 }
