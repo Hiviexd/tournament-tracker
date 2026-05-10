@@ -114,7 +114,6 @@ export default function TournamentStatus({ tournament }: IProps) {
                             onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
                             allowDeselect={false}
                             clearable={false}
-                            searchable={true}
                         />
                         <ActionIcon variant="subtle" onClick={handleStatusSave} color="success" title="Save">
                             <FontAwesomeIcon icon="save" />

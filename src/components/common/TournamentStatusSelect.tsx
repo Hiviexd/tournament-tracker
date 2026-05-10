@@ -12,6 +12,7 @@ interface TournamentStatusSelectProps {
     searchable?: boolean;
     disabled?: boolean;
     allowDeselect?: boolean;
+    label?: string;
 }
 
 const StatusOption = forwardRef<HTMLDivElement, { value: string; label: string }>((props, ref) => (
@@ -26,9 +27,9 @@ export default function TournamentStatusSelect({
     onChange,
     placeholder = "Select status",
     clearable = true,
-    searchable = true,
     disabled = false,
     allowDeselect = true,
+    label = undefined,
 }: TournamentStatusSelectProps) {
     const statusOptions = [
         {
@@ -63,11 +64,11 @@ export default function TournamentStatusSelect({
             onChange={(value) => onChange(value as TournamentStatus | null)}
             data={statusOptions}
             renderOption={(item) => <StatusOption value={item.option.value} label={item.option.label} />}
-            searchable={searchable}
             clearable={clearable}
             disabled={disabled}
             allowDeselect={allowDeselect}
             leftSection={leftSection}
+            label={label ?? undefined}
         />
     );
 }
