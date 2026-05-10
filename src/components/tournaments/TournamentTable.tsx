@@ -15,41 +15,60 @@ import { TruncatedText } from "../common/TruncatedText";
 import utils from "../../../utils";
 import TournamentStatusSelect from "../common/TournamentStatusSelect";
 
+interface TournamentTableMassEditState {
+    isMassEditMode: boolean;
+    selectedTournamentIds: string[];
+    massStatusValue: TournamentStatus | "";
+    massStateValue: "active" | "archived" | "";
+    isApplyingMassStatus: boolean;
+    isApplyingMassState: boolean;
+}
+
+interface TournamentTableMassEditActions {
+    onToggleRowSelection: (tournamentId: string) => void;
+    onToggleAllVisibleSelection: (checked: boolean) => void;
+    onMassStatusChange: (status: TournamentStatus | "") => void;
+    onMassStateChange: (state: "active" | "archived" | "") => void;
+    onApplyMassStatus: () => void;
+    onApplyMassState: () => void;
+}
+
+export interface TournamentTableMassEditProps {
+    state: TournamentTableMassEditState;
+    actions: TournamentTableMassEditActions;
+}
+
 interface IProps {
     tournaments: ITournament[];
     total?: number;
     currentPage?: number;
-    isMassEditMode?: boolean;
-    selectedTournamentIds?: string[];
-    massStatusValue?: TournamentStatus | "";
-    massStateValue?: "active" | "archived" | "";
-    onToggleRowSelection?: (tournamentId: string) => void;
-    onToggleAllVisibleSelection?: (checked: boolean) => void;
-    onMassStatusChange?: (status: TournamentStatus | "") => void;
-    onMassStateChange?: (state: "active" | "archived" | "") => void;
-    onApplyMassStatus?: () => void;
-    onApplyMassState?: () => void;
-    isApplyingMassStatus?: boolean;
-    isApplyingMassState?: boolean;
+    massEdit: TournamentTableMassEditProps;
 }
 
 export default function TournamentTable({
     tournaments,
     total,
     currentPage,
-    isMassEditMode = false,
-    selectedTournamentIds = [],
-    massStatusValue = "",
-    massStateValue = "",
-    onToggleRowSelection,
-    onToggleAllVisibleSelection,
-    onMassStatusChange,
-    onMassStateChange,
-    onApplyMassStatus,
-    onApplyMassState,
-    isApplyingMassStatus = false,
-    isApplyingMassState = false,
+    massEdit,
 }: IProps) {
+    const {
+        state: {
+            isMassEditMode,
+            selectedTournamentIds,
+            massStatusValue,
+            massStateValue,
+            isApplyingMassStatus,
+            isApplyingMassState,
+        },
+        actions: {
+            onToggleRowSelection,
+            onToggleAllVisibleSelection,
+            onMassStatusChange,
+            onMassStateChange,
+            onApplyMassStatus,
+            onApplyMassState,
+        },
+    } = massEdit;
     const [user] = useAtom(loggedInUserAtom);
     const selectedIds = new Set(selectedTournamentIds);
     const selectedCount = selectedTournamentIds.length;
@@ -80,7 +99,7 @@ export default function TournamentTable({
                     <Group gap="sm" align="flex-end" wrap="wrap">
                         <TournamentStatusSelect
                             value={massStatusValue}
-                            onChange={(value) => onMassStatusChange?.(value || "")}
+                            onChange={(value) => onMassStatusChange(value || "")}
                             clearable={false}
                             allowDeselect={false}
                             disabled={isApplyingMassStatus}
@@ -101,7 +120,7 @@ export default function TournamentTable({
                     <Group gap="sm" align="flex-end" wrap="wrap">
                         <Select
                             value={massStateValue}
-                            onChange={(value) => onMassStateChange?.((value as "active" | "archived" | null) || "")}
+                            onChange={(value) => onMassStateChange((value as "active" | "archived" | null) || "")}
                             data={[
                                 { value: "active", label: "Active" },
                                 { value: "archived", label: "Archived" },
@@ -134,7 +153,7 @@ export default function TournamentTable({
                                 <Checkbox
                                     checked={allVisibleSelected}
                                     indeterminate={someVisibleSelected}
-                                    onChange={(event) => onToggleAllVisibleSelection?.(event.currentTarget.checked)}
+                                    onChange={(event) => onToggleAllVisibleSelection(event.currentTarget.checked)}
                                     aria-label="Select all tournaments on current page"
                                     disabled={!isMassEditMode}
                                     tabIndex={isMassEditMode ? 0 : -1}
@@ -159,7 +178,7 @@ export default function TournamentTable({
                                     <Table.Td className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
                                         <Checkbox
                                             checked={isSelected}
-                                            onChange={() => onToggleRowSelection?.(tournament._id.toString())}
+                                            onChange={() => onToggleRowSelection(tournament._id.toString())}
                                             aria-label={`Select ${tournament.name}`}
                                             disabled={!isMassEditMode}
                                             tabIndex={isMassEditMode ? 0 : -1}

@@ -18,8 +18,9 @@ import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
 import TournamentStatusSelect from "../common/TournamentStatusSelect";
-import { loggedInUserAtom, tournamentMassEditModeAtom, tournamentViewModeAtom } from "../../store/atoms";
-import { useAtom } from "jotai";
+import { loggedInUserAtom, tournamentViewModeAtom } from "../../store/atoms";
+import { tournamentCanUseMassEditAtom, tournamentMassEditModeAtom } from "../../store/tournamentMassEditAtoms";
+import { useAtom, useAtomValue } from "jotai";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
 
 interface IProps {
@@ -40,6 +41,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const [viewMode, setViewMode] = useLocalPreference<"cards" | "table" | "review">("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
     const [isMassEditMode, setIsMassEditMode] = useAtom(tournamentMassEditModeAtom);
+    const canUseMassEdit = useAtomValue(tournamentCanUseMassEditAtom);
     const isFirstRender = useIsFirstRender();
 
     // Local state for immediate UI updates
@@ -89,7 +91,6 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         { value: "active", label: "Active" },
         { value: "archived", label: "Archived" },
     ];
-    const canUseMassEdit = !!user?.isAdmin && viewMode === "table";
 
     return (
         <Card shadow="sm" p="md">
