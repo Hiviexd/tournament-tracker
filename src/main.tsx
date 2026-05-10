@@ -9,6 +9,7 @@ import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
 import Spotlight from "./components/common/Spotlight";
 import SnowOverlay from "./components/base/SnowOverlay";
+import AppErrorBoundary from "./components/base/AppErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -39,26 +40,28 @@ import { ensureCsrfInterceptor } from "../utils/csrf";
 ensureCsrfInterceptor();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <HelmetProvider>
-        <StateProvider>
-            <QueryClientProvider client={queryClient}>
-                <MantineProvider defaultColorScheme="dark" theme={theme}>
-                    <ModalsProvider>
-                        <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
-                            <ReactScan />
-                            <SnowOverlay />
-                            <Notifications />
-                            <Router>
-                                <Spotlight />
-                                <NuqsAdapter>
-                                    <AuthRouter />
-                                </NuqsAdapter>
-                            </Router>
-                        </DatesProvider>
-                    </ModalsProvider>
-                    <VersionChecker />
-                </MantineProvider>
-            </QueryClientProvider>
-        </StateProvider>
-    </HelmetProvider>
+    <AppErrorBoundary>
+        <HelmetProvider>
+            <StateProvider>
+                <QueryClientProvider client={queryClient}>
+                    <MantineProvider defaultColorScheme="dark" theme={theme}>
+                        <ModalsProvider>
+                            <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
+                                <ReactScan />
+                                <SnowOverlay />
+                                <Notifications />
+                                <Router>
+                                    <Spotlight />
+                                    <NuqsAdapter>
+                                        <AuthRouter />
+                                    </NuqsAdapter>
+                                </Router>
+                            </DatesProvider>
+                        </ModalsProvider>
+                        <VersionChecker />
+                    </MantineProvider>
+                </QueryClientProvider>
+            </StateProvider>
+        </HelmetProvider>
+    </AppErrorBoundary>
 );

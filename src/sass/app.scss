@@ -4,6 +4,7 @@
 @use "components/common/Header.scss";
 @use "components/common/EnvironmentBanner.scss";
 @use "components/common/SpotlightAction.scss";
+@use "components/base/AppErrorBoundary.scss";
 
 @use "components/common/MarkdownText.scss";
 @use "components/common/CodeBlock.scss";
