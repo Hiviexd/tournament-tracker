@@ -404,6 +404,53 @@ html {
     animation: spin 2s linear infinite;
 }
 
+.tournament-table {
+    .mass-edit-select-col {
+        width: 0;
+        min-width: 0;
+        padding-inline: 0;
+        opacity: 0;
+        transform: translateX(-6px);
+        overflow: hidden;
+        transition:
+            width 0.22s ease,
+            min-width 0.22s ease,
+            padding-inline 0.22s ease,
+            opacity 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .mass-edit-select-col.is-visible {
+        width: 44px;
+        min-width: 44px;
+        padding-inline: var(--mantine-spacing-xs);
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .tournament-row-selected > td {
+        background-color: color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
+        transition: background-color 0.18s ease;
+    }
+
+    .tournament-row-selected > td:first-child {
+        box-shadow: inset 3px 0 0 0 var(--mantine-color-primary-6);
+    }
+}
+
+.tournament-table-card {
+    .mass-edit-selected-count {
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .mass-edit-selected-count.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);

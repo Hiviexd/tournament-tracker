@@ -1,6 +1,6 @@
-import { Table, Group, Badge, Text, ScrollArea, Card, Tooltip } from "@mantine/core";
+import { Table, Group, Badge, Text, ScrollArea, Card, Tooltip, Checkbox, Button, Select, Collapse } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { ITournament } from "../../../interfaces/Tournament";
+import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
 import GameModeIcon from "../common/GameModeIcon";
 import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
@@ -13,15 +13,51 @@ import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TruncatedText } from "../common/TruncatedText";
 import utils from "../../../utils";
+import TournamentStatusSelect from "../common/TournamentStatusSelect";
 
 interface IProps {
     tournaments: ITournament[];
     total?: number;
     currentPage?: number;
+    isMassEditMode?: boolean;
+    selectedTournamentIds?: string[];
+    massStatusValue?: TournamentStatus | "";
+    massStateValue?: "active" | "archived" | "";
+    onToggleRowSelection?: (tournamentId: string) => void;
+    onToggleAllVisibleSelection?: (checked: boolean) => void;
+    onMassStatusChange?: (status: TournamentStatus | "") => void;
+    onMassStateChange?: (state: "active" | "archived" | "") => void;
+    onApplyMassStatus?: () => void;
+    onApplyMassState?: () => void;
+    isApplyingMassStatus?: boolean;
+    isApplyingMassState?: boolean;
 }
 
-export default function TournamentTable({ tournaments, total, currentPage }: IProps) {
+export default function TournamentTable({
+    tournaments,
+    total,
+    currentPage,
+    isMassEditMode = false,
+    selectedTournamentIds = [],
+    massStatusValue = "",
+    massStateValue = "",
+    onToggleRowSelection,
+    onToggleAllVisibleSelection,
+    onMassStatusChange,
+    onMassStateChange,
+    onApplyMassStatus,
+    onApplyMassState,
+    isApplyingMassStatus = false,
+    isApplyingMassState = false,
+}: IProps) {
     const [user] = useAtom(loggedInUserAtom);
+    const selectedIds = new Set(selectedTournamentIds);
+    const selectedCount = selectedTournamentIds.length;
+    const allVisibleSelected =
+        tournaments.length > 0 && tournaments.every((tournament) => selectedIds.has(tournament._id.toString()));
+    const someVisibleSelected = tournaments.some((tournament) => selectedIds.has(tournament._id.toString())) && !allVisibleSelected;
+    const canApplyStatus = selectedCount > 0 && !!massStatusValue;
+    const canApplyState = selectedCount > 0 && !!massStateValue;
 
     const getDiscordThreadLink = (tournament: ITournament) => {
         return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
@@ -38,11 +74,72 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
     };
 
     return (
-        <Card shadow="sm" p="lg">
+        <Card shadow="sm" p="lg" className={`tournament-table-card ${isMassEditMode ? "mass-edit-active" : ""}`}>
+            <Collapse in={isMassEditMode} transitionDuration={220} transitionTimingFunction="ease">
+                <Group justify="space-between" align="flex-end" mb="md" wrap="wrap">
+                    <Group gap="sm" align="flex-end" wrap="wrap">
+                        <TournamentStatusSelect
+                            value={massStatusValue}
+                            onChange={(value) => onMassStatusChange?.(value || "")}
+                            clearable={false}
+                            allowDeselect={false}
+                            disabled={isApplyingMassStatus}
+                            placeholder="Set status"
+                            label="Status"
+                        />
+                        <Button
+                            variant="light"
+                            color="primary"
+                            leftSection={<FontAwesomeIcon icon="check" />}
+                            disabled={!canApplyStatus}
+                            loading={isApplyingMassStatus}
+                            onClick={onApplyMassStatus}>
+                            Apply
+                        </Button>
+                    </Group>
+
+                    <Group gap="sm" align="flex-end" wrap="wrap">
+                        <Select
+                            value={massStateValue}
+                            onChange={(value) => onMassStateChange?.((value as "active" | "archived" | null) || "")}
+                            data={[
+                                { value: "active", label: "Active" },
+                                { value: "archived", label: "Archived" },
+                            ]}
+                            clearable={false}
+                            allowDeselect={false}
+                            placeholder="Set state"
+                            disabled={isApplyingMassState}
+                            w={180}
+                            label="State"
+                        />
+                        <Button
+                            variant="light"
+                            color="primary"
+                            leftSection={<FontAwesomeIcon icon="check" />}
+                            disabled={!canApplyState}
+                            loading={isApplyingMassState}
+                            onClick={onApplyMassState}>
+                            Apply
+                        </Button>
+                    </Group>
+
+                </Group>
+            </Collapse>
             <ScrollArea>
-                <Table miw={{ base: 1200, md: 800 }}>
+                <Table miw={{ base: 1200, md: 800 }} className="tournament-table">
                     <Table.Thead>
                         <Table.Tr>
+                            <Table.Th className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
+                                <Checkbox
+                                    checked={allVisibleSelected}
+                                    indeterminate={someVisibleSelected}
+                                    onChange={(event) => onToggleAllVisibleSelection?.(event.currentTarget.checked)}
+                                    aria-label="Select all tournaments on current page"
+                                    disabled={!isMassEditMode}
+                                    tabIndex={isMassEditMode ? 0 : -1}
+                                />
+                            </Table.Th>
                             <Table.Th>Type</Table.Th>
                             <Table.Th>Mode</Table.Th>
                             <Table.Th>Name</Table.Th>
@@ -54,8 +151,20 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                     </Table.Thead>
                     <Table.Tbody>
                         {tournaments.map((tournament) => {
+                            const isSelected = selectedIds.has(tournament._id.toString());
                             return (
-                                <Table.Tr key={tournament.id}>
+                                <Table.Tr
+                                    key={tournament.id}
+                                    className={isMassEditMode && isSelected ? "tournament-row-selected" : undefined}>
+                                    <Table.Td className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
+                                        <Checkbox
+                                            checked={isSelected}
+                                            onChange={() => onToggleRowSelection?.(tournament._id.toString())}
+                                            aria-label={`Select ${tournament.name}`}
+                                            disabled={!isMassEditMode}
+                                            tabIndex={isMassEditMode ? 0 : -1}
+                                        />
+                                    </Table.Td>
                                     <Table.Td>
                                         <TournamentTypeBadge type={tournament.type} />
                                     </Table.Td>
@@ -142,12 +251,20 @@ export default function TournamentTable({ tournaments, total, currentPage }: IPr
                     </Table.Tbody>
                 </Table>
             </ScrollArea>
-            {total !== undefined && (
-                <Group justify="space-between" align="center" mt="md" ml="auto">
-                    <Text size="sm" c="dimmed">
-                        Showing {tournaments.length} out of {total} tournaments
-                        {currentPage && currentPage > 1 && ` (page ${currentPage})`}
+            {(isMassEditMode || total !== undefined) && (
+                <Group justify="space-between" align="center" mt="md">
+                    <Text
+                        size="sm"
+                        c="dimmed"
+                        className={`mass-edit-selected-count ${isMassEditMode ? "is-visible" : ""}`}>
+                        {selectedCount} selected
                     </Text>
+                    {total !== undefined && (
+                        <Text size="sm" c="dimmed">
+                            Showing {tournaments.length} out of {total} tournaments
+                            {currentPage && currentPage > 1 && ` (page ${currentPage})`}
+                        </Text>
+                    )}
                 </Group>
             )}
         </Card>

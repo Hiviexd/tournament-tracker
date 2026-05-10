@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Stack,
     Group,
@@ -11,21 +11,26 @@ import {
     Divider,
     Table,
     ScrollArea,
+    List,
+    Badge,
 } from "@mantine/core";
 import { useDisclosure, useIsFirstRender } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { notifications } from "@mantine/notifications";
 import { ITournament, GameMode, TournamentType, TournamentStatus } from "../../interfaces/Tournament";
 import TournamentFilters from "../components/tournaments/TournamentFilters";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import TournamentTable from "../components/tournaments/TournamentTable";
 import TournamentCreateModal from "../components/tournaments/TournamentCreateModal";
-import { useTournaments } from "../hooks/useTournaments";
-import { loggedInUserAtom, tournamentViewModeAtom } from "../store/atoms";
+import { useBulkEditTournaments, useTournaments } from "../hooks/useTournaments";
+import { loggedInUserAtom, tournamentMassEditModeAtom, tournamentViewModeAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { IUser } from "../../interfaces/User";
 import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoard";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
 import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
+import { useConfirmModal } from "../hooks/useModals";
+import TournamentStatusBadge from "../components/common/badges/TournamentStatusBadge";
 
 interface FilterValues {
     search: string;
@@ -178,7 +183,14 @@ export default function TournamentListPage() {
     );
 
     const [viewMode, setViewMode] = useAtom(tournamentViewModeAtom);
+    const [isMassEditMode, setIsMassEditMode] = useAtom(tournamentMassEditModeAtom);
     const [opened, { open, close }] = useDisclosure(false);
+    const [selectedTournamentIds, setSelectedTournamentIds] = useState<string[]>([]);
+    const [massStatusValue, setMassStatusValue] = useState<TournamentStatus | "">("");
+    const [massStateValue, setMassStateValue] = useState<"active" | "archived" | "">("");
+    const [activeBulkAction, setActiveBulkAction] = useState<"status" | "state" | null>(null);
+    const bulkEditMutation = useBulkEditTournaments();
+    const confirmModal = useConfirmModal();
 
     // Apply automatic type filter only on first render when user loads and no type is set
     useEffect(() => {
@@ -217,6 +229,16 @@ export default function TournamentListPage() {
         page: queryState.page,
     });
 
+    const visibleTournamentIds = useMemo(
+        () => (data?.tournaments || []).map((tournament: ITournament) => tournament._id),
+        [data?.tournaments],
+    );
+    const canUseMassEdit = !!user?.isAdmin && viewMode === "table";
+    const selectedTournaments = useMemo(() => {
+        const selectedIdSet = new Set(selectedTournamentIds);
+        return (data?.tournaments || []).filter((tournament: ITournament) => selectedIdSet.has(tournament._id.toString()));
+    }, [data?.tournaments, selectedTournamentIds]);
+
     // Handle filter changes - automatically reset page to 1 when filters change
     const handleFiltersChange = (newFilters: FilterValues) => {
         // Check if any filter (except page) has changed
@@ -254,17 +276,160 @@ export default function TournamentListPage() {
         }
     }, [viewMode, user?.isCommittee, setViewMode]);
 
+    // Exit mass edit if user changes to a mode where it isn't available.
+    useEffect(() => {
+        if (!canUseMassEdit && isMassEditMode) {
+            setIsMassEditMode(false);
+            setSelectedTournamentIds([]);
+        }
+    }, [canUseMassEdit, isMassEditMode, setIsMassEditMode]);
+
+    // Keep selection limited to visible rows to avoid stale selections when data changes.
+    useEffect(() => {
+        setSelectedTournamentIds((currentIds) => currentIds.filter((id) => visibleTournamentIds.includes(id)));
+    }, [visibleTournamentIds]);
+
+    const toggleRowSelection = (tournamentId: string) => {
+        setSelectedTournamentIds((currentIds) =>
+            currentIds.includes(tournamentId)
+                ? currentIds.filter((id) => id !== tournamentId)
+                : [...currentIds, tournamentId],
+        );
+    };
+
+    const toggleAllVisibleSelection = (checked: boolean) => {
+        if (checked) {
+            setSelectedTournamentIds(visibleTournamentIds);
+            return;
+        }
+        setSelectedTournamentIds([]);
+    };
+
+    useEffect(() => {
+        if (!isMassEditMode) {
+            setSelectedTournamentIds([]);
+            setMassStatusValue("");
+            setMassStateValue("");
+        }
+    }, [isMassEditMode]);
+
+    const showPartialFailureNotification = (result: any) => {
+        if (!result?.failureCount) return;
+
+        const failedResults = (result.results || []).filter((item: any) => !item.success);
+        const details = failedResults
+            .slice(0, 3)
+            .map((item: any) => `${item.name || item.tournamentId}: ${item.error || "Unknown error"}`)
+            .join(" | ");
+
+        notifications.show({
+            title: "Bulk edit partially completed",
+            message: details
+                ? `${result.failureCount} failed. ${details}${failedResults.length > 3 ? " ..." : ""}`
+                : `${result.failureCount} updates failed.`,
+            color: "yellow",
+        });
+    };
+
+    const handleApplyMassStatus = async () => {
+        if (!massStatusValue || selectedTournamentIds.length === 0) return;
+
+        const statusConfirmContent = (
+            <Stack gap="sm">
+                <Text size="sm">
+                    This will set {selectedTournamentIds.length} tournaments to <TournamentStatusBadge status={massStatusValue} />
+                </Text>
+                <Text size="sm" fw={500}>
+                    Tournaments affected:
+                </Text>
+                <ScrollArea.Autosize mah={220} offsetScrollbars>
+                    <List size="sm" spacing={4}>
+                        {selectedTournaments.map((tournament) => (
+                            <List.Item key={tournament._id.toString()}>{tournament.name}</List.Item>
+                        ))}
+                    </List>
+                </ScrollArea.Autosize>
+            </Stack>
+        );
+
+        const confirmed = await confirmModal({
+            title: "Apply status to selected tournaments?",
+            children: statusConfirmContent,
+            confirmText: "Apply Status",
+            confirmProps: { leftSection: <FontAwesomeIcon icon="check" /> },
+        });
+
+        if (!confirmed) return;
+
+        try {
+            setActiveBulkAction("status");
+            const result = await bulkEditMutation.mutateAsync({
+                tournamentIds: selectedTournamentIds,
+                status: massStatusValue,
+            });
+            showPartialFailureNotification(result);
+            setSelectedTournamentIds([]);
+            setMassStatusValue("");
+        } finally {
+            setActiveBulkAction(null);
+        }
+    };
+
+    const handleApplyMassState = async () => {
+        if (!massStateValue || selectedTournamentIds.length === 0) return;
+
+        const isActive = massStateValue === "active";
+        const stateConfirmContent = (
+            <Stack gap="sm">
+                <Text size="sm">
+                    This will mark {selectedTournamentIds.length} tournaments as{" "}
+                    <Badge color={isActive ? "success" : "gray"} variant="light">
+                        {isActive ? "Active" : "Archived"}
+                    </Badge>
+                    .
+                </Text>
+                <Text size="sm" fw={500}>
+                    Tournaments affected:
+                </Text>
+                <ScrollArea.Autosize mah={220} offsetScrollbars>
+                    <List size="sm" spacing={4}>
+                        {selectedTournaments.map((tournament) => (
+                            <List.Item key={tournament._id.toString()}>{tournament.name}</List.Item>
+                        ))}
+                    </List>
+                </ScrollArea.Autosize>
+            </Stack>
+        );
+
+        const confirmed = await confirmModal({
+            title: "Apply state to selected tournaments?",
+            children: stateConfirmContent,
+            confirmText: "Apply State",
+            confirmProps: { leftSection: <FontAwesomeIcon icon="check" /> },
+        });
+
+        if (!confirmed) return;
+
+        try {
+            setActiveBulkAction("state");
+            const result = await bulkEditMutation.mutateAsync({
+                tournamentIds: selectedTournamentIds,
+                isActive,
+            });
+            showPartialFailureNotification(result);
+            setSelectedTournamentIds([]);
+            setMassStateValue("");
+        } finally {
+            setActiveBulkAction(null);
+        }
+    };
+
     return (
         <Stack gap="md">
             <TournamentFilters values={filters} onChange={handleFiltersChange} />
 
             {user?.isCommittee && (
-                <Button
-                    onClick={open}
-                    leftSection={<FontAwesomeIcon icon="plus" />}
-                    variant="filled"
-                    color="primary"
-                    fullWidth>
+                <Button onClick={open} leftSection={<FontAwesomeIcon icon="plus" />} variant="filled" color="primary">
                     New Tournament
                 </Button>
             )}
@@ -292,7 +457,23 @@ export default function TournamentListPage() {
                     {viewMode === "review" ? (
                         <TournamentReviewBoard tournaments={data.tournaments} />
                     ) : viewMode === "table" ? (
-                        <TournamentTable tournaments={data.tournaments} total={data.total} currentPage={data.page} />
+                        <TournamentTable
+                            tournaments={data.tournaments}
+                            total={data.total}
+                            currentPage={data.page}
+                            isMassEditMode={canUseMassEdit && isMassEditMode}
+                            selectedTournamentIds={selectedTournamentIds}
+                            massStatusValue={massStatusValue}
+                            massStateValue={massStateValue}
+                            onToggleRowSelection={toggleRowSelection}
+                            onToggleAllVisibleSelection={toggleAllVisibleSelection}
+                            onMassStatusChange={setMassStatusValue}
+                            onMassStateChange={setMassStateValue}
+                            onApplyMassStatus={handleApplyMassStatus}
+                            onApplyMassState={handleApplyMassState}
+                            isApplyingMassStatus={bulkEditMutation.isPending && activeBulkAction === "status"}
+                            isApplyingMassState={bulkEditMutation.isPending && activeBulkAction === "state"}
+                        />
                     ) : (
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                             {data.tournaments.map((tournament: ITournament) => (

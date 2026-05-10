@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
-import { ITournamentCreateResponse, TournamentFormData } from "../../interfaces/Tournament";
+import { ITournamentCreateResponse, TournamentFormData, TournamentStatus } from "../../interfaces/Tournament";
 import { IReview } from "../../interfaces/Review";
 import { IMessageFormData } from "../../interfaces/Message";
 
@@ -81,6 +81,33 @@ export function useEditTournament(tournamentId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+        },
+    });
+}
+
+export function useBulkEditTournaments() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (bulkData: {
+            tournamentIds: string[];
+            status?: TournamentStatus;
+            isActive?: boolean;
+        }) => {
+            const response = await utils.apiCall({
+                method: "patch",
+                url: "/api/tournaments/bulkEdit",
+                data: bulkData,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+
+            const tournamentIds = variables.tournamentIds || [];
+            tournamentIds.forEach((tournamentId) => {
+                queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+            });
         },
     });
 }

@@ -16,6 +16,7 @@ tournamentsRouter.get("/", requireScopes(["tournaments:read"]), auth.optionalAut
 tournamentsRouter.post("/create", auth.isLoggedIn, auth.isCommittee, TournamentsController.create);
 tournamentsRouter.get("/:tournamentId", requireScopes(["tournaments:read"]), auth.optionalAuth, TournamentsController.getTournament);
 tournamentsRouter.put("/:tournamentId/edit", auth.isLoggedIn, TournamentsController.edit);
+tournamentsRouter.patch("/bulkEdit", auth.isLoggedIn, auth.isAdmin, TournamentsController.bulkEdit);
 tournamentsRouter.patch(
     "/:tournamentId/assignReviewers",
     auth.isLoggedIn,

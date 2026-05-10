@@ -729,6 +729,91 @@ class TournamentsController {
         res.json({ message: "Tournament updated successfully!" });
     }
 
+    /** PATCH bulk edit tournaments */
+    public async bulkEdit(req: Request, res: Response) {
+        const currentUser = res.locals!.user!;
+        const { tournamentIds, status, isActive } = req.body as {
+            tournamentIds?: string[];
+            status?: TournamentStatus;
+            isActive?: boolean;
+        };
+
+        if (!Array.isArray(tournamentIds) || tournamentIds.length === 0) {
+            return res.status(400).json({ error: "tournamentIds must be a non-empty array" });
+        }
+
+        if (status === undefined && isActive === undefined) {
+            return res.status(400).json({ error: "At least one field (status or isActive) is required" });
+        }
+
+        const uniqueTournamentIds = Array.from(new Set(tournamentIds));
+        const results = await Promise.all(
+            uniqueTournamentIds.map(async (tournamentId) => {
+                try {
+                    const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+
+                    if (status !== undefined) {
+                        const statusResult = await TournamentService.updateStatus(
+                            tournament,
+                            status,
+                            currentUser,
+                            req.session,
+                        );
+                        if (statusResult.error) {
+                            return {
+                                tournamentId,
+                                name: tournament.name,
+                                success: false,
+                                error: statusResult.error,
+                            };
+                        }
+                    }
+
+                    if (isActive !== undefined) {
+                        const activeResult = await TournamentService.updateIsActive(
+                            tournament,
+                            isActive,
+                            currentUser,
+                            req.session,
+                        );
+                        if (activeResult.error) {
+                            return {
+                                tournamentId,
+                                name: tournament.name,
+                                success: false,
+                                error: activeResult.error,
+                            };
+                        }
+                    }
+
+                    await tournament.save();
+
+                    return {
+                        tournamentId,
+                        name: tournament.name,
+                        success: true,
+                    };
+                } catch (error) {
+                    return {
+                        tournamentId,
+                        success: false,
+                        error: error instanceof Error ? error.message : "Failed to bulk edit tournament",
+                    };
+                }
+            }),
+        );
+
+        const successes = results.filter((result) => result.success);
+        const failures = results.filter((result) => !result.success);
+
+        res.json({
+            message: `Bulk edit complete: ${successes.length} succeeded, ${failures.length} failed.`,
+            successCount: successes.length,
+            failureCount: failures.length,
+            results,
+        });
+    }
+
     /** POST reassign reviewer */
     public async reassignReviewer(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;

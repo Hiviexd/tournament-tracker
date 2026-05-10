@@ -1,4 +1,16 @@
-import { Card, TextInput, Select, Stack, SimpleGrid, Checkbox, Group, SegmentedControl, Box } from "@mantine/core";
+import {
+    Card,
+    TextInput,
+    Select,
+    Stack,
+    SimpleGrid,
+    Checkbox,
+    Group,
+    SegmentedControl,
+    Box,
+    ActionIcon,
+    Tooltip,
+} from "@mantine/core";
 import { useDebouncedCallback, useIsFirstRender } from "@mantine/hooks";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,7 +18,7 @@ import { GameMode, TournamentStatus, TournamentType } from "../../../interfaces/
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
 import TournamentStatusSelect from "../common/TournamentStatusSelect";
-import { loggedInUserAtom, tournamentViewModeAtom } from "../../store/atoms";
+import { loggedInUserAtom, tournamentMassEditModeAtom, tournamentViewModeAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
 
@@ -27,6 +39,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const [viewMode, setViewMode] = useLocalPreference<"cards" | "table" | "review">("tournaments_view_mode", "cards");
     const [, setGlobalViewMode] = useAtom(tournamentViewModeAtom);
+    const [isMassEditMode, setIsMassEditMode] = useAtom(tournamentMassEditModeAtom);
     const isFirstRender = useIsFirstRender();
 
     // Local state for immediate UI updates
@@ -76,6 +89,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
         { value: "active", label: "Active" },
         { value: "archived", label: "Archived" },
     ];
+    const canUseMassEdit = !!user?.isAdmin && viewMode === "table";
 
     return (
         <Card shadow="sm" p="md">
@@ -118,7 +132,6 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         leftSection={<FontAwesomeIcon icon="list" />}
                         onChange={(value) => handleChange("status", value)}
                         placeholder="Filter by status"
-                        searchable
                         clearable
                         disabled={viewMode === "review"}
                     />
@@ -144,17 +157,31 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                             />
                         )}
                     </Box>
-                    <SegmentedControl
-                        color="primary"
-                        withItemsBorders={false}
-                        value={viewMode}
-                        onChange={handleViewModeChange}
-                        data={[
-                            { label: "Cards", value: "cards" },
-                            { label: "Table", value: "table" },
-                            ...(user?.isCommittee ? [{ label: "Review Board", value: "review" }] : []),
-                        ]}
-                    />
+                    <Group gap="xs" align="center">
+                        {canUseMassEdit && (
+                            <Tooltip label={isMassEditMode ? "Exit mass edit" : "Enter mass edit"}>
+                                <ActionIcon
+                                    aria-label={isMassEditMode ? "Exit mass edit" : "Enter mass edit"}
+                                    onClick={() => setIsMassEditMode((currentMode) => !currentMode)}
+                                    variant={isMassEditMode ? "filled" : "light"}
+                                    size="lg"
+                                    color="orange">
+                                    <FontAwesomeIcon icon={isMassEditMode ? "xmark" : "pen-to-square"} />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+                        <SegmentedControl
+                            color="primary"
+                            withItemsBorders={false}
+                            value={viewMode}
+                            onChange={handleViewModeChange}
+                            data={[
+                                { label: "Cards", value: "cards" },
+                                { label: "Table", value: "table" },
+                                ...(user?.isCommittee ? [{ label: "Review Board", value: "review" }] : []),
+                            ]}
+                        />
+                    </Group>
                 </Group>
             </Stack>
         </Card>
