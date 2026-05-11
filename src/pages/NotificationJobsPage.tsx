@@ -230,7 +230,7 @@ export default function NotificationJobsPage() {
                                 description="Try refreshing the page."
                             />
                         ) : jobs.length === 0 ? (
-                            <EmptyState icon="database" title="No jobs found" description="Try adjusting your filters." />
+                            <EmptyState icon="bell" title="No jobs found" description="Try adjusting your filters." />
                         ) : (
                             <Stack gap="md">
                                 <Text size="sm" c="dimmed">
