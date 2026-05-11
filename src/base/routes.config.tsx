@@ -23,6 +23,7 @@ import TemplatesPage from "../pages/TemplatesPage";
 import DashboardPage from "../pages/DashboardPage";
 import ApiKeysPage from "../pages/ApiKeysPage";
 import WatchlistPage from "../pages/WatchlistPage";
+import NotificationJobsPage from "../pages/NotificationJobsPage";
 
 interface RouteConfig {
     path: string;
@@ -244,6 +245,13 @@ const routes: RouteConfig[] = [
         page: <ApiKeysPage />,
         title: "API Keys",
         icon: "key",
+        permissions: ["dev"],
+    },
+    {
+        path: "/notification-jobs",
+        page: <NotificationJobsPage />,
+        title: "Notification Jobs",
+        icon: "bell",
         permissions: ["dev"],
     },
     {

@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
-import utils from "../../utils";
 import { IBeatmap, IBeatmapResponse, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
@@ -8,6 +7,33 @@ import config from "../../config.json";
 export default class OsuApiService {
     static isOsuResponseError<T>(errorResponse: T | ErrorResponse): errorResponse is ErrorResponse {
         return (errorResponse as ErrorResponse).error !== undefined;
+    }
+
+    private static buildErrorResponse(options: AxiosRequestConfig, error: unknown): ErrorResponse {
+        if (axios.isAxiosError(error)) {
+            const statusCode = error.response?.status;
+            const responseData = error.response?.data as any;
+            const message =
+                responseData?.error ||
+                responseData?.message ||
+                error.message ||
+                `osu! api request failed: ${options.method || "GET"} ${options.url || "unknown-url"}`;
+
+            return {
+                error: String(message),
+                statusCode,
+                details: responseData ?? null,
+                source: "osu-api",
+            };
+        }
+
+        return {
+            error:
+                error instanceof Error
+                    ? error.message
+                    : `osu! api request failed: ${options.method || "GET"} ${options.url || "unknown-url"}`,
+            source: "osu-api",
+        };
     }
 
     protected static async executeRequest(options: AxiosRequestConfig) {
@@ -18,9 +44,13 @@ export default class OsuApiService {
                 return res.data;
             }
 
-            return utils.defaultErrorMessage;
+            return {
+                error: "osu api returned an empty response body",
+                statusCode: res?.status,
+                source: "osu-api",
+            } as ErrorResponse;
         } catch (error) {
-            return utils.defaultErrorMessage;
+            return this.buildErrorResponse(options, error);
         }
     }
 

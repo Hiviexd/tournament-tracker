@@ -19,7 +19,7 @@ class OsuSender {
                 return { ok: true, retryable: false };
             }
 
-            const errorResult = result as ErrorResponse & { statusCode?: number };
+            const errorResult = result as ErrorResponse;
             const statusCode = errorResult.statusCode;
             return {
                 ok: false,

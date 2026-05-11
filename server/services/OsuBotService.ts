@@ -145,7 +145,7 @@ export default class OsuBotService extends OsuApiService {
             finalUserIds.push(fallbackId);
         } else {
             console.log("Non-production environment detected, but no fallback ID provided. Skipping osu! announcement.");
-            return { error: "No user IDs provided" } as ErrorResponse;
+            return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" } as ErrorResponse;
         }
 
         // Add delay to prevent rate limiting
@@ -171,15 +171,18 @@ export default class OsuBotService extends OsuApiService {
             return true;
         } catch (error: any) {
             const statusCode = error?.response?.status as number | undefined;
+            const responseData = error?.response?.data;
             const messageText =
-                error?.response?.data?.error ||
-                error?.response?.data?.message ||
+                responseData?.error ||
+                responseData?.message ||
                 error?.message ||
                 "Failed to send osu announcement";
 
             return {
                 error: String(messageText),
                 statusCode,
+                details: responseData ?? null,
+                source: "osu-bot",
             } as ErrorResponse;
         }
     }

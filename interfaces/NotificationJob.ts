@@ -40,3 +40,53 @@ export interface INotificationJob extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface INotificationQueueStats {
+    pending: number;
+    processing: number;
+    sent: number;
+    failed: number;
+}
+
+export interface INotificationRuntimeStats {
+    enqueued: number;
+    sent: number;
+    retried: number;
+    failed: number;
+}
+
+export interface INotificationStatsResponse {
+    queue: INotificationQueueStats;
+    runtime: INotificationRuntimeStats;
+}
+
+export interface INotificationJobListItem {
+    _id: string;
+    id?: string;
+    provider: NotificationProvider;
+    kind: string;
+    status: NotificationJobStatus;
+    attempts: number;
+    maxAttempts: number;
+    lastError: string | null;
+    lastHttpStatus: number | null;
+    payload: NotificationJobPayload;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface INotificationJobsListQuery {
+    page?: number;
+    status?: NotificationJobStatus | "";
+    provider?: NotificationProvider | "";
+    kind?: string;
+    payload?: string;
+}
+
+export interface INotificationJobsListResponse {
+    jobs: INotificationJobListItem[];
+    total: number;
+    page: number;
+    pages: number;
+    limit: number;
+}

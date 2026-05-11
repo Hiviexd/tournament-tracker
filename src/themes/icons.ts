@@ -110,6 +110,7 @@ import {
     faGavel,
     faLightbulb,
     faUpRightFromSquare,
+    faBell,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -224,5 +225,6 @@ export default function loadIcons() {
         faGavel,
         faLightbulb,
         faUpRightFromSquare,
+        faBell,
     );
 }

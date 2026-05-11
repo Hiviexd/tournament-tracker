@@ -129,6 +129,12 @@ export const routes: IRoute[] = [
                 icon: "key",
                 permissions: ["dev"],
             },
+            {
+                title: "Notification Jobs",
+                link: "/notification-jobs",
+                icon: "bell",
+                permissions: ["dev"],
+            },
             // {
             //     title: "Create Article",
             //     link: "/articles/create",
