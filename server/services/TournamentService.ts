@@ -7,7 +7,7 @@ import { ITicket } from "../../interfaces/Ticket";
 import { IVoting } from "../../interfaces/Voting";
 import Ticket from "../models/ticketModel";
 import Voting from "../models/votingModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import UserService from "./UserService";
 import Tournament from "../models/tournamentModel";
 import User from "../models/userModel";
@@ -17,8 +17,9 @@ import { WebhookBuilder } from "./discord/WebhookBuilder";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
 import config from "../../config.json";
-import _ from "lodash";
-import moment from "moment";
+import capitalize from "lodash/capitalize";
+import startCase from "lodash/startCase";
+import dayjs from "../../utils/dayjs";
 
 class TournamentService {
     /**
@@ -455,7 +456,7 @@ class TournamentService {
         await this.addTournamentLog(
             tournament,
             currentUser,
-            `Updated type from **${_.startCase(oldType)}** to **${_.startCase(type)}**`,
+            `Updated type from **${startCase(oldType)}** to **${startCase(type)}**`,
             "pen-to-square",
         );
         await LogService.generate(currentUser.id, `Updated type for **${tournament.name}**`, "tournament");
@@ -529,7 +530,7 @@ class TournamentService {
         await this.addTournamentLog(
             tournament,
             currentUser,
-            `Updated start and end date: **${moment(startDate).format("YYYY-MM-DD")}** — **${moment(endDate).format(
+            `Updated start and end date: **${dayjs(startDate).format("YYYY-MM-DD")}** — **${dayjs(endDate).format(
                 "YYYY-MM-DD",
             )}**`,
             "calendar",
@@ -643,7 +644,7 @@ class TournamentService {
         }
 
         // Logging
-        await this.addTournamentLog(tournament, currentUser, `Updated status to **${_.startCase(status)}**`, "flag");
+        await this.addTournamentLog(tournament, currentUser, `Updated status to **${startCase(status)}**`, "flag");
         await LogService.generate(currentUser.id, `Updated status for **${tournament.name}**`, "tournament");
 
         // osu! message
@@ -657,7 +658,7 @@ class TournamentService {
         if (shouldSendOsuMessage) {
             let message = `The official support status of your ${tournament.type}: **${
                 tournament.name
-            }** has been updated to **${_.startCase(
+            }** has been updated to **${startCase(
                 status,
             )}**.\n\n[View your ${tournament.type} in the Tournament Tracker by clicking here](${config.baseUrl}/tournaments/${
                 tournament._id
@@ -678,7 +679,7 @@ class TournamentService {
                 hostOsuIds,
                 {
                     channel: {
-                        name: `${_.capitalize(tournament.type)} Status Update`,
+                        name: `${capitalize(tournament.type)} Status Update`,
                         description: `Update regarding: ${tournament.name}`,
                     },
                     content: message,
@@ -707,7 +708,7 @@ class TournamentService {
                 .setDescription(
                     `Updated status for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 )
-                .addField("New Status", `${_.startCase(status)}`);
+                .addField("New Status", `${startCase(status)}`);
 
             const webhookBuilder = new WebhookBuilder().addEmbed(embed);
 

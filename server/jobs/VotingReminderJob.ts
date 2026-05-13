@@ -1,11 +1,11 @@
 import BaseJob from "./BaseJob";
 import Voting from "../models/votingModel";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import config from "../../config.json";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import User from "../models/userModel";
 import LogService from "../services/LogService";
 import { IVoting } from "../../interfaces/Voting";
@@ -31,8 +31,8 @@ export default class VotingReminderJob extends BaseJob {
         const votingsToNotify: IVoting[] = [];
 
         for (const voting of activeVotings) {
-            const deadline = moment(voting.deadline);
-            const now = moment();
+            const deadline = dayjs(voting.deadline);
+            const now = dayjs();
             const hoursUntilDeadline = deadline.diff(now, "hours");
             const isOverdue = now.isAfter(deadline);
             const roles: string[] = [];

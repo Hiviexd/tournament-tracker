@@ -1,7 +1,7 @@
 import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IInfringement } from "../../../../interfaces/Infringement";
-import moment from "moment";
+import dayjs from "../../../../utils/dayjs";
 
 interface IProps {
     infringement: IInfringement | null;
@@ -23,8 +23,8 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
         );
     }
 
-    const now = moment();
-    const daysUntilExpiration = moment(infringement.endDate).diff(now, "days");
+    const now = dayjs();
+    const daysUntilExpiration = dayjs(infringement.endDate).diff(now, "days");
 
     // Get color based on days until expiration
     const getColor = () => {
@@ -35,9 +35,9 @@ export default function InfringementExpirationBadge({ infringement, variant = "l
     };
 
     return (
-        <Tooltip label={moment(infringement.endDate).format("LLL")}>
+        <Tooltip label={dayjs(infringement.endDate).format("LLL")}>
             <Badge variant={variant} color={getColor()} size={size} leftSection={<FontAwesomeIcon icon="calendar" />}>
-            {hideEndsText ? "" : infringement.isExpired ? "Ended" : "Ends"} {moment(infringement.endDate).fromNow()}
+            {hideEndsText ? "" : infringement.isExpired ? "Ended" : "Ends"} {dayjs(infringement.endDate).fromNow()}
             </Badge>
         </Tooltip>
     );

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 import Template from "../models/templateModel";
 import LogService from "../services/LogService";
 
@@ -30,7 +30,7 @@ class TemplatesController {
         const template = new Template({
             name,
             content,
-            category: _.startCase(category.toLowerCase()),
+            category: startCase(category.toLowerCase()),
         });
 
         await template.save();
@@ -74,7 +74,7 @@ class TemplatesController {
             if (!category || typeof category !== "string" || category.trim().length === 0) {
                 return res.status(400).json({ error: "Category is required" });
             }
-            template.category = _.startCase(category.toLowerCase().trim());
+            template.category = startCase(category.toLowerCase().trim());
         }
 
         await template.save();

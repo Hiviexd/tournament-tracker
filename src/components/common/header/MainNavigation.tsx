@@ -2,7 +2,6 @@ import { Menu, Button, Group } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useCallback, useMemo } from "react";
 import { routes } from "../../../base/header.config";
 import utils from "../../../../utils";
 import { IUser } from "../../../../interfaces/User";
@@ -14,20 +13,17 @@ interface IProps {
 export default function MainNavigation({ user }: IProps) {
     const location = useLocation();
 
-    const getSelectedRoute = useCallback(() => {
-        const mainRoute = routes.find((route) => route.link === location.pathname);
-        if (mainRoute) return mainRoute.title;
+    const mainRoute = routes.find((route) => route.link === location.pathname);
+    const parentByPrefix = routes.find((route) => route.link && location.pathname.startsWith(route.link));
+    const parentByNestedLink = routes.find((route) => route.links?.some((link) => link.link === location.pathname));
 
-        const parentByPrefix = routes.find((route) => route.link && location.pathname.startsWith(route.link));
-        if (parentByPrefix) return parentByPrefix.title;
-
-        const parentByNestedLink = routes.find((route) => route.links?.some((link) => link.link === location.pathname));
-        if (parentByNestedLink) return parentByNestedLink.title;
-
-        return null;
-    }, [location.pathname]);
-
-    const selectedRoute = useMemo(() => getSelectedRoute(), [getSelectedRoute]);
+    const selectedRoute = mainRoute
+        ? mainRoute.title
+        : parentByPrefix
+          ? parentByPrefix.title
+          : parentByNestedLink
+            ? parentByNestedLink.title
+            : null;
 
     const visibleRoutes = routes
         .filter((route) => utils.hasRequiredPermissions(user, route.permissions))

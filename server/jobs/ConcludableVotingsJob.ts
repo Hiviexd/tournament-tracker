@@ -1,6 +1,6 @@
 import BaseJob from "./BaseJob";
 import Voting from "../models/votingModel";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import config from "../../config.json";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
@@ -13,7 +13,7 @@ export default class ConcludableVotingsJob extends BaseJob {
     schedule = "0,30 * * * *"; // Run every 30 minutes
 
     protected async execute(): Promise<void> {
-        const now = moment();
+        const now = dayjs();
         const concludableVotings = await Voting.find({
             isActive: true,
             $expr: {

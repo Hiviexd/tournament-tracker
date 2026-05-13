@@ -2,7 +2,6 @@ import { IOsuAuthResponse, IBeatmapWithNotes } from "../interfaces/OsuApi";
 import { IValidationResult } from "../interfaces/ComplianceApi";
 import { IDiscordField } from "../interfaces/Discord";
 import { IAttachment } from "../interfaces/Attachment";
-import moment from "moment";
 import crypto from "crypto";
 
 /**
@@ -12,7 +11,7 @@ import crypto from "crypto";
  */
 export function setSession(session, response: IOsuAuthResponse) {
     // set the cookie's maxAge to 7 days
-    session.cookie.maxAge = moment.duration(7, "days").asMilliseconds();
+    session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000;
 
     // *1000 because maxAge is miliseconds, oauth is seconds
     session.expireDate = Date.now() + response.expires_in * 1000;

@@ -1,11 +1,11 @@
 import BaseJob from "./BaseJob";
 import Tournament from "../models/tournamentModel";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import config from "../../config.json";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import User from "../models/userModel";
 import LogService from "../services/LogService";
 import { ITournament } from "../../interfaces/Tournament";
@@ -46,8 +46,8 @@ export default class OverdueReviewsJob extends BaseJob {
             // Skip if no startedReviewAt date
             if (!tournament.startedReviewAt) continue;
 
-            const reviewStartDate = moment(tournament.startedReviewAt);
-            const now = moment();
+            const reviewStartDate = dayjs(tournament.startedReviewAt);
+            const now = dayjs();
             const daysSinceReview = now.diff(reviewStartDate, "days");
 
             // Skip if less than 7 days old

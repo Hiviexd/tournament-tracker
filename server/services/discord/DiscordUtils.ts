@@ -1,7 +1,7 @@
 import { IDiscordEmbed, IDiscordAuthor } from "../../../interfaces/Discord";
 import { Session } from "express-session";
 import { EmbedBuilder } from "./EmbedBuilder";
-import utils from "../../../utils";
+import utils from "../../../utils/server";
 import axios from "axios";
 import config from "../../../config.json";
 

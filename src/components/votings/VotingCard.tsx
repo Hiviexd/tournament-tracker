@@ -1,5 +1,5 @@
 // Base
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { Link } from "react-router-dom";
 import { IVoting } from "../../../interfaces/Voting";
 
@@ -29,8 +29,8 @@ export default function VotingCard({ voting }: IPropTypes) {
     const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
 
     const getDueDateColor = (): string => {
-        const deadline = moment(voting.deadline);
-        const now = moment();
+        const deadline = dayjs(voting.deadline);
+        const now = dayjs();
         if (deadline.isBefore(now)) return "danger";
         if (deadline.isBefore(now.add(24, "hours"))) return "warning";
         return "success";
@@ -90,8 +90,8 @@ export default function VotingCard({ voting }: IPropTypes) {
                         </Tooltip>
                     )}
                     {/* Groups */}
-                    {sortedGroups.map((group, index) => (
-                        <UserGroupBadge key={index} group={group} tooltip="top" variant="light" />
+                    {sortedGroups.map((group) => (
+                        <UserGroupBadge key={group} group={group} tooltip="top" variant="light" />
                     ))}
                     {/* Active/Concluded */}
                     <Badge color={voting.isActive ? "success" : "gray"} variant="light">

@@ -1,5 +1,5 @@
 // Base
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { useState } from "react";
 import { IVoting } from "../../../interfaces/Voting";
 import { IUser } from "../../../interfaces/User";
@@ -62,8 +62,8 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
     const getDueDateColor = (): string => {
-        const deadline = moment(voting.deadline);
-        const now = moment();
+        const deadline = dayjs(voting.deadline);
+        const now = dayjs();
         if (deadline.isBefore(now)) return "danger";
         if (deadline.isBefore(now.add(24, "hours"))) return "warning";
         return "success";
@@ -237,8 +237,8 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     </Badge>
                                 </Tooltip>
                             )}
-                            {sortedGroups.map((group, index) => (
-                                <UserGroupBadge key={index} group={group} tooltip="top" variant="light" />
+                            {sortedGroups.map((group) => (
+                                <UserGroupBadge key={group} group={group} tooltip="top" variant="light" />
                             ))}
                             <Badge color={voting.isActive ? "success" : "gray"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}

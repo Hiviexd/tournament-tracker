@@ -1,7 +1,7 @@
 import { Badge, Tooltip, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IInfringement } from "../../../../interfaces/Infringement";
-import moment from "moment";
+import dayjs from "../../../../utils/dayjs";
 
 interface IProps {
     infringement: IInfringement | null;
@@ -32,7 +32,7 @@ export default function InfringementDurationBadge({ infringement, variant = "lig
         );
     }
 
-    const duration = moment(infringement.endDate).diff(moment(infringement.startDate), "days");
+    const duration = dayjs(infringement.endDate).diff(dayjs(infringement.startDate), "days");
 
     // Get color based on duration
     const getColor = () => {
@@ -41,10 +41,10 @@ export default function InfringementDurationBadge({ infringement, variant = "lig
         return "red";
     };
 
-    const durationText = moment.duration(duration, "days").humanize();
+    const durationText = dayjs.duration(duration, "days").humanize();
 
     return (
-        <Tooltip label={`${moment(infringement.startDate).format("MMM D, YYYY")} — ${moment(infringement.endDate).format("MMM D, YYYY")}`}>
+        <Tooltip label={`${dayjs(infringement.startDate).format("MMM D, YYYY")} — ${dayjs(infringement.endDate).format("MMM D, YYYY")}`}>
             <Badge variant={variant} color={getColor()} size={size} leftSection={<FontAwesomeIcon icon="clock" />}>
                 {durationText}
             </Badge>

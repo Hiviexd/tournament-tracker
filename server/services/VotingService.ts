@@ -3,7 +3,7 @@ import { IVote } from "../../interfaces/Vote";
 import { IUser } from "@interfaces/User";
 import { IDiscordField } from "@interfaces/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@interfaces/Vote";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import { Document } from "mongoose";
 
 class VotingService {

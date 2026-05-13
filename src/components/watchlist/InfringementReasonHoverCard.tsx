@@ -2,7 +2,7 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { IInfringement } from "../../../interfaces/Infringement";
 import { HoverCard, ActionIcon, ScrollArea, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import MarkdownText from "../common/MarkdownText";
 
 interface IProps {
@@ -47,7 +47,7 @@ export default function InfringementReasonHoverCard({ infringement, children }: 
                     <MarkdownText content={reasonContent} size="sm" />
                     {infringement.createdAt ? (
                         <Text size="xs" c="dimmed" mt="xs">
-                            {moment(infringement.createdAt).fromNow()}
+                            {dayjs(infringement.createdAt).fromNow()}
                         </Text>
                     ) : null}
                 </ScrollArea.Autosize>

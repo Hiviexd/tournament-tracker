@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Resource from "../models/resourceModel";
 import LogService from "../services/LogService";
 import User from "../models/userModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl country" }];
 

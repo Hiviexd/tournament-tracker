@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IResource, ResourceCategory } from "../../../interfaces/Resource";
 import UserLink from "../common/UserLink";
-import _ from "lodash";
+import capitalize from "lodash/capitalize";
 
 const CATEGORY_ICONS: Record<ResourceCategory, IconProp> = {
     discord: ["fab", "discord"],
@@ -36,7 +36,7 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
             target="_blank"
             rel="noopener noreferrer">
             <Group mb="xs" wrap="nowrap">
-                <Tooltip label={_.capitalize(resource.category)}>
+                <Tooltip label={capitalize(resource.category)}>
                     <FontAwesomeIcon icon={icon} size="lg" style={{ color: "var(--mantine-color-primary-6)" }} />
                 </Tooltip>
                 <Title order={4} style={{ flex: 1 }}>

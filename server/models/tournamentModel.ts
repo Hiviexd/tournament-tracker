@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
-import _ from "lodash";
-import utils from "../../utils";
+import startCase from "lodash/startCase";
+import utils from "../../utils/server";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -75,7 +75,7 @@ TournamentSchema.virtual("isContest").get(function (this: ITournament) {
 });
 
 TournamentSchema.virtual("statusString").get(function (this: ITournament) {
-    return _.startCase(this.status);
+    return startCase(this.status);
 });
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);

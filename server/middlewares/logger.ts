@@ -1,9 +1,9 @@
 import morgan from "morgan";
-import moment from "moment";
-import utils from "../../utils";
+import dayjs from "../../utils/dayjs";
+import utils from "../../utils/server";
 import { StyleName } from "../../utils/backend";
 
-morgan.token("time-colored", () => utils.consoleStyles(moment().format("HH:mm:ss.SSS"), ["dim"]));
+morgan.token("time-colored", () => utils.consoleStyles(dayjs().format("HH:mm:ss.SSS"), ["dim"]));
 
 morgan.token("method-colored", (req) => {
     const method = req.method as string;

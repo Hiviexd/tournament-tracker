@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import TournamentService from "../services/TournamentService";
 import GlobalSearchService from "../services/GlobalSearchService";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 class GlobalSearchController {
     public async index(req: Request, res: Response) {

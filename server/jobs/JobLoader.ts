@@ -3,7 +3,7 @@ import { join, dirname, basename } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import config from "../../config.json";
 import BaseJob from "./BaseJob";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -63,6 +63,7 @@ class JobLoader {
 
                 // Try .js first for production, then .ts for development
                 // (use pathToFileURL for Windows compatibility)
+                // react-doctor: dynamic import path is intentional — job modules are discovered from disk at runtime.
                 try {
                     modulePath = `${basePath}.js`;
                     module = await import(pathToFileURL(modulePath).href);

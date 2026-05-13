@@ -1,11 +1,11 @@
 import BaseJob from "./BaseJob";
 import Ticket from "../models/ticketModel";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import config from "../../config.json";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import LogService from "../services/LogService";
 import { ITicket } from "../../interfaces/Ticket";
 
@@ -23,11 +23,11 @@ export default class StaleTicketsJob extends BaseJob {
         const ticketsToUpdate: any[] = [];
 
         for (const ticket of activeTickets) {
-            const now = moment();
+            const now = dayjs();
 
             // Check if ticket is snoozed
             if (ticket.snoozedUntil) {
-                const snoozeExpiration = moment(ticket.snoozedUntil);
+                const snoozeExpiration = dayjs(ticket.snoozedUntil);
 
                 // If snooze time has passed, remove the snooze
                 if (now.isAfter(snoozeExpiration)) {
@@ -40,7 +40,7 @@ export default class StaleTicketsJob extends BaseJob {
                 }
             }
 
-            const lastResponse = moment(ticket.lastResponseAt);
+            const lastResponse = dayjs(ticket.lastResponseAt);
             const daysSinceLastResponse = now.diff(lastResponse, "days");
 
             // Skip if less than 7 days old

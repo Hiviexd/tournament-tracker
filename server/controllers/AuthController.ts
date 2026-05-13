@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import config from "../../config.json";
 import OsuApiService from "../services/OsuApiService";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import UserService from "../services/UserService";
 import User from "../models/userModel";
 import { Request, Response } from "express";

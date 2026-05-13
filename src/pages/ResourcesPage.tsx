@@ -14,6 +14,39 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import MarkdownText from "../components/common/MarkdownText";
 
+function ResourcesLoadingState() {
+    return (
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+            {[1, 2, 3, 4].map((i) => (
+                <Card key={i} padding="lg" radius="md" className="feature-card">
+                    <Stack gap="md">
+                        <Group>
+                            <Skeleton height={24} circle />
+                            <Skeleton height={24} width="60%" />
+                        </Group>
+                        <Skeleton height={30} />
+                        <Skeleton height={20} width="40%" />
+                    </Stack>
+                </Card>
+            ))}
+        </SimpleGrid>
+    );
+}
+
+function ResourcesEmptyState() {
+    return (
+        <Stack align="center" justify="center" h={200}>
+            <FontAwesomeIcon icon="book" size="2x" style={{ opacity: 0.5 }} />
+            <Text size="lg" c="dimmed">
+                No resources found...
+            </Text>
+            <Text size="sm" c="dimmed">
+                Try adjusting your filters
+            </Text>
+        </Stack>
+    );
+}
+
 interface FilterValues {
     search: string;
     author: string;
@@ -101,35 +134,6 @@ export default function ResourcesPage() {
         page: queryState.page,
     });
 
-    const LoadingState = () => (
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-            {[1, 2, 3, 4].map((i) => (
-                <Card key={i} padding="lg" radius="md" className="feature-card">
-                    <Stack gap="md">
-                        <Group>
-                            <Skeleton height={24} circle />
-                            <Skeleton height={24} width="60%" />
-                        </Group>
-                        <Skeleton height={30} />
-                        <Skeleton height={20} width="40%" />
-                    </Stack>
-                </Card>
-            ))}
-        </SimpleGrid>
-    );
-
-    const EmptyState = () => (
-        <Stack align="center" justify="center" h={200}>
-            <FontAwesomeIcon icon="book" size="2x" style={{ opacity: 0.5 }} />
-            <Text size="lg" c="dimmed">
-                No resources found...
-            </Text>
-            <Text size="sm" c="dimmed">
-                Try adjusting your filters
-            </Text>
-        </Stack>
-    );
-
     return (
         <Stack gap="md">
             {type === "community" && (
@@ -144,9 +148,9 @@ export default function ResourcesPage() {
             <Divider />
 
             {isLoading ? (
-                <LoadingState />
+                <ResourcesLoadingState />
             ) : !data || data.resources.length === 0 ? (
-                <EmptyState />
+                <ResourcesEmptyState />
             ) : (
                 <Stack gap="md">
                     {data.pagination.total > 1 && (

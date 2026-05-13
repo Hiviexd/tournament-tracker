@@ -1,4 +1,16 @@
-import { Card, Group, Stack, Alert, Text, ThemeIcon, Menu, ActionIcon, Box, useMantineTheme, MantineTheme } from "@mantine/core";
+import {
+    Card,
+    Group,
+    Stack,
+    Alert,
+    Text,
+    ThemeIcon,
+    Menu,
+    ActionIcon,
+    Box,
+    useMantineTheme,
+    MantineTheme,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage } from "../../../interfaces/Message";
 import { ITicket } from "../../../interfaces/Ticket";
@@ -16,46 +28,61 @@ interface IProps {
     showTrueAuthor: boolean;
 }
 
-// When to use committee identity over the true author
+/** When to use committee identity over the true author */
 type CommitteeIdentityDisplay = "always" | "whenMasked";
 
-export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
-    const theme = useMantineTheme();
-    const mobileNoteIcon = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
-
-    const getUserDisplayProps = (CommitteeIdentityDisplay: CommitteeIdentityDisplay) => {
-        const showCommitteeFacade =
-            message.isCommittee && (CommitteeIdentityDisplay === "always" || !showTrueAuthor);
-        if (showCommitteeFacade) {
-            return {
-                username: ticket?.assignedGroup === "tc" ? "Tournament Committee" : "Contest Committee",
-                avatarUrl: "/assets/logo-512.png",
-                group: ticket?.assignedGroup,
-            };
-        }
+function getTicketMessageUserDisplayProps(
+    ticket: ITicket | undefined,
+    message: IMessage,
+    committeeIdentityDisplay: CommitteeIdentityDisplay,
+    showTrueAuthor: boolean
+) {
+    const showCommitteeFacade =
+        message.isCommittee && (committeeIdentityDisplay === "always" || !showTrueAuthor);
+    if (showCommitteeFacade) {
         return {
-            user: message.author,
+            username: ticket?.assignedGroup === "tc" ? "Tournament Committee" : "Contest Committee",
+            avatarUrl: "/assets/logo-512.png",
+            group: ticket?.assignedGroup,
         };
+    }
+    return {
+        user: message.author,
     };
+}
 
-    const getBorderColor = (theme: MantineTheme) => {
-        if (message.isCommittee) {
-            if (ticket?.assignedGroup === "tc") return theme.colors.warning[6];
-            if (ticket?.assignedGroup === "cc") return theme.colors.info[6];
-        }
-        return "var(--mantine-color-primary-light-color)";
-    };
+function getTicketMessageBorderColor(ticket: ITicket | undefined, message: IMessage, theme: MantineTheme) {
+    if (message.isCommittee) {
+        if (ticket?.assignedGroup === "tc") return theme.colors.warning[6];
+        if (ticket?.assignedGroup === "cc") return theme.colors.info[6];
+    }
+    return "var(--mantine-color-primary-light-color)";
+}
 
-    const MessageContent = ({
-        mobileNoteIcon = false,
-        CommitteeIdentityDisplay,
-    }: {
-        mobileNoteIcon?: boolean;
-        CommitteeIdentityDisplay: CommitteeIdentityDisplay;
-    }) => (
+function TicketMessageBody({
+    ticket,
+    message,
+    showTrueAuthor,
+    mobileNoteIcon = false,
+    committeeIdentityDisplay,
+}: {
+    ticket?: ITicket;
+    message: IMessage;
+    showTrueAuthor: boolean;
+    mobileNoteIcon?: boolean;
+    committeeIdentityDisplay: CommitteeIdentityDisplay;
+}) {
+    const displayProps = getTicketMessageUserDisplayProps(
+        ticket,
+        message,
+        committeeIdentityDisplay,
+        showTrueAuthor
+    );
+
+    return (
         <Stack gap="sm">
             <Group justify="space-between" align="center">
-                <UserDisplay {...getUserDisplayProps(CommitteeIdentityDisplay)} />
+                <UserDisplay {...displayProps} />
                 <Group gap="xs">
                     <Box visibleFrom="xs">
                         <DateBadge date={message.createdAt} staticColor />
@@ -85,10 +112,9 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
             <Box style={{ overflowWrap: "anywhere" }}>
                 <MarkdownText content={message.content} />
             </Box>
-            {CommitteeIdentityDisplay === "always" && message.isCommittee && showTrueAuthor && (
+            {committeeIdentityDisplay === "always" && message.isCommittee && showTrueAuthor && (
                 <Text size="xs" c="dimmed">
-                    sent by{" "}
-                    <UserLink user={message.author} fw={700} c="white" />
+                    sent by <UserLink user={message.author} fw={700} c="white" />
                 </Text>
             )}
             {message.attachments && message.attachments.length > 0 && (
@@ -101,6 +127,11 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
             )}
         </Stack>
     );
+}
+
+export default function TicketMessage({ ticket, message, showTrueAuthor }: IProps) {
+    const theme = useMantineTheme();
+    const mobileNoteIcon = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
     // Notes
     // TODO: split into its own component and make mobile ver less ass
@@ -111,13 +142,22 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 variant="light"
                 color="info"
                 icon={!mobileNoteIcon && <FontAwesomeIcon icon="sticky-note" />}>
-                <MessageContent mobileNoteIcon={mobileNoteIcon} CommitteeIdentityDisplay="whenMasked" />
+                <TicketMessageBody
+                    ticket={ticket}
+                    message={message}
+                    showTrueAuthor={showTrueAuthor}
+                    mobileNoteIcon={mobileNoteIcon ?? false}
+                    committeeIdentityDisplay="whenMasked"
+                />
             </Alert>
         );
+    }
     // Event logs
-    } else if (message.event && ticket) {
+    if (message.event && ticket) {
         const isClosing = message.event === "close";
-        const eventLogUserDisplay = getUserDisplayProps("whenMasked");
+        const eventLogUserDisplay = getTicketMessageUserDisplayProps(ticket, message, "whenMasked", showTrueAuthor);
+        const committeeFacade =
+            "username" in eventLogUserDisplay ? eventLogUserDisplay.username : undefined;
         return (
             <Group gap="xs" align="center" mx="lg">
                 <ThemeIcon size="sm" radius="xl" color={isClosing ? "red" : "green"} variant="filled">
@@ -126,8 +166,8 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 <Text size="sm" c="dimmed">
                     <UserLink
                         user={message.author}
-                        username={eventLogUserDisplay.username}
-                        asText={!!eventLogUserDisplay.username}
+                        username={committeeFacade}
+                        asText={!!committeeFacade}
                         c="white"
                     />{" "}
                     {isClosing ? "closed" : "reopened"} this {ticket.isTicket ? "ticket" : "report"}{" "}
@@ -135,17 +175,23 @@ export default function TicketMessage({ ticket, message, showTrueAuthor }: IProp
                 </Text>
             </Group>
         );
-        // Regular message
-    } else if (!message.isNote) {
+    }
+    // Regular message
+    if (!message.isNote) {
         return (
             <Card
                 shadow="sm"
                 p="lg"
                 radius="md"
-                style={(theme) => ({
-                    borderLeft: `4px solid ${getBorderColor(theme)}`,
+                style={(t) => ({
+                    borderLeft: `4px solid ${getTicketMessageBorderColor(ticket, message, t)}`,
                 })}>
-                <MessageContent CommitteeIdentityDisplay="always" />
+                <TicketMessageBody
+                    ticket={ticket}
+                    message={message}
+                    showTrueAuthor={showTrueAuthor}
+                    committeeIdentityDisplay="always"
+                />
             </Card>
         );
     }

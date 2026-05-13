@@ -31,6 +31,34 @@ import utils from "../../utils";
 import { IValidateBeatmapsResponse, IValidationResult } from "../../interfaces/ComplianceApi";
 import AlertText from "../components/common/AlertText";
 
+function MappoolComplianceLoadingState() {
+    return (
+        <Stack gap="md">
+            {[1, 2, 3].map((i) => (
+                <Card key={i} shadow="sm" p="lg">
+                    <Stack gap="md">
+                        <Group>
+                            <Skeleton height={24} circle />
+                            <Skeleton height={24} width="15%" />
+                            <Skeleton height={20} width={30} radius="xl" />
+                        </Group>
+                        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                            {[1, 2, 3].map((j) => (
+                                <Card key={j} shadow="sm" p="md" bg="primary.10">
+                                    <Stack gap="xs">
+                                        <Skeleton height={20} width="80%" />
+                                        <Skeleton height={16} width="60%" />
+                                    </Stack>
+                                </Card>
+                            ))}
+                        </SimpleGrid>
+                    </Stack>
+                </Card>
+            ))}
+        </Stack>
+    );
+}
+
 interface IProps {
     header?: string;
     radius?: MantineRadius;
@@ -85,32 +113,6 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
             </Stack>
         );
     };
-
-    const LoadingState = () => (
-        <Stack gap="md">
-            {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg">
-                    <Stack gap="md">
-                        <Group>
-                            <Skeleton height={24} circle />
-                            <Skeleton height={24} width="15%" />
-                            <Skeleton height={20} width={30} radius="xl" />
-                        </Group>
-                        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                            {[1, 2, 3].map((j) => (
-                                <Card key={j} shadow="sm" p="md" bg="primary.10">
-                                    <Stack gap="xs">
-                                        <Skeleton height={20} width="80%" />
-                                        <Skeleton height={16} width="60%" />
-                                    </Stack>
-                                </Card>
-                            ))}
-                        </SimpleGrid>
-                    </Stack>
-                </Card>
-            ))}
-        </Stack>
-    );
 
     const complianceData = data as IValidateBeatmapsResponse | undefined;
 
@@ -173,7 +175,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
             {complianceData && <Divider />}
 
             {isPending ? (
-                <LoadingState />
+                <MappoolComplianceLoadingState />
             ) : (
                 complianceData && (
                     <Stack gap="lg">

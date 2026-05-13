@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "react-router-dom";
 import defaultBanner from "/assets/default-banner.jpg";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { loggedInUserAtom } from "../../store/atoms";
@@ -22,10 +22,111 @@ const DEFAULT_PREVIEW: BannerPreview = {
     description:
         "Long description text goes here. Reasonably long, two lines, gotta keep typing or else we'll have to make this even longer to unreasonable degrees!",
     author: "You & Me",
-    date: { day: moment().format("D"), month: moment().format("MMM"), year: moment().format("YYYY") },
+    date: { day: dayjs().format("D"), month: dayjs().format("MMM"), year: dayjs().format("YYYY") },
     imageUrl: defaultBanner,
     isLocalImage: false,
 };
+
+function HomepageLoggedInBannerPreview({ preview }: { preview: BannerPreview }) {
+    return (
+        <div className="newspost newspost-homepage">
+            <div className="newspost-image">
+                <img src={preview.imageUrl} alt="Preview" />
+            </div>
+            <div className="newspost-homepage-inner">
+                <div className="newspost-homepage-date">
+                    <p className="newspost-homepage-date-day">{preview.date.day}</p>
+                    <p className="newspost-homepage-date-month">
+                        {preview.date.month} {preview.date.year}
+                    </p>
+                </div>
+                <div className="newspost-homepage-texts">
+                    <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
+                    <p className="newspost-homepage-description">{preview.description}</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function NewsHistoryPagePreview({ preview, authorLabel }: { preview: BannerPreview; authorLabel: string }) {
+    return (
+        <div className="newspost newspost-listing">
+            <div className="newspost-image">
+                <img src={preview.imageUrl} alt="Preview" />
+                <div className="newspost-date-badge">
+                    {preview.date.day} {preview.date.month} {preview.date.year}
+                </div>
+            </div>
+            <div className="newspost-listing-inner">
+                <p className="newspost-listing-title">Newspost in news history page</p>
+                <p className="newspost-listing-description">{preview.description}</p>
+                <p className="newspost-listing-meta">
+                    by <strong>{authorLabel}</strong>
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function HomepageLoggedOutSmallBannerPreview({ preview, authorLabel }: { preview: BannerPreview; authorLabel: string }) {
+    return (
+        <div className="newspost newspost-loggedout small">
+            <div className="newspost-image">
+                <img src={preview.imageUrl} alt="Preview" />
+                <div className="newspost-date-badge">
+                    {preview.date.day} {preview.date.month} {preview.date.year}
+                </div>
+            </div>
+            <div className="newspost-loggedout-inner">
+                <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
+                <p className="newspost-listing-meta">
+                    by <strong>{authorLabel}</strong>
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function HomepageLoggedOutLargeBannerPreview({ preview, authorLabel }: { preview: BannerPreview; authorLabel: string }) {
+    return (
+        <div className="newspost newspost-loggedout">
+            <div className="newspost-image">
+                <img src={preview.imageUrl} alt="Preview" />
+                <div className="newspost-date-badge">
+                    {preview.date.day} {preview.date.month} {preview.date.year}
+                </div>
+            </div>
+            <div className="newspost-loggedout-inner">
+                <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
+                <p className="newspost-listing-meta">
+                    by <strong>{authorLabel}</strong>
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function NewsPagePreview({ preview, authorLabel }: { preview: BannerPreview; authorLabel: string }) {
+    return (
+        <div className="newspost newspost-newspost">
+            <div className="newspost-newspost-inner">
+                <div className="newspost-image">
+                    <img src={preview.imageUrl} alt="Preview" />
+                    <div className="newspost-date-badge">
+                        {preview.date.day} {preview.date.month} {preview.date.year}
+                    </div>
+                </div>
+                <p className="newspost-newspost-title">Newspost in newspost page</p>
+                <p className="newspost-newspost-meta">
+                    by <strong>{authorLabel}</strong>
+                </p>
+            </div>
+
+            <p className="newspost-newspost-description">{preview.description}</p>
+        </div>
+    );
+}
 
 export default function NewsBannersTab() {
     const [user] = useAtom(loggedInUserAtom);
@@ -128,106 +229,7 @@ export default function NewsBannersTab() {
         setPreview(DEFAULT_PREVIEW);
     }, []);
 
-    const HomepageLoggedInBannerPreview = () => {
-        return (
-            <div className="newspost newspost-homepage">
-                <div className="newspost-image">
-                    <img src={preview.imageUrl} alt="Preview" />
-                </div>
-                <div className="newspost-homepage-inner">
-                    <div className="newspost-homepage-date">
-                        <p className="newspost-homepage-date-day">{preview.date.day}</p>
-                        <p className="newspost-homepage-date-month">
-                            {preview.date.month} {preview.date.year}
-                        </p>
-                    </div>
-                    <div className="newspost-homepage-texts">
-                        <p className="newspost-homepage-title">Newspost in homepage (logged in)</p>
-                        <p className="newspost-homepage-description">{preview.description}</p>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const NewsHistoryPagePreview = () => {
-        return (
-            <div className="newspost newspost-listing">
-                <div className="newspost-image">
-                    <img src={preview.imageUrl} alt="Preview" />
-                    <div className="newspost-date-badge">
-                        {preview.date.day} {preview.date.month} {preview.date.year}
-                    </div>
-                </div>
-                <div className="newspost-listing-inner">
-                    <p className="newspost-listing-title">Newspost in news history page</p>
-                    <p className="newspost-listing-description">{preview.description}</p>
-                    <p className="newspost-listing-meta">
-                        by <strong>{user?.username ?? preview.author}</strong>
-                    </p>
-                </div>
-            </div>
-        );
-    };
-
-    const HomepageLoggedOutSmallBannerPreview = () => {
-        return (
-            <div className="newspost newspost-loggedout small">
-                <div className="newspost-image">
-                    <img src={preview.imageUrl} alt="Preview" />
-                    <div className="newspost-date-badge">
-                        {preview.date.day} {preview.date.month} {preview.date.year}
-                    </div>
-                </div>
-                <div className="newspost-loggedout-inner">
-                    <p className="newspost-loggedout-title">Small newspost in homepage (logged out)</p>
-                    <p className="newspost-listing-meta">
-                        by <strong>{user?.username ?? preview.author}</strong>
-                    </p>
-                </div>
-            </div>
-        );
-    };
-
-    const HomepageLoggedOutLargeBannerPreview = () => {
-        return (
-            <div className="newspost newspost-loggedout">
-                <div className="newspost-image">
-                    <img src={preview.imageUrl} alt="Preview" />
-                    <div className="newspost-date-badge">
-                        {preview.date.day} {preview.date.month} {preview.date.year}
-                    </div>
-                </div>
-                <div className="newspost-loggedout-inner">
-                    <p className="newspost-loggedout-title">Large newspost in homepage (logged out)</p>
-                    <p className="newspost-listing-meta">
-                        by <strong>{user?.username ?? preview.author}</strong>
-                    </p>
-                </div>
-            </div>
-        );
-    };
-
-    const NewsPagePreview = () => {
-        return (
-            <div className="newspost newspost-newspost">
-                <div className="newspost-newspost-inner">
-                    <div className="newspost-image">
-                        <img src={preview.imageUrl} alt="Preview" />
-                        <div className="newspost-date-badge">
-                            {preview.date.day} {preview.date.month} {preview.date.year}
-                        </div>
-                    </div>
-                    <p className="newspost-newspost-title">Newspost in newspost page</p>
-                    <p className="newspost-newspost-meta">
-                        by <strong>{user?.username ?? preview.author}</strong>
-                    </p>
-                </div>
-
-                <p className="newspost-newspost-description">{preview.description}</p>
-            </div>
-        );
-    };
+    const authorLabel = user?.username ?? preview.author;
 
     return (
         <Stack gap="xl" className="news-banner-previewer">
@@ -241,7 +243,7 @@ export default function NewsBannersTab() {
                     border: `2px dashed var(--mantine-color-${isDragActive ? "primary" : "gray"}-4)`,
                     backgroundColor: isDragActive ? "var(--mantine-color-primary-light)" : "var(--mantine-color-body)",
                     cursor: "pointer",
-                    transition: "all 0.2s ease",
+                    transition: "border-color 0.2s ease, background-color 0.2s ease",
                 }}>
                 <input {...getInputProps()} />
                 <Center>
@@ -283,19 +285,19 @@ export default function NewsBannersTab() {
             {/* Preview section */}
             <Stack gap="xl" align="center" className="banners-container">
                 {/* Homepage logged in */}
-                <HomepageLoggedInBannerPreview />
+                <HomepageLoggedInBannerPreview preview={preview} />
 
                 {/* News history page */}
-                <NewsHistoryPagePreview />
+                <NewsHistoryPagePreview preview={preview} authorLabel={authorLabel} />
 
                 {/* Homepage logged out (small) */}
-                <HomepageLoggedOutSmallBannerPreview />
+                <HomepageLoggedOutSmallBannerPreview preview={preview} authorLabel={authorLabel} />
 
                 {/* Homepage logged out (large) */}
-                <HomepageLoggedOutLargeBannerPreview />
+                <HomepageLoggedOutLargeBannerPreview preview={preview} authorLabel={authorLabel} />
 
                 {/* Newspost page */}
-                <NewsPagePreview />
+                <NewsPagePreview preview={preview} authorLabel={authorLabel} />
             </Stack>
 
             {/* Screenshot Modal */}
@@ -320,11 +322,11 @@ export default function NewsBannersTab() {
                 <div className="news-banner-previewer">
                     <div className="banners-container" style={{ padding: "20px" }}>
                         <Group align="center" justify="center">
-                            <HomepageLoggedInBannerPreview />
-                            <HomepageLoggedOutSmallBannerPreview />
-                            <NewsHistoryPagePreview />
-                            <HomepageLoggedOutLargeBannerPreview />
-                            <NewsPagePreview />
+                            <HomepageLoggedInBannerPreview preview={preview} />
+                            <HomepageLoggedOutSmallBannerPreview preview={preview} authorLabel={authorLabel} />
+                            <NewsHistoryPagePreview preview={preview} authorLabel={authorLabel} />
+                            <HomepageLoggedOutLargeBannerPreview preview={preview} authorLabel={authorLabel} />
+                            <NewsPagePreview preview={preview} authorLabel={authorLabel} />
                         </Group>
                     </div>
                 </div>

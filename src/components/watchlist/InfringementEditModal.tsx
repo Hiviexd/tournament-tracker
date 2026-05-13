@@ -7,7 +7,7 @@ import { useUpdateInfringement } from "../../hooks/useInfringements";
 import { IInfringement, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import utils from "../../../utils";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 
 interface IProps {
     opened: boolean;
@@ -141,7 +141,7 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
                                 clearable
                                 minDate={
                                     form.values.startDate
-                                        ? moment(form.values.startDate).add(1, "day").toDate()
+                                        ? dayjs(form.values.startDate).add(1, "day").toDate()
                                         : undefined
                                 }
                                 {...form.getInputProps("endDate")}

@@ -1,6 +1,6 @@
 import { Table, Card, Tooltip, Text, ScrollArea } from "@mantine/core";
 import { ILog } from "../../../interfaces/Log";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import MarkdownText from "../common/MarkdownText";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import UserLink from "../common/UserLink";
@@ -27,8 +27,8 @@ export default function LogsTable({ logs }: IProps) {
                         {logs.map((log) => (
                             <Table.Tr key={log.id}>
                                 <Table.Td>
-                                    <Tooltip label={moment(log.createdAt).format("LLL")}>
-                                        <span>{moment(log.createdAt).fromNow()}</span>
+                                    <Tooltip label={dayjs(log.createdAt).format("LLL")}>
+                                        <span>{dayjs(log.createdAt).fromNow()}</span>
                                     </Tooltip>
                                 </Table.Td>
                                 <Table.Td p={0}>{log.isSystemLog && <FontAwesomeIcon icon="robot" />}</Table.Td>

@@ -19,14 +19,15 @@ import axios from "axios";
 import TournamentService from "../services/TournamentService";
 import LogService from "../services/LogService";
 import NotificationDispatchService from "../services/NotificationDispatchService";
-import _ from "lodash";
-import moment from "moment";
+import capitalize from "lodash/capitalize";
+import startCase from "lodash/startCase";
+import dayjs from "../../utils/dayjs";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import Message from "../models/messageModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import { ITicket } from "../../interfaces/Ticket";
 import { IVoting } from "../../interfaces/Voting";
 
@@ -333,8 +334,8 @@ class TournamentsController {
                 `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
-            .addField("Start Date", moment(tournament.startDate).format("YYYY-MM-DD"), true)
-            .addField("End Date", moment(tournament.endDate).format("YYYY-MM-DD"), true)
+            .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
+            .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
             .addField("Game Mode", tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "), true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
@@ -441,7 +442,7 @@ class TournamentsController {
         const webhookBuilder = new WebhookBuilder()
             .addEmbed(embed)
             .addUsers(usersToPing)
-            .setMessage(`New ${_.capitalize(tournament.type)} Review`);
+            .setMessage(`New ${capitalize(tournament.type)} Review`);
 
         if (tournament.threadId) {
             webhookBuilder.setThreadId(tournament.threadId);
@@ -535,7 +536,7 @@ class TournamentsController {
         const webhookBuilder = new WebhookBuilder()
             .addEmbed(embed)
             .addUsers([user.discordId || user.username])
-            .setMessage(`Reviewer added to ${_.capitalize(tournament.type)}`);
+            .setMessage(`Reviewer added to ${capitalize(tournament.type)}`);
         if (tournament.threadId) webhookBuilder.setThreadId(tournament.threadId);
         await webhookBuilder.send();
     }
@@ -1018,7 +1019,7 @@ class TournamentsController {
                 }**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .setColor(color)
-            .addField("Decision", `${emoji} ${_.startCase(vote)}`, true)
+            .addField("Decision", `${emoji} ${startCase(vote)}`, true)
             .addField("Checklist Issues", `${falseCount > 0 ? "⚠️" : "🎉"} ${falseCount}`, true)
             .addField("Comment", comment.trim().length > 0 ? utils.shorten(comment, 512) : "*No comment provided...*");
 

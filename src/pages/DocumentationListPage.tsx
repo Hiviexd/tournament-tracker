@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import { useDocumentation } from "../hooks/useArticle";
 import EmptyState from "../components/common/EmptyState";
 
-export default function DocumentationListPage() {
-    const { data: articles, isLoading, isError } = useDocumentation();
-
-    const LoadingState = () => (
+function DocumentationListLoadingState() {
+    return (
         <Container size="lg">
             <Stack gap="xl">
                 {/* Welcome Card Skeleton */}
@@ -25,9 +23,13 @@ export default function DocumentationListPage() {
             </Stack>
         </Container>
     );
+}
+
+export default function DocumentationListPage() {
+    const { data: articles, isLoading, isError } = useDocumentation();
 
     if (isLoading) {
-        return <LoadingState />;
+        return <DocumentationListLoadingState />;
     }
 
     if (isError || !articles || articles.length === 0) {

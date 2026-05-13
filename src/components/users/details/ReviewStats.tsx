@@ -26,19 +26,21 @@ function timespanBadgeColor(days: number): "success" | "warning" | "danger" | "b
     return "danger";
 }
 
-export default function ReviewStats({ user }: IProps) {
-    const [days, setDays] = useState(180);
-    const { data: stats, isLoading } = useReviewStats(user.id, days);
-
-    if (!user.isCommittee) return null;
-
-    const LoadingState = () => (
+function ReviewStatsLoadingState() {
+    return (
         <Stack gap="xs" w="50%">
             <Skeleton height={20} radius="md" />
             <Skeleton height={20} radius="md" />
             <Skeleton height={20} radius="md" />
         </Stack>
     );
+}
+
+export default function ReviewStats({ user }: IProps) {
+    const [days, setDays] = useState(180);
+    const { data: stats, isLoading } = useReviewStats(user.id, days);
+
+    if (!user.isCommittee) return null;
 
     return (
         <Stack gap="md">
@@ -57,7 +59,7 @@ export default function ReviewStats({ user }: IProps) {
             </Group>
 
             {isLoading ? (
-                <LoadingState />
+                <ReviewStatsLoadingState />
             ) : stats ? (
                 <Stack gap="md">
                     <List>

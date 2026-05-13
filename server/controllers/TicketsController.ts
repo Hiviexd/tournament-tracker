@@ -8,9 +8,9 @@ import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import TicketService from "../services/TicketService";
-import _ from "lodash";
+import capitalize from "lodash/capitalize";
 import UploadService from "../services/UploadService";
 import OsuBotService from "../services/OsuBotService";
 
@@ -299,10 +299,10 @@ class TicketsController {
         await new WebhookBuilder()
             .addEmbed(embed)
             .addRoles(roles)
-            .setMessage(`New ${_.capitalize(type)}`)
+            .setMessage(`New ${capitalize(type)}`)
             .send();
 
-        res.json({ message: `${_.capitalize(type)} created successfully!`, ticket });
+        res.json({ message: `${capitalize(type)} created successfully!`, ticket });
     }
 
     /** POST send message in ticket */
@@ -456,7 +456,7 @@ class TicketsController {
         await ticket.save();
 
         res.json({
-            message: `${_.capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`,
+            message: `${capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`,
             ticket,
         });
 

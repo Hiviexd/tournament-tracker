@@ -35,7 +35,7 @@ export default function Header({ mobileHeaderOpened, mobileHeaderToggle }: IProp
                     <Group gap="xl">
                         <Link to="/">
                             <Image
-                                src="/assets/logo-main.svg?20250714"
+                                src="/assets/logo-main.svg?20260211"
                                 alt="Logo"
                                 className="logo-image"
                                 style={{ maxWidth: "35px", maxHeight: "35px" }}

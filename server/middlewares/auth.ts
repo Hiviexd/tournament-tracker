@@ -1,5 +1,5 @@
 import User from "../models/userModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import OsuApiService from "../services/OsuApiService";
 import { Request, Response, NextFunction } from "express";
 

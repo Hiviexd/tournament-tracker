@@ -10,6 +10,22 @@ import utils from "../../../utils";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 
+function GlobalSearchSpotlightSkeleton() {
+    return (
+        <>
+            <MantineSpotlight.ActionsGroup label="Loading...">
+                {["spotlight-skel-a", "spotlight-skel-b", "spotlight-skel-c", "spotlight-skel-d", "spotlight-skel-e"].map(
+                    (skelId) => (
+                    <MantineSpotlight.Action key={skelId} disabled>
+                        <Skeleton height={60} width="100%" radius="md" />
+                    </MantineSpotlight.Action>
+                    )
+                )}
+            </MantineSpotlight.ActionsGroup>
+        </>
+    );
+}
+
 export default function Spotlight() {
     const [user] = useAtom(loggedInUserAtom);
 
@@ -60,20 +76,6 @@ export default function Spotlight() {
         }
     };
 
-    const SpotlightSkeleton = () => {
-        return (
-            <>
-                <MantineSpotlight.ActionsGroup label="Loading...">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                        <MantineSpotlight.Action key={index} disabled>
-                            <Skeleton height={60} width="100%" radius="md" />
-                        </MantineSpotlight.Action>
-                    ))}
-                </MantineSpotlight.ActionsGroup>
-            </>
-        );
-    };
-
     return (
         <MantineSpotlight.Root scrollable maxHeight="500px">
             <FocusTrap active>
@@ -85,7 +87,7 @@ export default function Spotlight() {
                 />
             </FocusTrap>
             <MantineSpotlight.ActionsList>
-                {isLoading && <SpotlightSkeleton />}
+                {isLoading && <GlobalSearchSpotlightSkeleton />}
                 {results.length > 0 && (
                     <>
                         {Object.entries(
@@ -125,9 +127,9 @@ export default function Spotlight() {
                                 <FontAwesomeIcon icon="trash" size="xs" />
                             </ActionIcon>
                         </Group>
-                        {lastSearches.map((searchItem, index) => (
+                        {lastSearches.map((searchItem) => (
                             <SpotlightAction
-                                key={`${searchItem.type}-${searchItem.link}-${index}`}
+                                key={`${searchItem.type}-${searchItem.link}`}
                                 searchItem={searchItem}
                                 onClick={() => handleSelectOption(searchItem)}
                             />

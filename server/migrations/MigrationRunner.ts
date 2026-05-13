@@ -44,6 +44,7 @@ class MigrationRunner {
         let module;
         try {
             // Try .ts first (for development)
+            // react-doctor: dynamic path required — migrations are selected at runtime by filename from disk.
             try {
                 module = await import(pathToFileURL(`${basePath}.ts`).href);
             } catch (tsError) {

@@ -5,16 +5,10 @@ import UserSearch from "../components/common/UserSearch";
 import { IUser } from "../../interfaces/User";
 import UserLink from "../components/common/UserLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 
-export default function QuotesPage() {
-    const [quote, setQuote] = useState("");
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
-
-    const { data: quotes = [], isLoading } = useAllQuotes();
-    const createQuoteMutation = useCreateQuote(selectedUser?.id || "", quote);
-
-    const LoadingState = () => (
+function QuotesLoadingState() {
+    return (
         <ScrollArea>
             <Table miw={{ base: 1200, md: 800 }}>
                 <Table.Thead>
@@ -49,6 +43,14 @@ export default function QuotesPage() {
             </Table>
         </ScrollArea>
     );
+}
+
+export default function QuotesPage() {
+    const [quote, setQuote] = useState("");
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+
+    const { data: quotes = [], isLoading } = useAllQuotes();
+    const createQuoteMutation = useCreateQuote(selectedUser?.id || "", quote);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -90,7 +92,7 @@ export default function QuotesPage() {
 
             <Card shadow="sm" p="md">
                 {isLoading ? (
-                    <LoadingState />
+                    <QuotesLoadingState />
                 ) : (
                     <ScrollArea>
                         <Table miw={{ base: 1200, md: 800 }}>
@@ -106,8 +108,8 @@ export default function QuotesPage() {
                                 {quotes.map((quote) => (
                                     <Table.Tr key={quote._id}>
                                         <Table.Td>
-                                            <Tooltip label={moment(quote.createdAt).format("LLL")}>
-                                                <span>{moment(quote.createdAt).fromNow()}</span>
+                                            <Tooltip label={dayjs(quote.createdAt).format("LLL")}>
+                                                <span>{dayjs(quote.createdAt).fromNow()}</span>
                                             </Tooltip>
                                         </Table.Td>
                                         <Table.Td>

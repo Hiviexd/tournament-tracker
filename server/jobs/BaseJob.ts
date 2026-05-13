@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 export default abstract class BaseJob {
     abstract name: string;

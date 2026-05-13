@@ -16,7 +16,7 @@ import ReportsMiniSection from "../common/ReportsMiniSection";
 import VotingsMiniSection from "../common/VotingsMiniSection";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
-import _ from "lodash";
+import capitalize from "lodash/capitalize";
 import { useNavigate } from "react-router";
 import { ITicket } from "../../../interfaces/Ticket";
 import { IVoting } from "../../../interfaces/Voting";
@@ -78,7 +78,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
         <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Group justify="space-between" align="center">
-                    <Title order={3}>{_.capitalize(tournament.type)} Information</Title>
+                    <Title order={3}>{capitalize(tournament.type)} Information</Title>
                     {user?.isAdmin && (
                         <Group gap="xs">
                             {tournament.status === "supportRequestReceived" && (

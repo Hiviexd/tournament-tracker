@@ -2,7 +2,7 @@ import Log from "../models/logModel";
 import User from "../models/userModel";
 import { LogQueryParams, LogListQuery } from "../../interfaces/Log";
 import { Request, Response } from "express";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 const DEFAULT_POPULATE = [
     {

@@ -17,16 +17,8 @@ import VotingForm from "../components/votings/VotingForm";
 import VotingResults from "../components/votings/VotingResults";
 import EmptyState from "../components/common/EmptyState";
 
-export default function VotingDetailsPage() {
-    const { votingId } = useParams();
-    const navigate = useNavigate();
-    const [loggedInUser] = useAtom(loggedInUserAtom);
-    const { data: voting, isLoading } = useVoting(votingId!);
-    const [editModalOpened, { close: closeEditModal }] = useDisclosure(false);
-
-    useDocumentTitle(voting?.title ? `${voting.title} | Vote Details` : "Vote Details | Tournament Tracker");
-
-    const LoadingState = () => (
+function VotingDetailsLoadingState() {
+    return (
         <Stack gap="lg">
             {/* VotingInfo Skeleton */}
             <Card shadow="sm" p="lg" radius="md">
@@ -94,11 +86,21 @@ export default function VotingDetailsPage() {
             </Card>
         </Stack>
     );
+}
+
+export default function VotingDetailsPage() {
+    const { votingId } = useParams();
+    const navigate = useNavigate();
+    const [loggedInUser] = useAtom(loggedInUserAtom);
+    const { data: voting, isLoading } = useVoting(votingId!);
+    const [editModalOpened, { close: closeEditModal }] = useDisclosure(false);
+
+    useDocumentTitle(voting?.title ? `${voting.title} | Vote Details` : "Vote Details | Tournament Tracker");
 
     return (
         <>
             {isLoading ? (
-                <LoadingState />
+                <VotingDetailsLoadingState />
             ) : voting.error ? (
                 <EmptyState
                     icon="poll-h"

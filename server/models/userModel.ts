@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import { IUser, IUserStatics, UserGroup } from "../../interfaces/User";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 const UserSchema = new Schema<IUser, IUserStatics>(
     {
@@ -139,14 +139,14 @@ function getDuration(user: IUser, group: UserGroup): number {
         leftHistory.splice(i, 1);
 
         if (leftDate) {
-            duration += moment(leftDate.date).diff(history.date, "days");
+            duration += dayjs(leftDate.date).diff(history.date, "days");
         } else {
             unendingDate = history.date;
         }
     }
 
     if (unendingDate) {
-        duration += moment().diff(unendingDate, "days");
+        duration += dayjs().diff(unendingDate, "days");
     }
 
     return duration;

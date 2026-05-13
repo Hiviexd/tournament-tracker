@@ -8,6 +8,16 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import utils from "../../../../utils";
 import CopyButton from "../../common/buttons/CopyButton";
 
+function CommitteeBadgePlaceholderCard() {
+    return (
+        <Card w={86} h={40} bg="var(--mantine-color-primary-10)" p="xs" radius="sm">
+            <Group h="100%" justify="center" align="center">
+                <Text size="xs">None...</Text>
+            </Group>
+        </Card>
+    );
+}
+
 interface IProps {
     user: IUser;
     committee: "tc" | "cc";
@@ -30,14 +40,6 @@ export default function BadgeManager({ user, committee }: IProps) {
             console.error("Failed to update badge value:", error);
         }
     };
-
-    const NoBadgeCard = () => (
-        <Card w={86} h={40} bg="var(--mantine-color-primary-10)" p="xs" radius="sm">
-            <Group h="100%" justify="center" align="center">
-                <Text size="xs">None...</Text>
-            </Group>
-        </Card>
-    );
 
     return (
         <Stack gap={6}>
@@ -73,7 +75,7 @@ export default function BadgeManager({ user, committee }: IProps) {
                             radius="sm"
                         />
                     ) : (
-                        <NoBadgeCard />
+                        <CommitteeBadgePlaceholderCard />
                     )}
 
                     {loggedInUser!.isAdmin && (

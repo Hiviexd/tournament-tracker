@@ -4,6 +4,12 @@ import UserService from "../../services/UserService";
 import User from "../../models/userModel";
 import { createMockTCUsers, createMockCCUsers } from "../utils/users";
 
+const lodashAssignMocks = vi.hoisted(() => ({
+    sampleSize: vi.fn(),
+    /** Preserve order so sampleSize receives the same user array as from DB */
+    shuffle: vi.fn((users: unknown[]) => [...users]),
+}));
+
 // Mock the User model
 vi.mock("../../models/userModel", () => ({
     default: {
@@ -13,20 +19,10 @@ vi.mock("../../models/userModel", () => ({
     },
 }));
 
-// Mock lodash's sampleSize function to make tests predictable
-vi.mock("lodash", () => ({
-    default: {
-        sampleSize: vi.fn(),
-        isEqual: vi.fn(),
-        shuffle: vi.fn(),
-    },
-    sampleSize: vi.fn(),
-    isEqual: vi.fn(),
-    shuffle: vi.fn(),
-}));
+vi.mock("lodash/sampleSize", () => ({ default: lodashAssignMocks.sampleSize }));
+vi.mock("lodash/shuffle", () => ({ default: lodashAssignMocks.shuffle }));
 
 const mockUser = User as any;
-const mockLodash = await import("lodash");
 
 describe("UserService", () => {
     beforeEach(() => {
@@ -43,7 +39,7 @@ describe("UserService", () => {
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
                 // Mock lodash to return first 2 users predictably
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[0], mockTCUsers[1]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockTCUsers[0], mockTCUsers[1]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc");
@@ -76,7 +72,7 @@ describe("UserService", () => {
                 mockUser.find.mockResolvedValue([mockTCUsers[2], mockTCUsers[3], mockTCUsers[4]]);
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[2], mockTCUsers[3]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockTCUsers[2], mockTCUsers[3]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc", usersToExclude);
@@ -109,7 +105,7 @@ describe("UserService", () => {
                     .mockResolvedValueOnce(mockTCUsers); // Second call after reset returns all users
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[1]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockTCUsers[1]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc");
@@ -150,7 +146,7 @@ describe("UserService", () => {
                     .mockResolvedValueOnce(availableAfterReset); // Second call after reset
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[2]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockTCUsers[2]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc", usersToExclude);
@@ -223,7 +219,7 @@ describe("UserService", () => {
                 mockUser.find.mockResolvedValue(mockCCUsers);
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockCCUsers[0], mockCCUsers[1]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockCCUsers[0], mockCCUsers[1]]);
 
                 // Act
                 const result = await UserService.assignReviewers("cc");
@@ -252,7 +248,7 @@ describe("UserService", () => {
                 mockUser.find.mockResolvedValue([mockCCUsers[1], mockCCUsers[2], mockCCUsers[3]]);
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockCCUsers[1], mockCCUsers[2]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockCCUsers[1], mockCCUsers[2]]);
 
                 // Act
                 const result = await UserService.assignReviewers("cc", usersToExclude);
@@ -277,7 +273,7 @@ describe("UserService", () => {
                 mockUser.find.mockResolvedValue(mockTCUsers);
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue([mockTCUsers[0], mockTCUsers[1]]);
+                lodashAssignMocks.sampleSize.mockReturnValue([mockTCUsers[0], mockTCUsers[1]]);
 
                 // Act
                 const result = await UserService.assignReviewers("tc", []);
@@ -317,7 +313,7 @@ describe("UserService", () => {
                 mockUser.find.mockResolvedValue(activeTCUsers); // Only active reviewers returned
                 mockUser.updateMany.mockResolvedValue({ acknowledged: true });
 
-                (mockLodash.default.sampleSize as any).mockReturnValue(activeTCUsers);
+                lodashAssignMocks.sampleSize.mockReturnValue(activeTCUsers);
 
                 // Act
                 const result = await UserService.assignReviewers("tc");

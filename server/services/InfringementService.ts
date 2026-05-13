@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 import Infringement from "../models/infringementModel";
 import User from "../models/userModel";
 import {
@@ -9,7 +9,7 @@ import {
     WatchlistQuery,
     WATCHLIST_DEFAULT_LIMIT,
 } from "../../interfaces/Infringement";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 class InfringementService {
     public async addInfringement(
@@ -32,16 +32,16 @@ class InfringementService {
         const isTimeBased = TIME_BASED_TYPES.includes(type);
 
         if (isTimeBased) {
-            if (startDate && !moment(startDate).isValid()) {
+            if (startDate && !dayjs(startDate).isValid()) {
                 throw { status: 400, error: "Invalid start date format" };
             }
 
             if (endDate) {
-                if (!moment(endDate).isValid()) {
+                if (!dayjs(endDate).isValid()) {
                     throw { status: 400, error: "Invalid end date format" };
                 }
 
-                if (startDate && moment(endDate).isBefore(moment(startDate))) {
+                if (startDate && dayjs(endDate).isBefore(dayjs(startDate))) {
                     throw { status: 400, error: "End date must be after start date" };
                 }
             }
@@ -127,16 +127,16 @@ class InfringementService {
         const isTimeBased = TIME_BASED_TYPES.includes(infringement.type);
 
         if (isTimeBased) {
-            if (startDate && !moment(startDate).isValid()) {
+            if (startDate && !dayjs(startDate).isValid()) {
                 throw { status: 400, error: "Invalid start date format" };
             }
 
             if (endDate) {
-                if (!moment(endDate).isValid()) {
+                if (!dayjs(endDate).isValid()) {
                     throw { status: 400, error: "Invalid end date format" };
                 }
 
-                if (startDate && moment(endDate).isBefore(moment(startDate))) {
+                if (startDate && dayjs(endDate).isBefore(dayjs(startDate))) {
                     throw { status: 400, error: "End date must be after start date" };
                 }
             }

@@ -1,6 +1,6 @@
 import { Badge, Divider, Group, Modal, ScrollArea, Stack, Text } from "@mantine/core";
 import { INotificationJobListItem } from "../../../interfaces/NotificationJob";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { CSSProperties } from "react";
 
 interface IProps {
@@ -56,10 +56,10 @@ export default function NotificationJobDetailModal({ job, opened, onClose }: IPr
                         Last HTTP Status: {job.lastHttpStatus ?? "N/A"}
                     </Text>
                     <Text size="sm" c="dimmed">
-                        Created: {moment(job.createdAt).format("LLL")}
+                        Created: {dayjs(job.createdAt).format("LLL")}
                     </Text>
                     <Text size="sm" c="dimmed">
-                        Updated: {moment(job.updatedAt).format("LLL")}
+                        Updated: {dayjs(job.updatedAt).format("LLL")}
                     </Text>
 
                     <Divider />

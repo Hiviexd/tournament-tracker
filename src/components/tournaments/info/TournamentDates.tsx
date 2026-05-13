@@ -4,7 +4,7 @@ import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useEditTournament } from "../../../hooks/useTournaments";
-import moment from "moment";
+import dayjs from "../../../../utils/dayjs";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 
@@ -47,8 +47,8 @@ export default function TournamentDates({ tournament }: IProps) {
             );
         }
 
-        const start = tournament.startDate ? moment(tournament.startDate).format("MMMM D, YYYY") : "?";
-        const end = tournament.endDate ? moment(tournament.endDate).format("MMMM D, YYYY") : "?";
+        const start = tournament.startDate ? dayjs(tournament.startDate).format("MMMM D, YYYY") : "?";
+        const end = tournament.endDate ? dayjs(tournament.endDate).format("MMMM D, YYYY") : "?";
 
         return (
             <Text size="sm" fw={700}>

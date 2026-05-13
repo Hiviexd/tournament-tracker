@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 import { IInfringement, IInfringementStatics, InfringementType, TIME_BASED_TYPES } from "../../interfaces/Infringement";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 
 const InfringementSchema = new Schema<IInfringement, IInfringementStatics>(
     {
@@ -32,7 +32,7 @@ InfringementSchema.virtual("isExpired").get(function (this: IInfringement) {
 });
 
 InfringementSchema.virtual("typeString").get(function (this: IInfringement) {
-    return _.startCase(this.type);
+    return startCase(this.type);
 });
 
 InfringementSchema.statics.findActiveForUser = async function (userId: string | Types.ObjectId): Promise<IInfringement | null> {

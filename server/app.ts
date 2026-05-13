@@ -7,7 +7,7 @@ import config from "../config.json";
 import { logger } from "./middlewares/logger";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import utils from "../utils";
+import utils from "../utils/server";
 import JobLoader from "./jobs/JobLoader";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";

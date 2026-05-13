@@ -13,12 +13,8 @@ interface ISectionProps {
     users: IUser[];
 }
 
-export default function CommitteeSection({ onSelect, showBadges = false }: IProps) {
-    const { data: users = [], isLoading } = useCommitteeUsers({
-        includeAlumni: true,
-    });
-
-    const LoadingState = () => (
+function CommitteeSectionLoadingState() {
+    return (
         <Stack gap="xl">
             {[...Array(3)].map((_, sectionIndex) => (
                 <Card key={sectionIndex} shadow="sm" p="md">
@@ -43,32 +39,53 @@ export default function CommitteeSection({ onSelect, showBadges = false }: IProp
             ))}
         </Stack>
     );
+}
 
-    const UserGrid = ({ users }: { users: IUser[] }) => (
+function CommitteeUserGrid({
+    users,
+    onSelect,
+    showBadges,
+}: {
+    users: IUser[];
+    onSelect: (user: IUser) => void;
+    showBadges: boolean;
+}) {
+    return (
         <Flex wrap="wrap" gap="md" justify="center">
             {users.map((user) => (
                 <UserCard key={user.id} user={user} onSelect={onSelect} showBadges={showBadges} />
             ))}
         </Flex>
     );
+}
 
-    const CommitteeSection = ({ title, users }: ISectionProps) => {
-        if (users.length === 0) return null;
+function CommitteeSubgroupCard({
+    title,
+    users,
+    onSelect,
+    showBadges,
+}: ISectionProps & { onSelect: (user: IUser) => void; showBadges: boolean }) {
+    if (users.length === 0) return null;
 
-        const sortedUsers = [...users].sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+    const sortedUsers = [...users].sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
 
-        return (
-            <Card shadow="sm" p="md">
-                <Stack gap="md">
-                    <Title order={3}>{title}</Title>
-                    <Divider />
-                    <UserGrid users={sortedUsers} />
-                </Stack>
-            </Card>
-        );
-    };
+    return (
+        <Card shadow="sm" p="md">
+            <Stack gap="md">
+                <Title order={3}>{title}</Title>
+                <Divider />
+                <CommitteeUserGrid users={sortedUsers} onSelect={onSelect} showBadges={showBadges} />
+            </Stack>
+        </Card>
+    );
+}
 
-    if (isLoading) return <LoadingState />;
+export default function CommitteeSection({ onSelect, showBadges = false }: IProps) {
+    const { data: users = [], isLoading } = useCommitteeUsers({
+        includeAlumni: true,
+    });
+
+    if (isLoading) return <CommitteeSectionLoadingState />;
 
     if (!Array.isArray(users)) return;
 
@@ -78,9 +95,9 @@ export default function CommitteeSection({ onSelect, showBadges = false }: IProp
 
     return (
         <Stack gap="md">
-            <CommitteeSection title="Tournament Committee" users={tcUsers} />
-            <CommitteeSection title="Contest Committee" users={ccUsers} />
-            <CommitteeSection title="Alumni" users={almUsers} />
+            <CommitteeSubgroupCard title="Tournament Committee" users={tcUsers} onSelect={onSelect} showBadges={showBadges} />
+            <CommitteeSubgroupCard title="Contest Committee" users={ccUsers} onSelect={onSelect} showBadges={showBadges} />
+            <CommitteeSubgroupCard title="Alumni" users={almUsers} onSelect={onSelect} showBadges={showBadges} />
         </Stack>
     );
 }

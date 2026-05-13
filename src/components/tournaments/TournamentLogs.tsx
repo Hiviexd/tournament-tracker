@@ -2,7 +2,7 @@ import { Stack, Group, Text, Timeline, Card, Title, Collapse, Tooltip, Segmented
 import { ITournament, ITournamentReviewHistoryEntry, ReviewHistoryAction } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import MarkdownText from "../common/MarkdownText";
@@ -44,11 +44,11 @@ export default function TournamentLogs({ tournament }: IProps) {
     }
 
     const sortedLogs = hasLogs
-        ? [...tournament.logs!].sort((a, b) => moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf())
+        ? [...tournament.logs!].sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         : [];
     const sortedReviewHistory = hasReviewHistory
         ? [...(tournament.reviewHistory as ITournamentReviewHistoryEntry[])].sort(
-              (a, b) => moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf(),
+              (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
           )
         : [];
 
@@ -95,10 +95,10 @@ export default function TournamentLogs({ tournament }: IProps) {
                                                         </Group>
                                                     }>
                                                     <Tooltip
-                                                        label={moment(log.createdAt).format("LLL")}
+                                                        label={dayjs(log.createdAt).format("LLL")}
                                                         position="right">
                                                         <Text size="xs" c="dimmed" w="fit-content">
-                                                            {moment(log.createdAt).fromNow()}
+                                                            {dayjs(log.createdAt).fromNow()}
                                                         </Text>
                                                     </Tooltip>
                                                 </Timeline.Item>
@@ -140,10 +140,10 @@ export default function TournamentLogs({ tournament }: IProps) {
                                                         </Group>
                                                     }>
                                                     <Tooltip
-                                                        label={moment(entry.createdAt).format("LLL")}
+                                                        label={dayjs(entry.createdAt).format("LLL")}
                                                         position="right">
                                                         <Text size="xs" c="dimmed" w="fit-content">
-                                                            {moment(entry.createdAt).fromNow()}
+                                                            {dayjs(entry.createdAt).fromNow()}
                                                         </Text>
                                                     </Tooltip>
                                                 </Timeline.Item>

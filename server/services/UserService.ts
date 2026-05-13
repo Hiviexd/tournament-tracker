@@ -1,5 +1,7 @@
 import User from "../models/userModel";
-import _ from "lodash";
+import isEqual from "lodash/isEqual";
+import sampleSize from "lodash/sampleSize";
+import shuffle from "lodash/shuffle";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
 import OsuApiService from "./OsuApiService";
@@ -51,7 +53,7 @@ class UserService {
                 saveTrigger = true;
             }
 
-            if (!_.isEqual(user.country, country)) {
+            if (!isEqual(user.country, country)) {
                 user.country = country;
                 saveTrigger = true;
             }
@@ -147,9 +149,9 @@ class UserService {
         }
 
         // shuffle users to ensure random pairings
-        const shuffledUsers = _.shuffle(users);
+        const shuffledUsers = shuffle(users);
 
-        selectedUsers.push(..._.sampleSize(shuffledUsers, selectedUsers.length === 0 ? 2 : 1));
+        selectedUsers.push(...sampleSize(shuffledUsers, selectedUsers.length === 0 ? 2 : 1));
 
         await User.updateMany({ _id: { $in: selectedUsers.map((user) => user._id) } }, { $set: { inBag: false } });
 

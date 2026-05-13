@@ -1,7 +1,7 @@
 import { Timeline, Text, Stack, Title } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IUserHistory } from "../../../../interfaces/User";
-import moment from "moment";
+import dayjs from "../../../../utils/dayjs";
 
 interface IProps {
     history: IUserHistory[];
@@ -30,7 +30,7 @@ export default function UserHistory({ history }: IProps) {
                                 {entry.kind === "join" ? "Joined" : "Left"} {entry.group.toUpperCase()}
                             </Text>
                             <Text size="xs" c="dimmed">
-                                {moment(entry.date).format("LL")}
+                                {dayjs(entry.date).format("LL")}
                             </Text>
                         </Timeline.Item>
                     ))}

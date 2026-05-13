@@ -138,8 +138,8 @@ const LoadingState = () => (
         </Stack>
 
         {/* Reports/Tickets Section Skeleton */}
-        {Array.from({ length: 2 }).map(() => (
-            <Stack gap="md">
+        {Array.from({ length: 2 }).map((_, sectionIndex) => (
+            <Stack key={`reports-tickets-skel-${sectionIndex}`} gap="md">
                 <Divider />
                 <Skeleton height={24} width="20%" />
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">

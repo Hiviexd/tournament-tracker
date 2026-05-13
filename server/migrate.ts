@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import config from "../config.json";
-import utils from "../utils";
+import utils from "../utils/server";
 import MigrationRunner from "./migrations/MigrationRunner";
 
 // Return the "new" updated object by default when doing findByIdAndUpdate

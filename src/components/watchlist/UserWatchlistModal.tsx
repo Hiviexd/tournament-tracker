@@ -17,6 +17,19 @@ interface IProps {
     onClose: () => void;
 }
 
+function UserWatchlistLoadingState() {
+    return (
+        <Stack>
+            <Skeleton height={78} radius="md" mb="md" />
+            <Skeleton height={50} radius="sm" mb="md" />
+            <Skeleton height={28} width={120} mb="xs" />
+            <Skeleton height={100} radius="sm" mb="md" />
+            <Skeleton height={100} radius="sm" mb="md" />
+            <Skeleton height={100} radius="sm" />
+        </Stack>
+    );
+}
+
 export default function UserWatchlistModal({ userId, onClose }: IProps) {
     const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -90,22 +103,11 @@ export default function UserWatchlistModal({ userId, onClose }: IProps) {
         }
     }, [userId, isLoading, fetchedUser, shouldFetch, selectedUserMatches, handleClose, setSelectedUser]);
 
-    const LoadingState = () => (
-        <Stack>
-            <Skeleton height={78} radius="md" mb="md" />
-            <Skeleton height={50} radius="sm" mb="md" />
-            <Skeleton height={28} width={120} mb="xs" />
-            <Skeleton height={100} radius="sm" mb="md" />
-            <Skeleton height={100} radius="sm" mb="md" />
-            <Skeleton height={100} radius="sm" />
-        </Stack>
-    );
-
     return (
         <>
             <Modal opened={opened} onClose={handleClose} title="User Watchlist" size="xl">
                 {isLoading ? (
-                    <LoadingState />
+                    <UserWatchlistLoadingState />
                 ) : displayedUser ? (
                     <Stack gap="md">
                         <UserCard user={displayedUser} static fullWidth />

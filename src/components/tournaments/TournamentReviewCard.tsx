@@ -2,7 +2,7 @@ import { Card, Stack, Badge, Text, Box } from "@mantine/core";
 import { IReview } from "../../../interfaces/Review";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 import { ITournament } from "../../../interfaces/Tournament";
 import utils from "../../../utils";
 import { useAtom } from "jotai";
@@ -73,7 +73,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                     <Stack gap="md">
                         <UserDisplay {...getUserDisplayProps()} />
                         <Badge size="lg" variant="light" color={getVoteColor()}>
-                            {_.startCase(review.vote)}
+                            {startCase(review.vote)}
                         </Badge>
                         <Stack gap="xs">
                             {!shouldHideChecklist() && (
@@ -113,7 +113,7 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
                 <Box display={{ base: "none", sm: "block" }}>
                     <Box style={{ float: "right", marginLeft: "var(--mantine-spacing-md)" }}>
                         <Badge size="lg" variant="light" color={getVoteColor()}>
-                            {_.startCase(review.vote)}
+                            {startCase(review.vote)}
                         </Badge>
                     </Box>
                     <Box>

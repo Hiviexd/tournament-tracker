@@ -1,6 +1,6 @@
 import { IUser, UserListQuery } from "../../interfaces/User";
 import User from "../models/userModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import UserService from "../services/UserService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";

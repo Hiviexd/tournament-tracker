@@ -1,7 +1,7 @@
 import { ApiScope, IApiKey } from "../../interfaces/ApiKey";
 import User from "../models/userModel";
 import ApiKey from "../models/apiKeyModel";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import { IUser } from "../../interfaces/User";
 import { Request } from "express";
 

@@ -12,6 +12,59 @@ import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
 
+function TicketsListLoadingState() {
+    return (
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+            {Array.from({ length: 12 }).map((_, i) => (
+                <Card
+                    key={i}
+                    shadow="sm"
+                    p="lg"
+                    radius="md"
+                    className="ticket-card"
+                    style={{
+                        "--card-status-color": "var(--mantine-color-primary-6)",
+                    }}>
+                    <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
+                        <Stack gap="xs">
+                            <Skeleton height={24} width="80%" />
+                            <Skeleton height={16} width={120} />
+                        </Stack>
+                        <Group mt="auto">
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={40} radius="xl" />
+                            <Skeleton height={22} width={80} radius="xl" />
+                        </Group>
+                    </Stack>
+                </Card>
+            ))}
+        </SimpleGrid>
+    );
+}
+
+function TicketsListEmptyState({
+    type,
+    hasError,
+    showAdjustFilters,
+}: {
+    type: string;
+    hasError: boolean;
+    showAdjustFilters: boolean;
+}) {
+    return (
+        <Stack align="center" justify="center" h={200}>
+            <FontAwesomeIcon icon={type === "ticket" ? "paper-plane" : "flag"} size="2x" style={{ opacity: 0.5 }} />
+            <Text size="lg" c="dimmed">
+                {hasError ? `Error loading ${type}s` : `No ${type}s found...`}
+            </Text>
+            <Text size="sm" c="dimmed">
+                {hasError ? "Try refreshing the page" : showAdjustFilters ? "Try adjusting your filters" : ""}
+            </Text>
+        </Stack>
+    );
+}
+
 interface FilterValues {
     title: string;
     content: string;
@@ -116,51 +169,6 @@ export default function TicketsListPage() {
         setQueryState({ page: newPage });
     };
 
-    const LoadingState = () => (
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-            {Array.from({ length: 12 }).map((_, i) => (
-                <Card
-                    key={i}
-                    shadow="sm"
-                    p="lg"
-                    radius="md"
-                    className="ticket-card"
-                    style={{
-                        "--card-status-color": "var(--mantine-color-primary-6)",
-                    }}>
-                    <Stack gap="md" justify="space-between" style={{ height: "100%" }}>
-                        <Stack gap="xs">
-                            <Skeleton height={24} width="80%" />
-                            <Skeleton height={16} width={120} />
-                        </Stack>
-                        <Group mt="auto">
-                            <Skeleton height={22} width={40} radius="xl" />
-                            <Skeleton height={22} width={40} radius="xl" />
-                            <Skeleton height={22} width={40} radius="xl" />
-                            <Skeleton height={22} width={80} radius="xl" />
-                        </Group>
-                    </Stack>
-                </Card>
-            ))}
-        </SimpleGrid>
-    );
-
-    const EmptyState = ({ hasError }: { hasError: boolean }) => (
-        <Stack align="center" justify="center" h={200}>
-            <FontAwesomeIcon icon={type === "ticket" ? "paper-plane" : "flag"} size="2x" style={{ opacity: 0.5 }} />
-            <Text size="lg" c="dimmed">
-                {hasError ? `Error loading ${type}s` : `No ${type}s found...`}
-            </Text>
-            <Text size="sm" c="dimmed">
-                {hasError
-                    ? "Try refreshing the page"
-                    : type === "ticket" || user?.isCommittee
-                    ? "Try adjusting your filters"
-                    : ""}
-            </Text>
-        </Stack>
-    );
-
     return (
         <Stack gap="md">
             <TicketsFilters values={filters} onChange={handleFilterChange} type={type} />
@@ -168,9 +176,13 @@ export default function TicketsListPage() {
             <Divider />
 
             {isLoading ? (
-                <LoadingState />
+                <TicketsListLoadingState />
             ) : !data || data.tickets.length === 0 ? (
-                <EmptyState hasError={!!error} />
+                <TicketsListEmptyState
+                    type={type}
+                    hasError={!!error}
+                    showAdjustFilters={type === "ticket" || !!user?.isCommittee}
+                />
             ) : (
                 <Stack gap="md">
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">

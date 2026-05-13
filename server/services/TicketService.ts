@@ -1,6 +1,6 @@
 import { ITicket } from "../../interfaces/Ticket";
 import { IUser } from "../../interfaces/User";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import Message from "../models/messageModel";
 
 class TicketService {

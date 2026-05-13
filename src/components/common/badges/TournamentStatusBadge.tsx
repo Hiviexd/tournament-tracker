@@ -2,7 +2,7 @@ import { Badge, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TournamentStatus } from "../../../../interfaces/Tournament";
 import utils from "../../../../utils";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 
 interface IProps {
     status: TournamentStatus;
@@ -11,7 +11,7 @@ interface IProps {
 }
 
 export default function TournamentStatusBadge({ status, variant = "light", size }: IProps) {
-    const statusString = status === "reviewOngoing" ? "Under Review" : _.startCase(status);
+    const statusString = status === "reviewOngoing" ? "Under Review" : startCase(status);
     const statusStyles = utils.getTournamentStatusStyles(status);
 
     return (

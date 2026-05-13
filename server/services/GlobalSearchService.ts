@@ -9,7 +9,7 @@ import Resource from "../models/resourceModel";
 import { IResource } from "../../interfaces/Resource";
 import Article from "../models/articleModel";
 import { IArticle } from "../../interfaces/Article";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 const DEFAULT_LIMIT = 5 as const;
 

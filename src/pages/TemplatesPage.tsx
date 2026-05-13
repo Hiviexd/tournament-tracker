@@ -9,6 +9,44 @@ import TemplateEditModal from "../components/templates/TemplateEditModal";
 import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 
+function TemplatesLoadingState() {
+    return (
+        <Stack gap="lg">
+            {[1, 2, 3].map((i) => (
+                <Card key={i} shadow="sm" p="lg">
+                    <Stack gap="md">
+                        <Skeleton height={24} width="30%" />
+                        <Divider />
+                        {[1, 2, 3].map((j) => (
+                            <Group key={j} justify="space-between">
+                                <Stack gap="xs" style={{ flex: 1 }}>
+                                    <Skeleton height={20} width="40%" />
+                                    <Skeleton height={16} width="80%" />
+                                </Stack>
+                                <Skeleton height={32} width={32} circle />
+                            </Group>
+                        ))}
+                    </Stack>
+                </Card>
+            ))}
+        </Stack>
+    );
+}
+
+function TemplatesEmptyState() {
+    return (
+        <Stack align="center" justify="center" h={200}>
+            <FontAwesomeIcon icon="comment-dots" size="2x" style={{ opacity: 0.5 }} />
+            <Text size="lg" c="dimmed">
+                No templates found
+            </Text>
+            <Text size="sm" c="dimmed">
+                Create your first template to get started
+            </Text>
+        </Stack>
+    );
+}
+
 export default function TemplatesPage() {
     const [user] = useAtom(loggedInUserAtom);
     const { data: templates = [], isLoading } = useTemplates(user?.isCommittee ?? false);
@@ -43,40 +81,6 @@ export default function TemplatesPage() {
             templates: (categoryTemplates as ITemplate[]).sort((a, b) => a.name.localeCompare(b.name)),
         }));
 
-    const LoadingState = () => (
-        <Stack gap="lg">
-            {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg">
-                    <Stack gap="md">
-                        <Skeleton height={24} width="30%" />
-                        <Divider />
-                        {[1, 2, 3].map((j) => (
-                            <Group key={j} justify="space-between">
-                                <Stack gap="xs" style={{ flex: 1 }}>
-                                    <Skeleton height={20} width="40%" />
-                                    <Skeleton height={16} width="80%" />
-                                </Stack>
-                                <Skeleton height={32} width={32} circle />
-                            </Group>
-                        ))}
-                    </Stack>
-                </Card>
-            ))}
-        </Stack>
-    );
-
-    const EmptyState = () => (
-        <Stack align="center" justify="center" h={200}>
-            <FontAwesomeIcon icon="comment-dots" size="2x" style={{ opacity: 0.5 }} />
-            <Text size="lg" c="dimmed">
-                No templates found
-            </Text>
-            <Text size="sm" c="dimmed">
-                Create your first template to get started
-            </Text>
-        </Stack>
-    );
-
     return (
         <Stack gap="lg">
             <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
@@ -98,9 +102,9 @@ export default function TemplatesPage() {
             <Divider />
 
             {isLoading ? (
-                <LoadingState />
+                <TemplatesLoadingState />
             ) : templates.length === 0 ? (
-                <EmptyState />
+                <TemplatesEmptyState />
             ) : (
                 <Stack gap="lg">
                     {sortedCategories.map(({ category, templates }) => (

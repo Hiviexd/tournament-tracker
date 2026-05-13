@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import _ from "lodash";
-import moment from "moment";
+import startCase from "lodash/startCase";
+import dayjs from "../../utils/dayjs";
 import { InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "../../interfaces/Infringement";
 import InfringementService from "../services/InfringementService";
 import LogService from "../services/LogService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import config from "../../config.json";
 
 class InfringementsController {
@@ -52,7 +52,7 @@ class InfringementsController {
 
                 await LogService.generate(
                     req.session.mongoId!,
-                    `Added **${_.startCase(type)}** infringement to [**${result.user.username}**](${config.baseUrl}/watchlist?user=${result.user.osuId})`,
+                    `Added **${startCase(type)}** infringement to [**${result.user.username}**](${config.baseUrl}/watchlist?user=${result.user.osuId})`,
                     "user",
                 );
             }
@@ -86,8 +86,8 @@ class InfringementsController {
                 .setColor(isIndefinite ? DiscordUtils.webhookColors.darkRed : typeColorMap[type])
                 .setDescription(
                     addedInfringements.length === 1
-                        ? `Added **${_.startCase(type)}** to [**${firstUser.username}**](${config.baseUrl}/watchlist?user=${firstUser.osuId})`
-                        : `Added **${_.startCase(type)}** infringements to **${addedInfringements.length} users**.`,
+                        ? `Added **${startCase(type)}** to [**${firstUser.username}**](${config.baseUrl}/watchlist?user=${firstUser.osuId})`
+                        : `Added **${startCase(type)}** infringements to **${addedInfringements.length} users**.`,
                 );
 
             if (addedInfringements.length === 1) {
@@ -104,10 +104,10 @@ class InfringementsController {
 
             if (isTimeBased) {
                 if (startDate && endDate) {
-                    const humanizedDuration = moment.duration(moment(endDate).diff(moment(startDate))).humanize();
+                    const humanizedDuration = dayjs.duration(dayjs(endDate).diff(dayjs(startDate))).humanize();
                     embed.addField(
                         "Duration",
-                        `${moment(startDate).format("MMM D, YYYY")} – ${moment(endDate).format(
+                        `${dayjs(startDate).format("MMM D, YYYY")} – ${dayjs(endDate).format(
                             "MMM D, YYYY",
                         )} (${humanizedDuration})`,
                     );

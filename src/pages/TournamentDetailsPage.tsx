@@ -12,19 +12,8 @@ import { useAtom } from "jotai";
 import MappoolCompliancePage from "./MappoolCompliancePage";
 import { useDocumentTitle } from "@mantine/hooks";
 
-export default function TournamentDetailsPage() {
-    const [user] = useAtom(loggedInUserAtom);
-    const { tournamentId } = useParams();
-    const { data, isLoading } = useTournament(tournamentId!);
-    const tournament = data?.tournament;
-    const reports = data?.reports;
-    const votings = data?.votings;
-
-    useDocumentTitle(
-        tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker"
-    );
-
-    const LoadingState = () => (
+function TournamentDetailsLoadingState() {
+    return (
         <Stack gap="md">
             <Card shadow="sm" p={0} radius="md">
                 <Skeleton height={200} radius="md" mb="md" /> {/* Banner */}
@@ -72,11 +61,24 @@ export default function TournamentDetailsPage() {
             </Card>
         </Stack>
     );
+}
+
+export default function TournamentDetailsPage() {
+    const [user] = useAtom(loggedInUserAtom);
+    const { tournamentId } = useParams();
+    const { data, isLoading } = useTournament(tournamentId!);
+    const tournament = data?.tournament;
+    const reports = data?.reports;
+    const votings = data?.votings;
+
+    useDocumentTitle(
+        tournament?.name ? `${tournament.name} | Tournament Details` : "Tournament Details | Tournament Tracker"
+    );
 
     return (
         <>
             {isLoading ? (
-                <LoadingState />
+                <TournamentDetailsLoadingState />
             ) : !tournament || tournament.error ? (
                 <EmptyState
                     icon="trophy"

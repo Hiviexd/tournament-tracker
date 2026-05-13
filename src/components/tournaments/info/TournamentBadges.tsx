@@ -154,10 +154,8 @@ export default function TournamentBadges({ tournament }: IProps) {
                                     backgroundColor: "var(--mantine-color-primary-11)",
                                     borderRadius: "0 0 6px 6px",
                                 }}>
-                                {Array(9)
-                                    .fill(0)
-                                    .map((_, i) => (
-                                        <Skeleton key={i} height={40} width={86} />
+                                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((slot) => (
+                                        <Skeleton key={`badge-skel-${slot}`} height={40} width={86} />
                                     ))}
                             </div>
                         </div>
@@ -234,7 +232,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                         {badges.length > 0 && (
                             <Group gap="xs">
                                 {badges.map((badge, index) => (
-                                    <BadgeImage key={index} badge={badge} index={index} />
+                                    <BadgeImage key={badge.url} badge={badge} index={index} />
                                 ))}
                             </Group>
                         )}
@@ -265,7 +263,7 @@ export default function TournamentBadges({ tournament }: IProps) {
                 ) : badges.length > 0 ? (
                     <Group gap="xs">
                         {badges.map((badge, index) => (
-                            <BadgeImage key={index} badge={badge} index={index} />
+                            <BadgeImage key={badge.url} badge={badge} index={index} />
                         ))}
                     </Group>
                 ) : (

@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Box, Tooltip, Stack, Text } from "@mantine/core";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { LocalBadge } from "../../hooks/useBadgePreviewer";
 import CountryFlag from "../common/CountryFlag";
 import { IOsuUser } from "../../../interfaces/OsuApi";
@@ -86,7 +86,7 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                             <Stack gap={2}>
                                 <Text size="sm">{badge.description}</Text>
                                 <Text size="xs" c="#dcaec3">
-                                    {moment(badge.awarded_at).format("D MMMM YYYY")}
+                                    {dayjs(badge.awarded_at).format("D MMMM YYYY")}
                                 </Text>
                             </Stack>
                         }

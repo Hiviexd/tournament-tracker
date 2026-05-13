@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InfringementType } from "../../../interfaces/Infringement";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 
 interface FilterValues {
     type: InfringementType | "";
@@ -17,11 +17,11 @@ interface IProps {
 
 export default function WatchlistFilters({ values, onChange, onUserSelect }: IProps) {
     const infringementTypeOptions = [
-        { value: InfringementType.NOTE, label: _.startCase(InfringementType.NOTE) },
-        { value: InfringementType.WARNING, label: _.startCase(InfringementType.WARNING) },
-        { value: InfringementType.TOURNAMENT_BAN, label: _.startCase(InfringementType.TOURNAMENT_BAN) },
-        { value: InfringementType.HOSTING_BAN, label: _.startCase(InfringementType.HOSTING_BAN) },
-        { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
+        { value: InfringementType.NOTE, label: startCase(InfringementType.NOTE) },
+        { value: InfringementType.WARNING, label: startCase(InfringementType.WARNING) },
+        { value: InfringementType.TOURNAMENT_BAN, label: startCase(InfringementType.TOURNAMENT_BAN) },
+        { value: InfringementType.HOSTING_BAN, label: startCase(InfringementType.HOSTING_BAN) },
+        { value: InfringementType.STAFFING_BAN, label: startCase(InfringementType.STAFFING_BAN) },
     ];
 
     const handleUserChange = (user: IUser | null) => {

@@ -8,7 +8,7 @@ import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import LogService from "../services/LogService";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import { Request, Response } from "express";
 import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";

@@ -57,37 +57,8 @@ function hasMarkdownHeadings(content?: string) {
     return false;
 }
 
-export default function ArticlePage() {
-    const { slug } = useParams<{ slug: string }>();
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [user] = useAtom(loggedInUserAtom);
-
-    const articleSlug = PREDEFINED_ARTICLE_SLUGS[location.pathname] || slug;
-
-    const { data: article, isLoading, isError } = useArticle(articleSlug!);
-    const { mutate: editArticle, isPending: isEditing } = useEditArticle(articleSlug!);
-    const deleteArticleMutation = useDeleteArticle(articleSlug!);
-    const confirmModal = useConfirmModal();
-
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editTitle, setEditTitle] = useState("");
-    const [editContent, setEditContent] = useState("");
-    const reinitializeTocRef = useRef<() => void>(() => {});
-
-    useDocumentTitle(article?.title ? `${article.title} | Article` : "Article | Tournament Tracker");
-
-    // disable the title if the article is in the predefined slugs
-    const isPredefined = Object.keys(PREDEFINED_ARTICLE_SLUGS).includes(location.pathname);
-    const showToc = article ? hasMarkdownHeadings(article.content) : false;
-
-    useLayoutEffect(() => {
-        if (article?.content) {
-            reinitializeTocRef.current();
-        }
-    }, [article?.content]);
-
-    const LoadingState = () => (
+function ArticleLoadingState() {
+    return (
         <Stack gap="lg">
             <Grid gutter="lg" align="flex-start">
                 <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
@@ -118,9 +89,40 @@ export default function ArticlePage() {
             </Grid>
         </Stack>
     );
+}
+
+export default function ArticlePage() {
+    const { slug } = useParams<{ slug: string }>();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [user] = useAtom(loggedInUserAtom);
+
+    const articleSlug = PREDEFINED_ARTICLE_SLUGS[location.pathname] || slug;
+
+    const { data: article, isLoading, isError } = useArticle(articleSlug!);
+    const { mutate: editArticle, isPending: isEditing } = useEditArticle(articleSlug!);
+    const deleteArticleMutation = useDeleteArticle(articleSlug!);
+    const confirmModal = useConfirmModal();
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
+    const [editContent, setEditContent] = useState("");
+    const reinitializeTocRef = useRef<() => void>(() => {});
+
+    useDocumentTitle(article?.title ? `${article.title} | Article` : "Article | Tournament Tracker");
+
+    // disable the title if the article is in the predefined slugs
+    const isPredefined = Object.keys(PREDEFINED_ARTICLE_SLUGS).includes(location.pathname);
+    const showToc = article ? hasMarkdownHeadings(article.content) : false;
+
+    useLayoutEffect(() => {
+        if (article?.content) {
+            reinitializeTocRef.current();
+        }
+    }, [article?.content]);
 
     if (isLoading) {
-        return <LoadingState />;
+        return <ArticleLoadingState />;
     }
 
     if (isError || !article || article.error) {

@@ -8,7 +8,7 @@ import CommitteeSection from "../components/users/CommitteeSection";
 import { IUser } from "@interfaces/User";
 import { Link } from "react-router-dom";
 import { useRandomQuote } from "../hooks/useQuotes";
-import moment from "moment";
+import dayjs from "../../utils/dayjs";
 
 interface Feature {
     icon: IconProp;
@@ -167,7 +167,7 @@ export default function HomePage() {
                             Here's some wisdom from one of them:
                         </Text>
                         <Text size="sm" c="dimmed" ta="center" maw={400} mx="auto">
-                            {quote?.quote} — {quote?.author?.username}, {moment(quote?.createdAt).format("YYYY")}
+                            {quote?.quote} — {quote?.author?.username}, {dayjs(quote?.createdAt).format("YYYY")}
                         </Text>
                     </Stack>
                 ) : null}

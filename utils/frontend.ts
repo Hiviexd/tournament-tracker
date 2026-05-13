@@ -14,7 +14,8 @@ import { ITournament, TournamentStatus } from "../interfaces/Tournament";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
-import moment from "moment";
+import dayjs from "./dayjs";
+import type { ConfigType } from "dayjs";
 
 export interface ApiResponse<T = any> {
     data?: T;
@@ -303,19 +304,19 @@ export const handleApiError = (error: any) => {
 
 /**
  * Convert a date to a short relative format (e.g., "2d ago", "5h ago", "30s ago")
- * @param date The date to convert (can be Date, string, or moment object)
+ * @param date The date to convert (can be Date, string, or Dayjs-parsable value)
  * @param now Optional current date/time for comparison (defaults to current time)
  * @returns Short relative time string
  */
-export function getShortRelativeTime(date: Date | string | moment.Moment, now?: Date | moment.Moment): string {
-    const targetMoment = moment(date);
-    const nowMoment = now ? moment(now) : moment();
+export function getShortRelativeTime(date: ConfigType, now?: ConfigType): string {
+    const target = dayjs(date);
+    const nowD = now ? dayjs(now) : dayjs();
 
-    if (!targetMoment.isValid()) {
+    if (!target.isValid()) {
         return "invalid date";
     }
 
-    const diffMs = nowMoment.diff(targetMoment);
+    const diffMs = nowD.diff(target);
     const isPast = diffMs > 0;
     const absDiffMs = Math.abs(diffMs);
 

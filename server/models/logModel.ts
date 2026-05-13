@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ILog } from "../../interfaces/Log";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 
 const LogSchema = new Schema<ILog>(
     {
@@ -13,7 +13,7 @@ const LogSchema = new Schema<ILog>(
 
 LogSchema.virtual("categoryString").get(function (this: ILog) {
     if (this.category === "api_key") return "API Key";
-    return _.startCase(this.category);
+    return startCase(this.category);
 });
 
 const Log = mongoose.model<ILog>("Log", LogSchema);

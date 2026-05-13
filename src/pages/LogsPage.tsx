@@ -6,6 +6,35 @@ import LogsFilters from "../components/logs/LogsFilters";
 import LogsTable from "../components/logs/LogsTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+function LogsLoadingState() {
+    return (
+        <Stack gap="md">
+            {
+                <Card shadow="sm" p="lg">
+                    <Skeleton height={32} width="100%" mb="lg" />
+                    {[...Array(10)].map((_, index) => (
+                        <Skeleton key={index} height={24} width="100%" mb="xs" />
+                    ))}
+                </Card>
+            }
+        </Stack>
+    );
+}
+
+function LogsEmptyState({ hasError }: { hasError: boolean }) {
+    return (
+        <Stack align="center" justify="center" h={200}>
+            <FontAwesomeIcon icon="history" size="2x" style={{ opacity: 0.5 }} />
+            <Text size="lg" c="dimmed">
+                {hasError ? "Error loading logs" : "No logs found"}
+            </Text>
+            <Text size="sm" c="dimmed">
+                {hasError ? `Try refreshing the page` : "Try adjusting your filters"}
+            </Text>
+        </Stack>
+    );
+}
+
 interface FilterValues {
     user: string;
     category: LogCategory;
@@ -69,41 +98,14 @@ export default function LogsPage() {
         content: queryState.content
     });
 
-    const LoadingState = () => (
-        <Stack gap="md">
-            {
-                <Card shadow="sm" p="lg">
-                    <Skeleton height={32} width="100%" mb="lg" />
-                    {[...Array(10)].map((_, index) => (
-                        <Skeleton key={index} height={24} width="100%" mb="xs" />
-                    ))}
-                </Card>
-            }
-        </Stack>
-    );
-
-    const EmptyState = ({ hasError }: { hasError: boolean }) => {
-        return (
-            <Stack align="center" justify="center" h={200}>
-                <FontAwesomeIcon icon="history" size="2x" style={{ opacity: 0.5 }} />
-                <Text size="lg" c="dimmed">
-                    {hasError ? "Error loading logs" : "No logs found"}
-                </Text>
-                <Text size="sm" c="dimmed">
-                    {hasError ? `Try refreshing the page` : "Try adjusting your filters"}
-                </Text>
-            </Stack>
-        );
-    };
-
     return (
         <Stack gap="md">
             <LogsFilters values={filters} onChange={handleFilterChange} />
 
             {isLoading ? (
-                <LoadingState />
+                <LogsLoadingState />
             ) : !data || data.logs.length === 0 ? (
-                <EmptyState hasError={!!error} />
+                <LogsEmptyState hasError={!!error} />
             ) : (
                 <LogsTable logs={data.logs} />
             )}

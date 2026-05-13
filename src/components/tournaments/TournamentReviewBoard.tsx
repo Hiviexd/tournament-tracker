@@ -5,7 +5,7 @@ import UserLink from "../common/UserLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import config from "../../../config.json";
 import DateBadge from "../common/badges/DateBadge";
-import _ from "lodash";
+import truncate from "lodash/truncate";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 
 interface IProps {
@@ -70,7 +70,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
                                     <Table.Td>
                                         <Text fw={500} truncate>
                                             <Link to={`/tournaments/${tournament.id}`}>
-                                                {_.truncate(tournament.name, { length: 45 })}
+                                                {truncate(tournament.name, { length: 45 })}
                                             </Link>
                                         </Text>
                                     </Table.Td>

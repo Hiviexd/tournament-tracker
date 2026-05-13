@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { IOsuBotMessage } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import OsuApiService from "./OsuApiService";
 import NotificationDispatchService from "./NotificationDispatchService";
 

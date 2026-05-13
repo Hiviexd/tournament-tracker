@@ -1,6 +1,6 @@
 import { Badge, Tooltip, type BadgeVariant, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../../../utils/dayjs";
 import utils from "../../../../utils";
 
 interface IDateBadgeProps {
@@ -24,7 +24,7 @@ export default function DateBadge({
 }: IDateBadgeProps) {
     const getColor = () => {
         if (staticColor) return "gray";
-        const daysOld = moment().diff(moment(date), "days");
+        const daysOld = dayjs().diff(dayjs(date), "days");
 
         if (daysOld >= dangerAge) return "danger";
         if (daysOld >= warningAge) return "warning";
@@ -32,7 +32,7 @@ export default function DateBadge({
     };
 
     return (
-        <Tooltip label={moment(date).format("LLL")}>
+        <Tooltip label={dayjs(date).format("LLL")}>
             <Badge variant={variant} color={color || getColor()} size={size}>
                 <FontAwesomeIcon icon="clock" /> {utils.getShortRelativeTime(date)}
             </Badge>

@@ -4,7 +4,7 @@ import config from "../../config.json";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
-import utils from "../../utils";
+import utils from "../../utils/server";
 import LogService from "../services/LogService";
 import { IUser } from "../../interfaces/User";
 

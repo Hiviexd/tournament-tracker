@@ -24,7 +24,7 @@ import { IUser } from "../../../interfaces/User";
 import { useSnoozeTicket, useToggleStatus, useUpdateThreadId } from "../../hooks/useTickets";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { useState } from "react";
 import config from "../../../config.json";
 import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
@@ -58,7 +58,7 @@ export default function TicketInfo({ ticket }: IProps) {
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";
 
-        const updatedDays = moment().diff(moment(ticket.lastResponseAt), "days");
+        const updatedDays = dayjs().diff(dayjs(ticket.lastResponseAt), "days");
         if (updatedDays >= 10) return "danger";
         if (updatedDays >= 7) return "warning";
         return "success";
@@ -279,7 +279,7 @@ export default function TicketInfo({ ticket }: IProps) {
                                 disabled={ticket.isSnoozed}
                                 leftSection={<FontAwesomeIcon icon="moon" />}>
                                 {ticket.isSnoozed
-                                    ? `Snoozed until ${moment(ticket.snoozedUntil).format("MMM Do, YYYY")}`
+                                    ? `Snoozed until ${dayjs(ticket.snoozedUntil).format("MMM Do, YYYY")}`
                                     : "Snooze Reminders"}
                             </Button>
                         </Group>

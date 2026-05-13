@@ -8,11 +8,11 @@ import { useAddInfringement } from "../../hooks/useInfringements";
 import { InfringementType, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
 import { IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
-import _ from "lodash";
+import startCase from "lodash/startCase";
 import utils from "../../../utils";
 import { useConfirmModal } from "../../hooks/useModals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 
 const DURATION_PRESETS = [
     { label: "1 month", months: 1 },
@@ -84,11 +84,11 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
     const isNonTimeBased = !TIME_BASED_TYPES.includes(form.values.type);
 
     const infringementTypeOptions = [
-        { value: InfringementType.NOTE, label: _.startCase(InfringementType.NOTE) },
-        { value: InfringementType.WARNING, label: _.startCase(InfringementType.WARNING) },
-        { value: InfringementType.TOURNAMENT_BAN, label: _.startCase(InfringementType.TOURNAMENT_BAN) },
-        { value: InfringementType.HOSTING_BAN, label: _.startCase(InfringementType.HOSTING_BAN) },
-        { value: InfringementType.STAFFING_BAN, label: _.startCase(InfringementType.STAFFING_BAN) },
+        { value: InfringementType.NOTE, label: startCase(InfringementType.NOTE) },
+        { value: InfringementType.WARNING, label: startCase(InfringementType.WARNING) },
+        { value: InfringementType.TOURNAMENT_BAN, label: startCase(InfringementType.TOURNAMENT_BAN) },
+        { value: InfringementType.HOSTING_BAN, label: startCase(InfringementType.HOSTING_BAN) },
+        { value: InfringementType.STAFFING_BAN, label: startCase(InfringementType.STAFFING_BAN) },
     ];
 
     const handleSubmit = async (values: typeof form.values) => {
@@ -152,7 +152,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
     };
 
     const applyDurationPreset = (months: number) => {
-        const mStart = form.values.startDate ? moment(form.values.startDate).startOf("day") : moment().startOf("day");
+        const mStart = form.values.startDate ? dayjs(form.values.startDate).startOf("day") : dayjs().startOf("day");
         const end = mStart.clone().add(months, "months").add(1, "day");
         form.setFieldValue("startDate", mStart.toDate());
         form.setFieldValue("isIndefinite", false);
@@ -231,7 +231,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                                 clearable
                                 minDate={
                                     form.values.startDate
-                                        ? moment(form.values.startDate).add(1, "day").toDate()
+                                        ? dayjs(form.values.startDate).add(1, "day").toDate()
                                         : undefined
                                 }
                                 {...form.getInputProps("endDate")}

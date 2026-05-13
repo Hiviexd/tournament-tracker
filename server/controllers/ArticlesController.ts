@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Article from "../models/articleModel";
 import LogService from "../services/LogService";
 import config from "../../config.json";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 class ArticlesController {
     /** GET article by slug */

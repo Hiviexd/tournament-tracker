@@ -17,6 +17,18 @@ interface IProps {
     onClose: () => void;
 }
 
+function UserDetailsModalLoadingState() {
+    return (
+        <Stack>
+            <Skeleton height={78} radius="md" mb="md" />
+            <Skeleton height={28} width={120} mb="xs" />
+            <Skeleton height={100} radius="sm" mb="md" />
+            <Skeleton height={28} width={140} mb="xs" />
+            <Skeleton height={120} radius="sm" />
+        </Stack>
+    );
+}
+
 export default function UserDetailsModal({ userId, onClose }: IProps) {
     const [loggedInUser] = useAtom(loggedInUserAtom);
 
@@ -80,20 +92,10 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
         }
     }, [userId, isLoading, fetchedUser, shouldFetch, selectedUserMatches, handleClose, setSelectedUser]);
 
-    const LoadingState = () => (
-        <Stack>
-            <Skeleton height={78} radius="md" mb="md" />
-            <Skeleton height={28} width={120} mb="xs" />
-            <Skeleton height={100} radius="sm" mb="md" />
-            <Skeleton height={28} width={140} mb="xs" />
-            <Skeleton height={120} radius="sm" />
-        </Stack>
-    );
-
     return (
         <Modal opened={opened} onClose={handleClose} title="User Details" size="xl">
             {isLoading ? (
-                <LoadingState />
+                <UserDetailsModalLoadingState />
             ) : selectedUser ? (
                 <Stack gap="md">
                     <UserCard user={selectedUser} static fullWidth />

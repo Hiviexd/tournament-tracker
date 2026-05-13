@@ -2,7 +2,7 @@
 import { Card, Group, Stack, Text, Badge, Tooltip, Anchor } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from "moment";
+import dayjs from "../../../utils/dayjs";
 import { useMemo } from "react";
 
 // Types
@@ -47,7 +47,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
     const getStatusColor = useMemo((): string => {
         if (!ticket.isActive) return "danger";
 
-        const updatedDays = moment().diff(moment(ticket.lastResponseAt), "days");
+        const updatedDays = dayjs().diff(dayjs(ticket.lastResponseAt), "days");
         if (updatedDays >= 10) return "danger";
         if (updatedDays >= 7) return "warning";
         return "success";
@@ -101,7 +101,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
 
                     {ticket.isSnoozed && (
                         <Tooltip
-                            label={`Reminders snoozed until ${moment(ticket.snoozedUntil).format("MMM Do, YYYY")}`}>
+                            label={`Reminders snoozed until ${dayjs(ticket.snoozedUntil).format("MMM Do, YYYY")}`}>
                             <Badge color="grape" variant="light">
                                 <FontAwesomeIcon icon="moon" />
                             </Badge>

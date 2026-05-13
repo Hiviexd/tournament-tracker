@@ -20,6 +20,38 @@ import VotingFilters from "../components/votings/VotingFilters";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 
+function VotingListLoadingState() {
+    return (
+        <Stack gap="md">
+            {[1, 2, 3].map((i) => (
+                <Card key={i} shadow="sm" p="lg">
+                    <Skeleton height={24} width="40%" mb="xs" />
+                    <Skeleton height={16} width="20%" mb="lg" />
+                    <Skeleton height={16} width="70%" />
+                </Card>
+            ))}
+        </Stack>
+    );
+}
+
+function VotingListEmptyState({ hasError, showCommitteeHint }: { hasError: boolean; showCommitteeHint: boolean }) {
+    return (
+        <Stack align="center" justify="center" h={200}>
+            <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
+            <Text size="lg" c="dimmed">
+                {hasError ? "Error loading votes" : "No votes found..."}
+            </Text>
+            <Text size="sm" c="dimmed">
+                {hasError
+                    ? `Try refreshing the page`
+                    : showCommitteeHint
+                    ? "Try adjusting your filters or create a new vote"
+                    : ""}
+            </Text>
+        </Stack>
+    );
+}
+
 export default function VotingListPage() {
     const [user] = useAtom(loggedInUserAtom);
     const automaticTypeFilter = getSavedPreference<boolean>("automatic_type_filter", true);
@@ -103,36 +135,6 @@ export default function VotingListPage() {
         }
     }, [data, queryState.page, setQueryState]);
 
-    const LoadingState = () => (
-        <Stack gap="md">
-            {[1, 2, 3].map((i) => (
-                <Card key={i} shadow="sm" p="lg">
-                    <Skeleton height={24} width="40%" mb="xs" />
-                    <Skeleton height={16} width="20%" mb="lg" />
-                    <Skeleton height={16} width="70%" />
-                </Card>
-            ))}
-        </Stack>
-    );
-
-    const EmptyState = ({ hasError }: { hasError: boolean }) => {
-        return (
-            <Stack align="center" justify="center" h={200}>
-                <FontAwesomeIcon icon="poll-h" size="2x" style={{ opacity: 0.5 }} />
-                <Text size="lg" c="dimmed">
-                    {hasError ? "Error loading votes" : "No votes found..."}
-                </Text>
-                <Text size="sm" c="dimmed">
-                    {hasError
-                        ? `Try refreshing the page`
-                        : user?.isCommittee
-                        ? "Try adjusting your filters or create a new vote"
-                        : ""}
-                </Text>
-            </Stack>
-        );
-    };
-
     return (
         <Stack gap="md">
             {/* Only show filters and create button for committee members */}
@@ -157,9 +159,9 @@ export default function VotingListPage() {
 
             {/* Content area */}
             {isLoading ? (
-                <LoadingState />
+                <VotingListLoadingState />
             ) : !data || data.votings.length === 0 ? (
-                <EmptyState hasError={!!error} />
+                <VotingListEmptyState hasError={!!error} showCommitteeHint={!!user?.isCommittee} />
             ) : (
                 <Stack gap="md">
                     {data.votings.map((voting: IVoting) => (

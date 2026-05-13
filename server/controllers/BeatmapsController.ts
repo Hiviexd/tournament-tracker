@@ -3,7 +3,7 @@ import BeatmapService from "../services/BeatmapService";
 import OsuApiService from "../services/OsuApiService";
 import OsuBotService from "../services/OsuBotService";
 import { IBeatmap, IBeatmapWithNotes } from "../../interfaces/OsuApi";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 /**
  * @deprecated Replaced with ComplianceController

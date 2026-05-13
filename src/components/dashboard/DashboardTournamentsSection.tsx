@@ -5,7 +5,7 @@ import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
-import _ from "lodash";
+import capitalize from "lodash/capitalize";
 import { useDisclosure } from "@mantine/hooks";
 
 interface IProps {
@@ -44,7 +44,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
         <Stack gap="md">
             <Group align="center" gap="xs">
                 <Title order={3} className="header-border-left">
-                    {_.capitalize(typeString)}
+                    {capitalize(typeString)}
                 </Title>
                 {tournamentsNeedingReview.length > 0 && (
                     <Tooltip label="Needs Your Review">
@@ -61,7 +61,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
                     </Tooltip>
                 )}
                 {otherTournaments.length > 0 && (
-                    <Tooltip label={`Other Assigned ${_.capitalize(typeString)}`}>
+                    <Tooltip label={`Other Assigned ${capitalize(typeString)}`}>
                         <Badge color="gray" variant="light">
                             {otherTournaments.length}
                         </Badge>
@@ -70,7 +70,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
                 {tournamentsNeedingReview.length === 0 &&
                     inactiveReviewerTournaments.length === 0 &&
                     otherTournaments.length === 0 && (
-                        <Tooltip label={`No ${_.capitalize(typeString)} Assigned`}>
+                        <Tooltip label={`No ${capitalize(typeString)} Assigned`}>
                             <Badge color="gray" variant="light">
                                 0
                             </Badge>
@@ -111,7 +111,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
 
                         <Stack gap="sm">
                             <Group align="center" gap="xs">
-                                <Title order={4}>Other Assigned {_.capitalize(typeString)}</Title>
+                                <Title order={4}>Other Assigned {capitalize(typeString)}</Title>
                                 <Badge color="gray" variant="light">
                                     {otherTournaments.length}
                                 </Badge>

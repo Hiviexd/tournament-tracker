@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ComplianceApiService from "../services/ComplianceApiService";
 import { ComplianceStatus, IValidationResult } from "../../interfaces/ComplianceApi";
-import utils from "../../utils";
+import utils from "../../utils/server";
 
 class ComplianceController {
     /** POST validate beatmaps */
