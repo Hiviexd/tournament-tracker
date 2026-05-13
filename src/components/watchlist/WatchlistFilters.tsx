@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InfringementType } from "../../../interfaces/Infringement";
 import { IUser } from "../../../interfaces/User";
 import UserSearch from "../common/UserSearch";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 
 interface FilterValues {
     type: InfringementType | "";

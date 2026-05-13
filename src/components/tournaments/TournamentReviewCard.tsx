@@ -2,7 +2,7 @@ import { Card, Stack, Badge, Text, Box } from "@mantine/core";
 import { IReview } from "../../../interfaces/Review";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 import { ITournament } from "../../../interfaces/Tournament";
 import utils from "../../../utils";
 import { useAtom } from "jotai";

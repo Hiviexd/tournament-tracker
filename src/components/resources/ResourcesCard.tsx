@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IResource, ResourceCategory } from "../../../interfaces/Resource";
 import UserLink from "../common/UserLink";
-import capitalize from "lodash/capitalize";
+import capitalize from "lodash/capitalize.js";
 
 const CATEGORY_ICONS: Record<ResourceCategory, IconProp> = {
     discord: ["fab", "discord"],

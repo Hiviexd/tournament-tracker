@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 import Template from "../models/templateModel";
 import LogService from "../services/LogService";
 

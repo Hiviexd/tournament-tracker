@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ITournament } from "../../interfaces/Tournament";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 import utils from "../../utils/server";
 
 const TournamentSchema = new Schema<ITournament>(

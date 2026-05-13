@@ -2,7 +2,7 @@ import { Badge, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TournamentStatus } from "../../../../interfaces/Tournament";
 import utils from "../../../../utils";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 
 interface IProps {
     status: TournamentStatus;

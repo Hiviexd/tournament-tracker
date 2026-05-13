@@ -15,5 +15,7 @@ export default defineConfig({
     clean: true,
     dts: false,
     external: ["express", "express-async-errors"],
+    /** Bundle these into dist so Node ESM never resolves extensionless package subpaths at runtime. */
+    noExternal: ["lodash", "dayjs"],
     tsconfig: "server/tsconfig.json",
 });

@@ -5,7 +5,7 @@ import TournamentCard from "../tournaments/TournamentCard";
 import { ITournament } from "../../../interfaces/Tournament";
 import { IUser } from "../../../interfaces/User";
 import EmptyState from "../common/EmptyState";
-import capitalize from "lodash/capitalize";
+import capitalize from "lodash/capitalize.js";
 import { useDisclosure } from "@mantine/hooks";
 
 interface IProps {

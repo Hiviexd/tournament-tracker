@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import isEqual from "lodash/isEqual";
+import isEqual from "lodash/isEqual.js";
 import utils from "../../utils";
 import { routes, IRoute } from "../base/header.config";
 import { ITournament } from "../../interfaces/Tournament";

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ILog } from "../../interfaces/Log";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 
 const LogSchema = new Schema<ILog>(
     {

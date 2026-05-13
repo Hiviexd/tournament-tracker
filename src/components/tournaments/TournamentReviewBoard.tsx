@@ -5,7 +5,7 @@ import UserLink from "../common/UserLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import config from "../../../config.json";
 import DateBadge from "../common/badges/DateBadge";
-import truncate from "lodash/truncate";
+import truncate from "lodash/truncate.js";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 
 interface IProps {

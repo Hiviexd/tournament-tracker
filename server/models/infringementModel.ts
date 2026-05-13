@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 import { IInfringement, IInfringementStatics, InfringementType, TIME_BASED_TYPES } from "../../interfaces/Infringement";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 
 const InfringementSchema = new Schema<IInfringement, IInfringementStatics>(
     {

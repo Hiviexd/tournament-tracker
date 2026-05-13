@@ -8,7 +8,7 @@ import { useAddInfringement } from "../../hooks/useInfringements";
 import { InfringementType, TIME_BASED_TYPES } from "../../../interfaces/Infringement";
 import { IUser } from "../../../interfaces/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 import utils from "../../../utils";
 import { useConfirmModal } from "../../hooks/useModals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

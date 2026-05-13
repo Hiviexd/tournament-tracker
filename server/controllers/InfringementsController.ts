@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import startCase from "lodash/startCase";
+import startCase from "lodash/startCase.js";
 import dayjs from "../../utils/dayjs";
 import { InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "../../interfaces/Infringement";
 import InfringementService from "../services/InfringementService";

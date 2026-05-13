@@ -10,7 +10,7 @@ import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "../../config.json";
 import utils from "../../utils/server";
 import TicketService from "../services/TicketService";
-import capitalize from "lodash/capitalize";
+import capitalize from "lodash/capitalize.js";
 import UploadService from "../services/UploadService";
 import OsuBotService from "../services/OsuBotService";
 

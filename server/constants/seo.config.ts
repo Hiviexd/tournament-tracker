@@ -1,7 +1,7 @@
 import TournamentModel from "../models/tournamentModel";
 import VotingModel from "../models/votingModel";
 import TicketModel from "../models/ticketModel";
-import capitalize from "lodash/capitalize";
+import capitalize from "lodash/capitalize.js";
 import utils from "../../utils/server";
 
 interface SEORoute {

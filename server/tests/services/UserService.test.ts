@@ -19,8 +19,8 @@ vi.mock("../../models/userModel", () => ({
     },
 }));
 
-vi.mock("lodash/sampleSize", () => ({ default: lodashAssignMocks.sampleSize }));
-vi.mock("lodash/shuffle", () => ({ default: lodashAssignMocks.shuffle }));
+vi.mock("lodash/sampleSize.js", () => ({ default: lodashAssignMocks.sampleSize }));
+vi.mock("lodash/shuffle.js", () => ({ default: lodashAssignMocks.shuffle }));
 
 const mockUser = User as any;
 

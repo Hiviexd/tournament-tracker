@@ -17,8 +17,8 @@ import { WebhookBuilder } from "./discord/WebhookBuilder";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
 import config from "../../config.json";
-import capitalize from "lodash/capitalize";
-import startCase from "lodash/startCase";
+import capitalize from "lodash/capitalize.js";
+import startCase from "lodash/startCase.js";
 import dayjs from "../../utils/dayjs";
 
 class TournamentService {

@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-import duration from "dayjs/plugin/duration";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import relativeTime from "dayjs/plugin/relativeTime";
+import advancedFormat from "dayjs/plugin/advancedFormat.js";
+import duration from "dayjs/plugin/duration.js";
+import localizedFormat from "dayjs/plugin/localizedFormat.js";
+import relativeTime from "dayjs/plugin/relativeTime.js";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);

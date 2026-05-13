@@ -16,7 +16,7 @@ import ReportsMiniSection from "../common/ReportsMiniSection";
 import VotingsMiniSection from "../common/VotingsMiniSection";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
-import capitalize from "lodash/capitalize";
+import capitalize from "lodash/capitalize.js";
 import { useNavigate } from "react-router";
 import { ITicket } from "../../../interfaces/Ticket";
 import { IVoting } from "../../../interfaces/Voting";

@@ -1,7 +1,7 @@
 import User from "../models/userModel";
-import isEqual from "lodash/isEqual";
-import sampleSize from "lodash/sampleSize";
-import shuffle from "lodash/shuffle";
+import isEqual from "lodash/isEqual.js";
+import sampleSize from "lodash/sampleSize.js";
+import shuffle from "lodash/shuffle.js";
 import { IUser, UserGroup } from "../../interfaces/User";
 import { IOsuUser } from "../../interfaces/OsuApi";
 import OsuApiService from "./OsuApiService";
