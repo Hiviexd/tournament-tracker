@@ -206,6 +206,8 @@ export function useUploadBadges(tournamentId: string) {
 }
 
 export function useDownloadBadges(tournamentId: string) {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (filenames?: { badgeId: string; filename: string }[]) => {
             const response = await utils.apiCall({
@@ -227,6 +229,9 @@ export function useDownloadBadges(tournamentId: string) {
             window.URL.revokeObjectURL(url);
 
             return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
         },
     });
 }

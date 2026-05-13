@@ -225,7 +225,7 @@ export default function InGameBannersTab() {
                                 ? "var(--mantine-color-primary-light)"
                                 : "var(--mantine-color-body)",
                             cursor: "pointer",
-                            transition: "all 0.2s ease",
+                            transition: "border-color 0.2s ease, background-color 0.2s ease",
                             minHeight: "120px",
                         }}>
                         <input {...getBannerInputProps()} />
@@ -249,7 +249,7 @@ export default function InGameBannersTab() {
                                 ? "var(--mantine-color-primary-light)"
                                 : "var(--mantine-color-body)",
                             cursor: "pointer",
-                            transition: "all 0.2s ease",
+                            transition: "border-color 0.2s ease, background-color 0.2s ease",
                             minHeight: "120px",
                         }}>
                         <input {...getBackgroundInputProps()} />

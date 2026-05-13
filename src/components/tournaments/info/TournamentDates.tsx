@@ -8,6 +8,10 @@ import dayjs from "../../../../utils/dayjs";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 
+function pickerValueToDateOrNull(value: string | null): Date | null {
+    return value == null ? null : new Date(value);
+}
+
 interface IProps {
     tournament: ITournament;
 }
@@ -86,14 +90,14 @@ export default function TournamentDates({ tournament }: IProps) {
                         <DateInput
                             label="Start Date"
                             value={startDate}
-                            onChange={(value) => setStartDate(value ? new Date(value) : null)}
+                            onChange={(v) => setStartDate(pickerValueToDateOrNull(v))}
                             placeholder="Select start date..."
                             clearable
                         />
                         <DateInput
                             label="End Date"
                             value={endDate}
-                            onChange={(value) => setEndDate(value ? new Date(value) : null)}
+                            onChange={(v) => setEndDate(pickerValueToDateOrNull(v))}
                             placeholder="Select end date..."
                             clearable
                             minDate={startDate || undefined}

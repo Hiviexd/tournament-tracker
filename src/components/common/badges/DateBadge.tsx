@@ -31,10 +31,12 @@ export default function DateBadge({
         return "success";
     };
 
+    const badgeLabel = staticColor ? dayjs(date).format("LLL") : utils.getShortRelativeTime(date);
+
     return (
         <Tooltip label={dayjs(date).format("LLL")}>
             <Badge variant={variant} color={color || getColor()} size={size}>
-                <FontAwesomeIcon icon="clock" /> {utils.getShortRelativeTime(date)}
+                <FontAwesomeIcon icon="clock" /> {badgeLabel}
             </Badge>
         </Tooltip>
     );

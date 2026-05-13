@@ -1,5 +1,5 @@
 import { MantineThemeComponents } from "@mantine/core";
-import { normalizeAlertColor, getThemeColor } from "./index";
+import { normalizeAlertColor, getThemeColor } from "./themeColorUtils";
 
 /**
  * Base theme configuration shared across all themes

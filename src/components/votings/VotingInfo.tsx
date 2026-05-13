@@ -55,7 +55,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const togglePublicMutation = useToggleVotingPublic(voting.id);
     const deleteVotingMutation = useDeleteVoting(voting.id);
     const clearVotesMutation = useClearVotes(voting.id);
-    const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
+    const sortedGroups = voting.assignedGroups.toSorted((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
 
     const theme = useMantineTheme();

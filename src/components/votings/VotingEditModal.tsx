@@ -317,7 +317,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                                         VOTE_COLORS[index % VOTE_COLORS.length]
                                                     } 15%, transparent)`,
                                                     color: VOTE_COLORS[index % VOTE_COLORS.length],
-                                                    transition: "all 0.2s ease",
+                                                    transition:
+                                                        "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
                                                 }}>
                                                 {option}
                                             </Pill>

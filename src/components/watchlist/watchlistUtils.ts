@@ -21,7 +21,7 @@ export function getPrimaryInfringement(user: IUser): IInfringement | null {
 
     const bans = infringements.filter(isTimeBasedType);
     if (bans.length > 0) {
-        const sortedBans = [...bans].sort((a, b) => {
+        const sortedBans = bans.toSorted((a, b) => {
             const aActive = isTimeBasedType(a) && !isExpiredInfringement(a) ? 1 : 0;
             const bActive = isTimeBasedType(b) && !isExpiredInfringement(b) ? 1 : 0;
             if (bActive !== aActive) return bActive - aActive;
@@ -30,13 +30,16 @@ export function getPrimaryInfringement(user: IUser): IInfringement | null {
         return sortedBans[0];
     }
 
-    const latestWarning = [...infringements]
-        .filter((i) => i.type === InfringementType.WARNING)
-        .sort(byCreatedDesc)[0];
-    if (latestWarning) return latestWarning;
+    const warnings = infringements.filter((i) => i.type === InfringementType.WARNING);
+    if (warnings.length > 0) {
+        const latestWarning = warnings.reduce((latest, i) => (byCreatedDesc(latest, i) > 0 ? i : latest));
+        return latestWarning;
+    }
 
-    const latestNote = [...infringements]
-        .filter((i) => i.type === InfringementType.NOTE)
-        .sort(byCreatedDesc)[0];
-    return latestNote ?? null;
+    const notes = infringements.filter((i) => i.type === InfringementType.NOTE);
+    if (notes.length > 0) {
+        const latestNote = notes.reduce((latest, i) => (byCreatedDesc(latest, i) > 0 ? i : latest));
+        return latestNote;
+    }
+    return null;
 }

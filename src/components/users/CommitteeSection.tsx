@@ -67,7 +67,7 @@ function CommitteeSubgroupCard({
 }: ISectionProps & { onSelect: (user: IUser) => void; showBadges: boolean }) {
     if (users.length === 0) return null;
 
-    const sortedUsers = [...users].sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+    const sortedUsers = users.toSorted((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
 
     return (
         <Card shadow="sm" p="md">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, type Ref } from "react";
 import MdEditor, { Plugins } from "react-markdown-editor-lite";
 import MarkdownText from "./MarkdownText";
 import { useAutoSave } from "../../hooks/useAutoSave";
@@ -30,22 +30,19 @@ interface IProps {
     allowHtml?: boolean;
 }
 
-const TextEditor = forwardRef<TextEditorRef, IProps>(
-    (
-        {
-            value,
-            onChange,
-            placeholder = "Type your content here...",
-            minHeight = 200,
-            maxHeight = 600,
-            className,
-            disabled = false,
-            autoSaveKey,
-            style,
-            allowHtml = false,
-        },
-        ref
-    ) => {
+function TextEditor({
+    ref,
+    value,
+    onChange,
+    placeholder = "Type your content here...",
+    minHeight = 200,
+    maxHeight = 600,
+    className,
+    disabled = false,
+    autoSaveKey,
+    style,
+    allowHtml = false,
+}: IProps & { ref?: Ref<TextEditorRef> }) {
         const isAutoSaveEnabled = !!autoSaveKey;
         const {
             value: autoSavedValue,
@@ -174,9 +171,6 @@ const TextEditor = forwardRef<TextEditorRef, IProps>(
                 />
             </div>
         );
-    }
-);
-
-TextEditor.displayName = "TextEditor";
+}
 
 export default TextEditor;

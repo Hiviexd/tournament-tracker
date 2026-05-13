@@ -20,7 +20,9 @@ export default function CommitHeatmap() {
 
     const latestCommitHash = __COMMIT_HASH__;
     const latestCommitLink = `https://github.com/Hiviexd/tournament-tracker/commit/${latestCommitHash}`;
-    const latestCommitDate = Object.keys(commitData).sort((a, b) => dayjs(b).diff(dayjs(a)))[0];
+    const keys = Object.keys(commitData);
+    const latestCommitDate =
+        keys.length === 0 ? "" : keys.reduce((latest, k) => (dayjs(k).isAfter(dayjs(latest)) ? k : latest), keys[0]);
 
     const commitMessage = __COMMIT_MESSAGE__.split("\n")[0]; // First line of commit message
 

@@ -26,7 +26,7 @@ interface IPropTypes {
 
 export default function VotingCard({ voting }: IPropTypes) {
     const [user] = useAtom(loggedInUserAtom);
-    const sortedGroups = [...voting.assignedGroups].sort((a, b) => b.localeCompare(a));
+    const sortedGroups = voting.assignedGroups.toSorted((a, b) => b.localeCompare(a));
 
     const getDueDateColor = (): string => {
         const deadline = dayjs(voting.deadline);

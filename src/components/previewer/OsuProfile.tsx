@@ -20,13 +20,15 @@ interface OsuProfileProps {
 export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
     const renderSupporterHearts = () => {
         return Array.from({ length: user.support_level || 0 }).map((_, index) => (
-            <FontAwesomeIcon key={index} icon={faHeart} />
+            <FontAwesomeIcon key={`supporter-${index}`} icon={faHeart} />
         ));
     };
 
     // Sort badges by awarded date (newest first)
     const sortedBadges = user.badges
-        ? [...user.badges].sort((a, b) => new Date(b.awarded_at).getTime() - new Date(a.awarded_at).getTime())
+        ? user.badges.toSorted(
+              (a, b) => dayjs(b.awarded_at).valueOf() - dayjs(a.awarded_at).valueOf(),
+          )
         : [];
 
     return (
@@ -108,14 +110,16 @@ export default function OsuProfile({ user, onDeleteBadge }: OsuProfileProps) {
                         <div className="badge-item">
                             <img src={badge["image@2x_url"]} alt={badge.description} title={badge.description} />
                             {onDeleteBadge && (
-                                <div
+                                <button
+                                    type="button"
                                     className="badge-delete-overlay"
+                                    aria-label="Remove badge"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onDeleteBadge(badge);
                                     }}>
                                     <FontAwesomeIcon icon={faTimes} />
-                                </div>
+                                </button>
                             )}
                         </div>
                     </Tooltip>

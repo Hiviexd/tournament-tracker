@@ -1,6 +1,5 @@
 import { MultiSelect as MantineMultiSelect } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { forwardRef } from "react";
 import type { ComponentPropsWithRef } from "react";
 
 type MultiSelectProps = ComponentPropsWithRef<typeof MantineMultiSelect>;
@@ -8,15 +7,11 @@ type MultiSelectProps = ComponentPropsWithRef<typeof MantineMultiSelect>;
 /**
  * Wrapper for Mantine's MultiSelect component that closes the dropdown when the value changes.
  */
-const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(function MultiSelect(
-    { onChange, ...props },
-    ref
-) {
+export default function MultiSelect({ onChange, ...props }: MultiSelectProps) {
     const [dropdownOpened, { open, close }] = useDisclosure(false);
 
     return (
         <MantineMultiSelect
-            ref={ref}
             {...props}
             dropdownOpened={dropdownOpened}
             onDropdownOpen={open}
@@ -27,6 +22,4 @@ const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(function Mult
             }}
         />
     );
-});
-
-export default MultiSelect;
+}

@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import utils from "../../utils";
 import { LogQueryParams } from "../../interfaces/Log";
 
@@ -15,6 +15,8 @@ export function useLogs(params?: LogQueryParams) {
 }
 
 export function useExportLogsCsv() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async () => {
             const response = await utils.apiCall({
@@ -25,6 +27,7 @@ export function useExportLogsCsv() {
             return response.data;
         },
         onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["logs"] });
             // Create a download link
             const url = window.URL.createObjectURL(new Blob([data]));
             const link = document.createElement("a");

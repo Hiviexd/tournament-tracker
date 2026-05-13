@@ -1,5 +1,5 @@
 import { Select } from "@mantine/core";
-import { forwardRef } from "react";
+import type { HTMLAttributes, Ref } from "react";
 import { TournamentStatus } from "../../../interfaces/Tournament";
 import TournamentStatusBadge from "./badges/TournamentStatusBadge";
 
@@ -15,11 +15,18 @@ interface TournamentStatusSelectProps {
     label?: string;
 }
 
-const StatusOption = forwardRef<HTMLDivElement, { value: string; label: string }>((props, ref) => (
-    <div ref={ref} {...props}>
-        <TournamentStatusBadge status={props.value as TournamentStatus} size="sm" />
-    </div>
-));
+function StatusOption({
+    ref,
+    value,
+    label,
+    ...props
+}: { value: string; label: string; ref?: Ref<HTMLDivElement> } & HTMLAttributes<HTMLDivElement>) {
+    return (
+        <div ref={ref} aria-label={label} {...props}>
+            <TournamentStatusBadge status={value as TournamentStatus} size="sm" />
+        </div>
+    );
+}
 
 export default function TournamentStatusSelect({
     value,

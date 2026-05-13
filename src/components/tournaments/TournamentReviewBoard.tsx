@@ -45,9 +45,9 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
     };
 
     // Sort tournaments by createdAt in descending order (newest first)
-    const sortedTournaments = [...tournaments].sort(
+    const sortedTournaments = tournaments.toSorted(
         (a, b) =>
-            new Date(b.startedReviewAt || b.createdAt).getTime() - new Date(a.startedReviewAt || a.createdAt).getTime()
+            new Date(b.startedReviewAt || b.createdAt).getTime() - new Date(a.startedReviewAt || a.createdAt).getTime(),
     );
 
     return (

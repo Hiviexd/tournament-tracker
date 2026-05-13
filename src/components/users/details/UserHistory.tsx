@@ -18,10 +18,10 @@ export default function UserHistory({ history }: IProps) {
             )}
             <Timeline active={history.length} bulletSize={24}>
                 {history
-                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                    .map((entry, index) => (
+                    .toSorted((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
+                    .map((entry) => (
                         <Timeline.Item
-                            key={index}
+                            key={`${entry.date}-${entry.kind}-${entry.group}`}
                             color={entry.kind === "join" ? (entry.group === "tc" ? "warning" : "info") : "gray.7"}
                             bullet={
                                 <FontAwesomeIcon icon={entry.kind === "join" ? "user-plus" : "user-minus"} size="xs" />

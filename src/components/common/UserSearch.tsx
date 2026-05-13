@@ -1,4 +1,4 @@
-import { useState, forwardRef, useImperativeHandle, useRef } from "react";
+import { useState, useImperativeHandle, useRef, type Ref } from "react";
 import { Combobox, InputBase, Loader, Stack, ActionIcon, Text, useCombobox, FocusTrap } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useUsers, useCreateUser } from "../../hooks/useUsers";
@@ -25,22 +25,20 @@ export interface UserSearchRef {
     clearSelection: () => void;
 }
 
-export default forwardRef<UserSearchRef, IProps>(function UserSearch(
-    {
-        onChange,
-        label,
-        placeholder = "Search by username or osu! ID...",
-        leftSection,
-        error,
-        required,
-        width = "100%",
-        allowUserCreation = false,
-        disabled = false,
-        onEnterWhenSelected,
-        preloadUser,
-    }: IProps,
-    ref
-) {
+export default function UserSearch({
+    ref,
+    onChange,
+    label,
+    placeholder = "Search by username or osu! ID...",
+    leftSection,
+    error,
+    required,
+    width = "100%",
+    allowUserCreation = false,
+    disabled = false,
+    onEnterWhenSelected,
+    preloadUser,
+}: IProps & { ref?: Ref<UserSearchRef> }) {
     const [search, setSearch] = useState(preloadUser || "");
     const [debouncedSearch] = useDebouncedValue(search, 400);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -171,4 +169,4 @@ export default forwardRef<UserSearchRef, IProps>(function UserSearch(
             )}
         </Stack>
     );
-});
+}

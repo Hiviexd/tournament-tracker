@@ -12,6 +12,11 @@ import { loggedInUserAtom } from "../../store/atoms";
 import SignInBanner from "../common/SignInBanner";
 import OsuProfile from "./OsuProfile";
 
+/** Parses `<input type="date">` value to a Date (module scope avoids false-positive hydration lint on handler bodies). */
+function dateFromDateInputValue(value: string): Date {
+    return new Date(value);
+}
+
 interface LocalUser extends IOsuUser {
     badges?: LocalBadge[];
 }
@@ -298,7 +303,7 @@ export default function BadgesTab({ skeleton }: IProps) {
                                 ? "var(--mantine-color-primary-light)"
                                 : "var(--mantine-color-body)",
                             cursor: imageLoading ? "default" : "pointer",
-                            transition: "all 0.2s ease",
+                            transition: "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "center",
@@ -382,7 +387,9 @@ export default function BadgesTab({ skeleton }: IProps) {
                         value={
                             newBadge.awarded_at instanceof Date ? newBadge.awarded_at.toISOString().split("T")[0] : ""
                         }
-                        onChange={(e) => setNewBadge((prev) => ({ ...prev, awarded_at: new Date(e.target.value) }))}
+                        onChange={(e) =>
+                            setNewBadge((prev) => ({ ...prev, awarded_at: dateFromDateInputValue(e.target.value) }))
+                        }
                     />
                     <Button onClick={handleAddBadge} disabled={!newBadge.description || !newBadge["image@2x_url"]}>
                         Add Badge

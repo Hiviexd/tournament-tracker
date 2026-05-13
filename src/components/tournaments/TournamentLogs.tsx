@@ -44,10 +44,10 @@ export default function TournamentLogs({ tournament }: IProps) {
     }
 
     const sortedLogs = hasLogs
-        ? [...tournament.logs!].sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
+        ? tournament.logs!.toSorted((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         : [];
     const sortedReviewHistory = hasReviewHistory
-        ? [...(tournament.reviewHistory as ITournamentReviewHistoryEntry[])].sort(
+        ? (tournament.reviewHistory as ITournamentReviewHistoryEntry[]).toSorted(
               (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
           )
         : [];
