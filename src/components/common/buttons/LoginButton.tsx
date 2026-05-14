@@ -33,7 +33,7 @@ export default function LoginButton({ size = "md", text = "Login", ...props }: I
             gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
             leftSection={
                 <Image
-                    src="/assets/logo-osu.svg?20250714"
+                    src="/assets/logo-osu.svg?20260514"
                     style={{ maxWidth: `${getIconSize()}px`, maxHeight: `${getIconSize()}px` }}
                 />
             }
