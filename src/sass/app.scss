@@ -343,16 +343,15 @@ html {
     overflow: hidden;
 }
 
-.mantine-ButtonGroup-group > .mantine-Button-root {
+.mantine-ButtonGroup-group>.mantine-Button-root {
     flex: 1 1 0;
     min-width: 0;
     border: none !important;
     border-radius: 0 !important;
 }
 
-.mantine-ButtonGroup-group > .mantine-Button-root + .mantine-Button-root {
-    border-left: 1px solid
-        color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent) !important;
+.mantine-ButtonGroup-group>.mantine-Button-root+.mantine-Button-root {
+    border-left: 1px solid color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent) !important;
 }
 
 /* ButtonGroup full-width variant (opt-in via mod="full-width") */
@@ -405,36 +404,60 @@ html {
     animation: spin 2s linear infinite;
 }
 
+/* Keep duration in sync with TournamentTable <Collapse transitionDuration={220} /> */
+$tournament-mass-edit-transition: 220ms ease;
+
 .tournament-table {
-    .mass-edit-select-col {
-        width: 0;
+    /*
+     * Checkbox column stays mounted so column count is stable (Collapse + width animations stay aligned).
+     * Fade uses .mass-edit-checkbox-wrap — avoid display:none on collapse or opacity cannot transition out.
+     */
+    .mass-edit-checkbox-wrap {
+        display: inline-flex;
         min-width: 0;
-        padding-inline: 0;
         opacity: 0;
-        transform: translateX(-6px);
-        overflow: hidden;
+        transition: opacity $tournament-mass-edit-transition;
+    }
+
+    .mass-edit-select-col.is-visible .mass-edit-checkbox-wrap {
+        opacity: 1;
+    }
+
+    .mass-edit-select-col:not(.is-visible) {
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+        border-width: 0 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
         transition:
-            width 0.22s ease,
-            min-width 0.22s ease,
-            padding-inline 0.22s ease,
-            opacity 0.2s ease,
-            transform 0.2s ease;
+            width $tournament-mass-edit-transition,
+            min-width $tournament-mass-edit-transition,
+            max-width $tournament-mass-edit-transition,
+            padding $tournament-mass-edit-transition;
     }
 
     .mass-edit-select-col.is-visible {
         width: 44px;
         min-width: 44px;
+        max-width: 44px;
         padding-inline: var(--mantine-spacing-xs);
-        opacity: 1;
-        transform: translateX(0);
+        box-sizing: border-box;
+        vertical-align: middle;
+        transition:
+            width $tournament-mass-edit-transition,
+            min-width $tournament-mass-edit-transition,
+            max-width $tournament-mass-edit-transition,
+            padding $tournament-mass-edit-transition;
     }
 
-    .tournament-row-selected > td {
+    .tournament-row-selected>td {
         background-color: color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
         transition: background-color 0.18s ease;
     }
 
-    .tournament-row-selected > td:first-child {
+    .tournament-row-selected>td:first-child {
         box-shadow: inset 3px 0 0 0 var(--mantine-color-primary-6);
     }
 }

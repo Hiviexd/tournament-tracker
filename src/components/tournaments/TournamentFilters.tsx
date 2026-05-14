@@ -164,9 +164,8 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                                 <ActionIcon
                                     aria-label={isMassEditMode ? "Exit mass edit" : "Enter mass edit"}
                                     onClick={() => setIsMassEditMode((currentMode) => !currentMode)}
-                                    variant={isMassEditMode ? "filled" : "light"}
-                                    size="lg"
-                                    color="orange">
+                                    variant={isMassEditMode ? "light" : "subtle"}
+                                    size="lg">
                                     <FontAwesomeIcon icon={isMassEditMode ? "xmark" : "pen-to-square"} />
                                 </ActionIcon>
                             </Tooltip>

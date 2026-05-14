@@ -1,4 +1,16 @@
-import { Table, Group, Badge, Text, ScrollArea, Card, Tooltip, Checkbox, Button, Select, Collapse } from "@mantine/core";
+import {
+    Table,
+    Group,
+    Badge,
+    Text,
+    ScrollArea,
+    Card,
+    Tooltip,
+    Checkbox,
+    Button,
+    Select,
+    Collapse,
+} from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament, TournamentStatus } from "../../../interfaces/Tournament";
 import UserLink from "../common/UserLink";
@@ -45,12 +57,7 @@ interface IProps {
     massEdit: TournamentTableMassEditProps;
 }
 
-export default function TournamentTable({
-    tournaments,
-    total,
-    currentPage,
-    massEdit,
-}: IProps) {
+export default function TournamentTable({ tournaments, total, currentPage, massEdit }: IProps) {
     const {
         state: {
             isMassEditMode,
@@ -74,7 +81,8 @@ export default function TournamentTable({
     const selectedCount = selectedTournamentIds.length;
     const allVisibleSelected =
         tournaments.length > 0 && tournaments.every((tournament) => selectedIds.has(tournament._id.toString()));
-    const someVisibleSelected = tournaments.some((tournament) => selectedIds.has(tournament._id.toString())) && !allVisibleSelected;
+    const someVisibleSelected =
+        tournaments.some((tournament) => selectedIds.has(tournament._id.toString())) && !allVisibleSelected;
     const canApplyStatus = selectedCount > 0 && !!massStatusValue;
     const canApplyState = selectedCount > 0 && !!massStateValue;
 
@@ -142,7 +150,6 @@ export default function TournamentTable({
                             Apply
                         </Button>
                     </Group>
-
                 </Group>
             </Collapse>
             <ScrollArea>
@@ -150,14 +157,16 @@ export default function TournamentTable({
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
-                                <Checkbox
-                                    checked={allVisibleSelected}
-                                    indeterminate={someVisibleSelected}
-                                    onChange={(event) => onToggleAllVisibleSelection(event.currentTarget.checked)}
-                                    aria-label="Select all tournaments on current page"
-                                    disabled={!isMassEditMode}
-                                    tabIndex={isMassEditMode ? 0 : -1}
-                                />
+                                <span className="mass-edit-checkbox-wrap">
+                                    <Checkbox
+                                        checked={allVisibleSelected}
+                                        indeterminate={someVisibleSelected}
+                                        onChange={(event) => onToggleAllVisibleSelection(event.currentTarget.checked)}
+                                        aria-label="Select all tournaments on current page"
+                                        disabled={!isMassEditMode}
+                                        tabIndex={isMassEditMode ? 0 : -1}
+                                    />
+                                </span>
                             </Table.Th>
                             <Table.Th>Type</Table.Th>
                             <Table.Th>Mode</Table.Th>
@@ -176,13 +185,15 @@ export default function TournamentTable({
                                     key={tournament.id}
                                     className={isMassEditMode && isSelected ? "tournament-row-selected" : undefined}>
                                     <Table.Td className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
-                                        <Checkbox
-                                            checked={isSelected}
-                                            onChange={() => onToggleRowSelection(tournament._id.toString())}
-                                            aria-label={`Select ${tournament.name}`}
-                                            disabled={!isMassEditMode}
-                                            tabIndex={isMassEditMode ? 0 : -1}
-                                        />
+                                        <span className="mass-edit-checkbox-wrap">
+                                            <Checkbox
+                                                checked={isSelected}
+                                                onChange={() => onToggleRowSelection(tournament._id.toString())}
+                                                aria-label={`Select ${tournament.name}`}
+                                                disabled={!isMassEditMode}
+                                                tabIndex={isMassEditMode ? 0 : -1}
+                                            />
+                                        </span>
                                     </Table.Td>
                                     <Table.Td>
                                         <TournamentTypeBadge type={tournament.type} />
