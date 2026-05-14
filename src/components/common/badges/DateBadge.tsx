@@ -1,7 +1,6 @@
 import { Badge, Tooltip, type BadgeVariant, type MantineSize } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dayjs from "../../../../utils/dayjs";
-import utils from "../../../../utils";
 
 interface IDateBadgeProps {
     date: Date;
@@ -31,7 +30,7 @@ export default function DateBadge({
         return "success";
     };
 
-    const badgeLabel = staticColor ? dayjs(date).format("LLL") : utils.getShortRelativeTime(date);
+    const badgeLabel = dayjs(date).shortRelativeTime();
 
     return (
         <Tooltip label={dayjs(date).format("LLL")}>
