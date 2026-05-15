@@ -24,7 +24,7 @@ export default class OverdueReviewsJob extends BaseJob {
         }).populate([
             {
                 path: "assignedReviewers",
-                select: "username osuId discordId isActiveReviewer",
+                select: "username osuId discordId isActiveReviewer groups",
             },
             {
                 path: "reviews",
@@ -63,14 +63,23 @@ export default class OverdueReviewsJob extends BaseJob {
             const missingReviewers = tournament.assignedReviewers.filter(
                 (reviewer) => !reviewedUserIds.has(reviewer._id.toString())
             );
-
-            // Filter out inactive reviewers
-            const missingReviewersExcludingInactive = missingReviewers.filter((reviewer) => reviewer.isActiveReviewer);
-
             if (missingReviewers.length === 0) continue;
 
-            // Get Discord IDs for pinging only active reviewers (fall back to username if no Discord ID)
-            const usersToPing = missingReviewersExcludingInactive.map((user) => user.discordId || user.username);
+            // Filter out users who are not in the tournament's committee (tc/cc)
+            const reviewerGroup = tournament.type === "tournament" ? "tc" : "cc";
+            const missingReviewersInCommittee = missingReviewers.filter((reviewer) =>
+                reviewer.groups?.includes(reviewerGroup)
+            );
+
+            // Nothing still owed by this tournament line (tc/cc) — nothing to escalate
+            if (missingReviewersInCommittee.length === 0) continue;
+
+            // Filter out users who are not active reviewers
+            const activeAssignedInCommittee = missingReviewersInCommittee.filter((reviewer) => reviewer.isActiveReviewer);
+            if (activeAssignedInCommittee.length === 0) continue;
+
+            // Get Discord IDs for pinging only active reviewers still in this tournament's committee (tc/cc)
+            const usersToPing: string[] = activeAssignedInCommittee.map((user) => user.discordId || user.username);
 
             // Determine notification color based on days overdue
             let color = DiscordUtils.webhookColors.lightOrange;
@@ -88,25 +97,27 @@ export default class OverdueReviewsJob extends BaseJob {
             ) {
                 overdueReviews.push({ tournament, daysSinceReview, missingReviewers });
 
-                // Ping a random non-assigned, active committee member for visibility
-                const targetGroup = tournament.type === "tournament" ? "tc" : "cc";
                 let thirdUser: IUser | null = null;
+                const assignedReviewerIds = (tournament.assignedReviewers ?? []).map((r) => r._id);
 
-                const [randomUser]: IUser[] = await User.aggregate([
-                    {
-                        $match: {
-                            groups: targetGroup,
-                            isActiveReviewer: true,
-                            _id: { $nin: tournament.assignedReviewers },
+                // Tournament committee only: ping a random non-assigned TC member for visibility (not used for contests)
+                if (tournament.type === "tournament") {
+                    const [randomUser]: IUser[] = await User.aggregate([
+                        {
+                            $match: {
+                                groups: "tc",
+                                isActiveReviewer: true,
+                                _id: { $nin: assignedReviewerIds },
+                            },
                         },
-                    },
-                    { $sample: { size: 1 } }, // get 1 random user
-                ]);
+                        { $sample: { size: 1 } },
+                    ]);
 
-                thirdUser = randomUser ?? null;
+                    thirdUser = randomUser ?? null;
 
-                if (thirdUser) {
-                    usersToPing.push(thirdUser.discordId || thirdUser.username);
+                    if (thirdUser) {
+                        usersToPing.push(thirdUser.discordId || thirdUser.username);
+                    }
                 }
 
                 const reviewEmbed = new EmbedBuilder()
@@ -133,13 +144,14 @@ export default class OverdueReviewsJob extends BaseJob {
                             tournament.startedReviewAt,
                             "dateTime"
                         )})`
-                    )
-                    .addField(
-                        "Note",
-                        `A random committee member (<@${
-                            thirdUser?.discordId || thirdUser?.username
-                        }>) has been added to the thread for visibility.`
                     );
+
+                if (thirdUser) {
+                    reviewEmbed.addField(
+                        "Note",
+                        `A random committee member (<@${thirdUser.discordId || thirdUser.username}>) has been added to the thread for visibility.`
+                    );
+                }
 
                 const webhookBuilder = new WebhookBuilder()
                     .addEmbed(reviewEmbed)
