@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
-import { Modal, TextInput, Stack, Select, Button, Group, LoadingOverlay, TagsInput } from "@mantine/core";
+import { Modal, TextInput, Stack, Select, Button, Group, LoadingOverlay, TagsInput, Pill, Text, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
@@ -9,10 +9,20 @@ import MultipleUsersInput from "../common/MultipleUsersInput";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
 import { IUser } from "../../../interfaces/User";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IProps {
     opened: boolean;
     onClose: () => void;
+}
+
+function generateSuggestedTagFromName(name: string): string {
+    const letterGroups = name.match(/[A-z]+/g);
+    if (!letterGroups || letterGroups.length < 2) return "";
+
+    const matches = name.match(/[A-z]+|\d+/g);
+    if (!matches) return "";
+    return matches.map((word) => (/\d/.test(word) ? word : word[0])).join("").toUpperCase();
 }
 
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
@@ -95,6 +105,20 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         { value: "contest", label: "Contest" },
     ];
 
+    const suggestedTags = useMemo(() => {
+        const tag = generateSuggestedTagFromName(form.values.name);
+        if (!tag) return [];
+
+        const existingTagsLower = new Set(form.values.tags.map((t) => t.toLowerCase()));
+        if (existingTagsLower.has(tag.toLowerCase())) return [];
+
+        return [tag];
+    }, [form.values.name, form.values.tags]);
+
+    const handleAddSuggestedTag = (tag: string) => {
+        form.setFieldValue("tags", [...form.values.tags, tag.toUpperCase()]);
+    };
+
     return (
         <Modal opened={opened} onClose={onClose} title="Create New Tournament" size="lg">
             <LoadingOverlay
@@ -157,12 +181,35 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         {...form.getInputProps("enchantUrl")}
                     />
 
-                    <TagsInput
-                        label="Search Tags"
-                        placeholder="Enter tags..."
-                        description="Press enter to add a tag"
-                        {...form.getInputProps("tags")}
-                    />
+                    <Box>
+                        <TagsInput
+                            label="Search Tags"
+                            placeholder="Enter tags..."
+                            description="Press enter to add a tag, case-insensitive"
+                            {...form.getInputProps("tags")}
+                        />
+
+                        {suggestedTags.length > 0 && (
+                            <Box mt="xs">
+                                <Text size="sm" fw={500} mb={4}>
+                                    Suggested tags
+                                </Text>
+                                <Group gap="xs">
+                                    {suggestedTags.map((tag) => (
+                                        <Pill
+                                            key={tag}
+                                            onClick={() => handleAddSuggestedTag(tag)}
+                                            style={{ cursor: "pointer" }}>
+                                            <Group gap={6} wrap="nowrap">
+                                                {tag}
+                                                <FontAwesomeIcon icon="plus" size="xs" />
+                                            </Group>
+                                        </Pill>
+                                    ))}
+                                </Group>
+                            </Box>
+                        )}
+                    </Box>
 
                     <Group grow>
                         <DateInput
