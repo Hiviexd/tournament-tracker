@@ -472,8 +472,8 @@ class TournamentService {
         forumUrl: string,
         currentUser: IUser,
     ): Promise<{ error?: string }> {
-        if (!utils.isOsuForumLink(forumUrl)) {
-            return { error: "Invalid osu! forum URL" };
+        if (!utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
+            return { error: "Invalid osu! forum or news URL" };
         }
 
         // remove query parameters from forum url

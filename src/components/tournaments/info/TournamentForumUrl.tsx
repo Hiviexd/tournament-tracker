@@ -72,7 +72,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         <TextInput
                             value={forumUrl}
                             onChange={(event) => setForumUrl(event.currentTarget.value)}
-                            placeholder="Enter forum URL..."
+                            placeholder="Enter forum/news URL..."
                             style={{ flex: 1 }}
                             onFocus={(event) => event.target.select()}
                         />
@@ -96,7 +96,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         </Text>
                     ) : (
                         <Text size="sm" c="dimmed" fs="italic">
-                            No forum URL set
+                            No link set
                         </Text>
                     )}
                 </Box>

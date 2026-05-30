@@ -164,8 +164,8 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                     />
 
                     <TextInput
-                        label="Forum URL"
-                        placeholder="Enter forum post URL..."
+                        label="Forum/News URL"
+                        placeholder="Enter forum/news URL..."
                         {...form.getInputProps("forumUrl")}
                     />
 
