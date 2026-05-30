@@ -268,8 +268,8 @@ class TournamentsController {
 
         const status: TournamentStatus = "supportRequestReceived";
 
-        if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
-            return res.status(400).json({ error: "Invalid osu! forum URL format" });
+        if (forumUrl && !utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
+            return res.status(400).json({ error: "Invalid osu! forum or news URL format" });
         }
 
         if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {

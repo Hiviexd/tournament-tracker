@@ -35,6 +35,14 @@ export function isOsuForumLink(link: string): boolean {
 }
 
 /**
+ * Checks if a link is an osu! news link
+ * @param link Link to check
+ */
+export function isOsuNewsLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/home\/news\/[\w-]+(?:\?.*)?$/.test(link);
+}
+
+/**
  * Extracts the osu! forum ID from a link
  * @param link Link to extract the ID from
  * @returns The osu! forum ID, or `null` if the link is not a valid osu! forum link

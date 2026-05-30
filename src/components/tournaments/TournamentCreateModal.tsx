@@ -54,7 +54,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             modes: (value) => (value.length === 0 ? "At least one game mode is required" : null),
             type: (value) => (!value ? "Type is required" : null),
             forumUrl: (value) => {
-                if (value && !utils.isOsuForumLink(value)) return "Invalid osu! forum URL";
+                if (value && !utils.isOsuForumLink(value) && !utils.isOsuNewsLink(value)) return "Invalid osu! forum or news URL";
             },
             bannerUrl: (value) => {
                 if (value && !utils.isValidUrl(value)) return "Invalid URL";

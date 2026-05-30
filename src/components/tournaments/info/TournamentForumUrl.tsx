@@ -20,10 +20,10 @@ export default function TournamentForumUrl({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleForumUrlSave = async () => {
-        if (!utils.isOsuForumLink(forumUrl)) {
+        if (!utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
             notifications.show({
                 title: "Invalid URL",
-                message: "Please enter a valid osu! forum URL",
+                message: "Please enter a valid osu! forum or news URL",
                 color: "red",
             });
             return;
@@ -37,7 +37,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
         <Stack gap={5}>
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500} className="header-border-left">
-                    Forum Link
+                    Forum/News Link
                 </Text>
                 {isEditingForumUrl ? (
                     <ActionIcon
