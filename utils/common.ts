@@ -1,5 +1,6 @@
 import { RankedChoiceVote, RankedChoiceVoteScore } from "../interfaces/Vote";
 import { IUser } from "../interfaces/User";
+import { IInfringement, TIME_BASED_TYPES } from "../interfaces/Infringement";
 
 /**
  * Shortens a string
@@ -317,6 +318,43 @@ export function parseSearchQuery(
     }
 
     return result;
+}
+
+function isInfringementTimeBased(infringement: IInfringement): boolean {
+    return infringement.isTimeBased ?? TIME_BASED_TYPES.includes(infringement.type);
+}
+
+function isInfringementIndefinite(infringement: IInfringement): boolean {
+    return infringement.isIndefinite ?? !!(infringement.startDate && !infringement.endDate);
+}
+
+function isInfringementExpired(infringement: IInfringement): boolean {
+    return infringement.isExpired ?? !!(infringement.endDate && new Date(infringement.endDate) < new Date());
+}
+
+/**
+ * Resolves the user's active infringement (matches the User model virtual).
+ * Uses `activeInfringement` when present; otherwise derives from a populated `infringements` array.
+ */
+export function getActiveInfringement(user: IUser | undefined | null): IInfringement | null {
+    if (!user) return null;
+    if (user.activeInfringement) return user.activeInfringement;
+
+    const infringements = user.infringements ?? [];
+    if (infringements.length === 0) return null;
+
+    const indefiniteInfringement = infringements.find(isInfringementIndefinite);
+    if (indefiniteInfringement) return indefiniteInfringement;
+
+    return (
+        infringements
+            .filter((infringement) => isInfringementTimeBased(infringement) && !isInfringementExpired(infringement))
+            .sort(
+                (a, b) =>
+                    (b.createdAt ? new Date(b.createdAt).getTime() : 0) -
+                    (a.createdAt ? new Date(a.createdAt).getTime() : 0),
+            )[0] ?? null
+    );
 }
 
 /**

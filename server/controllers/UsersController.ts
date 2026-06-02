@@ -36,16 +36,21 @@ class UsersController {
 
         userInput = utils.escapeUsername(userInput);
 
+        const populateInfringements = !!currentUser?.isCommitteeOrAdmin;
+
         let users: IUser[] = [];
 
         if (utils.isValidMongoId(userInput)) {
-            const user = await User.findById(userInput);
+            const query = User.findById(userInput);
+            const user = populateInfringements ? await query.populate("infringements") : await query;
             if (user) users.push(user);
         } else if (utils.isNumeric(userInput)) {
-            const user = await User.findOne({ osuId: parseInt(userInput, 10) });
+            const query = User.findOne({ osuId: parseInt(userInput, 10) });
+            const user = populateInfringements ? await query.populate("infringements") : await query;
             if (user) users.push(user);
         } else {
-            users = await User.find({ username: { $regex: userInput, $options: "i" } });
+            const query = User.find({ username: { $regex: userInput, $options: "i" } });
+            users = populateInfringements ? await query.populate("infringements") : await query;
         }
 
         const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser));

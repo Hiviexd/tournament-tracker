@@ -1,6 +1,7 @@
 import { Stack, Group, Text, ActionIcon, Box, List } from "@mantine/core";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { IUser } from "../../../../interfaces/User";
+import { InfringementType } from "../../../../interfaces/Infringement";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { loggedInUserAtom } from "../../../store/atoms";
@@ -9,9 +10,15 @@ import MultipleUsersInput from "../../common/MultipleUsersInput";
 import UserLink from "../../common/UserLink";
 import { useEditTournament } from "../../../hooks/useTournaments";
 import CopyActionIcon from "../../common/buttons/CopyActionIcon";
+import { useConfirmModal } from "../../../hooks/useModals";
+import utils from "../../../../utils";
 
 interface IProps {
     tournament: ITournament;
+}
+
+function hasActiveTournamentBan(user: IUser): boolean {
+    return utils.getActiveInfringement(user)?.type === InfringementType.TOURNAMENT_BAN;
 }
 
 export default function TournamentWinners({ tournament }: IProps) {
@@ -19,8 +26,29 @@ export default function TournamentWinners({ tournament }: IProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [winners, setWinners] = useState<IUser[]>(tournament.winners || []);
     const editTournamentMutation = useEditTournament(tournament.id);
+    const confirmModal = useConfirmModal();
+
+    const confirmTournamentBanWinners = (bannedWinners: IUser[]) => {
+        if (bannedWinners.length === 0) return true;
+
+        const names = utils.formatHostsList(bannedWinners);
+        const message =
+            bannedWinners.length === 1
+                ? `${names} has an active tournament ban. Are you sure you want to save them as a winner?`
+                : `The following winners have active tournament bans: ${names}. Are you sure you want to save?`;
+
+        return confirmModal({
+            title: "Active tournament bans",
+            text: message,
+            confirmText: "Save anyway",
+            confirmProps: { color: "warning", leftSection: <FontAwesomeIcon icon="floppy-disk" /> },
+        });
+    };
 
     const handleSave = async () => {
+        const bannedWinners = winners.filter(hasActiveTournamentBan);
+        if (!(await confirmTournamentBanWinners(bannedWinners))) return;
+
         await editTournamentMutation.mutateAsync({ winners: winners.map((winner) => winner) });
         setIsEditing(false);
     };

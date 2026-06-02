@@ -1,6 +1,5 @@
 import { ITournament, GameMode, TournamentType, TournamentStatus, ITournamentReviewHistoryEntry } from "../../interfaces/Tournament";
 import { IUser } from "../../interfaces/User";
-import { InfringementType } from "../../interfaces/Infringement";
 import { FlattenMaps } from "mongoose";
 import { IReview } from "../../interfaces/Review";
 import { ITicket } from "../../interfaces/Ticket";
@@ -590,17 +589,6 @@ class TournamentService {
     ): Promise<{ error?: string }> {
         const winnerIds = winners.map((w) => w._id || w);
         const populatedWinners = await User.find({ _id: { $in: winnerIds } }).populate("infringements");
-
-        const winnersWithActiveTournamentBan = populatedWinners.filter(
-            (winner) => winner.activeInfringement && winner.activeInfringement.type === InfringementType.TOURNAMENT_BAN,
-        );
-        if (winnersWithActiveTournamentBan.length > 0) {
-            return {
-                error: `Cannot add winners with active tournament bans: ${utils.formatHostsList(
-                    winnersWithActiveTournamentBan,
-                )}`,
-            };
-        }
 
         tournament.winners = winners;
 
