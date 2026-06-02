@@ -1193,7 +1193,7 @@ class TournamentsController {
 
             // Sanitize the tournament name for use in filename
             const { ascii: sanitizedTournamentName } = utils.sanitizeFilename(tournament.name);
-            res.setHeader("Content-Disposition", `attachment; filename=${sanitizedTournamentName} Badges.zip`);
+            res.setHeader("Content-Disposition", `attachment; filename=${sanitizedTournamentName}_Badges.zip`);
 
             // Pipe archive data to the response
             archive.pipe(res);

@@ -205,7 +205,10 @@ export default function TournamentAwardsManager({ opened, onClose, tournament }:
     }
 
     function generateDefaultFilename(tournamentName: string, username: string) {
-        const baseName = tournamentName.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+        const baseName = tournamentName
+            .replace(/[^a-z0-9]/gi, "-")
+            .replace(/-+/g, "-")
+            .toLowerCase();
         const isSingleBadge = badges.length === 1;
         return `${baseName}-${isSingleBadge ? "winner" : username.toLowerCase()}`;
     }
