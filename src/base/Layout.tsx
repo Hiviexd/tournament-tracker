@@ -28,8 +28,7 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
-    const isNonProduction = import.meta.env.MODE !== "production";
-    const bottomBannerPadding = `calc(var(--osu-api-banner-height, 0px) + ${isNonProduction ? "3em" : "1em"})`;
+    const bottomBannerPadding = `calc(var(--osu-api-banner-height, 0px) + var(--environment-banner-height, 0px) + 1em)`;
 
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 

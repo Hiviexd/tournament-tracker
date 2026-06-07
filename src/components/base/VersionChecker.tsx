@@ -8,23 +8,20 @@ import { useStatus } from "../../hooks/useStatus";
 declare const __COMMIT_HASH__: string;
 
 export default function VersionChecker() {
-    const { data: status } = useStatus();
+    const { data: status, isSuccess } = useStatus();
     const version = status?.version;
     const currentHash = __COMMIT_HASH__;
 
     useEffect(() => {
-        // Only show notification if we:
-        // - have both hashes
-        // - they don't match
-        // - skip flag is not present in backend commit message
-        const skipRefresh = version?.message?.includes("--skip-client-refresh");
-        if (
-            version?.hash &&
-            currentHash &&
-            version.hash !== currentHash &&
-            version.hash !== "unknown" &&
-            !skipRefresh
-        ) {
+        if (!isSuccess || !version?.hash || !currentHash) {
+            return;
+        }
+
+        const skipRefresh = version.message?.includes("--skip-client-refresh");
+        const isOutdated =
+            version.hash !== currentHash && version.hash !== "unknown" && !skipRefresh;
+
+        if (isOutdated) {
             notifications.show({
                 id: "version-check",
                 color: "primary",
@@ -44,11 +41,17 @@ export default function VersionChecker() {
                 withCloseButton: false,
                 style: {
                     width: "fit-content",
-                    margin: "0 auto",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                    marginBottom:
+                        "calc(var(--osu-api-banner-height, 0px) + var(--environment-banner-height, 0px) + 12px)",
                 },
             });
+            return;
         }
-    }, [version?.hash, currentHash, version?.message]);
+
+        notifications.hide("version-check");
+    }, [isSuccess, version?.hash, currentHash, version?.message]);
 
     return null;
 }

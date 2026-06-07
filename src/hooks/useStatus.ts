@@ -2,18 +2,33 @@ import { useQuery } from "@tanstack/react-query";
 import utils from "../../utils";
 import { StatusInfo } from "../../interfaces/Status";
 
+const HEALTHY_REFETCH_INTERVAL_MS = 3 * 60 * 1000;
+const OUTAGE_REFETCH_INTERVAL_MS = 30 * 1000;
+
+async function fetchStatus(): Promise<StatusInfo> {
+    const result = await utils.apiCall<StatusInfo>({
+        method: "get",
+        url: "/api/status",
+    });
+
+    if (!result || typeof result !== "object" || "error" in result || !result.version?.hash) {
+        throw new Error(
+            result && typeof result === "object" && "error" in result && result.error
+                ? String(result.error)
+                : "Failed to fetch status",
+        );
+    }
+
+    return result;
+}
+
 export const useStatus = () => {
     return useQuery<StatusInfo>({
         queryKey: ["status"],
-        queryFn: () =>
-            utils.apiCall({
-                method: "get",
-                url: "/api/status",
-            }),
-        // Disable caching
+        queryFn: fetchStatus,
         gcTime: 0,
-        refetchInterval: 3 * 60 * 1000, // Every 3 minutes
-        // Don't show stale data while refetching
+        refetchInterval: (query) =>
+            query.state.data?.osuApi.status === "down" ? OUTAGE_REFETCH_INTERVAL_MS : HEALTHY_REFETCH_INTERVAL_MS,
         staleTime: 0,
     });
 };

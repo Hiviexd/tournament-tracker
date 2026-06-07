@@ -1,24 +1,31 @@
 import { Request, Response } from "express";
 import { StatusInfo } from "../../interfaces/Status";
+import { VersionInfo } from "../../interfaces/Version";
 import VersionService from "../services/VersionService";
 import OsuApiHealthService from "../services/OsuApiHealthService";
+
+function buildVersionInfo(): VersionInfo {
+    const versionData: VersionInfo = {
+        hash: VersionService.getGitHash(),
+        message: VersionService.getGitMessage(),
+    };
+
+    if (process.env.NODE_ENV === "preview") {
+        const branchStatus = VersionService.getBranchStatus();
+        if (branchStatus) {
+            versionData.branchStatus = branchStatus;
+        }
+    }
+
+    return versionData;
+}
 
 class StatusController {
     public getStatus(_: Request, res: Response) {
         const statusData: StatusInfo = {
-            version: {
-                hash: VersionService.getGitHash(),
-                message: VersionService.getGitMessage(),
-            },
+            version: buildVersionInfo(),
             osuApi: OsuApiHealthService.getStatus(),
         };
-
-        if (process.env.NODE_ENV === "preview") {
-            const branchStatus = VersionService.getBranchStatus();
-            if (branchStatus) {
-                statusData.version.branchStatus = branchStatus;
-            }
-        }
 
         res.json(statusData);
     }
