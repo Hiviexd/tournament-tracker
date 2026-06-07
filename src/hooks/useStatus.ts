@@ -26,9 +26,10 @@ export const useStatus = () => {
     return useQuery<StatusInfo>({
         queryKey: ["status"],
         queryFn: fetchStatus,
-        gcTime: 0,
+        staleTime: HEALTHY_REFETCH_INTERVAL_MS,
+        gcTime: HEALTHY_REFETCH_INTERVAL_MS,
+        refetchOnMount: false,
         refetchInterval: (query) =>
             query.state.data?.osuApi.status === "down" ? OUTAGE_REFETCH_INTERVAL_MS : HEALTHY_REFETCH_INTERVAL_MS,
-        staleTime: 0,
     });
 };
