@@ -28,7 +28,8 @@ interface IPropTypes {
 
 export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
-    const envBannerPadding = import.meta.env.MODE !== "production" ? "3em" : "1em";
+    const isNonProduction = import.meta.env.MODE !== "production";
+    const bottomBannerPadding = `calc(var(--osu-api-banner-height, 0px) + ${isNonProduction ? "3em" : "1em"})`;
 
     useDocumentTitle(title && title !== "Home" ? `${title} | Tournament Tracker` : "Tournament Tracker");
 
@@ -87,7 +88,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                 <Header mobileHeaderOpened={opened} mobileHeaderToggle={toggle} />
                 <MobileNavbar opened={opened} onClose={toggle} />
 
-                <AppShell.Main style={{ paddingBottom: envBannerPadding }}>
+                <AppShell.Main style={{ paddingBottom: bottomBannerPadding }}>
                     <div className="main-layout">
                         <Container fluid className="page-header">
                             <Flex align="center" gap="md">
@@ -112,7 +113,7 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                     </div>
                     <Footer />
                 </AppShell.Main>
-                <ScrollToTopButton style={{ paddingBottom: envBannerPadding }} />
+                <ScrollToTopButton style={{ paddingBottom: bottomBannerPadding }} />
             </AppShell>
             <EnvironmentBanner />
         </>

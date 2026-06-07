@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useVersion } from "../../hooks/useVersion";
+import { useStatus } from "../../hooks/useStatus";
 
 // This will be replaced by Vite at build time
 declare const __COMMIT_HASH__: string;
 
 export default function VersionChecker() {
-    const { data: version } = useVersion();
+    const { data: status } = useStatus();
+    const version = status?.version;
     const currentHash = __COMMIT_HASH__;
 
     useEffect(() => {

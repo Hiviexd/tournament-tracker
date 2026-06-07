@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from "axios";
 import { IOsuBotMessage } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
@@ -166,24 +166,12 @@ export default class OsuBotService extends OsuApiService {
             },
         };
 
-        try {
-            await axios(options);
-            return true;
-        } catch (error: any) {
-            const statusCode = error?.response?.status as number | undefined;
-            const responseData = error?.response?.data;
-            const messageText =
-                responseData?.error ||
-                responseData?.message ||
-                error?.message ||
-                "Failed to send osu announcement";
+        const response = await this.executeRequest(options);
 
-            return {
-                error: String(messageText),
-                statusCode,
-                details: responseData ?? null,
-                source: "osu-bot",
-            } as ErrorResponse;
+        if (OsuApiService.isOsuResponseError(response)) {
+            return { ...response, source: "osu-bot" };
         }
+
+        return true;
     }
 }

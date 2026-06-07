@@ -1,0 +1,6 @@
+.login-button-osu-logo {
+    flex-shrink: 0;
+    background-color: var(--button-color, currentColor);
+    mask: url("/assets/logo-osu.svg?20260514") center / contain no-repeat;
+    -webkit-mask: url("/assets/logo-osu.svg?20260514") center / contain no-repeat;
+}

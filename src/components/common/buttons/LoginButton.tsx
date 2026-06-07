@@ -1,9 +1,18 @@
-import { Button, Image, ButtonProps } from "@mantine/core";
+import { Box, Button, ButtonProps, Tooltip } from "@mantine/core";
 import { useState } from "react";
 import { useAtom } from "jotai";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { loggedInUserAtom } from "../../../store/atoms";
+import { useStatus } from "../../../hooks/useStatus";
 
-interface IProps extends Omit<ButtonProps, "onClick" | "loading" | "leftSection" | "variant" | "gradient"> {
+function LoginButtonOsuLogo({ size }: { size: number }) {
+    return <Box className="login-button-osu-logo" style={{ width: size, height: size }} aria-hidden />;
+}
+
+interface IProps extends Omit<
+    ButtonProps,
+    "onClick" | "loading" | "leftSection" | "rightSection" | "variant" | "gradient"
+> {
     size?: "xs" | "sm" | "md" | "lg" | "xl";
     text?: string;
 }
@@ -11,6 +20,8 @@ interface IProps extends Omit<ButtonProps, "onClick" | "loading" | "leftSection"
 export default function LoginButton({ size = "md", text = "Login", ...props }: IProps) {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [user] = useAtom(loggedInUserAtom);
+    const { data: status } = useStatus();
+    const isOsuApiDown = status?.osuApi.status === "down";
 
     const handleLogin = () => {
         setIsLoggingIn(true);
@@ -25,21 +36,32 @@ export default function LoginButton({ size = "md", text = "Login", ...props }: I
 
     if (user) return;
 
-    return (
+    const button = (
         <Button
             onClick={handleLogin}
-            variant="gradient"
+            variant={isOsuApiDown ? "light" : "gradient"}
+            color={isOsuApiDown ? "warning" : undefined}
             loading={isLoggingIn}
-            gradient={{ from: "primary.9", to: "primary.4", deg: 45 }}
-            leftSection={
-                <Image
-                    src="/assets/logo-osu.svg?20260514"
-                    style={{ maxWidth: `${getIconSize()}px`, maxHeight: `${getIconSize()}px` }}
-                />
-            }
+            gradient={isOsuApiDown ? undefined : { from: "primary.9", to: "primary.4", deg: 45 }}
+            leftSection={<LoginButtonOsuLogo size={getIconSize()} />}
+            rightSection={isOsuApiDown ? <FontAwesomeIcon icon="triangle-exclamation" /> : undefined}
             size={size}
             {...props}>
             {text}
         </Button>
     );
+
+    if (isOsuApiDown) {
+        return (
+            <Tooltip
+                multiline
+                w={200}
+                styles={{ tooltip: { textAlign: "center", textWrap: "pretty" } }}
+                label="Login may fail, try again when osu! is back online.">
+                {button}
+            </Tooltip>
+        );
+    }
+
+    return button;
 }

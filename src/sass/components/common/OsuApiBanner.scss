@@ -1,11 +1,11 @@
 @use "../../mixins.scss";
 
-.environment-banner {
-    @include mixins.glass-bg(var(--environment-banner-background), false);
+.osu-api-banner {
+    @include mixins.glass-bg(var(--osu-api-banner-background), false);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
     position: fixed;
-    bottom: var(--osu-api-banner-height, 0px);
+    bottom: 0;
     margin: 0;
     left: 0;
     right: 0;
@@ -15,13 +15,8 @@
     padding: 8px 16px;
     font-size: 12px;
     font-weight: 600;
-    border-top: 1px solid color-mix(in srgb, #fff 30%, var(--environment-banner-background) 70%);
-    z-index: 101;
-
-    html[data-osu-api-banner-visible] & {
-        border-bottom: none;
-        box-shadow: none;
-    }
+    border-top: 1px solid color-mix(in srgb, #fff 30%, var(--osu-api-banner-background) 70%);
+    z-index: 100;
 
     .banner-text {
         font-size: 12px;

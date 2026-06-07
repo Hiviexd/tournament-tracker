@@ -1,10 +1,11 @@
 import { Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useVersion } from "../../hooks/useVersion";
+import { useStatus } from "../../hooks/useStatus";
 import utils from "../../../utils";
 
 export default function EnvironmentBanner() {
-    const { data: version } = useVersion();
+    const { data: status } = useStatus();
+    const version = status?.version;
 
     // we need to use Vite's import.meta.env because process.env is not available prod builds
     const isDevelopment = import.meta.env.MODE === "development";

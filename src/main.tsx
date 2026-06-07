@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { NuqsAdapter } from "nuqs/adapters/react-router";
 import ReactScan from "./components/base/ReactScan";
 import VersionChecker from "./components/base/VersionChecker";
+import OsuApiBanner from "./components/base/OsuApiBanner";
 import Spotlight from "./components/common/Spotlight";
 import SnowOverlay from "./components/base/SnowOverlay";
 import AppErrorBoundary from "./components/base/AppErrorBoundary";
@@ -59,6 +60,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             </DatesProvider>
                         </ModalsProvider>
                         <VersionChecker />
+                        <OsuApiBanner />
                     </MantineProvider>
                 </QueryClientProvider>
             </StateProvider>

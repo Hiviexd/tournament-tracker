@@ -3,6 +3,7 @@ import querystring from "querystring";
 import { IBeatmap, IBeatmapResponse, IOsuAuthResponse, IOsuUser } from "../../interfaces/OsuApi";
 import { ErrorResponse } from "../../interfaces/Responses";
 import config from "../../config.json";
+import OsuApiHealthService from "./OsuApiHealthService";
 
 export default class OsuApiService {
     static isOsuResponseError<T>(errorResponse: T | ErrorResponse): errorResponse is ErrorResponse {
@@ -41,16 +42,29 @@ export default class OsuApiService {
             const res = await axios(options);
 
             if (res?.data) {
+                OsuApiHealthService.recordSuccess();
                 return res.data;
             }
 
-            return {
+            const emptyResponse: ErrorResponse = {
                 error: "osu api returned an empty response body",
                 statusCode: res?.status,
                 source: "osu-api",
-            } as ErrorResponse;
+            };
+
+            if (OsuApiHealthService.isInfrastructureFailure(emptyResponse)) {
+                OsuApiHealthService.recordFailure(emptyResponse);
+            }
+
+            return emptyResponse;
         } catch (error) {
-            return this.buildErrorResponse(options, error);
+            const errorResponse = this.buildErrorResponse(options, error);
+
+            if (OsuApiHealthService.isInfrastructureFailure(errorResponse)) {
+                OsuApiHealthService.recordFailure(errorResponse);
+            }
+
+            return errorResponse;
         }
     }
 

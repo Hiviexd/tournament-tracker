@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import utils from "../../utils";
-import { VersionInfo } from "../../interfaces/Version";
+import { StatusInfo } from "../../interfaces/Status";
 
-export const useVersion = () => {
-    return useQuery<VersionInfo>({
-        queryKey: ["version"],
+export const useStatus = () => {
+    return useQuery<StatusInfo>({
+        queryKey: ["status"],
         queryFn: () =>
             utils.apiCall({
                 method: "get",
-                url: "/api/version",
+                url: "/api/status",
             }),
         // Disable caching
         gcTime: 0,

@@ -2,7 +2,9 @@
 
 @use "Layout.scss";
 @use "components/common/Header.scss";
+@use "components/common/LoginButton.scss";
 @use "components/common/EnvironmentBanner.scss";
+@use "components/common/OsuApiBanner.scss";
 @use "components/common/SpotlightAction.scss";
 @use "components/base/AppErrorBoundary.scss";
 
