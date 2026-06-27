@@ -129,15 +129,6 @@ export function isExtraLinkUrlValid(type: ExtraLinkType, url: string): boolean {
 }
 
 /**
- * Sanitize an extra link URL (strip query params where appropriate)
- */
-export function sanitizeExtraLinkUrl(url: string, type: ExtraLinkType): string {
-    const trimmed = url.trim();
-    if (type === "sheet" || type === "website") return trimmed;
-    return trimmed.split("?")[0];
-}
-
-/**
  * Validate a single extra link entry
  * @returns Error message or null if valid
  */

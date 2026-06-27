@@ -503,7 +503,7 @@ class TournamentService {
         tournament.extraLinks = extraLinks.map((link) => ({
             type: link.type,
             name: link.name.trim(),
-            url: utils.sanitizeExtraLinkUrl(link.url.trim(), link.type),
+            url: link.url.trim(),
         }));
 
         await this.addTournamentLog(

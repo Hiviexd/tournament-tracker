@@ -177,7 +177,7 @@ export default function TournamentExtraLinks({ tournament }: IProps) {
             {
                 type: entry.type,
                 name: entry.name,
-                url: utils.sanitizeExtraLinkUrl(entry.url, entry.type),
+                url: entry.url.trim(),
             },
         ]);
         setDraftRow(createDraftRow());
