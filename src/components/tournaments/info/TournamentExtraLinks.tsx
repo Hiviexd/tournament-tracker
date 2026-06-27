@@ -141,9 +141,7 @@ export default function TournamentExtraLinks({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament.id);
 
     const savedLinks = tournament.extraLinks ?? [];
-    const canEdit = user?.isCommitteeOrAdmin && tournament.isActive;
-
-    if (!canEdit && savedLinks.length === 0) return null;
+    const canEdit = !!user?.isCommitteeOrAdmin;
 
     const handleCancel = () => {
         setIsEditing(false);

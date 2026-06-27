@@ -153,7 +153,7 @@ const TOURNAMENT_EDIT_FIELDS: TournamentEditField[] = [
     },
     {
         isSet: (body) => body.extraLinks !== undefined,
-        archivedAllowed: false,
+        archivedAllowed: true,
         hostAllowed: false,
         errorStatus: 400,
         run: ({ tournament, body, currentUser }) =>
