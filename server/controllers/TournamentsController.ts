@@ -268,8 +268,8 @@ class TournamentsController {
 
         const status: TournamentStatus = "supportRequestReceived";
 
-        if (forumUrl && !utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
-            return res.status(400).json({ error: "Invalid osu! forum or news URL format" });
+        if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
+            return res.status(400).json({ error: "Invalid osu! forum URL format" });
         }
 
         if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
@@ -633,6 +633,7 @@ class TournamentsController {
             winners,
             enchantUrl,
             tags,
+            extraLinks,
         } = req.body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
@@ -656,11 +657,29 @@ class TournamentsController {
         let actioner = currentUser;
         const isHost = tournament.hosts && tournament.hosts.some((host) => host._id.equals(currentUser._id));
 
+        if (!currentUser.isCommitteeOrAdmin && !isHost) {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
         if (!actioner.isCommittee && isHost) {
             actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
             // Hosts can only edit banner
-            if (name || hostIds || modes || type || forumUrl || startDate || endDate || status || isActive || winners) {
+            if (
+                name ||
+                hostIds ||
+                modes ||
+                type ||
+                forumUrl !== undefined ||
+                startDate ||
+                endDate ||
+                status ||
+                isActive !== undefined ||
+                winners ||
+                extraLinks !== undefined ||
+                enchantUrl !== undefined ||
+                tags !== undefined
+            ) {
                 return res.status(403).json({ error: "Hosts can only edit banner!" });
             }
         }
@@ -686,12 +705,17 @@ class TournamentsController {
             if (result.error) return res.status(403).json({ error: result.error });
         }
 
-        if (forumUrl) {
+        if (forumUrl !== undefined) {
             const result = await TournamentService.updateForumUrl(tournament, forumUrl, currentUser);
             if (result.error) return res.status(400).json({ error: result.error });
         }
 
-        if (enchantUrl) {
+        if (extraLinks !== undefined) {
+            const result = await TournamentService.updateExtraLinks(tournament, extraLinks, currentUser);
+            if (result.error) return res.status(400).json({ error: result.error });
+        }
+
+        if (enchantUrl !== undefined) {
             const result = await TournamentService.updateEnchantUrl(tournament, enchantUrl, currentUser);
             if (result.error) return res.status(400).json({ error: result.error });
         }

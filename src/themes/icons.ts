@@ -1,6 +1,6 @@
 // fontawesome icons
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { fab } from "@fortawesome/free-brands-svg-icons";
+import { fab, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import {
     faSignOutAlt,
     faUserCircle,
@@ -85,6 +85,7 @@ import {
     faEllipsisVertical,
     faArrowsRotate,
     faAward,
+    faMedal,
     faBoxArchive,
     faLink,
     faCalendar,
@@ -116,6 +117,7 @@ import {
 export default function loadIcons() {
     library.add(
         fab,
+        faGoogle,
         faSignOutAlt,
         faUserCircle,
         faTrophy,
@@ -200,6 +202,7 @@ export default function loadIcons() {
         faEllipsisVertical,
         faArrowsRotate,
         faAward,
+        faMedal,
         faBoxArchive,
         faLink,
         faCalendar,

@@ -60,6 +60,14 @@ export interface ITournamentCreateResponse {
     tournament: ITournament;
 }
 
+export type ExtraLinkType = "news" | "wiki" | "challonge" | "sheet" | "website" | "mappersguild" | "contest";
+
+export interface ITournamentExtraLink {
+    type: ExtraLinkType;
+    name: string;
+    url: string;
+}
+
 export interface ITournament {
     _id: Types.ObjectId;
     id: string;
@@ -85,6 +93,7 @@ export interface ITournament {
     startedReviewAt?: Date;
     tags?: string[];
     reviewHistory?: ITournamentReviewHistoryEntry[];
+    extraLinks?: ITournamentExtraLink[];
 
     // virtuals
     isTournament: boolean;

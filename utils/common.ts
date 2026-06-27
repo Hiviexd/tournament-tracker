@@ -1,6 +1,7 @@
 import { RankedChoiceVote, RankedChoiceVoteScore } from "../interfaces/Vote";
 import { IUser } from "../interfaces/User";
 import { IInfringement, TIME_BASED_TYPES } from "../interfaces/Infringement";
+import type { ExtraLinkType, ITournamentExtraLink } from "../interfaces/Tournament";
 
 /**
  * Shortens a string
@@ -41,6 +42,126 @@ export function isOsuForumLink(link: string): boolean {
  */
 export function isOsuNewsLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/home\/news\/[\w-]+(?:\?.*)?$/.test(link);
+}
+
+/**
+ * Checks if a link is an osu! wiki page link
+ * @param link Link to check
+ */
+export function isOsuWikiLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/wiki\/.+(?:\?.*)?$/.test(link);
+}
+
+/**
+ * Checks if a link is a Challonge link
+ * @param link Link to check
+ */
+export function isChallongeLink(link: string): boolean {
+    return /^https:\/\/([a-z0-9-]+\.)?challonge\.com\/.+/.test(link);
+}
+
+/**
+ * Checks if a link is a Google Docs link
+ * @param link Link to check
+ */
+export function isGoogleDocsLink(link: string): boolean {
+    return /^https:\/\/docs\.google\.com\/.+/.test(link);
+}
+
+/**
+ * Checks if a link is a Mappers' Guild link
+ * @param link Link to check
+ */
+export function isMappersGuildLink(link: string): boolean {
+    return /^https:\/\/([a-z0-9-]+\.)?mappersguild\.com\/.+/.test(link);
+}
+
+/**
+ * Checks if a link is an osu! contest listing link
+ * @param link Link to check
+ */
+export function isOsuContestLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/community\/contests(?:\/\d+)?(?:\?.*)?$/.test(link);
+}
+
+export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
+    "news",
+    "wiki",
+    "challonge",
+    "sheet",
+    "website",
+    "mappersguild",
+    "contest",
+];
+
+export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
+    news: "News post",
+    wiki: "Wiki page",
+    challonge: "Challonge",
+    sheet: "Sheet",
+    website: "Website",
+    mappersguild: "Mapper's Guild",
+    contest: "Contest Listing",
+};
+
+/**
+ * Checks if a URL is valid for the given extra link type
+ */
+export function isExtraLinkUrlValid(type: ExtraLinkType, url: string): boolean {
+    switch (type) {
+        case "news":
+            return isOsuNewsLink(url);
+        case "wiki":
+            return isOsuWikiLink(url);
+        case "challonge":
+            return isChallongeLink(url);
+        case "sheet":
+            return isGoogleDocsLink(url);
+        case "website":
+            return isValidUrl(url);
+        case "mappersguild":
+            return isMappersGuildLink(url);
+        case "contest":
+            return isOsuContestLink(url);
+        default:
+            return false;
+    }
+}
+
+/**
+ * Sanitize an extra link URL (strip query params where appropriate)
+ */
+export function sanitizeExtraLinkUrl(url: string, type: ExtraLinkType): string {
+    const trimmed = url.trim();
+    if (type === "sheet" || type === "website") return trimmed;
+    return trimmed.split("?")[0];
+}
+
+/**
+ * Validate a single extra link entry
+ * @returns Error message or null if valid
+ */
+export function validateExtraLink(link: ITournamentExtraLink): string | null {
+    if (!link.type || !EXTRA_LINK_TYPES.includes(link.type)) return "Invalid link type";
+    if (!link.name?.trim()) return "Link name is required";
+    if (!link.url?.trim()) return "Link URL is required";
+    if (!isExtraLinkUrlValid(link.type, link.url.trim())) {
+        return `Invalid ${EXTRA_LINK_DEFAULTS[link.type]} URL`;
+    }
+    return null;
+}
+
+/**
+ * Validate an array of extra links
+ * @returns Error message or null if valid
+ */
+export function validateExtraLinks(links: ITournamentExtraLink[]): string | null {
+    if (!Array.isArray(links)) return "Extra links must be an array";
+    for (const link of links) {
+        const error = validateExtraLink(link);
+        if (error) return error;
+    }
+    return null;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { ITournament, GameMode, TournamentType, TournamentStatus, ITournamentReviewHistoryEntry } from "../../interfaces/Tournament";
+import { ITournament, GameMode, TournamentType, TournamentStatus, ITournamentReviewHistoryEntry, ITournamentExtraLink } from "../../interfaces/Tournament";
 import { IUser } from "../../interfaces/User";
 import { FlattenMaps } from "mongoose";
 import { IReview } from "../../interfaces/Review";
@@ -471,17 +471,48 @@ class TournamentService {
         forumUrl: string,
         currentUser: IUser,
     ): Promise<{ error?: string }> {
-        if (!utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
-            return { error: "Invalid osu! forum or news URL" };
+        if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
+            return { error: "Invalid osu! forum URL" };
         }
 
         // remove query parameters from forum url
-        const cleanForumUrl = forumUrl?.split("?")[0] ?? forumUrl;
+        const cleanForumUrl = forumUrl ? forumUrl.split("?")[0] : "";
 
         tournament.forumUrl = cleanForumUrl;
 
-        await this.addTournamentLog(tournament, currentUser, `Updated forum URL: **${forumUrl}**`, "link");
+        const logMessage = cleanForumUrl
+            ? `Updated forum URL: **${cleanForumUrl}**`
+            : "Cleared forum URL";
+        await this.addTournamentLog(tournament, currentUser, logMessage, "link");
         await LogService.generate(currentUser.id, `Updated forum URL for **${tournament.name}**`, "tournament");
+
+        return {};
+    }
+
+    /**
+     * Update extra links
+     */
+    public async updateExtraLinks(
+        tournament: ITournament,
+        extraLinks: ITournamentExtraLink[],
+        currentUser: IUser,
+    ): Promise<{ error?: string }> {
+        const validationError = utils.validateExtraLinks(extraLinks);
+        if (validationError) return { error: validationError };
+
+        tournament.extraLinks = extraLinks.map((link) => ({
+            type: link.type,
+            name: link.name.trim(),
+            url: utils.sanitizeExtraLinkUrl(link.url.trim(), link.type),
+        }));
+
+        await this.addTournamentLog(
+            tournament,
+            currentUser,
+            `Updated extra links (${tournament.extraLinks.length})`,
+            "link",
+        );
+        await LogService.generate(currentUser.id, `Updated extra links for **${tournament.name}**`, "tournament");
 
         return {};
     }

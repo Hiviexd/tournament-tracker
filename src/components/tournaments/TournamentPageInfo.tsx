@@ -8,6 +8,7 @@ import TournamentTags from "./info/TournamentTags";
 import TournamentDates from "./info/TournamentDates";
 import TournamentBadges from "./info/TournamentBadges";
 import TournamentForumUrl from "./info/TournamentForumUrl";
+import TournamentExtraLinks from "./info/TournamentExtraLinks";
 import TournamentEnchantUrl from "./info/TournamentEnchantUrl";
 import TournamentDiscordThread from "./info/TournamentDiscordThread";
 import TournamentBanner from "./info/TournamentBanner";
@@ -113,11 +114,9 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
                     {user?.isCommitteeOrAdmin && <VotingsMiniSection votings={votings} />}
                     <TournamentWinners tournament={tournament} />
                     <TournamentTags tournament={tournament} />
-                </SimpleGrid>
-
-                <Stack gap="md">
                     <TournamentBadges tournament={tournament} />
-                </Stack>
+                    <TournamentExtraLinks tournament={tournament} />
+                </SimpleGrid>
             </Stack>
         </Card>
     );

@@ -58,6 +58,13 @@ const TournamentSchema = new Schema<ITournament>(
                 updatedAt: { type: Date, required: true },
             },
         ],
+        extraLinks: [
+            {
+                type: { type: String, enum: ["news", "wiki", "challonge", "sheet", "website", "mappersguild", "contest"], required: true },
+                name: { type: String, required: true },
+                url: { type: String, required: true },
+            },
+        ],
     },
     {
         timestamps: true,

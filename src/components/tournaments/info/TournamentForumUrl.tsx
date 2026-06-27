@@ -8,6 +8,7 @@ import { useAtom } from "jotai";
 import utils from "../../../../utils";
 import { notifications } from "@mantine/notifications";
 import CopyActionIcon from "../../common/buttons/CopyActionIcon";
+import AlertText from "../../common/AlertText";
 
 interface IProps {
     tournament: ITournament;
@@ -20,16 +21,17 @@ export default function TournamentForumUrl({ tournament }: IProps) {
     const editTournamentMutation = useEditTournament(tournament.id);
 
     const handleForumUrlSave = async () => {
-        if (!utils.isOsuForumLink(forumUrl) && !utils.isOsuNewsLink(forumUrl)) {
+        const trimmed = forumUrl.trim();
+        if (trimmed && !utils.isOsuForumLink(trimmed)) {
             notifications.show({
                 title: "Invalid URL",
-                message: "Please enter a valid osu! forum or news URL",
+                message: "Please enter a valid osu! forum URL",
                 color: "red",
             });
             return;
         }
 
-        await editTournamentMutation.mutateAsync({ forumUrl });
+        await editTournamentMutation.mutateAsync({ forumUrl: trimmed });
         setIsEditingForumUrl(false);
     };
 
@@ -37,7 +39,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
         <Stack gap={5}>
             <Group gap="xs" align="center">
                 <Text size="sm" fw={500} className="header-border-left">
-                    Forum/News Link
+                    Forum Link
                 </Text>
                 {isEditingForumUrl ? (
                     <ActionIcon
@@ -72,7 +74,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         <TextInput
                             value={forumUrl}
                             onChange={(event) => setForumUrl(event.currentTarget.value)}
-                            placeholder="Enter forum/news URL..."
+                            placeholder="Enter forum URL..."
                             style={{ flex: 1 }}
                             onFocus={(event) => event.target.select()}
                         />
@@ -82,7 +84,7 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                         onClick={handleForumUrlSave}
                         color="success"
                         title="Save"
-                        disabled={!forumUrl.trim()}>
+                        loading={editTournamentMutation.isPending}>
                         <FontAwesomeIcon icon="save" />
                     </ActionIcon>
                 </Group>
@@ -94,6 +96,10 @@ export default function TournamentForumUrl({ tournament }: IProps) {
                                 {tournament.forumUrl}
                             </Anchor>
                         </Text>
+                    ) : user?.isCommitteeOrAdmin ? (
+                        <AlertText type="warning">
+                            Not set! Make sure to set the osu! forum post for this tournament.
+                        </AlertText>
                     ) : (
                         <Text size="sm" c="dimmed" fs="italic">
                             No link set
