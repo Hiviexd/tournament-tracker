@@ -8,6 +8,7 @@ import {
     TournamentStatus,
     GameMode,
     ITournament,
+    ITournamentExtraLink,
 } from "../../interfaces/Tournament";
 import { IUser, UserGroup } from "../../interfaces/User";
 import User from "../models/userModel";
@@ -92,6 +93,142 @@ const defaultPopulate = [
 const DEFAULT_LIMIT = 30;
 
 const FILE_UPLOAD_CATEGORY = "tournaments";
+
+interface TournamentEditContext {
+    tournament: ITournament;
+    body: Record<string, unknown>;
+    currentUser: IUser;
+    actioner: IUser;
+    session: Request["session"];
+}
+
+interface TournamentEditField {
+    isSet: (body: Record<string, unknown>) => boolean;
+    archivedAllowed: boolean;
+    hostAllowed: boolean;
+    errorStatus: 400 | 403;
+    run: (ctx: TournamentEditContext) => Promise<{ error?: string }>;
+}
+
+const TOURNAMENT_EDIT_FIELDS: TournamentEditField[] = [
+    {
+        isSet: (body) => body.name !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateName(tournament, body.name as string, currentUser),
+    },
+    {
+        isSet: (body) => body.hostIds !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateHosts(tournament, body.hostIds as string[], currentUser),
+    },
+    {
+        isSet: (body) => body.modes !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 403,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateModes(tournament, body.modes as ITournament["modes"], currentUser),
+    },
+    {
+        isSet: (body) => body.type !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 403,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateType(tournament, body.type as ITournament["type"], currentUser),
+    },
+    {
+        isSet: (body) => body.forumUrl !== undefined,
+        archivedAllowed: false,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateForumUrl(tournament, body.forumUrl as string, currentUser),
+    },
+    {
+        isSet: (body) => body.extraLinks !== undefined,
+        archivedAllowed: false,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateExtraLinks(tournament, body.extraLinks as ITournamentExtraLink[], currentUser),
+    },
+    {
+        isSet: (body) => body.enchantUrl !== undefined,
+        archivedAllowed: false,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateEnchantUrl(tournament, body.enchantUrl as string, currentUser),
+    },
+    {
+        isSet: (body) => body.startDate != null && body.endDate != null,
+        archivedAllowed: false,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateDates(
+                tournament,
+                body.startDate as Date,
+                body.endDate as Date,
+                currentUser,
+            ),
+    },
+    {
+        isSet: (body) => body.tags !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, actioner }) =>
+            TournamentService.updateTags(tournament, body.tags as string[], actioner),
+    },
+    {
+        isSet: (body) => typeof body.bannerUrl === "string",
+        archivedAllowed: true,
+        hostAllowed: true,
+        errorStatus: 400,
+        run: ({ tournament, body, actioner }) =>
+            TournamentService.updateBanner(tournament, body.bannerUrl as string, actioner),
+    },
+    {
+        isSet: (body) => body.winners !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser }) =>
+            TournamentService.updateWinners(tournament, body.winners as IUser[], currentUser),
+    },
+    {
+        isSet: (body) => body.status !== undefined,
+        archivedAllowed: false,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser, session }) =>
+            TournamentService.updateStatus(tournament, body.status as ITournament["status"], currentUser, session),
+    },
+    {
+        isSet: (body) => body.isActive !== undefined,
+        archivedAllowed: true,
+        hostAllowed: false,
+        errorStatus: 400,
+        run: ({ tournament, body, currentUser, session }) =>
+            TournamentService.updateIsActive(tournament, body.isActive as boolean, currentUser, session),
+    },
+];
+
+function hasArchivedAllowedEdit(body: Record<string, unknown>): boolean {
+    return TOURNAMENT_EDIT_FIELDS.some((field) => field.archivedAllowed && field.isSet(body));
+}
+
+function hasNonHostEdit(body: Record<string, unknown>): boolean {
+    return TOURNAMENT_EDIT_FIELDS.some((field) => field.isSet(body) && !field.hostAllowed);
+}
 
 const selectFields = (isCommittee: boolean) =>
     isCommittee ? "" : "-assignedReviewers -notes -logs -threadId -enchantUrl";
@@ -618,136 +755,43 @@ class TournamentsController {
     public async edit(req: Request, res: Response) {
         const tournamentId = req.params.tournamentId;
         const currentUser = res.locals!.user!;
-
-        const {
-            name,
-            hostIds,
-            modes,
-            type,
-            forumUrl,
-            startDate,
-            endDate,
-            status,
-            isActive,
-            bannerUrl,
-            winners,
-            enchantUrl,
-            tags,
-            extraLinks,
-        } = req.body;
+        const body = req.body as Record<string, unknown>;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        // Check if tournament is archived and no allowed fields are being edited
-        if (
-            !tournament.isActive &&
-            isActive === undefined &&
-            !bannerUrl &&
-            !tags &&
-            !winners &&
-            !name &&
-            !hostIds &&
-            !modes &&
-            !type
-        ) {
+        if (!tournament.isActive && !hasArchivedAllowedEdit(body)) {
             return res.status(400).json({ error: "Cannot edit archived tournament!" });
         }
 
-        // Determine who is making the edit
         let actioner = currentUser;
-        const isHost = tournament.hosts && tournament.hosts.some((host) => host._id.equals(currentUser._id));
+        const isHost = tournament.hosts?.some((host) => host._id.equals(currentUser._id));
 
         if (!currentUser.isCommitteeOrAdmin && !isHost) {
             return res.status(403).json({ error: "Unauthorized" });
         }
 
-        if (!actioner.isCommittee && isHost) {
+        if (!currentUser.isCommittee && isHost) {
             actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
-            // Hosts can only edit banner
-            if (
-                name ||
-                hostIds ||
-                modes ||
-                type ||
-                forumUrl !== undefined ||
-                startDate ||
-                endDate ||
-                status ||
-                isActive !== undefined ||
-                winners ||
-                extraLinks !== undefined ||
-                enchantUrl !== undefined ||
-                tags !== undefined
-            ) {
+            if (hasNonHostEdit(body)) {
                 return res.status(403).json({ error: "Hosts can only edit banner!" });
             }
         }
 
-        // Update fields using service methods
-        if (name !== undefined) {
-            const result = await TournamentService.updateName(tournament, name, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
+        for (const field of TOURNAMENT_EDIT_FIELDS) {
+            if (!field.isSet(body)) continue;
 
-        if (hostIds !== undefined) {
-            const result = await TournamentService.updateHosts(tournament, hostIds, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
+            const result = await field.run({
+                tournament,
+                body,
+                currentUser,
+                actioner,
+                session: req.session,
+            });
 
-        if (modes !== undefined) {
-            const result = await TournamentService.updateModes(tournament, modes, currentUser);
-            if (result.error) return res.status(403).json({ error: result.error });
-        }
-
-        if (type !== undefined) {
-            const result = await TournamentService.updateType(tournament, type, currentUser);
-            if (result.error) return res.status(403).json({ error: result.error });
-        }
-
-        if (forumUrl !== undefined) {
-            const result = await TournamentService.updateForumUrl(tournament, forumUrl, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (extraLinks !== undefined) {
-            const result = await TournamentService.updateExtraLinks(tournament, extraLinks, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (enchantUrl !== undefined) {
-            const result = await TournamentService.updateEnchantUrl(tournament, enchantUrl, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (startDate && endDate) {
-            const result = await TournamentService.updateDates(tournament, startDate, endDate, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (tags) {
-            const result = await TournamentService.updateTags(tournament, tags, actioner);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (typeof bannerUrl === "string") {
-            const result = await TournamentService.updateBanner(tournament, bannerUrl, actioner);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (winners) {
-            const result = await TournamentService.updateWinners(tournament, winners, currentUser);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (status) {
-            const result = await TournamentService.updateStatus(tournament, status, currentUser, req.session);
-            if (result.error) return res.status(400).json({ error: result.error });
-        }
-
-        if (isActive !== undefined) {
-            const result = await TournamentService.updateIsActive(tournament, isActive, currentUser, req.session);
-            if (result.error) return res.status(400).json({ error: result.error });
+            if (result.error) {
+                return res.status(field.errorStatus).json({ error: result.error });
+            }
         }
 
         await tournament.save();
