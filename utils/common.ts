@@ -84,6 +84,18 @@ export function isOsuContestLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/community\/contests(?:\/\d+)?(?:\?.*)?$/.test(link);
 }
 
+/**
+ * Checks if a link is a Discord invite or channel link
+ * @param link Link to check
+ */
+export function isDiscordLink(link: string): boolean {
+    return (
+        /^https:\/\/discord\.com\/channels\/\d+\/\d+(?:\/\d+)?(?:\?.*)?$/.test(link) ||
+        /^https:\/\/discord\.gg\/[\w-]+(?:\?.*)?$/.test(link) ||
+        /^https:\/\/discord\.com\/invite\/[\w-]+(?:\?.*)?$/.test(link)
+    );
+}
+
 export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
     "news",
     "wiki",
@@ -92,6 +104,7 @@ export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
     "website",
     "mappersguild",
     "contest",
+    "discord",
 ];
 
 export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
@@ -102,6 +115,7 @@ export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
     website: "Website",
     mappersguild: "Mapper's Guild",
     contest: "Contest Listing",
+    discord: "Discord",
 };
 
 /**
@@ -123,6 +137,8 @@ export function isExtraLinkUrlValid(type: ExtraLinkType, url: string): boolean {
             return isMappersGuildLink(url);
         case "contest":
             return isOsuContestLink(url);
+        case "discord":
+            return isDiscordLink(url);
         default:
             return false;
     }

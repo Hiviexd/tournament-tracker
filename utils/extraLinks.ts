@@ -10,6 +10,7 @@ export const EXTRA_LINK_FA_ICONS: Partial<Record<ExtraLinkType, IconProp>> = {
     sheet: ["fab", "google"],
     website: "link",
     contest: "medal",
+    discord: ["fab", "discord"],
 };
 
 export const EXTRA_LINK_IMAGE_ICONS: Partial<Record<ExtraLinkType, string>> = {
