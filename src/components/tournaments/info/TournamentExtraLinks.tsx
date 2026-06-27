@@ -242,7 +242,7 @@ export default function TournamentExtraLinks({ tournament }: IProps) {
 
             {isEditing ? (
                 <Stack gap="xs">
-                    <Group align="flex-end" wrap="nowrap" w="100%">
+                    <Group align="center" wrap="nowrap" w="100%">
                         <ExtraLinkTypeSelect value={draftRow.type} onChange={handleTypeChange} />
                         <TextInput
                             value={draftRow.name}
