@@ -1,4 +1,4 @@
-import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor, Combobox, InputBase, useCombobox } from "@mantine/core";
+import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor, Combobox, InputBase, useCombobox, Tooltip } from "@mantine/core";
 import { ITournament, ITournamentExtraLink, ExtraLinkType } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -28,9 +28,12 @@ const typeSelectData = EXTRA_LINK_TYPES.map((type) => ({
 function ExtraLinkTypeIcon({ type, size = "sm" }: { type: ExtraLinkType; size?: "sm" | "xs" }) {
     const imageSrc = EXTRA_LINK_IMAGE_ICONS[type];
     const px = ICON_PX[size];
+    const label = EXTRA_LINK_DEFAULTS[type];
+
+    let iconContent: React.ReactNode;
 
     if (imageSrc) {
-        return (
+        iconContent = (
             <Box
                 component="img"
                 src={imageSrc}
@@ -40,12 +43,19 @@ function ExtraLinkTypeIcon({ type, size = "sm" }: { type: ExtraLinkType; size?: 
                 style={{ objectFit: "contain", display: "block", flexShrink: 0 }}
             />
         );
+    } else {
+        const icon = EXTRA_LINK_FA_ICONS[type];
+        if (!icon) return null;
+        iconContent = <FontAwesomeIcon icon={icon} size={size} fixedWidth />;
     }
 
-    const icon = EXTRA_LINK_FA_ICONS[type];
-    if (!icon) return null;
-
-    return <FontAwesomeIcon icon={icon} size={size} fixedWidth />;
+    return (
+        <Tooltip label={label}>
+            <Box component="span" style={{ display: "inline-flex", alignItems: "center", lineHeight: 0 }}>
+                {iconContent}
+            </Box>
+        </Tooltip>
+    );
 }
 
 function ExtraLinkTypeSelect({

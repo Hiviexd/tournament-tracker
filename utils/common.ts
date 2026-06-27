@@ -108,8 +108,8 @@ export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
 ];
 
 export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
-    news: "News post",
-    wiki: "Wiki page",
+    news: "News Post",
+    wiki: "Wiki Page",
     challonge: "Challonge",
     sheet: "Sheet",
     website: "Website",
