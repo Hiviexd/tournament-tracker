@@ -525,13 +525,16 @@ class TournamentService {
         enchantUrl: string,
         currentUser: IUser,
     ): Promise<{ error?: string }> {
-        if (!utils.isEnchantTicketLink(enchantUrl)) {
+        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
             return { error: "Invalid Enchant ticket URL" };
         }
 
-        tournament.enchantUrl = enchantUrl;
+        tournament.enchantUrl = enchantUrl || undefined;
 
-        await this.addTournamentLog(tournament, currentUser, `Updated Enchant ticket URL: **${enchantUrl}**`, "link");
+        const logMessage = enchantUrl
+            ? `Updated Enchant ticket URL: **${enchantUrl}**`
+            : "Cleared Enchant ticket URL";
+        await this.addTournamentLog(tournament, currentUser, logMessage, "link");
         await LogService.generate(
             currentUser.id,
             `Updated Enchant ticket URL for **${tournament.name}**`,
