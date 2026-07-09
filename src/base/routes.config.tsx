@@ -35,6 +35,7 @@ interface RouteConfig {
         title: string;
         path: string;
     };
+    banner?: React.ReactNode;
 }
 
 const routes: RouteConfig[] = [

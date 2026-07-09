@@ -24,9 +24,10 @@ interface IPropTypes {
     title?: string;
     icon?: string;
     parent?: { title: string; path: string };
+    banner?: React.ReactNode;
 }
 
-export default function Layout({ page, title, icon = "trophy", parent }: IPropTypes) {
+export default function Layout({ page, title, icon = "trophy", parent, banner }: IPropTypes) {
     const [opened, { toggle }] = useDisclosure();
     const bottomBannerPadding = `calc(var(--osu-api-banner-height, 0px) + var(--environment-banner-height, 0px) + 1em)`;
 
@@ -88,27 +89,28 @@ export default function Layout({ page, title, icon = "trophy", parent }: IPropTy
                 <MobileNavbar opened={opened} onClose={toggle} />
 
                 <AppShell.Main style={{ paddingBottom: bottomBannerPadding }}>
+                    {banner && <div className="layout-banner">{banner}</div>}
                     <div className="main-layout">
-                        <Container fluid className="page-header">
-                            <Flex align="center" gap="md">
-                                <FontAwesomeIcon icon={icon as IconProp} />
-                                {title && (
-                                    <Breadcrumbs>
-                                        {parent && (
-                                            <Link to={parent.path} className="breadcrumb-link">
-                                                {parent.title}
-                                            </Link>
-                                        )}
-                                        <span>{title}</span>
-                                    </Breadcrumbs>
-                                )}
-                            </Flex>
-                        </Container>
-                        {
-                            <Container className="layout-body" px={{ base: 10, sm: 20 }} py={20} fluid>
-                                {page}
+                        {title !== "Home" && (
+                            <Container fluid className="page-header">
+                                <Flex align="center" gap="md">
+                                    <FontAwesomeIcon icon={icon as IconProp} />
+                                    {title && (
+                                        <Breadcrumbs>
+                                            {parent && (
+                                                <Link to={parent.path} className="breadcrumb-link">
+                                                    {parent.title}
+                                                </Link>
+                                            )}
+                                            <span>{title}</span>
+                                        </Breadcrumbs>
+                                    )}
+                                </Flex>
                             </Container>
-                        }
+                        )}
+                        <Container className="layout-body" px={{ base: 10, sm: 20 }} py={20} fluid>
+                            {page}
+                        </Container>
                     </div>
                     <Footer />
                 </AppShell.Main>
