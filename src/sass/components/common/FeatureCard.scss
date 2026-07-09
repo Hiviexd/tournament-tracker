@@ -1,9 +1,12 @@
 .feature-card {
     text-decoration: none !important;
     position: relative;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
+    border: 1px solid transparent;
     border-top: 4px solid transparent;
+    height: 100%;
+    color: inherit;
 
     &:last-child:nth-child(2n + 1) {
         grid-column: 1 / -1;
@@ -22,23 +25,65 @@
         z-index: 0;
         opacity: 0;
         transition: opacity 0.2s ease;
-        background: linear-gradient(180deg, var(--mantine-color-primary-6) -120%, var(--mantine-color-primary-11) 2rem);
+        background: linear-gradient(
+            180deg,
+            var(--mantine-color-primary-6) -120%,
+            var(--mantine-color-primary-11) 2rem
+        );
+        pointer-events: none;
+    }
+
+    .feature-card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-card-icon {
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--mantine-radius-md);
+        background: color-mix(in srgb, var(--mantine-color-primary-6) 16%, var(--mantine-color-primary-11));
+        color: var(--mantine-color-primary-4);
+        font-size: 1rem;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .feature-card-chevron {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        color: var(--mantine-color-dimmed);
+        opacity: 0;
+        transform: translateX(-4px);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+        pointer-events: none;
     }
 
     &:not([data-disabled="true"]) {
         &:hover {
             transform: translateY(-4px);
             cursor: pointer;
+            border-color: color-mix(in srgb, var(--mantine-color-primary-6) 28%, transparent);
             border-top-color: var(--mantine-color-primary-6);
+            box-shadow: var(--mantine-shadow-md);
 
             &::after {
                 opacity: 1;
             }
-        }
 
-        >* {
-            position: relative;
-            z-index: 1;
+            .feature-card-icon {
+                background: color-mix(in srgb, var(--mantine-color-primary-6) 28%, var(--mantine-color-primary-11));
+                color: var(--mantine-color-primary-3);
+                transform: scale(1.05);
+            }
+
+            .feature-card-chevron {
+                opacity: 1;
+                transform: translateX(0);
+                color: var(--mantine-color-primary-4);
+            }
         }
     }
 

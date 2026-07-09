@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
+import HomeHero from "../components/home/HomeHero";
 import ErrorPage from "../pages/ErrorPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import VotingListPage from "../pages/VotingListPage";
@@ -42,6 +43,7 @@ const routes: RouteConfig[] = [
     {
         path: "/",
         page: <HomePage />,
+        banner: <HomeHero />,
         title: "Home",
         icon: "home",
         permissions: [],
