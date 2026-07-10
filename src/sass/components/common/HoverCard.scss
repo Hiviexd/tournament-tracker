@@ -1,0 +1,55 @@
+.hover-card {
+    text-decoration: none !important;
+    position: relative;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-top: 4px solid transparent;
+
+    &:last-child:nth-child(2n + 1) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        max-width: 600px;
+        width: 100%;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        background: linear-gradient(180deg, var(--mantine-color-primary-6) -120%, var(--mantine-color-primary-11) 2rem);
+    }
+
+    &:not([data-disabled="true"]) {
+        &:hover {
+            transform: translateY(-4px);
+            cursor: pointer;
+            border-color: color-mix(in srgb, var(--mantine-color-primary-6) 28%, transparent);
+            border-top-color: var(--mantine-color-primary-6);
+
+            &::after {
+                opacity: 1;
+            }
+        }
+
+        > * {
+            position: relative;
+            z-index: 1;
+        }
+    }
+
+    &[data-disabled="true"] {
+        opacity: 0.7;
+        cursor: not-allowed;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

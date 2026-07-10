@@ -18,7 +18,7 @@ function ResourcesLoadingState() {
     return (
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
             {[1, 2, 3, 4].map((i) => (
-                <Card key={i} padding="lg" radius="md" className="feature-card">
+                <Card key={i} padding="lg" radius="md" className="hover-card">
                     <Stack gap="md">
                         <Group>
                             <Skeleton height={24} circle />

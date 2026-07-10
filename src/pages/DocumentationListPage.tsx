@@ -15,7 +15,7 @@ function DocumentationListLoadingState() {
                     {Array(10)
                         .fill(0)
                         .map((_, index) => (
-                            <Card key={index} shadow="sm" p="xl" radius="md" className="feature-card">
+                            <Card key={index} shadow="sm" p="xl" radius="md" className="hover-card">
                                 <Skeleton height={26} width="80%" mx="auto" />
                             </Card>
                         ))}
@@ -63,7 +63,7 @@ export default function DocumentationListPage() {
                         shadow="sm"
                         p="lg"
                         radius="md"
-                        className="feature-card"
+                        className="hover-card"
                         component={Link}
                         to={`/docs/${welcomeArticle.slug}`}>
                         <Title order={2} ta="center">
@@ -83,7 +83,7 @@ export default function DocumentationListPage() {
                             shadow="sm"
                             p="xl"
                             radius="md"
-                            className="feature-card"
+                            className="hover-card"
                             component={Link}
                             to={`/docs/${article.slug}`}>
                             <Title order={3} size="h4" ta="center">

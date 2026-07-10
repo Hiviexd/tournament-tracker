@@ -30,7 +30,7 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
         <Card
             padding="lg"
             radius="md"
-            className="feature-card"
+            className="hover-card"
             component="a"
             href={resource.link}
             target="_blank"
