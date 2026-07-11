@@ -240,8 +240,22 @@ export function isValidUrl(url: string, options: IsValidUrlOptions = {}): boolea
 
 /** Named CSS colors that are safe for inline style (e.g. from osu! API). */
 const SAFE_CSS_NAMED_COLORS = new Set([
-    "transparent", "currentColor", "inherit", "initial", "unset",
-    "black", "white", "red", "green", "blue", "yellow", "orange", "purple", "pink", "gray", "grey"
+    "transparent",
+    "currentColor",
+    "inherit",
+    "initial",
+    "unset",
+    "black",
+    "white",
+    "red",
+    "green",
+    "blue",
+    "yellow",
+    "orange",
+    "purple",
+    "pink",
+    "gray",
+    "grey",
 ]);
 
 /**
@@ -262,12 +276,15 @@ export function sanitizeCssColor(value: string | null | undefined): string | und
 }
 
 /**
- * Appends a count to a word and pluralizes it if necessary
+ * Pluralizes a word based on count, optionally prefixing the count
  * @param count Count of the word
- * @param word Word to append the count to
+ * @param word Word to pluralize
+ * @param options.includeCount Whether to include the count in the result (default: true)
  */
-export function formatCount(count: number, word: string) {
-    return count === 1 ? `${count} ${word}` : `${count} ${word}s`;
+export function formatCount(count: number, word: string, options: { includeCount?: boolean } = {}) {
+    const { includeCount = true } = options;
+    const label = count === 1 ? word : `${word}s`;
+    return includeCount ? `${count} ${label}` : label;
 }
 
 /**
@@ -420,7 +437,7 @@ export function getSearchTypes({
  */
 export function parseSearchQuery(
     query: string,
-    searchTypes: Record<string, string[]>
+    searchTypes: Record<string, string[]>,
 ): { searchType: string | null; searchContent: string } {
     const typePrefixMatch = query.match(/^(\w+):(.+)$/);
 
@@ -433,7 +450,7 @@ export function parseSearchQuery(
 
         // Create alias map from search types
         const searchAliasMap: Record<string, string> = Object.fromEntries(
-            Object.entries(searchTypes).flatMap(([canonical, aliases]) => aliases.map((alias) => [alias, canonical]))
+            Object.entries(searchTypes).flatMap(([canonical, aliases]) => aliases.map((alias) => [alias, canonical])),
         );
 
         const canonicalType = searchAliasMap[normalizedType];
@@ -493,12 +510,18 @@ export function getActiveInfringement(user: IUser | undefined | null): IInfringe
  */
 export function formatHostsList(
     hosts: { username: string; osuProfileUrl?: string }[],
-    options: { style?: "long" | "short" | "narrow"; type?: "conjunction" | "disjunction" | "unit", mdLinks?: boolean } = {}
+    options: {
+        style?: "long" | "short" | "narrow";
+        type?: "conjunction" | "disjunction" | "unit";
+        mdLinks?: boolean;
+    } = {},
 ): string {
     if (!hosts || hosts.length === 0) return "";
 
     const { style = "long", type = "conjunction", mdLinks = false } = options;
     const formatter = new (Intl as any).ListFormat("en", { style, type });
 
-    return formatter.format(hosts.map((host) => mdLinks ? `[**${host.username}**](${host.osuProfileUrl})` : host.username));
+    return formatter.format(
+        hosts.map((host) => (mdLinks ? `[**${host.username}**](${host.osuProfileUrl})` : host.username)),
+    );
 }

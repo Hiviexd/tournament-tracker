@@ -451,7 +451,7 @@ class TournamentsController {
                 return res.status(400).json({ error: "Winners must be an array" });
             }
             winnerIds = winners.map((w: IUser | string) =>
-                typeof w === "string" ? w : ((w as IUser)._id?.toString?.() ?? (w as IUser).id)
+                typeof w === "string" ? w : ((w as IUser)._id?.toString?.() ?? (w as IUser).id),
             );
             if (winnerIds.some((id) => !id)) {
                 return res.status(400).json({ error: "One or more winner IDs are invalid" });
@@ -517,12 +517,13 @@ class TournamentsController {
                 `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
+            .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
+            .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
             .addField(
-                "Dates",
-                `${dayjs(tournament.startDate).format("YYYY-MM-DD")} — ${dayjs(tournament.endDate).format("YYYY-MM-DD")}`,
+                utils.formatCount(tournament.modes.length, "Mode", { includeCount: false }),
+                tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "),
                 true,
             )
-            .addField("Mode", tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "), true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
                 "Extra Links",
