@@ -1,15 +1,28 @@
 import { useMemo, useState } from "react";
 import { useCreateTournament } from "../../hooks/useTournaments";
-import { Modal, TextInput, Stack, Select, Button, Group, LoadingOverlay, TagsInput, Pill, Text, Box } from "@mantine/core";
+import {
+    Modal,
+    TextInput,
+    Stack,
+    Select,
+    Button,
+    Group,
+    LoadingOverlay,
+    TagsInput,
+    Pill,
+    Text,
+    Box,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
-import { GameMode, TournamentType, TournamentStatus } from "../../../interfaces/Tournament";
+import { GameMode, TournamentType, TournamentStatus, ITournamentExtraLink } from "../../../interfaces/Tournament";
 import MultiSelect from "../common/MultiSelect";
 import MultipleUsersInput from "../common/MultipleUsersInput";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
 import { IUser } from "../../../interfaces/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ExtraLinksEditor from "./info/ExtraLinksEditor";
 
 interface IProps {
     opened: boolean;
@@ -43,6 +56,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
             endDate: null as Date | null,
             enchantUrl: "",
             tags: [] as string[],
+            extraLinks: [] as ITournamentExtraLink[],
         },
         validate: {
             name: (value) => {
@@ -70,6 +84,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                 }
                 return null;
             },
+            extraLinks: (value) => utils.validateExtraLinks(value),
         },
     });
 
@@ -228,6 +243,21 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                             {...form.getInputProps("endDate")}
                         />
                     </Group>
+
+                    <Box>
+                        <Text size="sm" fw={500} mb={4}>
+                            Extra Links
+                        </Text>
+                        <ExtraLinksEditor
+                            value={form.values.extraLinks}
+                            onChange={(links) => form.setFieldValue("extraLinks", links)}
+                        />
+                        {form.errors.extraLinks && (
+                            <Text size="xs" c="red" mt={4}>
+                                {form.errors.extraLinks}
+                            </Text>
+                        )}
+                    </Box>
 
                     <Group justify="flex-end">
                         <Button variant="subtle" onClick={onClose}>

@@ -173,12 +173,7 @@ const TOURNAMENT_EDIT_FIELDS: TournamentEditField[] = [
         hostAllowed: false,
         errorStatus: 400,
         run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateDates(
-                tournament,
-                body.startDate as Date,
-                body.endDate as Date,
-                currentUser,
-            ),
+            TournamentService.updateDates(tournament, body.startDate as Date, body.endDate as Date, currentUser),
     },
     {
         isSet: (body) => body.tags !== undefined,
@@ -382,7 +377,8 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostIds, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags } = req.body;
+        const { name, hostIds, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags, extraLinks } =
+            req.body;
         const currentUser = res.locals!.user!;
 
         // Handle both single hostId (legacy) and multiple hostIds
@@ -421,6 +417,19 @@ class TournamentsController {
             return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
         }
 
+        let normalizedExtraLinks: ITournamentExtraLink[] = [];
+        if (extraLinks !== undefined) {
+            const extraLinksError = utils.validateExtraLinks(extraLinks);
+            if (extraLinksError) {
+                return res.status(400).json({ error: extraLinksError });
+            }
+            normalizedExtraLinks = (extraLinks as ITournamentExtraLink[]).map((link) => ({
+                type: link.type,
+                name: link.name.trim(),
+                url: link.url.trim(),
+            }));
+        }
+
         // Check for active infringements on any host
         const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
         if (hostsWithInfringements.length > 0) {
@@ -447,6 +456,7 @@ class TournamentsController {
             bannerUrl,
             enchantUrl,
             tags: lowerCaseTags,
+            extraLinks: normalizedExtraLinks,
         });
 
         await tournament.save();
