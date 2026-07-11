@@ -34,7 +34,13 @@ export function TruncatedText({ children, lineClamp = 1, textProps, tooltipProps
     );
 
     return truncated ? (
-        <Tooltip label={children} multiline w={300} styles={{ tooltip: { textAlign: "center", textWrap: "pretty" } }} {...tooltipProps}>
+        <Tooltip
+            label={
+                <span style={{ display: "inline-block", maxWidth: 300, textAlign: "center", textWrap: "pretty" }}>
+                    {children}
+                </span>
+            }
+            {...tooltipProps}>
             {content}
         </Tooltip>
     ) : (
