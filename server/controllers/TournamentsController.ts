@@ -517,9 +517,12 @@ class TournamentsController {
                 `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
-            .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
-            .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
-            .addField("Game Mode", tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "), true)
+            .addField(
+                "Dates",
+                `${dayjs(tournament.startDate).format("YYYY-MM-DD")} — ${dayjs(tournament.endDate).format("YYYY-MM-DD")}`,
+                true,
+            )
+            .addField("Mode", tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "), true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
                 "Extra Links",

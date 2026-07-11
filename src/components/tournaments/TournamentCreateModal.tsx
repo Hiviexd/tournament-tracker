@@ -15,7 +15,8 @@ import {
     Stepper,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { DateInput } from "@mantine/dates";
+import { DatePickerInput } from "@mantine/dates";
+import dayjs from "../../../utils/dayjs";
 import { notifications } from "@mantine/notifications";
 import { GameMode, TournamentType, TournamentStatus, ITournamentExtraLink, TournamentFormData } from "../../../interfaces/Tournament";
 import MultiSelect from "../common/MultiSelect";
@@ -291,23 +292,20 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                                     withAsterisk
                                 />
 
-                                <Group grow>
-                                    <DateInput
-                                        label="Start Date"
-                                        placeholder="Select start date"
-                                        clearable
-                                        withAsterisk
-                                        {...form.getInputProps("startDate")}
-                                    />
-                                    <DateInput
-                                        label="End Date"
-                                        placeholder="Select end date"
-                                        clearable
-                                        withAsterisk
-                                        minDate={form.values.startDate || undefined}
-                                        {...form.getInputProps("endDate")}
-                                    />
-                                </Group>
+                                <DatePickerInput
+                                    type="range"
+                                    label="Start & End Dates"
+                                    placeholder="Select start and end date range"
+                                    clearable
+                                    withAsterisk
+                                    value={[form.values.startDate, form.values.endDate]}
+                                    onChange={(value) => {
+                                        const [start, end] = value ?? [null, null];
+                                        form.setFieldValue("startDate", start ? dayjs(start).toDate() : null);
+                                        form.setFieldValue("endDate", end ? dayjs(end).toDate() : null);
+                                    }}
+                                    error={form.errors.startDate || form.errors.endDate}
+                                />
                             </Stack>
                         </Stepper.Step>
 

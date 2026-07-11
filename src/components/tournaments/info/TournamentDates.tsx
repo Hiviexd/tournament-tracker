@@ -1,5 +1,5 @@
 import { Stack, Group, Text, ActionIcon, Box } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
+import { DatePickerInput } from "@mantine/dates";
 import { ITournament } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -7,10 +7,6 @@ import { useEditTournament } from "../../../hooks/useTournaments";
 import dayjs from "../../../../utils/dayjs";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
-
-function pickerValueToDateOrNull(value: string | null): Date | null {
-    return value == null ? null : new Date(value);
-}
 
 interface IProps {
     tournament: ITournament;
@@ -68,12 +64,13 @@ export default function TournamentDates({ tournament }: IProps) {
                     Start & End Dates
                 </Text>
                 {isEditingDates ? (
-                    <ActionIcon variant="subtle" onClick={handleCancel} color="danger" title="Cancel">
+                    <ActionIcon type="button" variant="subtle" onClick={handleCancel} color="danger" title="Cancel">
                         <FontAwesomeIcon icon="xmark" />
                     </ActionIcon>
                 ) : user?.isCommitteeOrAdmin ? (
                     tournament.isActive && (
                         <ActionIcon
+                            type="button"
                             variant="subtle"
                             onClick={() => setIsEditingDates(true)}
                             color="info"
@@ -85,35 +82,32 @@ export default function TournamentDates({ tournament }: IProps) {
             </Group>
 
             {isEditingDates ? (
-                <Stack gap="xs">
-                    <Group align="end">
-                        <DateInput
-                            label="Start Date"
-                            value={startDate}
-                            onChange={(v) => setStartDate(pickerValueToDateOrNull(v))}
-                            placeholder="Select start date..."
-                            clearable
-                        />
-                        <DateInput
-                            label="End Date"
-                            value={endDate}
-                            onChange={(v) => setEndDate(pickerValueToDateOrNull(v))}
-                            placeholder="Select end date..."
-                            clearable
-                            minDate={startDate || undefined}
-                        />
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={handleSaveDates}
-                            color="success"
-                            title="Save"
-                            mb={4}
-                            disabled={!startDate || !endDate}
-                            loading={editTournamentMutation.isPending}>
-                            <FontAwesomeIcon icon="save" />
-                        </ActionIcon>
-                    </Group>
-                </Stack>
+                <Group align="end" wrap="nowrap">
+                    <DatePickerInput
+                        type="range"
+                        label="Date Range"
+                        placeholder="Select start and end dates"
+                        clearable
+                        style={{ flex: 1 }}
+                        value={[startDate, endDate]}
+                        onChange={(value) => {
+                            const [start, end] = value ?? [null, null];
+                            setStartDate(start ? dayjs(start).toDate() : null);
+                            setEndDate(end ? dayjs(end).toDate() : null);
+                        }}
+                    />
+                    <ActionIcon
+                        type="button"
+                        variant="subtle"
+                        onClick={handleSaveDates}
+                        color="success"
+                        title="Save"
+                        mb={4}
+                        disabled={!startDate || !endDate}
+                        loading={editTournamentMutation.isPending}>
+                        <FontAwesomeIcon icon="save" />
+                    </ActionIcon>
+                </Group>
             ) : (
                 <Box>{formatDateRange()}</Box>
             )}
