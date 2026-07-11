@@ -202,7 +202,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
                         }
                     }}
                 />
-                <ActionIcon variant="subtle" onClick={handleAdd} color="success" title="Add link">
+                <ActionIcon type="button" variant="subtle" onClick={handleAdd} color="success" title="Add link">
                     <FontAwesomeIcon icon="plus" />
                 </ActionIcon>
             </Group>
@@ -228,6 +228,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
                                 {link.url}
                             </Text>
                             <ActionIcon
+                                type="button"
                                 variant="subtle"
                                 onClick={() => handleRemove(index)}
                                 color="danger"

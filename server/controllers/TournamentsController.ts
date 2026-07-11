@@ -377,8 +377,21 @@ class TournamentsController {
 
     /** POST create a tournament */
     public async create(req: Request, res: Response) {
-        const { name, hostIds, modes, type, forumUrl, startDate, endDate, bannerUrl, enchantUrl, tags, extraLinks } =
-            req.body;
+        const {
+            name,
+            hostIds,
+            modes,
+            type,
+            forumUrl,
+            startDate,
+            endDate,
+            bannerUrl,
+            enchantUrl,
+            tags,
+            extraLinks,
+            threadId: rawThreadId,
+            winners,
+        } = req.body;
         const currentUser = res.locals!.user!;
 
         // Handle both single hostId (legacy) and multiple hostIds
@@ -430,6 +443,27 @@ class TournamentsController {
             }));
         }
 
+        const threadId = utils.extractDiscordThreadId(rawThreadId ?? null);
+
+        let winnerIds: string[] = [];
+        if (winners !== undefined) {
+            if (!Array.isArray(winners)) {
+                return res.status(400).json({ error: "Winners must be an array" });
+            }
+            winnerIds = winners.map((w: IUser | string) =>
+                typeof w === "string" ? w : ((w as IUser)._id?.toString?.() ?? (w as IUser).id)
+            );
+            if (winnerIds.some((id) => !id)) {
+                return res.status(400).json({ error: "One or more winner IDs are invalid" });
+            }
+            if (winnerIds.length > 0) {
+                const foundWinners = await User.find({ _id: { $in: winnerIds } });
+                if (foundWinners.length !== winnerIds.length) {
+                    return res.status(400).json({ error: "One or more winner IDs are invalid" });
+                }
+            }
+        }
+
         // Check for active infringements on any host
         const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
         if (hostsWithInfringements.length > 0) {
@@ -457,6 +491,8 @@ class TournamentsController {
             enchantUrl,
             tags: lowerCaseTags,
             extraLinks: normalizedExtraLinks,
+            threadId: threadId || undefined,
+            winners: winnerIds,
         });
 
         await tournament.save();
@@ -483,7 +519,7 @@ class TournamentsController {
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
             .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
             .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
-            .addField("Game Mode", tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "), true)
+            .addField("Game Mode", "<:osutaiko:1054779616583221278>", true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
                 "Extra Links",

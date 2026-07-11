@@ -12,12 +12,16 @@ import {
     Pill,
     Text,
     Box,
+    Stepper,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
-import { GameMode, TournamentType, TournamentStatus, ITournamentExtraLink } from "../../../interfaces/Tournament";
+import { notifications } from "@mantine/notifications";
+import { GameMode, TournamentType, TournamentStatus, ITournamentExtraLink, TournamentFormData } from "../../../interfaces/Tournament";
 import MultiSelect from "../common/MultiSelect";
 import MultipleUsersInput from "../common/MultipleUsersInput";
+import FileUploadInput from "../common/FileUploadInput";
+import { useFileUpload } from "../../hooks/useFileUpload";
 import utils from "../../../utils";
 import { useNavigate } from "react-router";
 import { IUser } from "../../../interfaces/User";
@@ -28,6 +32,37 @@ interface IProps {
     opened: boolean;
     onClose: () => void;
 }
+
+const STEPS = ["Basics", "Links", "Metadata", "Awards"] as const;
+
+const badgeUploadOptions = {
+    maxFiles: 8,
+    maxSize: 5 * 1024 * 1024,
+    allowedTypes: ["image/png"],
+};
+
+const initialFormValues = {
+    name: "",
+    hostIds: [] as string[],
+    modes: [] as GameMode[],
+    type: "" as TournamentType,
+    status: "" as TournamentStatus,
+    bannerUrl: "",
+    forumUrl: "",
+    startDate: null as Date | null,
+    endDate: null as Date | null,
+    enchantUrl: "",
+    threadId: "",
+    tags: [] as string[],
+    extraLinks: [] as ITournamentExtraLink[],
+};
+
+const STEP_FIELDS: (keyof typeof initialFormValues)[][] = [
+    ["name", "hostIds", "modes", "type", "startDate", "endDate"],
+    ["forumUrl", "bannerUrl", "enchantUrl", "threadId"],
+    ["extraLinks", "tags"],
+    [],
+];
 
 function generateSuggestedTagFromName(name: string): string {
     const letterGroups = name.match(/[A-z]+/g);
@@ -41,23 +76,14 @@ function generateSuggestedTagFromName(name: string): string {
 export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
     const [selectedHosts, setSelectedHosts] = useState<IUser[]>([]);
+    const [selectedWinners, setSelectedWinners] = useState<IUser[]>([]);
+    const [active, setActive] = useState(0);
+    const [isUploadingBadges, setIsUploadingBadges] = useState(false);
+    const { files, handleFileChange, clearFiles } = useFileUpload(badgeUploadOptions);
     const navigate = useNavigate();
 
     const form = useForm({
-        initialValues: {
-            name: "",
-            hostIds: [] as string[],
-            modes: [] as GameMode[],
-            type: "" as TournamentType,
-            status: "" as TournamentStatus,
-            bannerUrl: "",
-            forumUrl: "",
-            startDate: null as Date | null,
-            endDate: null as Date | null,
-            enchantUrl: "",
-            tags: [] as string[],
-            extraLinks: [] as ITournamentExtraLink[],
-        },
+        initialValues: initialFormValues,
         validate: {
             name: (value) => {
                 if (!value) return "Name is required";
@@ -88,6 +114,19 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         },
     });
 
+    const resetFormState = () => {
+        form.reset();
+        setSelectedHosts([]);
+        setSelectedWinners([]);
+        clearFiles();
+        setActive(0);
+    };
+
+    const handleClose = () => {
+        resetFormState();
+        onClose();
+    };
+
     const handleHostsChange = (hosts: IUser[]) => {
         setSelectedHosts(hosts);
         form.setFieldValue(
@@ -96,16 +135,88 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         );
     };
 
-    const handleSubmit = async (values) => {
+    const validateStep = (step: number) => {
+        const fields = STEP_FIELDS[step];
+        let hasError = false;
+        for (const field of fields) {
+            const result = form.validateField(field);
+            if (result.hasError) hasError = true;
+        }
+        return !hasError;
+    };
+
+    const nextStep = () => {
+        if (!validateStep(active)) return;
+        setActive((current) => Math.min(current + 1, STEPS.length - 1));
+    };
+
+    const prevStep = () => {
+        setActive((current) => Math.max(current - 1, 0));
+    };
+
+    const handleSubmit = async (values: typeof initialFormValues) => {
+        if (active !== STEPS.length - 1) return;
+        if (!validateStep(active)) return;
+
         try {
-            const res = await createTournamentMutation.mutateAsync(values);
-            form.reset();
-            setSelectedHosts([]);
+            const res = await createTournamentMutation.mutateAsync({
+                ...values,
+                threadId: values.threadId || undefined,
+                winners: selectedWinners,
+            } as unknown as TournamentFormData);
+
+            const tournamentId = res.tournament._id?.toString?.() ?? res.tournament.id;
+
+            if (files.length > 0 && tournamentId) {
+                setIsUploadingBadges(true);
+                try {
+                    const formData = new FormData();
+                    files.forEach((file) => formData.append("files", file));
+                    const uploadResponse = await utils.apiCall({
+                        method: "post",
+                        url: `/api/tournaments/${tournamentId}/uploadBadges`,
+                        data: formData,
+                        headers: { "Content-Type": "multipart/form-data" },
+                    });
+                    if (uploadResponse.error) {
+                        notifications.show({
+                            title: "Badge upload failed",
+                            message:
+                                "Tournament was created, but badges could not be uploaded. You can retry from the tournament page.",
+                            color: "orange",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to upload badges:", error);
+                    notifications.show({
+                        title: "Badge upload failed",
+                        message:
+                            "Tournament was created, but badges could not be uploaded. You can retry from the tournament page.",
+                        color: "orange",
+                    });
+                } finally {
+                    setIsUploadingBadges(false);
+                }
+            }
+
+            resetFormState();
             onClose();
-            navigate(`/tournaments/${res.tournament._id}`);
+            navigate(`/tournaments/${tournamentId}`);
         } catch (error) {
             console.error("Failed to create tournament:", error);
         }
+    };
+
+    const handleCreateClick = () => {
+        if (active !== STEPS.length - 1) return;
+        form.onSubmit(handleSubmit, () => {
+            for (let i = 0; i < STEP_FIELDS.length; i++) {
+                if (!validateStep(i)) {
+                    setActive(i);
+                    return;
+                }
+            }
+        })();
     };
 
     const modeOptions = [
@@ -134,141 +245,199 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         form.setFieldValue("tags", [...form.values.tags, tag.toUpperCase()]);
     };
 
+    const isPending = createTournamentMutation.isPending || isUploadingBadges;
+    const isLastStep = active === STEPS.length - 1;
+
     return (
-        <Modal opened={opened} onClose={onClose} title="Create New Tournament" size="lg">
-            <LoadingOverlay
-                visible={createTournamentMutation.isPending}
-                zIndex={1000}
-                overlayProps={{ radius: "sm", blur: 2 }}
-            />
+        <Modal opened={opened} onClose={handleClose} title="Create New Tournament" size="xl">
+            <LoadingOverlay visible={isPending} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
 
-            <form onSubmit={form.onSubmit(handleSubmit)}>
+            <form onSubmit={(event) => event.preventDefault()}>
                 <Stack gap="md">
-                    <TextInput
-                        label="Tournament Name"
-                        placeholder="Enter tournament name..."
-                        {...form.getInputProps("name")}
-                        withAsterisk
-                    />
+                    <Stepper active={active} onStepClick={setActive} size="sm" allowNextStepsSelect={false}>
+                        <Stepper.Step label="Basics" description="Core details">
+                            <Stack gap="md" mt="md">
+                                <TextInput
+                                    label="Tournament Name"
+                                    placeholder="Enter tournament name..."
+                                    {...form.getInputProps("name")}
+                                    withAsterisk
+                                />
 
-                    <MultipleUsersInput
-                        value={selectedHosts}
-                        onChange={handleHostsChange}
-                        label="Hosts"
-                        placeholder="Search for a host to add..."
-                        required
-                        error={form.errors.hostIds as string}
-                        allowUserCreation
-                        showActiveInfringementWarning
-                    />
+                                <MultipleUsersInput
+                                    value={selectedHosts}
+                                    onChange={handleHostsChange}
+                                    label="Hosts"
+                                    placeholder="Search for a host to add..."
+                                    required
+                                    error={form.errors.hostIds as string}
+                                    allowUserCreation
+                                    showActiveInfringementWarning
+                                />
 
-                    <MultiSelect
-                        label="Game Modes"
-                        placeholder="Select game modes"
-                        data={modeOptions}
-                        {...form.getInputProps("modes")}
-                        withAsterisk
-                    />
+                                <MultiSelect
+                                    label="Game Modes"
+                                    placeholder="Select game modes"
+                                    data={modeOptions}
+                                    {...form.getInputProps("modes")}
+                                    withAsterisk
+                                />
 
-                    <Select
-                        label="Type"
-                        placeholder="Select type"
-                        data={typeOptions}
-                        {...form.getInputProps("type")}
-                        withAsterisk
-                    />
+                                <Select
+                                    label="Type"
+                                    placeholder="Select type"
+                                    data={typeOptions}
+                                    {...form.getInputProps("type")}
+                                    withAsterisk
+                                />
 
-                    <TextInput
-                        label="Forum Link"
-                        placeholder="Enter forum URL..."
-                        {...form.getInputProps("forumUrl")}
-                    />
-
-                    <TextInput
-                        label="Banner URL"
-                        placeholder="Enter banner image URL..."
-                        {...form.getInputProps("bannerUrl")}
-                    />
-
-                    <TextInput
-                        label="Enchant URL"
-                        placeholder="Enter enchant ticket URL..."
-                        {...form.getInputProps("enchantUrl")}
-                    />
-
-                    <Box>
-                        <TagsInput
-                            label="Search Tags"
-                            placeholder="Enter tags..."
-                            description="Press enter to add a tag, case-insensitive"
-                            {...form.getInputProps("tags")}
-                        />
-
-                        {suggestedTags.length > 0 && (
-                            <Box mt="xs">
-                                <Text size="sm" fw={500} mb={4}>
-                                    Suggested tags
-                                </Text>
-                                <Group gap="xs">
-                                    {suggestedTags.map((tag) => (
-                                        <Pill
-                                            key={tag}
-                                            onClick={() => handleAddSuggestedTag(tag)}
-                                            style={{ cursor: "pointer" }}>
-                                            <Group gap={6} wrap="nowrap">
-                                                {tag}
-                                                <FontAwesomeIcon icon="plus" size="xs" />
-                                            </Group>
-                                        </Pill>
-                                    ))}
+                                <Group grow>
+                                    <DateInput
+                                        label="Start Date"
+                                        placeholder="Select start date"
+                                        clearable
+                                        withAsterisk
+                                        {...form.getInputProps("startDate")}
+                                    />
+                                    <DateInput
+                                        label="End Date"
+                                        placeholder="Select end date"
+                                        clearable
+                                        withAsterisk
+                                        minDate={form.values.startDate || undefined}
+                                        {...form.getInputProps("endDate")}
+                                    />
                                 </Group>
-                            </Box>
-                        )}
-                    </Box>
+                            </Stack>
+                        </Stepper.Step>
 
-                    <Group grow>
-                        <DateInput
-                            label="Start Date"
-                            placeholder="Select start date"
-                            clearable
-                            withAsterisk
-                            {...form.getInputProps("startDate")}
-                        />
-                        <DateInput
-                            label="End Date"
-                            placeholder="Select end date"
-                            clearable
-                            withAsterisk
-                            minDate={form.values.startDate || undefined}
-                            {...form.getInputProps("endDate")}
-                        />
-                    </Group>
+                        <Stepper.Step label="Links" description="External URLs">
+                            <Stack gap="md" mt="md">
+                                <TextInput
+                                    label="Forum Link"
+                                    placeholder="Enter forum URL..."
+                                    {...form.getInputProps("forumUrl")}
+                                />
 
-                    <Box>
-                        <Text size="sm" fw={500} mb={4}>
-                            Extra Links
-                        </Text>
-                        <ExtraLinksEditor
-                            value={form.values.extraLinks}
-                            onChange={(links) => form.setFieldValue("extraLinks", links)}
-                        />
-                        {form.errors.extraLinks && (
-                            <Text size="xs" c="red" mt={4}>
-                                {form.errors.extraLinks}
-                            </Text>
-                        )}
-                    </Box>
+                                <TextInput
+                                    label="Banner URL"
+                                    placeholder="Enter banner image URL..."
+                                    {...form.getInputProps("bannerUrl")}
+                                />
 
-                    <Group justify="flex-end">
-                        <Button variant="subtle" onClick={onClose}>
+                                <TextInput
+                                    label="Enchant URL"
+                                    placeholder="Enter enchant ticket URL..."
+                                    {...form.getInputProps("enchantUrl")}
+                                />
+
+                                <TextInput
+                                    label="Discord Thread"
+                                    placeholder="Thread ID or Discord URL..."
+                                    description="Paste a thread ID or full Discord channel/thread link"
+                                    {...form.getInputProps("threadId")}
+                                />
+                            </Stack>
+                        </Stepper.Step>
+
+                        <Stepper.Step label="Metadata" description="Tags & links">
+                            <Stack gap="md" mt="md">
+                                <Box>
+                                    <Text size="sm" fw={500} mb={4}>
+                                        Extra Links
+                                    </Text>
+                                    <ExtraLinksEditor
+                                        value={form.values.extraLinks}
+                                        onChange={(links) => form.setFieldValue("extraLinks", links)}
+                                    />
+                                    {form.errors.extraLinks && (
+                                        <Text size="xs" c="red" mt={4}>
+                                            {form.errors.extraLinks}
+                                        </Text>
+                                    )}
+                                </Box>
+
+                                <Box>
+                                    <TagsInput
+                                        label="Search Tags"
+                                        placeholder="Enter tags..."
+                                        description="Press enter to add a tag, case-insensitive"
+                                        {...form.getInputProps("tags")}
+                                    />
+
+                                    {suggestedTags.length > 0 && (
+                                        <Box mt="xs">
+                                            <Text size="sm" fw={500} mb={4}>
+                                                Suggested tags
+                                            </Text>
+                                            <Group gap="xs">
+                                                {suggestedTags.map((tag) => (
+                                                    <Pill
+                                                        key={tag}
+                                                        onClick={() => handleAddSuggestedTag(tag)}
+                                                        style={{ cursor: "pointer" }}>
+                                                        <Group gap={6} wrap="nowrap">
+                                                            {tag}
+                                                            <FontAwesomeIcon icon="plus" size="xs" />
+                                                        </Group>
+                                                    </Pill>
+                                                ))}
+                                            </Group>
+                                        </Box>
+                                    )}
+                                </Box>
+                            </Stack>
+                        </Stepper.Step>
+
+                        <Stepper.Step label="Awards" description="Winners & badges">
+                            <Stack gap="md" mt="md">
+                                <MultipleUsersInput
+                                    value={selectedWinners}
+                                    onChange={setSelectedWinners}
+                                    label="Winners"
+                                    placeholder="Search for a winner to add..."
+                                    allowUserCreation
+                                    showActiveInfringementWarning
+                                />
+
+                                <FileUploadInput
+                                    value={files}
+                                    onChange={handleFileChange}
+                                    label="Badges"
+                                    description="Badge(s) must be .png and 172x80px"
+                                    placeholder="Up to 8 badges"
+                                    options={badgeUploadOptions}
+                                    accept={[".png"]}
+                                />
+                            </Stack>
+                        </Stepper.Step>
+                    </Stepper>
+
+                    <Group justify="space-between" mt="md">
+                        <Button type="button" variant="subtle" onClick={handleClose} disabled={isPending}>
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            loading={createTournamentMutation.isPending}
-                            disabled={selectedHosts.some((host) => host.activeInfringement)}>
-                            Create Tournament
-                        </Button>
+                        <Group gap="xs">
+                            {active > 0 && (
+                                <Button type="button" variant="default" onClick={prevStep} disabled={isPending}>
+                                    Back
+                                </Button>
+                            )}
+                            {isLastStep ? (
+                                <Button
+                                    key="create"
+                                    type="button"
+                                    onClick={handleCreateClick}
+                                    loading={isPending}
+                                    disabled={selectedHosts.some((host) => host.activeInfringement)}>
+                                    Create Tournament
+                                </Button>
+                            ) : (
+                                <Button key="next" type="button" onClick={nextStep} disabled={isPending}>
+                                    Next
+                                </Button>
+                            )}
+                        </Group>
                     </Group>
                 </Stack>
             </form>
