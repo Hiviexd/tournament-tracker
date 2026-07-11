@@ -486,6 +486,12 @@ class TournamentsController {
             .addField("Game Mode", tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "), true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
+                "Extra Links",
+                tournament.extraLinks?.length
+                    ? tournament.extraLinks.map((link) => `- [${link.name}](${link.url})`).join("\n")
+                    : "*None*",
+            )
+            .addField(
                 "Search Tags",
                 tournament.tags && tournament.tags.length
                     ? tournament.tags.map((tag) => `\`${tag}\``).join(", ")
