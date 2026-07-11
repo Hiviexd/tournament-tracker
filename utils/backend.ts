@@ -325,3 +325,20 @@ export function extractDiscordThreadId(input: string | null): string | null {
 
     return output || null;
 }
+
+const discordEmojis: Record<string, string> = {
+    osu: "<:osu:1123726872044380230>",
+    taiko: "<:taiko:1123726858316423271>",
+    catch: "<:catch:1123726862414250004>",
+    fruits: "<:catch:1123726862414250004>",
+    mania: "<:mania:1123726866705039460>",
+};
+
+/**
+ * Returns a Discord custom emoji string for a given key
+ * @param name Emoji key (e.g. `"taiko"`, `"osu"`)
+ * @returns Discord emoji markup, or an empty string if not found
+ */
+export function getDiscordEmoji(name: string): string {
+    return discordEmojis[name] ?? "";
+}

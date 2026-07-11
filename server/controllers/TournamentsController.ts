@@ -519,7 +519,7 @@ class TournamentsController {
             .addField(hosts.length === 1 ? "Host" : "Hosts", hostsList)
             .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
             .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
-            .addField("Game Mode", "<:osutaiko:1054779616583221278>", true)
+            .addField("Game Mode", tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "), true)
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
             .addField(
                 "Extra Links",
