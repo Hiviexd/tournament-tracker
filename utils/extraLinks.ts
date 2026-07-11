@@ -13,6 +13,6 @@ export const EXTRA_LINK_FA_ICONS: Partial<Record<ExtraLinkType, IconProp>> = {
     discord: ["fab", "discord"],
 };
 
-export const EXTRA_LINK_IMAGE_ICONS: Partial<Record<ExtraLinkType, string>> = {
-    mappersguild: "/assets/mg-icon.png",
+export const EXTRA_LINK_SVG_ICONS: Partial<Record<ExtraLinkType, string>> = {
+    mappersguild: "/assets/mg-icon.svg",
 };

@@ -10,7 +10,7 @@ import { notifications } from "@mantine/notifications";
 import {
     EXTRA_LINK_DEFAULTS,
     EXTRA_LINK_FA_ICONS,
-    EXTRA_LINK_IMAGE_ICONS,
+    EXTRA_LINK_SVG_ICONS,
     EXTRA_LINK_TYPES,
 } from "../../../../utils/extraLinks";
 
@@ -26,21 +26,23 @@ const typeSelectData = EXTRA_LINK_TYPES.map((type) => ({
 }));
 
 function ExtraLinkTypeIcon({ type, size = "sm" }: { type: ExtraLinkType; size?: "sm" | "xs" }) {
-    const imageSrc = EXTRA_LINK_IMAGE_ICONS[type];
+    const svgSrc = EXTRA_LINK_SVG_ICONS[type];
     const px = ICON_PX[size];
     const label = EXTRA_LINK_DEFAULTS[type];
 
     let iconContent: React.ReactNode;
 
-    if (imageSrc) {
+    if (svgSrc) {
         iconContent = (
             <Box
-                component="img"
-                src={imageSrc}
-                alt=""
                 w={px}
                 h={px}
-                style={{ objectFit: "contain", display: "block", flexShrink: 0 }}
+                style={{
+                    flexShrink: 0,
+                    backgroundColor: "currentColor",
+                    mask: `url(${svgSrc}) center / contain no-repeat`,
+                    WebkitMask: `url(${svgSrc}) center / contain no-repeat`,
+                }}
             />
         );
     } else {
