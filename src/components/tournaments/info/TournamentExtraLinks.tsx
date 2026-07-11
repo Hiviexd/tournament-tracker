@@ -1,4 +1,17 @@
-import { Stack, Group, Text, ActionIcon, Box, TextInput, Anchor, Combobox, InputBase, useCombobox, Tooltip } from "@mantine/core";
+import {
+    Stack,
+    Group,
+    Text,
+    ActionIcon,
+    Box,
+    TextInput,
+    Anchor,
+    Combobox,
+    InputBase,
+    useCombobox,
+    Tooltip,
+    SimpleGrid,
+} from "@mantine/core";
 import { ITournament, ITournamentExtraLink, ExtraLinkType } from "../../../../interfaces/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -60,13 +73,7 @@ function ExtraLinkTypeIcon({ type, size = "sm" }: { type: ExtraLinkType; size?: 
     );
 }
 
-function ExtraLinkTypeSelect({
-    value,
-    onChange,
-}: {
-    value: ExtraLinkType;
-    onChange: (type: ExtraLinkType) => void;
-}) {
+function ExtraLinkTypeSelect({ value, onChange }: { value: ExtraLinkType; onChange: (type: ExtraLinkType) => void }) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
@@ -301,18 +308,26 @@ export default function TournamentExtraLinks({ tournament }: IProps) {
             ) : (
                 <Box>
                     {savedLinks.length > 0 ? (
-                        <Stack gap={4}>
+                        <SimpleGrid
+                            cols={2}
+                            verticalSpacing={4}
+                            w="fit-content"
+                            styles={{
+                                root: {
+                                    gridTemplateColumns: "auto auto",
+                                },
+                            }}>
                             {savedLinks.map((link, index) => (
                                 <Group key={`${link.type}-${link.url}-${index}`} gap="xs" wrap="nowrap">
                                     <ExtraLinkTypeIcon type={link.type} />
-                                    <Text size="sm" fw={500}>
+                                    <Text size="sm" fw={500} lineClamp={1}>
                                         <Anchor href={link.url} target="_blank" rel="noopener noreferrer">
                                             {link.name}
                                         </Anchor>
                                     </Text>
                                 </Group>
                             ))}
-                        </Stack>
+                        </SimpleGrid>
                     ) : (
                         <Text size="sm" c="dimmed" fs="italic">
                             No extra links
