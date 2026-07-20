@@ -1,49 +1,43 @@
-import { useState, useRef, useEffect } from "react";
-import { Tooltip, Text } from "@mantine/core";
+import { useEffect, useRef, useState } from "react";
+import { Text, TextProps, Tooltip, TooltipProps } from "@mantine/core";
 
-interface IProps {
+type TruncatedTextProps = {
     children: string;
     lineClamp?: number;
-    textProps?: React.ComponentProps<typeof Text>;
-    tooltipProps?: Omit<React.ComponentProps<typeof Tooltip>, "label" | "children">;
-}
+    tooltipProps?: Omit<TooltipProps, "label" | "children" | "disabled">;
+} & Omit<TextProps, "children" | "lineClamp">;
 
-/**
- * Truncates text and shows a tooltip when the text is too long.
- * @param children - The text to truncate.
- * @param lineClamp - The number of lines to clamp the text to.
- * @param textProps - Props to pass to the `Text` component.
- * @param tooltipProps - Props to pass to the `Tooltip` component.
- */
-export function TruncatedText({ children, lineClamp = 1, textProps, tooltipProps }: IProps) {
-    const textRef = useRef<HTMLDivElement>(null);
+/** Truncates text and shows a shrink-wrapped tooltip when overflowing. */
+export function TruncatedText({ children, lineClamp = 1, tooltipProps, ...textProps }: TruncatedTextProps) {
+    const ref = useRef<HTMLDivElement>(null);
     const [truncated, setTruncated] = useState(false);
 
     useEffect(() => {
-        const el = textRef.current;
-        if (el) {
-            // Check if content is overflowing
+        const el = ref.current;
+        if (!el) return;
+
+        const update = () => {
             setTruncated(el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight);
-        }
+        };
+
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(el);
+        return () => observer.disconnect();
     }, [children, lineClamp]);
 
-    const content = (
-        <Text ref={textRef} lineClamp={lineClamp} style={{ maxWidth: "100%" }} {...textProps}>
-            {children}
-        </Text>
-    );
-
-    return truncated ? (
+    return (
         <Tooltip
+            {...tooltipProps}
+            disabled={!truncated}
             label={
                 <span style={{ display: "inline-block", maxWidth: 300, textAlign: "center", textWrap: "pretty" }}>
                     {children}
                 </span>
-            }
-            {...tooltipProps}>
-            {content}
+            }>
+            <Text ref={ref} maw="100%" lineClamp={lineClamp} {...textProps}>
+                {children}
+            </Text>
         </Tooltip>
-    ) : (
-        content
     );
 }

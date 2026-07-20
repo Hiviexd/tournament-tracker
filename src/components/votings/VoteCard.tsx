@@ -130,10 +130,7 @@ export default function VoteCard({ vote, options, allowNeutralVotes }: IProps) {
 
                                 return (
                                     <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
-                                        <TruncatedText
-                                            lineClamp={1}
-                                            textProps={{ size: "sm", w: { base: 500, sm: 200 } }}
-                                            tooltipProps={{ w: { base: 500, sm: "fit-content" } }}>
+                                        <TruncatedText size="sm" w={{ base: 500, sm: 200 }}>
                                             {options[score.optionIndex]}
                                         </TruncatedText>
                                         <Badge
@@ -162,10 +159,7 @@ export default function VoteCard({ vote, options, allowNeutralVotes }: IProps) {
 
                                     return (
                                         <Group key={score.optionIndex} wrap="nowrap" justify="space-between">
-                                            <TruncatedText
-                                                lineClamp={1}
-                                                textProps={{ size: "sm", w: { base: 500, sm: 200 } }}
-                                                tooltipProps={{ w: { base: 500, sm: "fit-content" } }}>
+                                            <TruncatedText size="sm" w={{ base: 500, sm: 200 }}>
                                                 {options[score.optionIndex]}
                                             </TruncatedText>
                                             <Tooltip label={getRankedChoiceDisplay(score.score).tooltip}>

@@ -205,9 +205,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
 
                                     <Table.Td w={350}>
                                         <Link to={`/tournaments/${tournament._id}`}>
-                                            <TruncatedText lineClamp={1} textProps={{ fw: 500 }}>
-                                                {tournament.name}
-                                            </TruncatedText>
+                                            <TruncatedText fw={500}>{tournament.name}</TruncatedText>
                                         </Link>
                                     </Table.Td>
 

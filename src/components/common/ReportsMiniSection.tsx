@@ -47,7 +47,7 @@ export default function ReportsMiniSection({ reports, hideTooltip = false }: IPr
                         className="tournament-report-card">
                         <Group justify="space-between" align="flex-start" gap="xs">
                             <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                                <TruncatedText lineClamp={1} textProps={{ size: "sm", fw: 500 }}>
+                                <TruncatedText size="sm" fw={500}>
                                     {report.title}
                                 </TruncatedText>
                                 <Text size="xs" c="dimmed">

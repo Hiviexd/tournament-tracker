@@ -82,7 +82,7 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             <Stack gap="md" justify="space-between" h="100%">
                 <Group justify="space-between" align="flex-start">
                     <Stack gap="xs">
-                        <TruncatedText lineClamp={2} textProps={{ size: "lg", fw: 500 }}>
+                        <TruncatedText lineClamp={2} size="lg" fw={500}>
                             {ticket.title}
                         </TruncatedText>
                         <Text size="sm" c="dimmed">
