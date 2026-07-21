@@ -23,6 +23,7 @@ interface IProps {
 
 export interface UserSearchRef {
     clearSelection: () => void;
+    focus: () => void;
 }
 
 export default function UserSearch({
@@ -61,6 +62,10 @@ export default function UserSearch({
 
     useImperativeHandle(ref, () => ({
         clearSelection: () => handleSelect(null),
+        focus: () => {
+            // Wait for the text input to remount after clearing a selection
+            setTimeout(() => inputRef.current?.focus(), 0);
+        },
     }));
 
     const handleChange = (value: string) => {

@@ -37,6 +37,7 @@ export default function MultipleUsersInput({
             onChange([...value, user]);
             setSelectedUser(null);
             userSearchRef.current?.clearSelection();
+            userSearchRef.current?.focus();
         } else {
             notifications.show({
                 title: "User already in list",
