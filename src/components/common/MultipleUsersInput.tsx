@@ -88,7 +88,7 @@ export default function MultipleUsersInput({
                 </Pill.Group>
             )}
 
-            <Group align="center" gap="xs" w="100%" wrap="nowrap">
+            <Group align="flex-start" gap="xs" w="100%" wrap="nowrap">
                 <UserSearch
                     ref={userSearchRef}
                     onChange={setSelectedUser}
@@ -100,6 +100,7 @@ export default function MultipleUsersInput({
                     placeholder={placeholder}
                     allowUserCreation={allowUserCreation}
                     disabled={disabled}
+                    error={error}
                 />
                 <ActionIcon
                     variant="light"
@@ -111,12 +112,11 @@ export default function MultipleUsersInput({
                     color="success"
                     size="lg"
                     disabled={!selectedUser || disabled}
-                    title="Add user">
+                    title="Add user"
+                    style={{ flexShrink: 0 }}>
                     <FontAwesomeIcon icon="plus" />
                 </ActionIcon>
             </Group>
-
-            {error && <div style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>{error}</div>}
 
             {showActiveInfringementWarning && value.some((user) => user.activeInfringement) && (
                 <AlertText size="xs" type="danger">
