@@ -61,6 +61,14 @@ export function isChallongeLink(link: string): boolean {
 }
 
 /**
+ * Checks if a link is a Twitch link
+ * @param link Link to check
+ */
+export function isTwitchLink(link: string): boolean {
+    return /^https:\/\/(www\.)?twitch\.tv\/[\w-]+(?:\/[\w-]+)*(?:\?.*)?$/.test(link);
+}
+
+/**
  * Checks if a link is a Google Docs link
  * @param link Link to check
  */
@@ -105,17 +113,19 @@ export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
     "mappersguild",
     "contest",
     "discord",
+    "twitch",
 ];
 
 export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
     news: "News Post",
     wiki: "Wiki Page",
     challonge: "Challonge",
-    sheet: "Sheet",
+    sheet: "Main Sheet",
     website: "Website",
     mappersguild: "Mapper's Guild",
     contest: "Contest Listing",
     discord: "Discord",
+    twitch: "Twitch",
 };
 
 /**
@@ -139,6 +149,8 @@ export function isExtraLinkUrlValid(type: ExtraLinkType, url: string): boolean {
             return isOsuContestLink(url);
         case "discord":
             return isDiscordLink(url);
+        case "twitch":
+            return isTwitchLink(url);
         default:
             return false;
     }

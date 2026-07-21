@@ -60,7 +60,11 @@ const TournamentSchema = new Schema<ITournament>(
         ],
         extraLinks: [
             {
-                type: { type: String, enum: ["news", "wiki", "challonge", "sheet", "website", "mappersguild", "contest", "discord"], required: true },
+                type: {
+                    type: String,
+                    enum: ["news", "wiki", "challonge", "sheet", "website", "mappersguild", "contest", "discord", "twitch"],
+                    required: true,
+                },
                 name: { type: String, required: true },
                 url: { type: String, required: true },
             },

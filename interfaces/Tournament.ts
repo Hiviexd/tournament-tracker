@@ -60,7 +60,16 @@ export interface ITournamentCreateResponse {
     tournament: ITournament;
 }
 
-export type ExtraLinkType = "news" | "wiki" | "challonge" | "sheet" | "website" | "mappersguild" | "contest" | "discord";
+export type ExtraLinkType =
+    | "news"
+    | "wiki"
+    | "challonge"
+    | "sheet"
+    | "website"
+    | "mappersguild"
+    | "contest"
+    | "discord"
+    | "twitch";
 
 export interface ITournamentExtraLink {
     type: ExtraLinkType;

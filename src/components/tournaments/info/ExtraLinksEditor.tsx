@@ -167,7 +167,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
         }
 
         onChange([...value, entry]);
-        setDraftRow(createDraftRow());
+        setDraftRow(createDraftRow(draftRow.type));
     };
 
     const handleRemove = (index: number) => {

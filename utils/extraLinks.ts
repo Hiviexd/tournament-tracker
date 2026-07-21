@@ -11,6 +11,7 @@ export const EXTRA_LINK_FA_ICONS: Partial<Record<ExtraLinkType, IconProp>> = {
     website: "link",
     contest: "medal",
     discord: ["fab", "discord"],
+    twitch: ["fab", "twitch"],
 };
 
 export const EXTRA_LINK_SVG_ICONS: Partial<Record<ExtraLinkType, string>> = {
