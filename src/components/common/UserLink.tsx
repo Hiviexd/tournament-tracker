@@ -29,6 +29,11 @@ export default function UserLink({
         }
     };
 
+    const banBadge =
+        displayActiveInfringement && user?.activeInfringement ? (
+            <BanIconBadge infringement={user.activeInfringement} osuId={user.osuId} />
+        ) : null;
+
     if (asText) {
         return (
             <Text
@@ -39,11 +44,7 @@ export default function UserLink({
                 style={{ cursor: onClick ? "pointer" : "default" }}
                 {...props}>
                 {username ?? user?.username}
-                {displayActiveInfringement && user?.activeInfringement && (
-                    <Text component="span" c="danger" ml={4} style={{ lineHeight: "normal" }}>
-                        <BanIconBadge infringement={user?.activeInfringement} />
-                    </Text>
-                )}
+                {banBadge}
             </Text>
         );
     }
@@ -51,19 +52,19 @@ export default function UserLink({
     return (
         <HoverCard position="right" shadow="md" disabled={!user || disablePopover}>
             <HoverCard.Target>
-                <Anchor
-                    {...props}
-                    fw={props.fw ?? 700}
-                    onClick={handleLinkClick}
-                    href={onClick ? undefined : `https://osu.ppy.sh/users/${user?.osuId}`}
-                    target={onClick ? undefined : "_blank"}
-                    rel={onClick ? undefined : "noopener noreferrer"}
-                    style={{ cursor: "pointer" }}>
-                    {user?.username ?? "Unknown"}
-                    {displayActiveInfringement && user?.activeInfringement && (
-                        <BanIconBadge infringement={user?.activeInfringement} />
-                    )}
-                </Anchor>
+                <Text component="span" style={{ display: "inline-flex", alignItems: "center" }}>
+                    <Anchor
+                        {...props}
+                        fw={props.fw ?? 700}
+                        onClick={handleLinkClick}
+                        href={onClick ? undefined : `https://osu.ppy.sh/users/${user?.osuId}`}
+                        target={onClick ? undefined : "_blank"}
+                        rel={onClick ? undefined : "noopener noreferrer"}
+                        style={{ cursor: "pointer" }}>
+                        {user?.username ?? "Unknown"}
+                    </Anchor>
+                    {banBadge}
+                </Text>
             </HoverCard.Target>
             <HoverCard.Dropdown p={0} style={{ border: "none" }}>
                 {user && <UserCard user={user} static />}
