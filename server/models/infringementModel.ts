@@ -14,7 +14,7 @@ const InfringementSchema = new Schema<IInfringement, IInfringementStatics>(
         endDate: { type: Date },
         reason: { type: String, required: true },
         threadId: { type: String },
-        enchantUrl: { type: String },
+        enchantUrl: { type: String, sparse: true, index: true },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

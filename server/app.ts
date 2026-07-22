@@ -44,7 +44,17 @@ app.use(handleCrawlers as express.RequestHandler);
 
 // settings/middlewares
 app.use(logger);
-app.use(express.json({ limit: "50mb" }));
+app.use(
+    express.json({
+        limit: "50mb",
+        verify: (req, _res, buf) => {
+            // Capture raw body for Enchant HMAC verification
+            if (req.headers["enchant-signature"]) {
+                (req as express.Request).rawBody = buf;
+            }
+        },
+    }),
+);
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 app.use(cookieParser());
 
@@ -102,6 +112,10 @@ import apiKeysRouter from "./routers/apiKeysRouter";
 import complianceRouter from "./routers/complianceRouter";
 import globalSearchRouter from "./routers/globalSearchRouter";
 import infringementsRouter from "./routers/infringementsRouter";
+import enchantRouter from "./routers/enchantRouter";
+
+// Enchant sidebar skips CORS/CSRF, gated via HMAC
+app.use("/api/enchant", enchantRouter);
 
 // setup api routes
 const apiRouter = express.Router();

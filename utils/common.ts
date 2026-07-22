@@ -204,6 +204,27 @@ export function isEnchantTicketLink(link: string): boolean {
 }
 
 /**
+ * Builds a canonical Enchant ticket URL from a ticket id
+ * @param ticketId Enchant ticket id
+ */
+export function buildEnchantTicketUrl(ticketId: string): string {
+    return `https://osu.enchant.com/spa/inbox/ticket/${ticketId}`;
+}
+
+/**
+ * Escapes text for safe HTML interpolation (basic entity encoding)
+ * @param value Text to escape
+ */
+export function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+/**
  * Get the number of full years from a number of days (365 days = 1 year).
  * Uses fixed 365-day years so that e.g. 730 days = 2 years for badge eligibility.
  * @param days Number of days

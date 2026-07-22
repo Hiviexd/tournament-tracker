@@ -18,6 +18,8 @@ declare module "express" {
     interface Request {
         session: Session;
         files?: Express.Multer.File[];
+        /** Raw request body buffer (captured for HMAC verification) */
+        rawBody?: Buffer;
     }
 }
 
