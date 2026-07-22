@@ -58,10 +58,7 @@ export default class EnchantSidebarService {
     private static renderTournament(tournament: ITournament): string {
         const name = utils.escapeHtml(tournament.name);
         const tournamentUrl = `${config.baseUrl}/tournaments/${tournament._id}`;
-        const rows: string[] = [
-            `<p><b>Tournament</b></p>`,
-            `<p><a href="${tournamentUrl}">${name}</a></p>`,
-        ];
+        const rows: string[] = [`<p><b>Tournament:</b> <a href="${tournamentUrl}">${name}</a></p>`];
 
         const hosts = (tournament.hosts || [])
             .filter((host): host is IUser => !!host && typeof host === "object" && "osuId" in host)
@@ -71,21 +68,21 @@ export default class EnchantSidebarService {
             });
 
         if (hosts.length > 0) {
-            rows.push(`<p>Hosts: ${hosts.join(", ")}</p>`);
+            rows.push(`<p><b>Hosts:</b> ${hosts.join(", ")}</p>`);
         }
 
         if (tournament.statusString) {
-            rows.push(`<p>Status: ${utils.escapeHtml(tournament.statusString)}</p>`);
+            rows.push(`<p><b>Status:</b> ${utils.escapeHtml(tournament.statusString)}</p>`);
         }
 
         if (tournament.forumUrl && /^https?:\/\//i.test(tournament.forumUrl)) {
             const forumUrl = utils.escapeHtml(tournament.forumUrl);
-            rows.push(`<p>Forum: <a href="${forumUrl}">Forum post</a></p>`);
+            rows.push(`<p><b>Forum:</b> <a href="${forumUrl}">Forum post</a></p>`);
         }
 
         if (tournament.threadId) {
             const discordUrl = this.buildDiscordThreadUrl(tournament.threadId);
-            rows.push(`<p>Discord: <a href="${discordUrl}">Thread</a></p>`);
+            rows.push(`<p><b>Discord:</b> <a href="${discordUrl}">Thread</a></p>`);
         }
 
         return `<div>${rows.join("")}</div>`;
@@ -98,20 +95,20 @@ export default class EnchantSidebarService {
         if (user?.osuId && user.username) {
             const username = utils.escapeHtml(user.username);
             const watchlistUrl = `${config.baseUrl}/watchlist?user=${user.osuId}`;
-            rows.push(`<p>User: <a href="${watchlistUrl}">${username}</a></p>`);
+            rows.push(`<p><b>User:</b> <a href="${watchlistUrl}">${username}</a></p>`);
         }
 
         if (infringement.typeString) {
-            rows.push(`<p>Type: ${utils.escapeHtml(infringement.typeString)}</p>`);
+            rows.push(`<p><b>Type:</b> ${utils.escapeHtml(infringement.typeString)}</p>`);
         }
 
         if (infringement.reason) {
-            rows.push(`<p>Reason: ${utils.escapeHtml(infringement.reason)}</p>`);
+            rows.push(`<p><b>Reason:</b> ${utils.escapeHtml(infringement.reason)}</p>`);
         }
 
         if (infringement.threadId) {
             const discordUrl = this.buildDiscordThreadUrl(infringement.threadId);
-            rows.push(`<p>Discord: <a href="${discordUrl}">Thread</a></p>`);
+            rows.push(`<p><b>Discord:</b> <a href="${discordUrl}">Thread</a></p>`);
         }
 
         return `<div>${rows.join("")}</div>`;
