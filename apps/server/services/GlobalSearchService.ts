@@ -1,13 +1,13 @@
-import Tournament from "../models/tournamentModel";
+import Tournament from "@tc/models/tournamentModel";
 import { ITournament } from "@tc/types/Tournament";
-import Voting from "../models/votingModel";
+import Voting from "@tc/models/votingModel";
 import { IVoting } from "@tc/types/Voting";
-import Ticket from "../models/ticketModel";
+import Ticket from "@tc/models/ticketModel";
 import { ITicket } from "@tc/types/Ticket";
 import TicketService from "./TicketService";
-import Resource from "../models/resourceModel";
+import Resource from "@tc/models/resourceModel";
 import { IResource } from "@tc/types/Resource";
-import Article from "../models/articleModel";
+import Article from "@tc/models/articleModel";
 import { IArticle } from "@tc/types/Article";
 import utils from "@tc/utils/server";
 

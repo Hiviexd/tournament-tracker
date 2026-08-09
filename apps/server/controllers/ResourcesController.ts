@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Resource from "../models/resourceModel";
+import Resource from "@tc/models/resourceModel";
 import LogService from "../services/LogService";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 
 const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl country" }];

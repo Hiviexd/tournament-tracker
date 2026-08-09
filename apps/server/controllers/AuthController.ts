@@ -3,7 +3,7 @@ import config from "@tc/config";
 import OsuApiService from "../services/OsuApiService";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import { Request, Response } from "express";
 
 class AuthController {

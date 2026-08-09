@@ -1,4 +1,4 @@
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import isEqual from "lodash/isEqual.js";
 import sampleSize from "lodash/sampleSize.js";
 import shuffle from "lodash/shuffle.js";

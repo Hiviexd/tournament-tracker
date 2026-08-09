@@ -1,5 +1,5 @@
 import BaseMigration from "./BaseMigration";
-import Tournament from "../models/tournamentModel";
+import Tournament from "@tc/models/tournamentModel";
 
 export default class SingleHostToMultipleHostsMigration extends BaseMigration {
     name = "SingleHostToMultipleHosts";

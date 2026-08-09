@@ -1,5 +1,5 @@
 import BaseJob from "./BaseJob";
-import Ticket from "../models/ticketModel";
+import Ticket from "@tc/models/ticketModel";
 import dayjs from "@tc/utils/dayjs";
 import config from "@tc/config";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";

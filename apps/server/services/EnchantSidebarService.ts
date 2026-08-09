@@ -4,8 +4,8 @@ import { IInfringement } from "@tc/types/Infringement";
 import { ITournament } from "@tc/types/Tournament";
 import { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
-import Infringement from "../models/infringementModel";
-import Tournament from "../models/tournamentModel";
+import Infringement from "@tc/models/infringementModel";
+import Tournament from "@tc/models/tournamentModel";
 
 const RESULT_CAP = 5;
 

@@ -1,6 +1,6 @@
 import BaseMigration from "./BaseMigration";
-import Tournament from "../models/tournamentModel";
-import User from "../models/userModel";
+import Tournament from "@tc/models/tournamentModel";
+import User from "@tc/models/userModel";
 import { Types } from "mongoose";
 
 /** Regex to extract osu.ppy.sh user IDs from log action text (e.g. [**name**](https://osu.ppy.sh/users/12345)) */

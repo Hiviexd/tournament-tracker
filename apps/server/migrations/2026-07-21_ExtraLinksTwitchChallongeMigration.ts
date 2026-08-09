@@ -1,5 +1,5 @@
 import BaseMigration from "./BaseMigration";
-import Tournament from "../models/tournamentModel";
+import Tournament from "@tc/models/tournamentModel";
 import utils from "@tc/utils/server";
 import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
 

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Ticket from "../models/ticketModel";
-import Message from "../models/messageModel";
-import User from "../models/userModel";
+import Ticket from "@tc/models/ticketModel";
+import Message from "@tc/models/messageModel";
+import User from "@tc/models/userModel";
 import { IUser } from "@tc/types/User";
 import LogService from "../services/LogService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";

@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "@tc/config";
 import { IAttachment } from "@tc/types/Attachment";
-import Attachment from "../models/attachmentModel";
+import Attachment from "@tc/models/attachmentModel";
 
 class UploadService {
     private client: S3Client;

@@ -1,5 +1,5 @@
-import Log from "../models/logModel";
-import User from "../models/userModel";
+import Log from "@tc/models/logModel";
+import User from "@tc/models/userModel";
 import { LogQueryParams, LogListQuery } from "@tc/types/Log";
 import { Request, Response } from "express";
 import utils from "@tc/utils/server";

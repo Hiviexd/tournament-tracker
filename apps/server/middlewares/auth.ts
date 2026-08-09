@@ -1,4 +1,4 @@
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 import OsuApiService from "../services/OsuApiService";
 import { Request, Response, NextFunction } from "express";

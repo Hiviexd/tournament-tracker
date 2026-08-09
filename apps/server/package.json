@@ -19,6 +19,7 @@
         "@aws-sdk/client-s3": "^3.995.0",
         "@scalar/express-api-reference": "^0.10.13",
         "@tc/config": "workspace:*",
+        "@tc/models": "workspace:*",
         "@tc/types": "workspace:*",
         "@tc/utils": "workspace:*",
         "archiver": "^7.0.1",

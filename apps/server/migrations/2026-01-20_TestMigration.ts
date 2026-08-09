@@ -1,5 +1,5 @@
 import BaseMigration from "./BaseMigration";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 
 export default class TestMigration extends BaseMigration {
     name = "Test";

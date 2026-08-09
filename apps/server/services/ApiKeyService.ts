@@ -1,6 +1,6 @@
 import { ApiScope, IApiKey } from "@tc/types/ApiKey";
-import User from "../models/userModel";
-import ApiKey from "../models/apiKeyModel";
+import User from "@tc/models/userModel";
+import ApiKey from "@tc/models/apiKeyModel";
 import utils from "@tc/utils/server";
 import { IUser } from "@tc/types/User";
 import { Request } from "express";

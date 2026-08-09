@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import NotificationDispatchService from "../services/NotificationDispatchService";
-import NotificationJob from "../models/notificationJobModel";
+import NotificationJob from "@tc/models/notificationJobModel";
 
 class DevController {
     private static readonly NOTIFICATION_LISTING_LIMIT = 30;

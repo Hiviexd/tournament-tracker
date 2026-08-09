@@ -1,7 +1,7 @@
 import { ITicket } from "@tc/types/Ticket";
 import { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
-import Message from "../models/messageModel";
+import Message from "@tc/models/messageModel";
 
 class TicketService {
     /**

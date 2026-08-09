@@ -1,5 +1,5 @@
 import { IUser, UserListQuery } from "@tc/types/User";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
@@ -9,8 +9,8 @@ import OsuApiService from "../services/OsuApiService";
 import LogService from "../services/LogService";
 import { Request, Response } from "express";
 import TournamentService from "../services/TournamentService";
-import Ticket from "../models/ticketModel";
-import Voting from "../models/votingModel";
+import Ticket from "@tc/models/ticketModel";
+import Voting from "@tc/models/votingModel";
 
 class UsersController {
     /** GET logged in user */

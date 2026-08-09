@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Article from "../models/articleModel";
+import Article from "@tc/models/articleModel";
 import LogService from "../services/LogService";
 import config from "@tc/config";
 import utils from "@tc/utils/server";

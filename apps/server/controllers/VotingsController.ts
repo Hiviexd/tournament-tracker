@@ -1,7 +1,7 @@
-import Voting from "../models/votingModel";
-import Vote from "../models/voteModel";
+import Voting from "@tc/models/votingModel";
+import Vote from "@tc/models/voteModel";
 import { VotingQueryParams, VotingListQuery } from "@tc/types/Voting";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import { IUser } from "@tc/types/User";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";

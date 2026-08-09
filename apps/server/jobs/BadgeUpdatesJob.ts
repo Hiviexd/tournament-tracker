@@ -1,5 +1,5 @@
 import BaseJob from "./BaseJob";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import config from "@tc/config";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";

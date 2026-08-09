@@ -1,5 +1,5 @@
 import BaseJob from "./BaseJob";
-import Voting from "../models/votingModel";
+import Voting from "@tc/models/votingModel";
 import dayjs from "@tc/utils/dayjs";
 import config from "@tc/config";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";

@@ -1,12 +1,12 @@
 import BaseJob from "./BaseJob";
-import Voting from "../models/votingModel";
+import Voting from "@tc/models/votingModel";
 import dayjs from "@tc/utils/dayjs";
 import config from "@tc/config";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import utils from "@tc/utils/server";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import LogService from "../services/LogService";
 import { IVoting } from "@tc/types/Voting";
 

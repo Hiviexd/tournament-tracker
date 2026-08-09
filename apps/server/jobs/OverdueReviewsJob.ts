@@ -1,12 +1,12 @@
 import BaseJob from "./BaseJob";
-import Tournament from "../models/tournamentModel";
+import Tournament from "@tc/models/tournamentModel";
 import dayjs from "@tc/utils/dayjs";
 import config from "@tc/config";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import utils from "@tc/utils/server";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import LogService from "../services/LogService";
 import { ITournament } from "@tc/types/Tournament";
 import { IUser } from "@tc/types/User";

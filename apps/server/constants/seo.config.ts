@@ -1,6 +1,6 @@
-import TournamentModel from "../models/tournamentModel";
-import VotingModel from "../models/votingModel";
-import TicketModel from "../models/ticketModel";
+import TournamentModel from "@tc/models/tournamentModel";
+import VotingModel from "@tc/models/votingModel";
+import TicketModel from "@tc/models/ticketModel";
 import capitalize from "lodash/capitalize.js";
 import utils from "@tc/utils/server";
 

@@ -1,4 +1,4 @@
-import NotificationJob from "../models/notificationJobModel";
+import NotificationJob from "@tc/models/notificationJobModel";
 import {
     IDiscordNotificationPayload,
     INotificationJob,

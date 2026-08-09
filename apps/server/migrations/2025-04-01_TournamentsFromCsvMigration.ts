@@ -6,10 +6,10 @@ import { parse as parseCsv } from "csv-parse";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-import Attachment from "../models/attachmentModel";
-import Tournament from "../models/tournamentModel";
-import Review from "../models/reviewModel";
-import Message from "../models/messageModel";
+import Attachment from "@tc/models/attachmentModel";
+import Tournament from "@tc/models/tournamentModel";
+import Review from "@tc/models/reviewModel";
+import Message from "@tc/models/messageModel";
 import mongoose from "mongoose";
 import UserService from "../services/UserService";
 import OsuBotService from "../services/OsuBotService";

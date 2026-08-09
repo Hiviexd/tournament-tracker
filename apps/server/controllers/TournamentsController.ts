@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import Tournament from "../models/tournamentModel";
+import Tournament from "@tc/models/tournamentModel";
 import UserService from "../services/UserService";
 import {
     TournamentQueryParams,
@@ -11,9 +11,9 @@ import {
     ITournamentExtraLink,
 } from "@tc/types/Tournament";
 import { IUser, UserGroup } from "@tc/types/User";
-import User from "../models/userModel";
+import User from "@tc/models/userModel";
 import UploadService from "../services/UploadService";
-import Review from "../models/reviewModel";
+import Review from "@tc/models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
@@ -27,7 +27,7 @@ import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import config from "@tc/config";
-import Message from "../models/messageModel";
+import Message from "@tc/models/messageModel";
 import utils from "@tc/utils/server";
 import { ITicket } from "@tc/types/Ticket";
 import { IVoting } from "@tc/types/Voting";

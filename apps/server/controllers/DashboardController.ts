@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Tournament from "../models/tournamentModel";
-import Voting from "../models/votingModel";
-import Ticket from "../models/ticketModel";
+import Tournament from "@tc/models/tournamentModel";
+import Voting from "@tc/models/votingModel";
+import Ticket from "@tc/models/ticketModel";
 import { IDashboardResponse } from "@tc/types/Dashboard";
 import { IUser } from "@tc/types/User";
 import InfringementService from "../services/InfringementService";

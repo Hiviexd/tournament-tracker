@@ -1,7 +1,7 @@
 import BaseMigration from "./BaseMigration";
-import Voting from "../models/votingModel";
-import Vote from "../models/voteModel";
-import User from "../models/userModel";
+import Voting from "@tc/models/votingModel";
+import Vote from "@tc/models/voteModel";
+import User from "@tc/models/userModel";
 
 interface IPif2Vote {
     comment?: string | null;

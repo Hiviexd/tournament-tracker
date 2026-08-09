@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Quote from "../models/quotesModel";
-import User from "../models/userModel";
+import Quote from "@tc/models/quotesModel";
+import User from "@tc/models/userModel";
 
 class QuotesController {
     /** GET a random quote */

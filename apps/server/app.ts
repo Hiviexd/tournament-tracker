@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import session from "express-session";
 import MongoStoreSession from "connect-mongo";
 import config from "@tc/config";
+import { initMongoose } from "@tc/models/init";
 import { logger } from "./middlewares/logger";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -17,17 +18,7 @@ import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Return the "new" updated object by default when doing findByIdAndUpdate
-mongoose.plugin((schema) => {
-    schema.pre("findOneAndUpdate", function (this: any) {
-        if (!("new" in this.options)) {
-            this.setOptions({ new: true });
-        }
-    });
-});
-
-// Make queries strict like in v5
-mongoose.set("strictQuery", true);
+initMongoose();
 
 const app = express();
 const MongoStore = MongoStoreSession(session);

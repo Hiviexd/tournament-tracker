@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import dayjs from "@tc/utils/dayjs";
-import Infringement from "../models/infringementModel";
-import User from "../models/userModel";
+import Infringement from "@tc/models/infringementModel";
+import User from "@tc/models/userModel";
 import {
     IInfringement,
     InfringementType,
