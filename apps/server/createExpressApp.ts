@@ -16,7 +16,6 @@ import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter
 import { handleCrawlers } from "./middlewares/seo";
 import votingsRouter from "./routers/votingsRouter";
 import logsRouter from "./routers/logsRouter";
-import tournamentsRouter from "./routers/tournamentsRouter";
 import ticketsRouter from "./routers/ticketsRouter";
 import articlesRouter from "./routers/articlesRouter";
 import devRouter from "./routers/devRouter";
@@ -136,10 +135,9 @@ export function createExpressApp(): express.Application {
         conditionalCsrf as express.RequestHandler,
     );
 
-    // Remaining Express routers (auth + users owned by Nest)
+    // Remaining Express routers (auth + users + tournaments owned by Nest)
     app.use("/api/votings", votingsRouter);
     app.use("/api/logs", logsRouter);
-    app.use("/api/tournaments", tournamentsRouter);
     app.use("/api/tickets", ticketsRouter);
     app.use("/api/articles", articlesRouter);
     app.use("/api/dev", devRouter);
