@@ -1,6 +1,6 @@
 {
-    "connection": "",
-    "session": "",
+    "connection": "mongodb://localhost:27017/tournament-tracker",
+    "session": "change-me-to-a-random-session-secret",
     "baseUrl": "http://localhost:8088",
     "automation": false,
     "osuApp": {
