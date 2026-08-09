@@ -6,7 +6,7 @@ The one-stop shop for all official osu! tournament correspondence and informatio
 
 ## API Usage
 
-Please refer to the [API documentation](https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation) for more information.
+Please refer to the [API documentation](https://tcomm.hivie.tn/api/docs) for more information.
 
 For a guide on how to use the Mappool Compliance API in your mappooling sheets, consult [this wiki article](https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage).
 
