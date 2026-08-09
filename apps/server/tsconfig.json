@@ -9,6 +9,8 @@
         "outDir": "dist",
         "noEmit": true,
         "types": ["node"],
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "paths": {
             "@controllers/*": ["./controllers/*"],
             "@routers/*": ["./routers/*"],
