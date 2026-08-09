@@ -1,87 +1,119 @@
-import { Controller, Get, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import TicketsController from "../../controllers/TicketsController";
-import { handleUpload } from "../../middlewares/upload";
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from "@nestjs/common";
+import type { Request } from "express";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { defaultFilesInterceptor } from "../common/upload.interceptors";
 import {
     IsCommitteeGuard,
     IsLoggedInGuard,
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
-
-function runUpload(middleware: typeof handleUpload, req: Request, res: Response): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let done = false;
-        const finish = () => {
-            if (!done) {
-                done = true;
-                resolve();
-            }
-        };
-        // Upload middleware may respond with 400 without calling next()
-        res.once("finish", finish);
-        middleware(req, res, (err?: unknown) => {
-            if (err) {
-                done = true;
-                reject(err instanceof Error ? err : new Error(String(err)));
-                return;
-            }
-            finish();
-        });
-    });
-}
+import { TicketsService } from "./tickets.service";
 
 @Controller("tickets")
-export class TicketsNestController {
+export class TicketsController {
+    constructor(private readonly ticketsService: TicketsService) {}
+
     @Get()
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.index(req, res);
+    index(
+        @Query()
+        query: {
+            type?: string;
+            title?: string;
+            content?: string;
+            targetUser?: string;
+            targetTournament?: string;
+            assignedGroup?: string;
+            isActive?: string;
+            showOwn?: string;
+            page?: string;
+        },
+        @CurrentUser() currentUser?: IUser,
+    ) {
+        return this.ticketsService.index(query, currentUser);
     }
 
     @Post("create")
     @UseGuards(IsLoggedInGuard)
-    async create(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await runUpload(handleUpload, req, res);
-        if (res.headersSent) return;
-        await TicketsController.create(req, res);
+    @UseInterceptors(defaultFilesInterceptor)
+    create(
+        @Body() body: Record<string, any>,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.ticketsService.create(body as any, files, currentUser, req.session);
     }
 
     @Get(":ticketId")
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
-    async getTicket(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.getTicket(req, res);
+    getTicket(@Param("ticketId") ticketId: string, @CurrentUser() currentUser?: IUser) {
+        return this.ticketsService.getTicket(ticketId, currentUser);
     }
 
     @Patch(":ticketId/sendMessage")
     @UseGuards(IsLoggedInGuard)
-    async sendMessage(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await runUpload(handleUpload, req, res);
-        if (res.headersSent) return;
-        await TicketsController.sendMessage(req, res);
+    @UseInterceptors(defaultFilesInterceptor)
+    sendMessage(
+        @Param("ticketId") ticketId: string,
+        @Body() body: { content: string; isNote?: string | boolean },
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.ticketsService.sendMessage(ticketId, body, files, currentUser, req.session);
     }
 
     @Patch(":ticketId/toggleStatus")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async toggleStatus(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.toggleStatus(req, res);
+    toggleStatus(@Param("ticketId") ticketId: string, @CurrentUser() currentUser: IUser, @Req() req: Request) {
+        return this.ticketsService.toggleStatus(ticketId, currentUser, req.session);
     }
 
     @Patch(":ticketId/updateThreadId")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async updateThreadId(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.updateThreadId(req, res);
+    updateThreadId(
+        @Param("ticketId") ticketId: string,
+        @Body("threadId") threadId: string | undefined,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.ticketsService.updateThreadId(ticketId, threadId, currentUser, req.session);
     }
 
     @Patch(":ticketId/snooze")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async snoozeTicket(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.snoozeTicket(req, res);
+    snoozeTicket(@Param("ticketId") ticketId: string, @CurrentUser() currentUser: IUser, @Req() req: Request) {
+        return this.ticketsService.snoozeTicket(ticketId, currentUser, req.session);
     }
 
     @Patch(":ticketId/edit")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async editReport(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TicketsController.editReport(req, res);
+    editReport(
+        @Param("ticketId") ticketId: string,
+        @Body()
+        body: {
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+        },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.ticketsService.editReport(ticketId, body, currentUser, req.session);
     }
 }

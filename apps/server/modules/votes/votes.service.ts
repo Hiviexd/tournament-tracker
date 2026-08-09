@@ -1,17 +1,22 @@
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+} from "@nestjs/common";
+import type { Session } from "express-session";
 import Voting from "@tc/models/votingModel";
 import Vote from "@tc/models/voteModel";
-import { VotingQueryParams, VotingListQuery } from "@tc/types/Voting";
+import type { VotingQueryParams, VotingListQuery } from "@tc/types/Voting";
 import User from "@tc/models/userModel";
-import { IUser } from "@tc/types/User";
+import type { IUser } from "@tc/types/User";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import LogService from "@tc/models/LogService";
 import utils from "@tc/utils/server";
-import { Request, Response } from "express";
-import UploadService from "../services/UploadService";
-import VotingService from "../services/VotingService";
+import UploadService from "../../services/UploadService";
+import { VotingService } from "../../services/VotingService";
 import { generateDiscordVotingResults } from "@tc/notifications/votingResults";
 
 const DEFAULT_POPULATE = [
@@ -34,12 +39,12 @@ const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
 const FILE_UPLOAD_CATEGORY = "votings";
 
-class VotingsController {
-    /** GET voting listing */
-    public async index(req: Request, res: Response) {
-        const reqQuery = req.query as VotingListQuery;
+@Injectable()
+export class VotesService {
+    constructor(private readonly votingService: VotingService) {}
+
+    async index(reqQuery: VotingListQuery, user: IUser | undefined) {
         const dbQuery: VotingQueryParams = {};
-        const user = res.locals!.user;
 
         if (reqQuery.title) dbQuery.title = new RegExp(utils.escapeRegexPattern(reqQuery.title), "i");
         if (reqQuery.category) dbQuery.category = reqQuery.category;
@@ -47,16 +52,13 @@ class VotingsController {
         if (reqQuery.visibility) dbQuery.isPublic = reqQuery.visibility === "public";
         if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
 
-        // Only show concluded AND public votes to non-committee members
         if (!user || !user.isCommitteeOrAdmin) {
             dbQuery.isActive = false;
             dbQuery.isPublic = true;
         }
 
-        // Handle needs attention filter for committee members
         if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
             dbQuery.isActive = true;
-            // First find votings where user is in assigned groups
             dbQuery.$or = [
                 { assignedGroups: "tc", $expr: { $eq: [user.isTournamentCommittee, true] } },
                 { assignedGroups: "cc", $expr: { $eq: [user.isContestCommittee, true] } },
@@ -66,7 +68,6 @@ class VotingsController {
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
 
-        // Get total count before pagination
         const total = await Voting.countDocuments(dbQuery);
 
         let votings = await Voting.find(dbQuery)
@@ -75,46 +76,56 @@ class VotingsController {
             .sort({ createdAt: -1 })
             .populate(DEFAULT_POPULATE);
 
-        // Filter out votings where user has already voted if needs attention is true
         if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
             votings = votings.filter((voting) => !voting.votes.some((vote) => vote.author._id.equals(user._id)));
         }
 
-        // Censor votings for non-committee members
         if (!user || !user.isCommitteeOrAdmin) {
-            votings = votings.map((voting) => VotingService.censorVotingForNonCommittee(voting));
+            votings = votings.map((voting) => this.votingService.censorVotingForNonCommittee(voting)) as typeof votings;
         }
 
-        res.json({
+        return {
             votings,
             total,
             page,
             pages: Math.ceil(total / DEFAULT_LIMIT),
-        });
+        };
     }
 
-    /** GET a voting */
-    public async getVoting(req: Request, res: Response) {
-        const votingId = req.params.votingId;
-        const user = res.locals!.user;
-
+    async getVoting(votingId: string, user: IUser | undefined) {
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
-        // Non-committee members can only view concluded public votes
         if ((!user || !user.isCommitteeOrAdmin) && (voting.isActive || !voting.isPublic)) {
-            return res.status(403).json({ error: "You can only view concluded public votes" });
+            throw new ForbiddenException("You can only view concluded public votes");
         }
 
-        // Censor voting for non-committee members
         if (!user || !user.isCommitteeOrAdmin) {
-            return res.json(VotingService.censorVotingForNonCommittee(voting));
+            return this.votingService.censorVotingForNonCommittee(voting);
         }
 
-        res.json(voting);
+        return voting;
     }
 
-    /** POST create a voting */
-    public async createVoting(req: Request, res: Response) {
+    async createVoting(
+        body: {
+            category: string;
+            assignedGroups: string[];
+            title: string;
+            description: string;
+            duration: number;
+            options: string[];
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+            type: string;
+            allowNeutralVotes?: boolean | string;
+            forceFullParticipation?: boolean | string;
+            binaryStrictPassThreshold?: number;
+        },
+        files: Express.Multer.File[] | undefined,
+        author: IUser,
+        session: Session,
+    ) {
         const {
             category,
             assignedGroups,
@@ -129,13 +140,8 @@ class VotingsController {
             allowNeutralVotes,
             forceFullParticipation,
             binaryStrictPassThreshold,
-        } = req.body;
-        const files = req.files as Express.Multer.File[];
+        } = body;
 
-        const author = res.locals!.user!;
-        let targetUser: IUser;
-
-        // Count only active voters in assigned groups
         const assignedUsersCount = await User.countDocuments({
             groups: { $in: assignedGroups },
             isActiveVoter: true,
@@ -166,32 +172,32 @@ class VotingsController {
 
         if (category === "user") {
             if (!targetUserId) {
-                return res.status(400).json({ error: "Missing target user ID" });
+                throw new BadRequestException("Missing target user ID");
             }
 
-            targetUser = await User.findById(targetUserId).orFail();
-            voting.targetUser = targetUser;
+            voting.targetUser = await User.findById(targetUserId).orFail();
         }
 
         if (category === "tournament") {
             if (!targetTournamentName || !targetTournamentLink) {
-                return res.status(400).json({ error: "Missing target tournament details" });
+                throw new BadRequestException("Missing target tournament details");
             }
 
             const sanitizedTournamentName = targetTournamentName.trim();
             const sanitizedTournamentLink = targetTournamentLink.trim();
 
-            if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
-                return res.status(400).json({ error: "Tournament name must be between 5 and 120 characters" });
+            if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120) {
+                throw new BadRequestException("Tournament name must be between 5 and 120 characters");
+            }
 
-            if (!utils.isOsuForumLink(sanitizedTournamentLink))
-                return res.status(400).json({ error: "Invalid tournament forum link" });
+            if (!utils.isOsuForumLink(sanitizedTournamentLink)) {
+                throw new BadRequestException("Invalid tournament forum link");
+            }
 
             voting.targetTournamentName = sanitizedTournamentName;
             voting.targetTournamentLink = sanitizedTournamentLink;
         }
 
-        // Handle file uploads
         if (files?.length) {
             voting.attachments = await UploadService.handleFileUploads(
                 files,
@@ -203,26 +209,19 @@ class VotingsController {
 
         await voting.save();
 
-        res.json({
-            message: "Vote created successfully!",
-            voting,
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting",
         );
 
-        // Discord
         const roles: ("tournament" | "contest")[] = [];
 
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setDescription(
                 `Created a new **${voting.category}** vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             )
@@ -260,73 +259,60 @@ class VotingsController {
         }
 
         await new WebhookBuilder().addEmbed(embed).addRoles(roles).setMessage("New Vote").send();
+
+        return {
+            message: "Vote created successfully!",
+            voting,
+        };
     }
 
-    /** POST submit vote */
-    public async submitVote(req: Request, res: Response) {
-        const votingId = req.params.votingId;
-        const { data, comment } = req.body;
+    async submitVote(
+        votingId: string,
+        body: { data: any; comment?: string },
+        author: IUser,
+        session: Session,
+    ) {
+        const { data, comment } = body;
 
-        const author = res.locals!.user!;
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         if (!voting.isActive) {
-            return res.status(400).json({ message: "Vote is not active!" });
+            throw new BadRequestException("Vote is not active!");
         }
 
         if (voting.abstainedUsers?.some((abstainedUser) => abstainedUser._id.equals(author._id))) {
-            return res.status(400).json({ error: "You are abstained from this vote!" });
+            throw new BadRequestException("You are abstained from this vote!");
         }
 
-        // Validate vote based on voting type
         if (data.type !== voting.type) {
-            return res.status(400).json({ error: "Vote type does not match voting type!" });
+            throw new BadRequestException("Vote type does not match voting type!");
         }
 
-        // We want comments to always be required now.
-        // Keeping previous logic commented out for preservation
         const requiresComment = true;
 
-        /*
-        const isExtremeVote = (value: number) => Math.abs(value) >= 4;
-
-        // Check if comment is required based on vote type and values
-        switch (data.type) {
-            case "binary":
-                requiresComment = isExtremeVote(data.score);
-                break;
-            case "variable":
-                requiresComment = data.scores.some((s) => isExtremeVote(s.score));
-                break;
-        }
-        */
-
         if (requiresComment && (!comment || comment.trim().length === 0)) {
-            return res.status(400).json({ error: "Vote comment is required." });
+            throw new BadRequestException("Vote comment is required.");
         }
 
-        // Validate vote data based on type
         switch (data.type) {
             case "classic":
                 if (typeof data.option !== "number" || data.option >= voting.options.length) {
-                    return res.status(400).json({ error: "Invalid option index" });
+                    throw new BadRequestException("Invalid option index");
                 }
                 break;
             case "binary":
                 if (typeof data.score !== "number" || data.score < -5 || data.score > 5) {
-                    return res.status(400).json({ error: "Invalid score (must be between -5 and 5)" });
+                    throw new BadRequestException("Invalid score (must be between -5 and 5)");
                 }
                 if (!voting.allowNeutralVotes && data.score === 0) {
-                    return res
-                        .status(400)
-                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                    throw new BadRequestException("Neutral votes (score of 0) are not allowed for this voting");
                 }
                 break;
             case "variable":
                 if (
                     !Array.isArray(data.scores) ||
                     !data.scores.every(
-                        (s) =>
+                        (s: any) =>
                             typeof s.optionIndex === "number" &&
                             s.optionIndex < voting.options.length &&
                             typeof s.score === "number" &&
@@ -334,29 +320,25 @@ class VotingsController {
                             s.score <= 5,
                     )
                 ) {
-                    return res.status(400).json({ error: "Invalid scores" });
+                    throw new BadRequestException("Invalid scores");
                 }
-                if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
-                    return res
-                        .status(400)
-                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                if (!voting.allowNeutralVotes && data.scores.some((s: any) => s.score === 0)) {
+                    throw new BadRequestException("Neutral votes (score of 0) are not allowed for this voting");
                 }
                 break;
             case "binary-strict":
                 if (typeof data.score !== "number" || data.score < -1 || data.score > 1) {
-                    return res.status(400).json({ error: "Invalid score (must be between -1 and 1)" });
+                    throw new BadRequestException("Invalid score (must be between -1 and 1)");
                 }
                 if (!voting.allowNeutralVotes && data.score === 0) {
-                    return res
-                        .status(400)
-                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                    throw new BadRequestException("Neutral votes (score of 0) are not allowed for this voting");
                 }
                 break;
             case "ranked-choice":
                 if (
                     !Array.isArray(data.scores) ||
                     !data.scores.every(
-                        (s) =>
+                        (s: any) =>
                             typeof s.optionIndex === "number" &&
                             s.optionIndex < voting.options.length &&
                             typeof s.score === "number" &&
@@ -364,12 +346,10 @@ class VotingsController {
                             s.score <= 2,
                     )
                 ) {
-                    return res.status(400).json({ error: "Invalid scores (must be between -2 and 2)" });
+                    throw new BadRequestException("Invalid scores (must be between -2 and 2)");
                 }
-                if (!voting.allowNeutralVotes && data.scores.some((s) => s.score === 0)) {
-                    return res
-                        .status(400)
-                        .json({ error: "Neutral votes (score of 0) are not allowed for this voting" });
+                if (!voting.allowNeutralVotes && data.scores.some((s: any) => s.score === 0)) {
+                    throw new BadRequestException("Neutral votes (score of 0) are not allowed for this voting");
                 }
                 break;
         }
@@ -386,7 +366,6 @@ class VotingsController {
             });
             isNewVote = true;
         } else {
-            // Find and update the existing vote document
             vote = await Vote.findById(existingVote._id);
             if (vote) {
                 vote.comment = comment;
@@ -403,63 +382,40 @@ class VotingsController {
             await voting.save();
         }
 
-        res.json({
-            message: "Vote submitted successfully!",
-            voting,
-        });
-
         if (isNewVote) {
-            // Logger
             await LogService.generate(
-                req.session.mongoId!,
+                session.mongoId!,
                 `Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                 "voting",
             );
-
-            // Discord
-            // ! Disabled per team request
-            /*
-            await new WebhookBuilder()
-                .addEmbed(
-                    new EmbedBuilder()
-                        .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
-                        .setDescription(`Submitted a vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
-                        .setColor(DiscordUtils.webhookColors.lightGreen)
-                )
-                .setNotification("silent")
-                .send();
-            */
         }
+
+        return {
+            message: "Vote submitted successfully!",
+            voting,
+        };
     }
 
-    /** POST toggle voting status */
-    public async toggleVotingStatus(req: Request, res: Response) {
-        const votingId = req.params.votingId;
+    async toggleVotingStatus(votingId: string, session: Session) {
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
         voting.isActive = !voting.isActive;
         voting.concludedAt = voting.isActive ? undefined : new Date();
         await voting.save();
 
-        res.json({
-            message: `Vote status is now ${voting.isActive ? "active" : "concluded"}`,
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Toggled vote status for [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${
                 voting.isActive ? "active" : "inactive"
             }`,
             "voting",
         );
 
-        // Only send results if concluding the vote
         if (!voting.isActive) {
             const fields = generateDiscordVotingResults(voting);
 
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(DiscordUtils.webhookColors.darkYellow)
                 .setDescription(`Concluded vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`);
 
@@ -469,19 +425,35 @@ class VotingsController {
 
             await new WebhookBuilder().addEmbed(embed).send();
         } else {
-            // Voting resumed
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setDescription(`Resumed vote for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
                 .setColor(DiscordUtils.webhookColors.yellow);
 
             await new WebhookBuilder().addEmbed(embed).send();
         }
+
+        return {
+            message: `Vote status is now ${voting.isActive ? "active" : "concluded"}`,
+        };
     }
 
-    /** POST update voting */
-    public async updateVoting(req: Request, res: Response) {
-        const votingId = req.params.votingId;
+    async updateVoting(
+        votingId: string,
+        body: {
+            title: string;
+            description: string;
+            duration: number;
+            options: string[];
+            publicDescription?: string;
+            allowNeutralVotes?: boolean;
+            category?: string;
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+        },
+        session: Session,
+    ) {
         const {
             title,
             description,
@@ -493,26 +465,23 @@ class VotingsController {
             targetUserId,
             targetTournamentName,
             targetTournamentLink,
-        } = req.body;
+        } = body;
 
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
             if (category) {
-                voting.category = category;
+                voting.category = category as any;
 
                 if (category === "user" && targetUserId) {
-                    // user vote - assign user and clear tournament details
                     voting.targetUser = await User.findById(targetUserId).orFail();
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
                 } else if (category === "tournament" && targetTournamentName && targetTournamentLink) {
-                    // tournament vote - assign tournament details and clear user details
                     voting.targetTournamentName = targetTournamentName;
                     voting.targetTournamentLink = targetTournamentLink;
                     voting.targetUser = undefined;
                 } else if (category === "discussion") {
-                    // discussion vote - clear all details
                     voting.targetUser = undefined;
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
@@ -524,92 +493,79 @@ class VotingsController {
         voting.description = description;
         voting.duration = duration;
         voting.publicDescription = publicDescription;
-        voting.allowNeutralVotes = allowNeutralVotes;
+        if (allowNeutralVotes !== undefined) {
+            voting.allowNeutralVotes = allowNeutralVotes;
+        }
 
-        // only update options when there is no votes
         if (!voting.votes.length) voting.options = options;
 
         await voting.save();
 
-        res.json({
-            message: "Vote updated successfully!",
-            voting,
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Updated the vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting",
         );
+
+        return {
+            message: "Vote updated successfully!",
+            voting,
+        };
     }
 
-    /** POST delete a voting */
-    public async deleteVoting(req: Request, res: Response) {
-        const votingId = req.params.votingId;
-
+    async deleteVoting(votingId: string, session: Session) {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.status(400).json({ error: "Cannot delete concluded votes!" });
+            throw new BadRequestException("Cannot delete concluded votes!");
         }
 
         if (voting.votes.length) {
-            return res.status(400).json({ error: "Cannot delete voting with votes!" });
+            throw new BadRequestException("Cannot delete voting with votes!");
         }
 
         await voting.deleteOne();
 
-        res.json({
-            message: "Vote deleted successfully!",
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Deleted the vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting",
         );
 
-        // Discord
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setDescription(`Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
                     .setColor(DiscordUtils.webhookColors.darkRed),
             )
             .send();
+
+        return {
+            message: "Vote deleted successfully!",
+        };
     }
 
-    /** POST toggle voting public */
-    public async toggleVotingPublic(req: Request, res: Response) {
-        const votingId = req.params.votingId;
+    async toggleVotingPublic(votingId: string, session: Session) {
         const voting = await Voting.findById(votingId).orFail();
 
         if (voting.isActive) {
-            return res.status(400).json({ error: "Cannot change publicity of active votes" });
+            throw new BadRequestException("Cannot change publicity of active votes");
         }
 
         voting.isPublic = !voting.isPublic;
         await voting.save();
 
-        res.json({
-            message: `Vote is now ${voting.isPublic ? "public" : "private"}`,
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
                 voting.isPublic ? "public" : "private"
             }`,
             "voting",
         );
 
-        // Discord
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setDescription(
                 `Made vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) ${
                     voting.isPublic ? "available for **public** viewing" : "private"
@@ -618,60 +574,53 @@ class VotingsController {
             .setColor(voting.isPublic ? DiscordUtils.webhookColors.lightPurple : DiscordUtils.webhookColors.darkPurple);
 
         await new WebhookBuilder().addEmbed(embed).send();
+
+        return {
+            message: `Vote is now ${voting.isPublic ? "public" : "private"}`,
+        };
     }
 
-    /** POST delete all votes from a voting */
-    public async clearVotes(req: Request, res: Response) {
-        const votingId = req.params.votingId;
-
+    async clearVotes(votingId: string, session: Session) {
         const voting = await Voting.findById(votingId).orFail();
 
         if (!voting.isActive) {
-            return res.status(400).json({ error: "Cannot handle concluded votes!" });
+            throw new BadRequestException("Cannot handle concluded votes!");
         }
 
         voting.votes = [];
         await voting.save();
 
-        res.json({
-            message: "Votes cleared successfully!",
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
             "voting",
         );
 
-        // Discord
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setDescription(
                         `Cleared all votes from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
                     )
                     .setColor(DiscordUtils.webhookColors.red),
             )
             .send();
+
+        return {
+            message: "Votes cleared successfully!",
+        };
     }
 
-    /** PATCH toggle abstention */
-    public async toggleAbstention(req: Request, res: Response) {
-        const votingId = req.params.votingId;
-
+    async toggleAbstention(votingId: string, user: IUser, session: Session) {
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         if (!voting.isActive) {
-            return res.status(400).json({ error: "Cannot handle concluded votes!" });
+            throw new BadRequestException("Cannot handle concluded votes!");
         }
 
-        const user = res.locals!.user!;
-
-        // check if user already submitted a vote
         if (voting.votes.some((vote) => vote.author._id.equals(user._id))) {
-            return res.status(400).json({ error: "You have already submitted a vote!" });
+            throw new BadRequestException("You have already submitted a vote!");
         }
 
         let isAbstained: boolean;
@@ -682,47 +631,36 @@ class VotingsController {
             voting.abstainedUsers = [];
         }
 
-        // check if user is already abstained (comparing by _id)
         const userIndex = voting.abstainedUsers.findIndex((abstainedUser) => abstainedUser._id.equals(user._id));
 
         if (userIndex >= 0) {
-            // user is abstained, remove them
             voting.abstainedUsers.splice(userIndex, 1);
             voting.requiredVotes++;
             isAbstained = false;
         } else {
-            // user is not abstained, add them
             voting.abstainedUsers.push(user);
             voting.requiredVotes--;
             isAbstained = true;
         }
 
         if (voting.requiredVotes < 1) {
-            return res.status(400).json({
-                error: "Cannot abstain: would result in no required votes!",
-            });
+            throw new BadRequestException("Cannot abstain: would result in no required votes!");
         }
 
         await voting.save();
 
-        res.json({
-            message: `You ${isAbstained ? "have abstained" : "are no longer abstained"} from this vote!`,
-        });
-
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Toggled abstention for [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${
                 isAbstained ? "true" : "false"
             }`,
             "voting",
         );
 
-        // Discord
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setDescription(
                         `${isAbstained ? "Abstained" : "Removed abstention"} from vote: [**${voting.title}**](${
                             config.baseUrl
@@ -732,7 +670,9 @@ class VotingsController {
                     .setFooter(`Required votes: ${originalRequiredVotes} → ${voting.requiredVotes}`),
             )
             .send();
+
+        return {
+            message: `You ${isAbstained ? "have abstained" : "are no longer abstained"} from this vote!`,
+        };
     }
 }
-
-export default new VotingsController();

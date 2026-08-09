@@ -1,7 +1,23 @@
-import { Controller, Delete, Get, Patch, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import VotingsController from "../../controllers/VotingsController";
-import { handleUpload } from "../../middlewares/upload";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    Req,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from "@nestjs/common";
+import type { Request } from "express";
+import type { IUser } from "@tc/types/User";
+import type { VotingListQuery } from "@tc/types/Voting";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { defaultFilesInterceptor } from "../common/upload.interceptors";
 import {
     IsAdminGuard,
     IsCommitteeGuard,
@@ -9,90 +25,84 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
-
-function runUpload(middleware: typeof handleUpload, req: Request, res: Response): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let done = false;
-        const finish = () => {
-            if (!done) {
-                done = true;
-                resolve();
-            }
-        };
-        // Upload middleware may respond with 400 without calling next()
-        res.once("finish", finish);
-        middleware(req, res, (err?: unknown) => {
-            if (err) {
-                done = true;
-                reject(err instanceof Error ? err : new Error(String(err)));
-                return;
-            }
-            finish();
-        });
-    });
-}
+import { VotesService } from "./votes.service";
 
 @Controller("votes")
-export class VotesNestController {
+export class VotesController {
+    constructor(private readonly votesService: VotesService) {}
+
     @Get()
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.index(req, res);
+    index(@Query() query: VotingListQuery, @CurrentUser() currentUser?: IUser) {
+        return this.votesService.index(query, currentUser);
     }
 
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async createVoting(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await runUpload(handleUpload, req, res);
-        if (res.headersSent) return;
-        await VotingsController.createVoting(req, res);
+    @UseInterceptors(defaultFilesInterceptor)
+    createVoting(
+        @Body() body: Record<string, any>,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.votesService.createVoting(body as any, files, currentUser, req.session);
     }
 
     @Get(":votingId")
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
-    async getVoting(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.getVoting(req, res);
+    getVoting(@Param("votingId") votingId: string, @CurrentUser() currentUser?: IUser) {
+        return this.votesService.getVoting(votingId, currentUser);
     }
 
     @Post(":votingId/submitVote")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async submitVote(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.submitVote(req, res);
+    submitVote(
+        @Param("votingId") votingId: string,
+        @Body() body: { data: any; comment?: string },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.votesService.submitVote(votingId, body, currentUser, req.session);
     }
 
     @Patch(":votingId/toggleStatus")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async toggleVotingStatus(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.toggleVotingStatus(req, res);
+    toggleVotingStatus(@Param("votingId") votingId: string, @Req() req: Request) {
+        return this.votesService.toggleVotingStatus(votingId, req.session);
     }
 
     @Put(":votingId/update")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async updateVoting(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.updateVoting(req, res);
+    updateVoting(@Param("votingId") votingId: string, @Body() body: Record<string, any>, @Req() req: Request) {
+        return this.votesService.updateVoting(votingId, body as any, req.session);
     }
 
     @Delete(":votingId/delete")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async deleteVoting(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.deleteVoting(req, res);
+    deleteVoting(@Param("votingId") votingId: string, @Req() req: Request) {
+        return this.votesService.deleteVoting(votingId, req.session);
     }
 
     @Patch(":votingId/togglePublic")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async toggleVotingPublic(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.toggleVotingPublic(req, res);
+    toggleVotingPublic(@Param("votingId") votingId: string, @Req() req: Request) {
+        return this.votesService.toggleVotingPublic(votingId, req.session);
     }
 
     @Delete(":votingId/clearVotes")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
-    async clearVotes(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.clearVotes(req, res);
+    clearVotes(@Param("votingId") votingId: string, @Req() req: Request) {
+        return this.votesService.clearVotes(votingId, req.session);
     }
 
     @Patch(":votingId/toggleAbstention")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async toggleAbstention(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await VotingsController.toggleAbstention(req, res);
+    toggleAbstention(
+        @Param("votingId") votingId: string,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.votesService.toggleAbstention(votingId, currentUser, req.session);
     }
 }

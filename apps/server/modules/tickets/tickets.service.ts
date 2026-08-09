@@ -1,17 +1,24 @@
-import { Request, Response } from "express";
+import {
+    BadRequestException,
+    ForbiddenException,
+    HttpException,
+    HttpStatus,
+    Injectable,
+} from "@nestjs/common";
+import type { Session } from "express-session";
 import Ticket from "@tc/models/ticketModel";
 import Message from "@tc/models/messageModel";
 import User from "@tc/models/userModel";
-import { IUser } from "@tc/types/User";
+import type { IUser } from "@tc/types/User";
 import LogService from "@tc/models/LogService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
-import TicketService from "../services/TicketService";
+import { TicketService } from "../../services/TicketService";
 import capitalize from "lodash/capitalize.js";
-import UploadService from "../services/UploadService";
+import UploadService from "../../services/UploadService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 
 const DEFAULT_POPULATE = [
@@ -34,9 +41,24 @@ const FILE_UPLOAD_CATEGORY = "tickets";
 
 const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 
-class TicketsController {
-    /** GET ticket listing */
-    public async index(req: Request, res: Response) {
+@Injectable()
+export class TicketsService {
+    constructor(private readonly ticketService: TicketService) {}
+
+    async index(
+        queryParams: {
+            type?: string;
+            title?: string;
+            content?: string;
+            targetUser?: string;
+            targetTournament?: string;
+            assignedGroup?: string;
+            isActive?: string;
+            showOwn?: string;
+            page?: string | number;
+        },
+        user: IUser | undefined,
+    ) {
         const {
             type,
             title,
@@ -47,27 +69,21 @@ class TicketsController {
             isActive,
             showOwn,
             page = 1,
-        } = req.query;
+        } = queryParams;
 
-        const user = res.locals!.user;
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
-        // Check if we need content search
-        const needsContentSearch = content && (content as string).trim().length >= 3;
-        const needsUnifiedSearch = type === "ticket" && title && (title as string).trim().length >= 3;
+        const needsContentSearch = content && content.trim().length >= 3;
+        const needsUnifiedSearch = type === "ticket" && title && title.trim().length >= 3;
 
         let ticketIdsFromContent: any[] = [];
 
-        // Handle content search with simple post-query processing
         if (needsContentSearch || needsUnifiedSearch) {
-            const searchTerm = needsContentSearch ? (content as string).trim() : (title as string).trim();
+            const searchTerm = needsContentSearch ? content.trim() : title!.trim();
 
-            // Find messages that match the content search
-            const matchingMessages = await TicketService.searchMessageContent(searchTerm);
+            const matchingMessages = await this.ticketService.searchMessageContent(searchTerm);
 
-            // Find tickets that contain these messages
             if (needsUnifiedSearch) {
-                // For tickets: title OR content search
                 const titleMatchingTickets = await Ticket.find({
                     title: new RegExp(utils.escapeRegexPattern(searchTerm), "i"),
                 }).distinct("_id");
@@ -76,48 +92,40 @@ class TicketsController {
                     messages: { $in: matchingMessages },
                 }).distinct("_id");
 
-                // Combine both searches
                 ticketIdsFromContent = [...new Set([...titleMatchingTickets, ...contentMatchingTickets])];
             } else {
-                // For reports: content search only
                 ticketIdsFromContent = await Ticket.find({
                     messages: { $in: matchingMessages },
                 }).distinct("_id");
             }
 
-            // If no matching tickets found, return empty result
             if (ticketIdsFromContent.length === 0) {
-                return res.json({
+                return {
                     tickets: [],
                     total: 0,
                     page: Number(page),
                     pages: 0,
-                });
+                };
             }
         }
 
-        // Build regular query (with potential content search constraint)
         const query: any = {};
 
         if (type) query.type = user ? type : "ticket";
 
-        // Add content search constraint if applicable
         if (ticketIdsFromContent.length > 0) {
             query._id = { $in: ticketIdsFromContent };
-        } else {
-            // Apply title search only if not doing content search
-            if (type === "ticket" && title && (title as string).trim().length >= 3) {
-                query.title = new RegExp(utils.escapeRegexPattern(title as string), "i");
-            }
+        } else if (type === "ticket" && title && title.trim().length >= 3) {
+            query.title = new RegExp(utils.escapeRegexPattern(title), "i");
         }
 
         if (type === "report") {
             if (targetUser) {
-                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser as string);
+                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser);
                 if (targetUserDoc) query.targetUser = targetUserDoc._id;
             }
             if (targetTournament) {
-                query.targetTournamentName = new RegExp(utils.escapeRegexPattern(targetTournament as string), "i");
+                query.targetTournamentName = new RegExp(utils.escapeRegexPattern(targetTournament), "i");
             }
         }
         if (assignedGroup) query.assignedGroup = assignedGroup;
@@ -137,44 +145,48 @@ class TicketsController {
             Ticket.countDocuments(query),
         ]);
 
-        tickets.forEach((ticket) => TicketService.sanitizeTicket(ticket, user));
+        tickets.forEach((ticket) => this.ticketService.sanitizeTicket(ticket, user));
 
-        res.json({
+        return {
             tickets,
             total,
             page: Number(page),
             pages: Math.ceil(total / DEFAULT_LIMIT),
-        });
+        };
     }
 
-    /** GET ticket */
-    public async getTicket(req: Request, res: Response) {
-        const user = res.locals!.user;
-        const ticket = await Ticket.findById(req.params.ticketId).populate(DEFAULT_POPULATE).orFail();
+    async getTicket(ticketId: string, user: IUser | undefined) {
+        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
 
-        // Case 1: If it's a report and user is not logged in, deny access
         if (!ticket.isTicket && !user) {
-            return res.status(403).json({ error: "Not authorized to view this ticket" });
+            throw new ForbiddenException("Not authorized to view this ticket");
         }
 
-        // Case 2: If it's a report, only allow access to admins, committee members, or the author
         if (!ticket.isTicket && user && !(user.isCommitteeOrAdmin || ticket.author._id.equals(user._id))) {
-            return res.status(403).json({ error: "Not authorized to view this ticket" });
+            throw new ForbiddenException("Not authorized to view this ticket");
         }
 
-        const sanitizedTicket = TicketService.sanitizeTicket(ticket, user);
-        res.json(sanitizedTicket);
+        return this.ticketService.sanitizeTicket(ticket, user);
     }
 
-    /** POST create ticket */
-    public async create(req: Request, res: Response) {
-        const author = res.locals!.user!;
+    async create(
+        body: {
+            title?: string;
+            message: string;
+            type: string;
+            assignedGroup?: string;
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+        },
+        files: Express.Multer.File[] | undefined,
+        author: IUser,
+        session: Session,
+    ) {
         const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentLink } =
-            req.body;
-        const files = req.files as Express.Multer.File[];
+            body;
 
-        // Rate limiting check - prevent creating multiple tickets/reports of the same type within an hour
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
         const recentTicket = await Ticket.findOne({
             author: author._id,
             type,
@@ -182,20 +194,22 @@ class TicketsController {
         });
 
         if (recentTicket && !author.isCommittee) {
-            return res.status(429).json({
-                error: `You have already created a ${type} within the last hour. Please wait before creating another one.`,
-            });
+            throw new HttpException(
+                `You have already created a ${type} within the last hour. Please wait before creating another one.`,
+                HttpStatus.TOO_MANY_REQUESTS,
+            );
         }
 
         let targetUser: IUser;
 
-        if (type === "ticket" && (title.length < 5 || title.length > 80))
-            return res.status(400).json({ error: "Title must be between 5 and 80 characters" });
+        if (type === "ticket" && (title!.length < 5 || title!.length > 80)) {
+            throw new BadRequestException("Title must be between 5 and 80 characters");
+        }
 
-        if (message.length < 10 || message.length > 8000)
-            return res.status(400).json({ error: "Message must be between 10 and 8000 characters" });
+        if (message.length < 10 || message.length > 8000) {
+            throw new BadRequestException("Message must be between 10 and 8000 characters");
+        }
 
-        // construct report title
         let constructedTitle: string = title ? title.trim() : "";
 
         if (type === "report") {
@@ -218,19 +232,19 @@ class TicketsController {
                 ticket.targetUser = targetUser;
             } else {
                 if (!targetTournamentName || !targetTournamentLink) {
-                    return res.status(400).json({ error: "Missing target tournament details" });
+                    throw new BadRequestException("Missing target tournament details");
                 }
 
                 const sanitizedTournamentName: string = targetTournamentName.trim();
                 const sanitizedTournamentLink: string = targetTournamentLink.trim();
 
-                if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
-                    return res.status(400).json({
-                        error: "Tournament name must be between 5 and 120 characters",
-                    });
+                if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120) {
+                    throw new BadRequestException("Tournament name must be between 5 and 120 characters");
+                }
 
-                if (!utils.isOsuForumLink(sanitizedTournamentLink))
-                    return res.status(400).json({ error: "Invalid tournament forum link" });
+                if (!utils.isOsuForumLink(sanitizedTournamentLink)) {
+                    throw new BadRequestException("Invalid tournament forum link");
+                }
 
                 ticket.targetTournamentName = sanitizedTournamentName;
                 ticket.targetTournamentLink = sanitizedTournamentLink;
@@ -244,9 +258,8 @@ class TicketsController {
             attachments: [],
         });
 
-        // Handle file uploads
         initialMessage.attachments = await UploadService.handleFileUploads(
-            files,
+            files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,
             author.id,
@@ -256,14 +269,12 @@ class TicketsController {
         ticket.messages.push(initialMessage.id);
         await ticket.save();
 
-        // Logger
         await LogService.generate(
             author.id,
             `Created a new ${type}: [**${ticket.title}**](${config.baseUrl}/${type}s/${ticket._id})`,
             "ticket",
         );
 
-        // Discord webhook
         const roles: ("tournament" | "contest")[] = [];
 
         if (ticket.assignedGroup === "tc") roles.push("tournament");
@@ -272,7 +283,7 @@ class TicketsController {
         const embedTitle = type === "report" ? `New ${ticket.title}` : `New Ticket: ${ticket.title}`;
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(type === "report" ? DiscordUtils.webhookColors.lightRed : DiscordUtils.webhookColors.blue)
             .setTitle(embedTitle)
             .setUrl(`${config.baseUrl}/${type}s/${ticket._id}`)
@@ -302,31 +313,32 @@ class TicketsController {
             .setMessage(`New ${capitalize(type)}`)
             .send();
 
-        res.json({ message: `${capitalize(type)} created successfully!`, ticket });
+        return { message: `${capitalize(type)} created successfully!`, ticket };
     }
 
-    /** POST send message in ticket */
-    public async sendMessage(req: Request, res: Response) {
-        const currentUser = res.locals!.user!;
-        const { ticketId } = req.params;
-        const { content } = req.body;
-        const isNote = req.body.isNote === "true" || req.body.isNote === false;
-        const files = req.files as Express.Multer.File[];
+    async sendMessage(
+        ticketId: string,
+        body: { content: string; isNote?: string | boolean },
+        files: Express.Multer.File[] | undefined,
+        currentUser: IUser,
+        session: Session,
+    ) {
+        const { content } = body;
+        const isNote = body.isNote === "true" || body.isNote === true;
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const senderIsTicketAuthor = ticket.author._id.equals(currentUser._id);
 
-        // Authorization checks
         if (!currentUser.isCommittee && !senderIsTicketAuthor) {
-            return res.status(403).json({ error: "Not authorized to message this ticket" });
+            throw new ForbiddenException("Not authorized to message this ticket");
         }
 
         if (isNote && !currentUser.isCommittee) {
-            return res.status(403).json({ error: "Not authorized to add notes" });
+            throw new ForbiddenException("Not authorized to add notes");
         }
 
         if (content.length < 10 || content.length > 8000) {
-            return res.status(400).json({ error: "Message must be between 10 and 8000 characters" });
+            throw new BadRequestException("Message must be between 10 and 8000 characters");
         }
 
         const newMessage = new Message({
@@ -337,9 +349,8 @@ class TicketsController {
             attachments: [],
         });
 
-        // Handle file uploads
         newMessage.attachments = await UploadService.handleFileUploads(
-            files,
+            files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,
             currentUser.id,
@@ -348,29 +359,13 @@ class TicketsController {
         await newMessage.save();
         ticket.messages.push(newMessage.id);
 
-        // unsnooze ticket
         if (ticket.snoozedUntil) {
             ticket.snoozedUntil = undefined;
         }
 
         await ticket.save();
 
-        // osu! notification
         if (newMessage.isCommittee && !isNote) {
-            /**
-            * ? this used to include the committee members who sent messages in the ticket
-            const uniqueUsers = new Set<number>();
-
-            uniqueUsers.add(ticket.author.osuId);
-
-            // Include sender if they're a committee member
-            if (user.isCommittee) {
-                uniqueUsers.add(user.osuId);
-            }
-
-            const userIds = Array.from(uniqueUsers);
-            */
-
             try {
                 await NotificationDispatchService.enqueueOsuAnnouncement({
                     userIds: [ticket.author.osuId],
@@ -388,18 +383,16 @@ class TicketsController {
                     fallbackId: currentUser.osuId,
                 });
             } catch {
-                // enqueue failures were previously swallowed as ErrorResponse
+                // enqueue failures were previously swallowed
             }
         }
 
-        // Logger
         await LogService.generate(
             currentUser.id,
             `Sent a message in ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket",
         );
 
-        // ping the committee members who sent messages in the ticket when the message is from the ticket author
         const committeeMembers = new Set<string>();
 
         if (senderIsTicketAuthor) {
@@ -410,9 +403,8 @@ class TicketsController {
             });
         }
 
-        // Discord
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(isNote ? DiscordUtils.webhookColors.lightBlue : DiscordUtils.webhookColors.darkBlue)
             .setDescription(
                 `${isNote ? "Added a note" : "Sent a message"} in ${ticket.type}: [**${ticket.title}**](${
@@ -435,15 +427,11 @@ class TicketsController {
 
         await webhookBuilder.send();
 
-        const response = isNote ? "Added a note successfully!" : "Message sent successfully!";
-
-        res.json({ message: response });
+        return { message: isNote ? "Added a note successfully!" : "Message sent successfully!" };
     }
 
-    /** POST close or reopen ticket */
-    public async toggleStatus(req: Request, res: Response) {
-        const user = res.locals!.user!;
-        const ticket = await Ticket.findById(req.params.ticketId).orFail();
+    async toggleStatus(ticketId: string, user: IUser, session: Session) {
+        const ticket = await Ticket.findById(ticketId).orFail();
 
         ticket.isActive = !ticket.isActive;
 
@@ -459,12 +447,6 @@ class TicketsController {
 
         await ticket.save();
 
-        res.json({
-            message: `${capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`,
-            ticket,
-        });
-
-        // Logger
         await LogService.generate(
             user.id,
             `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${
@@ -473,9 +455,8 @@ class TicketsController {
             "ticket",
         );
 
-        // Discord
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(ticket.isActive ? DiscordUtils.webhookColors.gray : DiscordUtils.webhookColors.black)
             .setDescription(
                 `${ticket.isActive ? "Reopened" : "Closed"} ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${
@@ -488,25 +469,24 @@ class TicketsController {
             webhookBuilder.setThreadId(ticket.threadId);
         }
         await webhookBuilder.send();
+
+        return {
+            message: `${capitalize(ticket.type)} ${ticket.isActive ? "reopened" : "closed"} successfully!`,
+            ticket,
+        };
     }
 
-    /** POST update thread ID */
-    public async updateThreadId(req: Request, res: Response) {
-        const user = res.locals!.user!;
-        const { ticketId } = req.params;
-        let threadId = req.body.threadId;
+    async updateThreadId(ticketId: string, threadIdInput: string | undefined, user: IUser, session: Session) {
+        let threadId = threadIdInput;
 
         const ticket = await Ticket.findById(ticketId).orFail();
 
-        threadId = utils.extractDiscordThreadId(threadId);
+        threadId = utils.extractDiscordThreadId(threadId ?? null) ?? undefined;
 
         if (threadId !== ticket.threadId) {
             ticket.threadId = threadId;
             await ticket.save();
 
-            res.json({ message: "Thread ID updated successfully!" });
-
-            // Logger
             await LogService.generate(
                 user.id,
                 `Updated thread ID for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${
@@ -515,9 +495,8 @@ class TicketsController {
                 "ticket",
             );
 
-            // Discord
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(DiscordUtils.webhookColors.white)
                 .setDescription(
                     `Updated webhook location for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
@@ -532,15 +511,14 @@ class TicketsController {
                 webhookBuilder.setThreadId(ticket.threadId);
             }
             await webhookBuilder.send();
-        } else {
-            res.json({ message: "Thread ID is already set!" });
+
+            return { message: "Thread ID updated successfully!" };
         }
+
+        return { message: "Thread ID is already set!" };
     }
 
-    /** PATCH snooze ticket for 7 days */
-    public async snoozeTicket(req: Request, res: Response) {
-        const user = res.locals!.user!;
-        const { ticketId } = req.params;
+    async snoozeTicket(ticketId: string, user: IUser, session: Session) {
         const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
         const ticket = await Ticket.findById(ticketId).orFail();
@@ -548,18 +526,14 @@ class TicketsController {
         ticket.snoozedUntil = sevenDaysFromNow;
         await ticket.save();
 
-        res.json({ message: "Reminders for this ticket will be shown again in 7 days!" });
-
-        // Logger
         await LogService.generate(
             user.id,
             `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
             "ticket",
         );
 
-        // Discord
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.purple)
             .setDescription(
                 `Snoozed reminders for ${ticket.type}: [**${ticket.title}**](${config.baseUrl}/${ticket.type}s/${ticket._id})`,
@@ -571,39 +545,43 @@ class TicketsController {
             webhookBuilder.setThreadId(ticket.threadId);
         }
         await webhookBuilder.send();
+
+        return { message: "Reminders for this ticket will be shown again in 7 days!" };
     }
 
-    /** PATCH edit report target */
-    public async editReport(req: Request, res: Response) {
-        const currentUser = res.locals!.user!;
-        const { ticketId } = req.params;
-        const { targetUserId, targetTournamentName, targetTournamentLink } = req.body;
+    async editReport(
+        ticketId: string,
+        body: {
+            targetUserId?: string;
+            targetTournamentName?: string;
+            targetTournamentLink?: string;
+        },
+        currentUser: IUser,
+        session: Session,
+    ) {
+        const { targetUserId, targetTournamentName, targetTournamentLink } = body;
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
 
-        // Only allow editing reports
         if (ticket.type !== "report") {
-            return res.status(400).json({ error: "Only reports can be edited" });
+            throw new BadRequestException("Only reports can be edited");
         }
 
-        // Only allow editing if the report is closed
         if (ticket.isActive) {
-            return res.status(400).json({ error: "Cannot edit an active report." });
+            throw new BadRequestException("Cannot edit an active report.");
         }
 
-        // Validate that we're editing either user OR tournament, not both
         const isEditingUser = targetUserId !== undefined;
         const isEditingTournament = targetTournamentName !== undefined || targetTournamentLink !== undefined;
 
         if (isEditingUser && isEditingTournament) {
-            return res.status(400).json({ error: "Cannot set both target user and target tournament" });
+            throw new BadRequestException("Cannot set both target user and target tournament");
         }
 
         if (!isEditingUser && !isEditingTournament) {
-            return res.status(400).json({ error: "Must provide either target user or target tournament" });
+            throw new BadRequestException("Must provide either target user or target tournament");
         }
 
-        // Handle user report
         if (isEditingUser) {
             const targetUser = await User.findById(targetUserId).orFail();
 
@@ -611,21 +589,18 @@ class TicketsController {
             ticket.targetTournamentName = undefined;
             ticket.targetTournamentLink = undefined;
 
-            // update title to change the first word to "User"
             ticket.title = ticket.title.replace(/^[^ ]+/, "User");
 
             await ticket.save();
 
-            // Logger
             await LogService.generate(
                 currentUser.id,
                 `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id}) to user **${targetUser.username}**`,
                 "ticket",
             );
 
-            // Discord
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(DiscordUtils.webhookColors.orange)
                 .setDescription(
                     `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
@@ -642,42 +617,38 @@ class TicketsController {
             await webhookBuilder.send();
         }
 
-        // Handle tournament report
         if (isEditingTournament) {
             if (!targetTournamentName || !targetTournamentLink) {
-                return res.status(400).json({ error: "Both tournament name and link are required" });
+                throw new BadRequestException("Both tournament name and link are required");
             }
 
             const sanitizedTournamentName = targetTournamentName.trim();
             const sanitizedTournamentLink = targetTournamentLink.trim();
 
             if (sanitizedTournamentName.length < 3 || sanitizedTournamentName.length > 120) {
-                return res.status(400).json({ error: "Tournament name must be between 3 and 120 characters" });
+                throw new BadRequestException("Tournament name must be between 3 and 120 characters");
             }
 
             if (!utils.isOsuForumLink(sanitizedTournamentLink)) {
-                return res.status(400).json({ error: "Invalid tournament forum link" });
+                throw new BadRequestException("Invalid tournament forum link");
             }
 
             ticket.targetUser = undefined;
             ticket.targetTournamentName = sanitizedTournamentName;
             ticket.targetTournamentLink = sanitizedTournamentLink;
 
-            // update title to change the first word to "Tournament"
             ticket.title = ticket.title.replace(/^[^ ]+/, ticket.assignedGroup === "cc" ? "Contest" : "Tournament");
 
             await ticket.save();
 
-            // Logger
             await LogService.generate(
                 currentUser.id,
                 `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id}) to tournament **${sanitizedTournamentName}**`,
                 "ticket",
             );
 
-            // Discord
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(DiscordUtils.webhookColors.orange)
                 .setDescription(
                     `Updated target for report: [**${ticket.title}**](${config.baseUrl}/reports/${ticket._id})`,
@@ -691,8 +662,6 @@ class TicketsController {
             await webhookBuilder.send();
         }
 
-        res.json({ message: "Report updated successfully!" });
+        return { message: "Report updated successfully!" };
     }
 }
-
-export default new TicketsController();

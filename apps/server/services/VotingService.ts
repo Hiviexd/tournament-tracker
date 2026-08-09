@@ -1,9 +1,11 @@
+import { Injectable } from "@nestjs/common";
 import { IVoting } from "@tc/types/Voting";
 import { IVote } from "@tc/types/Vote";
 import { IUser } from "@tc/types/User";
 import { Document } from "mongoose";
 
-class VotingService {
+@Injectable()
+export class VotingService {
     public censorVotingForNonCommittee(voting: Document & IVoting) {
         const publicVoting = voting.toObject();
         publicVoting.author = undefined as unknown as IUser;
@@ -19,4 +21,5 @@ class VotingService {
     }
 }
 
+/** Singleton for non-DI callers. */
 export default new VotingService();

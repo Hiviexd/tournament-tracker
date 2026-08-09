@@ -1,9 +1,11 @@
+import { Injectable } from "@nestjs/common";
 import { ITicket } from "@tc/types/Ticket";
 import { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
 import Message from "@tc/models/messageModel";
 
-class TicketService {
+@Injectable()
+export class TicketService {
     /**
      * * Sanitizes ticket data based on user permissions
      * * Removes notes from non-committee users
@@ -44,4 +46,5 @@ class TicketService {
     }
 }
 
+/** Singleton for non-DI callers (GlobalSearchService). */
 export default new TicketService();
