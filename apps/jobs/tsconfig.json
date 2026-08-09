@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "es2020",
+        "lib": ["ES2020", "ES2023.Array"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "baseUrl": ".",
+        "outDir": "dist",
+        "noEmit": true,
+        "types": ["node"]
+    },
+    "include": ["./**/*.ts"],
+    "exclude": ["node_modules", "dist"]
+}

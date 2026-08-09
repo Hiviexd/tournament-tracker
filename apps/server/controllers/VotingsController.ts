@@ -7,11 +7,12 @@ import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
-import LogService from "../services/LogService";
+import LogService from "@tc/models/LogService";
 import utils from "@tc/utils/server";
 import { Request, Response } from "express";
 import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";
+import { generateDiscordVotingResults } from "@tc/notifications/votingResults";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups coverUrl country" },
@@ -455,7 +456,7 @@ class VotingsController {
 
         // Only send results if concluding the vote
         if (!voting.isActive) {
-            const fields = VotingService.generateDiscordVotingResults(voting);
+            const fields = generateDiscordVotingResults(voting);
 
             const embed = new EmbedBuilder()
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))

@@ -17,7 +17,7 @@ import utils from "@tc/utils/server";
 import UserService from "./UserService";
 import Tournament from "@tc/models/tournamentModel";
 import User from "@tc/models/userModel";
-import LogService from "./LogService";
+import LogService from "@tc/models/LogService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";

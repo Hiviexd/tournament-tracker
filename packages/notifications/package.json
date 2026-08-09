@@ -11,6 +11,7 @@
         "./discord/EmbedBuilder": "./src/discord/EmbedBuilder.ts",
         "./discord/WebhookBuilder": "./src/discord/WebhookBuilder.ts",
         "./discord/DiscordUtils": "./src/discord/DiscordUtils.ts",
+        "./votingResults": "./src/votingResults.ts",
         "./*": "./src/*.ts"
     },
     "scripts": {

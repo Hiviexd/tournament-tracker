@@ -7,7 +7,7 @@ import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import utils from "@tc/utils/server";
 import User from "@tc/models/userModel";
-import LogService from "../services/LogService";
+import LogService from "@tc/models/LogService";
 import { IVoting } from "@tc/types/Voting";
 
 export default class VotingReminderJob extends BaseJob {

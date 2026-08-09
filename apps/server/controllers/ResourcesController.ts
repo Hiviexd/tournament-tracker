@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Resource from "@tc/models/resourceModel";
-import LogService from "../services/LogService";
+import LogService from "@tc/models/LogService";
 import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 

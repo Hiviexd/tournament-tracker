@@ -9,7 +9,6 @@ import { logger } from "./middlewares/logger";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import utils from "@tc/utils/server";
-import JobLoader from "./jobs/JobLoader";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
@@ -240,16 +239,11 @@ const environmentStyled = process.env.NODE_ENV
     ? utils.consoleStyles(process.env.NODE_ENV, ["yellow", "underline"])
     : utils.consoleStyles("⚠ Unknown", ["orange", "underline"]);
 
-const mode =
-    process.env.AUTOMATION_DEBUG === "true"
-        ? "Auto-start Automation Jobs"
-        : process.env.MIGRATION === "true"
-          ? "Run Migrations"
-          : null;
+const mode = process.env.MIGRATION === "true" ? "Run Migrations" : null;
 
 app.set("port", port);
 
-app.listen(port, async (err?: Error) => {
+app.listen(port, (err?: Error) => {
     if (err) throw err;
     console.log("┌──────────────────────────────────────────────────────────┐");
     console.log(`│ ${utils.consoleStyles("✓ Server started", ["green", "bold"])}${" ".repeat(41)}│`);
@@ -270,10 +264,6 @@ app.listen(port, async (err?: Error) => {
             )}│`,
         );
     console.log("└──────────────────────────────────────────────────────────┘");
-
-    // Load and start jobs
-    await JobLoader.loadJobs();
-    JobLoader.startAll();
 });
 
 export default app;

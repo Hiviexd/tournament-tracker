@@ -13,8 +13,8 @@ class JobLoader {
 
     /**
      * Determines the correct jobs directory based on the environment:
-     * - Development (tsx): __dirname is server/jobs/ (already in jobs dir)
-     * - Production (bundled): __dirname is dist/server/ (need to append jobs/)
+     * - Development (tsx): __dirname is apps/jobs/jobs/ (already in jobs dir)
+     * - Production (bundled): __dirname is dist/ (need to append jobs/)
      */
     private async getJobsDir(): Promise<string> {
         // Check if we're already in a jobs directory (development with tsx)

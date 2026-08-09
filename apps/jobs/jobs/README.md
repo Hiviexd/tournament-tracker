@@ -1,6 +1,6 @@
 # Creating Jobs
 
-Create a new file: `<JobName>Job.ts`
+Create a new file: `jobs/<JobName>Job.ts`
 
 ```typescript
 import BaseJob from "./BaseJob";
@@ -16,6 +16,11 @@ export default class MyNewJob extends BaseJob {
 }
 ```
 
-The job will be automatically discovered and loaded on server start.
+The job will be automatically discovered and loaded when the jobs worker starts.
 
 **Schedule format**: Cron syntax (e.g., `"0 12 * * *"` = daily at noon UTC)
+
+Run locally:
+
+- `pnpm dev-jobs` — jobs worker only
+- `pnpm dev:automation` — server + client + jobs (with `AUTOMATION_DEBUG=true` on jobs)

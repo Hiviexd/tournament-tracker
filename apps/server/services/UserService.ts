@@ -5,7 +5,7 @@ import shuffle from "lodash/shuffle.js";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IOsuUser } from "@tc/types/OsuApi";
 import OsuApiService from "@tc/osu/OsuApiService";
-import LogService from "./LogService";
+import LogService from "@tc/models/LogService";
 import { Document, Types } from "mongoose";
 
 class UserService {

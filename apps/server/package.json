@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json app.ts",
+        "dev:automation": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json app.ts",
         "dev:preview": "cross-env NODE_ENV=preview tsx watch --tsconfig tsconfig.json app.ts",
         "build": "tsup",
         "start": "node dist/app.js",
@@ -29,7 +30,6 @@
         "connect-mongo": "3.2.0",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
-        "cron": "^4.1.0",
         "cross-env": "^7.0.3",
         "csurf": "^1.11.0",
         "csv-parse": "^5.6.0",
@@ -57,7 +57,6 @@
         "@types/multer": "^1.4.12",
         "@types/node": "^24.1.0",
         "@vitest/ui": "3.2.4",
-        "glob": "^13.0.6",
         "tsup": "^8.5.0",
         "tsx": "^4.19.4",
         "typescript": "^5.2.2",

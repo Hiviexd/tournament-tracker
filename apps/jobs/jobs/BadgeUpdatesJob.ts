@@ -5,7 +5,7 @@ import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import utils from "@tc/utils/server";
-import LogService from "../services/LogService";
+import LogService from "@tc/models/LogService";
 import { IUser } from "@tc/types/User";
 
 export default class BadgeUpdatesJob extends BaseJob {

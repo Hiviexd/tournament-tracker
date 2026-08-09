@@ -6,6 +6,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./init": "./src/initMongoose.ts",
+        "./LogService": "./src/LogService.ts",
         "./*": "./src/*.ts"
     },
     "scripts": {

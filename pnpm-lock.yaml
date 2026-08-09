@@ -208,6 +208,49 @@ importers:
         specifier: ^5.2.0
         version: 5.4.20(@types/node@24.5.2)(sass@1.92.1)(sugarss@5.0.1(postcss@8.5.6))
 
+  apps/jobs:
+    dependencies:
+      '@tc/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@tc/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      '@tc/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
+      '@tc/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@tc/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      cron:
+        specifier: ^4.1.0
+        version: 4.3.3
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      mongoose:
+        specifier: 8.18.1
+        version: 8.18.1
+    devDependencies:
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.5.2
+      glob:
+        specifier: ^13.0.6
+        version: 13.0.6
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.2)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.21.0
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.2
+
   apps/server:
     dependencies:
       '@aws-sdk/client-s3':
@@ -249,9 +292,6 @@ importers:
       cors:
         specifier: ^2.8.5
         version: 2.8.5
-      cron:
-        specifier: ^4.1.0
-        version: 4.3.3
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -328,9 +368,6 @@ importers:
       '@vitest/ui':
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4)
-      glob:
-        specifier: ^13.0.6
-        version: 13.0.6
       tsup:
         specifier: ^8.5.0
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.2)
@@ -406,9 +443,6 @@ importers:
         specifier: ^1.13.5
         version: 1.13.5
     devDependencies:
-      '@types/express-session':
-        specifier: ^1.18.0
-        version: 1.18.2
       '@types/node':
         specifier: ^24.1.0
         version: 24.5.2

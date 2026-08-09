@@ -18,7 +18,7 @@ import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
 import TournamentService from "../services/TournamentService";
-import LogService from "../services/LogService";
+import LogService from "@tc/models/LogService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import capitalize from "lodash/capitalize.js";
 import startCase from "lodash/startCase.js";

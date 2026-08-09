@@ -86,6 +86,8 @@ jobs:
                 include:
                     - name: server
                       dockerfile: docker/Dockerfile.server
+                    - name: jobs
+                      dockerfile: docker/Dockerfile.jobs
                     - name: client
                       dockerfile: docker/Dockerfile.client
         steps:
@@ -139,6 +141,7 @@ jobs:
                   short_sha=$(echo '${{ github.sha }}' | cut -c1-7)
                   base="${{ env.REGISTRY }}/${owner}/${repo}"
                   echo "server=${base}/server:preview-sha-${short_sha}" >> "$GITHUB_OUTPUT"
+                  echo "jobs=${base}/jobs:preview-sha-${short_sha}" >> "$GITHUB_OUTPUT"
                   echo "client=${base}/client:preview-sha-${short_sha}" >> "$GITHUB_OUTPUT"
 
             - name: Deploy over SSH
@@ -149,13 +152,14 @@ jobs:
                   GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
                   GHCR_USER: ${{ github.actor }}
                   TC_SERVER_IMAGE: ${{ steps.images.outputs.server }}
+                  TC_JOBS_IMAGE: ${{ steps.images.outputs.jobs }}
                   TC_CLIENT_IMAGE: ${{ steps.images.outputs.client }}
               with:
                   host: ${{ secrets.SERVER_HOST }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   port: ${{ secrets.DEPLOY_SSH_PORT || 22 }}
-                  envs: DEPLOY_PATH,DEPLOY_SHA,GHCR_PULL_TOKEN,GHCR_USER,TC_SERVER_IMAGE,TC_CLIENT_IMAGE
+                  envs: DEPLOY_PATH,DEPLOY_SHA,GHCR_PULL_TOKEN,GHCR_USER,TC_SERVER_IMAGE,TC_JOBS_IMAGE,TC_CLIENT_IMAGE
                   script: |
                       set -euo pipefail
                       cd "$DEPLOY_PATH"
@@ -179,6 +183,7 @@ jobs:
 
                       printf '%s\n' \
                         "TC_SERVER_IMAGE=${TC_SERVER_IMAGE}" \
+                        "TC_JOBS_IMAGE=${TC_JOBS_IMAGE}" \
                         "TC_CLIENT_IMAGE=${TC_CLIENT_IMAGE}" \
                         "TC_PULL_POLICY=always" \
                         > .images.env
@@ -190,19 +195,20 @@ jobs:
 
                       echo "Deploying preview images:"
                       echo "  server=${TC_SERVER_IMAGE}"
+                      echo "  jobs=${TC_JOBS_IMAGE}"
                       echo "  client=${TC_CLIENT_IMAGE}"
 
                       docker image prune -af
 
-                      docker compose -f docker-compose.preview.yml pull server client
+                      docker compose -f docker-compose.preview.yml pull server jobs client
                       docker compose -f docker-compose.preview.yml up -d --remove-orphans --pull always --force-recreate \
-                        server client gateway
+                        server jobs client gateway
 
                       docker image prune -af
 
                       echo "Running containers:"
                       docker compose -f docker-compose.preview.yml ps
-                      docker compose -f docker-compose.preview.yml images server client
+                      docker compose -f docker-compose.preview.yml images server jobs client
 
     notify:
         needs: [check-deploy, build-and-push, deploy]

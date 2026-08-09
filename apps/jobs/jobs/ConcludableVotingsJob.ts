@@ -5,8 +5,8 @@ import config from "@tc/config";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
-import VotingService from "../services/VotingService";
-import LogService from "../services/LogService";
+import { generateDiscordVotingResults } from "@tc/notifications/votingResults";
+import LogService from "@tc/models/LogService";
 
 export default class ConcludableVotingsJob extends BaseJob {
     name = "ConcludableVotings";
@@ -43,7 +43,7 @@ export default class ConcludableVotingsJob extends BaseJob {
             await voting.save();
 
             // Send Discord notification
-            const fields = VotingService.generateDiscordVotingResults(voting);
+            const fields = generateDiscordVotingResults(voting);
 
             const concludedEmbed = new EmbedBuilder()
                 .setColor(DiscordUtils.webhookColors.darkYellow)

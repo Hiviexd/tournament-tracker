@@ -1,0 +1,31 @@
+{
+    "name": "@tc/jobs",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json main.ts",
+        "dev:automation": "cross-env NODE_ENV=development AUTOMATION_DEBUG=true tsx watch --tsconfig tsconfig.json main.ts",
+        "dev:preview": "cross-env NODE_ENV=preview tsx watch --tsconfig tsconfig.json main.ts",
+        "build": "tsup",
+        "start": "node dist/main.js",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "@tc/config": "workspace:*",
+        "@tc/models": "workspace:*",
+        "@tc/notifications": "workspace:*",
+        "@tc/types": "workspace:*",
+        "@tc/utils": "workspace:*",
+        "cron": "^4.1.0",
+        "cross-env": "^7.0.3",
+        "mongoose": "8.18.1"
+    },
+    "devDependencies": {
+        "@types/node": "^24.1.0",
+        "glob": "^13.0.6",
+        "tsup": "^8.5.0",
+        "tsx": "^4.19.4",
+        "typescript": "^5.2.2"
+    }
+}

@@ -1,5 +1,5 @@
 import { LogCategory } from "@tc/types/Log";
-import Log from "@tc/models/logModel";
+import Log from "./logModel";
 
 class LogService {
     /**

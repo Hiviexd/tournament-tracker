@@ -11,6 +11,16 @@ services:
       args:
         MODE: production
 
+  jobs:
+    image: tc-jobs:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jobs
+      target: prod
+      args:
+        MODE: production
+
   client:
     image: tc-client:local
     pull_policy: never
