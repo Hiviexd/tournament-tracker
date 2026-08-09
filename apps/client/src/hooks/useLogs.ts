@@ -1,0 +1,45 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import utils from "@tc/utils/client";
+import { LogQueryParams } from "@tc/types/Log";
+
+export function useLogs(params?: LogQueryParams) {
+    return useQuery({
+        queryKey: ["logs", params],
+        queryFn: () =>
+            utils.apiCall({
+                method: "get",
+                url: "/api/logs",
+                params,
+            }),
+    });
+}
+
+export function useExportLogsCsv() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "get",
+                url: "/api/logs/export",
+                responseType: "blob",
+            });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["logs"] });
+            // Create a download link
+            const url = window.URL.createObjectURL(new Blob([data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "logs-export.csv");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        },
+        onError: (error) => {
+            console.error("Failed to export logs:", error);
+        },
+    });
+}

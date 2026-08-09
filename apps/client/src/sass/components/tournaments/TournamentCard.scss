@@ -1,0 +1,81 @@
+.tournament-card {
+    text-decoration: none !important;
+    position: relative;
+    transition: transform 0.2s ease;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+
+    &-banner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: var(--banner-url);
+        background-size: cover;
+        background-position: center;
+        filter: brightness(1.1);
+        opacity: var(--banner-opacity, 1);
+        z-index: 0;
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(90deg, var(--mantine-color-primary-11) 10%, transparent 200%);
+        }
+    }
+
+    &-content {
+        position: relative;
+        z-index: 10;
+    }
+
+    &[data-active="true"] {
+        border-left: 4px solid var(--card-status-color);
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            inset: 0;
+            background: linear-gradient(90deg, var(--card-status-color) -20rem, transparent 5rem);
+        }
+    }
+
+    &[data-active="false"] {
+        border: none;
+    }
+}
+
+.tournament-report-card {
+    transition: transform 0.2s ease;
+    text-decoration: none !important;
+    background-color: var(--mantine-color-primary-10) !important;
+    border-left: 3px solid var(--mantine-color-red-6) !important;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mantine-shadow-md);
+    }
+}
+
+.tournament-voting-card {
+    transition: transform 0.2s ease;
+    text-decoration: none !important;
+    background-color: var(--mantine-color-primary-10) !important;
+    border-left: 3px solid var(--mantine-color-info-6) !important;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mantine-shadow-md);
+    }
+}

@@ -25,3 +25,5 @@ config.json
 backups/*
 checklist.json
 tournaments.csv
+.output/*
+.monorepo-migration/

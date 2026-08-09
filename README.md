@@ -26,6 +26,7 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
 - Set up a MongoDB database
 - Set up a Cloudflare R2 bucket (optional)
 - Run `pnpm install`
+- This is a pnpm monorepo (`apps/client`, `apps/server`, `packages/*`)
 - Set up `config.json` from `config.example.json` with the following fields:
   - `connection`: MongoDB connection URL
   - `session`: session string, grab a random string from [this website](https://www.random.org/strings/?num=10&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new)
@@ -39,17 +40,37 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
 - Set up `checklist.json` from `checklist.example.json`
 - Run `pnpm dev`, the project will be served in `http://localhost:8088`
 
+### Docker (production / preview)
+
+Production and preview run via Docker Compose (server API + nginx static client + nginx gateway). Local development stays on `pnpm dev`.
+
+**Local prod-style stack** (requires Docker, `config.json`, and `checklist.json` at the repo root):
+
+```bash
+pnpm docker:prod          # gateway on http://localhost:8088
+pnpm docker:prod:down
+pnpm docker:preview       # gateway on http://localhost:8089
+pnpm docker:preview:down
+```
+
+**VPS deploy** (GitHub Actions → GHCR → `docker compose pull/up`):
+
+- Production: push to `main` (or workflow_dispatch) — see `.github/workflows/deploy-production.yml`
+- Preview: push to `preview` / `preview/*` — see `.github/workflows/deploy-preview.yml`
+- Keep `config.json` and `checklist.json` on the VPS deploy path (bind-mounted into the server container; not baked into images)
+- Image refs for restarts are written to `.images.env` on the VPS
+
 ### Automation jobs
 
 If you need all automation jobs to run when the project starts, use `pnpm dev:automation`.
 
-For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/server/jobs/README.md) page.
+For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/jobs/README.md) page.
 
 ### Migrations
 
-For running a specific migration, run `pnpm migrate <migration-name>`. You can list all available migrations by running `pnpm migrate`.
+For running a specific migration, run `pnpm migrate -- <migration-name>`. You can list all available migrations by running `pnpm migrate`.
 
-For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/server/migrations/README.md) page.
+For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/migrations/README.md) page.
 
 ### Commit message flags
 

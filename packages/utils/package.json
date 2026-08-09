@@ -1,0 +1,45 @@
+{
+    "name": "@tc/utils",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./index.ts",
+        "./server": "./server.ts",
+        "./client": "./client.ts",
+        "./dayjs": "./dayjs.ts",
+        "./extraLinks": "./extraLinks.ts",
+        "./common": "./common.ts",
+        "./backend": "./backend.ts",
+        "./frontend": "./frontend.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    },
+    "dependencies": {
+        "@tc/types": "workspace:*",
+        "axios": "^1.13.5",
+        "dayjs": "^1.11.13"
+    },
+    "peerDependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.6.0",
+        "@mantine/notifications": "^8.1.3",
+        "react": "^19.1.0"
+    },
+    "peerDependenciesMeta": {
+        "@fortawesome/fontawesome-svg-core": {
+            "optional": true
+        },
+        "@mantine/notifications": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "@types/node": "^24.1.0",
+        "@types/react": "^19.0.0",
+        "typescript": "^5.2.2"
+    }
+}

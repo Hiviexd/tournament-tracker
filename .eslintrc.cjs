@@ -8,7 +8,7 @@ module.exports = {
         "prettier",
         "plugin:react-you-might-not-need-an-effect/legacy-recommended",
     ],
-    ignorePatterns: ["dist", ".eslintrc.cjs"],
+    ignorePatterns: ["dist", ".eslintrc.cjs", "apps/*/node_modules", "packages/*/node_modules"],
     parser: "@typescript-eslint/parser",
     plugins: ["react-refresh"],
     rules: {
@@ -23,7 +23,7 @@ module.exports = {
     },
     overrides: [
         {
-            files: ["server/routers/*.ts"],
+            files: ["apps/server/routers/*.ts"],
             rules: {
                 "@typescript-eslint/ban-ts-comment": "off",
             },

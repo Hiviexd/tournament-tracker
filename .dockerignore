@@ -1,0 +1,12 @@
+# Root .dockerignore for both Dockerfiles (shared context)
+node_modules
+**/node_modules
+dist
+.git
+.github
+.monorepo-migration
+.cursor
+.vscode
+backups
+*.log
+scripts/ecosystem.*.cjs

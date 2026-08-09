@@ -1,0 +1,22 @@
+# Local override: build images on-machine instead of pulling from GHCR.
+# Usage: docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d
+services:
+  server:
+    image: tc-server:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+      target: prod
+      args:
+        MODE: production
+
+  client:
+    image: tc-client:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+      target: prod
+      args:
+        MODE: production
