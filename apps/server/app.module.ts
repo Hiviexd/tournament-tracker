@@ -6,6 +6,7 @@ import { ComplianceModule } from "./modules/compliance/compliance.module";
 import { DatabaseModule } from "./modules/common/database.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
 import { DevModule } from "./modules/dev/dev.module";
+import { EnchantModule } from "./modules/enchant/enchant.module";
 import { InfringementsModule } from "./modules/infringements/infringements.module";
 import { KeysModule } from "./modules/keys/keys.module";
 import { LogsModule } from "./modules/logs/logs.module";
@@ -24,6 +25,7 @@ import { VotesModule } from "./modules/votes/votes.module";
         DatabaseModule,
         AuthModule,
         UsersModule,
+        EnchantModule,
         TournamentsModule,
         TicketsModule,
         VotesModule,

@@ -34,9 +34,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         if (exception instanceof HttpException) {
             const status = exception.getStatus();
+            const body = exception.getResponse();
+
+            // Preserve raw non-object bodies (e.g. users index returns `[]` with 400)
+            if (typeof body !== "object" || body === null || Array.isArray(body)) {
+                res.status(status).json(body);
+                return;
+            }
+
             const message = this.extractHttpMessage(exception);
 
-            if (status === HttpStatus.UNAUTHORIZED && req.accepts(["html", "json"]) !== "json") {
+            // Session-auth HTML clients redirect home; Enchant HMAC must stay 401
+            const pathOnly = (req.originalUrl || req.url || "").split("?")[0];
+            const isEnchant = pathOnly === "/api/enchant" || pathOnly.startsWith("/api/enchant/");
+            if (
+                status === HttpStatus.UNAUTHORIZED &&
+                !isEnchant &&
+                req.accepts(["html", "json"]) !== "json"
+            ) {
                 res.redirect("/");
                 return;
             }

@@ -1,7 +1,15 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import crypto from "crypto";
+import {
+    ForbiddenException,
+    Injectable,
+    InternalServerErrorException,
+    UnauthorizedException,
+} from "@nestjs/common";
+import config from "@tc/config";
 import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 import OsuApiService from "@tc/osu/OsuApiService";
+import UserService from "@tc/osu/UserService";
 import type { Request, Response } from "express";
 import type { ApiScope } from "@tc/types/ApiKey";
 import type { IUser } from "@tc/types/User";
@@ -10,6 +18,7 @@ type RefreshFailureMode = "redirect" | "continue";
 
 /**
  * Shared auth helpers for Nest guards: API-key gate, session load/refresh, role checks.
+ * Also owns osu! OAuth login/callback/logout and CSRF token issuance.
  * Still mirrors Express middleware outcomes (messages + admin/dev bypass).
  */
 @Injectable()
@@ -170,5 +179,109 @@ export class AuthService {
             return;
         }
         this.denyUnlessPrivileged(user);
+    }
+
+    /** GET CSRF token for session-auth flows */
+    getCsrfToken(req: Request): { token: string } {
+        if (!req.session || !req.session.mongoId) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        const token = typeof req.csrfToken === "function" ? req.csrfToken() : undefined;
+        if (!token) {
+            throw new InternalServerErrorException("CSRF not initialized");
+        }
+        return { token };
+    }
+
+    /** osu! OAuth login — sets `_state` cookie and redirects to osu! */
+    login(req: Request, res: Response): void {
+        const state = crypto.randomBytes(48).toString("hex");
+        res.cookie("_state", state, { httpOnly: true });
+        const hashedState = Buffer.from(state).toString("base64");
+
+        if (!req.session.lastPage) {
+            req.session.lastPage = req.get("referer");
+        }
+
+        res.redirect(
+            `https://osu.ppy.sh/oauth/authorize?response_type=code&client_id=${
+                config.osuApp.id
+            }&redirect_uri=${encodeURIComponent(config.osuApp.redirect)}&state=${hashedState}&scope=public+identify`,
+        );
+    }
+
+    /** Destroy session and return JSON confirmation */
+    async logout(req: Request): Promise<{ message: string }> {
+        await new Promise<void>((resolve, reject) => {
+            req.session.destroy((error) => {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+        return { message: "Logged out" };
+    }
+
+    /** osu! OAuth callback — validates state, sets session, redirects */
+    async callback(req: Request, res: Response): Promise<void> {
+        if (!req.query.code || req.query.error || !req.query.state) {
+            res.status(500).redirect("/error");
+            return;
+        }
+
+        const decodedState = Buffer.from(req.query.state.toString(), "base64").toString("ascii");
+        const savedState = req.cookies._state;
+        res.clearCookie("_state");
+
+        if (decodedState !== savedState) {
+            res.status(403).redirect("/error");
+            return;
+        }
+
+        const tokenResponse = await OsuApiService.getToken(req.query.code.toString());
+
+        if (OsuApiService.isOsuResponseError(tokenResponse)) {
+            res.status(500).redirect("/error");
+            return;
+        }
+
+        utils.setSession(req.session, tokenResponse);
+        const userResponse = await OsuApiService.getLoggedInUserInfo(req.session.accessToken!);
+
+        if (OsuApiService.isOsuResponseError(userResponse)) {
+            await new Promise<void>((resolve) => {
+                req.session.destroy(() => resolve());
+            });
+            res.status(500).redirect("/error");
+            return;
+        }
+
+        const userLookup = await User.findOne({ osuId: userResponse.id });
+        const user = await UserService.createOrUpdateUser(userResponse, userLookup);
+
+        req.session.mongoId = user.id;
+        req.session.osuId = user.osuId;
+        req.session.username = user.username;
+
+        const lastPage = req.session.lastPage || "/";
+        req.session.lastPage = undefined;
+
+        // Only redirect to same-origin or relative path to prevent open redirect
+        const baseUrl = config.baseUrl?.trim() || "";
+        let redirectTarget = "/";
+        if (lastPage && typeof lastPage === "string") {
+            const trimmed = lastPage.trim();
+            if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+                redirectTarget = trimmed;
+            } else if (baseUrl && trimmed.startsWith(baseUrl)) {
+                try {
+                    const u = new URL(trimmed);
+                    redirectTarget = u.pathname + u.search;
+                } catch {
+                    redirectTarget = "/";
+                }
+            }
+        }
+
+        res.redirect(redirectTarget);
     }
 }

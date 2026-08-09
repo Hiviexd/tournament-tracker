@@ -12,7 +12,6 @@ import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 import { handleCrawlers } from "./middlewares/seo";
-import enchantRouter from "./routers/enchantRouter";
 import { apiReference } from "@scalar/express-api-reference";
 import openApiSpec from "./openapi";
 
@@ -107,11 +106,8 @@ export function createExpressApp(): express.Application {
         }),
     );
 
-    // Enchant sidebar skips CORS/CSRF, gated via HMAC — must stay before the auth stack
-    app.use("/api/enchant", enchantRouter);
-
     // Shared /api middleware for Nest controllers (registered during app.init).
-    // Enchant paths skip the whole chain (prep for Nest Enchant; historically unauthenticated).
+    // Enchant paths skip the whole chain (HMAC-gated Nest EnchantModule; historically unauthenticated).
     app.use(
         "/api",
         unlessEnchant(authenticateRequest as express.RequestHandler),

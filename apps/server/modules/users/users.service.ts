@@ -1,5 +1,16 @@
-import { IUser, UserListQuery } from "@tc/types/User";
-import User from "@tc/models/userModel";
+import {
+    BadGatewayException,
+    BadRequestException,
+    HttpException,
+    HttpStatus,
+    Inject,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
+import type { Session } from "express-session";
+import type { Model } from "mongoose";
+import type { ITicket } from "@tc/types/Ticket";
+import type { IUser, IUserStatics, UserListQuery } from "@tc/types/User";
 import utils from "@tc/utils/server";
 import UserService from "@tc/osu/UserService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
@@ -7,23 +18,22 @@ import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import OsuApiService from "@tc/osu/OsuApiService";
 import LogService from "@tc/models/LogService";
-import { Request, Response } from "express";
-import TournamentService from "../services/TournamentService";
-import Ticket from "@tc/models/ticketModel";
 import Voting from "@tc/models/votingModel";
+import TournamentService from "../../services/TournamentService";
+import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
 
-class UsersController {
-    /** GET logged in user */
-    public getSelf(_: Request, res: Response) {
-        const user = res.locals!.user!;
-        res.json(UserService.sanitizeUser(user, user));
+@Injectable()
+export class UsersService {
+    constructor(
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+        @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+    ) {}
+
+    getSelf(currentUser: IUser) {
+        return UserService.sanitizeUser(currentUser, currentUser);
     }
 
-    /** GET users listing */
-    public async index(req: Request, res: Response) {
-        const reqQuery = req.query as UserListQuery;
-        const currentUser = res.locals!.user;
-
+    async index(reqQuery: UserListQuery, currentUser: IUser | undefined) {
         let userInput = reqQuery.userInput;
 
         if (userInput && utils.validateOsuProfileLink(userInput)) {
@@ -31,7 +41,8 @@ class UsersController {
         }
 
         if (!userInput) {
-            return res.status(400).json([]);
+            // Preserve Express contract: 400 with empty array body
+            throw new HttpException([], HttpStatus.BAD_REQUEST);
         }
 
         userInput = utils.escapeUsername(userInput);
@@ -41,59 +52,45 @@ class UsersController {
         let users: IUser[] = [];
 
         if (utils.isValidMongoId(userInput)) {
-            const query = User.findById(userInput);
+            const query = this.userModel.findById(userInput);
             const user = populateInfringements ? await query.populate("infringements") : await query;
             if (user) users.push(user);
         } else if (utils.isNumeric(userInput)) {
-            const query = User.findOne({ osuId: parseInt(userInput, 10) });
+            const query = this.userModel.findOne({ osuId: parseInt(userInput, 10) });
             const user = populateInfringements ? await query.populate("infringements") : await query;
             if (user) users.push(user);
         } else {
-            const query = User.find({ username: { $regex: userInput, $options: "i" } });
+            const query = this.userModel.find({ username: { $regex: userInput, $options: "i" } });
             users = populateInfringements ? await query.populate("infringements") : await query;
         }
 
         const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser));
 
-        res.json(reqQuery.limit ? sanitizedUsers.slice(0, parseInt(reqQuery.limit, 10)) : sanitizedUsers);
+        return reqQuery.limit ? sanitizedUsers.slice(0, parseInt(reqQuery.limit, 10)) : sanitizedUsers;
     }
 
-    /** GET a user */
-    public async getUser(req: Request, res: Response) {
-        const userInput = req.params.userInput;
-        const currentUser = res.locals!.user;
-
-        const user = await User.findByUsernameOrOsuId(userInput);
+    async getUser(userInput: string, currentUser: IUser | undefined) {
+        const user = await this.userModel.findByUsernameOrOsuId(userInput);
 
         if (!user) {
-            return res.status(404).json({ error: "User not found" });
+            throw new NotFoundException("User not found");
         }
 
-        const userWithInfringements = await User.findById(user._id).populate("infringements");
-        const sanitizedUser = UserService.sanitizeUser(userWithInfringements!, currentUser);
-
-        res.json(sanitizedUser);
+        const userWithInfringements = await this.userModel.findById(user._id).populate("infringements");
+        return UserService.sanitizeUser(userWithInfringements!, currentUser);
     }
 
-    /** GET osu! user info */
-    public async getOsuUserInfo(req: Request, res: Response) {
-        const userInput = req.params.userInput;
-
-        const user = await OsuApiService.getUserInfo(req.session.accessToken!, userInput);
+    async getOsuUserInfo(accessToken: string, userInput: string) {
+        const user = await OsuApiService.getUserInfo(accessToken, userInput);
 
         if (OsuApiService.isOsuResponseError(user)) {
-            return res.status(404).json({ error: "osu! user not found!" });
+            throw new NotFoundException("osu! user not found!");
         }
 
-        res.json(user);
+        return user;
     }
 
-    /** GET users in a committee */
-    public async getCommittee(req: Request, res: Response) {
-        const type = req.query.type;
-        const includeAlumni = req.query.includeAlumni === "true" || false;
-        const currentUser = res.locals!.user;
-
+    async getCommittee(type: string | undefined, includeAlumni: boolean, currentUser: IUser | undefined) {
         let query;
 
         switch (type) {
@@ -107,27 +104,26 @@ class UsersController {
                 query = includeAlumni ? { groups: { $in: ["tc", "cc", "alm"] } } : { groups: { $in: ["tc", "cc"] } };
         }
 
-        const committee = await User.find(query).orFail();
+        const committee = await this.userModel.find(query).orFail();
 
-        const sanitizedCommittee = committee.map((user) => UserService.sanitizeUser(user, currentUser));
-
-        res.json(sanitizedCommittee);
+        return committee.map((user) => UserService.sanitizeUser(user, currentUser));
     }
 
-    /** POST create a user */
-    public async create(req: Request, res: Response) {
-        const { userInput } = req.body;
+    async create(accessToken: string, userInput: string | undefined, session: Session) {
+        if (userInput == null || userInput === "") {
+            throw new NotFoundException("User not found");
+        }
 
-        const user = await UserService.findOrCreateUser(req.session.accessToken!, userInput);
+        const user = await UserService.findOrCreateUser(accessToken, userInput);
 
         if (!user) {
-            return res.status(404).json({ error: "User not found" });
+            throw new NotFoundException("User not found");
         }
 
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setColor(DiscordUtils.webhookColors.blue)
                     .setDescription(
                         `Added new user **[${user.username}](https://osu.ppy.sh/users/${user.osuId})** to the database`,
@@ -136,20 +132,17 @@ class UsersController {
             .setLocation("dev")
             .send();
 
-        res.json({ message: "User created successfully!", user });
+        return { message: "User created successfully!", user };
     }
 
-    /** POST toggle isActiveReviewer */
-    public async toggleReviewerStatus(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
-
-        const user = await User.findById(userId).orFail();
+    async toggleReviewerStatus(userId: string, session: Session) {
+        const user = await this.userModel.findById(userId).orFail();
 
         user.isActiveReviewer = !user.isActiveReviewer;
         await user.save();
 
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Toggled activity status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveReviewer}**`,
             "user",
         );
@@ -157,7 +150,7 @@ class UsersController {
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setColor(DiscordUtils.webhookColors.orange)
                     .setDescription(
                         `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
@@ -167,23 +160,20 @@ class UsersController {
             )
             .send();
 
-        res.json({
+        return {
             message: `Set activity status as ${user.isActiveReviewer ? "active" : "inactive"}!`,
             user,
-        });
+        };
     }
 
-    /** POST toggle isActiveVoter */
-    public async toggleVoterStatus(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
-
-        const user = await User.findById(userId).orFail();
+    async toggleVoterStatus(userId: string, session: Session) {
+        const user = await this.userModel.findById(userId).orFail();
 
         user.isActiveVoter = !user.isActiveVoter;
         await user.save();
 
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Toggled voting activity status for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to **${user.isActiveVoter}**`,
             "user",
         );
@@ -191,7 +181,7 @@ class UsersController {
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setColor(DiscordUtils.webhookColors.lightOrange)
                     .setDescription(
                         `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
@@ -201,36 +191,28 @@ class UsersController {
             )
             .send();
 
-        res.json({
+        return {
             message: `Set voting activity status as ${user.isActiveVoter ? "active" : "inactive"}!`,
             user,
-        });
+        };
     }
 
-    /** POST update user group */
-    public async updateUserGroups(req: Request, res: Response) {
-        const { userId } = req.params;
-        const { group, join } = req.body;
-
-        // Validate input
+    async updateUserGroups(userId: string, group: string, join: boolean, session: Session) {
         if (!["tc", "cc"].includes(group)) {
-            return res.status(400).json({ error: "Invalid group" });
+            throw new BadRequestException("Invalid group");
         }
 
-        const user = await User.findById(userId).orFail();
+        const user = await this.userModel.findById(userId).orFail();
 
         if (join) {
-            // Add to group if not already in it
-            if (!user.groups.includes(group)) {
-                user.groups.push(group);
+            if (!user.groups.includes(group as any)) {
+                user.groups.push(group as any);
             }
 
             user.groups = user.groups.filter((g) => g !== "alm");
         } else {
-            // Remove from group
             user.groups = user.groups.filter((g) => g !== group);
 
-            // Add to alumni if removing from last committee
             if (!user.groups.some((g) => ["tc", "cc"].includes(g)) && !user.groups.includes("alm")) {
                 user.groups.push("alm");
             }
@@ -238,32 +220,29 @@ class UsersController {
 
         await user.save();
 
-        // Create history entry
         const historyEntry = {
             date: new Date(),
             group,
-            kind: join ? "join" : ("leave" as "join" | "leave"),
+            kind: (join ? "join" : "leave") as "join" | "leave",
         };
 
-        user.history.push(historyEntry);
+        user.history.push(historyEntry as any);
         await user.save();
 
         const groupName = group === "tc" ? "Tournament Committee" : "Contest Committee";
 
-        // Logger
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
                 join ? "to" : "from"
             } the **${groupName}**`,
             "user",
         );
 
-        // Discord webhook
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setColor(join ? DiscordUtils.webhookColors.lightGreen : DiscordUtils.webhookColors.lightRed)
                     .setDescription(
                         `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
@@ -273,45 +252,38 @@ class UsersController {
             )
             .send();
 
-        res.json({
+        return {
             message: `User ${join ? "added to" : "removed from"} the **${groupName}** successfully!`,
             user,
-        });
+        };
     }
 
-    /** POST update user badge value */
-    public async updateBadge(req: Request, res: Response) {
-        const { userId } = req.params;
-        const { increment } = req.body;
-
-        const user = await User.findById(userId).orFail();
+    async updateBadge(userId: string, increment: boolean, session: Session) {
+        const user = await this.userModel.findById(userId).orFail();
         const oldValue = user.badgeValue;
 
-        // Update badge value
         if (increment && user.badgeValue < 10) {
             user.badgeValue++;
         } else if (!increment && user.badgeValue > 0) {
             user.badgeValue--;
         } else {
-            return res.status(400).json({
-                error: increment ? "Badge value cannot exceed 10!" : "Badge value cannot be less than 0!",
-            });
+            throw new BadRequestException(
+                increment ? "Badge value cannot exceed 10!" : "Badge value cannot be less than 0!",
+            );
         }
 
         await user.save();
 
-        // Log the change
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
             "user",
         );
 
-        // Discord webhook notification
         await new WebhookBuilder()
             .addEmbed(
                 new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                     .setColor(DiscordUtils.webhookColors.orange)
                     .setDescription(
                         `Changed [**${user.username}**](https://osu.ppy.sh/users/${user.osuId})'s badge level from **${oldValue}** to **${user.badgeValue}**`,
@@ -319,89 +291,77 @@ class UsersController {
             )
             .send();
 
-        return res.json({
+        return {
             message: `Badge level updated to ${user.badgeValue}`,
             user,
-        });
+        };
     }
 
-    /** POST sync user data with osu! */
-    public async syncUser(req: Request, res: Response) {
-        const { userId } = req.params;
-        const user = await User.findById(userId).orFail();
+    async syncUser(userId: string, accessToken: string) {
+        const user = await this.userModel.findById(userId).orFail();
 
-        const userResponse = await OsuApiService.getUserInfo(req.session.accessToken!, user.osuId);
+        const userResponse = await OsuApiService.getUserInfo(accessToken, user.osuId);
 
         if (OsuApiService.isOsuResponseError(userResponse)) {
-            return res.status(502).json({ error: "Failed to fetch user data from osu!" });
+            throw new BadGatewayException("Failed to fetch user data from osu!");
         }
 
         const updatedUser = await UserService.createOrUpdateUser(userResponse, user);
 
-        res.json({
+        return {
             message: "User data synced successfully!",
             user: updatedUser,
-        });
+        };
     }
 
-    /** POST update discord ID */
-    public async updateDiscordId(req: Request, res: Response) {
-        const userId = req.params.userId;
-        const { discordId } = req.body;
-
-        const user = await User.findById(userId).orFail();
+    async updateDiscordId(userId: string, discordId: string, session: Session) {
+        const user = await this.userModel.findById(userId).orFail();
 
         if (Number.isNaN(Number(discordId))) {
-            return res.status(400).json({ error: "Invalid Discord ID!" });
+            throw new BadRequestException("Invalid Discord ID!");
         }
 
         user.discordId = discordId;
         await user.save();
 
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Updated Discord ID for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${discordId}`,
             "user",
         );
 
-        res.json({
+        return {
             message: `Updated Discord ID successfully!`,
             user,
-        });
+        };
     }
 
-    /** POST update user email */
-    public async updateEmail(req: Request, res: Response) {
-        const { userId } = req.params;
-        const { email } = req.body;
-
-        const user = await User.findById(userId).orFail();
+    async updateEmail(userId: string, email: string, session: Session) {
+        const user = await this.userModel.findById(userId).orFail();
 
         if (!utils.isValidEmail(email)) {
-            return res.status(400).json({ error: "Invalid email!" });
+            throw new BadRequestException("Invalid email!");
         }
 
         user.email = email;
         await user.save();
 
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Updated email for [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) to ${email}`,
             "user",
         );
 
-        res.json({
+        return {
             message: `Updated email successfully!`,
             user,
-        });
+        };
     }
 
-    /** GET review stats */
-    public async getReviewStats(req: Request, res: Response) {
-        const { userId } = req.params;
-        const rawDays = req.query.days != null ? Number(req.query.days) : 180;
+    async getReviewStats(userId: string, daysQuery: string | number | undefined) {
+        const rawDays = daysQuery != null ? Number(daysQuery) : 180;
         const days = Math.min(365, Math.max(1, Math.floor(rawDays)));
-        const user = await User.findById(userId).orFail();
+        const user = await this.userModel.findById(userId).orFail();
 
         const { assignments } = await TournamentService.findAssignedTournamentsForUser(user, days);
 
@@ -417,7 +377,7 @@ class UsersController {
         const totalAssignedLastNDays = tournamentIdsAssigned.size;
         const totalSubmittedLastNDays = tournamentIdsWithReview.size;
 
-        res.json({
+        return {
             activeReviews,
             totalAssignedLastNDays,
             totalSubmittedLastNDays,
@@ -428,38 +388,35 @@ class UsersController {
                 timespan: a.timespan,
                 actionIcon: a.actionIcon,
             })),
-        });
+        };
     }
 
-    /** PATCH cycle bag */
-    public async cycleBag(req: Request, res: Response) {
+    async cycleBag(session: Session) {
         const reviewers = await UserService.assignReviewers("tc");
 
-        res.json({
-            message: "Assignments cycled successfully!",
-            reviewers,
-        });
-
         await LogService.generate(
-            req.session.mongoId!,
+            session.mongoId!,
             `Cycled tournament reviewers and got: ${reviewers
                 .map((u) => `[**${u.username}**](${u.osuProfileUrl})`)
                 .join(", ")}`,
             "user",
         );
+
+        return {
+            message: "Assignments cycled successfully!",
+            reviewers,
+        };
     }
 
-    /** GET related reports and votings */
-    public async getRelatedReportsAndVotings(req: Request, res: Response) {
-        const { userId } = req.params;
-        const user = await User.findByUsernameOrOsuId(userId);
+    async getRelatedReportsAndVotings(userId: string) {
+        const user = await this.userModel.findByUsernameOrOsuId(userId);
 
         if (!user) {
-            return res.status(404).json({ error: "User not found" });
+            throw new NotFoundException("User not found");
         }
 
         const [reports, votings] = await Promise.all([
-            Ticket.find({ type: "report", targetUser: user._id }).populate([
+            this.ticketModel.find({ type: "report", targetUser: user._id }).populate([
                 { path: "author", select: "username osuId groups coverUrl country" },
             ]),
             Voting.find({ category: "user", targetUser: user._id }).populate([
@@ -467,8 +424,6 @@ class UsersController {
             ]),
         ]);
 
-        res.json({ reports, votings });
+        return { reports, votings };
     }
 }
-
-export default new UsersController();

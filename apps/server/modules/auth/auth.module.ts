@@ -1,6 +1,6 @@
 import { Global, MiddlewareConsumer, Module, NestModule, RequestMethod } from "@nestjs/common";
 import { csrfTokenFetchLimiter } from "../../middlewares/rateLimiter";
-import { AuthNestController } from "./auth.controller";
+import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import {
     IsAdminGuard,
@@ -12,7 +12,7 @@ import {
 
 @Global()
 @Module({
-    controllers: [AuthNestController],
+    controllers: [AuthController],
     providers: [
         AuthService,
         IsLoggedInGuard,

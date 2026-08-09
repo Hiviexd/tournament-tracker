@@ -1,26 +1,28 @@
 import { Controller, Get, Post, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
-import AuthController from "../../controllers/AuthController";
+import { AuthService } from "./auth.service";
 
 @Controller("auth")
-export class AuthNestController {
+export class AuthController {
+    constructor(private readonly authService: AuthService) {}
+
     @Get("login")
     login(@Req() req: Request, @Res() res: Response): void {
-        AuthController.login(req, res);
+        this.authService.login(req, res);
     }
 
     @Post("logout")
-    logout(@Req() req: Request, @Res() res: Response): void {
-        AuthController.logout(req, res);
+    logout(@Req() req: Request) {
+        return this.authService.logout(req);
     }
 
     @Get("callback")
     async callback(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await AuthController.callback(req, res);
+        await this.authService.callback(req, res);
     }
 
     @Get("csrf")
-    getCsrfToken(@Req() req: Request, @Res() res: Response): void {
-        AuthController.getCsrfToken(req, res);
+    getCsrfToken(@Req() req: Request) {
+        return this.authService.getCsrfToken(req);
     }
 }
