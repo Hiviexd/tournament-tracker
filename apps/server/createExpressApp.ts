@@ -14,9 +14,7 @@ import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 import { handleCrawlers } from "./middlewares/seo";
-import votingsRouter from "./routers/votingsRouter";
 import logsRouter from "./routers/logsRouter";
-import ticketsRouter from "./routers/ticketsRouter";
 import articlesRouter from "./routers/articlesRouter";
 import devRouter from "./routers/devRouter";
 import resourcesRouter from "./routers/resourcesRouter";
@@ -135,10 +133,8 @@ export function createExpressApp(): express.Application {
         conditionalCsrf as express.RequestHandler,
     );
 
-    // Remaining Express routers (auth + users + tournaments owned by Nest)
-    app.use("/api/votings", votingsRouter);
+    // Remaining Express routers (auth + users + tournaments + tickets + votings owned by Nest)
     app.use("/api/logs", logsRouter);
-    app.use("/api/tickets", ticketsRouter);
     app.use("/api/articles", articlesRouter);
     app.use("/api/dev", devRouter);
     app.use("/api/resources", resourcesRouter);
