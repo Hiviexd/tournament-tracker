@@ -1,3 +1,4 @@
+import { DISCORD_SERVER_ID } from "../../constants";
 import {
     Table,
     Group,
@@ -19,7 +20,6 @@ import TournamentStatusBadge from "../common/badges/TournamentStatusBadge";
 import ReviewStatusBadge from "../common/badges/ReviewStatusBadge";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
-import config from "@tc/config/client";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -87,7 +87,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
     const canApplyState = selectedCount > 0 && !!massStateValue;
 
     const getDiscordThreadLink = (tournament: ITournament) => {
-        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
+        return `https://discord.com/channels/${DISCORD_SERVER_ID}/${tournament.threadId}`;
     };
 
     const potentiallyNeedsReview = (tournament: ITournament) => {

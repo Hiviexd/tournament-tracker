@@ -160,11 +160,13 @@ app.use("/api/*splat", (req, res) => {
     res.status(404).json({ error: "API endpoint not found" });
 });
 
-// serve production frontend
+// serve production frontend when not behind the Docker gateway
 const DIST_ENVS = ["production", "preview"];
+const serveClient = process.env.SERVE_CLIENT === "true";
 
-if (DIST_ENVS.includes(process.env.NODE_ENV || "")) {
-    const clientDist = path.join(__dirname, "../client");
+if (serveClient && DIST_ENVS.includes(process.env.NODE_ENV || "")) {
+    // apps/server/dist → repo root dist/client
+    const clientDist = path.join(__dirname, "../../../dist/client");
 
     // serve static frontend files
     app.use(express.static(clientDist));

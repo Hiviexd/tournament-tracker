@@ -12,8 +12,8 @@
         "preview-dev": "pnpm run --parallel --filter @tc/server --filter @tc/client dev:preview",
         "preview-dev-client": "pnpm --filter @tc/client dev:preview",
         "preview-dev-server": "pnpm --filter @tc/server dev:preview",
-        "preview": "cross-env NODE_ENV=preview PORT=8089 node ./dist/server/app.js",
-        "prod": "cross-env NODE_ENV=production PORT=8088 node ./dist/server/app.js",
+        "preview": "cross-env NODE_ENV=preview PORT=8089 SERVE_CLIENT=true pnpm --filter @tc/server start",
+        "prod": "cross-env NODE_ENV=production PORT=8088 SERVE_CLIENT=true pnpm --filter @tc/server start",
         "build": "pnpm build-client && pnpm build-server",
         "build-preview": "pnpm build-client-preview && pnpm build-server",
         "build-client": "pnpm --filter @tc/client build",
@@ -27,7 +27,11 @@
         "test:ui": "pnpm --filter @tc/server test:ui",
         "test:coverage": "pnpm --filter @tc/server test:coverage",
         "migrate": "pnpm --filter @tc/server run migrate --",
-        "format": "prettier --write \"**/*.{ts,tsx,json,scss}\""
+        "format": "prettier --write \"**/*.{ts,tsx,json,scss}\"",
+        "docker:prod": "docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d",
+        "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+        "docker:preview": "docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d",
+        "docker:preview:down": "docker compose -f docker-compose.preview.yml down"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7.2.0",

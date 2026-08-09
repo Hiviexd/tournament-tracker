@@ -27,7 +27,6 @@
         "@mantine/notifications": "^8.1.3",
         "@mantine/spotlight": "^8.3.1",
         "@tanstack/react-query": "^5.51.21",
-        "@tc/config": "workspace:*",
         "@tc/types": "workspace:*",
         "@tc/utils": "workspace:*",
         "axios": "^1.13.5",

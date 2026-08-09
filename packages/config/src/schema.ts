@@ -2,7 +2,6 @@ import { z } from "zod";
 import { readFileSync, existsSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
-import { publicConfigSchema, type PublicConfig } from "./public";
 
 const webhookSchema = z.object({
     id: z.string(),
@@ -56,8 +55,6 @@ export const configSchema = z.object({
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
-export type { PublicConfig };
-export { publicConfigSchema };
 
 function findRepoRoot(startDir: string): string {
     let dir = startDir;
@@ -82,19 +79,4 @@ export function loadConfigFromDisk(): AppConfig {
     }
     const raw = JSON.parse(readFileSync(configPath, "utf8"));
     return configSchema.parse(raw);
-}
-
-export function toPublicConfig(config: AppConfig): PublicConfig {
-    return publicConfigSchema.parse({
-        discord: {
-            webhooks: {
-                main: {
-                    serverId: config.discord.webhooks.main.serverId,
-                },
-            },
-        },
-        r2: {
-            baseUrl: config.r2.baseUrl,
-        },
-    });
 }

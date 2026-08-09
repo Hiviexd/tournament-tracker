@@ -1,3 +1,4 @@
+import { DISCORD_SERVER_ID } from "../../constants";
 import {
     Card,
     Group,
@@ -26,7 +27,6 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
 import dayjs from "@tc/utils/dayjs";
 import { useState } from "react";
-import config from "@tc/config/client";
 import CopyActionIcon from "@components/common/buttons/CopyActionIcon";
 import { useConfirmModal } from "../../hooks/useModals";
 import AlertText from "../common/AlertText";
@@ -53,7 +53,7 @@ export default function TicketInfo({ ticket }: IProps) {
     const snoozeTicketMutation = useSnoozeTicket(ticket.id);
     const confirmModal = useConfirmModal();
 
-    const threadLink = `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${ticket.threadId ?? ""}`;
+    const threadLink = `https://discord.com/channels/${DISCORD_SERVER_ID}/${ticket.threadId ?? ""}`;
 
     const getStatusColor = (): string => {
         if (!ticket.isActive) return "danger";

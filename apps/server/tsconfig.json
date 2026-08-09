@@ -6,7 +6,7 @@
         "module": "ESNext",
         "moduleResolution": "bundler",
         "baseUrl": ".",
-        "outDir": "../../dist/server",
+        "outDir": "dist",
         "noEmit": true,
         "types": ["node"],
         "paths": {

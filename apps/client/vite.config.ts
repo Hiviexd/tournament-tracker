@@ -1,16 +1,23 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { execSync } from "child_process";
-import { readFileSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
 
-const commitHash = execSync("git rev-parse HEAD", { cwd: repoRoot }).toString().trim();
-const commitMessage = execSync("git log -1 --pretty=%B", { cwd: repoRoot }).toString().trim();
-const branchName = execSync("git rev-parse --abbrev-ref HEAD", { cwd: repoRoot }).toString().trim();
+function git(command: string, fallback = ""): string {
+    try {
+        return execSync(command, { cwd: repoRoot, encoding: "utf8" }).toString().trim();
+    } catch {
+        return fallback;
+    }
+}
+
+const commitHash = git("git rev-parse HEAD", process.env.COMMIT_SHA ?? "unknown");
+const commitMessage = git("git log -1 --pretty=%B", "");
+const branchName = git("git rev-parse --abbrev-ref HEAD", process.env.BRANCH_NAME ?? "unknown");
 
 function getCommitData() {
     try {
@@ -20,8 +27,7 @@ function getCommitData() {
         const endDate = new Date().toISOString().split("T")[0];
 
         const gitCommand = `git log --since="${startDate}" --until="${endDate}" --pretty=format:"%ad" --date=short`;
-        const commitDates = execSync(gitCommand, { encoding: "utf8", cwd: repoRoot })
-            .trim()
+        const commitDates = git(gitCommand)
             .split("\n")
             .filter((date) => date.trim() !== "");
 
@@ -37,32 +43,7 @@ function getCommitData() {
     }
 }
 
-function loadPublicConfig() {
-    const configPath = resolve(repoRoot, "config.json");
-    if (!existsSync(configPath)) {
-        console.warn("config.json missing — using empty public config for Vite");
-        return {
-            discord: { webhooks: { main: { serverId: "" } } },
-            r2: { baseUrl: "" },
-        };
-    }
-    const full = JSON.parse(readFileSync(configPath, "utf8"));
-    return {
-        discord: {
-            webhooks: {
-                main: {
-                    serverId: full.discord?.webhooks?.main?.serverId ?? "",
-                },
-            },
-        },
-        r2: {
-            baseUrl: full.r2?.baseUrl ?? "",
-        },
-    };
-}
-
 const commitData = getCommitData();
-const publicConfig = loadPublicConfig();
 
 export default defineConfig({
     plugins: [
@@ -97,6 +78,5 @@ export default defineConfig({
         __COMMIT_MESSAGE__: JSON.stringify(commitMessage),
         __COMMIT_DATA__: JSON.stringify(commitData),
         __BRANCH_NAME__: JSON.stringify(branchName),
-        __TC_PUBLIC_CONFIG__: JSON.stringify(publicConfig),
     },
 });

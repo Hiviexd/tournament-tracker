@@ -1,0 +1,22 @@
+# Local override: build preview images on-machine.
+# Usage: docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d
+services:
+  server:
+    image: tc-server-preview:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+      target: prod
+      args:
+        MODE: preview
+
+  client:
+    image: tc-client-preview:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+      target: prod
+      args:
+        MODE: preview

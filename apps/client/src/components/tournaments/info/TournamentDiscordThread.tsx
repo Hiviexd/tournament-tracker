@@ -1,3 +1,4 @@
+import { DISCORD_SERVER_ID } from "../../../constants";
 import { Stack, Group, Text, ActionIcon, Input, Anchor, FocusTrap } from "@mantine/core";
 import { ITournament } from "@tc/types/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -5,7 +6,6 @@ import { useState } from "react";
 import { useUpdateThreadId } from "../../../hooks/useTournaments";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
-import config from "@tc/config/client";
 import AlertText from "../../common/AlertText";
 import CopyActionIcon from "../../common/buttons/CopyActionIcon";
 
@@ -56,7 +56,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                         )}
                         {tournament.threadId?.length && (
                             <CopyActionIcon
-                                value={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`}
+                                value={`https://discord.com/channels/${DISCORD_SERVER_ID}/${tournament.threadId}`}
                                 tooltip="Copy thread link"
                             />
                         )}
@@ -87,7 +87,7 @@ export default function TournamentDiscordThread({ tournament }: IProps) {
                 <Text size="sm">
                     {tournament.threadId ? (
                         <Anchor
-                            href={`https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`}
+                            href={`https://discord.com/channels/${DISCORD_SERVER_ID}/${tournament.threadId}`}
                             target="_blank"
                             rel="noopener noreferrer">
                             {tournament.threadId}

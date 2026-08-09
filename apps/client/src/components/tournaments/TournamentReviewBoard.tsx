@@ -1,9 +1,9 @@
+import { DISCORD_SERVER_ID } from "../../constants";
 import { Table, Group, Text, ScrollArea, Card } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { ITournament } from "@tc/types/Tournament";
 import UserLink from "../common/UserLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import config from "@tc/config/client";
 import DateBadge from "../common/badges/DateBadge";
 import truncate from "lodash/truncate.js";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
@@ -41,7 +41,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
     };
 
     const getDiscordThreadLink = (tournament: ITournament) => {
-        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${tournament.threadId}`;
+        return `https://discord.com/channels/${DISCORD_SERVER_ID}/${tournament.threadId}`;
     };
 
     // Sort tournaments by createdAt in descending order (newest first)

@@ -1,3 +1,4 @@
+import { DISCORD_SERVER_ID } from "../constants";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Stack, Button, Group, Pagination, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,7 +14,6 @@ import InfringementCreateModal from "../components/watchlist/InfringementCreateM
 import EmptyState from "../components/common/EmptyState";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
-import config from "@tc/config/client";
 import { WATCHLIST_PAGE_SIZE } from "../components/watchlist/watchlistUtils";
 
 interface FilterValues {
@@ -26,7 +26,7 @@ export default function WatchlistPage() {
     const previousQueryBeforeUserModalRef = useRef<{ type: string; page: number } | null>(null);
 
     const getDiscordThreadLink = (threadId: string) =>
-        `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
+        `https://discord.com/channels/${DISCORD_SERVER_ID}/${threadId}`;
 
     const [queryState, setQueryState] = useQueryStates(
         {

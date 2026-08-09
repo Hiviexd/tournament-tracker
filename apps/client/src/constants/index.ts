@@ -94,6 +94,10 @@ export const COLORBLIND_MODES = {
 
 export const DEFAULT_COLORBLIND_MODE: ColorblindMode = "none";
 
+export const DISCORD_SERVER_ID = "589557574702071819";
+
+export const R2_BASE_URL = "https://assets.hivie.tn";
+
 import checklist from "../../../../checklist.json";
 
 export const TC_REVIEW_CHECKLIST = checklist.tc;

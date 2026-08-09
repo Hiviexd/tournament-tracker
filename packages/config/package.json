@@ -5,9 +5,7 @@
     "type": "module",
     "exports": {
         ".": "./src/index.ts",
-        "./client": "./src/client.ts",
-        "./schema": "./src/schema.ts",
-        "./public": "./src/public.ts"
+        "./schema": "./src/schema.ts"
     },
     "scripts": {
         "typecheck": "tsc -p tsconfig.json --noEmit"

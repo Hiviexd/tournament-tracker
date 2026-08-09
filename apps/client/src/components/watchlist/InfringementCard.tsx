@@ -1,3 +1,4 @@
+import { DISCORD_SERVER_ID } from "../../constants";
 import { Stack, Card, Group, Text, Badge, ActionIcon, Tooltip, Divider, ThemeIcon } from "@mantine/core";
 import { IInfringement, InfringementType } from "@tc/types/Infringement";
 import InfringementBadge from "../common/badges/InfringementBadge";
@@ -6,7 +7,6 @@ import InfringementExpirationBadge from "../common/badges/InfringementExpiration
 import MarkdownText from "../common/MarkdownText";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import DateBadge from "../common/badges/DateBadge";
-import config from "@tc/config/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 
@@ -18,7 +18,7 @@ interface IProps {
 
 export default function InfringementCard({ infringement, userToNavigateTo, onEdit }: IProps) {
     const getDiscordThreadLink = (threadId: string) => {
-        return `https://discord.com/channels/${config.discord.webhooks.main.serverId}/${threadId}`;
+        return `https://discord.com/channels/${DISCORD_SERVER_ID}/${threadId}`;
     };
 
     const handleOpenTicket = (e: React.MouseEvent) => {

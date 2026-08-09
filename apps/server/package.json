@@ -7,7 +7,7 @@
         "dev": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json app.ts",
         "dev:preview": "cross-env NODE_ENV=preview tsx watch --tsconfig tsconfig.json app.ts",
         "build": "tsup",
-        "start": "node ../../dist/server/app.js",
+        "start": "node dist/app.js",
         "migrate": "tsx --tsconfig tsconfig.json migrate.ts",
         "typecheck": "tsc --noEmit -p tsconfig.json",
         "test": "vitest",

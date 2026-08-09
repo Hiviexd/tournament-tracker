@@ -5,7 +5,7 @@ const jobFiles = globSync("jobs/*Job.ts", { ignore: ["**/BaseJob.ts"] }).map((f)
 
 export default defineConfig({
     entry: ["app.ts", ...jobFiles],
-    outDir: "../../dist/server",
+    outDir: "dist",
     target: "node20",
     format: ["esm"],
     splitting: true,

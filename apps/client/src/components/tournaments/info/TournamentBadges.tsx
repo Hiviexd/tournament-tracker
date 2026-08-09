@@ -1,3 +1,4 @@
+import { R2_BASE_URL } from "../../../constants";
 import { Stack, Group, Text, ActionIcon, Box, Image, Popover, Modal, Skeleton } from "@mantine/core";
 import { ITournament } from "@tc/types/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,7 +8,6 @@ import FileUploadInput from "../../common/FileUploadInput";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
-import config from "@tc/config/client";
 import { IAttachment } from "@tc/types/Attachment";
 import { useDisclosure } from "@mantine/hooks";
 import TournamentAwardsManager from "./TournamentAwardsManager";
@@ -62,7 +62,7 @@ export default function TournamentBadges({ tournament }: IProps) {
 
     // check if none of the badges have file size 0
     const validateBadges = (badges: IAttachment[]) => {
-        return badges.every((badge) => badge.url.includes(config.r2.baseUrl));
+        return badges.every((badge) => badge.url.includes(R2_BASE_URL));
     };
 
     const clientAcceptedTypes = [".png"];
