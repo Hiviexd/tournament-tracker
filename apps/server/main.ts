@@ -4,6 +4,7 @@ import { ExpressAdapter } from "@nestjs/platform-express";
 import utils from "@tc/utils/server";
 import { AppModule } from "./app.module";
 import { createExpressApp, registerFinalHandlers } from "./createExpressApp";
+import { AllExceptionsFilter } from "./modules/common/filters/http-exception.filter";
 
 async function bootstrap() {
     const expressApp = createExpressApp();
@@ -13,6 +14,7 @@ async function bootstrap() {
     });
 
     app.setGlobalPrefix("api");
+    app.useGlobalFilters(new AllExceptionsFilter());
 
     // Important when using a prebuilt Express instance
     await app.init();

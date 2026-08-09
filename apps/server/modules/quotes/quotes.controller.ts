@@ -1,24 +1,30 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import QuotesController from "../../controllers/QuotesController";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { IsCommitteeGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { QuotesService } from "./quotes.service";
 
 @Controller("quotes")
-export class QuotesNestController {
+export class QuotesController {
+    constructor(private readonly quotesService: QuotesService) {}
+
     @Get()
-    async getRandomQuote(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await QuotesController.getRandomQuote(req, res);
+    getRandomQuote() {
+        return this.quotesService.getRandomQuote();
     }
 
     @Get("all")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async getAllQuotes(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await QuotesController.getAllQuotes(req, res);
+    getAllQuotes() {
+        return this.quotesService.getAllQuotes();
     }
 
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async createQuote(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await QuotesController.createQuote(req, res);
+    createQuote(
+        @Body() body: { authorId?: string; quote?: string },
+        @CurrentUser() currentUser: IUser,
+    ) {
+        return this.quotesService.createQuote(body.authorId, body.quote, currentUser);
     }
 }

@@ -1,11 +1,13 @@
-import { Controller, Get, Req, Res } from "@nestjs/common";
-import type { Request, Response } from "express";
-import StatusController from "../../controllers/StatusController";
+import { Controller, Get } from "@nestjs/common";
+import type { StatusInfo } from "@tc/types/Status";
+import { StatusService } from "./status.service";
 
 @Controller("status")
-export class StatusNestController {
+export class StatusController {
+    constructor(private readonly statusService: StatusService) {}
+
     @Get()
-    async getStatus(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await StatusController.getStatus(req, res);
+    getStatus(): StatusInfo {
+        return this.statusService.getStatus();
     }
 }

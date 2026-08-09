@@ -3,6 +3,7 @@ import { ArticlesModule } from "./modules/articles/articles.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { BeatmapsModule } from "./modules/beatmaps/beatmaps.module";
 import { ComplianceModule } from "./modules/compliance/compliance.module";
+import { DatabaseModule } from "./modules/common/database.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
 import { DevModule } from "./modules/dev/dev.module";
 import { InfringementsModule } from "./modules/infringements/infringements.module";
@@ -20,6 +21,7 @@ import { VotesModule } from "./modules/votes/votes.module";
 
 @Module({
     imports: [
+        DatabaseModule,
         AuthModule,
         UsersModule,
         TournamentsModule,

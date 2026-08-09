@@ -1,14 +1,12 @@
-import express, { ErrorRequestHandler } from "express";
+import express, { ErrorRequestHandler, RequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import session from "express-session";
 import MongoStoreSession from "connect-mongo";
 import config from "@tc/config";
-import { initMongoose } from "@tc/models/init";
 import { logger } from "./middlewares/logger";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import utils from "@tc/utils/server";
 import { authenticateRequest } from "./middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
@@ -21,13 +19,27 @@ import openApiSpec from "./openapi";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/** Skip shared /api middleware for Enchant (HMAC-gated; no session/CORS/CSRF/rate-limit stack). */
+function isEnchantApiPath(req: { originalUrl: string }): boolean {
+    const pathOnly = req.originalUrl.split("?")[0];
+    return pathOnly === "/api/enchant" || pathOnly.startsWith("/api/enchant/");
+}
+
+function unlessEnchant(middleware: RequestHandler): RequestHandler {
+    return ((req, res, next) => {
+        if (isEnchantApiPath(req)) {
+            return next();
+        }
+        return (middleware as any)(req, res, next);
+    }) as RequestHandler;
+}
+
 /**
  * Build the Express application (shared middleware + docs + Enchant) without final 404/error handlers.
  * Domain API routes live in Nest modules. Call registerFinalHandlers after Nest app.init().
+ * Mongoose is connected by Nest DatabaseModule onModuleInit.
  */
 export function createExpressApp(): express.Application {
-    initMongoose();
-
     const app = express();
     const MongoStore = MongoStoreSession(session);
 
@@ -65,18 +77,7 @@ export function createExpressApp(): express.Application {
 
     app.use(payloadErrorHandler);
 
-    // database
-    mongoose.connect(config.connection);
-    const database = mongoose.connection;
-
-    database.on(
-        "error",
-        console.error.bind(console, utils.consoleStyles("✗ Database connection error", ["red", "underline"])),
-    );
-    database.once("open", function () {
-        console.log(utils.consoleStyles("✓ Database connected", ["green", "bold", "underline"]));
-    });
-
+    // Session store uses mongoose.connection; DatabaseModule connects during Nest init
     app.use(
         session({
             secret: config.session,
@@ -109,14 +110,15 @@ export function createExpressApp(): express.Application {
     // Enchant sidebar skips CORS/CSRF, gated via HMAC — must stay before the auth stack
     app.use("/api/enchant", enchantRouter);
 
-    // Shared /api middleware for Nest controllers (registered during app.init)
+    // Shared /api middleware for Nest controllers (registered during app.init).
+    // Enchant paths skip the whole chain (prep for Nest Enchant; historically unauthenticated).
     app.use(
         "/api",
-        authenticateRequest as express.RequestHandler,
-        conditionalCors as express.RequestHandler,
-        sessionRateLimiter as express.RequestHandler,
-        apiKeyRateLimiter as express.RequestHandler,
-        conditionalCsrf as express.RequestHandler,
+        unlessEnchant(authenticateRequest as express.RequestHandler),
+        unlessEnchant(conditionalCors as express.RequestHandler),
+        unlessEnchant(sessionRateLimiter as express.RequestHandler),
+        unlessEnchant(apiKeyRateLimiter as express.RequestHandler),
+        unlessEnchant(conditionalCsrf as express.RequestHandler),
     );
 
     return app;
@@ -124,6 +126,8 @@ export function createExpressApp(): express.Application {
 
 /**
  * Attach 404 + error handlers after Nest has registered its routes via app.init().
+ * Nest AllExceptionsFilter handles Nest-pipeline errors; Express handlers remain for
+ * CSRF and other Express-layer failures (e.g. Enchant).
  */
 export function registerFinalHandlers(app: express.Application): void {
     // 404 handler for API routes

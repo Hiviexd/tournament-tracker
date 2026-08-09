@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common";
-import { QuotesNestController } from "./quotes.controller";
+import { QuotesController } from "./quotes.controller";
+import { QuotesService } from "./quotes.service";
 
 @Module({
-    controllers: [QuotesNestController],
+    controllers: [QuotesController],
+    providers: [QuotesService],
 })
 export class QuotesModule {}

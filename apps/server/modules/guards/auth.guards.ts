@@ -1,47 +1,66 @@
-import { CanActivate, ExecutionContext, Injectable, mixin, Type } from "@nestjs/common";
+import {
+    CanActivate,
+    ExecutionContext,
+    Injectable,
+    mixin,
+    Type,
+} from "@nestjs/common";
 import type { Request, Response } from "express";
 import type { ApiScope } from "@tc/types/ApiKey";
-import auth from "../../middlewares/auth";
-import { requireScopes } from "../../middlewares/authenticateRequest";
-import { runExpressMiddleware } from "./express-middleware";
+import { AuthService } from "../auth/auth.service";
 
 @Injectable()
 export class IsLoggedInGuard implements CanActivate {
+    constructor(private readonly auth: AuthService) {}
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const http = context.switchToHttp();
-        return runExpressMiddleware(auth.isLoggedIn, http.getRequest<Request>(), http.getResponse<Response>());
+        await this.auth.ensureLoggedIn(http.getRequest<Request>(), http.getResponse<Response>());
+        return true;
     }
 }
 
 @Injectable()
 export class IsCommitteeGuard implements CanActivate {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    constructor(private readonly auth: AuthService) {}
+
+    canActivate(context: ExecutionContext): boolean {
         const http = context.switchToHttp();
-        return runExpressMiddleware(auth.isCommittee, http.getRequest<Request>(), http.getResponse<Response>());
+        this.auth.ensureCommittee(http.getRequest<Request>(), http.getResponse<Response>());
+        return true;
     }
 }
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    constructor(private readonly auth: AuthService) {}
+
+    canActivate(context: ExecutionContext): boolean {
         const http = context.switchToHttp();
-        return runExpressMiddleware(auth.isAdmin, http.getRequest<Request>(), http.getResponse<Response>());
+        this.auth.ensureAdmin(http.getRequest<Request>(), http.getResponse<Response>());
+        return true;
     }
 }
 
 @Injectable()
 export class IsDevGuard implements CanActivate {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    constructor(private readonly auth: AuthService) {}
+
+    canActivate(context: ExecutionContext): boolean {
         const http = context.switchToHttp();
-        return runExpressMiddleware(auth.isDev, http.getRequest<Request>(), http.getResponse<Response>());
+        this.auth.ensureDev(http.getRequest<Request>(), http.getResponse<Response>());
+        return true;
     }
 }
 
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
+    constructor(private readonly auth: AuthService) {}
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const http = context.switchToHttp();
-        return runExpressMiddleware(auth.optionalAuth, http.getRequest<Request>(), http.getResponse<Response>());
+        await this.auth.optionalAuth(http.getRequest<Request>(), http.getResponse<Response>());
+        return true;
     }
 }
 
@@ -49,13 +68,12 @@ export class OptionalAuthGuard implements CanActivate {
 export function RequireScopesGuard(scopes: ApiScope[]): Type<CanActivate> {
     @Injectable()
     class RequireScopesGuardMixin implements CanActivate {
-        async canActivate(context: ExecutionContext): Promise<boolean> {
+        constructor(private readonly auth: AuthService) {}
+
+        canActivate(context: ExecutionContext): boolean {
             const http = context.switchToHttp();
-            return runExpressMiddleware(
-                requireScopes(scopes),
-                http.getRequest<Request>(),
-                http.getResponse<Response>(),
-            );
+            this.auth.requireScopes(http.getResponse<Response>(), scopes);
+            return true;
         }
     }
     return mixin(RequireScopesGuardMixin);
