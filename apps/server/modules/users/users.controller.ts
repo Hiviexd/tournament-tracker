@@ -9,6 +9,7 @@ import {
     Req,
     UseGuards,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import type { IUser, UpdateBadgeRequest, UpdateUserGroupsRequest, UserListQuery } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -21,6 +22,7 @@ import {
 } from "../guards/auth.guards";
 import { UsersService } from "./users.service";
 
+@ApiTags("Users")
 @Controller("users")
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
@@ -32,6 +34,11 @@ export class UsersController {
     }
 
     @Get("me")
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({
+        summary: "Get current user",
+        description: "Returns the user profile that owns the API key.",
+    })
     @UseGuards(RequireScopesGuard(["users:read"]), IsLoggedInGuard)
     getSelf(@CurrentUser() currentUser: IUser) {
         return this.usersService.getSelf(currentUser);

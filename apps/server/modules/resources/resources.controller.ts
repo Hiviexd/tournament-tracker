@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { ResourceCategory } from "@tc/types/Resource";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -7,11 +8,14 @@ import { IsCommitteeGuard, IsLoggedInGuard, RequireScopesGuard } from "../guards
 import { ResourcesIndexQuerySchema, type ResourcesIndexQuery } from "./dto/resources.dto";
 import { ResourcesService } from "./resources.service";
 
+@ApiTags("Resources")
 @Controller("resources")
 export class ResourcesController {
     constructor(private readonly resourcesService: ResourcesService) {}
 
     @Get()
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Get resources" })
     @UseGuards(RequireScopesGuard(["resources:read"]))
     index(@Query(ZodPipe(ResourcesIndexQuerySchema)) query: ResourcesIndexQuery) {
         return this.resourcesService.index(query);

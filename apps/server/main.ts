@@ -1,10 +1,30 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
+import { apiReference } from "@scalar/express-api-reference";
 import utils from "@tc/utils/server";
+import type { Application } from "express";
 import { AppModule } from "./app.module";
 import { createExpressApp, registerFinalHandlers } from "./createExpressApp";
 import { AllExceptionsFilter } from "./modules/common/filters/http-exception.filter";
+import { createPublicOpenApiDocument } from "./openapi.build";
+
+function registerApiDocs(expressApp: Application, openApiDocument: object): void {
+    expressApp.get("/api/openapi.json", (_req, res) => {
+        res.json(openApiDocument);
+    });
+    expressApp.use(
+        "/api/docs",
+        apiReference({
+            url: "/api/openapi.json",
+            theme: "default",
+            persistAuth: true,
+            metaData: {
+                title: "Tournament Tracker API",
+            },
+        }),
+    );
+}
 
 async function bootstrap() {
     const expressApp = createExpressApp();
@@ -19,7 +39,11 @@ async function bootstrap() {
     // Important when using a prebuilt Express instance
     await app.init();
 
-    // After Nest routes are registered so 404/error handlers do not swallow them
+    // Nest-generated public OpenAPI + Scalar (after init so createDocument sees all routes)
+    const openApiDocument = createPublicOpenApiDocument(app);
+    registerApiDocs(expressApp, openApiDocument);
+
+    // After Nest routes + docs so 404/error handlers do not swallow them
     registerFinalHandlers(expressApp);
 
     const port = process.env.PORT || "3000";

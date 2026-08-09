@@ -14,6 +14,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request, Response } from "express";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -34,11 +35,14 @@ import {
 import { defaultFilesInterceptor, tournamentBadgeFilesInterceptor } from "./tournaments-upload";
 import { TournamentsService } from "./tournaments.service";
 
+@ApiTags("Tournaments")
 @Controller("tournaments")
 export class TournamentsController {
     constructor(private readonly tournamentsService: TournamentsService) {}
 
     @Get()
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Search tournaments" })
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
     index(
         @Query(ZodPipe(TournamentIndexQuerySchema)) query: TournamentIndexQuery,
@@ -73,6 +77,8 @@ export class TournamentsController {
     }
 
     @Get(":tournamentId")
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Get tournament by ID" })
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
     getTournament(
         @Param("tournamentId", ZodPipe(TournamentIdParamSchema)) tournamentId: string,

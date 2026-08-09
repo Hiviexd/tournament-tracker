@@ -12,8 +12,6 @@ import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 import { handleCrawlers } from "./middlewares/seo";
-import { apiReference } from "@scalar/express-api-reference";
-import openApiSpec from "./openapi";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,8 +32,9 @@ function unlessEnchant(middleware: RequestHandler): RequestHandler {
 }
 
 /**
- * Build the Express application (shared middleware + docs + Enchant) without final 404/error handlers.
- * Domain API routes live in Nest modules. Call registerFinalHandlers after Nest app.init().
+ * Build the Express application (shared middleware + Enchant) without final 404/error handlers.
+ * Domain API routes live in Nest modules. OpenAPI/Scalar are registered in main.ts after createDocument.
+ * Call registerFinalHandlers after Nest app.init() (and docs registration).
  * Mongoose is connected by Nest DatabaseModule onModuleInit.
  */
 export function createExpressApp(): express.Application {
@@ -90,24 +89,10 @@ export function createExpressApp(): express.Application {
         }),
     );
 
-    // API docs (outside auth/CORS/CSRF stack; under /api so the gateway proxies them)
-    app.get("/api/openapi.json", (_req, res) => {
-        res.json(openApiSpec);
-    });
-    app.use(
-        "/api/docs",
-        apiReference({
-            url: "/api/openapi.json",
-            theme: "default",
-            persistAuth: true,
-            metaData: {
-                title: "Tournament Tracker API",
-            },
-        }),
-    );
-
     // Shared /api middleware for Nest controllers (registered during app.init).
     // Enchant paths skip the whole chain (HMAC-gated Nest EnchantModule; historically unauthenticated).
+    // OpenAPI/Scalar (/api/openapi.json, /api/docs) are registered in main after Nest init;
+    // they still pass through this stack (auth is no-op without a Bearer key).
     app.use(
         "/api",
         unlessEnchant(authenticateRequest as express.RequestHandler),

@@ -11,6 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -31,11 +32,19 @@ import {
 } from "./dto/tickets.dto";
 import { TicketsService } from "./tickets.service";
 
+@ApiTags("Tickets")
 @Controller("tickets")
 export class TicketsController {
     constructor(private readonly ticketsService: TicketsService) {}
 
     @Get()
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({
+        summary: "Search tickets/reports",
+        description:
+            "Tickets and reports are the same entity (`type` field). " +
+            "Querying reports is restricted: with `type=report` you only get reports you own; other report filters are ignored for non-committee keys.",
+    })
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
     index(
         @Query(ZodPipe(TicketsIndexQuerySchema)) query: TicketsIndexQuery,
@@ -57,6 +66,8 @@ export class TicketsController {
     }
 
     @Get(":ticketId")
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Get ticket/report by ID" })
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
     getTicket(
         @Param("ticketId", ZodPipe(TicketIdParamSchema)) ticketId: string,

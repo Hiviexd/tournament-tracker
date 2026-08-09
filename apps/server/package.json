@@ -20,6 +20,7 @@
         "@nestjs/common": "^11.1.28",
         "@nestjs/core": "^11.1.28",
         "@nestjs/platform-express": "^11.1.28",
+        "@nestjs/swagger": "^11.4.6",
         "@scalar/express-api-reference": "^0.10.13",
         "@tc/config": "workspace:*",
         "@tc/models": "workspace:*",

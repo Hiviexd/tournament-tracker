@@ -13,6 +13,7 @@ import {
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import type { IUser } from "@tc/types/User";
 import type { VotingListQuery } from "@tc/types/Voting";
@@ -35,11 +36,14 @@ import {
 } from "./dto/votes.dto";
 import { VotesService } from "./votes.service";
 
+@ApiTags("Votings")
 @Controller("votes")
 export class VotesController {
     constructor(private readonly votesService: VotesService) {}
 
     @Get()
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Search votes" })
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
     index(@Query(ZodPipe(VotesIndexQuerySchema)) query: VotesIndexQuery, @CurrentUser() currentUser?: IUser) {
         return this.votesService.index(query as VotingListQuery, currentUser);
@@ -58,6 +62,8 @@ export class VotesController {
     }
 
     @Get(":votingId")
+    @ApiBearerAuth("bearerAuth")
+    @ApiOperation({ summary: "Get vote by ID" })
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
     getVoting(
         @Param("votingId", ZodPipe(VotingIdParamSchema)) votingId: string,
