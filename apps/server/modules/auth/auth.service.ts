@@ -77,7 +77,7 @@ export class AuthService {
     }
 
     async loadUser(req: Request, res: Response): Promise<IUser | null> {
-        return User.findById(req.session.mongoId || res.locals?.user?._id);
+        return await User.findById(req.session.mongoId || res.locals?.user?._id);
     }
 
     /**

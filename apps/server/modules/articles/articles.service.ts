@@ -33,7 +33,7 @@ export class ArticlesService {
             throw new ForbiddenException("You don't have permission to view this");
         }
 
-        return Article.find({ type: "documentation" }).sort({ title: 1 });
+        return await Article.find({ type: "documentation" }).sort({ title: 1 });
     }
 
     async createArticle(

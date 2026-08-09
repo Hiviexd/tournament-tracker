@@ -20,6 +20,6 @@ export class EnchantController {
             return "";
         }
 
-        return this.enchantService.buildSidebarHtml(ticketId);
+        return await this.enchantService.buildSidebarHtml(ticketId);
     }
 }

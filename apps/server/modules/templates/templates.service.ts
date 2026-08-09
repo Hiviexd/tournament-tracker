@@ -7,7 +7,7 @@ import type { IUser } from "@tc/types/User";
 @Injectable()
 export class TemplatesService {
     async index() {
-        return Template.find().sort({ category: 1, name: 1 });
+        return await Template.find().sort({ category: 1, name: 1 });
     }
 
     async create(body: { name?: string; content?: string; category?: string }, currentUser: IUser) {

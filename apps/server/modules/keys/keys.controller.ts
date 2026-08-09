@@ -26,7 +26,7 @@ import { KeysService } from "./keys.service";
 class ApiKeyManagementLimiterGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const http = context.switchToHttp();
-        return runExpressMiddleware(
+        return await runExpressMiddleware(
             apiKeyManagementLimiter as (req: Request, res: Response, next: (err?: unknown) => void) => unknown,
             http.getRequest<Request>(),
             http.getResponse<Response>(),

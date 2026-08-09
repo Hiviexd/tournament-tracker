@@ -16,7 +16,7 @@ export class QuotesService {
     }
 
     async getAllQuotes() {
-        return this.quoteModel
+        return await this.quoteModel
             .find()
             .populate("author", "username osuId groups coverUrl")
             .populate("addedBy", "username osuId groups coverUrl")

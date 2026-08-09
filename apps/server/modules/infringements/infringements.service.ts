@@ -27,7 +27,7 @@ export class InfringementsService {
             page: queryParams.page ? parseInt(queryParams.page, 10) : undefined,
             limit: queryParams.limit ? parseInt(queryParams.limit, 10) : undefined,
         };
-        return InfringementService.getWatchlist(query);
+        return await InfringementService.getWatchlist(query);
     }
 
     async addInfringement(
