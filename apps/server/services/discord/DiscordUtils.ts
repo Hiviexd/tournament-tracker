@@ -28,32 +28,32 @@ export default class DiscordUtils {
      * Webhook color constants
      */
     public static readonly webhookColors = {
-        darkRed: this.parseColor("#861615"), // deleteVoting
-        red: this.parseColor("#EE2629"),
-        lightRed: this.parseColor("#FF7373"), // create report
-        darkOrange: this.parseColor("#CE5310"),
-        orange: this.parseColor("#f57e2a"),
-        lightOrange: this.parseColor("#EEA578"),
-        darkYellow: this.parseColor("#ffac00"), // toggleVotingStatus
-        yellow: this.parseColor("#ffc85a"), // toggleVotingStatus
+        darkRed: this.parseColor("#861615"), // deleteVoting, revokeApiKey, indefiniteInfringement, overdueReview(18d+)
+        red: this.parseColor("#EE2629"), // embedError, overdueVote, staleTicket(10d+), bans, overdueReview(15d+), removeReviewer, clearVotes
+        lightRed: this.parseColor("#FF7373"), // createReport, badgeRejected, denyReview, dueSoonVote, overdueReview(12d+), removeUserFromGroup
+        darkOrange: this.parseColor("#CE5310"), // unused
+        orange: this.parseColor("#f57e2a"), // rateLimitAlert, staleTicket(7-9d), badgeUpdate, updateReportTarget, assign/addReviewer, tournamentStatus(default), toggleReviewerActivity, updateBadgeLevel
+        lightOrange: this.parseColor("#EEA578"), // overdueReview(<12d), reassignReviewer, toggleVoterActivity
+        darkYellow: this.parseColor("#ffac00"), // concludeVoting, autoConcludeVoting
+        yellow: this.parseColor("#ffc85a"), // resumeVoting, changesRequested(status/review), warningInfringement, failedBadgeNote
         lightYellow: this.parseColor("#FFFF55"), // createVoting
-        darkGreen: this.parseColor("#22A522"),
-        green: this.parseColor("#42D63E"),
-        lightGreen: this.parseColor("#1df27d"), // submitVote
-        darkBlue: this.parseColor("#304989"), // send ticket message
-        blue: this.parseColor("#008cff"), // create ticket
-        lightBlue: this.parseColor("#83E3FF"), // add ticket note
-        darkPurple: this.parseColor("#721C6F"),
-        purple: this.parseColor("#8240A8"),
-        lightPurple: this.parseColor("#AA7FF1"),
-        darkPink: this.parseColor("#FF40A8"),
-        pink: this.parseColor("#FF8ECC"),
-        lightPink: this.parseColor("#FFB3C4"),
-        white: this.parseColor("#EFEFEF"),
-        brown: this.parseColor("#91582A"),
-        gray: this.parseColor("#9E9E9E"),
-        darkGray: this.parseColor("#424242"),
-        black: this.parseColor("#272727"),
+        darkGreen: this.parseColor("#22A522"), // unused
+        green: this.parseColor("#42D63E"), // createTournament
+        lightGreen: this.parseColor("#1df27d"), // submitVote(disabled), activeVoteReminder, badgeApproved, approveReview, addUserToGroup
+        darkBlue: this.parseColor("#304989"), // sendTicketMessage
+        blue: this.parseColor("#008cff"), // createTicket, updateApiKeyScopes, screeningConcluded, createTournamentNote, createUser
+        lightBlue: this.parseColor("#83E3FF"), // addTicketNote, noteInfringement, reviewVote(neutral)
+        darkPurple: this.parseColor("#721C6F"), // makeVotingPrivate
+        purple: this.parseColor("#8240A8"), // snoozeTicketReminders
+        lightPurple: this.parseColor("#AA7FF1"), // makeVotingPublic, supportRequestReceived
+        darkPink: this.parseColor("#FF40A8"), // onHold
+        pink: this.parseColor("#FF8ECC"), // unused
+        lightPink: this.parseColor("#FFB3C4"), // unused
+        white: this.parseColor("#EFEFEF"), // createApiKey, updateWebhookLocation(ticket/tournament), removeAbstention
+        brown: this.parseColor("#91582A"), // unused
+        gray: this.parseColor("#9E9E9E"), // reopenTicket, noBadgeRequested, unarchiveTournament
+        darkGray: this.parseColor("#424242"), // abstainFromVote
+        black: this.parseColor("#272727"), // closeTicket, archiveTournament
     };
 
     /**
