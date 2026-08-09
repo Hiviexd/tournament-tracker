@@ -47,7 +47,8 @@
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.2",
         "sharp": "^0.33.5",
-        "slugify": "^1.6.6"
+        "slugify": "^1.6.6",
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.7",

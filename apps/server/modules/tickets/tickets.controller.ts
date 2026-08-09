@@ -14,6 +14,7 @@ import {
 import type { Request } from "express";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { defaultFilesInterceptor } from "../common/upload.interceptors";
 import {
     IsCommitteeGuard,
@@ -21,6 +22,13 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
+import {
+    TicketCreateBodySchema,
+    TicketIdParamSchema,
+    TicketsIndexQuerySchema,
+    type TicketCreateBody,
+    type TicketsIndexQuery,
+} from "./dto/tickets.dto";
 import { TicketsService } from "./tickets.service";
 
 @Controller("tickets")
@@ -30,18 +38,7 @@ export class TicketsController {
     @Get()
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
     index(
-        @Query()
-        query: {
-            type?: string;
-            title?: string;
-            content?: string;
-            targetUser?: string;
-            targetTournament?: string;
-            assignedGroup?: string;
-            isActive?: string;
-            showOwn?: string;
-            page?: string;
-        },
+        @Query(ZodPipe(TicketsIndexQuerySchema)) query: TicketsIndexQuery,
         @CurrentUser() currentUser?: IUser,
     ) {
         return this.ticketsService.index(query, currentUser);
@@ -51,17 +48,20 @@ export class TicketsController {
     @UseGuards(IsLoggedInGuard)
     @UseInterceptors(defaultFilesInterceptor)
     create(
-        @Body() body: Record<string, any>,
+        @Body(ZodPipe(TicketCreateBodySchema)) body: TicketCreateBody,
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.ticketsService.create(body as any, files, currentUser, req.session);
+        return this.ticketsService.create(body, files, currentUser, req.session);
     }
 
     @Get(":ticketId")
     @UseGuards(RequireScopesGuard(["tickets:read"]), OptionalAuthGuard)
-    getTicket(@Param("ticketId") ticketId: string, @CurrentUser() currentUser?: IUser) {
+    getTicket(
+        @Param("ticketId", ZodPipe(TicketIdParamSchema)) ticketId: string,
+        @CurrentUser() currentUser?: IUser,
+    ) {
         return this.ticketsService.getTicket(ticketId, currentUser);
     }
 

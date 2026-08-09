@@ -17,6 +17,7 @@ import type { Request } from "express";
 import type { IUser } from "@tc/types/User";
 import type { VotingListQuery } from "@tc/types/Voting";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { defaultFilesInterceptor } from "../common/upload.interceptors";
 import {
     IsAdminGuard,
@@ -25,6 +26,13 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
+import {
+    SubmitVoteBodySchema,
+    VotingIdParamSchema,
+    VotesIndexQuerySchema,
+    type SubmitVoteBody,
+    type VotesIndexQuery,
+} from "./dto/votes.dto";
 import { VotesService } from "./votes.service";
 
 @Controller("votes")
@@ -33,8 +41,8 @@ export class VotesController {
 
     @Get()
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
-    index(@Query() query: VotingListQuery, @CurrentUser() currentUser?: IUser) {
-        return this.votesService.index(query, currentUser);
+    index(@Query(ZodPipe(VotesIndexQuerySchema)) query: VotesIndexQuery, @CurrentUser() currentUser?: IUser) {
+        return this.votesService.index(query as VotingListQuery, currentUser);
     }
 
     @Post("create")
@@ -51,15 +59,18 @@ export class VotesController {
 
     @Get(":votingId")
     @UseGuards(RequireScopesGuard(["votings:read"]), OptionalAuthGuard)
-    getVoting(@Param("votingId") votingId: string, @CurrentUser() currentUser?: IUser) {
+    getVoting(
+        @Param("votingId", ZodPipe(VotingIdParamSchema)) votingId: string,
+        @CurrentUser() currentUser?: IUser,
+    ) {
         return this.votesService.getVoting(votingId, currentUser);
     }
 
     @Post(":votingId/submitVote")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     submitVote(
-        @Param("votingId") votingId: string,
-        @Body() body: { data: any; comment?: string },
+        @Param("votingId", ZodPipe(VotingIdParamSchema)) votingId: string,
+        @Body(ZodPipe(SubmitVoteBodySchema)) body: SubmitVoteBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {

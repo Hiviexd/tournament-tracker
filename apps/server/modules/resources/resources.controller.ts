@@ -2,7 +2,9 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } fro
 import type { ResourceCategory } from "@tc/types/Resource";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsCommitteeGuard, IsLoggedInGuard, RequireScopesGuard } from "../guards/auth.guards";
+import { ResourcesIndexQuerySchema, type ResourcesIndexQuery } from "./dto/resources.dto";
 import { ResourcesService } from "./resources.service";
 
 @Controller("resources")
@@ -11,16 +13,7 @@ export class ResourcesController {
 
     @Get()
     @UseGuards(RequireScopesGuard(["resources:read"]))
-    index(
-        @Query()
-        query: {
-            search?: string;
-            author?: string;
-            category?: string;
-            type?: string;
-            page?: string;
-        },
-    ) {
+    index(@Query(ZodPipe(ResourcesIndexQuerySchema)) query: ResourcesIndexQuery) {
         return this.resourcesService.index(query);
     }
 

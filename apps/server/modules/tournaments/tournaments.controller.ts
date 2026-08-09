@@ -17,6 +17,7 @@ import {
 import type { Request, Response } from "express";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import {
     IsAdminGuard,
     IsCommitteeGuard,
@@ -24,6 +25,12 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
+import {
+    TournamentCreateBodySchema,
+    TournamentIdParamSchema,
+    TournamentIndexQuerySchema,
+    type TournamentIndexQuery,
+} from "./dto/tournaments.dto";
 import { defaultFilesInterceptor, tournamentBadgeFilesInterceptor } from "./tournaments-upload";
 import { TournamentsService } from "./tournaments.service";
 
@@ -34,17 +41,7 @@ export class TournamentsController {
     @Get()
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
     index(
-        @Query()
-        query: {
-            search?: string;
-            mode?: string;
-            host?: string;
-            type?: string;
-            status?: string;
-            state?: string;
-            showAllAssignedReviews?: string;
-            page?: string;
-        },
+        @Query(ZodPipe(TournamentIndexQuerySchema)) query: TournamentIndexQuery,
         @CurrentUser() currentUser?: IUser,
     ) {
         return this.tournamentsService.index(query, currentUser);
@@ -52,7 +49,11 @@ export class TournamentsController {
 
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    create(@Body() body: Record<string, unknown>, @CurrentUser() currentUser: IUser, @Req() req: Request) {
+    create(
+        @Body(ZodPipe(TournamentCreateBodySchema)) body: Record<string, unknown>,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
         return this.tournamentsService.create(body, currentUser, req.session);
     }
 
@@ -73,7 +74,10 @@ export class TournamentsController {
 
     @Get(":tournamentId")
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
-    getTournament(@Param("tournamentId") tournamentId: string, @CurrentUser() currentUser?: IUser) {
+    getTournament(
+        @Param("tournamentId", ZodPipe(TournamentIdParamSchema)) tournamentId: string,
+        @CurrentUser() currentUser?: IUser,
+    ) {
         return this.tournamentsService.getTournament(tournamentId, currentUser);
     }
 
