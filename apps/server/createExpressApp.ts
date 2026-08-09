@@ -14,8 +14,6 @@ import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 import { handleCrawlers } from "./middlewares/seo";
-import authRouter from "./routers/authRouter";
-import usersRouter from "./routers/usersRouter";
 import votingsRouter from "./routers/votingsRouter";
 import logsRouter from "./routers/logsRouter";
 import tournamentsRouter from "./routers/tournamentsRouter";
@@ -40,8 +38,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Build the existing Express application (middleware, routes, error handlers)
- * without calling listen. Used by Nest bootstrap via ExpressAdapter.
+ * Build the Express application (middleware + remaining Express routers)
+ * without final 404/error handlers. Nest controllers register during app.init();
+ * call registerFinalHandlers after that so Nest routes are not swallowed.
  */
 export function createExpressApp(): express.Application {
     initMongoose();
@@ -127,44 +126,41 @@ export function createExpressApp(): express.Application {
     // Enchant sidebar skips CORS/CSRF, gated via HMAC
     app.use("/api/enchant", enchantRouter);
 
-    // setup api routes
-    const apiRouter = express.Router();
+    // API auth stack at app level so Nest routes share it
+    app.use(
+        "/api",
+        authenticateRequest as express.RequestHandler,
+        conditionalCors as express.RequestHandler,
+        sessionRateLimiter as express.RequestHandler,
+        apiKeyRateLimiter as express.RequestHandler,
+        conditionalCsrf as express.RequestHandler,
+    );
 
-    // Determine auth method (apiKey vs session)
-    apiRouter.use(authenticateRequest as express.RequestHandler);
+    // Remaining Express routers (auth + users owned by Nest)
+    app.use("/api/votings", votingsRouter);
+    app.use("/api/logs", logsRouter);
+    app.use("/api/tournaments", tournamentsRouter);
+    app.use("/api/tickets", ticketsRouter);
+    app.use("/api/articles", articlesRouter);
+    app.use("/api/dev", devRouter);
+    app.use("/api/resources", resourcesRouter);
+    app.use("/api/beatmaps", beatmapsRouter);
+    app.use("/api/status", statusRouter);
+    app.use("/api/quotes", quotesRouter);
+    app.use("/api/templates", templatesRouter);
+    app.use("/api/dashboard", dashboardRouter);
+    app.use("/api/keys", apiKeysRouter);
+    app.use("/api/compliance", complianceRouter);
+    app.use("/api/search", globalSearchRouter);
+    app.use("/api/infringements", infringementsRouter);
 
-    // Conditionally enforce CORS
-    apiRouter.use(conditionalCors as express.RequestHandler);
+    return app;
+}
 
-    // Rate limit based on auth method
-    apiRouter.use(sessionRateLimiter as express.RequestHandler);
-    apiRouter.use(apiKeyRateLimiter as express.RequestHandler);
-
-    // Conditionally enforce CSRF
-    apiRouter.use(conditionalCsrf as express.RequestHandler);
-
-    // API routes
-    apiRouter.use("/auth", authRouter);
-    apiRouter.use("/users", usersRouter);
-    apiRouter.use("/votes", votingsRouter);
-    apiRouter.use("/logs", logsRouter);
-    apiRouter.use("/tournaments", tournamentsRouter);
-    apiRouter.use("/tickets", ticketsRouter);
-    apiRouter.use("/articles", articlesRouter);
-    apiRouter.use("/dev", devRouter);
-    apiRouter.use("/resources", resourcesRouter);
-    apiRouter.use("/beatmaps", beatmapsRouter);
-    apiRouter.use("/status", statusRouter);
-    apiRouter.use("/quotes", quotesRouter);
-    apiRouter.use("/templates", templatesRouter);
-    apiRouter.use("/dashboard", dashboardRouter);
-    apiRouter.use("/keys", apiKeysRouter);
-    apiRouter.use("/compliance", complianceRouter);
-    apiRouter.use("/search", globalSearchRouter);
-    apiRouter.use("/infringements", infringementsRouter);
-
-    app.use("/api", apiRouter);
-
+/**
+ * Attach 404 + error handlers after Nest has registered its routes via app.init().
+ */
+export function registerFinalHandlers(app: express.Application): void {
     // 404 handler for API routes
     app.use("/api/*splat", (req, res) => {
         res.status(404).json({ error: "API endpoint not found" });
@@ -233,6 +229,4 @@ export function createExpressApp(): express.Application {
         if (!isDev) console.error(err);
         else console.log(err);
     });
-
-    return app;
 }

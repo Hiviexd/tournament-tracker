@@ -3,7 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
 import utils from "@tc/utils/server";
 import { AppModule } from "./app.module";
-import { createExpressApp } from "./createExpressApp";
+import { createExpressApp, registerFinalHandlers } from "./createExpressApp";
 
 async function bootstrap() {
     const expressApp = createExpressApp();
@@ -12,8 +12,13 @@ async function bootstrap() {
         bodyParser: false,
     });
 
+    app.setGlobalPrefix("api");
+
     // Important when using a prebuilt Express instance
     await app.init();
+
+    // After Nest routes are registered so 404/error handlers do not swallow them
+    registerFinalHandlers(expressApp);
 
     const port = process.env.PORT || "3000";
     const environmentString = process.env.NODE_ENV || "⚠ Unknown";
