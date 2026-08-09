@@ -10,7 +10,7 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "json", "html"],
-            include: ["services/**/*.ts", "controllers/**/*.ts", "models/**/*.ts"],
+            include: ["services/**/*.ts", "modules/**/*.ts"],
             exclude: ["tests/**", "node_modules/**", "dist/**"],
         },
         testTimeout: 10000,

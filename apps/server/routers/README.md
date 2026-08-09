@@ -1,3 +1,3 @@
-# Enchant HTTP surface
+# Routers
 
-Enchant stays on Express (not Nest controllers) so it can be mounted **before** the `/api` auth/CORS/CSRF stack. HMAC verification uses `rawBody`; applying the session API middleware would change that contract.
+Express routers were removed during the Nest migration. Domain routes live under `apps/server/modules/`. Shared Express adapter middleware remains in `createExpressApp.ts`.
