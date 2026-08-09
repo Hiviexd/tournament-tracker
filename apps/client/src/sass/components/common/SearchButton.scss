@@ -1,0 +1,85 @@
+.search-button {
+    height: 34px;
+    width: 200px;
+    padding-left: var(--mantine-spacing-sm);
+    padding-right: var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-md);
+    color: var(--mantine-color-primary-light-color);
+    background-color: var(--mantine-color-primary-light);
+    // border: 1px solid var(--mantine-color-primary-light);
+    transition:
+        width 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+        background-color 0.2s ease;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-xs);
+
+    &[data-mobile="true"] {
+        width: 100%;
+    }
+
+    &:hover {
+        background-color: var(--mantine-color-primary-light-hover);
+    }
+
+    &.collapsed {
+        // left padding + right padding + icon width + 1px offset to make icon more visually balanced
+        width: calc((var(--mantine-spacing-sm) * 3) + 1px);
+    }
+
+    .search-icon {
+        flex-shrink: 0;
+        opacity: 1 !important;
+    }
+
+    .search-content {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+        padding-right: 54px;
+    }
+
+    &.collapsed .search-content {
+        width: 0 !important;
+    }
+
+    .search-text {
+        white-space: nowrap;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 0;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+    }
+
+    &.collapsed .search-text {
+        opacity: 0;
+    }
+
+    .shortcut {
+        position: absolute;
+        right: var(--mantine-spacing-sm);
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        line-height: 1;
+        border-radius: var(--mantine-radius-sm);
+        font-weight: bold;
+        color: var(--mantine-color-primary-light-color);
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.18s ease;
+        transition-delay: 0.14s;
+    }
+
+    &.collapsed .shortcut {
+        opacity: 0;
+        transition-duration: 0.1s;
+        transition-delay: 0.02s;
+    }
+}

@@ -1,0 +1,143 @@
+.app-error-boundary {
+    /* Fallback colors keep styling stable if Mantine CSS vars are unavailable */
+    --eb-bg: var(--mantine-color-primary-11, #1d1a15);
+    --eb-panel: var(--mantine-color-primary-10, #28221a);
+    --eb-border: #5a4733;
+    --eb-text: #f6e9d2;
+    --eb-dim: #d5c0a1;
+    --eb-accent: #ffb01b;
+    --eb-accent-hover: #ffc454;
+    --eb-code-bg: #1a1611;
+
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    background-color: var(--eb-bg);
+    color: var(--eb-text);
+    font-family: "Nunito", sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-error-boundary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("/assets/triangles.png");
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.app-error-boundary-panel {
+    width: min(560px, 100%);
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: 1px solid var(--eb-border);
+    border-radius: 14px;
+    background: var(--eb-panel);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    display: grid;
+    gap: 0.9rem;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+
+    h1 {
+        margin: 0;
+        font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+        font-weight: 600;
+        line-height: 1.15;
+    }
+
+    p {
+        margin: 0;
+        color: var(--eb-dim);
+    }
+}
+
+.app-error-boundary-icon {
+    justify-self: center;
+    opacity: 0.5;
+    color: var(--eb-text);
+}
+
+.app-error-boundary-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.25rem;
+
+    button {
+        border: 0;
+        border-radius: 10px;
+        padding: 0.58rem 1rem;
+        background: var(--eb-accent);
+        color: #2a1e0d;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+            transform 0.15s ease,
+            background-color 0.15s ease;
+
+        &:hover {
+            background: var(--eb-accent-hover);
+        }
+
+        &:active {
+            transform: translateY(1px);
+        }
+    }
+}
+
+.app-error-boundary-message {
+    margin: 0;
+    padding: 0.65rem;
+    border-radius: 8px;
+    background: var(--eb-code-bg);
+    border: 1px solid #463626;
+    color: #f3dfbf;
+    font-size: 0.84rem;
+    line-height: 1.35;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.app-error-boundary-debug {
+    margin-top: 0.45rem;
+    border: 1px solid var(--eb-border);
+    border-radius: 10px;
+    background: #241d15;
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+
+    summary {
+        cursor: pointer;
+        font-size: 0.86rem;
+        color: var(--eb-accent);
+    }
+
+    pre {
+        margin: 0.6rem 0 0;
+        padding: 0.65rem;
+        border-radius: 8px;
+        background: var(--eb-code-bg);
+        border: 1px solid #463626;
+        color: #f3dfbf;
+        font-size: 0.8rem;
+        line-height: 1.35;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+}
+
+.app-error-boundary ::selection {
+    background-color: #b77b14;
+    color: #fff4e5;
+}
+
+.app-error-boundary ::-moz-selection {
+    background-color: #b77b14;
+    color: #fff4e5;
+}

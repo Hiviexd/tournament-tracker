@@ -1,0 +1,499 @@
+/* Components */
+
+@use "Layout.scss";
+@use "components/common/Header.scss";
+@use "components/common/LoginButton.scss";
+@use "components/common/EnvironmentBanner.scss";
+@use "components/common/OsuApiBanner.scss";
+@use "components/common/SpotlightAction.scss";
+@use "components/base/AppErrorBoundary.scss";
+
+@use "components/common/MarkdownText.scss";
+@use "components/common/CodeBlock.scss";
+@use "components/common/UserCard.scss";
+@use "components/common/GameModeIcon.scss";
+@use "components/common/AttachmentDisplay.scss";
+@use "components/common/FeatureCard.scss";
+@use "components/common/HoverCard.scss";
+@use "components/common/HomePage.scss";
+@use "components/common/TextEditor.scss";
+@use "components/common/CountryFlag.scss";
+@use "components/common/SearchButton.scss";
+
+@use "components/votings/VotingInfo.scss";
+@use "components/votings/VotingCard.scss";
+
+@use "components/tournaments/TournamentCard.scss";
+
+@use "components/tickets/TicketCard.scss";
+@use "components/tickets/TicketInfo.scss";
+
+@use "components/previewer/NewsBannersTab.scss";
+@use "components/previewer/OsuProfile.scss";
+@use "components/previewer/InGameBannersTab.scss";
+@use "components/previewer/OsuWebPreview.scss";
+
+@use "components/compliance/BeatmapCard.scss";
+
+@use "components/watchlist/InfringementCard.scss";
+
+@use "mixins.scss";
+
+/* Fonts */
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-Heavy.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-Light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-SemiBold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Torus";
+    src: url("/fonts/Torus-Thin.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+}
+
+/* Theme */
+
+/* light mode */
+:root[data-mantine-color-scheme="light"] {
+    --mantine-color-body: var(--mantine-color-gray-1) !important;
+    --mantine-color-text: var(--mantine-color-black) !important;
+}
+
+/* dark mode */
+:root[data-mantine-color-scheme="dark"] {
+    --mantine-color-body: var(--mantine-color-primary-11) !important;
+    --mantine-color-text: var(--mantine-color-white) !important;
+    --mantine-color-primary-filled: var(--mantine-color-primary-9) !important;
+    --mantine-color-primary-filled-hover: darken(var(--mantine-color-primary-9), 10%) !important;
+
+    /* Navigation menu */
+    .mantine-Menu-dropdown {
+        background-color: var(--mantine-color-primary-11) !important;
+    }
+
+    /** 
+    * We need this because the Menu component doesn't support changing the default hover color.
+    * To force-enable custom hover colors, add mod="color-override" (which adds a data-color-override attribute) to the Menu.Item.
+     */
+    .mantine-Menu-item {
+        text-decoration: none !important;
+        transition:
+            background-color 0.1s ease,
+            color 0.1s ease;
+
+        &:hover {
+            &:not([data-color-override]) {
+                background-color: var(--mantine-color-primary-light) !important;
+                color: var(--mantine-color-primary-light-color) !important;
+            }
+        }
+    }
+
+    /* Notifications */
+    .mantine-Notification-title {
+        font-weight: 700 !important;
+    }
+
+    .mantine-Notification-description {
+        color: var(--mantine-color-white) !important;
+    }
+
+    .mantine-Notification-root {
+        @include mixins.glass-bg(var(--notification-color));
+
+        &:before {
+            background-color: var(--mantine-color-white) !important;
+        }
+    }
+
+    .mantine-Notification-closeButton {
+        color: var(--mantine-color-white) !important;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    /* Skeleton */
+    .mantine-Skeleton-root::before {
+        background-color: var(--mantine-color-primary-9) !important;
+    }
+
+    .mantine-Skeleton-root::after {
+        background-color: var(--mantine-color-primary-10) !important;
+    }
+
+    /* Inputs */
+    .mantine-Input-input,
+    .mantine-Popover-dropdown {
+        background-color: var(--mantine-color-primary-10) !important;
+    }
+
+    .mantine-Select-option,
+    .mantine-Combobox-option,
+    .mantine-MultiSelect-option {
+        background-color: var(--mantine-color-primary-10) !important;
+        transition: background-color 0.1s ease;
+
+        &:hover {
+            background-color: var(--mantine-color-primary-9) !important;
+        }
+    }
+
+    .mantine-MultiSelect-pill {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+    }
+
+    .mantine-Pagination-control {
+        background-color: var(--mantine-color-primary-10) !important;
+    }
+
+    /* NavLink styles */
+    .mantine-NavLink-root {
+        text-decoration: none !important;
+
+        &[data-active] {
+            text-decoration: none !important;
+        }
+    }
+
+    /* Tabs */
+    .mantine-Tabs-tab {
+        &:hover {
+            background-color: color-mix(in srgb, var(--mantine-color-primary-11) 60%, transparent);
+        }
+    }
+
+    .mantine-Badge-label {
+        line-height: normal;
+    }
+
+    .mantine-Code-root {
+        background-color: color-mix(in srgb, var(--mantine-color-primary-11) 80%, transparent);
+    }
+
+    .mantine-Pill-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+    }
+
+    .mantine-Kbd-root {
+        background-color: var(--mantine-color-primary-light);
+        color: var(--mantine-color-primary-light-color);
+        border-color: var(--mantine-color-primary-light);
+    }
+
+    .mantine-Accordion-item {
+        background-color: var(--mantine-color-primary-10);
+        border: none;
+    }
+
+    .mantine-TableOfContents-control {
+        text-decoration: none;
+        transition: background-color 0.1s ease;
+    }
+}
+
+/* Links */
+a {
+    color: var(--mantine-color-primary-3);
+    text-decoration: none;
+
+    &.whiteLink {
+        color: var(--mantine-color-white);
+    }
+
+    &:hover:not(.mantine-Button-root) {
+        text-decoration: underline;
+    }
+}
+
+/* Headers */
+.header-border-left {
+    margin-left: 0.625em;
+
+    &:before {
+        margin-left: -0.625em;
+        margin-top: 0.3em;
+        border-radius: 1000em;
+        content: "";
+        display: block;
+        width: 0.2em;
+        height: 0.8em;
+        background-color: var(--mantine-color-primary-5);
+        position: absolute;
+    }
+}
+
+body {
+    background-color: var(--mantine-color-primary-11);
+
+    &:after {
+        background:
+            linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--mantine-color-primary-11) 60%, var(--mantine-color-primary-filled)) -70%,
+                transparent 150%
+            ),
+            url("/assets/triangles.png") repeat-x top center;
+        background-size: cover, auto;
+        mask: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
+        -webkit-mask: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100px;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    &:before {
+        background-image: url("/assets/triangles.png");
+        opacity: 0.2;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        content: "";
+        z-index: -1;
+        pointer-events: none;
+    }
+}
+
+/* Scrollbar */
+html {
+    scrollbar-gutter: stable;
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--mantine-color-primary-6) var(--mantine-color-primary-11);
+}
+
+/* Chrome/Edge/Safari */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--mantine-color-primary-11);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--mantine-color-primary-6);
+    border-radius: 8px;
+    border: 4px solid var(--mantine-color-primary-11);
+
+    &:hover {
+        background-color: var(--mantine-color-primary-5);
+    }
+}
+
+.article-toc-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--mantine-color-primary-6) transparent;
+}
+
+.article-toc-scroll::-webkit-scrollbar {
+    width: 7px;
+}
+
+.article-toc-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.article-toc-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--mantine-color-primary-6);
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.article-toc-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mantine-color-primary-5);
+}
+
+/* ButtonGroup global override */
+.mantine-ButtonGroup-group {
+    display: inline-flex;
+    border: 1px solid color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent);
+    border-radius: var(--mantine-radius-sm);
+    overflow: hidden;
+}
+
+.mantine-ButtonGroup-group > .mantine-Button-root {
+    flex: 1 1 0;
+    min-width: 0;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.mantine-ButtonGroup-group > .mantine-Button-root + .mantine-Button-root {
+    border-left: 1px solid color-mix(in srgb, var(--mantine-color-primary-light-color) 40%, transparent) !important;
+}
+
+/* ButtonGroup full-width variant (opt-in via mod="full-width") */
+.mantine-ButtonGroup-group[data-full-width] {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+}
+
+#article-content :is(h1, h2, h3, h4, h5, h6) {
+    /* Offset added to acocunt for the fixed header */
+    scroll-margin-top: 88px;
+}
+
+/* Selection */
+::selection {
+    background-color: var(--mantine-color-primary-9);
+    color: var(--mantine-color-text);
+}
+
+::moz-selection {
+    background-color: var(--mantine-color-primary-9);
+    color: var(--mantine-color-text);
+}
+
+/* Navbar avatar hover effect */
+.user-avatar {
+    transition: border 0.2s ease;
+    border: 2px solid transparent;
+}
+
+/* Visual pulse animation */
+.animation-pulse {
+    animation: pulse 1s infinite;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes pulse {
+    from {
+        filter: brightness(1.4);
+    }
+
+    to {
+        filter: brightness(1);
+    }
+}
+
+/* Spin animation */
+.animation-spin {
+    animation: spin 2s linear infinite;
+}
+
+/* Keep duration in sync with TournamentTable <Collapse transitionDuration={220} /> */
+$tournament-mass-edit-transition: 220ms ease;
+
+.tournament-table {
+    /*
+     * Checkbox column stays mounted so column count is stable (Collapse + width animations stay aligned).
+     * Fade uses .mass-edit-checkbox-wrap — avoid display:none on collapse or opacity cannot transition out.
+     */
+    .mass-edit-checkbox-wrap {
+        display: inline-flex;
+        min-width: 0;
+        opacity: 0;
+        transition: opacity $tournament-mass-edit-transition;
+    }
+
+    .mass-edit-select-col.is-visible .mass-edit-checkbox-wrap {
+        opacity: 1;
+    }
+
+    .mass-edit-select-col:not(.is-visible) {
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+        border-width: 0 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        transition:
+            width $tournament-mass-edit-transition,
+            min-width $tournament-mass-edit-transition,
+            max-width $tournament-mass-edit-transition,
+            padding $tournament-mass-edit-transition;
+    }
+
+    .mass-edit-select-col.is-visible {
+        width: 44px;
+        min-width: 44px;
+        max-width: 44px;
+        padding-inline: var(--mantine-spacing-xs);
+        box-sizing: border-box;
+        vertical-align: middle;
+        transition:
+            width $tournament-mass-edit-transition,
+            min-width $tournament-mass-edit-transition,
+            max-width $tournament-mass-edit-transition,
+            padding $tournament-mass-edit-transition;
+    }
+
+    .tournament-row-selected > td {
+        background-color: color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
+        transition: background-color 0.18s ease;
+    }
+
+    .tournament-row-selected > td:first-child {
+        box-shadow: inset 3px 0 0 0 var(--mantine-color-primary-6);
+    }
+}
+
+.tournament-table-card {
+    .mass-edit-selected-count {
+        opacity: 0;
+        transform: translateY(4px);
+        transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .mass-edit-selected-count.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

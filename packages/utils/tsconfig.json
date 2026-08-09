@@ -1,0 +1,12 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "lib": ["ES2020", "ES2023.Array", "DOM", "DOM.Iterable"],
+        "types": ["node"]
+    },
+    "include": ["./**/*.ts", "./**/*.tsx"],
+    "exclude": ["node_modules"]
+}
