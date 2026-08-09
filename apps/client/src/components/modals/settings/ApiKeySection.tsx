@@ -28,7 +28,7 @@ import { loggedInUserAtom } from "../../../store/atoms";
 export default function ApiKeySection() {
     const [user] = useAtom(loggedInUserAtom);
 
-    const DOCS_URL = "https://github.com/Hiviexd/tournament-tracker/wiki/API-Documentation";
+    const DOCS_URL = "/api/docs";
 
     const { data: meta, isLoading } = useApiKeyMeta();
     const createKeyMutation = useCreateApiKey();
@@ -136,13 +136,13 @@ export default function ApiKeySection() {
                     {hasComplianceScope && (
                         <Alert color="yellow" title="Important" icon={<FontAwesomeIcon icon="warning" />}>
                             <Text size="sm">
-                                If you're using the Compliance API in your mappooling sheets, consult this{" "}
+                                If you're using the Compliance API in your mappooling sheets,{" "}
                                 <Anchor
                                     fw={700}
                                     href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
                                     target="_blank"
                                     rel="noopener noreferrer">
-                                    wiki page guide
+                                    consult this guide
                                 </Anchor>
                                 .
                             </Text>
@@ -285,13 +285,13 @@ export default function ApiKeySection() {
                         </Alert>
                         <Alert color="success" title="Note" icon={<FontAwesomeIcon icon="lightbulb" />}>
                             <Text size="sm">
-                                If you only care about using the Compliance API in your mappooling sheets, consult this{" "}
+                                If you only care about using the Compliance API in your mappooling sheets,{" "}
                                 <Anchor
                                     fw={700}
                                     href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
                                     target="_blank"
                                     rel="noopener noreferrer">
-                                    wiki page guide
+                                    consult this guide
                                 </Anchor>
                                 .
                             </Text>

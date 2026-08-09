@@ -140,12 +140,12 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
                     </Text>
                     <AlertText type="info" size="md">
                         <Text>
-                            If you want to use this tool directly in your mappooling sheet (via the API), consult this{" "}
+                            If you want to use this tool directly in your mappooling sheet (via the API),{" "}
                             <Anchor
                                 href="https://github.com/Hiviexd/tournament-tracker/wiki/Compliance-API-Example-Usage"
                                 target="_blank"
                                 rel="noopener noreferrer">
-                                wiki page guide
+                                consult this guide
                             </Anchor>
                             .
                         </Text>

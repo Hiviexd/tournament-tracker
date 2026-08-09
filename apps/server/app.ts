@@ -113,6 +113,24 @@ import complianceRouter from "./routers/complianceRouter";
 import globalSearchRouter from "./routers/globalSearchRouter";
 import infringementsRouter from "./routers/infringementsRouter";
 import enchantRouter from "./routers/enchantRouter";
+import { apiReference } from "@scalar/express-api-reference";
+import openApiSpec from "./openapi";
+
+// API docs (outside auth/CORS/CSRF stack; under /api so the gateway proxies them)
+app.get("/api/openapi.json", (_req, res) => {
+    res.json(openApiSpec);
+});
+app.use(
+    "/api/docs",
+    apiReference({
+        url: "/api/openapi.json",
+        theme: "default",
+        persistAuth: true,
+        metaData: {
+            title: "Tournament Tracker API",
+        },
+    }),
+);
 
 // Enchant sidebar skips CORS/CSRF, gated via HMAC
 app.use("/api/enchant", enchantRouter);
