@@ -26,8 +26,6 @@ async function bootstrap() {
         ? utils.consoleStyles(process.env.NODE_ENV, ["yellow", "underline"])
         : utils.consoleStyles("⚠ Unknown", ["orange", "underline"]);
 
-    const mode = process.env.MIGRATION === "true" ? "Run Migrations" : null;
-
     expressApp.set("port", port);
 
     await app.listen(port);
@@ -44,12 +42,6 @@ async function bootstrap() {
             42 - environmentString.length,
         )}│`,
     );
-    if (mode)
-        console.log(
-            `│   ${utils.consoleStyles("Mode:", ["dim"])} ${utils.consoleStyles(mode, ["orange", "bold"])}${" ".repeat(
-                49 - mode.length,
-            )}│`,
-        );
     console.log("└──────────────────────────────────────────────────────────┘");
 }
 

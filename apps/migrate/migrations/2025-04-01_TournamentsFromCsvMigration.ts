@@ -11,7 +11,7 @@ import Tournament from "@tc/models/tournamentModel";
 import Review from "@tc/models/reviewModel";
 import Message from "@tc/models/messageModel";
 import mongoose from "mongoose";
-import UserService from "../services/UserService";
+import UserService from "@tc/osu/UserService";
 import OsuBotService from "@tc/osu/OsuBotService";
 import { IReviewChecklistItem } from "@tc/types/Review";
 import checklist from "../../../checklist.json";

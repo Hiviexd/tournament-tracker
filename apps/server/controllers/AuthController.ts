@@ -2,7 +2,7 @@ import crypto from "crypto";
 import config from "@tc/config";
 import OsuApiService from "@tc/osu/OsuApiService";
 import utils from "@tc/utils/server";
-import UserService from "../services/UserService";
+import UserService from "@tc/osu/UserService";
 import User from "@tc/models/userModel";
 import { Request, Response } from "express";
 

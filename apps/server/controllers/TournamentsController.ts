@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Tournament from "@tc/models/tournamentModel";
-import UserService from "../services/UserService";
+import UserService from "@tc/osu/UserService";
 import {
     TournamentQueryParams,
     TournamentType,

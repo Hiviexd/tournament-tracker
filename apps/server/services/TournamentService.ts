@@ -14,7 +14,7 @@ import { IVoting } from "@tc/types/Voting";
 import Ticket from "@tc/models/ticketModel";
 import Voting from "@tc/models/votingModel";
 import utils from "@tc/utils/server";
-import UserService from "./UserService";
+import UserService from "@tc/osu/UserService";
 import Tournament from "@tc/models/tournamentModel";
 import User from "@tc/models/userModel";
 import LogService from "@tc/models/LogService";

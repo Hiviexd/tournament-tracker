@@ -1,22 +1,14 @@
 import mongoose from "mongoose";
 import config from "@tc/config";
+import { initMongoose } from "@tc/models/init";
 import utils from "@tc/utils/server";
 import MigrationRunner from "./migrations/MigrationRunner";
 
-// Return the "new" updated object by default when doing findByIdAndUpdate
-mongoose.plugin((schema) => {
-    schema.pre("findOneAndUpdate", function (this: any) {
-        if (!("new" in this.options)) {
-            this.setOptions({ new: true });
-        }
-    });
-});
+initMongoose();
 
-// Make queries strict like in v5
-mongoose.set("strictQuery", true);
-
-// Get migration name from CLI arguments
-const migrationName = process.argv[2];
+// Get migration name from CLI arguments (ignore pnpm's pass-through "--")
+const rawArg = process.argv[2];
+const migrationName = rawArg && rawArg !== "--" ? rawArg : undefined;
 
 if (!migrationName) {
     console.error(utils.consoleStyles("✗ Error: Migration name is required", ["red", "bold"]));

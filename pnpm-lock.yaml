@@ -251,6 +251,43 @@ importers:
         specifier: ^5.2.2
         version: 5.9.2
 
+  apps/migrate:
+    dependencies:
+      '@tc/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@tc/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      '@tc/osu':
+        specifier: workspace:*
+        version: link:../../packages/osu
+      '@tc/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@tc/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      csv-parse:
+        specifier: ^5.6.0
+        version: 5.6.0
+      mongoose:
+        specifier: 8.18.1
+        version: 8.18.1
+    devDependencies:
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.5.2
+      tsx:
+        specifier: ^4.19.4
+        version: 4.21.0
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.2
+
   apps/server:
     dependencies:
       '@aws-sdk/client-s3':
@@ -307,9 +344,6 @@ importers:
       csurf:
         specifier: ^1.11.0
         version: 1.11.0
-      csv-parse:
-        specifier: ^5.6.0
-        version: 5.6.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -470,6 +504,9 @@ importers:
       '@tc/config':
         specifier: workspace:*
         version: link:../config
+      '@tc/models':
+        specifier: workspace:*
+        version: link:../models
       '@tc/types':
         specifier: workspace:*
         version: link:../types
@@ -479,7 +516,16 @@ importers:
       axios:
         specifier: ^1.13.5
         version: 1.13.5
+      lodash:
+        specifier: ^4.17.23
+        version: 4.17.23
+      mongoose:
+        specifier: 8.18.1
+        version: 8.18.1
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.17
+        version: 4.17.20
       '@types/node':
         specifier: ^24.1.0
         version: 24.5.2

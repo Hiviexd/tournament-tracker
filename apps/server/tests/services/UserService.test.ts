@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Types } from "mongoose";
-import UserService from "../../services/UserService";
+import UserService from "@tc/osu/UserService";
 import User from "@tc/models/userModel";
 import { createMockTCUsers, createMockCCUsers } from "../utils/users";
 

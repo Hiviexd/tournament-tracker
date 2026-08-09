@@ -1,7 +1,7 @@
 import { IUser, UserListQuery } from "@tc/types/User";
 import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
-import UserService from "../services/UserService";
+import UserService from "@tc/osu/UserService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";

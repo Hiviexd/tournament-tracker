@@ -70,7 +70,7 @@ For documentation on how to create a new automation job, see the [jobs README](h
 
 For running a specific migration, run `pnpm migrate -- <migration-name>`. You can list all available migrations by running `pnpm migrate`.
 
-For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/migrations/README.md) page.
+For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/migrate/migrations/README.md) page.
 
 ### Commit message flags
 
