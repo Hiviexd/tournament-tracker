@@ -1,7 +1,22 @@
-import { Controller, Delete, Get, Patch, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    Req,
+    Res,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from "@nestjs/common";
 import type { Request, Response } from "express";
-import TournamentsController from "../../controllers/TournamentsController";
-import { createUploadMiddleware, handleUpload } from "../../middlewares/upload";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import {
     IsAdminGuard,
     IsCommitteeGuard,
@@ -9,127 +24,173 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
-
-const tournamentBadgeUpload = createUploadMiddleware({
-    maxFiles: 8,
-    allowedTypes: ["image/jpeg", "image/png"],
-});
-
-function runUpload(middleware: typeof handleUpload, req: Request, res: Response): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let done = false;
-        const finish = () => {
-            if (!done) {
-                done = true;
-                resolve();
-            }
-        };
-        // Upload middleware may respond with 400 without calling next()
-        res.once("finish", finish);
-        middleware(req, res, (err?: unknown) => {
-            if (err) {
-                done = true;
-                reject(err instanceof Error ? err : new Error(String(err)));
-                return;
-            }
-            finish();
-        });
-    });
-}
+import { defaultFilesInterceptor, tournamentBadgeFilesInterceptor } from "./tournaments-upload";
+import { TournamentsService } from "./tournaments.service";
 
 @Controller("tournaments")
-export class TournamentsNestController {
+export class TournamentsController {
+    constructor(private readonly tournamentsService: TournamentsService) {}
+
     @Get()
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.index(req, res);
+    index(
+        @Query()
+        query: {
+            search?: string;
+            mode?: string;
+            host?: string;
+            type?: string;
+            status?: string;
+            state?: string;
+            showAllAssignedReviews?: string;
+            page?: string;
+        },
+        @CurrentUser() currentUser?: IUser,
+    ) {
+        return this.tournamentsService.index(query, currentUser);
     }
 
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async create(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.create(req, res);
+    create(@Body() body: Record<string, unknown>, @CurrentUser() currentUser: IUser, @Req() req: Request) {
+        return this.tournamentsService.create(body, currentUser, req.session);
     }
 
     @Patch("bulkEdit")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
-    async bulkEdit(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.bulkEdit(req, res);
+    bulkEdit(
+        @Body()
+        body: {
+            tournamentIds?: string[];
+            status?: import("@tc/types/Tournament").TournamentStatus;
+            isActive?: boolean;
+        },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.bulkEdit(body, currentUser, req.session);
     }
 
     @Get(":tournamentId")
     @UseGuards(RequireScopesGuard(["tournaments:read"]), OptionalAuthGuard)
-    async getTournament(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.getTournament(req, res);
+    getTournament(@Param("tournamentId") tournamentId: string, @CurrentUser() currentUser?: IUser) {
+        return this.tournamentsService.getTournament(tournamentId, currentUser);
     }
 
     @Put(":tournamentId/edit")
     @UseGuards(IsLoggedInGuard)
-    async edit(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.edit(req, res);
+    edit(
+        @Param("tournamentId") tournamentId: string,
+        @Body() body: Record<string, unknown>,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.edit(tournamentId, body, currentUser, req.session);
     }
 
     @Patch(":tournamentId/assignReviewers")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async assignReviewers(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.assignReviewers(req, res);
+    assignReviewers(
+        @Param("tournamentId") tournamentId: string,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.assignReviewers(tournamentId, currentUser, req.session);
     }
 
     @Patch(":tournamentId/reassignReviewer")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async reassignReviewer(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.reassignReviewer(req, res);
+    reassignReviewer(
+        @Param("tournamentId") tournamentId: string,
+        @Body() body: { oldReviewerId?: string; newReviewerId?: string },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.reassignReviewer(tournamentId, body, currentUser, req.session);
     }
 
     @Patch(":tournamentId/addReviewer")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async addReviewer(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.addReviewer(req, res);
+    addReviewer(
+        @Param("tournamentId") tournamentId: string,
+        @Body("reviewerId") reviewerId: string | undefined,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.addReviewer(tournamentId, reviewerId, currentUser, req.session);
     }
 
     @Patch(":tournamentId/removeReviewer")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async removeReviewer(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.removeReviewer(req, res);
+    removeReviewer(
+        @Param("tournamentId") tournamentId: string,
+        @Body("reviewerId") reviewerId: string | undefined,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.removeReviewer(tournamentId, reviewerId, currentUser, req.session);
     }
 
     @Patch(":tournamentId/submitReview")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async submitReview(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.submitReview(req, res);
+    submitReview(
+        @Param("tournamentId") tournamentId: string,
+        @Body() body: { checklist?: any[]; comment?: string; vote?: string },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.submitReview(tournamentId, body, currentUser, req.session);
     }
 
     @Post(":tournamentId/uploadBadges")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async uploadBadges(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await runUpload(tournamentBadgeUpload, req, res);
-        if (res.headersSent) return;
-        await TournamentsController.uploadBadges(req, res);
+    @UseInterceptors(tournamentBadgeFilesInterceptor)
+    uploadBadges(
+        @Param("tournamentId") tournamentId: string,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.uploadBadges(tournamentId, files, currentUser, req.session);
     }
 
     @Post(":tournamentId/downloadBadges")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async downloadBadges(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.downloadBadges(req, res);
+    async downloadBadges(
+        @Param("tournamentId") tournamentId: string,
+        @Body() body: { badgeId: string; filename: string }[],
+        @Res({ passthrough: false }) res: Response,
+    ): Promise<void> {
+        await this.tournamentsService.downloadBadges(tournamentId, body, res);
     }
 
     @Patch(":tournamentId/updateThreadId")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async updateThreadId(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.updateThreadId(req, res);
+    updateThreadId(
+        @Param("tournamentId") tournamentId: string,
+        @Body("threadId") threadId: string | undefined,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.updateThreadId(tournamentId, threadId, currentUser, req.session);
     }
 
     @Post(":tournamentId/createNote")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async createNote(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await runUpload(handleUpload, req, res);
-        if (res.headersSent) return;
-        await TournamentsController.createNote(req, res);
+    @UseInterceptors(defaultFilesInterceptor)
+    createNote(
+        @Param("tournamentId") tournamentId: string,
+        @Body("content") content: string | undefined,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.tournamentsService.createNote(tournamentId, content, files, currentUser, req.session);
     }
 
     @Delete(":tournamentId/delete")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
-    async delete(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TournamentsController.delete(req, res);
+    delete(@Param("tournamentId") tournamentId: string) {
+        return this.tournamentsService.delete(tournamentId);
     }
 }

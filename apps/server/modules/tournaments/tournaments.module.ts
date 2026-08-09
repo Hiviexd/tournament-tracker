@@ -1,7 +1,11 @@
 import { Module } from "@nestjs/common";
-import { TournamentsNestController } from "./tournaments.controller";
+import { TournamentService } from "../../services/TournamentService";
+import { TournamentsController } from "./tournaments.controller";
+import { TournamentsService } from "./tournaments.service";
 
 @Module({
-    controllers: [TournamentsNestController],
+    controllers: [TournamentsController],
+    providers: [TournamentsService, TournamentService],
+    exports: [TournamentService],
 })
 export class TournamentsModule {}

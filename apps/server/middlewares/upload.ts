@@ -22,8 +22,14 @@ const defaultOptions: UploadOptions = {
     ],
 };
 
+export type { UploadOptions };
+
+export function resolveUploadOptions(options: UploadOptions = {}) {
+    return { ...defaultOptions, ...options };
+}
+
 export const createUploadMiddleware = (options: UploadOptions = {}) => {
-    const finalOptions = { ...defaultOptions, ...options };
+    const finalOptions = resolveUploadOptions(options);
 
     const middleware = multer({
         storage: multer.memoryStorage(),

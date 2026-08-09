@@ -1,4 +1,12 @@
-import { Request, Response } from "express";
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    InternalServerErrorException,
+    NotFoundException,
+} from "@nestjs/common";
+import type { Response } from "express";
+import type { Session } from "express-session";
 import { Types } from "mongoose";
 import Tournament from "@tc/models/tournamentModel";
 import UserService from "@tc/osu/UserService";
@@ -12,12 +20,12 @@ import {
 } from "@tc/types/Tournament";
 import { IUser, UserGroup } from "@tc/types/User";
 import User from "@tc/models/userModel";
-import UploadService from "../services/UploadService";
+import UploadService from "../../services/UploadService";
 import Review from "@tc/models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
-import TournamentService from "../services/TournamentService";
+import { TournamentService } from "../../services/TournamentService";
 import LogService from "@tc/models/LogService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import capitalize from "lodash/capitalize.js";
@@ -29,8 +37,6 @@ import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import Message from "@tc/models/messageModel";
 import utils from "@tc/utils/server";
-import { ITicket } from "@tc/types/Ticket";
-import { IVoting } from "@tc/types/Voting";
 
 const defaultPopulate = [
     {
@@ -99,7 +105,7 @@ interface TournamentEditContext {
     body: Record<string, unknown>;
     currentUser: IUser;
     actioner: IUser;
-    session: Request["session"];
+    session: Session;
 }
 
 interface TournamentEditField {
@@ -110,140 +116,164 @@ interface TournamentEditField {
     run: (ctx: TournamentEditContext) => Promise<{ error?: string }>;
 }
 
-const TOURNAMENT_EDIT_FIELDS: TournamentEditField[] = [
-    {
-        isSet: (body) => body.name !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateName(tournament, body.name as string, currentUser),
-    },
-    {
-        isSet: (body) => body.hostIds !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateHosts(tournament, body.hostIds as string[], currentUser),
-    },
-    {
-        isSet: (body) => body.modes !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 403,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateModes(tournament, body.modes as ITournament["modes"], currentUser),
-    },
-    {
-        isSet: (body) => body.type !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 403,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateType(tournament, body.type as ITournament["type"], currentUser),
-    },
-    {
-        isSet: (body) => body.forumUrl !== undefined,
-        archivedAllowed: false,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateForumUrl(tournament, body.forumUrl as string, currentUser),
-    },
-    {
-        isSet: (body) => body.extraLinks !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateExtraLinks(tournament, body.extraLinks as ITournamentExtraLink[], currentUser),
-    },
-    {
-        isSet: (body) => body.enchantUrl !== undefined,
-        archivedAllowed: false,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateEnchantUrl(tournament, body.enchantUrl as string, currentUser),
-    },
-    {
-        isSet: (body) => body.startDate != null && body.endDate != null,
-        archivedAllowed: false,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateDates(tournament, body.startDate as Date, body.endDate as Date, currentUser),
-    },
-    {
-        isSet: (body) => body.tags !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, actioner }) =>
-            TournamentService.updateTags(tournament, body.tags as string[], actioner),
-    },
-    {
-        isSet: (body) => typeof body.bannerUrl === "string",
-        archivedAllowed: true,
-        hostAllowed: true,
-        errorStatus: 400,
-        run: ({ tournament, body, actioner }) =>
-            TournamentService.updateBanner(tournament, body.bannerUrl as string, actioner),
-    },
-    {
-        isSet: (body) => body.winners !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser }) =>
-            TournamentService.updateWinners(tournament, body.winners as IUser[], currentUser),
-    },
-    {
-        isSet: (body) => body.status !== undefined,
-        archivedAllowed: false,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser, session }) =>
-            TournamentService.updateStatus(tournament, body.status as ITournament["status"], currentUser, session),
-    },
-    {
-        isSet: (body) => body.isActive !== undefined,
-        archivedAllowed: true,
-        hostAllowed: false,
-        errorStatus: 400,
-        run: ({ tournament, body, currentUser, session }) =>
-            TournamentService.updateIsActive(tournament, body.isActive as boolean, currentUser, session),
-    },
-];
-
-function hasArchivedAllowedEdit(body: Record<string, unknown>): boolean {
-    return TOURNAMENT_EDIT_FIELDS.some((field) => field.archivedAllowed && field.isSet(body));
+function buildEditFields(tournamentService: TournamentService): TournamentEditField[] {
+    return [
+        {
+            isSet: (body) => body.name !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateName(tournament, body.name as string, currentUser),
+        },
+        {
+            isSet: (body) => body.hostIds !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateHosts(tournament, body.hostIds as string[], currentUser),
+        },
+        {
+            isSet: (body) => body.modes !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 403,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateModes(tournament, body.modes as ITournament["modes"], currentUser),
+        },
+        {
+            isSet: (body) => body.type !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 403,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateType(tournament, body.type as ITournament["type"], currentUser),
+        },
+        {
+            isSet: (body) => body.forumUrl !== undefined,
+            archivedAllowed: false,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateForumUrl(tournament, body.forumUrl as string, currentUser),
+        },
+        {
+            isSet: (body) => body.extraLinks !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateExtraLinks(tournament, body.extraLinks as ITournamentExtraLink[], currentUser),
+        },
+        {
+            isSet: (body) => body.enchantUrl !== undefined,
+            archivedAllowed: false,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateEnchantUrl(tournament, body.enchantUrl as string, currentUser),
+        },
+        {
+            isSet: (body) => body.startDate != null && body.endDate != null,
+            archivedAllowed: false,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateDates(tournament, body.startDate as Date, body.endDate as Date, currentUser),
+        },
+        {
+            isSet: (body) => body.tags !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, actioner }) =>
+                tournamentService.updateTags(tournament, body.tags as string[], actioner),
+        },
+        {
+            isSet: (body) => typeof body.bannerUrl === "string",
+            archivedAllowed: true,
+            hostAllowed: true,
+            errorStatus: 400,
+            run: ({ tournament, body, actioner }) =>
+                tournamentService.updateBanner(tournament, body.bannerUrl as string, actioner),
+        },
+        {
+            isSet: (body) => body.winners !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser }) =>
+                tournamentService.updateWinners(tournament, body.winners as IUser[], currentUser),
+        },
+        {
+            isSet: (body) => body.status !== undefined,
+            archivedAllowed: false,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser, session }) =>
+                tournamentService.updateStatus(tournament, body.status as ITournament["status"], currentUser, session),
+        },
+        {
+            isSet: (body) => body.isActive !== undefined,
+            archivedAllowed: true,
+            hostAllowed: false,
+            errorStatus: 400,
+            run: ({ tournament, body, currentUser, session }) =>
+                tournamentService.updateIsActive(tournament, body.isActive as boolean, currentUser, session),
+        },
+    ];
 }
 
-function hasNonHostEdit(body: Record<string, unknown>): boolean {
-    return TOURNAMENT_EDIT_FIELDS.some((field) => field.isSet(body) && !field.hostAllowed);
+function hasArchivedAllowedEdit(fields: TournamentEditField[], body: Record<string, unknown>): boolean {
+    return fields.some((field) => field.archivedAllowed && field.isSet(body));
+}
+
+function hasNonHostEdit(fields: TournamentEditField[], body: Record<string, unknown>): boolean {
+    return fields.some((field) => field.isSet(body) && !field.hostAllowed);
 }
 
 const selectFields = (isCommittee: boolean) =>
     isCommittee ? "" : "-assignedReviewers -notes -logs -threadId -enchantUrl";
 
-class TournamentsController {
-    /** GET tournament listing */
-    public async index(req: Request, res: Response) {
-        const { search, mode, host, type, status, state, showAllAssignedReviews, page = 1 } = req.query;
+function throwEditError(status: 400 | 403, error: string): never {
+    if (status === 403) throw new ForbiddenException(error);
+    throw new BadRequestException(error);
+}
+
+@Injectable()
+export class TournamentsService {
+    private readonly editFields: TournamentEditField[];
+
+    constructor(private readonly tournamentService: TournamentService) {
+        this.editFields = buildEditFields(tournamentService);
+    }
+
+    async index(
+        queryParams: {
+            search?: string;
+            mode?: string;
+            host?: string;
+            type?: string;
+            status?: string;
+            state?: string;
+            showAllAssignedReviews?: string;
+            page?: string | number;
+        },
+        user: IUser | undefined,
+    ) {
+        const { search, mode, host, type, status, state, showAllAssignedReviews, page = 1 } = queryParams;
         const query: TournamentQueryParams = {};
-        const user = res.locals!.user;
 
         if (search) {
-            const searchQuery = TournamentService.createSearchQuery(search as string);
+            const searchQuery = this.tournamentService.createSearchQuery(search);
             if (searchQuery.$and) {
                 query.$and = searchQuery.$and;
             }
         }
         if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
-            const hostUser = await User.findByUsernameOrOsuId(host as string);
+            const hostUser = await User.findByUsernameOrOsuId(host);
             if (hostUser) query.hosts = { $in: [hostUser._id] };
         }
         if (type) query.type = type as TournamentType;
@@ -270,18 +300,14 @@ class TournamentsController {
                 { $match: query },
                 {
                     $addFields: {
-                        // Add a field to check if tournament needs user's review
                         needsUserReview: {
                             $cond: {
                                 if: {
                                     $and: [
-                                        // User exists and is assigned
                                         { $in: [user?._id, { $ifNull: ["$assignedReviewers", []] }] },
-                                        // Status is reviewOngoing or changesRequested
                                         {
                                             $in: ["$status", ["reviewOngoing", "changesRequested"]],
                                         },
-                                        // Tournament is active
                                         { $eq: ["$isActive", true] },
                                     ],
                                 },
@@ -315,10 +341,10 @@ class TournamentsController {
                 },
                 {
                     $sort: {
-                        needsUserReview: -1, // Sort by needs review first
-                        isActive: -1, // Then by active status
-                        statusOrder: 1, // Then by status order
-                        createdAt: -1, // Finally by creation date
+                        needsUserReview: -1,
+                        isActive: -1,
+                        statusOrder: 1,
+                        createdAt: -1,
                     },
                 },
                 { $skip: skip },
@@ -334,24 +360,21 @@ class TournamentsController {
                 .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
                     tournaments.map((t) =>
-                        TournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user),
+                        this.tournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user),
                     ),
                 ),
             Tournament.countDocuments(query),
         ]);
 
-        res.json({
+        return {
             tournaments,
             total,
             page: Number(page),
             pages: Math.ceil(total / DEFAULT_LIMIT),
-        });
+        };
     }
 
-    /** GET tournament */
-    public async getTournament(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const user = res.locals!.user;
+    async getTournament(tournamentId: string, user: IUser | undefined) {
         const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
 
         let tournament = await Tournament.findById(tournamentId)
@@ -359,24 +382,20 @@ class TournamentsController {
             .populate(defaultPopulate)
             .orFail();
 
-        tournament = TournamentService.censorTournamentData(tournament, res.locals!.user);
-
-        let reports: ITicket[] = [];
-        let votings: IVoting[] = [];
+        tournament = this.tournamentService.censorTournamentData(tournament, user);
 
         if (isCommitteeOrAdmin) {
-            [reports, votings] = await Promise.all([
-                TournamentService.getRelatedReports(tournament),
-                TournamentService.getRelatedVotings(tournament),
+            const [reports, votings] = await Promise.all([
+                this.tournamentService.getRelatedReports(tournament),
+                this.tournamentService.getRelatedVotings(tournament),
             ]);
-            return res.json({ tournament, reports, votings });
+            return { tournament, reports, votings };
         }
 
-        res.json({ tournament });
+        return { tournament };
     }
 
-    /** POST create a tournament */
-    public async create(req: Request, res: Response) {
+    async create(body: Record<string, any>, currentUser: IUser, session: Session) {
         const {
             name,
             hostIds,
@@ -391,50 +410,47 @@ class TournamentsController {
             extraLinks,
             threadId: rawThreadId,
             winners,
-        } = req.body;
-        const currentUser = res.locals!.user!;
+        } = body;
 
-        // Handle both single hostId (legacy) and multiple hostIds
         const hostIdArray = Array.isArray(hostIds) ? hostIds : hostIds ? [hostIds] : [];
 
         if (hostIdArray.length === 0) {
-            return res.status(400).json({ error: "At least one host is required" });
+            throw new BadRequestException("At least one host is required");
         }
 
         const hostsUnordered = await User.find({ _id: { $in: hostIdArray } });
 
         if (hostsUnordered.length !== hostIdArray.length) {
-            return res.status(400).json({ error: "One or more host IDs are invalid" });
+            throw new BadRequestException("One or more host IDs are invalid");
         }
 
-        // Preserve the order of hosts based on hostIdArray
         const hosts = hostIdArray
-            .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
+            .map((id: string) => hostsUnordered.find((host) => host._id.toString() === id))
             .filter((host) => host !== undefined) as typeof hostsUnordered;
 
         const status: TournamentStatus = "supportRequestReceived";
 
         if (forumUrl && !utils.isOsuForumLink(forumUrl)) {
-            return res.status(400).json({ error: "Invalid osu! forum URL format" });
+            throw new BadRequestException("Invalid osu! forum URL format");
         }
 
         if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
-            return res.status(400).json({ error: "Invalid Enchant ticket URL format" });
+            throw new BadRequestException("Invalid Enchant ticket URL format");
         }
 
         if (bannerUrl && !utils.isValidUrl(bannerUrl)) {
-            return res.status(400).json({ error: "Banner URL must be a valid URL" });
+            throw new BadRequestException("Banner URL must be a valid URL");
         }
 
         if (name && !utils.isLatinScriptOnly(name)) {
-            return res.status(400).json({ error: "Name must be in Latin script (no Cyrillic, Chinese, etc.)" });
+            throw new BadRequestException("Name must be in Latin script (no Cyrillic, Chinese, etc.)");
         }
 
         let normalizedExtraLinks: ITournamentExtraLink[] = [];
         if (extraLinks !== undefined) {
             const extraLinksError = utils.validateExtraLinks(extraLinks);
             if (extraLinksError) {
-                return res.status(400).json({ error: extraLinksError });
+                throw new BadRequestException(extraLinksError);
             }
             normalizedExtraLinks = (extraLinks as ITournamentExtraLink[]).map((link) => ({
                 type: link.type,
@@ -448,34 +464,31 @@ class TournamentsController {
         let winnerIds: string[] = [];
         if (winners !== undefined) {
             if (!Array.isArray(winners)) {
-                return res.status(400).json({ error: "Winners must be an array" });
+                throw new BadRequestException("Winners must be an array");
             }
             winnerIds = winners.map((w: IUser | string) =>
                 typeof w === "string" ? w : ((w as IUser)._id?.toString?.() ?? (w as IUser).id),
             );
             if (winnerIds.some((id) => !id)) {
-                return res.status(400).json({ error: "One or more winner IDs are invalid" });
+                throw new BadRequestException("One or more winner IDs are invalid");
             }
             if (winnerIds.length > 0) {
                 const foundWinners = await User.find({ _id: { $in: winnerIds } });
                 if (foundWinners.length !== winnerIds.length) {
-                    return res.status(400).json({ error: "One or more winner IDs are invalid" });
+                    throw new BadRequestException("One or more winner IDs are invalid");
                 }
             }
         }
 
-        // Check for active infringements on any host
         const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);
         if (hostsWithInfringements.length > 0) {
             const hostnames = hostsWithInfringements.map((host) => host.username).join(", ");
-            return res.status(400).json({
-                error: `Cannot create tournament with hosts that have active infringements: ${hostnames}`,
-            });
+            throw new BadRequestException(
+                `Cannot create tournament with hosts that have active infringements: ${hostnames}`,
+            );
         }
 
         const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
-
-        // remove query parameters from forum url
         const cleanForumUrl = forumUrl?.split("?")[0] ?? forumUrl;
 
         const tournament = new Tournament({
@@ -497,21 +510,17 @@ class TournamentsController {
 
         await tournament.save();
 
-        res.json({ message: "Tournament created successfully!", tournament });
-
-        // logging
         await LogService.generate(currentUser.id, `Created ${tournament.type}: **${tournament.name}**`, "tournament");
-        await TournamentService.addTournamentLog(
+        await this.tournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Created ${tournament.type}`,
             tournament.isTournament ? "trophy" : "award",
         );
 
-        // Discord
         const hostsList = utils.formatHostsList(hosts, { mdLinks: true });
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.green)
             .setDescription(
                 `Created a new ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -543,13 +552,11 @@ class TournamentsController {
         }
 
         await new WebhookBuilder().addEmbed(embed).send();
+
+        return { message: "Tournament created successfully!", tournament };
     }
 
-    /** POST assign reviewers */
-    public async assignReviewers(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-
+    async assignReviewers(tournamentId: string, currentUser: IUser, session: Session) {
         const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
@@ -558,7 +565,6 @@ class TournamentsController {
         };
 
         const assignedReviewersType = reviewerTypeMap[tournament.type];
-
         const usersToExclude: string[] = [];
 
         if (tournament.hosts && tournament.hosts.length > 0) {
@@ -576,7 +582,6 @@ class TournamentsController {
         let reviewers: IUser[] = [];
 
         if (assignedReviewersType === "cc") {
-            // assign all of CC
             if (usersToExclude.length > 0) {
                 const excludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
                 reviewers = await User.find({
@@ -605,10 +610,7 @@ class TournamentsController {
 
         await tournament.save();
 
-        res.json({ message: "Reviewers assigned successfully!" });
-
-        // logging
-        await TournamentService.addTournamentLog(
+        await this.tournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Assigned reviewers: ${utils.formatHostsList(reviewers, { mdLinks: true })}`,
@@ -621,11 +623,10 @@ class TournamentsController {
             "tournament",
         );
 
-        // Discord
         const usersToPing = reviewers.map((r) => r.discordId || r.username);
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.orange)
             .setDescription(
                 `Assigned reviewers to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -642,16 +643,13 @@ class TournamentsController {
         }
 
         await webhookBuilder.send();
+
+        return { message: "Reviewers assigned successfully!" };
     }
 
-    /** PATCH add reviewer */
-    public async addReviewer(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-        const { reviewerId } = req.body;
-
+    async addReviewer(tournamentId: string, reviewerId: string | undefined, currentUser: IUser, session: Session) {
         if (!reviewerId) {
-            return res.status(400).json({ error: "reviewerId is required" });
+            throw new BadRequestException("reviewerId is required");
         }
 
         const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
@@ -673,15 +671,13 @@ class TournamentsController {
 
         const user = await User.findById(reviewerId);
         if (!user) {
-            return res.status(400).json({ error: "User not found" });
+            throw new BadRequestException("User not found");
         }
         if (!user.groups.includes(requiredGroup)) {
-            return res.status(400).json({
-                error: `${user.username} is not a member of ${requiredGroup.toUpperCase()}`,
-            });
+            throw new BadRequestException(`${user.username} is not a member of ${requiredGroup.toUpperCase()}`);
         }
         if (usersToExclude.includes(reviewerId)) {
-            return res.status(400).json({ error: `${user.username} is already assigned or excluded` });
+            throw new BadRequestException(`${user.username} is already assigned or excluded`);
         }
 
         const existingIds = (tournament.assignedReviewers || []).map((r: any) =>
@@ -705,9 +701,7 @@ class TournamentsController {
             await user.save();
         }
 
-        res.json({ message: "Reviewer added successfully!" });
-
-        await TournamentService.addTournamentLog(
+        await this.tournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Added reviewer: [**${user.username}**](${user.osuProfileUrl})`,
@@ -720,7 +714,7 @@ class TournamentsController {
         );
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.orange)
             .setDescription(
                 `Added reviewer to ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -732,27 +726,24 @@ class TournamentsController {
             .setMessage(`Reviewer added to ${capitalize(tournament.type)}`);
         if (tournament.threadId) webhookBuilder.setThreadId(tournament.threadId);
         await webhookBuilder.send();
+
+        return { message: "Reviewer added successfully!" };
     }
 
-    /** PATCH remove reviewer */
-    public async removeReviewer(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-        const { reviewerId } = req.body;
-
+    async removeReviewer(tournamentId: string, reviewerId: string | undefined, currentUser: IUser, session: Session) {
         if (!reviewerId) {
-            return res.status(400).json({ error: "reviewerId is required" });
+            throw new BadRequestException("reviewerId is required");
         }
 
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
-            return res.status(400).json({ error: "Tournament has no assigned reviewers" });
+            throw new BadRequestException("Tournament has no assigned reviewers");
         }
 
         const index = tournament.assignedReviewers.findIndex((r: any) => r.toString() === reviewerId);
         if (index === -1) {
-            return res.status(400).json({ error: "Reviewer is not assigned to this tournament" });
+            throw new BadRequestException("Reviewer is not assigned to this tournament");
         }
 
         const removedUser = await User.findById(reviewerId).orFail();
@@ -768,9 +759,7 @@ class TournamentsController {
             await removedUser.save();
         }
 
-        res.json({ message: "Reviewer removed successfully!" });
-
-        await TournamentService.addTournamentLog(
+        await this.tournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Removed reviewer: [**${removedUser.username}**](${removedUser.osuProfileUrl})`,
@@ -796,7 +785,7 @@ class TournamentsController {
         );
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.red)
             .setDescription(
                 `Removed reviewer from ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -805,36 +794,33 @@ class TournamentsController {
         const webhookBuilder = new WebhookBuilder().addEmbed(embed);
         if (tournament.threadId) webhookBuilder.setThreadId(tournament.threadId);
         await webhookBuilder.send();
+
+        return { message: "Reviewer removed successfully!" };
     }
 
-    /** POST edit tournament */
-    public async edit(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-        const body = req.body as Record<string, unknown>;
-
+    async edit(tournamentId: string, body: Record<string, unknown>, currentUser: IUser, session: Session) {
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        if (!tournament.isActive && !hasArchivedAllowedEdit(body)) {
-            return res.status(400).json({ error: "Cannot edit archived tournament!" });
+        if (!tournament.isActive && !hasArchivedAllowedEdit(this.editFields, body)) {
+            throw new BadRequestException("Cannot edit archived tournament!");
         }
 
         let actioner = currentUser;
         const isHost = tournament.hosts?.some((host) => host._id.equals(currentUser._id));
 
         if (!currentUser.isCommitteeOrAdmin && !isHost) {
-            return res.status(403).json({ error: "Unauthorized" });
+            throw new ForbiddenException("Unauthorized");
         }
 
         if (!currentUser.isCommittee && isHost) {
             actioner = tournament.hosts.find((host) => host._id.equals(currentUser._id)) || currentUser;
 
-            if (hasNonHostEdit(body)) {
-                return res.status(403).json({ error: "Hosts can only edit banner!" });
+            if (hasNonHostEdit(this.editFields, body)) {
+                throw new ForbiddenException("Hosts can only edit banner!");
             }
         }
 
-        for (const field of TOURNAMENT_EDIT_FIELDS) {
+        for (const field of this.editFields) {
             if (!field.isSet(body)) continue;
 
             const result = await field.run({
@@ -842,34 +828,36 @@ class TournamentsController {
                 body,
                 currentUser,
                 actioner,
-                session: req.session,
+                session,
             });
 
             if (result.error) {
-                return res.status(field.errorStatus).json({ error: result.error });
+                throwEditError(field.errorStatus, result.error);
             }
         }
 
         await tournament.save();
 
-        res.json({ message: "Tournament updated successfully!" });
+        return { message: "Tournament updated successfully!" };
     }
 
-    /** PATCH bulk edit tournaments */
-    public async bulkEdit(req: Request, res: Response) {
-        const currentUser = res.locals!.user!;
-        const { tournamentIds, status, isActive } = req.body as {
+    async bulkEdit(
+        body: {
             tournamentIds?: string[];
             status?: TournamentStatus;
             isActive?: boolean;
-        };
+        },
+        currentUser: IUser,
+        session: Session,
+    ) {
+        const { tournamentIds, status, isActive } = body;
 
         if (!Array.isArray(tournamentIds) || tournamentIds.length === 0) {
-            return res.status(400).json({ error: "tournamentIds must be a non-empty array" });
+            throw new BadRequestException("tournamentIds must be a non-empty array");
         }
 
         if (status === undefined && isActive === undefined) {
-            return res.status(400).json({ error: "At least one field (status or isActive) is required" });
+            throw new BadRequestException("At least one field (status or isActive) is required");
         }
 
         const uniqueTournamentIds = Array.from(new Set(tournamentIds));
@@ -879,11 +867,11 @@ class TournamentsController {
                     const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
                     if (status !== undefined) {
-                        const statusResult = await TournamentService.updateStatus(
+                        const statusResult = await this.tournamentService.updateStatus(
                             tournament,
                             status,
                             currentUser,
-                            req.session,
+                            session,
                         );
                         if (statusResult.error) {
                             return {
@@ -896,11 +884,11 @@ class TournamentsController {
                     }
 
                     if (isActive !== undefined) {
-                        const activeResult = await TournamentService.updateIsActive(
+                        const activeResult = await this.tournamentService.updateIsActive(
                             tournament,
                             isActive,
                             currentUser,
-                            req.session,
+                            session,
                         );
                         if (activeResult.error) {
                             return {
@@ -933,76 +921,66 @@ class TournamentsController {
         const failures = results.filter((result) => !result.success);
         const queueStats = await NotificationDispatchService.getQueueStats();
 
-        res.json({
+        return {
             message: `Bulk edit complete: ${successes.length} succeeded, ${failures.length} failed.`,
             successCount: successes.length,
             failureCount: failures.length,
             results,
             dispatchMode: "queued",
             notificationQueue: queueStats,
-        });
+        };
     }
 
-    /** POST reassign reviewer */
-    public async reassignReviewer(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-
-        const { oldReviewerId, newReviewerId } = req.body;
+    async reassignReviewer(
+        tournamentId: string,
+        body: { oldReviewerId?: string; newReviewerId?: string },
+        currentUser: IUser,
+        session: Session,
+    ) {
+        const { oldReviewerId, newReviewerId } = body;
 
         if (!oldReviewerId || !newReviewerId) {
-            return res.status(400).json({ error: "Both old and new reviewer IDs are required" });
+            throw new BadRequestException("Both old and new reviewer IDs are required");
         }
 
-        // Find tournament without populating first to check and get a proper reference
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
-            return res.status(400).json({ error: "Tournament has no assigned reviewers" });
+            throw new BadRequestException("Tournament has no assigned reviewers");
         }
 
-        // Check if old reviewer is actually assigned
         const oldReviewerIndex = tournament.assignedReviewers.findIndex(
             (reviewer) => reviewer.toString() === oldReviewerId,
         );
 
         if (oldReviewerIndex === -1) {
-            return res.status(400).json({ error: "Old reviewer is not assigned to this tournament" });
+            throw new BadRequestException("Old reviewer is not assigned to this tournament");
         }
 
-        // Get and validate new reviewer
         const newReviewer = await User.findById(newReviewerId).orFail();
 
-        // Check if new reviewer has the correct group
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
             contest: "cc",
         };
         const requiredGroup = reviewerTypeMap[tournament.type];
         if (!newReviewer.groups.includes(requiredGroup)) {
-            return res.status(400).json({
-                error: `New reviewer must be a member of ${requiredGroup.toUpperCase()}`,
-            });
+            throw new BadRequestException(`New reviewer must be a member of ${requiredGroup.toUpperCase()}`);
         }
 
-        // Check if new reviewer is already assigned
         if (tournament.assignedReviewers.some((reviewer) => reviewer.toString() === newReviewerId)) {
-            return res.status(400).json({ error: "New reviewer is already assigned to this tournament" });
+            throw new BadRequestException("New reviewer is already assigned to this tournament");
         }
 
-        // Instead of direct array manipulation, use mongoose's array update methods
-        // Create a new array with the updated reviewer
         const updatedReviewers = [...tournament.assignedReviewers];
-        updatedReviewers[oldReviewerIndex] = newReviewerId;
+        updatedReviewers[oldReviewerIndex] = newReviewerId as any;
 
-        // Update the tournament with the new array
         await Tournament.findByIdAndUpdate(
             tournamentId,
             { assignedReviewers: updatedReviewers },
             { new: true, runValidators: true },
         );
 
-        // Update the users' bag
         newReviewer.inBag = false;
         await newReviewer.save();
 
@@ -1010,10 +988,7 @@ class TournamentsController {
         oldReviewer.inBag = true;
         await oldReviewer.save();
 
-        res.json({ message: "Reviewer reassigned successfully!" });
-
-        // logging
-        await TournamentService.addTournamentLog(
+        await this.tournamentService.addTournamentLog(
             tournament,
             currentUser,
             `Reassigned reviewer from [**${oldReviewer.username}**](${oldReviewer.osuProfileUrl}) to [**${newReviewer.username}**](${newReviewer.osuProfileUrl})`,
@@ -1038,13 +1013,12 @@ class TournamentsController {
             "tournament",
         );
 
-        // Discord
         const usersToPing = [
             oldReviewer.discordId || oldReviewer.username,
             newReviewer.discordId || newReviewer.username,
         ];
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setColor(DiscordUtils.webhookColors.lightOrange)
             .setDescription(
                 `Reassigned reviewer for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -1062,46 +1036,49 @@ class TournamentsController {
         }
 
         await webhookBuilder.send();
+
+        return { message: "Reviewer reassigned successfully!" };
     }
 
-    /** POST submit review */
-    public async submitReview(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-
-        const { checklist, comment, vote } = req.body;
+    async submitReview(
+        tournamentId: string,
+        body: { checklist?: any[]; comment?: string; vote?: string },
+        currentUser: IUser,
+        session: Session,
+    ) {
+        const { checklist, comment, vote } = body;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!tournament.isActive) {
-            return res.status(400).json({ error: "Tournament is not active" });
+            throw new BadRequestException("Tournament is not active");
         }
 
         if (!checklist || !checklist.length || !vote) {
-            return res.status(400).json({ error: "Missing required fields" });
+            throw new BadRequestException("Missing required fields");
         }
 
         if (vote !== "approve" && vote !== "changesRequested" && vote !== "deny") {
-            return res.status(400).json({ error: "Invalid vote" });
+            throw new BadRequestException("Invalid vote");
         }
 
         if (checklist.some((item) => item.checked === undefined)) {
-            return res.status(400).json({ error: "Invalid checklist" });
+            throw new BadRequestException("Invalid checklist");
         }
 
-        let review = tournament.reviews.find((review) => review.author!._id.equals(res.locals!.user!._id));
+        let review = tournament.reviews.find((review) => review.author!._id.equals(currentUser._id));
         let isNewReview = false;
 
         if (!review) {
             review = new Review({
-                author: res.locals!.user!,
-                comment,
+                author: currentUser,
+                comment: comment ?? "",
                 vote,
                 checklist,
             });
             isNewReview = true;
         } else {
-            review.comment = comment;
+            review.comment = comment ?? "";
             review.vote = vote;
             review.checklist = checklist;
         }
@@ -1113,15 +1090,11 @@ class TournamentsController {
             await tournament.save();
         }
 
-        res.json({ message: "Review submitted successfully!" });
-
         if (isNewReview) {
-            // logging
-            await TournamentService.addTournamentLog(tournament, currentUser, `Submitted review`, "check-to-slot");
+            await this.tournamentService.addTournamentLog(tournament, currentUser, `Submitted review`, "check-to-slot");
             await LogService.generate(currentUser.id, `Submitted review for **${tournament.name}**`, "tournament");
         }
 
-        // Discord
         let color = DiscordUtils.webhookColors.lightBlue;
         if (vote === "changesRequested") color = DiscordUtils.webhookColors.yellow;
         if (vote === "deny") color = DiscordUtils.webhookColors.lightRed;
@@ -1132,11 +1105,10 @@ class TournamentsController {
         if (vote === "deny") emoji = "❌";
         if (vote === "approve") emoji = "✅";
 
-        // get count of false checklist items, iterate through the review.checklist and count the checked: false items
         const falseCount = review.checklist.filter((item) => !item.checked).length;
 
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setDescription(
                 `${isNewReview ? "Submitted a" : "Updated their"} review for ${tournament.type}: [**${
                     tournament.name
@@ -1145,7 +1117,7 @@ class TournamentsController {
             .setColor(color)
             .addField("Decision", `${emoji} ${startCase(vote)}`, true)
             .addField("Checklist Issues", `${falseCount > 0 ? "⚠️" : "🎉"} ${falseCount}`, true)
-            .addField("Comment", comment.trim().length > 0 ? utils.shorten(comment, 512) : "*No comment provided...*");
+            .addField("Comment", comment!.trim().length > 0 ? utils.shorten(comment!, 512) : "*No comment provided...*");
 
         const webhookBuilder = new WebhookBuilder().addEmbed(embed).setNotification("silent");
 
@@ -1154,25 +1126,25 @@ class TournamentsController {
         }
 
         await webhookBuilder.send();
+
+        return { message: "Review submitted successfully!" };
     }
 
-    /** POST upload badges */
-    public async uploadBadges(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const files = req.files as Express.Multer.File[];
-        const currentUser = res.locals!.user!;
-
+    async uploadBadges(
+        tournamentId: string,
+        files: Express.Multer.File[] | undefined,
+        currentUser: IUser,
+        session: Session,
+    ) {
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!files?.length) {
-            return res.status(400).json({ error: "No files uploaded" });
+            throw new BadRequestException("No files uploaded");
         }
 
-        // Separate valid and invalid files
         const validFiles: Express.Multer.File[] = [];
         const invalidFiles: { file: Express.Multer.File; width: number; height: number }[] = [];
 
-        // Check dimensions of each file
         for (const file of files) {
             try {
                 const metadata = await sharp(file.buffer).metadata();
@@ -1184,13 +1156,11 @@ class TournamentsController {
                 } else {
                     validFiles.push(file);
                 }
-            } catch (error) {
-                // If we can't process the image, treat it as invalid
+            } catch {
                 invalidFiles.push({ file, width: 0, height: 0 });
             }
         }
 
-        // If there are invalid files, create a note with them
         if (invalidFiles.length > 0) {
             const failedBadgesInfo = invalidFiles
                 .map(({ file, width, height }) => {
@@ -1210,7 +1180,6 @@ class TournamentsController {
                 isNote: true,
             });
 
-            // Add failed badge files as attachments
             note.attachments = await UploadService.handleFileUploads(
                 invalidFiles.map((item) => item.file),
                 FILE_UPLOAD_CATEGORY,
@@ -1221,8 +1190,7 @@ class TournamentsController {
             await note.save();
             tournament.notes.push(note);
 
-            // logging and Discord notification for failed badges
-            await TournamentService.addTournamentLog(
+            await this.tournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Created note for failed badge uploads`,
@@ -1234,9 +1202,8 @@ class TournamentsController {
                 "tournament",
             );
 
-            // Discord notification for failed badges note
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setDescription(
                     `Added a note for failed badge uploads for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
                 )
@@ -1257,7 +1224,6 @@ class TournamentsController {
             await webhookBuilder.send();
         }
 
-        // Upload only valid badges
         if (validFiles.length > 0) {
             const badges = await UploadService.handleFileUploads(
                 validFiles,
@@ -1268,14 +1234,12 @@ class TournamentsController {
 
             tournament.badges = badges;
 
-            // logging for successful uploads
-            await TournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
+            await this.tournamentService.addTournamentLog(tournament, currentUser, `Uploaded badges`, "image");
             await LogService.generate(currentUser.id, `Uploaded badges for **${tournament.name}**`, "tournament");
         }
 
         await tournament.save();
 
-        // Determine response message
         let message = "";
         if (validFiles.length > 0 && invalidFiles.length > 0) {
             message = `${validFiles.length} badge(s) uploaded successfully! ${invalidFiles.length} badge(s) failed dimension requirements and were added to notes.`;
@@ -1286,43 +1250,37 @@ class TournamentsController {
                 "No valid badges were uploaded. All badges failed dimension requirements and were added to notes.";
         }
 
-        res.json({ message });
+        return { message };
     }
 
-    /** POST download badges */
-    public async downloadBadges(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
+    async downloadBadges(
+        tournamentId: string,
+        customFilenames: { badgeId: string; filename: string }[] | undefined,
+        res: Response,
+    ) {
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
-        const customFilenames = req.body as { badgeId: string; filename: string }[];
-
         const badges = tournament.badges;
 
         if (!badges?.length) {
-            return res.status(404).json({ error: "No badges found" });
+            throw new NotFoundException("No badges found");
         }
 
         try {
-            // Create a zip file
             const archive = archiver("zip", {
-                zlib: { level: 9 }, // Maximum compression
+                zlib: { level: 9 },
             });
 
-            // Listen for all archive data to be written
             archive.on("error", (err) => {
                 throw err;
             });
 
-            // Set the headers for file download
             res.setHeader("Content-Type", "application/zip");
 
-            // Sanitize the tournament name for use in filename
             const { ascii: sanitizedTournamentName } = utils.sanitizeFilename(tournament.name);
             res.setHeader("Content-Disposition", `attachment; filename=${sanitizedTournamentName}_Badges.zip`);
 
-            // Pipe archive data to the response
             archive.pipe(res);
 
-            // Group filenames by badge ID to handle duplicates
             const badgeFilenames = new Map<string, string[]>();
             customFilenames?.forEach(({ badgeId, filename }) => {
                 if (!badgeFilenames.has(badgeId)) {
@@ -1331,35 +1289,27 @@ class TournamentsController {
                 badgeFilenames.get(badgeId)!.push(filename);
             });
 
-            // Track processed badge IDs to avoid duplicates
             const processedBadgeIds = new Set<string>();
 
-            // Process each badge
             for (const badge of badges) {
                 try {
-                    // Skip if we've already processed this badge
                     if (processedBadgeIds.has(badge._id.toString())) {
                         continue;
                     }
                     processedBadgeIds.add(badge._id.toString());
 
-                    // Download the badge image
                     const response = await axios.get(badge.url, { responseType: "arraybuffer" });
                     const buffer = Buffer.from(response.data);
 
-                    // Get file extension from URL
                     const ext = badge.url.split(".").pop();
                     const filenames = badgeFilenames.get(badge._id.toString()) || [
                         tournament.name.replace(/[^a-z0-9]/gi, "-").toLowerCase(),
                     ];
 
-                    // Use the first filename for this badge
                     const baseFilename = filenames[0];
 
-                    // Add the 2x version (original 172x80)
                     archive.append(buffer, { name: `${baseFilename}@2x.${ext}` });
 
-                    // Create and add the 1x version (86x40)
                     const resizedBuffer = await sharp(buffer)
                         .resize(86, 40, {
                             fit: "fill",
@@ -1374,36 +1324,27 @@ class TournamentsController {
                 }
             }
 
-            // Finalize the archive and wait for it to complete
             await archive.finalize();
         } catch (error) {
             console.error("Error creating zip:", error);
-            // Only send error if headers haven't been sent
             if (!res.headersSent) {
-                res.status(500).json({ error: "Failed to create badge archive" });
+                throw new InternalServerErrorException("Failed to create badge archive");
             }
         }
     }
 
-    /** POST update thread ID */
-    public async updateThreadId(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-
-        let threadId = req.body.threadId;
+    async updateThreadId(tournamentId: string, threadIdInput: string | undefined, currentUser: IUser, session: Session) {
+        let threadId = threadIdInput;
 
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        threadId = utils.extractDiscordThreadId(threadId);
+        threadId = utils.extractDiscordThreadId(threadId ?? null) ?? undefined;
 
         if (threadId !== tournament.threadId) {
             tournament.threadId = threadId;
             await tournament.save();
 
-            res.json({ message: "Thread ID updated successfully!" });
-
-            // logging
-            await TournamentService.addTournamentLog(
+            await this.tournamentService.addTournamentLog(
                 tournament,
                 currentUser,
                 `Updated Discord thread ID: **${threadId && threadId.length ? threadId : "#t-committee"}**`,
@@ -1415,9 +1356,8 @@ class TournamentsController {
                 "tournament",
             );
 
-            // discord
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(DiscordUtils.webhookColors.white)
                 .setDescription(
                     `Updated webhook location for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
@@ -1434,19 +1374,20 @@ class TournamentsController {
             }
 
             await webhookBuilder.send();
-        } else {
-            res.json({ message: "Thread ID is already set!" });
+
+            return { message: "Thread ID updated successfully!" };
         }
+
+        return { message: "Thread ID is already set!" };
     }
 
-    /** POST create note */
-    public async createNote(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-        const currentUser = res.locals!.user!;
-        const files = req.files as Express.Multer.File[];
-
-        const { content } = req.body;
-
+    async createNote(
+        tournamentId: string,
+        content: string | undefined,
+        files: Express.Multer.File[] | undefined,
+        currentUser: IUser,
+        session: Session,
+    ) {
         const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
 
         const note = new Message({
@@ -1456,7 +1397,6 @@ class TournamentsController {
             isNote: true,
         });
 
-        // Handle file uploads
         if (files?.length) {
             note.attachments = await UploadService.handleFileUploads(
                 files,
@@ -1471,20 +1411,16 @@ class TournamentsController {
         tournament.notes.push(note);
         await tournament.save();
 
-        res.json({ message: "Note created successfully!" });
-
-        // logging
-        await TournamentService.addTournamentLog(tournament, currentUser, `Created note`, "sticky-note");
+        await this.tournamentService.addTournamentLog(tournament, currentUser, `Created note`, "sticky-note");
         await LogService.generate(currentUser.id, `Created note for **${tournament.name}**`, "tournament");
 
-        // Discord
         const embed = new EmbedBuilder()
-            .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+            .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
             .setDescription(
                 `Added a note for ${tournament.type}: [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
             )
             .setColor(DiscordUtils.webhookColors.blue)
-            .addField("Note", utils.shorten(content, 512));
+            .addField("Note", utils.shorten(content ?? "", 512));
 
         if (note.attachments?.length) {
             const attachmentsField = utils.getAttachmentsField(note.attachments)!;
@@ -1498,24 +1434,21 @@ class TournamentsController {
         }
 
         await webhookBuilder.send();
+
+        return { message: "Note created successfully!" };
     }
 
-    /** POST delete tournament */
-    public async delete(req: Request, res: Response) {
-        const tournamentId = req.params.tournamentId;
-
+    async delete(tournamentId: string) {
         const tournament = await Tournament.findById(tournamentId).orFail();
 
         if (tournament.status !== "supportRequestReceived") {
-            return res
-                .status(400)
-                .json({ error: "Cannot delete tournament that isn't in support request received status!" });
+            throw new BadRequestException(
+                "Cannot delete tournament that isn't in support request received status!",
+            );
         }
 
         await Tournament.findByIdAndDelete(tournamentId);
 
-        res.json({ message: "Tournament deleted successfully!" });
+        return { message: "Tournament deleted successfully!" };
     }
 }
-
-export default new TournamentsController();

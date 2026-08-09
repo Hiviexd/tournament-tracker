@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
     ITournament,
     GameMode,
@@ -27,7 +28,8 @@ import capitalize from "lodash/capitalize.js";
 import startCase from "lodash/startCase.js";
 import dayjs from "@tc/utils/dayjs";
 
-class TournamentService {
+@Injectable()
+export class TournamentService {
     /**
      * Add a log to a tournament
      * @param tournament - The tournament to add the log to
@@ -792,4 +794,5 @@ class TournamentService {
     }
 }
 
+/** Singleton for non-DI callers (Express controllers, UsersService). */
 export default new TournamentService();
