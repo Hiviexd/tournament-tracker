@@ -22,9 +22,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Build the Express application (middleware + Enchant) without final 404/error handlers.
- * Nest controllers register during app.init(); call registerFinalHandlers after that
- * so Nest routes are not swallowed.
+ * Build the Express application (shared middleware + docs + Enchant) without final 404/error handlers.
+ * Domain API routes live in Nest modules. Call registerFinalHandlers after Nest app.init().
  */
 export function createExpressApp(): express.Application {
     initMongoose();
@@ -110,7 +109,7 @@ export function createExpressApp(): express.Application {
     // Enchant sidebar skips CORS/CSRF, gated via HMAC — must stay before the auth stack
     app.use("/api/enchant", enchantRouter);
 
-    // API auth stack at app level so Nest routes share it
+    // Shared /api middleware for Nest controllers (registered during app.init)
     app.use(
         "/api",
         authenticateRequest as express.RequestHandler,
