@@ -27,3 +27,4 @@ checklist.json
 tournaments.csv
 .output/*
 .monorepo-migration/
+.backend-migration/
