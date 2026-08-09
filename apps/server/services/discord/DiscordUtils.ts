@@ -27,7 +27,6 @@ export default class DiscordUtils {
     /**
      * Webhook color constants
      */
-    /* eslint-disable key-spacing */
     public static readonly webhookColors = {
         darkRed: this.parseColor("#861615"), // deleteVoting
         red: this.parseColor("#EE2629"),
