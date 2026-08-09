@@ -1,19 +1,24 @@
-import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import LogsController from "../../controllers/LogsController";
+import { Controller, Get, Header, Query, StreamableFile, UseGuards } from "@nestjs/common";
+import type { LogListQuery } from "@tc/types/Log";
 import { IsAdminGuard, IsCommitteeGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { LogsService } from "./logs.service";
 
 @Controller("logs")
-export class LogsNestController {
+export class LogsController {
+    constructor(private readonly logsService: LogsService) {}
+
     @Get()
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await LogsController.index(req, res);
+    index(@Query() query: LogListQuery) {
+        return this.logsService.index(query);
     }
 
     @Get("export")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
-    async exportCsv(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await LogsController.exportCsv(req, res);
+    @Header("Content-Type", "text/csv")
+    @Header("Content-Disposition", "attachment; filename=logs-export.csv")
+    async exportCsv(): Promise<StreamableFile> {
+        const csv = await this.logsService.exportCsv();
+        return new StreamableFile(Buffer.from(csv));
     }
 }

@@ -1,28 +1,38 @@
-import { Controller, Delete, Get, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import TemplatesController from "../../controllers/TemplatesController";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { IsCommitteeGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { TemplatesService } from "./templates.service";
 
 @Controller("templates")
 @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-export class TemplatesNestController {
+export class TemplatesController {
+    constructor(private readonly templatesService: TemplatesService) {}
+
     @Get()
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TemplatesController.index(req, res);
+    index() {
+        return this.templatesService.index();
     }
 
     @Post("create")
-    async create(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TemplatesController.create(req, res);
+    create(
+        @Body() body: { name?: string; content?: string; category?: string },
+        @CurrentUser() currentUser: IUser,
+    ) {
+        return this.templatesService.create(body, currentUser);
     }
 
     @Put(":id/update")
-    async update(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TemplatesController.update(req, res);
+    update(
+        @Param("id") id: string,
+        @Body() body: { name?: string; content?: string; category?: string },
+        @CurrentUser() currentUser: IUser,
+    ) {
+        return this.templatesService.update(id, body, currentUser);
     }
 
     @Delete(":id/delete")
-    async delete(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await TemplatesController.delete(req, res);
+    delete(@Param("id") id: string, @CurrentUser() currentUser: IUser) {
+        return this.templatesService.delete(id, currentUser);
     }
 }

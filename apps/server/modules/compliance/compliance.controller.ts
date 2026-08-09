@@ -1,13 +1,16 @@
-import { Controller, Post, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import ComplianceController from "../../controllers/ComplianceController";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { IsLoggedInGuard, RequireScopesGuard } from "../guards/auth.guards";
+import { ComplianceService } from "./compliance.service";
 
 @Controller("compliance")
-export class ComplianceNestController {
+export class ComplianceController {
+    constructor(private readonly complianceService: ComplianceService) {}
+
     @Post("validate")
     @UseGuards(RequireScopesGuard(["compliance:read"]), IsLoggedInGuard)
-    async validateBeatmaps(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ComplianceController.validateBeatmaps(req, res);
+    validateBeatmaps(@Body("input") input: unknown, @CurrentUser() currentUser: IUser) {
+        return this.complianceService.validateBeatmaps(input, currentUser);
     }
 }

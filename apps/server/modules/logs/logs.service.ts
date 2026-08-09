@@ -1,7 +1,7 @@
+import { Injectable } from "@nestjs/common";
 import Log from "@tc/models/logModel";
 import User from "@tc/models/userModel";
 import { LogQueryParams, LogListQuery } from "@tc/types/Log";
-import { Request, Response } from "express";
 import utils from "@tc/utils/server";
 
 const DEFAULT_POPULATE = [
@@ -13,10 +13,9 @@ const DEFAULT_POPULATE = [
 
 const DEFAULT_LIMIT = 20;
 
-class LogsController {
-    /** GET logs listing */
-    public async index(req: Request, res: Response) {
-        const reqQuery = req.query as LogListQuery;
+@Injectable()
+export class LogsService {
+    async index(reqQuery: LogListQuery) {
         const dbQuery: LogQueryParams = {};
 
         if (reqQuery.user && reqQuery.user.length) {
@@ -37,16 +36,15 @@ class LogsController {
             Log.countDocuments(dbQuery),
         ]);
 
-        res.json({
+        return {
             logs,
             total,
             page: Number(page),
             pages: Math.ceil(total / DEFAULT_LIMIT),
-        });
+        };
     }
 
-    /** GET logs CSV export */
-    public async exportCsv(req: Request, res: Response) {
+    async exportCsv(): Promise<string> {
         const logs = await Log.find({}).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE);
 
         const csvData = logs.map((log) => ({
@@ -69,12 +67,6 @@ class LogsController {
             csvRows.push(values.join(","));
         });
 
-        const csv = csvRows.join("\n");
-
-        res.setHeader("Content-Type", "text/csv");
-        res.setHeader("Content-Disposition", "attachment; filename=logs-export.csv");
-        res.send(csv);
+        return csvRows.join("\n");
     }
 }
-
-export default new LogsController();

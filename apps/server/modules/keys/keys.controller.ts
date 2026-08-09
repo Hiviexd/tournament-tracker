@@ -1,9 +1,26 @@
-import { CanActivate, ExecutionContext, Injectable, Controller, Get, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    CanActivate,
+    Controller,
+    ExecutionContext,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Injectable,
+    Param,
+    Post,
+    Put,
+    Req,
+    UseGuards,
+} from "@nestjs/common";
 import type { Request, Response } from "express";
-import ApiKeysController from "../../controllers/ApiKeysController";
+import type { ApiScope } from "@tc/types/ApiKey";
+import type { IUser } from "@tc/types/User";
 import { apiKeyManagementLimiter } from "../../middlewares/rateLimiter";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { IsDevGuard, IsLoggedInGuard } from "../guards/auth.guards";
 import { runExpressMiddleware } from "../guards/express-middleware";
+import { KeysService } from "./keys.service";
 
 @Injectable()
 class ApiKeyManagementLimiterGuard implements CanActivate {
@@ -18,40 +35,56 @@ class ApiKeyManagementLimiterGuard implements CanActivate {
 }
 
 @Controller("keys")
-export class KeysNestController {
+export class KeysController {
+    constructor(private readonly keysService: KeysService) {}
+
     @Get()
     @UseGuards(IsLoggedInGuard)
-    async get(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.get(req, res);
+    get(@CurrentUser() currentUser: IUser) {
+        return this.keysService.get(currentUser);
     }
 
     @Get("all")
     @UseGuards(IsLoggedInGuard, IsDevGuard)
-    async getAll(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.getAll(req, res);
+    getAll() {
+        return this.keysService.getAll();
     }
 
     @Post("create")
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(ApiKeyManagementLimiterGuard, IsLoggedInGuard)
-    async create(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.create(req, res);
+    create(
+        @Body() body: { name?: string; scopes?: ApiScope[]; isElevated?: boolean },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.keysService.create(body, currentUser, req.session);
     }
 
     @Put("update")
     @UseGuards(ApiKeyManagementLimiterGuard, IsLoggedInGuard)
-    async update(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.update(req, res);
+    update(
+        @Body() body: { scopes?: ApiScope[] },
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.keysService.update(body, currentUser, req.session);
     }
 
     @Post("revoke")
     @UseGuards(ApiKeyManagementLimiterGuard, IsLoggedInGuard)
-    async revoke(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.revoke(req, res);
+    revoke(@CurrentUser() currentUser: IUser, @Req() req: Request) {
+        return this.keysService.revoke(currentUser, req.session);
     }
 
     @Post("revoke/:keyId")
     @UseGuards(ApiKeyManagementLimiterGuard, IsLoggedInGuard, IsDevGuard)
-    async revokeById(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ApiKeysController.revokeById(req, res);
+    revokeById(
+        @Param("keyId") keyId: string,
+        @Body("keyId") bodyKeyId: string | undefined,
+        @CurrentUser() currentUser: IUser,
+        @Req() req: Request,
+    ) {
+        return this.keysService.revokeById(keyId ?? bodyKeyId, currentUser, req.session);
     }
 }

@@ -1,13 +1,16 @@
-import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import GlobalSearchController from "../../controllers/GlobalSearchController";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { OptionalAuthGuard } from "../guards/auth.guards";
+import { SearchService } from "./search.service";
 
 @Controller("search")
-export class SearchNestController {
+export class SearchController {
+    constructor(private readonly searchService: SearchService) {}
+
     @Get()
     @UseGuards(OptionalAuthGuard)
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await GlobalSearchController.index(req, res);
+    index(@Query("query") query: unknown, @CurrentUser() currentUser?: IUser) {
+        return this.searchService.index(query, currentUser);
     }
 }

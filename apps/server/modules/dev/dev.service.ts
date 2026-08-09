@@ -1,47 +1,55 @@
-import { Request, Response } from "express";
+import { Injectable } from "@nestjs/common";
+import type { Session } from "express-session";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import NotificationJob from "@tc/models/notificationJobModel";
 
-class DevController {
+@Injectable()
+export class DevService {
     private static readonly NOTIFICATION_LISTING_LIMIT = 30;
 
-    public getSession(req: Request, res: Response) {
-        res.json({
-            mongoId: req.session.mongoId,
-            osuId: req.session.osuId,
-            username: req.session.username,
-        });
+    getSession(session: Session) {
+        return {
+            mongoId: session.mongoId,
+            osuId: session.osuId,
+            username: session.username,
+        };
     }
 
-    public updateSession(req: Request, res: Response) {
-        req.session.mongoId = req.body.mongoId;
-        req.session.osuId = req.body.osuId;
-        req.session.username = req.body.username;
+    updateSession(session: Session, body: { mongoId?: string; osuId?: number; username?: string }) {
+        session.mongoId = body.mongoId;
+        session.osuId = body.osuId;
+        session.username = body.username;
 
-        req.session.save();
+        session.save();
 
-        res.json({ message: "Session updated successfully! Refresh to see changes." });
+        return { message: "Session updated successfully! Refresh to see changes." };
     }
 
-    public async getNotificationQueueStats(req: Request, res: Response) {
+    async getNotificationQueueStats() {
         const [queueStats, runtimeCounters] = await Promise.all([
             NotificationDispatchService.getQueueStats(),
             Promise.resolve(NotificationDispatchService.getRuntimeCounters()),
         ]);
 
-        res.json({
+        return {
             queue: queueStats,
             runtime: runtimeCounters,
-        });
+        };
     }
 
-    public async getNotificationJobsListing(req: Request, res: Response) {
-        const page = Math.max(1, Number(req.query.page) || 1);
-        const limit = DevController.NOTIFICATION_LISTING_LIMIT;
-        const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
-        const provider = typeof req.query.provider === "string" ? req.query.provider.trim() : "";
-        const kind = typeof req.query.kind === "string" ? req.query.kind.trim() : "";
-        const payload = typeof req.query.payload === "string" ? req.query.payload.trim() : "";
+    async getNotificationJobsListing(queryParams: {
+        page?: string;
+        status?: string;
+        provider?: string;
+        kind?: string;
+        payload?: string;
+    }) {
+        const page = Math.max(1, Number(queryParams.page) || 1);
+        const limit = DevService.NOTIFICATION_LISTING_LIMIT;
+        const status = typeof queryParams.status === "string" ? queryParams.status.trim() : "";
+        const provider = typeof queryParams.provider === "string" ? queryParams.provider.trim() : "";
+        const kind = typeof queryParams.kind === "string" ? queryParams.kind.trim() : "";
+        const payload = typeof queryParams.payload === "string" ? queryParams.payload.trim() : "";
 
         const query: Record<string, any> = {};
         if (status) query.status = status;
@@ -73,14 +81,12 @@ class DevController {
             ]);
         }
 
-        res.json({
+        return {
             jobs,
             total,
             page,
             pages: Math.max(1, Math.ceil(total / limit)),
             limit,
-        });
+        };
     }
 }
-
-export default new DevController();

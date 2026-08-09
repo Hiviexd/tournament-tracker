@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { BeatmapsNestController } from "./beatmaps.controller";
+import { BeatmapsController } from "./beatmaps.controller";
 
 @Module({
-    controllers: [BeatmapsNestController],
+    controllers: [BeatmapsController],
 })
 export class BeatmapsModule {}

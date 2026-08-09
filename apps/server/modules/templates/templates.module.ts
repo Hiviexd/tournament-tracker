@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common";
-import { TemplatesNestController } from "./templates.controller";
+import { TemplatesController } from "./templates.controller";
+import { TemplatesService } from "./templates.service";
 
 @Module({
-    controllers: [TemplatesNestController],
+    controllers: [TemplatesController],
+    providers: [TemplatesService],
 })
 export class TemplatesModule {}

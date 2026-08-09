@@ -1,28 +1,42 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import DevController from "../../controllers/DevController";
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
+import type { Request } from "express";
 import { IsDevGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { DevService } from "./dev.service";
 
 @Controller("dev")
 @UseGuards(IsLoggedInGuard, IsDevGuard)
-export class DevNestController {
+export class DevController {
+    constructor(private readonly devService: DevService) {}
+
     @Get("session")
-    async getSession(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await DevController.getSession(req, res);
+    getSession(@Req() req: Request) {
+        return this.devService.getSession(req.session);
     }
 
     @Post("session/update")
-    async updateSession(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await DevController.updateSession(req, res);
+    updateSession(
+        @Body() body: { mongoId?: string; osuId?: number; username?: string },
+        @Req() req: Request,
+    ) {
+        return this.devService.updateSession(req.session, body);
     }
 
     @Get("notifications/stats")
-    async getNotificationQueueStats(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await DevController.getNotificationQueueStats(req, res);
+    getNotificationQueueStats() {
+        return this.devService.getNotificationQueueStats();
     }
 
     @Get("notifications")
-    async getNotificationJobsListing(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await DevController.getNotificationJobsListing(req, res);
+    getNotificationJobsListing(
+        @Query()
+        query: {
+            page?: string;
+            status?: string;
+            provider?: string;
+            kind?: string;
+            payload?: string;
+        },
+    ) {
+        return this.devService.getNotificationJobsListing(query);
     }
 }

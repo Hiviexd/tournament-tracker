@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { Injectable } from "@nestjs/common";
 import Tournament from "@tc/models/tournamentModel";
 import Voting from "@tc/models/votingModel";
 import Ticket from "@tc/models/ticketModel";
-import { IDashboardResponse } from "@tc/types/Dashboard";
-import { IUser } from "@tc/types/User";
-import InfringementService from "../services/InfringementService";
+import type { IDashboardResponse } from "@tc/types/Dashboard";
+import type { IUser } from "@tc/types/User";
+import InfringementService from "../../services/InfringementService";
 
 const TOURNAMENT_POPULATE = [
     {
@@ -53,11 +53,9 @@ const TICKET_POPULATE = [
     { path: "targetUser", select: "username osuId groups coverUrl country" },
 ];
 
-class DashboardController {
-    /** GET dashboard data */
-    public async index(_: Request, res: Response) {
-        const user = res.locals!.user;
-
+@Injectable()
+export class DashboardService {
+    async index(user: IUser | undefined): Promise<IDashboardResponse> {
         const allReviewTournaments = await Tournament.find({
             status: { $in: ["reviewOngoing", "changesRequested"] },
             isActive: true,
@@ -66,17 +64,14 @@ class DashboardController {
             .sort({ startedReviewAt: 1 })
             .populate(TOURNAMENT_POPULATE);
 
-        // filter tournaments assigned to the user
         const userAssignedTournaments = allReviewTournaments.filter((tournament) =>
             tournament.assignedReviewers?.some((reviewer: IUser) => reviewer._id.equals(user?._id)),
         );
 
-        // filter tournaments that have inactive reviewers assigned
         const inactiveReviewerTournaments = allReviewTournaments.filter((tournament) =>
             tournament.assignedReviewers?.some((reviewer: IUser) => reviewer.isActiveReviewer === false),
         );
 
-        // query active votings that the user is involved in
         const votings = await Voting.find({
             isActive: true,
             assignedGroups: { $in: user?.groups },
@@ -84,7 +79,6 @@ class DashboardController {
             .sort({ createdAt: -1 })
             .populate(VOTING_POPULATE);
 
-        // query active tickets that the user is involved in
         const tickets = await Ticket.find({
             type: "ticket",
             isActive: true,
@@ -93,7 +87,6 @@ class DashboardController {
             .sort({ createdAt: -1 })
             .populate(TICKET_POPULATE);
 
-        // query reports that the user is involved in
         const reports = await Ticket.find({
             type: "report",
             isActive: true,
@@ -104,7 +97,7 @@ class DashboardController {
 
         const filteredUsers = await InfringementService.getInfringementsNeedingEmail();
 
-        const response: IDashboardResponse = {
+        return {
             tournaments: userAssignedTournaments,
             inactiveReviewerTournaments,
             votings,
@@ -112,9 +105,5 @@ class DashboardController {
             tickets,
             users: filteredUsers,
         };
-
-        res.json(response);
     }
 }
-
-export default new DashboardController();

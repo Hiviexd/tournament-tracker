@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
 import startCase from "lodash/startCase.js";
+import type { Session } from "express-session";
 import dayjs from "@tc/utils/dayjs";
 import { InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "@tc/types/Infringement";
-import InfringementService from "../services/InfringementService";
+import InfringementService from "../../services/InfringementService";
 import LogService from "@tc/models/LogService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
@@ -10,22 +11,38 @@ import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import utils from "@tc/utils/server";
 import config from "@tc/config";
 
-class InfringementsController {
-    /** GET watchlist */
-    public async getWatchlist(req: Request, res: Response) {
-        const reqQuery = req.query as Record<string, string | undefined>;
+function rethrowServiceError(err: unknown): never {
+    if (err && typeof err === "object" && "status" in err && "error" in err) {
+        const e = err as { status: number; error: string };
+        throw new HttpException(e.error, e.status);
+    }
+    throw err;
+}
+
+@Injectable()
+export class InfringementsService {
+    async getWatchlist(queryParams: Record<string, string | undefined>) {
         const query: WatchlistQuery = {
-            infringementType: reqQuery.infringementType as WatchlistQuery["infringementType"],
-            page: reqQuery.page ? parseInt(reqQuery.page, 10) : undefined,
-            limit: reqQuery.limit ? parseInt(reqQuery.limit, 10) : undefined,
+            infringementType: queryParams.infringementType as WatchlistQuery["infringementType"],
+            page: queryParams.page ? parseInt(queryParams.page, 10) : undefined,
+            limit: queryParams.limit ? parseInt(queryParams.limit, 10) : undefined,
         };
-        const result = await InfringementService.getWatchlist(query);
-        res.json(result);
+        return InfringementService.getWatchlist(query);
     }
 
-    /** POST add infringement */
-    public async addInfringement(req: Request, res: Response) {
-        const { userIds, type, startDate, endDate, reason, threadId, enchantUrl } = req.body;
+    async addInfringement(
+        body: {
+            userIds?: string | string[];
+            type: InfringementType;
+            startDate?: string | Date;
+            endDate?: string | Date;
+            reason: string;
+            threadId?: string;
+            enchantUrl?: string;
+        },
+        session: Session,
+    ) {
+        const { userIds, type, startDate, endDate, reason, threadId, enchantUrl } = body;
 
         try {
             const normalizedUserIds = Array.isArray(userIds) ? userIds : [userIds];
@@ -34,7 +51,7 @@ class InfringementsController {
             );
 
             if (validUserIds.length === 0) {
-                return res.status(400).json({ error: "At least one user ID is required" });
+                throw new BadRequestException("At least one user ID is required");
             }
 
             const addedInfringements: { infringement: any; user: any }[] = [];
@@ -51,20 +68,19 @@ class InfringementsController {
                 addedInfringements.push(result);
 
                 await LogService.generate(
-                    req.session.mongoId!,
+                    session.mongoId!,
                     `Added **${startCase(type)}** infringement to [**${result.user.username}**](${config.baseUrl}/watchlist?user=${result.user.osuId})`,
                     "user",
                 );
             }
 
-            if (addedInfringements.length === 1) {
-                res.json({ message: "Infringement added successfully!", user: addedInfringements[0].user });
-            } else {
-                res.json({
-                    message: `Infringements added successfully for ${addedInfringements.length} users!`,
-                    users: addedInfringements.map((item) => item.user),
-                });
-            }
+            const response =
+                addedInfringements.length === 1
+                    ? { message: "Infringement added successfully!", user: addedInfringements[0].user }
+                    : {
+                          message: `Infringements added successfully for ${addedInfringements.length} users!`,
+                          users: addedInfringements.map((item) => item.user),
+                      };
 
             const isTimeBased = TIME_BASED_TYPES.includes(type);
             const firstResult = addedInfringements[0];
@@ -82,7 +98,7 @@ class InfringementsController {
             const isIndefinite = isTimeBased && !endDate;
 
             const embed = new EmbedBuilder()
-                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(session))
                 .setColor(isIndefinite ? DiscordUtils.webhookColors.darkRed : typeColorMap[type])
                 .setDescription(
                     addedInfringements.length === 1
@@ -122,18 +138,27 @@ class InfringementsController {
             }
 
             await webhookBuilder.send();
-        } catch (err: any) {
-            if (err.status) {
-                return res.status(err.status).json({ error: err.error });
-            }
-            throw err;
+
+            return response;
+        } catch (err) {
+            if (err instanceof HttpException) throw err;
+            rethrowServiceError(err);
         }
     }
 
-    /** PATCH update infringement */
-    public async updateInfringement(req: Request, res: Response) {
-        const { infringementId } = req.params;
-        const { userId, startDate, endDate, reason, threadId, enchantUrl } = req.body;
+    async updateInfringement(
+        infringementId: string,
+        body: {
+            userId: string;
+            startDate?: string | Date;
+            endDate?: string | Date;
+            reason?: string;
+            threadId?: string;
+            enchantUrl?: string;
+        },
+        session: Session,
+    ) {
+        const { userId, startDate, endDate, reason, threadId, enchantUrl } = body;
 
         try {
             const { infringement, user } = await InfringementService.updateInfringement(infringementId, userId, {
@@ -144,20 +169,15 @@ class InfringementsController {
                 enchantUrl,
             });
 
-            res.json({ message: "Infringement updated successfully!", user });
-
             await LogService.generate(
-                req.session.mongoId!,
+                session.mongoId!,
                 `Updated **${infringement.typeString}** infringement of [**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`,
                 "user",
             );
-        } catch (err: any) {
-            if (err.status) {
-                return res.status(err.status).json({ error: err.error });
-            }
-            throw err;
+
+            return { message: "Infringement updated successfully!", user };
+        } catch (err) {
+            rethrowServiceError(err);
         }
     }
 }
-
-export default new InfringementsController();

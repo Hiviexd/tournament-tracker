@@ -1,31 +1,66 @@
-import { Controller, Delete, Get, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
-import type { Request, Response } from "express";
-import ResourcesController from "../../controllers/ResourcesController";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import type { ResourceCategory } from "@tc/types/Resource";
+import type { IUser } from "@tc/types/User";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { IsCommitteeGuard, IsLoggedInGuard, RequireScopesGuard } from "../guards/auth.guards";
+import { ResourcesService } from "./resources.service";
 
 @Controller("resources")
-export class ResourcesNestController {
+export class ResourcesController {
+    constructor(private readonly resourcesService: ResourcesService) {}
+
     @Get()
     @UseGuards(RequireScopesGuard(["resources:read"]))
-    async index(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ResourcesController.index(req, res);
+    index(
+        @Query()
+        query: {
+            search?: string;
+            author?: string;
+            category?: string;
+            type?: string;
+            page?: string;
+        },
+    ) {
+        return this.resourcesService.index(query);
     }
 
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async create(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ResourcesController.create(req, res);
+    create(
+        @Body()
+        body: {
+            title?: string;
+            description?: string;
+            category?: ResourceCategory;
+            type?: string;
+            link?: string;
+            author?: string;
+        },
+        @CurrentUser() currentUser: IUser,
+    ) {
+        return this.resourcesService.create(body, currentUser);
     }
 
     @Put(":id/edit")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async edit(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ResourcesController.edit(req, res);
+    edit(
+        @Param("id") id: string,
+        @Body()
+        body: {
+            title?: string;
+            description?: string;
+            category?: ResourceCategory;
+            link?: string;
+            author?: string;
+        },
+        @CurrentUser() currentUser: IUser,
+    ) {
+        return this.resourcesService.edit(id, body, currentUser);
     }
 
     @Delete(":id/delete")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    async delete(@Req() req: Request, @Res() res: Response): Promise<void> {
-        await ResourcesController.delete(req, res);
+    delete(@Param("id") id: string, @CurrentUser() currentUser: IUser) {
+        return this.resourcesService.delete(id, currentUser);
     }
 }

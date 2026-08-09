@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common";
-import { InfringementsNestController } from "./infringements.controller";
+import { InfringementsController } from "./infringements.controller";
+import { InfringementsService } from "./infringements.service";
 
 @Module({
-    controllers: [InfringementsNestController],
+    controllers: [InfringementsController],
+    providers: [InfringementsService],
 })
 export class InfringementsModule {}
