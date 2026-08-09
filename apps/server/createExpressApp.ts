@@ -14,19 +14,6 @@ import { conditionalCsrf, handleCsrfError } from "./middlewares/csrf";
 import { conditionalCors } from "./middlewares/cors";
 import { sessionRateLimiter, apiKeyRateLimiter } from "./middlewares/rateLimiter";
 import { handleCrawlers } from "./middlewares/seo";
-import logsRouter from "./routers/logsRouter";
-import articlesRouter from "./routers/articlesRouter";
-import devRouter from "./routers/devRouter";
-import resourcesRouter from "./routers/resourcesRouter";
-import beatmapsRouter from "./routers/beatmapsRouter";
-import statusRouter from "./routers/statusRouter";
-import quotesRouter from "./routers/quotesRouter";
-import templatesRouter from "./routers/templatesRouter";
-import dashboardRouter from "./routers/dashboardRouter";
-import apiKeysRouter from "./routers/apiKeysRouter";
-import complianceRouter from "./routers/complianceRouter";
-import globalSearchRouter from "./routers/globalSearchRouter";
-import infringementsRouter from "./routers/infringementsRouter";
 import enchantRouter from "./routers/enchantRouter";
 import { apiReference } from "@scalar/express-api-reference";
 import openApiSpec from "./openapi";
@@ -35,9 +22,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Build the Express application (middleware + remaining Express routers)
- * without final 404/error handlers. Nest controllers register during app.init();
- * call registerFinalHandlers after that so Nest routes are not swallowed.
+ * Build the Express application (middleware + Enchant) without final 404/error handlers.
+ * Nest controllers register during app.init(); call registerFinalHandlers after that
+ * so Nest routes are not swallowed.
  */
 export function createExpressApp(): express.Application {
     initMongoose();
@@ -120,7 +107,7 @@ export function createExpressApp(): express.Application {
         }),
     );
 
-    // Enchant sidebar skips CORS/CSRF, gated via HMAC
+    // Enchant sidebar skips CORS/CSRF, gated via HMAC — must stay before the auth stack
     app.use("/api/enchant", enchantRouter);
 
     // API auth stack at app level so Nest routes share it
@@ -132,21 +119,6 @@ export function createExpressApp(): express.Application {
         apiKeyRateLimiter as express.RequestHandler,
         conditionalCsrf as express.RequestHandler,
     );
-
-    // Remaining Express routers (auth + users + tournaments + tickets + votings owned by Nest)
-    app.use("/api/logs", logsRouter);
-    app.use("/api/articles", articlesRouter);
-    app.use("/api/dev", devRouter);
-    app.use("/api/resources", resourcesRouter);
-    app.use("/api/beatmaps", beatmapsRouter);
-    app.use("/api/status", statusRouter);
-    app.use("/api/quotes", quotesRouter);
-    app.use("/api/templates", templatesRouter);
-    app.use("/api/dashboard", dashboardRouter);
-    app.use("/api/keys", apiKeysRouter);
-    app.use("/api/compliance", complianceRouter);
-    app.use("/api/search", globalSearchRouter);
-    app.use("/api/infringements", infringementsRouter);
 
     return app;
 }

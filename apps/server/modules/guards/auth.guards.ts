@@ -30,6 +30,14 @@ export class IsAdminGuard implements CanActivate {
 }
 
 @Injectable()
+export class IsDevGuard implements CanActivate {
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const http = context.switchToHttp();
+        return runExpressMiddleware(auth.isDev, http.getRequest<Request>(), http.getResponse<Response>());
+    }
+}
+
+@Injectable()
 export class OptionalAuthGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const http = context.switchToHttp();
