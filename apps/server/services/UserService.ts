@@ -4,7 +4,7 @@ import sampleSize from "lodash/sampleSize.js";
 import shuffle from "lodash/shuffle.js";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IOsuUser } from "@tc/types/OsuApi";
-import OsuApiService from "./OsuApiService";
+import OsuApiService from "@tc/osu/OsuApiService";
 import LogService from "./LogService";
 import { Document, Types } from "mongoose";
 

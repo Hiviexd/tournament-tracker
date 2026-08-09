@@ -4,9 +4,9 @@ import dayjs from "@tc/utils/dayjs";
 import { InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "@tc/types/Infringement";
 import InfringementService from "../services/InfringementService";
 import LogService from "../services/LogService";
-import { EmbedBuilder } from "../services/discord/EmbedBuilder";
-import { WebhookBuilder } from "../services/discord/WebhookBuilder";
-import DiscordUtils from "../services/discord/DiscordUtils";
+import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import utils from "@tc/utils/server";
 import config from "@tc/config";
 

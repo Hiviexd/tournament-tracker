@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import NotificationDispatchService from "../services/NotificationDispatchService";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import NotificationJob from "@tc/models/notificationJobModel";
 
 class DevController {

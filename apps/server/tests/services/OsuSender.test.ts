@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import OsuSender from "../../services/notifications/OsuSender";
-import OsuBotService from "../../services/OsuBotService";
+import OsuSender from "@tc/notifications/OsuSender";
+import OsuBotService from "@tc/osu/OsuBotService";
 
-vi.mock("../../services/OsuBotService", () => ({
+vi.mock("@tc/osu/OsuBotService", () => ({
     default: {
         sendAnnouncementDirect: vi.fn(),
     },

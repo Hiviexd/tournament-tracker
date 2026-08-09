@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import NotificationDispatchService from "../../services/NotificationDispatchService";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 
 describe("NotificationDispatchService", () => {
     it("calculates bounded exponential backoff with jitter", () => {

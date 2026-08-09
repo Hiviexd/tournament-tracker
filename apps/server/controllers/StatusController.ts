@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { StatusInfo } from "@tc/types/Status";
 import { VersionInfo } from "@tc/types/Version";
 import VersionService from "../services/VersionService";
-import OsuApiHealthService from "../services/OsuApiHealthService";
+import OsuApiHealthService from "@tc/osu/OsuApiHealthService";
 
 function buildVersionInfo(): VersionInfo {
     const versionData: VersionInfo = {

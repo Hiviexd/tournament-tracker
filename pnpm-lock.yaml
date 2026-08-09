@@ -222,6 +222,12 @@ importers:
       '@tc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@tc/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
+      '@tc/osu':
+        specifier: workspace:*
+        version: link:../../packages/osu
       '@tc/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -372,6 +378,59 @@ importers:
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.20
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.5.2
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.2
+
+  packages/notifications:
+    dependencies:
+      '@tc/config':
+        specifier: workspace:*
+        version: link:../config
+      '@tc/models':
+        specifier: workspace:*
+        version: link:../models
+      '@tc/osu':
+        specifier: workspace:*
+        version: link:../osu
+      '@tc/types':
+        specifier: workspace:*
+        version: link:../types
+      '@tc/utils':
+        specifier: workspace:*
+        version: link:../utils
+      axios:
+        specifier: ^1.13.5
+        version: 1.13.5
+    devDependencies:
+      '@types/express-session':
+        specifier: ^1.18.0
+        version: 1.18.2
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.5.2
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.2
+
+  packages/osu:
+    dependencies:
+      '@tc/config':
+        specifier: workspace:*
+        version: link:../config
+      '@tc/types':
+        specifier: workspace:*
+        version: link:../types
+      '@tc/utils':
+        specifier: workspace:*
+        version: link:../utils
+      axios:
+        specifier: ^1.13.5
+        version: 1.13.5
+    devDependencies:
       '@types/node':
         specifier: ^24.1.0
         version: 24.5.2

@@ -1,9 +1,13 @@
 import { IDiscordEmbed, IDiscordAuthor } from "@tc/types/Discord";
-import { Session } from "express-session";
 import { EmbedBuilder } from "./EmbedBuilder";
 import utils from "@tc/utils/server";
 import axios from "axios";
 import config from "@tc/config";
+
+type WebhookAuthorSession = {
+    username?: string;
+    osuId?: number;
+};
 
 /**
  * Singleton utility class for Discord webhook operations
@@ -59,7 +63,7 @@ export default class DiscordUtils {
     /**
      * Constructs a webhook author from the current user session
      */
-    public static defaultWebhookAuthor(session: Session): IDiscordAuthor {
+    public static defaultWebhookAuthor(session: WebhookAuthorSession): IDiscordAuthor {
         return {
             name: session.username ?? "Unknown",
             icon_url: `https://a.ppy.sh/${session.osuId}`,

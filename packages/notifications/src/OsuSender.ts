@@ -1,7 +1,7 @@
 import { INotificationJob, IOsuAnnouncementPayload, NotificationJobPayload } from "@tc/types/NotificationJob";
 import { ErrorResponse } from "@tc/types/Responses";
-import OsuBotService from "../OsuBotService";
-import { NotificationDispatchResult } from "../NotificationDispatchService";
+import OsuBotService from "@tc/osu/OsuBotService";
+import { NotificationDispatchResult } from "./NotificationDispatchService";
 
 class OsuSender {
     public async send(job: INotificationJob): Promise<NotificationDispatchResult> {

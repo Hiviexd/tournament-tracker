@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import ApiKeyService from "../services/ApiKeyService";
 import { AvailableApiScopes } from "@tc/types/ApiKey";
 import LogService from "../services/LogService";
-import { EmbedBuilder } from "../services/discord/EmbedBuilder";
-import { WebhookBuilder } from "../services/discord/WebhookBuilder";
-import DiscordUtils from "../services/discord/DiscordUtils";
+import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 
 class ApiKeysController {
     /** POST create API key (single per user) - returns raw key once */

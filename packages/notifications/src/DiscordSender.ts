@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "@tc/config";
 import { IDiscordNotificationPayload, INotificationJob, NotificationJobPayload } from "@tc/types/NotificationJob";
-import { NotificationDispatchResult } from "../NotificationDispatchService";
+import { NotificationDispatchResult } from "./NotificationDispatchService";
 
 class DiscordSender {
     private getWebhookLink(location: "main" | "dev", threadId?: string): string {

@@ -1,9 +1,9 @@
 import BaseJob from "./BaseJob";
-import NotificationDispatchService from "../services/NotificationDispatchService";
-import DiscordSender from "../services/notifications/DiscordSender";
-import OsuSender from "../services/notifications/OsuSender";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
+import DiscordSender from "@tc/notifications/DiscordSender";
+import OsuSender from "@tc/notifications/OsuSender";
 import { INotificationJob } from "@tc/types/NotificationJob";
-import DiscordUtils from "../services/discord/DiscordUtils";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 
 const STALE_PROCESSING_TIMEOUT_MS = 5 * 60_000;
 const DEFAULT_CLAIM_LIMIT = 1;

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import OsuApiHealthService from "../../services/OsuApiHealthService";
+import OsuApiHealthService from "@tc/osu/OsuApiHealthService";
 import { ErrorResponse } from "@tc/types/Responses";
 
 describe("OsuApiHealthService", () => {

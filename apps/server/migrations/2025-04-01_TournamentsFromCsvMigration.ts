@@ -12,7 +12,7 @@ import Review from "@tc/models/reviewModel";
 import Message from "@tc/models/messageModel";
 import mongoose from "mongoose";
 import UserService from "../services/UserService";
-import OsuBotService from "../services/OsuBotService";
+import OsuBotService from "@tc/osu/OsuBotService";
 import { IReviewChecklistItem } from "@tc/types/Review";
 import checklist from "../../../checklist.json";
 

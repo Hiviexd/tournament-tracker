@@ -20,6 +20,8 @@
         "@scalar/express-api-reference": "^0.10.13",
         "@tc/config": "workspace:*",
         "@tc/models": "workspace:*",
+        "@tc/notifications": "workspace:*",
+        "@tc/osu": "workspace:*",
         "@tc/types": "workspace:*",
         "@tc/utils": "workspace:*",
         "archiver": "^7.0.1",

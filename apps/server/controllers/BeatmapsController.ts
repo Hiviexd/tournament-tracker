@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import BeatmapService from "../services/BeatmapService";
-import OsuApiService from "../services/OsuApiService";
-import OsuBotService from "../services/OsuBotService";
+import OsuApiService from "@tc/osu/OsuApiService";
+import OsuBotService from "@tc/osu/OsuBotService";
 import { IBeatmap, IBeatmapWithNotes } from "@tc/types/OsuApi";
 import utils from "@tc/utils/server";
 

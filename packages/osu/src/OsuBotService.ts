@@ -4,7 +4,6 @@ import { ErrorResponse } from "@tc/types/Responses";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
 import OsuApiService from "./OsuApiService";
-import NotificationDispatchService from "./NotificationDispatchService";
 
 interface TokenInfo {
     expiresAt: Date | null;
@@ -89,32 +88,6 @@ export default class OsuBotService extends OsuApiService {
         };
 
         return response.access_token;
-    }
-
-    /**
-     * Enqueues an announcement to specified users through the osu! chat
-     * @param userIds - Array of osu! user IDs to send the announcement to
-     * @param message - The message object containing channel info and content
-     * @param fallbackId - The osu! user ID to send the announcement to if in dev environment
-     * @returns true if enqueue succeeds, ErrorResponse if enqueue fails
-     */
-    public static async sendAnnouncement(
-        userIds: number[],
-        message: IOsuBotMessage,
-        fallbackId?: number,
-    ): Promise<true | ErrorResponse> {
-        try {
-            await NotificationDispatchService.enqueueOsuAnnouncement({
-                userIds,
-                message,
-                fallbackId,
-            });
-            return true;
-        } catch (error) {
-            return {
-                error: error instanceof Error ? error.message : "Failed to enqueue osu announcement",
-            };
-        }
     }
 
     /**

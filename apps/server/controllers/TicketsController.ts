@@ -4,15 +4,15 @@ import Message from "@tc/models/messageModel";
 import User from "@tc/models/userModel";
 import { IUser } from "@tc/types/User";
 import LogService from "../services/LogService";
-import { EmbedBuilder } from "../services/discord/EmbedBuilder";
-import { WebhookBuilder } from "../services/discord/WebhookBuilder";
-import DiscordUtils from "../services/discord/DiscordUtils";
+import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
 import TicketService from "../services/TicketService";
 import capitalize from "lodash/capitalize.js";
 import UploadService from "../services/UploadService";
-import OsuBotService from "../services/OsuBotService";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups coverUrl country" },
@@ -371,21 +371,25 @@ class TicketsController {
             const userIds = Array.from(uniqueUsers);
             */
 
-            await OsuBotService.sendAnnouncement(
-                [ticket.author.osuId],
-                {
-                    channel: {
-                        name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
-                        description: `Response regarding: ${ticket.title}`,
+            try {
+                await NotificationDispatchService.enqueueOsuAnnouncement({
+                    userIds: [ticket.author.osuId],
+                    message: {
+                        channel: {
+                            name: `${ticket.type === "report" ? "Report" : "Ticket"} Response`,
+                            description: `Response regarding: ${ticket.title}`,
+                        },
+                        content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
+                            ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
+                        } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
+                            ticket._id
+                        }).`,
                     },
-                    content: `Your ${ticket.type.toLowerCase()} "*${ticket.title}*" has received a response from the ${
-                        ticket.assignedGroup === "tc" ? "Tournament" : "Contest"
-                    } Committee.\n\n[View it by clicking here](${config.baseUrl}/${ticket.type.toLowerCase()}s/${
-                        ticket._id
-                    }).`,
-                },
-                currentUser.osuId,
-            );
+                    fallbackId: currentUser.osuId,
+                });
+            } catch {
+                // enqueue failures were previously swallowed as ErrorResponse
+            }
         }
 
         // Logger

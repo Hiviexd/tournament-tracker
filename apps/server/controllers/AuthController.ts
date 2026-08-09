@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import config from "@tc/config";
-import OsuApiService from "../services/OsuApiService";
+import OsuApiService from "@tc/osu/OsuApiService";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
 import User from "@tc/models/userModel";

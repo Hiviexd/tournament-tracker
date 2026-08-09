@@ -18,10 +18,10 @@ import UserService from "./UserService";
 import Tournament from "@tc/models/tournamentModel";
 import User from "@tc/models/userModel";
 import LogService from "./LogService";
-import OsuBotService from "./OsuBotService";
-import { WebhookBuilder } from "./discord/WebhookBuilder";
-import { EmbedBuilder } from "./discord/EmbedBuilder";
-import DiscordUtils from "./discord/DiscordUtils";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import capitalize from "lodash/capitalize.js";
 import startCase from "lodash/startCase.js";
@@ -700,17 +700,21 @@ class TournamentService {
             }
 
             const hostOsuIds = tournament.hosts.map((host: IUser) => host.osuId);
-            await OsuBotService.sendAnnouncement(
-                hostOsuIds,
-                {
-                    channel: {
-                        name: `${capitalize(tournament.type)} Status Update`,
-                        description: `Update regarding: ${tournament.name}`,
+            try {
+                await NotificationDispatchService.enqueueOsuAnnouncement({
+                    userIds: hostOsuIds,
+                    message: {
+                        channel: {
+                            name: `${capitalize(tournament.type)} Status Update`,
+                            description: `Update regarding: ${tournament.name}`,
+                        },
+                        content: message,
                     },
-                    content: message,
-                },
-                currentUser.osuId,
-            );
+                    fallbackId: currentUser.osuId,
+                });
+            } catch {
+                // enqueue failures were previously swallowed as ErrorResponse
+            }
         }
 
         // Discord
