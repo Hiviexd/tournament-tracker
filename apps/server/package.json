@@ -4,9 +4,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json main.ts",
-        "dev:automation": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json main.ts",
-        "dev:preview": "cross-env NODE_ENV=preview tsx watch --tsconfig tsconfig.json main.ts",
+        "dev": "cross-env NODE_ENV=development node --watch --import @swc-node/register/esm-register main.ts",
+        "dev:automation": "cross-env NODE_ENV=development node --watch --import @swc-node/register/esm-register main.ts",
+        "dev:preview": "cross-env NODE_ENV=preview node --watch --import @swc-node/register/esm-register main.ts",
         "build": "tsup",
         "start": "node dist/main.js",
         "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -52,6 +52,8 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@swc-node/register": "^1.12.1",
+        "@swc/core": "^1.15.47",
         "@types/cookie-parser": "^1.4.7",
         "@types/cors": "^2.8.19",
         "@types/csurf": "^1.11.3",
@@ -63,7 +65,6 @@
         "@types/node": "^24.1.0",
         "@vitest/ui": "3.2.4",
         "tsup": "^8.5.0",
-        "tsx": "^4.19.4",
         "typescript": "^5.2.2",
         "vitest": "3.2.4"
     }
