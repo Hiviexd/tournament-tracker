@@ -52,6 +52,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@nestjs/testing": "^11.1.28",
         "@swc-node/register": "^1.12.1",
         "@swc/core": "^1.15.47",
         "@types/cookie-parser": "^1.4.7",
@@ -68,6 +69,7 @@
         "supertest": "^7.2.2",
         "tsup": "^8.5.0",
         "typescript": "^5.2.2",
+        "unplugin-swc": "^1.5.10",
         "vitest": "3.2.4"
     }
 }
