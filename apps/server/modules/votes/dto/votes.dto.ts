@@ -41,3 +41,27 @@ export const SubmitVoteBodySchema = z
     .strip();
 
 export type SubmitVoteBody = z.infer<typeof SubmitVoteBodySchema>;
+
+/**
+ * Create uses multipart FormData (string numbers, repeated array fields).
+ * Keep a flexible bag — field rules stay in the service.
+ */
+export const VotingCreateBodySchema = z.record(z.unknown());
+export type VotingCreateBody = z.infer<typeof VotingCreateBodySchema>;
+
+export const VotingUpdateBodySchema = z
+    .object({
+        title: z.string(),
+        description: z.string(),
+        duration: z.number(),
+        options: z.array(z.string()),
+        publicDescription: z.string().optional(),
+        allowNeutralVotes: z.boolean().optional(),
+        category: z.string().optional(),
+        targetUserId: z.string().optional(),
+        targetTournamentName: z.string().optional(),
+        targetTournamentLink: z.string().optional(),
+    })
+    .strip();
+
+export type VotingUpdateBody = z.infer<typeof VotingUpdateBodySchema>;

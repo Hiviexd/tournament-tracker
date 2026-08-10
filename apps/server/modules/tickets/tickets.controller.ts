@@ -25,10 +25,16 @@ import {
 } from "../guards/auth.guards";
 import {
     TicketCreateBodySchema,
+    TicketEditReportBodySchema,
     TicketIdParamSchema,
+    TicketSendMessageBodySchema,
     TicketsIndexQuerySchema,
+    TicketUpdateThreadIdBodySchema,
     type TicketCreateBody,
+    type TicketEditReportBody,
+    type TicketSendMessageBody,
     type TicketsIndexQuery,
+    type TicketUpdateThreadIdBody,
 } from "./dto/tickets.dto";
 import { TicketsService } from "./tickets.service";
 
@@ -81,7 +87,7 @@ export class TicketsController {
     @UseInterceptors(defaultFilesInterceptor)
     sendMessage(
         @Param("ticketId") ticketId: string,
-        @Body() body: { content: string; isNote?: string | boolean },
+        @Body(ZodPipe(TicketSendMessageBodySchema)) body: TicketSendMessageBody,
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
@@ -99,11 +105,11 @@ export class TicketsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     updateThreadId(
         @Param("ticketId") ticketId: string,
-        @Body("threadId") threadId: string | undefined,
+        @Body(ZodPipe(TicketUpdateThreadIdBodySchema)) body: TicketUpdateThreadIdBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.ticketsService.updateThreadId(ticketId, threadId, currentUser, req.session);
+        return this.ticketsService.updateThreadId(ticketId, body.threadId, currentUser, req.session);
     }
 
     @Patch(":ticketId/snooze")
@@ -116,12 +122,7 @@ export class TicketsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     editReport(
         @Param("ticketId") ticketId: string,
-        @Body()
-        body: {
-            targetUserId?: string;
-            targetTournamentName?: string;
-            targetTournamentLink?: string;
-        },
+        @Body(ZodPipe(TicketEditReportBodySchema)) body: TicketEditReportBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {

@@ -29,10 +29,14 @@ import {
 } from "../guards/auth.guards";
 import {
     SubmitVoteBodySchema,
+    VotingCreateBodySchema,
     VotingIdParamSchema,
+    VotingUpdateBodySchema,
     VotesIndexQuerySchema,
     type SubmitVoteBody,
     type VotesIndexQuery,
+    type VotingCreateBody,
+    type VotingUpdateBody,
 } from "./dto/votes.dto";
 import { VotesService } from "./votes.service";
 
@@ -53,7 +57,7 @@ export class VotesController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     @UseInterceptors(defaultFilesInterceptor)
     createVoting(
-        @Body() body: Record<string, any>,
+        @Body(ZodPipe(VotingCreateBodySchema)) body: VotingCreateBody,
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
@@ -91,8 +95,12 @@ export class VotesController {
 
     @Put(":votingId/update")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    updateVoting(@Param("votingId") votingId: string, @Body() body: Record<string, any>, @Req() req: Request) {
-        return this.votesService.updateVoting(votingId, body as any, req.session);
+    updateVoting(
+        @Param("votingId") votingId: string,
+        @Body(ZodPipe(VotingUpdateBodySchema)) body: VotingUpdateBody,
+        @Req() req: Request,
+    ) {
+        return this.votesService.updateVoting(votingId, body, req.session);
     }
 
     @Delete(":votingId/delete")
