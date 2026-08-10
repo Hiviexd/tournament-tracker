@@ -10,6 +10,17 @@ export default defineConfig({
     clean: true,
     dts: false,
     external: ["express", "express-async-errors"],
-    noExternal: ["lodash", "dayjs", "@tc/utils", "@tc/config", "@tc/types"],
+    // Bundle workspace TS packages — they export .ts sources (dev uses @swc-node/register).
+    // Leaving them external makes `node dist/main.js` load raw .ts and fail on extensionless ESM imports.
+    noExternal: [
+        "lodash",
+        "dayjs",
+        "@tc/utils",
+        "@tc/config",
+        "@tc/types",
+        "@tc/models",
+        "@tc/osu",
+        "@tc/notifications",
+    ],
     tsconfig: "tsconfig.json",
 });
