@@ -1,18 +1,19 @@
 import crypto from "crypto";
 import {
     ForbiddenException,
+    Inject,
     Injectable,
     InternalServerErrorException,
     UnauthorizedException,
 } from "@nestjs/common";
 import config from "@tc/config";
-import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
 import OsuApiService from "@tc/osu/OsuApiService";
 import UserService from "@tc/osu/UserService";
 import type { Request, Response } from "express";
 import type { ApiScope } from "@tc/types/ApiKey";
-import type { IUser } from "@tc/types/User";
+import type { IUser, IUserStatics } from "@tc/types/User";
+import { USER_MODEL } from "../common/database.tokens";
 
 type RefreshFailureMode = "redirect" | "continue";
 
@@ -23,6 +24,7 @@ type RefreshFailureMode = "redirect" | "continue";
  */
 @Injectable()
 export class AuthService {
+    constructor(@Inject(USER_MODEL) private readonly userModel: IUserStatics) {}
     assertApiKeyAccess(res: Response): void {
         if (res.locals?.authMethod === "apiKey" && !res.locals?.isAccessibleViaKey) {
             throw new ForbiddenException("API is not accessible via key");
@@ -77,7 +79,7 @@ export class AuthService {
     }
 
     async loadUser(req: Request, res: Response): Promise<IUser | null> {
-        return await User.findById(req.session.mongoId || res.locals?.user?._id);
+        return await this.userModel.findById(req.session.mongoId || res.locals?.user?._id);
     }
 
     /**
@@ -255,7 +257,7 @@ export class AuthService {
             return;
         }
 
-        const userLookup = await User.findOne({ osuId: userResponse.id });
+        const userLookup = await this.userModel.findOne({ osuId: userResponse.id });
         const user = await UserService.createOrUpdateUser(userResponse, userLookup);
 
         req.session.mongoId = user.id;

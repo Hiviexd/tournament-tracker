@@ -3,13 +3,14 @@ import {
     ForbiddenException,
     HttpException,
     HttpStatus,
+    Inject,
     Injectable,
 } from "@nestjs/common";
 import type { Session } from "express-session";
-import Ticket from "@tc/models/ticketModel";
+import type { Model } from "mongoose";
 import Message from "@tc/models/messageModel";
-import User from "@tc/models/userModel";
-import type { IUser } from "@tc/types/User";
+import type { ITicket } from "@tc/types/Ticket";
+import type { IUser, IUserStatics } from "@tc/types/User";
 import LogService from "@tc/models/LogService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
@@ -20,6 +21,7 @@ import { TicketDomainService } from "../../services/TicketDomainService";
 import capitalize from "lodash/capitalize.js";
 import { UploadService } from "../../services/UploadService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
+import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups coverUrl country" },
@@ -44,6 +46,8 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 @Injectable()
 export class TicketsService {
     constructor(
+        @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         private readonly ticketService: TicketDomainService,
         private readonly uploadService: UploadService,
     ) {}
@@ -87,17 +91,17 @@ export class TicketsService {
             const matchingMessages = await this.ticketService.searchMessageContent(searchTerm);
 
             if (needsUnifiedSearch) {
-                const titleMatchingTickets = await Ticket.find({
+                const titleMatchingTickets = await this.ticketModel.find({
                     title: new RegExp(utils.escapeRegexPattern(searchTerm), "i"),
                 }).distinct("_id");
 
-                const contentMatchingTickets = await Ticket.find({
+                const contentMatchingTickets = await this.ticketModel.find({
                     messages: { $in: matchingMessages },
                 }).distinct("_id");
 
                 ticketIdsFromContent = [...new Set([...titleMatchingTickets, ...contentMatchingTickets])];
             } else {
-                ticketIdsFromContent = await Ticket.find({
+                ticketIdsFromContent = await this.ticketModel.find({
                     messages: { $in: matchingMessages },
                 }).distinct("_id");
             }
@@ -124,7 +128,7 @@ export class TicketsService {
 
         if (type === "report") {
             if (targetUser) {
-                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser);
+                const targetUserDoc = await this.userModel.findByUsernameOrOsuId(targetUser);
                 if (targetUserDoc) query.targetUser = targetUserDoc._id;
             }
             if (targetTournament) {
@@ -140,12 +144,12 @@ export class TicketsService {
         }
 
         const [tickets, total] = await Promise.all([
-            Ticket.find(query)
+            this.ticketModel.find(query)
                 .sort({ isActive: -1, createdAt: -1 })
                 .skip(skip)
                 .limit(DEFAULT_LIMIT)
                 .populate(DEFAULT_POPULATE),
-            Ticket.countDocuments(query),
+            this.ticketModel.countDocuments(query),
         ]);
 
         tickets.forEach((ticket) => this.ticketService.sanitizeTicket(ticket, user));
@@ -159,7 +163,7 @@ export class TicketsService {
     }
 
     async getTicket(ticketId: string, user: IUser | undefined) {
-        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
 
         if (!ticket.isTicket && !user) {
             throw new ForbiddenException("Not authorized to view this ticket");
@@ -190,7 +194,7 @@ export class TicketsService {
             body;
 
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-        const recentTicket = await Ticket.findOne({
+        const recentTicket = await this.ticketModel.findOne({
             author: author._id,
             type,
             createdAt: { $gte: oneHourAgo },
@@ -216,12 +220,12 @@ export class TicketsService {
         let constructedTitle: string = title ? title.trim() : "";
 
         if (type === "report") {
-            const count = await Ticket.countDocuments({ type: "report" });
+            const count = await this.ticketModel.countDocuments({ type: "report" });
             const reportType = targetUserId ? "User" : assignedGroup === "cc" ? "Contest" : "Tournament";
             constructedTitle = `${reportType} Report #${PIF_REPORT_COUNT_OFFSET + count + 1}`;
         }
 
-        const ticket = new Ticket({
+        const ticket = new this.ticketModel({
             title: constructedTitle,
             type,
             author,
@@ -231,7 +235,7 @@ export class TicketsService {
 
         if (type === "report") {
             if (targetUserId) {
-                targetUser = await User.findById(targetUserId).orFail();
+                targetUser = await this.userModel.findById(targetUserId).orFail();
                 ticket.targetUser = targetUser;
             } else {
                 if (!targetTournamentName || !targetTournamentLink) {
@@ -329,7 +333,7 @@ export class TicketsService {
         const { content } = body;
         const isNote = body.isNote === "true" || body.isNote === true;
 
-        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const senderIsTicketAuthor = ticket.author._id.equals(currentUser._id);
 
         if (!currentUser.isCommittee && !senderIsTicketAuthor) {
@@ -434,7 +438,7 @@ export class TicketsService {
     }
 
     async toggleStatus(ticketId: string, user: IUser, session: Session) {
-        const ticket = await Ticket.findById(ticketId).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).orFail();
 
         ticket.isActive = !ticket.isActive;
 
@@ -482,7 +486,7 @@ export class TicketsService {
     async updateThreadId(ticketId: string, threadIdInput: string | undefined, user: IUser, session: Session) {
         let threadId = threadIdInput;
 
-        const ticket = await Ticket.findById(ticketId).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).orFail();
 
         threadId = utils.extractDiscordThreadId(threadId ?? null) ?? undefined;
 
@@ -524,7 +528,7 @@ export class TicketsService {
     async snoozeTicket(ticketId: string, user: IUser, session: Session) {
         const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-        const ticket = await Ticket.findById(ticketId).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).orFail();
 
         ticket.snoozedUntil = sevenDaysFromNow;
         await ticket.save();
@@ -564,7 +568,7 @@ export class TicketsService {
     ) {
         const { targetUserId, targetTournamentName, targetTournamentLink } = body;
 
-        const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
+        const ticket = await this.ticketModel.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
 
         if (ticket.type !== "report") {
             throw new BadRequestException("Only reports can be edited");
@@ -586,7 +590,7 @@ export class TicketsService {
         }
 
         if (isEditingUser) {
-            const targetUser = await User.findById(targetUserId).orFail();
+            const targetUser = await this.userModel.findById(targetUserId).orFail();
 
             ticket.targetUser = targetUser;
             ticket.targetTournamentName = undefined;

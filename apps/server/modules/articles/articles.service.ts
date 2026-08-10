@@ -1,12 +1,16 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import Article from "@tc/models/articleModel";
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import type { Model } from "mongoose";
 import LogService from "@tc/models/LogService";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
+import type { IArticle } from "@tc/types/Article";
 import type { IUser } from "@tc/types/User";
+import { ARTICLE_MODEL } from "../common/database.tokens";
 
 @Injectable()
 export class ArticlesService {
+    constructor(@Inject(ARTICLE_MODEL) private readonly articleModel: Model<IArticle>) {}
+
     async getArticle(slug: string, user: IUser | undefined) {
         const query: any = {
             slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
@@ -16,7 +20,7 @@ export class ArticlesService {
             query.isPublic = true;
         }
 
-        const article = await Article.findOne(query).populate({
+        const article = await this.articleModel.findOne(query).populate({
             path: "lastEditor",
             select: "username osuId groups coverUrl country",
         });
@@ -33,7 +37,7 @@ export class ArticlesService {
             throw new ForbiddenException("You don't have permission to view this");
         }
 
-        return await Article.find({ type: "documentation" }).sort({ title: 1 });
+        return await this.articleModel.find({ type: "documentation" }).sort({ title: 1 });
     }
 
     async createArticle(
@@ -46,7 +50,7 @@ export class ArticlesService {
             throw new BadRequestException("Missing required fields");
         }
 
-        const article = new Article({
+        const article = new this.articleModel({
             title,
             content,
             type,
@@ -71,7 +75,7 @@ export class ArticlesService {
     async editArticle(slug: string, body: { title?: string; content?: string }, user: IUser) {
         const { title, content } = body;
 
-        const article = await Article.findOne({
+        const article = await this.articleModel.findOne({
             slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
         });
 
@@ -114,7 +118,7 @@ export class ArticlesService {
     }
 
     async deleteArticle(slug: string, user: IUser) {
-        const article = await Article.findOne({
+        const article = await this.articleModel.findOne({
             slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
         });
         if (!article) {

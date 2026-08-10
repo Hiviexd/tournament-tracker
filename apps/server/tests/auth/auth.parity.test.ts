@@ -9,6 +9,7 @@ import session from "express-session";
 import request from "supertest";
 import config from "@tc/config";
 import User from "@tc/models/userModel";
+import User from "@tc/models/userModel";
 import type { ApiScope } from "@tc/types/ApiKey";
 import type { Request, Response } from "express";
 import { AuthService } from "../../modules/auth/auth.service";
@@ -31,7 +32,7 @@ function mockReq(partial: Partial<Request> = {}): Request {
 }
 
 describe("auth parity checklist", () => {
-    const auth = new AuthService();
+    const auth = new AuthService(User);
 
     describe("1. login session + /users/me path", () => {
         it("login sets _state cookie and redirects to osu! OAuth", () => {

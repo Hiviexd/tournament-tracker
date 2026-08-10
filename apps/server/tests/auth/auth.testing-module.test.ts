@@ -3,7 +3,9 @@ import { Test } from "@nestjs/testing";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { Request, Response } from "express";
 import type { ApiScope } from "@tc/types/ApiKey";
+import User from "@tc/models/userModel";
 import { AuthService } from "../../modules/auth/auth.service";
+import { USER_MODEL } from "../../modules/common/database.tokens";
 import { IsLoggedInGuard, RequireScopesGuard } from "../../modules/guards/auth.guards";
 import { TournamentsController } from "../../modules/tournaments/tournaments.controller";
 import { TournamentsService } from "../../modules/tournaments/tournaments.service";
@@ -29,7 +31,12 @@ describe("Nest TestingModule auth + controller smoke", () => {
     beforeAll(async () => {
         const UsersReadGuard = RequireScopesGuard(["users:read"]);
         const moduleRef = await Test.createTestingModule({
-            providers: [AuthService, IsLoggedInGuard, UsersReadGuard],
+            providers: [
+                AuthService,
+                IsLoggedInGuard,
+                UsersReadGuard,
+                { provide: USER_MODEL, useValue: User },
+            ],
         }).compile();
 
         auth = moduleRef.get(AuthService);
@@ -82,6 +89,7 @@ describe("Nest TestingModule auth + controller smoke", () => {
             providers: [
                 AuthService,
                 IsLoggedInGuard,
+                { provide: USER_MODEL, useValue: User },
                 { provide: TournamentsService, useValue: { index: vi.fn() } },
             ],
         }).compile();
@@ -96,6 +104,7 @@ describe("Nest TestingModule auth + controller smoke", () => {
             providers: [
                 AuthService,
                 IsLoggedInGuard,
+                { provide: USER_MODEL, useValue: User },
                 { provide: TicketsService, useValue: { index: vi.fn() } },
             ],
         }).compile();
