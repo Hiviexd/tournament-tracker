@@ -19,7 +19,7 @@ import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import OsuApiService from "@tc/osu/OsuApiService";
 import LogService from "@tc/models/LogService";
 import Voting from "@tc/models/votingModel";
-import TournamentService from "../../services/TournamentService";
+import { TournamentService } from "../../services/TournamentService";
 import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
 
 @Injectable()
@@ -27,6 +27,7 @@ export class UsersService {
     constructor(
         @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+        private readonly tournamentService: TournamentService,
     ) {}
 
     getSelf(currentUser: IUser) {
@@ -363,7 +364,7 @@ export class UsersService {
         const days = Math.min(365, Math.max(1, Math.floor(rawDays)));
         const user = await this.userModel.findById(userId).orFail();
 
-        const { assignments } = await TournamentService.findAssignedTournamentsForUser(user, days);
+        const { assignments } = await this.tournamentService.findAssignedTournamentsForUser(user, days);
 
         const addAssignments = assignments.filter((a) => a.actionIcon === "add");
         const tournamentIdsAssigned = new Set(addAssignments.map((a) => a.tournament.id));

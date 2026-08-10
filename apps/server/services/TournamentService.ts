@@ -793,6 +793,3 @@ export class TournamentService {
         return {};
     }
 }
-
-/** Singleton for non-DI callers (Express controllers, UsersService). */
-export default new TournamentService();

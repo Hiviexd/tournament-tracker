@@ -1,19 +1,23 @@
+import { Injectable } from "@nestjs/common";
 import Tournament from "@tc/models/tournamentModel";
 import { ITournament } from "@tc/types/Tournament";
 import Voting from "@tc/models/votingModel";
 import { IVoting } from "@tc/types/Voting";
 import Ticket from "@tc/models/ticketModel";
 import { ITicket } from "@tc/types/Ticket";
-import TicketService from "./TicketService";
 import Resource from "@tc/models/resourceModel";
 import { IResource } from "@tc/types/Resource";
 import Article from "@tc/models/articleModel";
 import { IArticle } from "@tc/types/Article";
 import utils from "@tc/utils/server";
+import { TicketService } from "./TicketService";
 
 const DEFAULT_LIMIT = 5 as const;
 
-class GlobalSearchService {
+@Injectable()
+export class GlobalSearchService {
+    constructor(private readonly ticketService: TicketService) {}
+
     /**
      * Search tournaments by title or tags or forum URL
      */
@@ -86,7 +90,7 @@ class GlobalSearchService {
 
         // Only search messages if searchType is specified, given this query is kinda expensive
         if (searchType === "ticket") {
-            messageIds = await TicketService.searchMessageContent(searchContent);
+            messageIds = await this.ticketService.searchMessageContent(searchContent);
         }
 
         return await Ticket.find({
@@ -119,7 +123,7 @@ class GlobalSearchService {
         let messageIds: string[] = [];
 
         if (searchType === "report") {
-            messageIds = await TicketService.searchMessageContent(searchContent);
+            messageIds = await this.ticketService.searchMessageContent(searchContent);
         }
 
         return await Ticket.find({
@@ -186,5 +190,3 @@ class GlobalSearchService {
             .lean();
     }
 }
-
-export default new GlobalSearchService();

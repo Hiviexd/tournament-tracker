@@ -20,6 +20,3 @@ export class VotingService {
         return publicVoting;
     }
 }
-
-/** Singleton for non-DI callers. */
-export default new VotingService();

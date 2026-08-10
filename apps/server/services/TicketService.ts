@@ -45,6 +45,3 @@ export class TicketService {
         return messages.map((id) => id.toString());
     }
 }
-
-/** Singleton for non-DI callers (GlobalSearchService). */
-export default new TicketService();
