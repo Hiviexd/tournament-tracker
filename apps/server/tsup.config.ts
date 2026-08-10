@@ -22,5 +22,9 @@ export default defineConfig({
         "@tc/osu",
         "@tc/notifications",
     ],
+    // Bundling CJS deps (axios → form-data → combined-stream) needs a real require() in ESM output.
+    banner: {
+        js: `import { createRequire } from "module";\nconst require = createRequire(import.meta.url);`,
+    },
     tsconfig: "tsconfig.json",
 });
