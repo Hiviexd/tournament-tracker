@@ -1,6 +1,3 @@
-import multer from "multer";
-import { Request, Response, NextFunction } from "express";
-
 interface UploadOptions {
     maxFiles?: number;
     allowedTypes?: string[];
@@ -27,38 +24,3 @@ export type { UploadOptions };
 export function resolveUploadOptions(options: UploadOptions = {}) {
     return { ...defaultOptions, ...options };
 }
-
-export const createUploadMiddleware = (options: UploadOptions = {}) => {
-    const finalOptions = resolveUploadOptions(options);
-
-    const middleware = multer({
-        storage: multer.memoryStorage(),
-        limits: {
-            files: finalOptions.maxFiles,
-            fileSize: finalOptions.maxFileSize,
-        },
-        fileFilter: (_req, file, cb) => {
-            if (!finalOptions.allowedTypes?.includes(file.mimetype)) {
-                cb(new Error("Invalid file type"));
-                return;
-            }
-            cb(null, true);
-        },
-    }).array("files", finalOptions.maxFiles);
-
-    return (req: Request, res: Response, next: NextFunction): void => {
-        middleware(req, res as any, (err) => {
-            if (err instanceof multer.MulterError) {
-                res.status(400).json({ error: `Upload error: ${err.message}` });
-                return;
-            } else if (err) {
-                res.status(400).json({ error: err.message });
-                return;
-            }
-            next();
-        });
-    };
-};
-
-// For backward compatibility
-export const handleUpload = createUploadMiddleware();

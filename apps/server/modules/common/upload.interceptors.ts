@@ -4,7 +4,7 @@ import { memoryStorage } from "multer";
 import type { Request } from "express";
 import { resolveUploadOptions, type UploadOptions } from "../../middlewares/upload";
 
-/** Nest FilesInterceptor matching createUploadMiddleware memory storage limits. */
+/** Nest FilesInterceptor matching legacy memory storage limits. */
 export function createFilesInterceptor(options: UploadOptions = {}) {
     const finalOptions = resolveUploadOptions(options);
 
