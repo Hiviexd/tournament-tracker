@@ -1,3 +1,4 @@
+/** DI domain helpers used by Nest *Service HTTP layers — not controllers. */
 import { Injectable } from "@nestjs/common";
 import { ITicket } from "@tc/types/Ticket";
 import { IUser } from "@tc/types/User";
@@ -5,7 +6,7 @@ import utils from "@tc/utils/server";
 import Message from "@tc/models/messageModel";
 
 @Injectable()
-export class TicketService {
+export class TicketDomainService {
     /**
      * * Sanitizes ticket data based on user permissions
      * * Removes notes from non-committee users

@@ -19,7 +19,7 @@ import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import OsuApiService from "@tc/osu/OsuApiService";
 import LogService from "@tc/models/LogService";
 import Voting from "@tc/models/votingModel";
-import { TournamentService } from "../../services/TournamentService";
+import { TournamentDomainService } from "../../services/TournamentDomainService";
 import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
 
 @Injectable()
@@ -27,7 +27,7 @@ export class UsersService {
     constructor(
         @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
-        private readonly tournamentService: TournamentService,
+        private readonly tournamentService: TournamentDomainService,
     ) {}
 
     getSelf(currentUser: IUser) {

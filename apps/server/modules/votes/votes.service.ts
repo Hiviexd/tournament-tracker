@@ -16,7 +16,7 @@ import config from "@tc/config";
 import LogService from "@tc/models/LogService";
 import utils from "@tc/utils/server";
 import { UploadService } from "../../services/UploadService";
-import { VotingService } from "../../services/VotingService";
+import { VotingDomainService } from "../../services/VotingDomainService";
 import { generateDiscordVotingResults } from "@tc/notifications/votingResults";
 
 const DEFAULT_POPULATE = [
@@ -42,7 +42,7 @@ const FILE_UPLOAD_CATEGORY = "votings";
 @Injectable()
 export class VotesService {
     constructor(
-        private readonly votingService: VotingService,
+        private readonly votingService: VotingDomainService,
         private readonly uploadService: UploadService,
     ) {}
 

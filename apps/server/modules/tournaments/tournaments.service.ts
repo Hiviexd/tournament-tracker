@@ -25,7 +25,7 @@ import Review from "@tc/models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
-import { TournamentService } from "../../services/TournamentService";
+import { TournamentDomainService } from "../../services/TournamentDomainService";
 import LogService from "@tc/models/LogService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import capitalize from "lodash/capitalize.js";
@@ -116,7 +116,7 @@ interface TournamentEditField {
     run: (ctx: TournamentEditContext) => Promise<{ error?: string }>;
 }
 
-function buildEditFields(tournamentService: TournamentService): TournamentEditField[] {
+function buildEditFields(tournamentService: TournamentDomainService): TournamentEditField[] {
     return [
         {
             isSet: (body) => body.name !== undefined,
@@ -246,7 +246,7 @@ export class TournamentsService {
     private readonly editFields: TournamentEditField[];
 
     constructor(
-        private readonly tournamentService: TournamentService,
+        private readonly tournamentService: TournamentDomainService,
         private readonly uploadService: UploadService,
     ) {
         this.editFields = buildEditFields(tournamentService);

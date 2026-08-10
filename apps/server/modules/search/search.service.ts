@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { TournamentService } from "../../services/TournamentService";
+import { TournamentDomainService } from "../../services/TournamentDomainService";
 import { GlobalSearchService } from "../../services/GlobalSearchService";
 import utils from "@tc/utils/server";
 import type { IUser } from "@tc/types/User";
@@ -7,7 +7,7 @@ import type { IUser } from "@tc/types/User";
 @Injectable()
 export class SearchService {
     constructor(
-        private readonly tournamentService: TournamentService,
+        private readonly tournamentService: TournamentDomainService,
         private readonly globalSearchService: GlobalSearchService,
     ) {}
 

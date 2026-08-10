@@ -10,13 +10,13 @@ import { IResource } from "@tc/types/Resource";
 import Article from "@tc/models/articleModel";
 import { IArticle } from "@tc/types/Article";
 import utils from "@tc/utils/server";
-import { TicketService } from "./TicketService";
+import { TicketDomainService } from "./TicketDomainService";
 
 const DEFAULT_LIMIT = 5 as const;
 
 @Injectable()
 export class GlobalSearchService {
-    constructor(private readonly ticketService: TicketService) {}
+    constructor(private readonly ticketService: TicketDomainService) {}
 
     /**
      * Search tournaments by title or tags or forum URL

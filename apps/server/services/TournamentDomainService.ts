@@ -1,3 +1,4 @@
+/** DI domain helpers used by Nest *Service HTTP layers — not controllers. */
 import { Injectable } from "@nestjs/common";
 import {
     ITournament,
@@ -29,7 +30,7 @@ import startCase from "lodash/startCase.js";
 import dayjs from "@tc/utils/dayjs";
 
 @Injectable()
-export class TournamentService {
+export class TournamentDomainService {
     /**
      * Add a log to a tournament
      * @param tournament - The tournament to add the log to

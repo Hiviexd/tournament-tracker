@@ -16,7 +16,7 @@ import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
-import { TicketService } from "../../services/TicketService";
+import { TicketDomainService } from "../../services/TicketDomainService";
 import capitalize from "lodash/capitalize.js";
 import { UploadService } from "../../services/UploadService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
@@ -44,7 +44,7 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 @Injectable()
 export class TicketsService {
     constructor(
-        private readonly ticketService: TicketService,
+        private readonly ticketService: TicketDomainService,
         private readonly uploadService: UploadService,
     ) {}
 
