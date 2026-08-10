@@ -1,13 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import EnchantSidebarService from "../../services/EnchantSidebarService";
+import { EnchantSidebarService } from "../../services/EnchantSidebarService";
 
 @Injectable()
 export class EnchantService {
+    constructor(private readonly enchantSidebarService: EnchantSidebarService) {}
+
     verifySignature(rawBody: Buffer | undefined, signature: string | undefined): boolean {
-        return EnchantSidebarService.verifySignature(rawBody, signature);
+        return this.enchantSidebarService.verifySignature(rawBody, signature);
     }
 
     buildSidebarHtml(ticketId: string): Promise<string> {
-        return EnchantSidebarService.buildSidebarHtml(ticketId);
+        return this.enchantSidebarService.buildSidebarHtml(ticketId);
     }
 }

@@ -16,8 +16,8 @@ import { EnchantHmacGuard } from "../../modules/enchant/enchant-hmac.guard";
 import { EnchantService } from "../../modules/enchant/enchant.service";
 import { authenticateRequest } from "../../middlewares/authenticateRequest";
 import { conditionalCsrf, handleCsrfError } from "../../middlewares/csrf";
-import ApiKeyService from "../../services/ApiKeyService";
-import EnchantSidebarService from "../../services/EnchantSidebarService";
+import { ApiKeyService, bindApiKeyService } from "../../services/ApiKeyService";
+import { EnchantSidebarService } from "../../services/EnchantSidebarService";
 import { createMockUser } from "../utils/users";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -168,13 +168,17 @@ describe("auth parity checklist", () => {
         });
 
         it("authenticateRequest marks Bearer keys as inaccessible until scopes run", async () => {
-            const validate = vi.spyOn(ApiKeyService, "validate").mockResolvedValue({
+            const validate = vi.spyOn(ApiKeyService.prototype, "validate").mockResolvedValue({
                 user: createMockUser(),
                 apiKey: {
                     scopes: ["users:read"],
                     revokedAt: null,
                 } as never,
             });
+
+            // Bind bridge the same way KeysModule.onModuleInit does
+            const bridge = new ApiKeyService();
+            bindApiKeyService(bridge);
 
             const req = mockReq({
                 headers: { authorization: "Bearer test-raw-key" },
@@ -217,14 +221,14 @@ describe("auth parity checklist", () => {
             const rawBody = Buffer.from('{"id":"ticket-1"}');
             const signature = crypto.createHmac("sha256", "parity-secret").update(rawBody).digest("hex");
 
-            expect(EnchantSidebarService.verifySignature(rawBody, signature)).toBe(true);
-            expect(EnchantSidebarService.verifySignature(rawBody, "deadbeef")).toBe(false);
-            expect(EnchantSidebarService.verifySignature(undefined, signature)).toBe(false);
+            expect(new EnchantSidebarService().verifySignature(rawBody, signature)).toBe(true);
+            expect(new EnchantSidebarService().verifySignature(rawBody, "deadbeef")).toBe(false);
+            expect(new EnchantSidebarService().verifySignature(undefined, signature)).toBe(false);
         });
 
         it("EnchantHmacGuard rejects bad signatures when enabled", () => {
             config.enchant = { enabled: true, sidebarSecret: "parity-secret" };
-            const guard = new EnchantHmacGuard(new EnchantService());
+            const guard = new EnchantHmacGuard(new EnchantService(new EnchantSidebarService()));
             const rawBody = Buffer.from('{"id":"ticket-1"}');
             const context = {
                 switchToHttp: () => ({

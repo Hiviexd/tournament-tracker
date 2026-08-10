@@ -1,10 +1,12 @@
+import { Injectable } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
 import config from "@tc/config";
 import { IComplianceApiResponse } from "@tc/types/ComplianceApi";
 import { IUser } from "@tc/types/User";
 
-export default class ComplianceApiService {
-    static async validateBeatmaps(beatmapIds: (string | number)[], user: IUser) {
+@Injectable()
+export class ComplianceApiService {
+    async validateBeatmaps(beatmapIds: (string | number)[], user: IUser) {
         if (
             !config.complianceApi ||
             !config.complianceApi.url ||

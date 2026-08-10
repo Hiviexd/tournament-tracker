@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import ApiKeyService from "../services/ApiKeyService";
+import { resolveApiKeyService } from "../services/ApiKeyService";
 
 export async function authenticateRequest(req: Request, res: Response, next: NextFunction) {
     const authz = req.headers["authorization"];
     if (authz && typeof authz === "string" && authz.startsWith("Bearer ")) {
         const rawKey = authz.slice("Bearer ".length).trim();
         if (rawKey) {
-            const result = await ApiKeyService.validate(rawKey, req);
+            const result = await resolveApiKeyService().validate(rawKey, req);
             if (result) {
                 res.locals = res.locals || {};
                 res.locals.user = result.user;

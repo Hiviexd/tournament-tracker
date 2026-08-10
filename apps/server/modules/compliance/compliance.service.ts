@@ -1,11 +1,13 @@
 import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
-import ComplianceApiService from "../../services/ComplianceApiService";
+import { ComplianceApiService } from "../../services/ComplianceApiService";
 import { ComplianceStatus, IValidationResult } from "@tc/types/ComplianceApi";
 import utils from "@tc/utils/server";
 import type { IUser } from "@tc/types/User";
 
 @Injectable()
 export class ComplianceService {
+    constructor(private readonly complianceApiService: ComplianceApiService) {}
+
     async validateBeatmaps(input: unknown, user: IUser) {
         if (!input || typeof input !== "string") {
             throw new BadRequestException("Invalid input");
@@ -16,7 +18,7 @@ export class ComplianceService {
             throw new BadRequestException("No valid beatmap IDs found");
         }
 
-        const data = await ComplianceApiService.validateBeatmaps(Array.from(beatmapIds), user);
+        const data = await this.complianceApiService.validateBeatmaps(Array.from(beatmapIds), user);
 
         if ("statusCode" in data) {
             throw new HttpException(`${data.error} — ${data.message}`, data.statusCode);

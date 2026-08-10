@@ -5,7 +5,7 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 import type { Session } from "express-session";
-import ApiKeyService from "../../services/ApiKeyService";
+import { ApiKeyService } from "../../services/ApiKeyService";
 import { AvailableApiScopes, type ApiScope } from "@tc/types/ApiKey";
 import LogService from "@tc/models/LogService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
@@ -23,13 +23,15 @@ function rethrowApiKeyError(err: unknown): never {
 
 @Injectable()
 export class KeysService {
+    constructor(private readonly apiKeyService: ApiKeyService) {}
+
     async get(user: IUser) {
-        const apiKey = await ApiKeyService.getForUser(user);
+        const apiKey = await this.apiKeyService.getForUser(user);
         return { apiKey: apiKey ? { ...apiKey.toObject(), hashedKey: undefined } : null };
     }
 
     async getAll() {
-        const apiKeys = await ApiKeyService.getAllKeys();
+        const apiKeys = await this.apiKeyService.getAllKeys();
         return { apiKeys };
     }
 
@@ -49,7 +51,7 @@ export class KeysService {
         }
 
         try {
-            const { rawKey, apiKey } = await ApiKeyService.createKey(user, {
+            const { rawKey, apiKey } = await this.apiKeyService.createKey(user, {
                 name: String(name),
                 scopes,
                 isElevated: !!isElevated,
@@ -85,7 +87,7 @@ export class KeysService {
         }
 
         try {
-            const apiKey = await ApiKeyService.updateKey(user, { scopes });
+            const apiKey = await this.apiKeyService.updateKey(user, { scopes });
 
             await LogService.generate(user.id, `Updated API key scopes: **${apiKey.name}**`, "api_key");
 
@@ -107,7 +109,7 @@ export class KeysService {
     }
 
     async revoke(user: IUser, session: Session) {
-        const result = await ApiKeyService.revokeKey(user);
+        const result = await this.apiKeyService.revokeKey(user);
         if (result.apiKey && !result.alreadyRevoked) {
             await LogService.generate(user.id, `Revoked API key: **${result.apiKey.name}**`, "api_key");
             await new WebhookBuilder()
@@ -127,7 +129,7 @@ export class KeysService {
         if (!keyId) {
             throw new BadRequestException("Key ID is required");
         }
-        const result = await ApiKeyService.revokeKeyById(keyId);
+        const result = await this.apiKeyService.revokeKeyById(keyId);
         if (!result.apiKey) {
             throw new NotFoundException("API key not found");
         }

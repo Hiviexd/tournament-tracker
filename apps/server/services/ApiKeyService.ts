@@ -1,3 +1,4 @@
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ApiScope, IApiKey } from "@tc/types/ApiKey";
 import User from "@tc/models/userModel";
 import ApiKey from "@tc/models/apiKeyModel";
@@ -5,14 +6,33 @@ import utils from "@tc/utils/server";
 import { IUser } from "@tc/types/User";
 import { Request } from "express";
 
-export default class ApiKeyService {
+/** Express middleware bridge — bound in KeysModule onModuleInit. */
+let apiKeyServiceBridge: ApiKeyService | undefined;
+
+export function resolveApiKeyService(): ApiKeyService {
+    if (!apiKeyServiceBridge) {
+        throw new Error("ApiKeyService is not bound; Nest KeysModule has not initialized");
+    }
+    return apiKeyServiceBridge;
+}
+
+export function bindApiKeyService(service: ApiKeyService): void {
+    apiKeyServiceBridge = service;
+}
+
+@Injectable()
+export class ApiKeyService implements OnModuleInit {
+    onModuleInit(): void {
+        bindApiKeyService(this);
+    }
+
     /**
      * Creates a new API key for a user
      * @param user - the user to create the API key for
      * @param options - the options for the API key
      * @returns the raw and API key
      */
-    static async createKey(
+    async createKey(
         user: IUser,
         options: { name: string; scopes: ApiScope[]; isElevated: boolean },
     ): Promise<{ rawKey: string; apiKey: IApiKey }> {
@@ -44,7 +64,7 @@ export default class ApiKeyService {
      * @param user - the user to revoke the API key for
      * @returns the API key
      */
-    static async revokeKey(user: IUser) {
+    async revokeKey(user: IUser) {
         const apiKey = await ApiKey.findOne({ user, revokedAt: null });
 
         if (apiKey) {
@@ -61,7 +81,7 @@ export default class ApiKeyService {
      * @param keyId - the API key document _id
      * @returns the revoked key or null if not found / already revoked
      */
-    static async revokeKeyById(keyId: string): Promise<{ apiKey: IApiKey | null; alreadyRevoked: boolean }> {
+    async revokeKeyById(keyId: string): Promise<{ apiKey: IApiKey | null; alreadyRevoked: boolean }> {
         const apiKey = await ApiKey.findById(keyId).select("-hashedKey").populate("user");
         if (!apiKey) return { apiKey: null, alreadyRevoked: false };
         if (apiKey.revokedAt) return { apiKey, alreadyRevoked: true };
@@ -75,7 +95,7 @@ export default class ApiKeyService {
      * @param rawKey - the raw API key
      * @returns the user and API key
      */
-    static async validate(rawKey: string, req: Request): Promise<{ user: IUser; apiKey: IApiKey } | null> {
+    async validate(rawKey: string, req: Request): Promise<{ user: IUser; apiKey: IApiKey } | null> {
         const { hashed } = utils.generateApiKey(rawKey);
 
         const apiKey = await ApiKey.findOne({ hashedKey: hashed });
@@ -103,7 +123,7 @@ export default class ApiKeyService {
      * @param options - the options to update
      * @returns the updated API key
      */
-    static async updateKey(user: IUser, options: { scopes: ApiScope[] }): Promise<IApiKey> {
+    async updateKey(user: IUser, options: { scopes: ApiScope[] }): Promise<IApiKey> {
         const apiKey = await ApiKey.findOne({ user, revokedAt: null });
         if (!apiKey) {
             throw Object.assign(new Error("No active API key found for this user"), { status: 404 });
@@ -120,7 +140,7 @@ export default class ApiKeyService {
      * @param user - the user to get the API key for
      * @returns the API key document, minus the hashed key
      */
-    static async getForUser(user: IUser): Promise<Omit<IApiKey, "hashedKey"> | null> {
+    async getForUser(user: IUser): Promise<Omit<IApiKey, "hashedKey"> | null> {
         const found = await ApiKey.findOne({ user, revokedAt: null }).select("-hashedKey");
 
         if (found) return found;
@@ -131,7 +151,7 @@ export default class ApiKeyService {
      * Gets all API keys grouped by user
      * @returns all API keys
      */
-    static async getAllKeys(): Promise<{ user: IUser; apiKeys: IApiKey[] }[]> {
+    async getAllKeys(): Promise<{ user: IUser; apiKeys: IApiKey[] }[]> {
         const keys = await ApiKey.find({})
             .select("-hashedKey")
             .sort({ lastUsedAt: -1, createdAt: -1 })

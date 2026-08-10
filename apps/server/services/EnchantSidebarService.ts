@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import crypto from "crypto";
 import config from "@tc/config";
 import { IInfringement } from "@tc/types/Infringement";
@@ -9,11 +10,12 @@ import Tournament from "@tc/models/tournamentModel";
 
 const RESULT_CAP = 5;
 
-export default class EnchantSidebarService {
+@Injectable()
+export class EnchantSidebarService {
     /**
      * Verifies the Enchant-Signature HMAC against the raw request body.
      */
-    public static verifySignature(rawBody: Buffer | undefined, signature: string | undefined): boolean {
+    public verifySignature(rawBody: Buffer | undefined, signature: string | undefined): boolean {
         const secret = config.enchant?.sidebarSecret;
         if (!secret || !rawBody || !signature) return false;
 
@@ -29,7 +31,7 @@ export default class EnchantSidebarService {
      * Looks up tournaments and watchlist infringements for an Enchant ticket id
      * and returns sidebar HTML, or an empty string when nothing matches.
      */
-    public static async buildSidebarHtml(ticketId: string): Promise<string> {
+    public async buildSidebarHtml(ticketId: string): Promise<string> {
         if (!ticketId) return "";
 
         const enchantUrl = utils.buildEnchantTicketUrl(ticketId);
@@ -55,7 +57,7 @@ export default class EnchantSidebarService {
         return sections.join("<hr>");
     }
 
-    private static renderTournament(tournament: ITournament): string {
+    private renderTournament(tournament: ITournament): string {
         const name = utils.escapeHtml(tournament.name);
         const tournamentUrl = `${config.baseUrl}/tournaments/${tournament._id}`;
         const rows: string[] = [`<p><b>Tournament:</b> <a href="${tournamentUrl}">${name}</a></p>`];
@@ -88,7 +90,7 @@ export default class EnchantSidebarService {
         return `<div>${rows.join("")}</div>`;
     }
 
-    private static renderInfringement(infringement: IInfringement): string {
+    private renderInfringement(infringement: IInfringement): string {
         const user = infringement.userId as unknown as IUser | undefined;
         const rows: string[] = [];
 
@@ -114,7 +116,7 @@ export default class EnchantSidebarService {
         return `<div>${rows.join("")}</div>`;
     }
 
-    private static buildDiscordThreadUrl(threadId: string): string {
+    private buildDiscordThreadUrl(threadId: string): string {
         const serverId = config.discord.webhooks.main.serverId;
         return `https://discord.com/channels/${serverId}/${threadId}`;
     }
