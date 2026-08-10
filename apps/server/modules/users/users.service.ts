@@ -1,3 +1,4 @@
+import type { IVoting } from "@tc/types/Voting";
 import {
     BadGatewayException,
     BadRequestException,
@@ -18,13 +19,13 @@ import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import OsuApiService from "@tc/osu/OsuApiService";
 import LogService from "@tc/models/LogService";
-import Voting from "@tc/models/votingModel";
 import { TournamentDomainService } from "../../services/TournamentDomainService";
-import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
+import { TICKET_MODEL, USER_MODEL, VOTING_MODEL } from "../common/database.tokens";
 
 @Injectable()
 export class UsersService {
     constructor(
+        @Inject(VOTING_MODEL) private readonly votingModel: Model<IVoting>,
         @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
         private readonly tournamentService: TournamentDomainService,
@@ -420,7 +421,7 @@ export class UsersService {
             this.ticketModel.find({ type: "report", targetUser: user._id }).populate([
                 { path: "author", select: "username osuId groups coverUrl country" },
             ]),
-            Voting.find({ category: "user", targetUser: user._id }).populate([
+            this.votingModel.find({ category: "user", targetUser: user._id }).populate([
                 { path: "author", select: "username osuId groups coverUrl country" },
             ]),
         ]);

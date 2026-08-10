@@ -1,17 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { INFRINGEMENT_MODEL, TOURNAMENT_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import crypto from "crypto";
 import config from "@tc/config";
-import { IInfringement } from "@tc/types/Infringement";
-import { ITournament } from "@tc/types/Tournament";
-import { IUser } from "@tc/types/User";
+import type { IInfringement, IInfringementStatics } from "@tc/types/Infringement";
+import type { ITournament } from "@tc/types/Tournament";
+import type { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
-import Infringement from "@tc/models/infringementModel";
-import Tournament from "@tc/models/tournamentModel";
 
 const RESULT_CAP = 5;
 
 @Injectable()
 export class EnchantSidebarService {
+    constructor(
+        @Inject(INFRINGEMENT_MODEL) private readonly infringementModel: IInfringementStatics,
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+    ) {}
+
     /**
      * Verifies the Enchant-Signature HMAC against the raw request body.
      */
@@ -37,8 +42,8 @@ export class EnchantSidebarService {
         const enchantUrl = utils.buildEnchantTicketUrl(ticketId);
 
         const [tournaments, infringements] = await Promise.all([
-            Tournament.find({ enchantUrl }).populate("hosts").limit(RESULT_CAP),
-            Infringement.find({ enchantUrl }).sort({ createdAt: -1 }).limit(RESULT_CAP).populate("userId"),
+            this.tournamentModel.find({ enchantUrl }).populate("hosts").limit(RESULT_CAP),
+            this.infringementModel.find({ enchantUrl }).sort({ createdAt: -1 }).limit(RESULT_CAP).populate("userId"),
         ]);
 
         if (tournaments.length === 0 && infringements.length === 0) return "";

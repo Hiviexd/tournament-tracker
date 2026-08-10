@@ -1,12 +1,18 @@
+import { MESSAGE_MODEL } from "../modules/common/database.tokens";
+import type { IMessage } from "@tc/types/Message";
+import type { Model } from "mongoose";
 /** DI domain helpers used by Nest *Service HTTP layers — not controllers. */
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ITicket } from "@tc/types/Ticket";
 import { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
-import Message from "@tc/models/messageModel";
 
 @Injectable()
 export class TicketDomainService {
+    constructor(
+        @Inject(MESSAGE_MODEL) private readonly messageModel: Model<IMessage>,
+    ) {}
+
     /**
      * * Sanitizes ticket data based on user permissions
      * * Removes notes from non-committee users
@@ -37,7 +43,7 @@ export class TicketDomainService {
         const searchTerms = utils.splitSearchTerms(search);
 
         // TODO: Consider using Meilisearch or Atlas Search for this in the future
-        const messages = await Message.find({
+        const messages = await this.messageModel.find({
             $and: searchTerms.map((term) => ({
                 $or: [{ content: { $regex: utils.escapeRegexPattern(term), $options: "i" } }],
             })),

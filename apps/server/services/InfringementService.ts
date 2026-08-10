@@ -1,19 +1,25 @@
-import { Injectable } from "@nestjs/common";
+import { INFRINGEMENT_MODEL, USER_MODEL } from "../modules/common/database.tokens";
+import type { IUserStatics } from "@tc/types/User";
+import { Inject, Injectable } from "@nestjs/common";
 import { Types } from "mongoose";
 import dayjs from "@tc/utils/dayjs";
-import Infringement from "@tc/models/infringementModel";
-import User from "@tc/models/userModel";
 import {
-    IInfringement,
     InfringementType,
     TIME_BASED_TYPES,
-    WatchlistQuery,
     WATCHLIST_DEFAULT_LIMIT,
+    type IInfringement,
+    type IInfringementStatics,
+    type WatchlistQuery,
 } from "@tc/types/Infringement";
 import utils from "@tc/utils/server";
 
 @Injectable()
 export class InfringementService {
+    constructor(
+        @Inject(INFRINGEMENT_MODEL) private readonly infringementModel: IInfringementStatics,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+    ) {}
+
     public async addInfringement(
         userId: string,
         data: {
@@ -63,11 +69,11 @@ export class InfringementService {
 
         const extractedThreadId = utils.extractDiscordThreadId(threadId ?? null) || undefined;
 
-        const user = await User.findById(userId).orFail();
+        const user = await this.userModel.findById(userId).orFail();
 
         // Auto-expire active time-based infringement when adding a new time-based one
         if (isTimeBased) {
-            const activeInfringement = await (Infringement as any).findActiveForUser(userId);
+            const activeInfringement = await (this.infringementModel as any).findActiveForUser(userId);
             if (activeInfringement) {
                 activeInfringement.endDate = new Date();
                 await activeInfringement.save();
@@ -89,9 +95,9 @@ export class InfringementService {
             }
         }
 
-        const infringement = await Infringement.create(infringementData);
+        const infringement = await this.infringementModel.create(infringementData);
 
-        const userWithInfringements = await User.findById(userId).populate("infringements").orFail();
+        const userWithInfringements = await this.userModel.findById(userId).populate("infringements").orFail();
         return { infringement, user: userWithInfringements };
     }
 
@@ -120,7 +126,7 @@ export class InfringementService {
             throw { status: 400, error: "Invalid Enchant ticket URL format" };
         }
 
-        const infringement = await Infringement.findById(infringementId);
+        const infringement = await this.infringementModel.findById(infringementId);
 
         if (!infringement || infringement.userId.toString() !== userId) {
             throw { status: 404, error: "Infringement not found" };
@@ -165,7 +171,7 @@ export class InfringementService {
 
         await infringement.save();
 
-        const user = await User.findById(userId).populate("infringements").orFail();
+        const user = await this.userModel.findById(userId).populate("infringements").orFail();
 
         return { infringement, user };
     }
@@ -181,7 +187,7 @@ export class InfringementService {
         const limit = Math.min(100, Math.max(1, query.limit ?? WATCHLIST_DEFAULT_LIMIT));
         const skip = (page - 1) * limit;
 
-        const [facetResult] = await Infringement.aggregate<{
+        const [facetResult] = await this.infringementModel.aggregate<{
             total: { count: number }[];
             page: { _id: Types.ObjectId; latestInfringementAt: Date }[];
         }>([
@@ -203,7 +209,7 @@ export class InfringementService {
 
         const pages = Math.ceil(total / limit);
         const orderedIds = facetResult.page.map((row) => row._id);
-        const usersUnordered = await User.find({ _id: { $in: orderedIds } }).populate("infringements");
+        const usersUnordered = await this.userModel.find({ _id: { $in: orderedIds } }).populate("infringements");
         const orderIndex = new Map(orderedIds.map((id, i) => [id.toString(), i]));
         const users = usersUnordered.sort(
             (a, b) => (orderIndex.get(a._id.toString()) ?? 0) - (orderIndex.get(b._id.toString()) ?? 0),
@@ -213,7 +219,7 @@ export class InfringementService {
     }
 
     public async getInfringementsNeedingEmail() {
-        const userIds = await Infringement.distinct("userId", {
+        const userIds = await this.infringementModel.distinct("userId", {
             type: {
                 $in: [
                     InfringementType.HOSTING_BAN,
@@ -227,7 +233,7 @@ export class InfringementService {
 
         if (userIds.length === 0) return [];
 
-        const users = await User.find({ _id: { $in: userIds } }).populate({
+        const users = await this.userModel.find({ _id: { $in: userIds } }).populate({
             path: "infringements",
             match: {
                 type: { $ne: InfringementType.NOTE },
@@ -239,6 +245,6 @@ export class InfringementService {
     }
 
     public async findActiveForUser(userId: string | Types.ObjectId): Promise<IInfringement | null> {
-        return await Infringement.findActiveForUser(userId);
+        return await this.infringementModel.findActiveForUser(userId);
     }
 }

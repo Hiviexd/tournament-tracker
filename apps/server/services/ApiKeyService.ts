@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { API_KEY_MODEL, USER_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { ApiScope, IApiKey } from "@tc/types/ApiKey";
-import User from "@tc/models/userModel";
-import ApiKey from "@tc/models/apiKeyModel";
 import utils from "@tc/utils/server";
-import { IUser } from "@tc/types/User";
+import type { IUser, IUserStatics } from "@tc/types/User";
 import { Request } from "express";
 
 /** Express middleware bridge — bound in KeysModule onModuleInit. */
@@ -22,6 +22,11 @@ export function bindApiKeyService(service: ApiKeyService): void {
 
 @Injectable()
 export class ApiKeyService implements OnModuleInit {
+    constructor(
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+        @Inject(API_KEY_MODEL) private readonly apiKeyModel: Model<IApiKey>,
+    ) {}
+
     onModuleInit(): void {
         bindApiKeyService(this);
     }
@@ -36,14 +41,14 @@ export class ApiKeyService implements OnModuleInit {
         user: IUser,
         options: { name: string; scopes: ApiScope[]; isElevated: boolean },
     ): Promise<{ rawKey: string; apiKey: IApiKey }> {
-        const existing = await ApiKey.findOne({ user, revokedAt: null });
+        const existing = await this.apiKeyModel.findOne({ user, revokedAt: null });
         if (existing) {
             throw Object.assign(new Error("API key already exists for this user"), { status: 409 });
         }
 
         const { raw, hashed } = utils.generateApiKey();
 
-        const apiKey = await ApiKey.create({
+        const apiKey = await this.apiKeyModel.create({
             user,
             hashedKey: hashed,
             name: options.name,
@@ -65,7 +70,7 @@ export class ApiKeyService implements OnModuleInit {
      * @returns the API key
      */
     async revokeKey(user: IUser) {
-        const apiKey = await ApiKey.findOne({ user, revokedAt: null });
+        const apiKey = await this.apiKeyModel.findOne({ user, revokedAt: null });
 
         if (apiKey) {
             apiKey.revokedAt = new Date();
@@ -82,7 +87,7 @@ export class ApiKeyService implements OnModuleInit {
      * @returns the revoked key or null if not found / already revoked
      */
     async revokeKeyById(keyId: string): Promise<{ apiKey: IApiKey | null; alreadyRevoked: boolean }> {
-        const apiKey = await ApiKey.findById(keyId).select("-hashedKey").populate("user");
+        const apiKey = await this.apiKeyModel.findById(keyId).select("-hashedKey").populate("user");
         if (!apiKey) return { apiKey: null, alreadyRevoked: false };
         if (apiKey.revokedAt) return { apiKey, alreadyRevoked: true };
         apiKey.revokedAt = new Date();
@@ -98,10 +103,10 @@ export class ApiKeyService implements OnModuleInit {
     async validate(rawKey: string, req: Request): Promise<{ user: IUser; apiKey: IApiKey } | null> {
         const { hashed } = utils.generateApiKey(rawKey);
 
-        const apiKey = await ApiKey.findOne({ hashedKey: hashed });
+        const apiKey = await this.apiKeyModel.findOne({ hashedKey: hashed });
         if (!apiKey || apiKey.revokedAt) return null;
 
-        const user = await User.findById(apiKey.user).orFail();
+        const user = await this.userModel.findById(apiKey.user).orFail();
         if (!user) return null;
 
         // Lobotomize user if not elevated
@@ -124,7 +129,7 @@ export class ApiKeyService implements OnModuleInit {
      * @returns the updated API key
      */
     async updateKey(user: IUser, options: { scopes: ApiScope[] }): Promise<IApiKey> {
-        const apiKey = await ApiKey.findOne({ user, revokedAt: null });
+        const apiKey = await this.apiKeyModel.findOne({ user, revokedAt: null });
         if (!apiKey) {
             throw Object.assign(new Error("No active API key found for this user"), { status: 404 });
         }
@@ -141,7 +146,7 @@ export class ApiKeyService implements OnModuleInit {
      * @returns the API key document, minus the hashed key
      */
     async getForUser(user: IUser): Promise<Omit<IApiKey, "hashedKey"> | null> {
-        const found = await ApiKey.findOne({ user, revokedAt: null }).select("-hashedKey");
+        const found = await this.apiKeyModel.findOne({ user, revokedAt: null }).select("-hashedKey");
 
         if (found) return found;
         return null;
@@ -152,7 +157,7 @@ export class ApiKeyService implements OnModuleInit {
      * @returns all API keys
      */
     async getAllKeys(): Promise<{ user: IUser; apiKeys: IApiKey[] }[]> {
-        const keys = await ApiKey.find({})
+        const keys = await this.apiKeyModel.find({})
             .select("-hashedKey")
             .sort({ lastUsedAt: -1, createdAt: -1 })
             .populate("user");

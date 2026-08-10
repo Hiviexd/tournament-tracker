@@ -1,14 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import { ATTACHMENT_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "@tc/config";
 import { IAttachment } from "@tc/types/Attachment";
-import Attachment from "@tc/models/attachmentModel";
 
 @Injectable()
 export class UploadService {
     private client: S3Client;
 
-    constructor() {
+    constructor(
+        @Inject(ATTACHMENT_MODEL) private readonly attachmentModel: Model<IAttachment>,
+    ) {
         this.client = new S3Client({
             region: "auto",
             endpoint: `https://${config.r2.accountId}.r2.cloudflarestorage.com`,
@@ -66,7 +69,7 @@ export class UploadService {
                 try {
                     const url = await this.uploadFile(file, category, categoryObjectId);
 
-                    const attachment = new Attachment({
+                    const attachment = new this.attachmentModel({
                         originalName: file.originalname,
                         url,
                         size: file.size,

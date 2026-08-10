@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import Log from "@tc/models/logModel";
-import User from "@tc/models/userModel";
-import { LogQueryParams, LogListQuery } from "@tc/types/Log";
+import { LOG_MODEL, USER_MODEL } from "../common/database.tokens";
+import type { IUserStatics } from "@tc/types/User";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
+import { LogQueryParams, LogListQuery, ILog } from "@tc/types/Log";
 import utils from "@tc/utils/server";
 
 const DEFAULT_POPULATE = [
@@ -15,11 +16,16 @@ const DEFAULT_LIMIT = 20;
 
 @Injectable()
 export class LogsService {
+    constructor(
+        @Inject(LOG_MODEL) private readonly logModel: Model<ILog>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+    ) {}
+
     async index(reqQuery: LogListQuery) {
         const dbQuery: LogQueryParams = {};
 
         if (reqQuery.user && reqQuery.user.length) {
-            const userDoc = await User.findByUsernameOrOsuId(reqQuery.user);
+            const userDoc = await this.userModel.findByUsernameOrOsuId(reqQuery.user);
             dbQuery.user = userDoc || undefined;
             dbQuery.isSystemLog = false;
         }
@@ -32,8 +38,8 @@ export class LogsService {
         const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [logs, total] = await Promise.all([
-            Log.find(dbQuery).skip(skip).limit(DEFAULT_LIMIT).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE),
-            Log.countDocuments(dbQuery),
+            this.logModel.find(dbQuery).skip(skip).limit(DEFAULT_LIMIT).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE),
+            this.logModel.countDocuments(dbQuery),
         ]);
 
         return {
@@ -45,7 +51,7 @@ export class LogsService {
     }
 
     async exportCsv(): Promise<string> {
-        const logs = await Log.find({}).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE);
+        const logs = await this.logModel.find({}).sort({ createdAt: -1 }).populate(DEFAULT_POPULATE);
 
         const csvData = logs.map((log) => ({
             timestamp: log.createdAt.toISOString(),

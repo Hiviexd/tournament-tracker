@@ -1,3 +1,4 @@
+import type { IMessage } from "@tc/types/Message";
 import {
     BadRequestException,
     ForbiddenException,
@@ -8,7 +9,6 @@ import {
 } from "@nestjs/common";
 import type { Session } from "express-session";
 import type { Model } from "mongoose";
-import Message from "@tc/models/messageModel";
 import type { ITicket } from "@tc/types/Ticket";
 import type { IUser, IUserStatics } from "@tc/types/User";
 import LogService from "@tc/models/LogService";
@@ -21,7 +21,7 @@ import { TicketDomainService } from "../../services/TicketDomainService";
 import capitalize from "lodash/capitalize.js";
 import { UploadService } from "../../services/UploadService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
-import { TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
+import { MESSAGE_MODEL, TICKET_MODEL, USER_MODEL } from "../common/database.tokens";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups coverUrl country" },
@@ -46,6 +46,7 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 @Injectable()
 export class TicketsService {
     constructor(
+        @Inject(MESSAGE_MODEL) private readonly messageModel: Model<IMessage>,
         @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
         @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         private readonly ticketService: TicketDomainService,
@@ -258,7 +259,7 @@ export class TicketsService {
             }
         }
 
-        const initialMessage = new Message({
+        const initialMessage = new this.messageModel({
             author,
             content: message.trim(),
             isCommittee: false,
@@ -348,7 +349,7 @@ export class TicketsService {
             throw new BadRequestException("Message must be between 10 and 8000 characters");
         }
 
-        const newMessage = new Message({
+        const newMessage = new this.messageModel({
             author: currentUser._id,
             content,
             isCommittee: senderIsTicketAuthor ? false : currentUser.isCommittee,
@@ -442,7 +443,7 @@ export class TicketsService {
 
         ticket.isActive = !ticket.isActive;
 
-        const eventMessage = new Message({
+        const eventMessage = new this.messageModel({
             author: user._id,
             content: ticket.isActive ? "Ticket reopened" : "Ticket closed",
             isCommittee: true,

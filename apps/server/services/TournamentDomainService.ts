@@ -1,5 +1,7 @@
+import { TICKET_MODEL, TOURNAMENT_MODEL, USER_MODEL, VOTING_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
 /** DI domain helpers used by Nest *Service HTTP layers — not controllers. */
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import {
     ITournament,
     GameMode,
@@ -8,17 +10,13 @@ import {
     ITournamentReviewHistoryEntry,
     ITournamentExtraLink,
 } from "@tc/types/Tournament";
-import { IUser } from "@tc/types/User";
+import type { IUser, IUserStatics } from "@tc/types/User";
 import { FlattenMaps } from "mongoose";
 import { IReview } from "@tc/types/Review";
 import { ITicket } from "@tc/types/Ticket";
 import { IVoting } from "@tc/types/Voting";
-import Ticket from "@tc/models/ticketModel";
-import Voting from "@tc/models/votingModel";
 import utils from "@tc/utils/server";
 import UserService from "@tc/osu/UserService";
-import Tournament from "@tc/models/tournamentModel";
-import User from "@tc/models/userModel";
 import LogService from "@tc/models/LogService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
@@ -31,6 +29,13 @@ import dayjs from "@tc/utils/dayjs";
 
 @Injectable()
 export class TournamentDomainService {
+    constructor(
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+        @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+        @Inject(VOTING_MODEL) private readonly votingModel: Model<IVoting>,
+    ) {}
+
     /**
      * Add a log to a tournament
      * @param tournament - The tournament to add the log to
@@ -140,7 +145,7 @@ export class TournamentDomainService {
             return [];
         }
 
-        const reports = await Ticket.find({
+        const reports = await this.ticketModel.find({
             type: "report",
             $or: searchCriteria,
         }).populate([
@@ -173,7 +178,7 @@ export class TournamentDomainService {
         const cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - days);
 
-        const tournaments = await Tournament.find({
+        const tournaments = await this.tournamentModel.find({
             reviewHistory: {
                 $elemMatch: {
                     user: user._id,
@@ -299,7 +304,7 @@ export class TournamentDomainService {
             return [];
         }
 
-        const votings = await Voting.find({
+        const votings = await this.votingModel.find({
             $or: searchCriteria,
         }).populate([
             {
@@ -382,7 +387,7 @@ export class TournamentDomainService {
             return { error: "At least one host is required" };
         }
 
-        const hostsUnordered = await User.find({ _id: { $in: hostIds } }).populate("infringements");
+        const hostsUnordered = await this.userModel.find({ _id: { $in: hostIds } }).populate("infringements");
 
         if (hostsUnordered.length !== hostIds.length) {
             return { error: "One or more host IDs are invalid" };
@@ -403,7 +408,7 @@ export class TournamentDomainService {
         tournament.hosts = hosts;
 
         // Re-fetch to get populated hosts for logging
-        const updatedTournament = await Tournament.findById(tournament._id).populate("hosts").orFail();
+        const updatedTournament = await this.tournamentModel.findById(tournament._id).populate("hosts").orFail();
 
         await this.addTournamentLog(
             tournament,
@@ -628,7 +633,7 @@ export class TournamentDomainService {
         currentUser: IUser,
     ): Promise<{ error?: string }> {
         const winnerIds = winners.map((w) => w._id || w);
-        const populatedWinners = await User.find({ _id: { $in: winnerIds } }).populate("infringements");
+        const populatedWinners = await this.userModel.find({ _id: { $in: winnerIds } }).populate("infringements");
 
         tournament.winners = winners;
 

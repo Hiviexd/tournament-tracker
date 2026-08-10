@@ -1,10 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import { NOTIFICATION_JOB_MODEL } from "../common/database.tokens";
+import type { INotificationJob } from "@tc/types/NotificationJob";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import type { Session } from "express-session";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
-import NotificationJob from "@tc/models/notificationJobModel";
 
 @Injectable()
 export class DevService {
+    constructor(
+        @Inject(NOTIFICATION_JOB_MODEL) private readonly notificationJobModel: Model<INotificationJob>,
+    ) {}
+
     private static readonly NOTIFICATION_LISTING_LIMIT = 30;
 
     getSession(session: Session) {
@@ -65,7 +71,7 @@ export class DevService {
 
         if (payload) {
             const payloadNeedle = payload.toLowerCase();
-            const allFilteredJobs = await NotificationJob.find(query).sort({ updatedAt: -1 }).select(projection);
+            const allFilteredJobs = await this.notificationJobModel.find(query).sort({ updatedAt: -1 }).select(projection);
             const payloadMatchedJobs = allFilteredJobs.filter((job) =>
                 JSON.stringify(job.payload || {})
                     .toLowerCase()
@@ -76,8 +82,8 @@ export class DevService {
             jobs = payloadMatchedJobs.slice(skip, skip + limit);
         } else {
             [jobs, total] = await Promise.all([
-                NotificationJob.find(query).sort({ updatedAt: -1 }).skip(skip).limit(limit).select(projection),
-                NotificationJob.countDocuments(query),
+                this.notificationJobModel.find(query).sort({ updatedAt: -1 }).skip(skip).limit(limit).select(projection),
+                this.notificationJobModel.countDocuments(query),
             ]);
         }
 

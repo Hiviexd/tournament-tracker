@@ -1,14 +1,11 @@
-import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-    InternalServerErrorException,
-    NotFoundException,
-} from "@nestjs/common";
+import { MESSAGE_MODEL, REVIEW_MODEL, TOURNAMENT_MODEL, USER_MODEL } from "../common/database.tokens";
+import type { IMessage } from "@tc/types/Message";
+import type { IReview } from "@tc/types/Review";
+import type { Model } from "mongoose";
+import { Inject, BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import type { Response } from "express";
 import type { Session } from "express-session";
 import { Types } from "mongoose";
-import Tournament from "@tc/models/tournamentModel";
 import UserService from "@tc/osu/UserService";
 import {
     TournamentQueryParams,
@@ -18,10 +15,8 @@ import {
     ITournament,
     ITournamentExtraLink,
 } from "@tc/types/Tournament";
-import { IUser, UserGroup } from "@tc/types/User";
-import User from "@tc/models/userModel";
+import type { IUser, IUserStatics, UserGroup } from "@tc/types/User";
 import { UploadService } from "../../services/UploadService";
-import Review from "@tc/models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
 import axios from "axios";
@@ -35,7 +30,6 @@ import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
-import Message from "@tc/models/messageModel";
 import utils from "@tc/utils/server";
 
 const defaultPopulate = [
@@ -246,8 +240,12 @@ export class TournamentsService {
     private readonly editFields: TournamentEditField[];
 
     constructor(
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+        @Inject(REVIEW_MODEL) private readonly reviewModel: Model<IReview>,
+        @Inject(MESSAGE_MODEL) private readonly messageModel: Model<IMessage>,
         private readonly tournamentService: TournamentDomainService,
-        private readonly uploadService: UploadService,
+        private readonly uploadService: UploadService
     ) {
         this.editFields = buildEditFields(tournamentService);
     }
@@ -276,7 +274,7 @@ export class TournamentsService {
         }
         if (mode) query.modes = { $in: [mode as GameMode] };
         if (host) {
-            const hostUser = await User.findByUsernameOrOsuId(host);
+            const hostUser = await this.userModel.findByUsernameOrOsuId(host);
             if (hostUser) query.hosts = { $in: [hostUser._id] };
         }
         if (type) query.type = type as TournamentType;
@@ -299,7 +297,7 @@ export class TournamentsService {
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         const [tournaments, total] = await Promise.all([
-            Tournament.aggregate([
+            this.tournamentModel.aggregate([
                 { $match: query },
                 {
                     $addFields: {
@@ -360,13 +358,13 @@ export class TournamentsService {
                 },
             ])
                 .exec()
-                .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
+                .then((tournaments: ITournament[]) => this.tournamentModel.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
                     tournaments.map((t) =>
-                        this.tournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user),
+                        this.tournamentService.sanitizeTournamentListing(this.tournamentModel.hydrate(t).toJSON(), user),
                     ),
                 ),
-            Tournament.countDocuments(query),
+            this.tournamentModel.countDocuments(query),
         ]);
 
         return {
@@ -380,7 +378,7 @@ export class TournamentsService {
     async getTournament(tournamentId: string, user: IUser | undefined) {
         const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
 
-        let tournament = await Tournament.findById(tournamentId)
+        let tournament = await this.tournamentModel.findById(tournamentId)
             .select(selectFields(isCommitteeOrAdmin))
             .populate(defaultPopulate)
             .orFail();
@@ -421,7 +419,7 @@ export class TournamentsService {
             throw new BadRequestException("At least one host is required");
         }
 
-        const hostsUnordered = await User.find({ _id: { $in: hostIdArray } });
+        const hostsUnordered = await this.userModel.find({ _id: { $in: hostIdArray } });
 
         if (hostsUnordered.length !== hostIdArray.length) {
             throw new BadRequestException("One or more host IDs are invalid");
@@ -476,7 +474,7 @@ export class TournamentsService {
                 throw new BadRequestException("One or more winner IDs are invalid");
             }
             if (winnerIds.length > 0) {
-                const foundWinners = await User.find({ _id: { $in: winnerIds } });
+                const foundWinners = await this.userModel.find({ _id: { $in: winnerIds } });
                 if (foundWinners.length !== winnerIds.length) {
                     throw new BadRequestException("One or more winner IDs are invalid");
                 }
@@ -494,7 +492,7 @@ export class TournamentsService {
         const lowerCaseTags = tags?.map((tag: string) => tag.toLowerCase());
         const cleanForumUrl = forumUrl?.split("?")[0] ?? forumUrl;
 
-        const tournament = new Tournament({
+        const tournament = new this.tournamentModel({
             name,
             hosts: hosts.map((host) => host._id),
             modes,
@@ -560,7 +558,7 @@ export class TournamentsService {
     }
 
     async assignReviewers(tournamentId: string, currentUser: IUser, session: Session) {
-        const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate("hosts winners").orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
@@ -587,12 +585,12 @@ export class TournamentsService {
         if (assignedReviewersType === "cc") {
             if (usersToExclude.length > 0) {
                 const excludeObjectIds = usersToExclude.map((id) => new Types.ObjectId(id));
-                reviewers = await User.find({
+                reviewers = await this.userModel.find({
                     groups: { $in: ["cc"] },
                     _id: { $nin: excludeObjectIds },
                 }).sort("username");
             } else {
-                reviewers = await User.find({ groups: { $in: ["cc"] } }).sort("username");
+                reviewers = await this.userModel.find({ groups: { $in: ["cc"] } }).sort("username");
             }
         } else {
             reviewers = await UserService.assignReviewers(assignedReviewersType, usersToExclude);
@@ -655,7 +653,7 @@ export class TournamentsService {
             throw new BadRequestException("reviewerId is required");
         }
 
-        const tournament = await Tournament.findById(tournamentId).populate("hosts winners").orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate("hosts winners").orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
@@ -672,7 +670,7 @@ export class TournamentsService {
             tournament.winners.forEach((winner: IUser) => usersToExclude.push(winner._id.toString()));
         }
 
-        const user = await User.findById(reviewerId);
+        const user = await this.userModel.findById(reviewerId);
         if (!user) {
             throw new BadRequestException("User not found");
         }
@@ -738,7 +736,7 @@ export class TournamentsService {
             throw new BadRequestException("reviewerId is required");
         }
 
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).orFail();
 
         if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
             throw new BadRequestException("Tournament has no assigned reviewers");
@@ -749,9 +747,9 @@ export class TournamentsService {
             throw new BadRequestException("Reviewer is not assigned to this tournament");
         }
 
-        const removedUser = await User.findById(reviewerId).orFail();
+        const removedUser = await this.userModel.findById(reviewerId).orFail();
         const updatedReviewers = tournament.assignedReviewers.filter((r: any) => r.toString() !== reviewerId);
-        await Tournament.findByIdAndUpdate(
+        await this.tournamentModel.findByIdAndUpdate(
             tournamentId,
             { assignedReviewers: updatedReviewers },
             { runValidators: true },
@@ -770,7 +768,7 @@ export class TournamentsService {
         );
 
         const now = new Date();
-        await Tournament.findByIdAndUpdate(tournamentId, {
+        await this.tournamentModel.findByIdAndUpdate(tournamentId, {
             $push: {
                 reviewHistory: {
                     user: removedUser._id,
@@ -802,7 +800,7 @@ export class TournamentsService {
     }
 
     async edit(tournamentId: string, body: Record<string, unknown>, currentUser: IUser, session: Session) {
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!tournament.isActive && !hasArchivedAllowedEdit(this.editFields, body)) {
             throw new BadRequestException("Cannot edit archived tournament!");
@@ -867,7 +865,7 @@ export class TournamentsService {
         const results = await Promise.all(
             uniqueTournamentIds.map(async (tournamentId) => {
                 try {
-                    const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+                    const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
                     if (status !== undefined) {
                         const statusResult = await this.tournamentService.updateStatus(
@@ -946,7 +944,7 @@ export class TournamentsService {
             throw new BadRequestException("Both old and new reviewer IDs are required");
         }
 
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).orFail();
 
         if (!tournament.assignedReviewers || tournament.assignedReviewers.length === 0) {
             throw new BadRequestException("Tournament has no assigned reviewers");
@@ -960,7 +958,7 @@ export class TournamentsService {
             throw new BadRequestException("Old reviewer is not assigned to this tournament");
         }
 
-        const newReviewer = await User.findById(newReviewerId).orFail();
+        const newReviewer = await this.userModel.findById(newReviewerId).orFail();
 
         const reviewerTypeMap: { [key in TournamentType]: UserGroup } = {
             tournament: "tc",
@@ -978,7 +976,7 @@ export class TournamentsService {
         const updatedReviewers = [...tournament.assignedReviewers];
         updatedReviewers[oldReviewerIndex] = newReviewerId as any;
 
-        await Tournament.findByIdAndUpdate(
+        await this.tournamentModel.findByIdAndUpdate(
             tournamentId,
             { assignedReviewers: updatedReviewers },
             { new: true, runValidators: true },
@@ -987,7 +985,7 @@ export class TournamentsService {
         newReviewer.inBag = false;
         await newReviewer.save();
 
-        const oldReviewer = await User.findById(oldReviewerId).orFail();
+        const oldReviewer = await this.userModel.findById(oldReviewerId).orFail();
         oldReviewer.inBag = true;
         await oldReviewer.save();
 
@@ -999,7 +997,7 @@ export class TournamentsService {
         );
 
         const now = new Date();
-        await Tournament.findByIdAndUpdate(tournamentId, {
+        await this.tournamentModel.findByIdAndUpdate(tournamentId, {
             $push: {
                 reviewHistory: {
                     $each: [
@@ -1051,7 +1049,7 @@ export class TournamentsService {
     ) {
         const { checklist, comment, vote } = body;
 
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!tournament.isActive) {
             throw new BadRequestException("Tournament is not active");
@@ -1073,7 +1071,7 @@ export class TournamentsService {
         let isNewReview = false;
 
         if (!review) {
-            review = new Review({
+            review = new this.reviewModel({
                 author: currentUser,
                 comment: comment ?? "",
                 vote,
@@ -1139,7 +1137,7 @@ export class TournamentsService {
         currentUser: IUser,
         session: Session,
     ) {
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
         if (!files?.length) {
             throw new BadRequestException("No files uploaded");
@@ -1176,7 +1174,7 @@ export class TournamentsService {
 
             const noteContent = `The following badge uploads failed the dimension requirements:\n\n${failedBadgesInfo}`;
 
-            const note = new Message({
+            const note = new this.messageModel({
                 author: currentUser,
                 content: noteContent,
                 isCommittee: true,
@@ -1261,7 +1259,7 @@ export class TournamentsService {
         customFilenames: { badgeId: string; filename: string }[] | undefined,
         res: Response,
     ) {
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
         const badges = tournament.badges;
 
         if (!badges?.length) {
@@ -1339,7 +1337,7 @@ export class TournamentsService {
     async updateThreadId(tournamentId: string, threadIdInput: string | undefined, currentUser: IUser, session: Session) {
         let threadId = threadIdInput;
 
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
         threadId = utils.extractDiscordThreadId(threadId ?? null) ?? undefined;
 
@@ -1391,9 +1389,9 @@ export class TournamentsService {
         currentUser: IUser,
         session: Session,
     ) {
-        const tournament = await Tournament.findById(tournamentId).populate(defaultPopulate).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).populate(defaultPopulate).orFail();
 
-        const note = new Message({
+        const note = new this.messageModel({
             author: currentUser,
             content,
             isCommittee: true,
@@ -1442,7 +1440,7 @@ export class TournamentsService {
     }
 
     async delete(tournamentId: string) {
-        const tournament = await Tournament.findById(tournamentId).orFail();
+        const tournament = await this.tournamentModel.findById(tournamentId).orFail();
 
         if (tournament.status !== "supportRequestReceived") {
             throw new BadRequestException(
@@ -1450,7 +1448,7 @@ export class TournamentsService {
             );
         }
 
-        await Tournament.findByIdAndDelete(tournamentId);
+        await this.tournamentModel.findByIdAndDelete(tournamentId);
 
         return { message: "Tournament deleted successfully!" };
     }

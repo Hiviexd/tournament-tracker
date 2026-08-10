@@ -1,13 +1,19 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { TEMPLATE_MODEL } from "../common/database.tokens";
+import type { ITemplate } from "@tc/types/Template";
+import type { Model } from "mongoose";
+import { Inject, BadRequestException, Injectable } from "@nestjs/common";
 import startCase from "lodash/startCase.js";
-import Template from "@tc/models/templateModel";
 import LogService from "@tc/models/LogService";
 import type { IUser } from "@tc/types/User";
 
 @Injectable()
 export class TemplatesService {
+    constructor(
+        @Inject(TEMPLATE_MODEL) private readonly templateModel: Model<ITemplate>,
+    ) {}
+
     async index() {
-        return await Template.find().sort({ category: 1, name: 1 });
+        return await this.templateModel.find().sort({ category: 1, name: 1 });
     }
 
     async create(body: { name?: string; content?: string; category?: string }, currentUser: IUser) {
@@ -25,7 +31,7 @@ export class TemplatesService {
             throw new BadRequestException("Category is required");
         }
 
-        const template = new Template({
+        const template = new this.templateModel({
             name,
             content,
             category: startCase(category.toLowerCase()),
@@ -52,7 +58,7 @@ export class TemplatesService {
     ) {
         const { name, content, category } = body;
 
-        const template = await Template.findById(id).orFail();
+        const template = await this.templateModel.findById(id).orFail();
 
         if (name !== undefined) {
             if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -90,7 +96,7 @@ export class TemplatesService {
     }
 
     async delete(id: string, currentUser: IUser) {
-        const template = await Template.findById(id).orFail();
+        const template = await this.templateModel.findById(id).orFail();
 
         await template.deleteOne();
 

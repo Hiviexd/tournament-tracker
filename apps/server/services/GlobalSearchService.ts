@@ -1,13 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import Tournament from "@tc/models/tournamentModel";
+import { ARTICLE_MODEL, RESOURCE_MODEL, TICKET_MODEL, TOURNAMENT_MODEL, VOTING_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import { ITournament } from "@tc/types/Tournament";
-import Voting from "@tc/models/votingModel";
 import { IVoting } from "@tc/types/Voting";
-import Ticket from "@tc/models/ticketModel";
 import { ITicket } from "@tc/types/Ticket";
-import Resource from "@tc/models/resourceModel";
 import { IResource } from "@tc/types/Resource";
-import Article from "@tc/models/articleModel";
 import { IArticle } from "@tc/types/Article";
 import utils from "@tc/utils/server";
 import { TicketDomainService } from "./TicketDomainService";
@@ -16,7 +13,14 @@ const DEFAULT_LIMIT = 5 as const;
 
 @Injectable()
 export class GlobalSearchService {
-    constructor(private readonly ticketService: TicketDomainService) {}
+    constructor(
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+        @Inject(VOTING_MODEL) private readonly votingModel: Model<IVoting>,
+        @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+        @Inject(RESOURCE_MODEL) private readonly resourceModel: Model<IResource>,
+        @Inject(ARTICLE_MODEL) private readonly articleModel: Model<IArticle>,
+        private readonly ticketService: TicketDomainService
+    ) {}
 
     /**
      * Search tournaments by title or tags or forum URL
@@ -29,7 +33,7 @@ export class GlobalSearchService {
         const effectiveLimit = searchType === "tournament" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
 
         return tournamentSearchQuery.$and
-            ? await Tournament.find({ $and: tournamentSearchQuery.$and })
+            ? await this.tournamentModel.find({ $and: tournamentSearchQuery.$and })
                   .select("_id name type status isActive")
                   .sort({ createdAt: -1 })
                   .limit(effectiveLimit)
@@ -68,7 +72,7 @@ export class GlobalSearchService {
             ...(isCommitteeOrAdmin ? {} : { isPublic: true, isActive: false }),
         };
 
-        return await Voting.find(query)
+        return await this.votingModel.find(query)
             .select("_id title category isActive duration createdAt assignedGroups")
             .sort({ createdAt: -1 })
             .limit(effectiveLimit);
@@ -93,7 +97,7 @@ export class GlobalSearchService {
             messageIds = await this.ticketService.searchMessageContent(searchContent);
         }
 
-        return await Ticket.find({
+        return await this.ticketModel.find({
             type: "ticket",
             $and: searchTerms.map((term) => ({
                 $or: [
@@ -126,7 +130,7 @@ export class GlobalSearchService {
             messageIds = await this.ticketService.searchMessageContent(searchContent);
         }
 
-        return await Ticket.find({
+        return await this.ticketModel.find({
             type: "report",
             $and: searchTerms.map((term) => ({
                 $or: [
@@ -153,7 +157,7 @@ export class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
-        return await Article.find({
+        return await this.articleModel.find({
             $and: searchTerms.map((term) => ({
                 $or: [
                     { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
@@ -179,7 +183,7 @@ export class GlobalSearchService {
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
-        return await Resource.find({
+        return await this.resourceModel.find({
             $and: searchTerms.map((term) => ({
                 $or: [{ title: { $regex: utils.escapeRegexPattern(term), $options: "i" } }],
             })),

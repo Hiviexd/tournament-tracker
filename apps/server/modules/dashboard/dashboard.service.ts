@@ -1,7 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import Tournament from "@tc/models/tournamentModel";
-import Voting from "@tc/models/votingModel";
-import Ticket from "@tc/models/ticketModel";
+import { TICKET_MODEL, TOURNAMENT_MODEL, VOTING_MODEL } from "../common/database.tokens";
+import type { ITicket } from "@tc/types/Ticket";
+import type { IVoting } from "@tc/types/Voting";
+import type { ITournament } from "@tc/types/Tournament";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import type { IDashboardResponse } from "@tc/types/Dashboard";
 import type { IUser } from "@tc/types/User";
 import { InfringementService } from "../../services/InfringementService";
@@ -55,10 +57,15 @@ const TICKET_POPULATE = [
 
 @Injectable()
 export class DashboardService {
-    constructor(private readonly infringementService: InfringementService) {}
+    constructor(
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+        @Inject(VOTING_MODEL) private readonly votingModel: Model<IVoting>,
+        @Inject(TICKET_MODEL) private readonly ticketModel: Model<ITicket>,
+        private readonly infringementService: InfringementService
+    ) {}
 
     async index(user: IUser | undefined): Promise<IDashboardResponse> {
-        const allReviewTournaments = await Tournament.find({
+        const allReviewTournaments = await this.tournamentModel.find({
             status: { $in: ["reviewOngoing", "changesRequested"] },
             isActive: true,
             type: user?.isTournamentCommittee ? "tournament" : "contest",
@@ -74,14 +81,14 @@ export class DashboardService {
             tournament.assignedReviewers?.some((reviewer: IUser) => reviewer.isActiveReviewer === false),
         );
 
-        const votings = await Voting.find({
+        const votings = await this.votingModel.find({
             isActive: true,
             assignedGroups: { $in: user?.groups },
         })
             .sort({ createdAt: -1 })
             .populate(VOTING_POPULATE);
 
-        const tickets = await Ticket.find({
+        const tickets = await this.ticketModel.find({
             type: "ticket",
             isActive: true,
             assignedGroup: { $in: user?.groups },
@@ -89,7 +96,7 @@ export class DashboardService {
             .sort({ createdAt: -1 })
             .populate(TICKET_POPULATE);
 
-        const reports = await Ticket.find({
+        const reports = await this.ticketModel.find({
             type: "report",
             isActive: true,
             assignedGroup: { $in: user?.groups },

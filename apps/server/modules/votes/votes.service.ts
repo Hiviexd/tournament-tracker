@@ -1,14 +1,10 @@
-import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-} from "@nestjs/common";
+import { USER_MODEL, VOTE_MODEL, VOTING_MODEL } from "../common/database.tokens";
+import type { IVote } from "@tc/types/Vote";
+import type { Model } from "mongoose";
+import { Inject, BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 import type { Session } from "express-session";
-import Voting from "@tc/models/votingModel";
-import Vote from "@tc/models/voteModel";
-import type { VotingQueryParams, VotingListQuery } from "@tc/types/Voting";
-import User from "@tc/models/userModel";
-import type { IUser } from "@tc/types/User";
+import type { VotingQueryParams, VotingListQuery, IVoting } from "@tc/types/Voting";
+import type { IUser, IUserStatics } from "@tc/types/User";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
 import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
@@ -42,8 +38,11 @@ const FILE_UPLOAD_CATEGORY = "votings";
 @Injectable()
 export class VotesService {
     constructor(
+        @Inject(VOTING_MODEL) private readonly votingModel: Model<IVoting>,
+        @Inject(VOTE_MODEL) private readonly voteModel: Model<IVote>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
         private readonly votingService: VotingDomainService,
-        private readonly uploadService: UploadService,
+        private readonly uploadService: UploadService
     ) {}
 
     async index(reqQuery: VotingListQuery, user: IUser | undefined) {
@@ -71,9 +70,9 @@ export class VotesService {
         const page = Number(reqQuery.page || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
 
-        const total = await Voting.countDocuments(dbQuery);
+        const total = await this.votingModel.countDocuments(dbQuery);
 
-        let votings = await Voting.find(dbQuery)
+        let votings = await this.votingModel.find(dbQuery)
             .skip(skip)
             .limit(DEFAULT_LIMIT)
             .sort({ createdAt: -1 })
@@ -96,7 +95,7 @@ export class VotesService {
     }
 
     async getVoting(votingId: string, user: IUser | undefined) {
-        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+        const voting = await this.votingModel.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         if ((!user || !user.isCommitteeOrAdmin) && (voting.isActive || !voting.isPublic)) {
             throw new ForbiddenException("You can only view concluded public votes");
@@ -145,7 +144,7 @@ export class VotesService {
             binaryStrictPassThreshold,
         } = body;
 
-        const assignedUsersCount = await User.countDocuments({
+        const assignedUsersCount = await this.userModel.countDocuments({
             groups: { $in: assignedGroups },
             isActiveVoter: true,
         });
@@ -159,7 +158,7 @@ export class VotesService {
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;
 
-        const voting = new Voting({
+        const voting = new this.votingModel({
             author,
             category,
             assignedGroups,
@@ -178,7 +177,7 @@ export class VotesService {
                 throw new BadRequestException("Missing target user ID");
             }
 
-            voting.targetUser = await User.findById(targetUserId).orFail();
+            voting.targetUser = await this.userModel.findById(targetUserId).orFail();
         }
 
         if (category === "tournament") {
@@ -277,7 +276,7 @@ export class VotesService {
     ) {
         const { data, comment } = body;
 
-        const voting = await Voting.findById(votingId).populate("votes").orFail();
+        const voting = await this.votingModel.findById(votingId).populate("votes").orFail();
 
         if (!voting.isActive) {
             throw new BadRequestException("Vote is not active!");
@@ -362,14 +361,14 @@ export class VotesService {
         let isNewVote = false;
 
         if (!existingVote) {
-            vote = new Vote({
+            vote = new this.voteModel({
                 author,
                 comment,
                 data,
             });
             isNewVote = true;
         } else {
-            vote = await Vote.findById(existingVote._id);
+            vote = await this.voteModel.findById(existingVote._id);
             if (vote) {
                 vote.comment = comment;
                 vote.data = data;
@@ -400,7 +399,7 @@ export class VotesService {
     }
 
     async toggleVotingStatus(votingId: string, session: Session) {
-        const voting = await Voting.findById(votingId).populate("votes").orFail();
+        const voting = await this.votingModel.findById(votingId).populate("votes").orFail();
 
         voting.isActive = !voting.isActive;
         voting.concludedAt = voting.isActive ? undefined : new Date();
@@ -470,14 +469,14 @@ export class VotesService {
             targetTournamentLink,
         } = body;
 
-        const voting = await Voting.findById(votingId).orFail();
+        const voting = await this.votingModel.findById(votingId).orFail();
 
         if (!voting.isActive) {
             if (category) {
                 voting.category = category as any;
 
                 if (category === "user" && targetUserId) {
-                    voting.targetUser = await User.findById(targetUserId).orFail();
+                    voting.targetUser = await this.userModel.findById(targetUserId).orFail();
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
                 } else if (category === "tournament" && targetTournamentName && targetTournamentLink) {
@@ -517,7 +516,7 @@ export class VotesService {
     }
 
     async deleteVoting(votingId: string, session: Session) {
-        const voting = await Voting.findById(votingId).orFail();
+        const voting = await this.votingModel.findById(votingId).orFail();
 
         if (!voting.isActive) {
             throw new BadRequestException("Cannot delete concluded votes!");
@@ -550,7 +549,7 @@ export class VotesService {
     }
 
     async toggleVotingPublic(votingId: string, session: Session) {
-        const voting = await Voting.findById(votingId).orFail();
+        const voting = await this.votingModel.findById(votingId).orFail();
 
         if (voting.isActive) {
             throw new BadRequestException("Cannot change publicity of active votes");
@@ -584,7 +583,7 @@ export class VotesService {
     }
 
     async clearVotes(votingId: string, session: Session) {
-        const voting = await Voting.findById(votingId).orFail();
+        const voting = await this.votingModel.findById(votingId).orFail();
 
         if (!voting.isActive) {
             throw new BadRequestException("Cannot handle concluded votes!");
@@ -616,7 +615,7 @@ export class VotesService {
     }
 
     async toggleAbstention(votingId: string, user: IUser, session: Session) {
-        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+        const voting = await this.votingModel.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         if (!voting.isActive) {
             throw new BadRequestException("Cannot handle concluded votes!");

@@ -9,7 +9,9 @@ import session from "express-session";
 import request from "supertest";
 import config from "@tc/config";
 import User from "@tc/models/userModel";
-import User from "@tc/models/userModel";
+import ApiKey from "@tc/models/apiKeyModel";
+import Infringement from "@tc/models/infringementModel";
+import Tournament from "@tc/models/tournamentModel";
 import type { ApiScope } from "@tc/types/ApiKey";
 import type { Request, Response } from "express";
 import { AuthService } from "../../modules/auth/auth.service";
@@ -178,7 +180,7 @@ describe("auth parity checklist", () => {
             });
 
             // Bind bridge the same way KeysModule.onModuleInit does
-            const bridge = new ApiKeyService();
+            const bridge = new ApiKeyService(User, ApiKey);
             bindApiKeyService(bridge);
 
             const req = mockReq({
@@ -222,14 +224,17 @@ describe("auth parity checklist", () => {
             const rawBody = Buffer.from('{"id":"ticket-1"}');
             const signature = crypto.createHmac("sha256", "parity-secret").update(rawBody).digest("hex");
 
-            expect(new EnchantSidebarService().verifySignature(rawBody, signature)).toBe(true);
-            expect(new EnchantSidebarService().verifySignature(rawBody, "deadbeef")).toBe(false);
-            expect(new EnchantSidebarService().verifySignature(undefined, signature)).toBe(false);
+            const sidebar = new EnchantSidebarService(Infringement, Tournament);
+            expect(sidebar.verifySignature(rawBody, signature)).toBe(true);
+            expect(sidebar.verifySignature(rawBody, "deadbeef")).toBe(false);
+            expect(sidebar.verifySignature(undefined, signature)).toBe(false);
         });
 
         it("EnchantHmacGuard rejects bad signatures when enabled", () => {
             config.enchant = { enabled: true, sidebarSecret: "parity-secret" };
-            const guard = new EnchantHmacGuard(new EnchantService(new EnchantSidebarService()));
+            const guard = new EnchantHmacGuard(
+                new EnchantService(new EnchantSidebarService(Infringement, Tournament)),
+            );
             const rawBody = Buffer.from('{"id":"ticket-1"}');
             const context = {
                 switchToHttp: () => ({

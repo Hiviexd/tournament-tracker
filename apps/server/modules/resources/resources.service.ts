@@ -1,16 +1,21 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import Resource from "@tc/models/resourceModel";
+import { RESOURCE_MODEL, USER_MODEL } from "../common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import LogService from "@tc/models/LogService";
-import User from "@tc/models/userModel";
 import utils from "@tc/utils/server";
-import type { ResourceCategory } from "@tc/types/Resource";
-import type { IUser } from "@tc/types/User";
+import type { ResourceCategory, IResource } from "@tc/types/Resource";
+import type { IUser, IUserStatics } from "@tc/types/User";
 
 const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl country" }];
 const DEFAULT_LIMIT = 20;
 
 @Injectable()
 export class ResourcesService {
+    constructor(
+        @Inject(RESOURCE_MODEL) private readonly resourceModel: Model<IResource>,
+        @Inject(USER_MODEL) private readonly userModel: IUserStatics,
+    ) {}
+
     async index(queryParams: {
         search?: string;
         author?: string;
@@ -28,7 +33,7 @@ export class ResourcesService {
         }
 
         if (author) {
-            const user = await User.findByUsernameOrOsuId(author);
+            const user = await this.userModel.findByUsernameOrOsuId(author);
             if (user) query.author = user._id;
         }
         if (category) {
@@ -41,7 +46,7 @@ export class ResourcesService {
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         const [resources, total] = await Promise.all([
-            Resource.aggregate([
+            this.resourceModel.aggregate([
                 { $match: query },
                 {
                     $addFields: {
@@ -65,8 +70,8 @@ export class ResourcesService {
                 { $project: { categoryOrder: 0 } },
             ])
                 .exec()
-                .then((docs) => Resource.populate(docs, DEFAULT_POPULATE)),
-            Resource.countDocuments(query),
+                .then((docs) => this.resourceModel.populate(docs, DEFAULT_POPULATE)),
+            this.resourceModel.countDocuments(query),
         ]);
 
         return {
@@ -99,7 +104,7 @@ export class ResourcesService {
             throw new BadRequestException("Resource link must be a valid URL");
         }
 
-        const resource = await Resource.create({
+        const resource = await this.resourceModel.create({
             title,
             description,
             category,
@@ -134,7 +139,7 @@ export class ResourcesService {
     ) {
         const { title, description, category, link, author } = body;
 
-        const resource = await Resource.findById(id).populate(DEFAULT_POPULATE);
+        const resource = await this.resourceModel.findById(id).populate(DEFAULT_POPULATE);
         if (!resource) {
             throw new NotFoundException("Resource not found");
         }
@@ -167,7 +172,7 @@ export class ResourcesService {
     }
 
     async delete(id: string, user: IUser) {
-        const resource = await Resource.findById(id);
+        const resource = await this.resourceModel.findById(id);
         if (!resource) {
             throw new NotFoundException("Resource not found");
         }
