@@ -1,9 +1,11 @@
+import { Injectable } from "@nestjs/common";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "@tc/config";
 import { IAttachment } from "@tc/types/Attachment";
 import Attachment from "@tc/models/attachmentModel";
 
-class UploadService {
+@Injectable()
+export class UploadService {
     private client: S3Client;
 
     constructor() {
@@ -88,5 +90,3 @@ class UploadService {
         }
     }
 }
-
-export default new UploadService();

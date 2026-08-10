@@ -4,7 +4,7 @@ import Voting from "@tc/models/votingModel";
 import Ticket from "@tc/models/ticketModel";
 import type { IDashboardResponse } from "@tc/types/Dashboard";
 import type { IUser } from "@tc/types/User";
-import InfringementService from "../../services/InfringementService";
+import { InfringementService } from "../../services/InfringementService";
 
 const TOURNAMENT_POPULATE = [
     {
@@ -55,6 +55,8 @@ const TICKET_POPULATE = [
 
 @Injectable()
 export class DashboardService {
+    constructor(private readonly infringementService: InfringementService) {}
+
     async index(user: IUser | undefined): Promise<IDashboardResponse> {
         const allReviewTournaments = await Tournament.find({
             status: { $in: ["reviewOngoing", "changesRequested"] },
@@ -95,7 +97,7 @@ export class DashboardService {
             .sort({ createdAt: -1 })
             .populate(TICKET_POPULATE);
 
-        const filteredUsers = await InfringementService.getInfringementsNeedingEmail();
+        const filteredUsers = await this.infringementService.getInfringementsNeedingEmail();
 
         return {
             tournaments: userAssignedTournaments,

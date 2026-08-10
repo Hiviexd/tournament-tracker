@@ -3,7 +3,7 @@ import startCase from "lodash/startCase.js";
 import type { Session } from "express-session";
 import dayjs from "@tc/utils/dayjs";
 import { InfringementType, TIME_BASED_TYPES, WatchlistQuery } from "@tc/types/Infringement";
-import InfringementService from "../../services/InfringementService";
+import { InfringementService } from "../../services/InfringementService";
 import LogService from "@tc/models/LogService";
 import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
 import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
@@ -21,13 +21,15 @@ function rethrowServiceError(err: unknown): never {
 
 @Injectable()
 export class InfringementsService {
+    constructor(private readonly infringementService: InfringementService) {}
+
     async getWatchlist(queryParams: Record<string, string | undefined>) {
         const query: WatchlistQuery = {
             infringementType: queryParams.infringementType as WatchlistQuery["infringementType"],
             page: queryParams.page ? parseInt(queryParams.page, 10) : undefined,
             limit: queryParams.limit ? parseInt(queryParams.limit, 10) : undefined,
         };
-        return await InfringementService.getWatchlist(query);
+        return await this.infringementService.getWatchlist(query);
     }
 
     async addInfringement(
@@ -57,7 +59,7 @@ export class InfringementsService {
             const addedInfringements: { infringement: any; user: any }[] = [];
 
             for (const userId of validUserIds) {
-                const result = await InfringementService.addInfringement(userId, {
+                const result = await this.infringementService.addInfringement(userId, {
                     type,
                     startDate,
                     endDate,
@@ -161,7 +163,7 @@ export class InfringementsService {
         const { userId, startDate, endDate, reason, threadId, enchantUrl } = body;
 
         try {
-            const { infringement, user } = await InfringementService.updateInfringement(infringementId, userId, {
+            const { infringement, user } = await this.infringementService.updateInfringement(infringementId, userId, {
                 startDate,
                 endDate,
                 reason,

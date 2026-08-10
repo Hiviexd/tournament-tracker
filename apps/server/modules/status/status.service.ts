@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { StatusInfo } from "@tc/types/Status";
 import { VersionInfo } from "@tc/types/Version";
-import VersionService from "../../services/VersionService";
+import { VersionService } from "../../services/VersionService";
 import OsuApiHealthService from "@tc/osu/OsuApiHealthService";
 
 @Injectable()
 export class StatusService {
+    constructor(private readonly versionService: VersionService) {}
+
     getStatus(): StatusInfo {
         return {
             version: this.buildVersionInfo(),
@@ -15,12 +17,12 @@ export class StatusService {
 
     private buildVersionInfo(): VersionInfo {
         const versionData: VersionInfo = {
-            hash: VersionService.getGitHash(),
-            message: VersionService.getGitMessage(),
+            hash: this.versionService.getGitHash(),
+            message: this.versionService.getGitMessage(),
         };
 
         if (process.env.NODE_ENV === "preview") {
-            const branchStatus = VersionService.getBranchStatus();
+            const branchStatus = this.versionService.getBranchStatus();
             if (branchStatus) {
                 versionData.branchStatus = branchStatus;
             }

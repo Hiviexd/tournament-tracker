@@ -18,7 +18,7 @@ import config from "@tc/config";
 import utils from "@tc/utils/server";
 import { TicketService } from "../../services/TicketService";
 import capitalize from "lodash/capitalize.js";
-import UploadService from "../../services/UploadService";
+import { UploadService } from "../../services/UploadService";
 import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 
 const DEFAULT_POPULATE = [
@@ -43,7 +43,10 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 
 @Injectable()
 export class TicketsService {
-    constructor(private readonly ticketService: TicketService) {}
+    constructor(
+        private readonly ticketService: TicketService,
+        private readonly uploadService: UploadService,
+    ) {}
 
     async index(
         queryParams: {
@@ -258,7 +261,7 @@ export class TicketsService {
             attachments: [],
         });
 
-        initialMessage.attachments = await UploadService.handleFileUploads(
+        initialMessage.attachments = await this.uploadService.handleFileUploads(
             files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,
@@ -349,7 +352,7 @@ export class TicketsService {
             attachments: [],
         });
 
-        newMessage.attachments = await UploadService.handleFileUploads(
+        newMessage.attachments = await this.uploadService.handleFileUploads(
             files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,

@@ -20,7 +20,7 @@ import {
 } from "@tc/types/Tournament";
 import { IUser, UserGroup } from "@tc/types/User";
 import User from "@tc/models/userModel";
-import UploadService from "../../services/UploadService";
+import { UploadService } from "../../services/UploadService";
 import Review from "@tc/models/reviewModel";
 import sharp from "sharp";
 import archiver from "archiver";
@@ -245,7 +245,10 @@ function throwEditError(status: 400 | 403, error: string): never {
 export class TournamentsService {
     private readonly editFields: TournamentEditField[];
 
-    constructor(private readonly tournamentService: TournamentService) {
+    constructor(
+        private readonly tournamentService: TournamentService,
+        private readonly uploadService: UploadService,
+    ) {
         this.editFields = buildEditFields(tournamentService);
     }
 
@@ -1180,7 +1183,7 @@ export class TournamentsService {
                 isNote: true,
             });
 
-            note.attachments = await UploadService.handleFileUploads(
+            note.attachments = await this.uploadService.handleFileUploads(
                 invalidFiles.map((item) => item.file),
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,
@@ -1225,7 +1228,7 @@ export class TournamentsService {
         }
 
         if (validFiles.length > 0) {
-            const badges = await UploadService.handleFileUploads(
+            const badges = await this.uploadService.handleFileUploads(
                 validFiles,
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,
@@ -1398,7 +1401,7 @@ export class TournamentsService {
         });
 
         if (files?.length) {
-            note.attachments = await UploadService.handleFileUploads(
+            note.attachments = await this.uploadService.handleFileUploads(
                 files,
                 FILE_UPLOAD_CATEGORY,
                 tournament.id,

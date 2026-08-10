@@ -15,7 +15,7 @@ import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 import config from "@tc/config";
 import LogService from "@tc/models/LogService";
 import utils from "@tc/utils/server";
-import UploadService from "../../services/UploadService";
+import { UploadService } from "../../services/UploadService";
 import { VotingService } from "../../services/VotingService";
 import { generateDiscordVotingResults } from "@tc/notifications/votingResults";
 
@@ -41,7 +41,10 @@ const FILE_UPLOAD_CATEGORY = "votings";
 
 @Injectable()
 export class VotesService {
-    constructor(private readonly votingService: VotingService) {}
+    constructor(
+        private readonly votingService: VotingService,
+        private readonly uploadService: UploadService,
+    ) {}
 
     async index(reqQuery: VotingListQuery, user: IUser | undefined) {
         const dbQuery: VotingQueryParams = {};
@@ -199,7 +202,7 @@ export class VotesService {
         }
 
         if (files?.length) {
-            voting.attachments = await UploadService.handleFileUploads(
+            voting.attachments = await this.uploadService.handleFileUploads(
                 files,
                 FILE_UPLOAD_CATEGORY,
                 voting.id,

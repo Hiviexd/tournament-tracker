@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { Types } from "mongoose";
 import dayjs from "@tc/utils/dayjs";
 import Infringement from "@tc/models/infringementModel";
@@ -11,7 +12,8 @@ import {
 } from "@tc/types/Infringement";
 import utils from "@tc/utils/server";
 
-class InfringementService {
+@Injectable()
+export class InfringementService {
     public async addInfringement(
         userId: string,
         data: {
@@ -240,5 +242,3 @@ class InfringementService {
         return await Infringement.findActiveForUser(userId);
     }
 }
-
-export default new InfringementService();
