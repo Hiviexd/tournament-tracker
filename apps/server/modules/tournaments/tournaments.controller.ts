@@ -27,10 +27,27 @@ import {
     RequireScopesGuard,
 } from "../guards/auth.guards";
 import {
+    TournamentBulkEditBodySchema,
     TournamentCreateBodySchema,
+    TournamentCreateNoteBodySchema,
+    TournamentDownloadBadgesBodySchema,
+    TournamentEditBodySchema,
     TournamentIdParamSchema,
     TournamentIndexQuerySchema,
+    TournamentReassignReviewerBodySchema,
+    TournamentReviewerIdBodySchema,
+    TournamentSubmitReviewBodySchema,
+    TournamentUpdateThreadIdBodySchema,
+    type TournamentBulkEditBody,
+    type TournamentCreateBody,
+    type TournamentCreateNoteBody,
+    type TournamentDownloadBadgesBody,
+    type TournamentEditBody,
     type TournamentIndexQuery,
+    type TournamentReassignReviewerBody,
+    type TournamentReviewerIdBody,
+    type TournamentSubmitReviewBody,
+    type TournamentUpdateThreadIdBody,
 } from "./dto/tournaments.dto";
 import { defaultFilesInterceptor, tournamentBadgeFilesInterceptor } from "./tournaments-upload";
 import { TournamentsService } from "./tournaments.service";
@@ -54,7 +71,7 @@ export class TournamentsController {
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     create(
-        @Body(ZodPipe(TournamentCreateBodySchema)) body: Record<string, unknown>,
+        @Body(ZodPipe(TournamentCreateBodySchema)) body: TournamentCreateBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -64,12 +81,7 @@ export class TournamentsController {
     @Patch("bulkEdit")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
     bulkEdit(
-        @Body()
-        body: {
-            tournamentIds?: string[];
-            status?: import("@tc/types/Tournament").TournamentStatus;
-            isActive?: boolean;
-        },
+        @Body(ZodPipe(TournamentBulkEditBodySchema)) body: TournamentBulkEditBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -91,7 +103,7 @@ export class TournamentsController {
     @UseGuards(IsLoggedInGuard)
     edit(
         @Param("tournamentId") tournamentId: string,
-        @Body() body: Record<string, unknown>,
+        @Body(ZodPipe(TournamentEditBodySchema)) body: TournamentEditBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -112,7 +124,7 @@ export class TournamentsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     reassignReviewer(
         @Param("tournamentId") tournamentId: string,
-        @Body() body: { oldReviewerId?: string; newReviewerId?: string },
+        @Body(ZodPipe(TournamentReassignReviewerBodySchema)) body: TournamentReassignReviewerBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -123,29 +135,29 @@ export class TournamentsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     addReviewer(
         @Param("tournamentId") tournamentId: string,
-        @Body("reviewerId") reviewerId: string | undefined,
+        @Body(ZodPipe(TournamentReviewerIdBodySchema)) body: TournamentReviewerIdBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.tournamentsService.addReviewer(tournamentId, reviewerId, currentUser, req.session);
+        return this.tournamentsService.addReviewer(tournamentId, body.reviewerId, currentUser, req.session);
     }
 
     @Patch(":tournamentId/removeReviewer")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     removeReviewer(
         @Param("tournamentId") tournamentId: string,
-        @Body("reviewerId") reviewerId: string | undefined,
+        @Body(ZodPipe(TournamentReviewerIdBodySchema)) body: TournamentReviewerIdBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.tournamentsService.removeReviewer(tournamentId, reviewerId, currentUser, req.session);
+        return this.tournamentsService.removeReviewer(tournamentId, body.reviewerId, currentUser, req.session);
     }
 
     @Patch(":tournamentId/submitReview")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     submitReview(
         @Param("tournamentId") tournamentId: string,
-        @Body() body: { checklist?: any[]; comment?: string; vote?: string },
+        @Body(ZodPipe(TournamentSubmitReviewBodySchema)) body: TournamentSubmitReviewBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -168,7 +180,7 @@ export class TournamentsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     async downloadBadges(
         @Param("tournamentId") tournamentId: string,
-        @Body() body: { badgeId: string; filename: string }[],
+        @Body(ZodPipe(TournamentDownloadBadgesBodySchema)) body: TournamentDownloadBadgesBody,
         @Res({ passthrough: false }) res: Response,
     ): Promise<void> {
         await this.tournamentsService.downloadBadges(tournamentId, body, res);
@@ -178,11 +190,11 @@ export class TournamentsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     updateThreadId(
         @Param("tournamentId") tournamentId: string,
-        @Body("threadId") threadId: string | undefined,
+        @Body(ZodPipe(TournamentUpdateThreadIdBodySchema)) body: TournamentUpdateThreadIdBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.tournamentsService.updateThreadId(tournamentId, threadId, currentUser, req.session);
+        return this.tournamentsService.updateThreadId(tournamentId, body.threadId, currentUser, req.session);
     }
 
     @Post(":tournamentId/createNote")
@@ -190,12 +202,12 @@ export class TournamentsController {
     @UseInterceptors(defaultFilesInterceptor)
     createNote(
         @Param("tournamentId") tournamentId: string,
-        @Body("content") content: string | undefined,
+        @Body(ZodPipe(TournamentCreateNoteBodySchema)) body: TournamentCreateNoteBody,
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
-        return this.tournamentsService.createNote(tournamentId, content, files, currentUser, req.session);
+        return this.tournamentsService.createNote(tournamentId, body.content, files, currentUser, req.session);
     }
 
     @Delete(":tournamentId/delete")
