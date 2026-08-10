@@ -1,11 +1,17 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
-import type { ResourceCategory } from "@tc/types/Resource";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsCommitteeGuard, IsLoggedInGuard, RequireScopesGuard } from "../guards/auth.guards";
-import { ResourcesIndexQuerySchema, type ResourcesIndexQuery } from "./dto/resources.dto";
+import {
+    ResourcesCreateBodySchema,
+    ResourcesEditBodySchema,
+    ResourcesIndexQuerySchema,
+    type ResourcesCreateBody,
+    type ResourcesEditBody,
+    type ResourcesIndexQuery,
+} from "./dto/resources.dto";
 import { ResourcesService } from "./resources.service";
 
 @ApiTags("Resources")
@@ -24,15 +30,7 @@ export class ResourcesController {
     @Post("create")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     create(
-        @Body()
-        body: {
-            title?: string;
-            description?: string;
-            category?: ResourceCategory;
-            type?: string;
-            link?: string;
-            author?: string;
-        },
+        @Body(ZodPipe(ResourcesCreateBodySchema)) body: ResourcesCreateBody,
         @CurrentUser() currentUser: IUser,
     ) {
         return this.resourcesService.create(body, currentUser);
@@ -42,14 +40,7 @@ export class ResourcesController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     edit(
         @Param("id") id: string,
-        @Body()
-        body: {
-            title?: string;
-            description?: string;
-            category?: ResourceCategory;
-            link?: string;
-            author?: string;
-        },
+        @Body(ZodPipe(ResourcesEditBodySchema)) body: ResourcesEditBody,
         @CurrentUser() currentUser: IUser,
     ) {
         return this.resourcesService.edit(id, body, currentUser);

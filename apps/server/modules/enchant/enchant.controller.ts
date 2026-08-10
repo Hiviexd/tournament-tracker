@@ -1,5 +1,7 @@
 import { Body, Controller, Header, Post, UseGuards } from "@nestjs/common";
 import config from "@tc/config";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
+import { EnchantSidebarBodySchema, type EnchantSidebarBody } from "./dto/enchant.dto";
 import { EnchantHmacGuard } from "./enchant-hmac.guard";
 import { EnchantService } from "./enchant.service";
 
@@ -10,12 +12,12 @@ export class EnchantController {
     @Post("sidebar")
     @UseGuards(EnchantHmacGuard)
     @Header("Content-Type", "text/html")
-    async sidebar(@Body() body: { id?: unknown }): Promise<string> {
+    async sidebar(@Body(ZodPipe(EnchantSidebarBodySchema)) body: EnchantSidebarBody): Promise<string> {
         if (!config.enchant?.enabled) {
             return "";
         }
 
-        const ticketId = typeof body?.id === "string" ? body.id : "";
+        const ticketId = body.id ?? "";
         if (!ticketId) {
             return "";
         }

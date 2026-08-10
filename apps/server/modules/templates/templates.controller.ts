@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsCommitteeGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import {
+    TemplatesCreateBodySchema,
+    TemplatesUpdateBodySchema,
+    type TemplatesCreateBody,
+    type TemplatesUpdateBody,
+} from "./dto/templates.dto";
 import { TemplatesService } from "./templates.service";
 
 @Controller("templates")
@@ -16,7 +23,7 @@ export class TemplatesController {
 
     @Post("create")
     create(
-        @Body() body: { name?: string; content?: string; category?: string },
+        @Body(ZodPipe(TemplatesCreateBodySchema)) body: TemplatesCreateBody,
         @CurrentUser() currentUser: IUser,
     ) {
         return this.templatesService.create(body, currentUser);
@@ -25,7 +32,7 @@ export class TemplatesController {
     @Put(":id/update")
     update(
         @Param("id") id: string,
-        @Body() body: { name?: string; content?: string; category?: string },
+        @Body(ZodPipe(TemplatesUpdateBodySchema)) body: TemplatesUpdateBody,
         @CurrentUser() currentUser: IUser,
     ) {
         return this.templatesService.update(id, body, currentUser);

@@ -11,10 +11,11 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import type { Request } from "express";
-import type { ApiScope } from "@tc/types/ApiKey";
 import type { IUser } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsDevGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { KeysCreateBodySchema, KeysUpdateBodySchema, type KeysCreateBody, type KeysUpdateBody } from "./dto/keys.dto";
 import { KeysService } from "./keys.service";
 
 @Controller("keys")
@@ -37,7 +38,7 @@ export class KeysController {
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(IsLoggedInGuard)
     create(
-        @Body() body: { name?: string; scopes?: ApiScope[]; isElevated?: boolean },
+        @Body(ZodPipe(KeysCreateBodySchema)) body: KeysCreateBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {
@@ -47,7 +48,7 @@ export class KeysController {
     @Put("update")
     @UseGuards(IsLoggedInGuard)
     update(
-        @Body() body: { scopes?: ApiScope[] },
+        @Body(ZodPipe(KeysUpdateBodySchema)) body: KeysUpdateBody,
         @CurrentUser() currentUser: IUser,
         @Req() req: Request,
     ) {

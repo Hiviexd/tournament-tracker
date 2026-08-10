@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsDevGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import { DevSessionUpdateBodySchema, type DevSessionUpdateBody } from "./dto/dev.dto";
 import { DevService } from "./dev.service";
 
 @Controller("dev")
@@ -15,7 +17,7 @@ export class DevController {
 
     @Post("session/update")
     updateSession(
-        @Body() body: { mongoId?: string; osuId?: number; username?: string },
+        @Body(ZodPipe(DevSessionUpdateBodySchema)) body: DevSessionUpdateBody,
         @Req() req: Request,
     ) {
         return this.devService.updateSession(req.session, body);

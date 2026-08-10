@@ -1,7 +1,13 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
-import type { InfringementType } from "@tc/types/Infringement";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import { IsCommitteeGuard, IsLoggedInGuard } from "../guards/auth.guards";
+import {
+    InfringementsAddBodySchema,
+    InfringementsUpdateBodySchema,
+    type InfringementsAddBody,
+    type InfringementsUpdateBody,
+} from "./dto/infringements.dto";
 import { InfringementsService } from "./infringements.service";
 
 @Controller("infringements")
@@ -17,16 +23,7 @@ export class InfringementsController {
     @Post("add")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     addInfringement(
-        @Body()
-        body: {
-            userIds?: string | string[];
-            type: InfringementType;
-            startDate?: string | Date;
-            endDate?: string | Date;
-            reason: string;
-            threadId?: string;
-            enchantUrl?: string;
-        },
+        @Body(ZodPipe(InfringementsAddBodySchema)) body: InfringementsAddBody,
         @Req() req: Request,
     ) {
         return this.infringementsService.addInfringement(body, req.session);
@@ -36,15 +33,7 @@ export class InfringementsController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     updateInfringement(
         @Param("infringementId") infringementId: string,
-        @Body()
-        body: {
-            userId: string;
-            startDate?: string | Date;
-            endDate?: string | Date;
-            reason?: string;
-            threadId?: string;
-            enchantUrl?: string;
-        },
+        @Body(ZodPipe(InfringementsUpdateBodySchema)) body: InfringementsUpdateBody,
         @Req() req: Request,
     ) {
         return this.infringementsService.updateInfringement(infringementId, body, req.session);
