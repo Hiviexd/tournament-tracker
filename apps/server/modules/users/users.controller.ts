@@ -11,8 +11,9 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import type { IUser, UpdateBadgeRequest, UpdateUserGroupsRequest, UserListQuery } from "@tc/types/User";
+import type { IUser, UserListQuery } from "@tc/types/User";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { ZodPipe } from "../common/pipes/zod-validation.pipe";
 import {
     IsAdminGuard,
     IsCommitteeGuard,
@@ -20,6 +21,18 @@ import {
     OptionalAuthGuard,
     RequireScopesGuard,
 } from "../guards/auth.guards";
+import {
+    UsersCreateBodySchema,
+    UsersUpdateBadgeBodySchema,
+    UsersUpdateDiscordIdBodySchema,
+    UsersUpdateEmailBodySchema,
+    UsersUpdateGroupsBodySchema,
+    type UsersCreateBody,
+    type UsersUpdateBadgeBody,
+    type UsersUpdateDiscordIdBody,
+    type UsersUpdateEmailBody,
+    type UsersUpdateGroupsBody,
+} from "./dto/users.dto";
 import { UsersService } from "./users.service";
 
 @ApiTags("Users")
@@ -56,8 +69,8 @@ export class UsersController {
 
     @Post("create")
     @UseGuards(IsLoggedInGuard)
-    create(@Body("userInput") userInput: string | undefined, @Req() req: Request) {
-        return this.usersService.create(req.session.accessToken!, userInput, req.session);
+    create(@Body(ZodPipe(UsersCreateBodySchema)) body: UsersCreateBody, @Req() req: Request) {
+        return this.usersService.create(req.session.accessToken!, body.userInput, req.session);
     }
 
     @Patch("cycleBag")
@@ -94,7 +107,7 @@ export class UsersController {
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
     updateUserGroups(
         @Param("userId") userId: string,
-        @Body() body: UpdateUserGroupsRequest,
+        @Body(ZodPipe(UsersUpdateGroupsBodySchema)) body: UsersUpdateGroupsBody,
         @Req() req: Request,
     ) {
         return this.usersService.updateUserGroups(userId, body.group, body.join, req.session);
@@ -102,7 +115,11 @@ export class UsersController {
 
     @Patch(":userId/updateBadge")
     @UseGuards(IsLoggedInGuard, IsAdminGuard)
-    updateBadge(@Param("userId") userId: string, @Body() body: UpdateBadgeRequest, @Req() req: Request) {
+    updateBadge(
+        @Param("userId") userId: string,
+        @Body(ZodPipe(UsersUpdateBadgeBodySchema)) body: UsersUpdateBadgeBody,
+        @Req() req: Request,
+    ) {
         return this.usersService.updateBadge(userId, body.increment, req.session);
     }
 
@@ -116,16 +133,20 @@ export class UsersController {
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
     updateDiscordId(
         @Param("userId") userId: string,
-        @Body("discordId") discordId: string,
+        @Body(ZodPipe(UsersUpdateDiscordIdBodySchema)) body: UsersUpdateDiscordIdBody,
         @Req() req: Request,
     ) {
-        return this.usersService.updateDiscordId(userId, discordId, req.session);
+        return this.usersService.updateDiscordId(userId, body.discordId, req.session);
     }
 
     @Patch(":userId/updateEmail")
     @UseGuards(IsLoggedInGuard, IsCommitteeGuard)
-    updateEmail(@Param("userId") userId: string, @Body("email") email: string, @Req() req: Request) {
-        return this.usersService.updateEmail(userId, email, req.session);
+    updateEmail(
+        @Param("userId") userId: string,
+        @Body(ZodPipe(UsersUpdateEmailBodySchema)) body: UsersUpdateEmailBody,
+        @Req() req: Request,
+    ) {
+        return this.usersService.updateEmail(userId, body.email, req.session);
     }
 
     @Get(":userId/reviewStats")
