@@ -13,6 +13,9 @@
 #
 # Skip deploy by including `--skip-deploy` in the commit message.
 #
+# Manual runs can set `ref` to a commit SHA, tag, or branch to build and deploy
+# that revision (rollback / pin) instead of the workflow tip.
+#
 # VPS prerequisites: Docker + Compose, git clone at DEPLOY_PATH with config.json
 # and checklist.json present (gitignored). Image refs are written to .images.env.
 
@@ -23,6 +26,10 @@ on:
         inputs:
             reason:
                 description: Reason for production deployment
+                required: false
+                type: string
+            ref:
+                description: Commit SHA, tag, or branch to deploy (empty = workflow tip)
                 required: false
                 type: string
     push:
@@ -37,10 +44,12 @@ env:
     MODE: production
 
 jobs:
-    check-deploy:
+    prepare:
         runs-on: ubuntu-latest
         outputs:
             skip: ${{ steps.skip_check.outputs.skip }}
+            deploy_sha: ${{ steps.resolve.outputs.deploy_sha }}
+            short_sha: ${{ steps.resolve.outputs.short_sha }}
         steps:
             - name: Check for --skip-deploy flag
               id: skip_check
@@ -55,9 +64,28 @@ jobs:
                     echo "skip=false" >> "$GITHUB_OUTPUT"
                   fi
 
+            - name: Checkout deploy revision
+              if: steps.skip_check.outputs.skip == 'false'
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.inputs.ref || github.sha }}
+
+            - name: Resolve deploy SHA
+              if: steps.skip_check.outputs.skip == 'false'
+              id: resolve
+              run: |
+                  deploy_sha="$(git rev-parse HEAD)"
+                  short_sha="$(echo "$deploy_sha" | cut -c1-7)"
+                  echo "deploy_sha=$deploy_sha" >> "$GITHUB_OUTPUT"
+                  echo "short_sha=$short_sha" >> "$GITHUB_OUTPUT"
+                  echo "Deploying revision: $deploy_sha ($short_sha)"
+                  if [ -n "${{ github.event.inputs.ref }}" ]; then
+                    echo "Resolved from workflow_dispatch ref='${{ github.event.inputs.ref }}'"
+                  fi
+
     notify-start:
-        needs: check-deploy
-        if: needs.check-deploy.outputs.skip == 'false'
+        needs: prepare
+        if: needs.prepare.outputs.skip == 'false'
         runs-on: ubuntu-latest
         steps:
             - name: Send Deploy Start Notification
@@ -69,12 +97,13 @@ jobs:
                   title: "🚀 Deployment Started"
                   description: |
                       Starting deployment to production...
+                      - SHA: `${{ needs.prepare.outputs.short_sha }}`
                       - Reason: `${{ github.event.inputs.reason || github.event.head_commit.message || 'Manual deploy' }}`
                   color: 0x008cff
 
     build-and-push:
-        needs: [check-deploy, notify-start]
-        if: needs.check-deploy.outputs.skip == 'false'
+        needs: [prepare, notify-start]
+        if: needs.prepare.outputs.skip == 'false'
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -91,15 +120,16 @@ jobs:
                       dockerfile: docker/Dockerfile.client
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: ${{ needs.prepare.outputs.deploy_sha }}
 
             - name: Image name
               id: meta
               run: |
                   owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')
                   repo=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
-                  short_sha=$(echo '${{ github.sha }}' | cut -c1-7)
                   echo "image=${{ env.REGISTRY }}/${owner}/${repo}/${{ matrix.name }}" >> "$GITHUB_OUTPUT"
-                  echo "sha_tag=sha-${short_sha}" >> "$GITHUB_OUTPUT"
+                  echo "sha_tag=sha-${{ needs.prepare.outputs.short_sha }}" >> "$GITHUB_OUTPUT"
 
             - uses: docker/setup-buildx-action@v3
 
@@ -117,7 +147,7 @@ jobs:
                   push: true
                   build-args: |
                       MODE=${{ env.MODE }}
-                      COMMIT_SHA=${{ github.sha }}
+                      COMMIT_SHA=${{ needs.prepare.outputs.deploy_sha }}
                       BRANCH_NAME=${{ github.ref_name }}
                   tags: |
                       ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
@@ -126,8 +156,8 @@ jobs:
                   cache-to: type=gha,mode=max,scope=${{ matrix.name }}-prod
 
     deploy:
-        needs: [check-deploy, build-and-push]
-        if: needs.check-deploy.outputs.skip == 'false'
+        needs: [prepare, build-and-push]
+        if: needs.prepare.outputs.skip == 'false'
         runs-on: ubuntu-latest
         environment:
             name: production
@@ -137,8 +167,8 @@ jobs:
               run: |
                   owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')
                   repo=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
-                  short_sha=$(echo '${{ github.sha }}' | cut -c1-7)
                   base="${{ env.REGISTRY }}/${owner}/${repo}"
+                  short_sha="${{ needs.prepare.outputs.short_sha }}"
                   echo "server=${base}/server:sha-${short_sha}" >> "$GITHUB_OUTPUT"
                   echo "jobs=${base}/jobs:sha-${short_sha}" >> "$GITHUB_OUTPUT"
                   echo "client=${base}/client:sha-${short_sha}" >> "$GITHUB_OUTPUT"
@@ -147,7 +177,7 @@ jobs:
               uses: appleboy/ssh-action@v1.2.0
               env:
                   DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-                  DEPLOY_SHA: ${{ github.sha }}
+                  DEPLOY_SHA: ${{ needs.prepare.outputs.deploy_sha }}
                   GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
                   GHCR_USER: ${{ github.actor }}
                   TC_SERVER_IMAGE: ${{ steps.images.outputs.server }}
@@ -210,7 +240,7 @@ jobs:
                       docker compose -f docker-compose.prod.yml images server jobs client
 
     notify:
-        needs: [check-deploy, build-and-push, deploy]
+        needs: [prepare, build-and-push, deploy]
         runs-on: ubuntu-latest
         if: always()
         steps:
@@ -220,19 +250,20 @@ jobs:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   noprefix: true
                   title: >-
-                      ${{ needs.check-deploy.outputs.skip == 'true' && '⏭️ Deployment Skipped' ||
+                      ${{ needs.prepare.outputs.skip == 'true' && '⏭️ Deployment Skipped' ||
                           (needs.deploy.result == 'success' && '✅ Deployment Successful') ||
                           '❌ Deployment Failed' }}
                   description: >-
-                      ${{ needs.check-deploy.outputs.skip == 'true'
+                      ${{ needs.prepare.outputs.skip == 'true'
                           && 'Deployment was skipped due to `--skip-deploy` flag in commit message.'
-                          || format('- Build: `{0}`\n- Deploy: `{1}`\n- Reason: `{2}`',
+                          || format('- Build: `{0}`\n- Deploy: `{1}`\n- SHA: `{2}`\n- Reason: `{3}`',
                               needs.build-and-push.result,
                               needs.deploy.result,
+                              needs.prepare.outputs.short_sha,
                               github.event.inputs.reason || github.event.head_commit.message || 'Automated deploy') }}
                   color: >-
-                      ${{ needs.check-deploy.outputs.skip == 'true' && '0xffff00' ||
+                      ${{ needs.prepare.outputs.skip == 'true' && '0xffff00' ||
                           (needs.deploy.result == 'success' && '0x1df27d') || '0xff5050' }}
                   content: >-
-                      ${{ needs.deploy.result != 'success' && needs.check-deploy.outputs.skip != 'true'
+                      ${{ needs.deploy.result != 'success' && needs.prepare.outputs.skip != 'true'
                           && '⚠️ deploy failed! <@341321481390784512>' || '' }}

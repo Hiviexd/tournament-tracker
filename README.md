@@ -57,6 +57,7 @@ pnpm docker:preview:down
 
 - Production: push to `main` (or workflow_dispatch) — see `.github/workflows/deploy-production.yml`
 - Preview: push to `preview` / `preview/*` — see `.github/workflows/deploy-preview.yml`
+- Manual runs accept an optional `ref` (commit SHA, tag, or branch) to build and deploy that revision instead of the workflow tip — useful for rollbacks
 - Keep `config.json` and `checklist.json` on the VPS deploy path (bind-mounted into the server container; not baked into images)
 - Image refs for restarts are written to `.images.env` on the VPS
 
