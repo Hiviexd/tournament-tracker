@@ -16,9 +16,6 @@ ARG BRANCH_NAME=unknown
 ENV NODE_ENV=$MODE
 ENV COMMIT_SHA=$COMMIT_SHA
 ENV BRANCH_NAME=$BRANCH_NAME
-COPY checklist.example.json ./checklist.example.json
-COPY checklist.json* ./
-RUN if [ ! -f checklist.json ]; then cp checklist.example.json checklist.json; fi
 RUN pnpm --filter @tc/client exec vite build --mode "$MODE"
 
 FROM nginx:alpine AS prod

@@ -1,11 +1,12 @@
-import { Stack, Checkbox, Radio, Group, Button, Text, Alert, Collapse } from "@mantine/core";
+import { Stack, Checkbox, Radio, Group, Button, Text, Alert, Collapse, Loader, Center } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ITournament } from "@tc/types/Tournament";
+import { IChecklistCategory } from "@tc/types/Checklist";
 import { useState, useMemo, useCallback } from "react";
-import { TC_REVIEW_CHECKLIST, CC_REVIEW_CHECKLIST } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ExpandButton from "../common/buttons/ExpandButton";
 import { useSubmitReview } from "../../hooks/useTournaments";
+import { useReviewChecklists } from "../../hooks/useChecklist";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import TextEditor from "../common/TextEditor";
@@ -19,24 +20,52 @@ interface IProps {
 type ChecklistState = Record<string, boolean>;
 
 export default function TournamentReviewInput({ tournament }: IProps) {
+    const { data: checklists, isLoading, isError } = useReviewChecklists();
+
+    if (isLoading) {
+        return (
+            <Center py="xl">
+                <Loader size="sm" />
+            </Center>
+        );
+    }
+
+    if (isError || !checklists) {
+        return (
+            <Alert
+                color="danger"
+                icon={<FontAwesomeIcon icon="exclamation-triangle" />}
+                title="Failed to load checklist">
+                Could not load the review checklist. Please refresh and try again.
+            </Alert>
+        );
+    }
+
+    const reviewChecklist = tournament.isTournament ? checklists.tc : checklists.cc;
+
+    return <TournamentReviewForm tournament={tournament} reviewChecklist={reviewChecklist} />;
+}
+
+interface IFormProps {
+    tournament: ITournament;
+    reviewChecklist: IChecklistCategory[];
+}
+
+function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
     const [user] = useAtom(loggedInUserAtom);
     const userReview = tournament.reviews?.find((review) => review.author?.id === user?.id);
     const autoSaveKey = `tournament-review-${tournament._id}`;
     const checklistAutoSaveKey = `tournament-review-checklist-${tournament._id}`;
-    const REVIEW_CHECKLIST = tournament.isTournament ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
 
-    // Initialize default state
     const getDefaultChecklistState = useCallback((): ChecklistState => {
         const initialState: ChecklistState = {};
 
-        // First set all items to false
-        for (const category of REVIEW_CHECKLIST) {
+        for (const category of reviewChecklist) {
             for (const item of category.items) {
                 initialState[item] = false;
             }
         }
 
-        // Then populate with user's existing review data if available
         if (userReview?.checklist) {
             for (const item of userReview.checklist) {
                 initialState[item.item] = item.checked;
@@ -44,9 +73,8 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         }
 
         return initialState;
-    }, [REVIEW_CHECKLIST, userReview?.checklist]);
+    }, [reviewChecklist, userReview?.checklist]);
 
-    // Use autosave hook for checklist state
     const { value: checkedState, setValue: setCheckedState } = useAutoSave<ChecklistState>({
         key: checklistAutoSaveKey,
         initialValue: getDefaultChecklistState(),
@@ -60,12 +88,10 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     const submitReviewMutation = useSubmitReview(tournament.id);
 
-    // Get all possible checklist items
-    const allItems = REVIEW_CHECKLIST.flatMap((category) => category.items);
+    const allItems = reviewChecklist.flatMap((category) => category.items);
 
-    // Calculate select all state
     const checkedItems = allItems.filter((item) => checkedState[item]);
-    const allChecked = checkedItems.length === allItems.length;
+    const allChecked = allItems.length > 0 && checkedItems.length === allItems.length;
     const indeterminate = checkedItems.length > 0 && checkedItems.length < allItems.length;
 
     const handleSubmitReview = async () => {
@@ -80,8 +106,6 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         };
 
         await submitReviewMutation.mutateAsync(reviewData);
-
-        // Clear autosaved checklist data after successful submission
         clearAutoSavedValue(checklistAutoSaveKey);
     };
 
@@ -102,10 +126,8 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     const isSubmitDisabled = !decision || (decision !== "deny" && Object.values(checkedState).every((v) => !v));
 
-    // Check for unsaved changes
     const hasUnsavedChanges = useMemo(() => {
         if (!userReview) {
-            // If no existing review, check if there are any changes from default state
             const defaultState = getDefaultChecklistState();
             const hasChecklistChanges = JSON.stringify(checkedState) !== JSON.stringify(defaultState);
             const hasCommentChanges = comment.trim() !== "";
@@ -113,7 +135,6 @@ export default function TournamentReviewInput({ tournament }: IProps) {
             return hasChecklistChanges || hasCommentChanges || hasDecisionChanges;
         }
 
-        // If existing review, compare current state with saved state
         const savedChecklist = userReview.checklist.reduce((acc, item) => {
             acc[item.item] = item.checked;
             return acc;
@@ -130,7 +151,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
 
     return (
         <Stack gap="md">
-            <ReviewStatusBanner tournament={tournament} user={user} />
+            <ReviewStatusBanner tournament={tournament} user={user ?? null} />
 
             {hasUnsavedChanges && (
                 <Alert
@@ -161,7 +182,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
                         mb="xs"
                     />
 
-                    {REVIEW_CHECKLIST.map((category) => (
+                    {reviewChecklist.map((category) => (
                         <Stack key={category.category} gap="xs">
                             <Text fw={400} size="sm" c="dimmed" className="header-border-left">
                                 {category.category}

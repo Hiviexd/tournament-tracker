@@ -14,14 +14,13 @@ import mongoose from "mongoose";
 import UserService from "../services/UserService";
 import OsuBotService from "../services/OsuBotService";
 import { IReviewChecklistItem } from "@tc/types/Review";
-import checklist from "../../../checklist.json";
+import ChecklistService from "../services/ChecklistService";
 
 const FALLBACK_HOST_OSU_ID = "37548950";
 const FALLBACK_FORUM_URL = "https://osu.ppy.sh/community/forums/topics/1715676";
 const FILE_UPLOAD_CATEGORY = "tournaments";
 
-const TC_REVIEW_CHECKLIST = checklist.tc;
-const CC_REVIEW_CHECKLIST = checklist.cc;
+const { tc: TC_REVIEW_CHECKLIST, cc: CC_REVIEW_CHECKLIST } = ChecklistService.getChecklists();
 
 interface ICsvTournament {
     "DATE-RECEIVED": string;

@@ -112,6 +112,7 @@ import apiKeysRouter from "./routers/apiKeysRouter";
 import complianceRouter from "./routers/complianceRouter";
 import globalSearchRouter from "./routers/globalSearchRouter";
 import infringementsRouter from "./routers/infringementsRouter";
+import checklistRouter from "./routers/checklistRouter";
 import enchantRouter from "./routers/enchantRouter";
 import { apiReference } from "@scalar/express-api-reference";
 import openApiSpec from "./openapi";
@@ -170,6 +171,7 @@ apiRouter.use("/keys", apiKeysRouter);
 apiRouter.use("/compliance", complianceRouter);
 apiRouter.use("/search", globalSearchRouter);
 apiRouter.use("/infringements", infringementsRouter);
+apiRouter.use("/checklist", checklistRouter);
 
 app.use("/api", apiRouter);
 
