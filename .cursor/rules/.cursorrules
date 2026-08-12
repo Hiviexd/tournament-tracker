@@ -10,11 +10,12 @@ Tournament Tracker is a full-stack application for managing osu! tournaments, ba
 
 ### High-Level Design
 
-- **Client-server architecture**: React frontend, Express.js backend.
+- **Client-server architecture**: React frontend, NestJS API on an Express adapter.
 - **Core domain entities**: Tournaments, Votes, Tickets/Reports, Users, Resources, Articles, Quotes, Logs.
 - **Database**: MongoDB (with Mongoose ODM).
 - **File storage**: Local or cloud (Cloudflare R2 supported).
 - **External integrations**: osu! API (user/game data), Discord (notifications/webhooks).
+- **Jobs**: Cron and queue drain run in `apps/jobs` (API only enqueues).
 
 ---
 
@@ -205,17 +206,17 @@ useEffect(() => {
 
 ### Controller Pattern
 
-- **Controllers**: Each domain has a controller in `server/controllers/` (e.g., `TournamentsController`, `VotingsController`).
-- **Services**: Business logic is separated into services in `server/services/` (e.g., `TournamentService`, `VotingService`, `AutomationService`, `OsuApiService`, `DiscordService`).
-- **Models**: Mongoose schemas in `server/models/`, with TypeScript interfaces (that are shared with the frontend) in `/interfaces`.
+- **Controllers**: Nest controllers under `apps/server/modules/*/` (e.g., `TournamentsController`, `VotesController`).
+- **Services**: Nest module services for HTTP orchestration; shared DI helpers in `apps/server/services/` (e.g., `TournamentDomainService`, `UploadService`). Cross-app clients live in `@tc/osu` / `@tc/notifications`.
+- **Models**: Mongoose schemas in `@tc/models`, with shared TypeScript types in `@tc/types`.
 
 ### Middleware
 
-- **Authentication/authorization**: Session-based, with role checks for protected endpoints.
-- **Rate limiting**: Prevents abuse of sensitive endpoints.
+- **Authentication/authorization**: Session + Bearer API keys on the Express adapter; Nest guards for roles/scopes.
+- **CSRF / CORS / rate limits**: Stay on the Express adapter (Enchant paths skip this stack).
 - **Request logging**: All requests are logged for audit and debugging.
-- **File upload handling**: Multer-based, with validation and storage management.
-- **SEO/crawler handling**: Custom middleware for search engine optimization.
+- **File upload handling**: Nest `FilesInterceptor` with shared upload options.
+- **SEO/crawler handling**: Custom Express middleware for search engine optimization.
 
 ### Database Models
 
@@ -226,14 +227,14 @@ useEffect(() => {
 
 ### Automation and Integrations
 
-- **osu! API**: Used for user verification, beatmap compliance, and data enrichment.
-- **Discord**: Webhook integration for notifications and announcements.
-- **AutomationService**: Handles scheduled jobs and background tasks.
-- **MigrationService**: For data migrations and legacy import.
+- **osu! API**: Used for user verification, beatmap compliance, and data enrichment (`@tc/osu`).
+- **Discord**: Webhook integration for notifications and announcements (`@tc/notifications`).
+- **Jobs app**: Owns cron schedules and queue drain; do not run JobLoader in the API.
+- **Migrate app**: Data migrations live in `apps/migrate`.
 
 ### Constants
 
-- **Backend constants**: In `server/constants/` (e.g., SEO config, webhook colors, tournament CSV).
+- **Backend constants**: Prefer module-local constants; shared helpers in packages where needed.
 
 ---
 
@@ -332,29 +333,28 @@ useEffect(() => {
 
 ### Feature Implementation
 
-1. Define interfaces in `/interfaces`.
-2. Create/update Mongoose models in `server/models/`.
-3. Add/extend API endpoints in `server/routers/` and `server/controllers/`.
-4. Implement business logic in `server/services/`.
-5. Create/update frontend hooks in `src/hooks/`.
-6. Build or update components in `src/components/` and pages in `src/pages/`.
+1. Define types in `@tc/types`.
+2. Create/update Mongoose models in `@tc/models`.
+3. Add/extend Nest controllers and services under `apps/server/modules/`.
+4. Put shared domain helpers in `apps/server/services/` and register them as Nest providers.
+5. Create/update frontend hooks in `apps/client/src/hooks/`.
+6. Build or update components in `apps/client/src/components/` and pages in `apps/client/src/pages/`.
 7. **For list pages**: Implement query parameter handling using `nuqs` patterns.
 8. **For filter components**: Add debounced text inputs where appropriate.
-9. Add/modify routes in `src/base/routes.config.tsx`.
+9. Add/modify routes in `apps/client/src/base/routes.config.tsx`.
 10. Implement error handling and notifications.
 11. Add logging and Discord notifications as needed.
 
 ### Console Commands
 
-- Use `yarn` for all dependency management and scripts.
+- Use `pnpm` for all dependency management and scripts.
 - Key scripts:
-  - `yarn dev`: Start client and server in development mode.
-  - `yarn build`: Build the client and server.
-  - `yarn build-client`: Build the client only.
-  - `yarn build-server`: Build the server only.
-  - `yarn prod`: Run production build.
-  - `yarn dev-automation`: Development mode that runs automation jobs on startup.
-  - `yarn dev-migration`: Development mode that runs migration scripts on startup.
+  - `pnpm dev`: Start client and server in development mode.
+  - `pnpm build`: Build the client and server.
+  - `pnpm build-client`: Build the client only.
+  - `pnpm build-server`: Build the server only.
+  - `pnpm test:run`: Run server unit/integration tests.
+  - Jobs and migrations: use `apps/jobs` and `apps/migrate` (never JobLoader in the API).
 
 ### Testing and Quality
 

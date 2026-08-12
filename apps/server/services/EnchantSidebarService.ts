@@ -1,19 +1,26 @@
+import { INFRINGEMENT_MODEL, TOURNAMENT_MODEL } from "../modules/common/database.tokens";
+import type { Model } from "mongoose";
+import { Inject, Injectable } from "@nestjs/common";
 import crypto from "crypto";
 import config from "@tc/config";
-import { IInfringement } from "@tc/types/Infringement";
-import { ITournament } from "@tc/types/Tournament";
-import { IUser } from "@tc/types/User";
+import type { IInfringement, IInfringementStatics } from "@tc/types/Infringement";
+import type { ITournament } from "@tc/types/Tournament";
+import type { IUser } from "@tc/types/User";
 import utils from "@tc/utils/server";
-import Infringement from "../models/infringementModel";
-import Tournament from "../models/tournamentModel";
 
 const RESULT_CAP = 5;
 
-export default class EnchantSidebarService {
+@Injectable()
+export class EnchantSidebarService {
+    constructor(
+        @Inject(INFRINGEMENT_MODEL) private readonly infringementModel: IInfringementStatics,
+        @Inject(TOURNAMENT_MODEL) private readonly tournamentModel: Model<ITournament>,
+    ) {}
+
     /**
      * Verifies the Enchant-Signature HMAC against the raw request body.
      */
-    public static verifySignature(rawBody: Buffer | undefined, signature: string | undefined): boolean {
+    public verifySignature(rawBody: Buffer | undefined, signature: string | undefined): boolean {
         const secret = config.enchant?.sidebarSecret;
         if (!secret || !rawBody || !signature) return false;
 
@@ -29,14 +36,14 @@ export default class EnchantSidebarService {
      * Looks up tournaments and watchlist infringements for an Enchant ticket id
      * and returns sidebar HTML, or an empty string when nothing matches.
      */
-    public static async buildSidebarHtml(ticketId: string): Promise<string> {
+    public async buildSidebarHtml(ticketId: string): Promise<string> {
         if (!ticketId) return "";
 
         const enchantUrl = utils.buildEnchantTicketUrl(ticketId);
 
         const [tournaments, infringements] = await Promise.all([
-            Tournament.find({ enchantUrl }).populate("hosts").limit(RESULT_CAP),
-            Infringement.find({ enchantUrl }).sort({ createdAt: -1 }).limit(RESULT_CAP).populate("userId"),
+            this.tournamentModel.find({ enchantUrl }).populate("hosts").limit(RESULT_CAP),
+            this.infringementModel.find({ enchantUrl }).sort({ createdAt: -1 }).limit(RESULT_CAP).populate("userId"),
         ]);
 
         if (tournaments.length === 0 && infringements.length === 0) return "";
@@ -55,7 +62,7 @@ export default class EnchantSidebarService {
         return sections.join("<hr>");
     }
 
-    private static renderTournament(tournament: ITournament): string {
+    private renderTournament(tournament: ITournament): string {
         const name = utils.escapeHtml(tournament.name);
         const tournamentUrl = `${config.baseUrl}/tournaments/${tournament._id}`;
         const rows: string[] = [`<p><b>Tournament:</b> <a href="${tournamentUrl}">${name}</a></p>`];
@@ -88,7 +95,7 @@ export default class EnchantSidebarService {
         return `<div>${rows.join("")}</div>`;
     }
 
-    private static renderInfringement(infringement: IInfringement): string {
+    private renderInfringement(infringement: IInfringement): string {
         const user = infringement.userId as unknown as IUser | undefined;
         const rows: string[] = [];
 
@@ -114,7 +121,7 @@ export default class EnchantSidebarService {
         return `<div>${rows.join("")}</div>`;
     }
 
-    private static buildDiscordThreadUrl(threadId: string): string {
+    private buildDiscordThreadUrl(threadId: string): string {
         const serverId = config.discord.webhooks.main.serverId;
         return `https://discord.com/channels/${serverId}/${threadId}`;
     }

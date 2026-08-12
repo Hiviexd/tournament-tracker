@@ -1,6 +1,6 @@
-import { EmbedBuilder } from "../services/discord/EmbedBuilder";
-import { WebhookBuilder } from "../services/discord/WebhookBuilder";
-import DiscordUtils from "../services/discord/DiscordUtils";
+import { EmbedBuilder } from "@tc/notifications/discord/EmbedBuilder";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import DiscordUtils from "@tc/notifications/discord/DiscordUtils";
 
 export type RateLimitAlert = {
     type: "session" | "apiKey";

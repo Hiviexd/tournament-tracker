@@ -11,6 +11,16 @@ services:
       - ./checklist.json:/app/checklist.json:ro
     restart: unless-stopped
 
+  jobs:
+    image: ${TC_JOBS_IMAGE:-tc-jobs:local}
+    pull_policy: ${TC_PULL_POLICY:-missing}
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./checklist.json:/app/checklist.json:ro
+    restart: unless-stopped
+
   client:
     image: ${TC_CLIENT_IMAGE:-tc-client:local}
     pull_policy: ${TC_PULL_POLICY:-missing}

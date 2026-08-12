@@ -9,13 +9,14 @@
         "outDir": "dist",
         "noEmit": true,
         "types": ["node"],
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "paths": {
             "@controllers/*": ["./controllers/*"],
-            "@routers/*": ["./routers/*"],
-            "@models/*": ["./models/*"],
             "@helpers/*": ["./helpers/*"],
             "@middlewares/*": ["./middlewares/*"],
-            "@services/*": ["./services/*"]
+            "@services/*": ["./services/*"],
+            "@modules/*": ["./modules/*"]
         }
     },
     "include": ["./**/*.ts", "../../packages/types/express.d.ts"],

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import { readFileSync, existsSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
@@ -48,10 +48,13 @@ export const configSchema = z.object({
         url: z.string(),
         apiKey: z.string(),
     }),
-    enchant: z.object({
-        enabled: z.boolean(),
-        sidebarSecret: z.string(),
-    }),
+    // Older config.json files omit this; Enchant stays off until configured.
+    enchant: z
+        .object({
+            enabled: z.boolean(),
+            sidebarSecret: z.string(),
+        })
+        .default({ enabled: false, sidebarSecret: "" }),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
@@ -70,6 +73,20 @@ function findRepoRoot(startDir: string): string {
     }
 }
 
+function formatConfigZodError(configPath: string, error: ZodError): Error {
+    const lines = error.issues.map((issue) => {
+        const path = issue.path.length ? issue.path.join(".") : "(root)";
+        const got =
+            "received" in issue && issue.received !== undefined ? ` (received ${String(issue.received)})` : "";
+        return `  - ${path}: ${issue.message}${got}`;
+    });
+
+    return new Error(
+        `Invalid config.json at ${configPath}:\n${lines.join("\n")}\n` +
+            `Compare with config.example.json and fill any missing keys.`,
+    );
+}
+
 export function loadConfigFromDisk(): AppConfig {
     const here = dirname(fileURLToPath(import.meta.url));
     const root = findRepoRoot(here);
@@ -78,5 +95,9 @@ export function loadConfigFromDisk(): AppConfig {
         throw new Error(`Missing config.json at ${configPath}. Copy config.example.json and fill it in.`);
     }
     const raw = JSON.parse(readFileSync(configPath, "utf8"));
-    return configSchema.parse(raw);
+    const parsed = configSchema.safeParse(raw);
+    if (!parsed.success) {
+        throw formatConfigZodError(configPath, parsed.error);
+    }
+    return parsed.data;
 }

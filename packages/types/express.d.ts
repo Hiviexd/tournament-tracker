@@ -20,6 +20,8 @@ declare module "express" {
         files?: Express.Multer.File[];
         /** Raw request body buffer (captured for HMAC verification) */
         rawBody?: Buffer;
+        /** Authenticated user (set by Nest auth guards; mirrors res.locals.user) */
+        user?: IUser;
     }
 }
 

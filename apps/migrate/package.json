@@ -1,0 +1,25 @@
+{
+    "name": "@tc/migrate",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "migrate": "tsx --tsconfig tsconfig.json migrate.ts",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "@tc/config": "workspace:*",
+        "@tc/models": "workspace:*",
+        "@tc/osu": "workspace:*",
+        "@tc/types": "workspace:*",
+        "@tc/utils": "workspace:*",
+        "cross-env": "^7.0.3",
+        "csv-parse": "^5.6.0",
+        "mongoose": "8.18.1"
+    },
+    "devDependencies": {
+        "@types/node": "^24.1.0",
+        "tsx": "^4.19.4",
+        "typescript": "^5.2.2"
+    }
+}

@@ -1,10 +1,7 @@
 import { defineConfig } from "tsup";
-import { globSync } from "glob";
-
-const jobFiles = globSync("jobs/*Job.ts", { ignore: ["**/BaseJob.ts"] }).map((f) => f.replace(/\\/g, "/"));
 
 export default defineConfig({
-    entry: ["app.ts", ...jobFiles],
+    entry: ["main.ts"],
     outDir: "dist",
     target: "node20",
     format: ["esm"],
@@ -13,6 +10,21 @@ export default defineConfig({
     clean: true,
     dts: false,
     external: ["express", "express-async-errors"],
-    noExternal: ["lodash", "dayjs", "@tc/utils", "@tc/config", "@tc/types"],
+    // Bundle workspace TS packages — they export .ts sources (dev uses @swc-node/register).
+    // Leaving them external makes `node dist/main.js` load raw .ts and fail on extensionless ESM imports.
+    noExternal: [
+        "lodash",
+        "dayjs",
+        "@tc/utils",
+        "@tc/config",
+        "@tc/types",
+        "@tc/models",
+        "@tc/osu",
+        "@tc/notifications",
+    ],
+    // Bundling CJS deps (axios → form-data → combined-stream) needs a real require() in ESM output.
+    banner: {
+        js: `import { createRequire } from "module";\nconst require = createRequire(import.meta.url);`,
+    },
     tsconfig: "tsconfig.json",
 });

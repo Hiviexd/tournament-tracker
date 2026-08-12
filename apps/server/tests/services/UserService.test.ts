@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Types } from "mongoose";
-import UserService from "../../services/UserService";
-import User from "../../models/userModel";
+import UserService from "@tc/osu/UserService";
+import User from "@tc/models/userModel";
 import { createMockTCUsers, createMockCCUsers } from "../utils/users";
 
 const lodashAssignMocks = vi.hoisted(() => ({
@@ -11,7 +11,7 @@ const lodashAssignMocks = vi.hoisted(() => ({
 }));
 
 // Mock the User model
-vi.mock("../../models/userModel", () => ({
+vi.mock("@tc/models/userModel", () => ({
     default: {
         countDocuments: vi.fn(),
         find: vi.fn(),

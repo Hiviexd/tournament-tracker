@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import axios from "axios";
-import DiscordSender from "../../services/notifications/DiscordSender";
+import DiscordSender from "@tc/notifications/DiscordSender";
 
 vi.mock("axios", () => ({
     default: {

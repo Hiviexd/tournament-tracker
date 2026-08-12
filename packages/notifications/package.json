@@ -1,0 +1,32 @@
+{
+    "name": "@tc/notifications",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./NotificationDispatchService": "./src/NotificationDispatchService.ts",
+        "./DiscordSender": "./src/DiscordSender.ts",
+        "./OsuSender": "./src/OsuSender.ts",
+        "./discord/EmbedBuilder": "./src/discord/EmbedBuilder.ts",
+        "./discord/WebhookBuilder": "./src/discord/WebhookBuilder.ts",
+        "./discord/DiscordUtils": "./src/discord/DiscordUtils.ts",
+        "./votingResults": "./src/votingResults.ts",
+        "./*": "./src/*.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    },
+    "dependencies": {
+        "@tc/config": "workspace:*",
+        "@tc/models": "workspace:*",
+        "@tc/osu": "workspace:*",
+        "@tc/types": "workspace:*",
+        "@tc/utils": "workspace:*",
+        "axios": "^1.13.5"
+    },
+    "devDependencies": {
+        "@types/node": "^24.1.0",
+        "typescript": "^5.2.2"
+    }
+}

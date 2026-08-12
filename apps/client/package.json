@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "cross-env NODE_ENV=development vite --mode development",
+        "dev:automation": "cross-env NODE_ENV=development vite --mode development",
         "dev:preview": "cross-env NODE_ENV=preview vite --mode preview",
         "build": "vite build",
         "build:preview": "vite build --mode preview",

@@ -1,7 +1,9 @@
+import { Injectable } from "@nestjs/common";
 import { execSync } from "child_process";
 import { BranchStatus } from "@tc/types/Version";
 
-class VersionService {
+@Injectable()
+export class VersionService {
     private readonly hash: string;
     private readonly message: string;
     private readonly branchStatus: BranchStatus | null;
@@ -95,5 +97,3 @@ class VersionService {
         }
     }
 }
-
-export default new VersionService();

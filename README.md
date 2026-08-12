@@ -57,6 +57,7 @@ pnpm docker:preview:down
 
 - Production: push to `main` (or workflow_dispatch) — see `.github/workflows/deploy-production.yml`
 - Preview: push to `preview` / `preview/*` — see `.github/workflows/deploy-preview.yml`
+- Manual runs accept an optional `ref` (commit SHA, tag, or branch) to build and deploy that revision instead of the workflow tip — useful for rollbacks
 - Keep `config.json` and `checklist.json` on the VPS deploy path (bind-mounted into the server container; not baked into images)
 - Image refs for restarts are written to `.images.env` on the VPS
 
@@ -64,13 +65,13 @@ pnpm docker:preview:down
 
 If you need all automation jobs to run when the project starts, use `pnpm dev:automation`.
 
-For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/jobs/README.md) page.
+For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/jobs/jobs/README.md) page.
 
 ### Migrations
 
 For running a specific migration, run `pnpm migrate -- <migration-name>`. You can list all available migrations by running `pnpm migrate`.
 
-For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/migrations/README.md) page.
+For documentation on how to create a new migration, see the [migrations README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/migrate/migrations/README.md) page.
 
 ### Commit message flags
 

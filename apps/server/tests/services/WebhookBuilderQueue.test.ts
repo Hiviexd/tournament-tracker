@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { WebhookBuilder } from "../../services/discord/WebhookBuilder";
-import NotificationDispatchService from "../../services/NotificationDispatchService";
+import { WebhookBuilder } from "@tc/notifications/discord/WebhookBuilder";
+import NotificationDispatchService from "@tc/notifications/NotificationDispatchService";
 
-vi.mock("../../services/NotificationDispatchService", () => ({
+vi.mock("@tc/notifications/NotificationDispatchService", () => ({
     default: {
         enqueueDiscordWebhook: vi.fn(),
     },

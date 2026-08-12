@@ -11,6 +11,16 @@ services:
       args:
         MODE: preview
 
+  jobs:
+    image: tc-jobs-preview:local
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jobs
+      target: prod
+      args:
+        MODE: preview
+
   client:
     image: tc-client-preview:local
     pull_policy: never
