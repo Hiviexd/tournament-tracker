@@ -1,5 +1,6 @@
 # Local override: build preview images on-machine.
-# Usage: docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d
+# Usage: pnpm docker:preview  (generates git-meta.json, then)
+#   docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d
 services:
   server:
     image: tc-server-preview:local

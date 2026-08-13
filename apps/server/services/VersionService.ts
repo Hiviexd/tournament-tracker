@@ -1,5 +1,70 @@
 import { execSync } from "child_process";
+import { existsSync, readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { BranchStatus } from "@tc/types/Version";
+import { GitMeta, parseGitMeta } from "./gitMeta";
+
+function tryGit(command: string): string | null {
+    try {
+        const value = execSync(command).toString().trim();
+        return value.length > 0 ? value : null;
+    } catch {
+        return null;
+    }
+}
+
+function findGitMetaPath(): string | null {
+    let dir = dirname(fileURLToPath(import.meta.url));
+    for (;;) {
+        if (existsSync(join(dir, "pnpm-workspace.yaml"))) {
+            const candidate = join(dir, "git-meta.json");
+            return existsSync(candidate) ? candidate : null;
+        }
+        const parent = dirname(dir);
+        if (parent === dir) {
+            return null;
+        }
+        dir = parent;
+    }
+}
+
+function loadGitMetaFile(): GitMeta | null {
+    const metaPath = findGitMetaPath();
+    if (!metaPath) {
+        return null;
+    }
+
+    try {
+        return parseGitMeta(JSON.parse(readFileSync(metaPath, "utf8")));
+    } catch {
+        return null;
+    }
+}
+
+function envValue(...keys: string[]): string | null {
+    for (const key of keys) {
+        const value = process.env[key];
+        if (value && value !== "unknown") {
+            return value;
+        }
+    }
+    return null;
+}
+
+function branchStatusFromMeta(meta: GitMeta | null): BranchStatus | null {
+    if (!meta || !meta.branch || meta.branch === "main" || meta.branch === "HEAD" || meta.branch === "unknown") {
+        return null;
+    }
+    if (meta.ahead === null && meta.behind === null) {
+        return null;
+    }
+    return {
+        currentBranch: meta.branch,
+        ahead: meta.ahead ?? 0,
+        behind: meta.behind ?? 0,
+    };
+}
 
 class VersionService {
     private readonly hash: string;
@@ -7,11 +72,10 @@ class VersionService {
     private readonly branchStatus: BranchStatus | null;
 
     constructor() {
-        this.hash = this.computeGitHash();
-        this.message = this.computeGitMessage();
-
-        // Only compute branch status once on startup; it will be reused for all requests
-        this.branchStatus = this.computeBranchStatus();
+        const meta = loadGitMetaFile();
+        this.hash = this.computeGitHash(meta);
+        this.message = this.computeGitMessage(meta);
+        this.branchStatus = this.computeBranchStatus(meta);
     }
 
     /**
@@ -35,53 +99,62 @@ class VersionService {
         return this.branchStatus;
     }
 
-    /**
-     * Compute the git hash of the current commit
-     * @returns The git hash of the current commit
-     */
-    private computeGitHash(): string {
-        try {
-            return execSync("git rev-parse HEAD").toString().trim();
-        } catch (error) {
-            return "unknown";
-        }
+    private computeGitHash(meta: GitMeta | null): string {
+        return tryGit("git rev-parse HEAD") || meta?.hash || envValue("COMMIT_SHA", "GITHUB_SHA") || "unknown";
+    }
+
+    private computeGitMessage(meta: GitMeta | null): string {
+        return tryGit("git log -1 --pretty=%B") || meta?.message || envValue("COMMIT_MESSAGE") || "";
     }
 
     /**
-     * Compute the commit message of the current commit
-     * @returns The commit message of the current commit
+     * Compute branch comparison status with main branch.
+     * Live git is preferred (local dev); Docker images have no git so they use baked git-meta.json.
      */
-    private computeGitMessage(): string {
-        try {
-            return execSync("git log -1 --pretty=%B").toString().trim();
-        } catch (error) {
-            return "";
+    private computeBranchStatus(meta: GitMeta | null): BranchStatus | null {
+        const fromGit = this.computeBranchStatusFromGit();
+        if (fromGit !== undefined) {
+            return fromGit;
         }
+
+        const fromMeta = branchStatusFromMeta(meta);
+        if (fromMeta) {
+            return fromMeta;
+        }
+
+        const branch = envValue("BRANCH_NAME", "GITHUB_REF_NAME");
+        const ahead = envValue("BRANCH_AHEAD");
+        const behind = envValue("BRANCH_BEHIND");
+        if (!branch || branch === "main") {
+            return null;
+        }
+        if (ahead === null && behind === null) {
+            return null;
+        }
+        return {
+            currentBranch: branch,
+            ahead: ahead ? Number(ahead) : 0,
+            behind: behind ? Number(behind) : 0,
+        };
     }
 
     /**
-     * Compute branch comparison status with main branch
-     * This is run once at startup and reused for all requests.
-     * @returns Object with ahead/behind counts and current branch name
+     * @returns BranchStatus, null when on main, undefined when git is unavailable
      */
-    private computeBranchStatus(): BranchStatus | null {
+    private computeBranchStatusFromGit(): BranchStatus | null | undefined {
         try {
-            // Get current branch name
             const currentBranch = execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
 
-            // Only proceed if we're not on main branch
             if (currentBranch === "main") {
                 return null;
             }
 
-            // Fetch latest from remote to ensure accurate comparison
             try {
                 execSync("git fetch origin main", { stdio: "ignore" });
-            } catch (fetchError) {
+            } catch {
                 // Continue even if fetch fails
             }
 
-            // Get ahead/behind counts compared to origin/main
             const revList = execSync(`git rev-list --left-right --count origin/main...HEAD`).toString().trim();
             const [behind, ahead] = revList.split("\t").map(Number);
 
@@ -90,8 +163,8 @@ class VersionService {
                 ahead,
                 behind,
             };
-        } catch (error) {
-            return null;
+        } catch {
+            return undefined;
         }
     }
 }

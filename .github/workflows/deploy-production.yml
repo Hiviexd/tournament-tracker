@@ -89,6 +89,11 @@ jobs:
                       dockerfile: docker/Dockerfile.client
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Write git metadata
+              run: node docker/write-git-meta.mjs
 
             - name: Image name
               id: meta

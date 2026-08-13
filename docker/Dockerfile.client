@@ -13,9 +13,12 @@ FROM deps AS build
 ARG MODE=production
 ARG COMMIT_SHA=unknown
 ARG BRANCH_NAME=unknown
+ARG COMMIT_MESSAGE=""
 ENV NODE_ENV=$MODE
 ENV COMMIT_SHA=$COMMIT_SHA
 ENV BRANCH_NAME=$BRANCH_NAME
+ENV COMMIT_MESSAGE=$COMMIT_MESSAGE
+COPY git-meta.json ./
 RUN pnpm --filter @tc/client exec vite build --mode "$MODE"
 
 FROM nginx:alpine AS prod

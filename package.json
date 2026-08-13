@@ -28,9 +28,9 @@
         "test:coverage": "pnpm --filter @tc/server test:coverage",
         "migrate": "pnpm --filter @tc/server run migrate --",
         "format": "prettier --write \"**/*.{ts,tsx,json,scss}\"",
-        "docker:prod": "docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d",
+        "docker:prod": "node docker/write-git-meta.mjs && docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d",
         "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
-        "docker:preview": "docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d",
+        "docker:preview": "node docker/write-git-meta.mjs && docker compose -f docker-compose.preview.yml -f docker-compose.preview.build.yml up --build -d",
         "docker:preview:down": "docker compose -f docker-compose.preview.yml down"
     },
     "devDependencies": {

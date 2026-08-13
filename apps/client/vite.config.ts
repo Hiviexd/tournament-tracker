@@ -1,46 +1,71 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { execSync } from "child_process";
+import { existsSync, readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
 
-function git(command: string, fallback = ""): string {
+function git(command: string): string {
     try {
         return execSync(command, { cwd: repoRoot, encoding: "utf8" }).toString().trim();
     } catch {
-        return fallback;
+        return "";
     }
 }
 
-const commitHash = git("git rev-parse HEAD", process.env.COMMIT_SHA ?? "unknown");
-const commitMessage = git("git log -1 --pretty=%B", "");
-const branchName = git("git rev-parse --abbrev-ref HEAD", process.env.BRANCH_NAME ?? "unknown");
+function readGitMetaFile(): {
+    hash?: string;
+    message?: string;
+    branch?: string;
+    commitData?: Record<string, number>;
+} | null {
+    const metaPath = resolve(repoRoot, "git-meta.json");
+    if (!existsSync(metaPath)) {
+        return null;
+    }
+    try {
+        return JSON.parse(readFileSync(metaPath, "utf8"));
+    } catch {
+        return null;
+    }
+}
+
+const meta = readGitMetaFile();
+
+const commitHash = git("git rev-parse HEAD") || meta?.hash || process.env.COMMIT_SHA || "unknown";
+const commitMessage = git("git log -1 --pretty=%B") || meta?.message || process.env.COMMIT_MESSAGE || "";
+let branchName = git("git rev-parse --abbrev-ref HEAD") || meta?.branch || process.env.BRANCH_NAME || "unknown";
+if (branchName === "HEAD") {
+    branchName = process.env.BRANCH_NAME || meta?.branch || "unknown";
+    if (branchName === "HEAD") {
+        branchName = "unknown";
+    }
+}
 
 function getCommitData() {
-    try {
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        const startDate = oneYearAgo.toISOString().split("T")[0];
-        const endDate = new Date().toISOString().split("T")[0];
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const startDate = oneYearAgo.toISOString().split("T")[0];
+    const endDate = new Date().toISOString().split("T")[0];
 
-        const gitCommand = `git log --since="${startDate}" --until="${endDate}" --pretty=format:"%ad" --date=short`;
-        const commitDates = git(gitCommand)
-            .split("\n")
-            .filter((date) => date.trim() !== "");
+    const gitCommand = `git log --since="${startDate}" --until="${endDate}" --pretty=format:"%ad" --date=short`;
+    const commitDates = git(gitCommand)
+        .split("\n")
+        .filter((date) => date.trim() !== "");
 
-        const commitCounts: Record<string, number> = {};
-        commitDates.forEach((date) => {
-            commitCounts[date] = (commitCounts[date] || 0) + 1;
-        });
+    const commitCounts: Record<string, number> = {};
+    commitDates.forEach((date) => {
+        commitCounts[date] = (commitCounts[date] || 0) + 1;
+    });
 
+    if (Object.keys(commitCounts).length > 0) {
         return commitCounts;
-    } catch (error) {
-        console.warn("Failed to get commit data:", error);
-        return {};
     }
+
+    return meta?.commitData ?? {};
 }
 
 const commitData = getCommitData();

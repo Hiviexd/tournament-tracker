@@ -1,5 +1,6 @@
 # Local override: build images on-machine instead of pulling from GHCR.
-# Usage: docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d
+# Usage: pnpm docker:prod  (generates git-meta.json, then)
+#   docker compose -f docker-compose.prod.yml -f docker-compose.prod.build.yml up --build -d
 services:
   server:
     image: tc-server:local
