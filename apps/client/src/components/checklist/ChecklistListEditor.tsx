@@ -9,15 +9,20 @@ import EmptyState from "../common/EmptyState";
 interface IProps {
     categories: IChecklistCategory[];
     onChange: (categories: IChecklistCategory[]) => void;
+    canEdit?: boolean;
 }
 
-export default function ChecklistListEditor({ categories, onChange }: IProps) {
+export default function ChecklistListEditor({ categories, onChange, canEdit = true }: IProps) {
     const editor = useChecklistListEditor(categories, onChange);
 
     return (
         <FlipStack gap="md">
             {categories.length === 0 && (
-                <EmptyState icon="clipboard-list" title="No categories" description="Add a category to get started" />
+                <EmptyState
+                    icon="clipboard-list"
+                    title="No categories"
+                    description={canEdit ? "Add a category to get started" : "No categories in this checklist"}
+                />
             )}
 
             {categories.map((category, categoryIndex) => (
@@ -26,6 +31,7 @@ export default function ChecklistListEditor({ categories, onChange }: IProps) {
                     flipId={editor.ids.categories[categoryIndex]}
                     itemIds={editor.ids.items[categoryIndex]}
                     category={category}
+                    canEdit={canEdit}
                     isFirst={categoryIndex === 0}
                     isLast={categoryIndex === categories.length - 1}
                     onRename={(name) => editor.renameCategory(categoryIndex, name)}
@@ -38,9 +44,15 @@ export default function ChecklistListEditor({ categories, onChange }: IProps) {
                 />
             ))}
 
-            <Button variant="light" fullWidth leftSection={<FontAwesomeIcon icon="plus" />} onClick={editor.addCategory}>
-                Add category
-            </Button>
+            {canEdit && (
+                <Button
+                    variant="light"
+                    fullWidth
+                    leftSection={<FontAwesomeIcon icon="plus" />}
+                    onClick={editor.addCategory}>
+                    Add category
+                </Button>
+            )}
         </FlipStack>
     );
 }

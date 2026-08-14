@@ -1,7 +1,9 @@
 import { Alert, Card, Divider, Group, Skeleton, Stack, Text } from "@mantine/core";
+import { useAtom } from "jotai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IReviewChecklists } from "@tc/types/Checklist";
 import { isReviewChecklists, useReviewChecklists } from "../hooks/useChecklist";
+import { loggedInUserAtom } from "../store/atoms";
 import ChecklistEditor from "../components/checklist/ChecklistEditor";
 import EmptyState from "../components/common/EmptyState";
 
@@ -34,6 +36,7 @@ function ChecklistLoadingState() {
 }
 
 export default function ChecklistPage() {
+    const [user] = useAtom(loggedInUserAtom);
     const { data, isLoading } = useReviewChecklists();
     const loadFailed = !!data?.error && data.status !== 404;
 
@@ -41,8 +44,9 @@ export default function ChecklistPage() {
         <Stack gap="lg">
             <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
                 <Text size="sm">
-                    Changes apply to new and in-progress review forms. Existing submitted reviews keep the wording the
-                    reviewer checked.
+                    {user?.isAdmin
+                        ? "Changes apply to new and in-progress review forms. Existing submitted reviews keep the wording the reviewer checked."
+                        : "This checklist is read-only. Notify an admin if you need changes."}
                 </Text>
             </Alert>
 

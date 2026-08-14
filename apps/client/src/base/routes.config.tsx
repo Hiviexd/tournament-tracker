@@ -249,7 +249,7 @@ const routes: RouteConfig[] = [
         page: <ChecklistPage />,
         title: "Review Checklist",
         icon: "clipboard-list",
-        permissions: ["admin"],
+        permissions: ["committee"],
     },
     {
         path: "/keys",

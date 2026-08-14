@@ -1,8 +1,10 @@
 import { Button, Divider, Group, Stack, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { useAtom } from "jotai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IReviewChecklists } from "@tc/types/Checklist";
+import { loggedInUserAtom } from "../../store/atoms";
 import { isReviewChecklists, useUpdateChecklists } from "../../hooks/useChecklist";
 import ChecklistListEditor from "./ChecklistListEditor";
 import ChecklistImportModal from "./ChecklistImportModal";
@@ -19,6 +21,8 @@ function cloneChecklists(checklists: IReviewChecklists): IReviewChecklists {
 }
 
 export default function ChecklistEditor({ initialChecklists }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
+    const canEdit = !!user?.isAdmin;
     const saveMutation = useUpdateChecklists();
     const [importOpened, { open: openImport, close: closeImport }] = useDisclosure(false);
     const form = useForm<IReviewChecklists>({
@@ -48,30 +52,35 @@ export default function ChecklistEditor({ initialChecklists }: IProps) {
         <>
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="lg">
-                    <Group grow>
-                        <Button
-                            type="submit"
-                            leftSection={<FontAwesomeIcon icon="save" />}
-                            loading={saveMutation.isPending}
-                            disabled={!form.isDirty() || saveMutation.isPending}>
-                            Save Changes
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="light"
-                            leftSection={<FontAwesomeIcon icon="upload" />}
-                            onClick={openImport}>
-                            Paste JSON
-                        </Button>
-                    </Group>
+                    {canEdit && (
+                        <>
+                            <Group grow>
+                                <Button
+                                    type="submit"
+                                    leftSection={<FontAwesomeIcon icon="save" />}
+                                    loading={saveMutation.isPending}
+                                    disabled={!form.isDirty() || saveMutation.isPending}>
+                                    Save Changes
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="light"
+                                    leftSection={<FontAwesomeIcon icon="upload" />}
+                                    onClick={openImport}>
+                                    Paste JSON
+                                </Button>
+                            </Group>
 
-                    <Divider />
+                            <Divider />
+                        </>
+                    )}
 
                     <Stack gap="md">
                         <Title order={4} className="header-border-left">
                             Tournaments (TC)
                         </Title>
                         <ChecklistListEditor
+                            canEdit={canEdit}
                             categories={form.values.tc}
                             onChange={(tc) => form.setFieldValue("tc", tc)}
                         />
@@ -82,6 +91,7 @@ export default function ChecklistEditor({ initialChecklists }: IProps) {
                             Contests (CC)
                         </Title>
                         <ChecklistListEditor
+                            canEdit={canEdit}
                             categories={form.values.cc}
                             onChange={(cc) => form.setFieldValue("cc", cc)}
                         />
@@ -89,12 +99,14 @@ export default function ChecklistEditor({ initialChecklists }: IProps) {
                 </Stack>
             </form>
 
-            <ChecklistImportModal
-                opened={importOpened}
-                onClose={closeImport}
-                onImport={handleImport}
-                replaceExisting={form.values.tc.length > 0 || form.values.cc.length > 0}
-            />
+            {canEdit && (
+                <ChecklistImportModal
+                    opened={importOpened}
+                    onClose={closeImport}
+                    onImport={handleImport}
+                    replaceExisting={form.values.tc.length > 0 || form.values.cc.length > 0}
+                />
+            )}
         </>
     );
 }

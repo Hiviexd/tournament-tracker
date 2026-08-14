@@ -9,6 +9,7 @@ interface IProps {
     flipId: string;
     itemIds: string[];
     category: IChecklistCategory;
+    canEdit?: boolean;
     isFirst: boolean;
     isLast: boolean;
     onRename: (name: string) => void;
@@ -24,6 +25,7 @@ export default function ChecklistCategoryCard({
     flipId,
     itemIds,
     category,
+    canEdit = true,
     isFirst,
     isLast,
     onRename,
@@ -41,25 +43,31 @@ export default function ChecklistCategoryCard({
                     Category
                 </Text>
                 <Group justify="space-between" align="center" wrap="nowrap">
-                    <TextInput
-                        placeholder="Category name"
-                        value={category.category}
-                        onChange={(event) => onRename(event.currentTarget.value)}
-                        style={{ flex: 1 }}
-                    />
+                    {canEdit ? (
+                        <TextInput
+                            placeholder="Category name"
+                            value={category.category}
+                            onChange={(event) => onRename(event.currentTarget.value)}
+                            style={{ flex: 1 }}
+                        />
+                    ) : (
+                        <Text style={{ flex: 1 }}>{category.category}</Text>
+                    )}
                     <Text size="sm" c="dimmed" style={{ whiteSpace: "nowrap" }}>
                         {category.items.length} item{category.items.length !== 1 ? "s" : ""}
                     </Text>
-                    <ChecklistReorderActions
-                        canMoveUp={!isFirst}
-                        canMoveDown={!isLast}
-                        onMoveUp={() => onMove(-1)}
-                        onMoveDown={() => onMove(1)}
-                        onDelete={onDelete}
-                        upLabel="Move category up"
-                        downLabel="Move category down"
-                        deleteLabel="Delete category"
-                    />
+                    {canEdit && (
+                        <ChecklistReorderActions
+                            canMoveUp={!isFirst}
+                            canMoveDown={!isLast}
+                            onMoveUp={() => onMove(-1)}
+                            onMoveDown={() => onMove(1)}
+                            onDelete={onDelete}
+                            upLabel="Move category up"
+                            downLabel="Move category down"
+                            deleteLabel="Delete category"
+                        />
+                    )}
                 </Group>
 
                 <Divider />
@@ -71,6 +79,7 @@ export default function ChecklistCategoryCard({
                             flipId={itemIds[itemIndex]}
                             value={item}
                             index={itemIndex}
+                            canEdit={canEdit}
                             isFirst={itemIndex === 0}
                             isLast={itemIndex === category.items.length - 1}
                             onChange={(text) => onRenameItem(itemIndex, text)}
@@ -80,9 +89,11 @@ export default function ChecklistCategoryCard({
                     ))}
                 </FlipStack>
 
-                <Button variant="light" size="xs" leftSection={<FontAwesomeIcon icon="plus" />} onClick={onAddItem}>
-                    Add item
-                </Button>
+                {canEdit && (
+                    <Button variant="light" size="xs" leftSection={<FontAwesomeIcon icon="plus" />} onClick={onAddItem}>
+                        Add item
+                    </Button>
+                )}
             </Stack>
         </Card>
     );
