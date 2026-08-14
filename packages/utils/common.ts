@@ -316,8 +316,14 @@ export function sanitizeCssColor(value: string | null | undefined): string | und
  */
 export function formatCount(count: number, word: string, options: { includeCount?: boolean } = {}) {
     const { includeCount = true } = options;
-    const label = count === 1 ? word : `${word}s`;
+    const label = count === 1 ? word : pluralize(word);
     return includeCount ? `${count} ${label}` : label;
+}
+
+function pluralize(word: string): string {
+    if (/[aeiou]y$/i.test(word)) return `${word}s`;
+    if (/y$/i.test(word)) return `${word.slice(0, -1)}ies`;
+    return `${word}s`;
 }
 
 /**

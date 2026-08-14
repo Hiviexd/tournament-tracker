@@ -6,7 +6,7 @@ import { useState, useMemo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ExpandButton from "../common/buttons/ExpandButton";
 import { useSubmitReview } from "../../hooks/useTournaments";
-import { useReviewChecklists } from "../../hooks/useChecklist";
+import { isReviewChecklists, useReviewChecklists } from "../../hooks/useChecklist";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import TextEditor from "../common/TextEditor";
@@ -30,7 +30,7 @@ export default function TournamentReviewInput({ tournament }: IProps) {
         );
     }
 
-    if (isError || !checklists) {
+    if (isError || !isReviewChecklists(checklists)) {
         return (
             <Alert
                 color="danger"

@@ -37,14 +37,13 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
   - `discord`: Discord webhook setup
   - `r2`: the Cloudflare R2 bucket's credentials (optional)
   - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
-- Set up `checklist.json` from `checklist.example.json`
 - Run `pnpm dev`, the project will be served in `http://localhost:8088`
 
 ### Docker (production / preview)
 
 Production and preview run via Docker Compose (server API + nginx static client + nginx gateway). Local development stays on `pnpm dev`.
 
-**Local prod-style stack** (requires Docker, `config.json`, and `checklist.json` at the repo root):
+**Local prod-style stack** (requires Docker and `config.json` at the repo root):
 
 ```bash
 pnpm docker:prod          # gateway on http://localhost:8088
@@ -57,7 +56,7 @@ pnpm docker:preview:down
 
 - Production: push to `main` (or workflow_dispatch) — see `.github/workflows/deploy-production.yml`
 - Preview: push to `preview` / `preview/*` — see `.github/workflows/deploy-preview.yml`
-- Keep `config.json` and `checklist.json` on the VPS deploy path (bind-mounted into the server container; not baked into images)
+- Keep `config.json` on the VPS deploy path (bind-mounted into the server container; not baked into images)
 - Image refs for restarts are written to `.images.env` on the VPS
 
 ### Automation jobs

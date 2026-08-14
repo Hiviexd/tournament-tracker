@@ -179,7 +179,7 @@ jobs:
                       echo "Syncing git repo to ${DEPLOY_SHA}"
                       git fetch origin
                       git reset --hard "$DEPLOY_SHA"
-                      git clean -fd -e config.json -e checklist.json -e .images.env -e .env -e .env.*
+                      git clean -fd -e config.json -e .images.env -e .env -e .env.*
                       echo "Repo now at: $(git rev-parse --short HEAD) — $(git log -1 --oneline)"
 
                       printf '%s\n' \

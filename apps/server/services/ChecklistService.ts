@@ -1,34 +1,100 @@
-import { existsSync, readFileSync } from "fs";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath } from "url";
-import { IReviewChecklists } from "@tc/types/Checklist";
+import { IChecklistCategory, IReviewChecklists } from "@tc/types/Checklist";
+import SettingsService from "./SettingsService";
 
-function findRepoRoot(startDir: string): string {
-    let dir = startDir;
-    for (;;) {
-        if (existsSync(join(dir, "pnpm-workspace.yaml")) || existsSync(join(dir, "checklist.json"))) {
-            return dir;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            throw new Error("Could not find repository root containing checklist.json");
-        }
-        dir = parent;
+type HttpError = { status: number; error: string };
+
+function httpError(status: number, error: string): HttpError {
+    return { status, error };
+}
+
+function toPlainChecklists(checklist: IReviewChecklists): IReviewChecklists {
+    return {
+        tc: checklist.tc.map((category) => ({
+            category: category.category,
+            items: [...category.items],
+        })),
+        cc: checklist.cc.map((category) => ({
+            category: category.category,
+            items: [...category.items],
+        })),
+    };
+}
+
+function normalizeList(list: unknown, label: "tc" | "cc"): IChecklistCategory[] {
+    if (!Array.isArray(list)) {
+        throw httpError(400, `Checklist ${label} must be an array`);
     }
+
+    const categories: IChecklistCategory[] = [];
+    const categoryNames = new Set<string>();
+    const itemTexts = new Set<string>();
+
+    for (const raw of list) {
+        if (!raw || typeof raw !== "object") {
+            throw httpError(400, `Invalid category in ${label}`);
+        }
+
+        const rawCategory = (raw as IChecklistCategory).category;
+        const categoryName = typeof rawCategory === "string" ? rawCategory.trim() : "";
+
+        if (!categoryName) {
+            throw httpError(400, `Category name is required in ${label}`);
+        }
+
+        if (categoryNames.has(categoryName)) {
+            throw httpError(400, `Duplicate category "${categoryName}" in ${label}`);
+        }
+        categoryNames.add(categoryName);
+
+        const rawItems = (raw as IChecklistCategory).items;
+        if (!Array.isArray(rawItems) || rawItems.length === 0) {
+            throw httpError(400, `Category "${categoryName}" in ${label} must have at least one item`);
+        }
+
+        const items: string[] = [];
+        for (const rawItem of rawItems) {
+            if (typeof rawItem !== "string") {
+                throw httpError(400, `Invalid item in category "${categoryName}" (${label})`);
+            }
+            const item = rawItem.trim();
+            if (!item) {
+                throw httpError(400, `Item text is required in category "${categoryName}" (${label})`);
+            }
+            if (itemTexts.has(item)) {
+                throw httpError(400, `Duplicate item "${item}" in ${label}`);
+            }
+            itemTexts.add(item);
+            items.push(item);
+        }
+
+        categories.push({ category: categoryName, items });
+    }
+
+    return categories;
+}
+
+export function normalizeChecklists(input: unknown): IReviewChecklists {
+    if (!input || typeof input !== "object") {
+        throw httpError(400, "Checklist body is required");
+    }
+
+    const body = input as Partial<IReviewChecklists>;
+    return {
+        tc: normalizeList(body.tc, "tc"),
+        cc: normalizeList(body.cc, "cc"),
+    };
 }
 
 class ChecklistService {
-    /** Read checklist.json from disk at runtime (supports VPS bind mounts). */
-    public getChecklists(): IReviewChecklists {
-        const here = dirname(fileURLToPath(import.meta.url));
-        const root = findRepoRoot(here);
-        const checklistPath = resolve(root, "checklist.json");
+    public async getChecklists(): Promise<IReviewChecklists> {
+        const settings = await SettingsService.get();
+        return toPlainChecklists(settings.checklist);
+    }
 
-        if (!existsSync(checklistPath)) {
-            throw new Error(`Missing checklist.json at ${checklistPath}. Copy checklist.example.json and fill it in.`);
-        }
-
-        return JSON.parse(readFileSync(checklistPath, "utf8")) as IReviewChecklists;
+    public async updateChecklists(input: unknown): Promise<IReviewChecklists> {
+        const checklist = normalizeChecklists(input);
+        const settings = await SettingsService.updateChecklist(checklist);
+        return toPlainChecklists(settings.checklist);
     }
 }
 

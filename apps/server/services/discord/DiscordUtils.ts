@@ -32,7 +32,7 @@ export default class DiscordUtils {
         red: this.parseColor("#EE2629"), // embedError, overdueVote, staleTicket(10d+), bans, overdueReview(15d+), removeReviewer, clearVotes
         lightRed: this.parseColor("#FF7373"), // createReport, badgeRejected, denyReview, dueSoonVote, overdueReview(12d+), removeUserFromGroup
         darkOrange: this.parseColor("#CE5310"), // unused
-        orange: this.parseColor("#f57e2a"), // rateLimitAlert, staleTicket(7-9d), badgeUpdate, updateReportTarget, assign/addReviewer, tournamentStatus(default), toggleReviewerActivity, updateBadgeLevel
+        orange: this.parseColor("#f57e2a"), // rateLimitAlert, staleTicket(7-9d), badgeUpdate, updateReportTarget, assign/addReviewer, tournamentStatus(default), toggleReviewerActivity, updateBadgeLevel, updateChecklist
         lightOrange: this.parseColor("#EEA578"), // overdueReview(<12d), reassignReviewer, toggleVoterActivity
         darkYellow: this.parseColor("#ffac00"), // concludeVoting, autoConcludeVoting
         yellow: this.parseColor("#ffc85a"), // resumeVoting, changesRequested(status/review), warningInfringement, failedBadgeNote

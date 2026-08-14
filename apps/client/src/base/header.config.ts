@@ -124,6 +124,12 @@ export const routes: IRoute[] = [
                 permissions: ["committee"],
             },
             {
+                title: "Review Checklist",
+                link: "/checklist",
+                icon: "clipboard-list",
+                permissions: ["admin"],
+            },
+            {
                 title: "API Keys",
                 link: "/keys",
                 icon: "key",

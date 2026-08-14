@@ -14,13 +14,12 @@ import mongoose from "mongoose";
 import UserService from "../services/UserService";
 import OsuBotService from "../services/OsuBotService";
 import { IReviewChecklistItem } from "@tc/types/Review";
+import { IChecklistCategory } from "@tc/types/Checklist";
 import ChecklistService from "../services/ChecklistService";
 
 const FALLBACK_HOST_OSU_ID = "37548950";
 const FALLBACK_FORUM_URL = "https://osu.ppy.sh/community/forums/topics/1715676";
 const FILE_UPLOAD_CATEGORY = "tournaments";
-
-const { tc: TC_REVIEW_CHECKLIST, cc: CC_REVIEW_CHECKLIST } = ChecklistService.getChecklists();
 
 interface ICsvTournament {
     "DATE-RECEIVED": string;
@@ -49,7 +48,14 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
     name = "TournamentsFromCsv";
     description = "Migrating tournaments from CSV";
 
+    private tcChecklist: IChecklistCategory[] = [];
+    private ccChecklist: IChecklistCategory[] = [];
+
     protected async execute(): Promise<void> {
+        const { tc, cc } = await ChecklistService.getChecklists();
+        this.tcChecklist = tc;
+        this.ccChecklist = cc;
+
         // This should probably change, but 99% chance we won't ever run this again so /shrug
         const csvFilePath = path.join(__dirname, "../constants/tournaments.csv");
 
@@ -268,7 +274,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
     }
 
     private constructChecklist(type: "tournament" | "contest"): IReviewChecklistItem[] {
-        const checklist = type === "tournament" ? TC_REVIEW_CHECKLIST : CC_REVIEW_CHECKLIST;
+        const checklist = type === "tournament" ? this.tcChecklist : this.ccChecklist;
         const constructedChecklist: IReviewChecklistItem[] = [];
 
         for (const category of checklist) {

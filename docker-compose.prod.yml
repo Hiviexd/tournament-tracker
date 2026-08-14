@@ -8,7 +8,6 @@ services:
       SERVE_CLIENT: "false"
     volumes:
       - ./config.json:/app/config.json:ro
-      - ./checklist.json:/app/checklist.json:ro
     restart: unless-stopped
 
   client:

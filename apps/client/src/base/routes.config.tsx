@@ -25,6 +25,7 @@ import DashboardPage from "../pages/DashboardPage";
 import ApiKeysPage from "../pages/ApiKeysPage";
 import WatchlistPage from "../pages/WatchlistPage";
 import NotificationJobsPage from "../pages/NotificationJobsPage";
+import ChecklistPage from "../pages/ChecklistPage";
 
 interface RouteConfig {
     path: string;
@@ -242,6 +243,13 @@ const routes: RouteConfig[] = [
         title: "Quotes",
         icon: "quote-left",
         permissions: ["committee"],
+    },
+    {
+        path: "/checklist",
+        page: <ChecklistPage />,
+        title: "Review Checklist",
+        icon: "clipboard-list",
+        permissions: ["admin"],
     },
     {
         path: "/keys",

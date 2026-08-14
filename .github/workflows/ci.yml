@@ -28,9 +28,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Setup config files for CI
-              run: |
-                  cp config.example.json config.json
-                  cp checklist.example.json checklist.json
+              run: cp config.example.json config.json
 
             - name: Run ESLint
               run: pnpm lint
