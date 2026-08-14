@@ -9,6 +9,7 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import { useAtom } from "jotai";
 import { useConfirmModal } from "../../../hooks/useModals";
 import AlertText from "../../common/AlertText";
+import utils from "@tc/utils/client";
 
 interface IProps {
     tournament: ITournament;
@@ -39,17 +40,33 @@ export default function TournamentStatus({ tournament }: IProps) {
             excludedStatusesOsu.includes(selectedStatus) ||
             (selectedStatus === "reviewOngoing" && tournament.status === "onHold");
 
+        const hostsWithInfringements =
+            selectedStatus === "badgeApproved"
+                ? (tournament.hosts ?? []).filter((host) => utils.getActiveInfringement(host))
+                : [];
+        const hasInfringingHosts = hostsWithInfringements.length > 0;
+        const infringingHostnames = utils.formatHostsList(hostsWithInfringements);
+
         const message = (
             <>
                 <Text size="sm" mb="sm">
                     Are you sure you want to update the {tournament.type}'s status to{" "}
                     <TournamentStatusBadge status={selectedStatus} /> ?
                 </Text>
-                {notificationNotSending ? (
-                    <AlertText type="info">This will not notify the host.</AlertText>
-                ) : (
-                    <AlertText type="warning">This will notify the tournament host via an osu! message.</AlertText>
-                )}
+                <Stack gap="sm">
+                    {hasInfringingHosts && (
+                        <AlertText type="warning">
+                            {hostsWithInfringements.length === 1
+                                ? `${infringingHostnames} has an active infringement. Are you sure you want to approve badges?`
+                                : `The following hosts have active infringements: ${infringingHostnames}. Are you sure you want to approve badges?`}
+                        </AlertText>
+                    )}
+                    {notificationNotSending ? (
+                        <AlertText type="info">This will not notify the host.</AlertText>
+                    ) : (
+                        <AlertText type="warning">This will notify the tournament host via an osu! message.</AlertText>
+                    )}
+                </Stack>
             </>
         );
 
@@ -57,8 +74,11 @@ export default function TournamentStatus({ tournament }: IProps) {
             await confirmModal({
                 title: "Update Status?",
                 children: message,
-                confirmText: "Update Status",
-                confirmProps: { leftSection: <FontAwesomeIcon icon="floppy-disk" /> },
+                confirmText: hasInfringingHosts ? "Update anyway" : "Update Status",
+                confirmProps: {
+                    color: hasInfringingHosts ? "warning" : undefined,
+                    leftSection: <FontAwesomeIcon icon="floppy-disk" />,
+                },
             })
         ) {
             await editTournamentMutation.mutateAsync({ status: selectedStatus });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Badge } from "@mantine/core";
+import { Badge, Stack } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
 import { useAtom, useAtomValue } from "jotai";
@@ -8,6 +8,8 @@ import { useBulkEditTournaments } from "./useTournaments";
 import { useConfirmModal } from "./useModals";
 import TournamentStatusBadge from "../components/common/badges/TournamentStatusBadge";
 import MassEditConfirmContent from "../components/tournaments/mass-edit/MassEditConfirmContent";
+import AlertText from "../components/common/AlertText";
+import utils from "@tc/utils/client";
 import {
     tournamentCanUseMassEditAtom,
     tournamentMassEditActiveBulkActionAtom,
@@ -103,26 +105,46 @@ export function useTournamentMassEdit({ tournaments }: UseTournamentMassEditProp
     const handleApplyMassStatus = async () => {
         if (!massStatusValue || selectedTournamentIds.length === 0) return;
 
+        const tournamentsWithInfringingHosts =
+            massStatusValue === "badgeApproved"
+                ? selectedTournaments.filter((tournament) =>
+                      tournament.hosts?.some((host) => utils.getActiveInfringement(host)),
+                  )
+                : [];
+        const hasInfringingHosts = tournamentsWithInfringingHosts.length > 0;
+
         const statusConfirmContent = (
-            <MassEditConfirmContent
-                summary={
-                    <>
-                        This will set {selectedTournamentIds.length} tournaments to{" "}
-                        <TournamentStatusBadge status={massStatusValue} />
-                    </>
-                }
-                tournaments={selectedTournaments.map((tournament) => ({
-                    id: tournament._id.toString(),
-                    name: tournament.name,
-                }))}
-            />
+            <Stack gap="sm">
+                {hasInfringingHosts && (
+                    <AlertText type="warning">
+                        {tournamentsWithInfringingHosts.length === 1
+                            ? "1 of these tournaments has hosts with active infringements."
+                            : `${tournamentsWithInfringingHosts.length} of these tournaments have hosts with active infringements.`}
+                    </AlertText>
+                )}
+                <MassEditConfirmContent
+                    summary={
+                        <>
+                            This will set {selectedTournamentIds.length} tournaments to{" "}
+                            <TournamentStatusBadge status={massStatusValue} />
+                        </>
+                    }
+                    tournaments={selectedTournaments.map((tournament) => ({
+                        id: tournament._id.toString(),
+                        name: tournament.name,
+                    }))}
+                />
+            </Stack>
         );
 
         const confirmed = await confirmModal({
             title: "Apply status to selected tournaments?",
             children: statusConfirmContent,
-            confirmText: "Apply Status",
-            confirmProps: { leftSection: <FontAwesomeIcon icon="check" /> },
+            confirmText: hasInfringingHosts ? "Apply anyway" : "Apply Status",
+            confirmProps: {
+                color: hasInfringingHosts ? "warning" : undefined,
+                leftSection: <FontAwesomeIcon icon="check" />,
+            },
         });
 
         if (!confirmed) return;

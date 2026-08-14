@@ -653,15 +653,6 @@ class TournamentService {
     ): Promise<{ error?: string }> {
         const oldStatus = tournament.status;
 
-        // Block "badgeApproved" status if any host has an active infringement
-        if (status === "badgeApproved") {
-            const hostsWithInfringements = tournament.hosts.filter((host: IUser) => host.activeInfringement);
-            if (hostsWithInfringements.length > 0) {
-                const hostnames = utils.formatHostsList(hostsWithInfringements);
-                return { error: `Cannot approve badges for hosts with active infringements: ${hostnames}` };
-            }
-        }
-
         tournament.status = status;
 
         if (status === "reviewOngoing") {
