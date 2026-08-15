@@ -15,7 +15,7 @@ import AppErrorBoundary from "./components/base/AppErrorBoundary";
 const queryClient = new QueryClient();
 
 // Mantine
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { DatesProvider } from "@mantine/dates";
 import { ModalsProvider } from "@mantine/modals";
 import { theme } from "./themes";
@@ -45,7 +45,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <HelmetProvider>
             <StateProvider>
                 <QueryClientProvider client={queryClient}>
-                    <MantineProvider defaultColorScheme="dark" theme={theme}>
+                    <MantineProvider defaultColorScheme="dark" theme={theme} cssVariablesResolver={v8CssVariablesResolver}>
                         <ModalsProvider>
                             <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                                 <ReactScan />

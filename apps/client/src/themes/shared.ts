@@ -13,6 +13,7 @@ export const baseThemeConfig = {
     primaryColor: "primary" as const,
     white: "#f8f9fa",
     black: "#212529",
+    defaultRadius: "sm",
 };
 
 /**
@@ -30,9 +31,7 @@ export const baseComponents: MantineThemeComponents = {
             });
             return {
                 root: {
-                    "--alert-bg": colors.background,
                     "--alert-color": colors.color,
-                    "--alert-bd": colors.border,
                 },
             };
         },
