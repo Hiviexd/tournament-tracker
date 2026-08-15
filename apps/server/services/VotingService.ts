@@ -7,6 +7,7 @@ import utils from "@tc/utils/server";
 import config from "@tc/config";
 import { Document } from "mongoose";
 import User from "../models/userModel";
+import Vote from "../models/voteModel";
 import Voting from "../models/votingModel";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
@@ -29,10 +30,13 @@ export interface RecalibrateRequiredVotesResult {
 
 type AbstainedUserRef = NonNullable<IVoting["abstainedUsers"]>[number] | { _id: { toString(): string } } | string;
 
+type VoteRef = { author?: AbstainedUserRef } | AbstainedUserRef;
+
 type VotingForRequiredVotes = {
     assignedGroups: UserGroup[] | UserGroup;
     forceFullParticipation?: boolean;
     abstainedUsers?: AbstainedUserRef[];
+    votes?: VoteRef[];
 };
 
 type VotingToRecalibrate = VotingForRequiredVotes & {
@@ -68,20 +72,31 @@ class VotingService {
             isActiveVoter: true,
         }).select("_id");
 
-        const eligibleIds = new Set(eligibleUsers.map((user) => user._id.toString()));
-        const eligibleCount = eligibleIds.size;
+        const liveEligibleIds = new Set(eligibleUsers.map((user) => user._id.toString()));
+        const voteAuthorIds = await this.getVoteAuthorIds(voting.votes);
+        const ghostCandidateIds = voteAuthorIds.filter((id) => !liveEligibleIds.has(id));
+
+        let ghostCount = 0;
+        if (ghostCandidateIds.length) {
+            ghostCount = await User.countDocuments({
+                _id: { $in: ghostCandidateIds },
+                groups: { $in: assignedGroups },
+            });
+        }
+
+        const rosterCount = liveEligibleIds.size + ghostCount;
         const base = voting.forceFullParticipation
-            ? eligibleCount
-            : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * eligibleCount);
+            ? rosterCount
+            : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * rosterCount);
 
         const validAbstentionCount = (voting.abstainedUsers ?? []).filter((user) =>
-            eligibleIds.has(this.getEntityId(user)),
+            liveEligibleIds.has(this.getEntityId(user)),
         ).length;
 
         const unclamped = base - validAbstentionCount;
 
         return {
-            eligibleCount,
+            eligibleCount: rosterCount,
             validAbstentionCount,
             unclamped,
             requiredVotes: Math.max(1, unclamped),
@@ -158,12 +173,36 @@ class VotingService {
         return Array.isArray(assignedGroups) ? assignedGroups : [assignedGroups];
     }
 
-    private getEntityId(entity: AbstainedUserRef): string {
+    private getEntityId(entity: VoteRef): string {
         if (utils.isString(entity)) return entity;
         if ("_id" in entity && entity._id) {
             return entity._id.toString();
         }
         return String(entity);
+    }
+
+    private async getVoteAuthorIds(votes: VoteRef[] | undefined): Promise<string[]> {
+        if (!votes?.length) return [];
+
+        const authorIds: string[] = [];
+        const unpopulatedVoteIds: string[] = [];
+
+        for (const vote of votes) {
+            if (!utils.isString(vote) && "author" in vote && vote.author) {
+                authorIds.push(this.getEntityId(vote.author));
+            } else {
+                unpopulatedVoteIds.push(this.getEntityId(vote));
+            }
+        }
+
+        if (unpopulatedVoteIds.length) {
+            const docs = await Vote.find({ _id: { $in: unpopulatedVoteIds } }).select("author");
+            for (const doc of docs) {
+                authorIds.push(this.getEntityId(doc.author));
+            }
+        }
+
+        return [...new Set(authorIds)];
     }
 
     public generateDiscordVotingResults(voting: IVoting): IDiscordField[] {

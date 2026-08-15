@@ -1,21 +1,29 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Types } from "mongoose";
-import { IVoting } from "@tc/types/Voting";
-import { IUser } from "@tc/types/User";
-import User from "../../models/userModel";
-import Voting from "../../models/votingModel";
+import { IUser, UserGroup } from "@tc/types/User";
 import { createMockUsers } from "../utils/users";
 
+const mockUser = vi.hoisted(() => ({
+    find: vi.fn(),
+    countDocuments: vi.fn(),
+}));
+
+const mockVoting = vi.hoisted(() => ({
+    find: vi.fn(),
+}));
+
 vi.mock("../../models/userModel", () => ({
+    default: mockUser,
+}));
+
+vi.mock("../../models/voteModel", () => ({
     default: {
         find: vi.fn(),
     },
 }));
 
 vi.mock("../../models/votingModel", () => ({
-    default: {
-        find: vi.fn(),
-    },
+    default: mockVoting,
 }));
 
 vi.mock("@tc/config", () => ({
@@ -24,14 +32,12 @@ vi.mock("@tc/config", () => ({
 
 import VotingService from "../../services/VotingService";
 
-interface MockFindModel {
-    find: ReturnType<typeof vi.fn>;
+interface VotingInput {
+    assignedGroups: UserGroup[] | UserGroup;
+    forceFullParticipation?: boolean;
+    abstainedUsers?: Array<IUser | Types.ObjectId>;
+    votes?: Array<{ author?: IUser }>;
 }
-
-// SAFETY: vi.mock replaces mongoose models with find stubs.
-const mockUser = User as MockFindModel;
-// SAFETY: vi.mock replaces mongoose models with find stubs.
-const mockVoting = Voting as MockFindModel;
 
 function mockEligibleVoters(users: Pick<IUser, "_id">[]) {
     mockUser.find.mockReturnValue({
@@ -39,11 +45,9 @@ function mockEligibleVoters(users: Pick<IUser, "_id">[]) {
     });
 }
 
-function votingInput(
-    overrides: Partial<Pick<IVoting, "assignedGroups" | "forceFullParticipation" | "abstainedUsers">> = {},
-) {
+function votingInput(overrides: Partial<VotingInput> = {}): VotingInput {
     return {
-        assignedGroups: ["tc"],
+        assignedGroups: "tc",
         forceFullParticipation: false,
         abstainedUsers: [],
         ...overrides,
@@ -193,6 +197,61 @@ describe("VotingService required votes", () => {
             expect(result.requiredVotes).toBe(1);
             expect(result.unclamped).toBe(1);
         });
+
+        it("keeps inactive vote authors in the roster when they are still in an assigned group", async () => {
+            const liveEligible = createMockUsers(9, { groups: ["tc"], isActiveVoter: true });
+            const inactiveVoter = createMockUsers(1, { groups: ["tc"], isActiveVoter: false })[0];
+            mockEligibleVoters(liveEligible);
+            mockUser.countDocuments.mockResolvedValue(1);
+
+            const result = await VotingService.computeRequiredVotes(
+                votingInput({
+                    votes: [{ author: inactiveVoter }],
+                }),
+            );
+
+            expect(mockUser.countDocuments).toHaveBeenCalledWith({
+                _id: { $in: [inactiveVoter._id.toString()] },
+                groups: { $in: ["tc"] },
+            });
+            expect(result).toMatchObject({
+                eligibleCount: 10,
+                unclamped: 8,
+                requiredVotes: 8,
+            });
+        });
+
+        it("does not keep inactive vote authors who left the assigned group", async () => {
+            const liveEligible = createMockUsers(9, { groups: ["tc"], isActiveVoter: true });
+            const formerMember = createMockUsers(1, { groups: ["cc"], isActiveVoter: false })[0];
+            mockEligibleVoters(liveEligible);
+            mockUser.countDocuments.mockResolvedValue(0);
+
+            const result = await VotingService.computeRequiredVotes(
+                votingInput({
+                    votes: [{ author: formerMember }],
+                }),
+            );
+
+            expect(result).toMatchObject({
+                eligibleCount: 9,
+                unclamped: 7,
+                requiredVotes: 7,
+            });
+        });
+
+        it("does not keep inactive people in the roster if they never voted", async () => {
+            mockEligibleVoters(createMockUsers(9, { groups: ["tc"], isActiveVoter: true }));
+
+            const result = await VotingService.computeRequiredVotes(votingInput());
+
+            expect(mockUser.countDocuments).not.toHaveBeenCalled();
+            expect(result).toMatchObject({
+                eligibleCount: 9,
+                unclamped: 7,
+                requiredVotes: 7,
+            });
+        });
     });
 
     describe("recalibrateRequiredVotes", () => {
@@ -201,7 +260,7 @@ describe("VotingService required votes", () => {
             const save = vi.fn().mockResolvedValue(undefined);
             const voting = {
                 requiredVotes: 10,
-                assignedGroups: ["tc"],
+                assignedGroups: "tc" as const,
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save,
@@ -224,7 +283,7 @@ describe("VotingService required votes", () => {
             const save = vi.fn().mockResolvedValue(undefined);
             const voting = {
                 requiredVotes: 8,
-                assignedGroups: ["tc"],
+                assignedGroups: "tc" as const,
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save,
@@ -256,7 +315,7 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Stale quota",
                 requiredVotes: 10,
-                assignedGroups: ["tc"],
+                assignedGroups: "tc" as const,
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save: vi.fn().mockResolvedValue(undefined),
@@ -265,7 +324,7 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Already current",
                 requiredVotes: 8,
-                assignedGroups: ["tc"],
+                assignedGroups: "tc" as const,
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save: vi.fn().mockResolvedValue(undefined),
