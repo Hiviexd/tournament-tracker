@@ -1,6 +1,6 @@
 // Base
 import { useState } from "react";
-import { useUpdateVoting } from "../../hooks/useVotings";
+import { useUpdateVoting, useRecalibrateRequiredVotes } from "../../hooks/useVotings";
 import { IVoting } from "@tc/types/Voting";
 import { VOTE_COLORS } from "../../constants";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -25,6 +25,7 @@ import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TextEditor from "../common/TextEditor";
 import UserSearch from "../common/UserSearch";
+import { useConfirmModal } from "../../hooks/useModals";
 
 interface IProps {
     voting: IVoting;
@@ -34,6 +35,8 @@ interface IProps {
 
 export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     const updateVotingMutation = useUpdateVoting(voting.id);
+    const recalibrateMutation = useRecalibrateRequiredVotes(voting.id);
+    const confirmModal = useConfirmModal();
     const [newOption, setNewOption] = useState("");
     const [editorKey, setEditorKey] = useState(0);
     const hasVotes = voting.votes.length > 0;
@@ -163,6 +166,22 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
         form.validate();
     };
 
+    const handleRecalibrateRequiredVotes = async () => {
+        if (
+            !(await confirmModal({
+                title: "Recalibrate Required Votes?",
+                text: "Recalculate required votes from the current active-voter roster?",
+                confirmText: "Recalibrate",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon="arrows-rotate" />,
+                    color: "blue",
+                },
+            }))
+        )
+            return;
+        await recalibrateMutation.mutateAsync();
+    };
+
     const categoryOptions = [
         { value: "discussion", label: "Discussion" },
         { value: "tournament", label: "Tournament" },
@@ -284,6 +303,24 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 min={1}
                                 {...form.getInputProps("duration")}
                             />
+
+                            <Group justify="space-between" align="center">
+                                <Text size="sm">
+                                    Required votes:{" "}
+                                    <Text span fw={600}>
+                                        {voting.requiredVotes}
+                                    </Text>
+                                </Text>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    color="blue"
+                                    onClick={handleRecalibrateRequiredVotes}
+                                    loading={recalibrateMutation.isPending}
+                                    leftSection={<FontAwesomeIcon icon="arrows-rotate" />}>
+                                    Recalibrate
+                                </Button>
+                            </Group>
 
                             <Stack gap="xs">
                                 <Group justify="space-between">

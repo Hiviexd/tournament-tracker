@@ -3,7 +3,12 @@ import dayjs from "@tc/utils/dayjs";
 import { useState } from "react";
 import { IVoting } from "@tc/types/Voting";
 import { IUser } from "@tc/types/User";
-import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic, useClearVotes } from "../../hooks/useVotings";
+import {
+    useToggleVotingStatus,
+    useDeleteVoting,
+    useToggleVotingPublic,
+    useClearVotes,
+} from "../../hooks/useVotings";
 import { useConfirmModal } from "../../hooks/useModals";
 
 // Mantine
@@ -312,7 +317,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     )}
 
                     {user?.isCommittee && (
-                        <Group>
+                        <Group wrap="wrap">
                             <Button
                                 variant={voting.isActive ? "filled" : "outline"}
                                 color="warning"

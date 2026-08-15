@@ -1,5 +1,5 @@
 import { RankedChoiceVote, RankedChoiceVoteScore } from "@tc/types/Vote";
-import { IUser } from "@tc/types/User";
+import { IUser, UserGroup } from "@tc/types/User";
 import { IInfringement, TIME_BASED_TYPES } from "@tc/types/Infringement";
 import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
 
@@ -514,6 +514,18 @@ function isInfringementIndefinite(infringement: IInfringement): boolean {
 
 function isInfringementExpired(infringement: IInfringement): boolean {
     return infringement.isExpired ?? !!(infringement.endDate && new Date(infringement.endDate) < new Date());
+}
+
+/**
+ * Whether a user currently counts toward a vote's required-votes roster
+ * (active voter in at least one of the vote's assigned groups).
+ */
+export function isEligibleVoter(
+    user: Pick<IUser, "isActiveVoter" | "groups"> | null | undefined,
+    assignedGroups: UserGroup[],
+): boolean {
+    if (!user?.isActiveVoter || !assignedGroups?.length) return false;
+    return user.groups.some((group) => assignedGroups.includes(group));
 }
 
 /**

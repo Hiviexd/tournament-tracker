@@ -50,7 +50,7 @@ class ChecklistController {
                 const embed = new EmbedBuilder()
                     .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                     .setColor(DiscordUtils.webhookColors.orange)
-                    .setDescription(`Updated the [**review checklist**](${checklistUrl}).${reorderNote}`);
+                    .setDescription(`Updated the [**review checklist**](${checklistUrl})${reorderNote}`);
 
                 for (const field of changes.fields) {
                     embed.addField(field.name, field.value);

@@ -1,12 +1,14 @@
-import { IUser, UserListQuery } from "@tc/types/User";
+import { IUser, UserGroup, UserListQuery } from "@tc/types/User";
 import User from "../models/userModel";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
+import VotingService from "../services/VotingService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import OsuApiService from "../services/OsuApiService";
 import LogService from "../services/LogService";
+import config from "@tc/config";
 import { Request, Response } from "express";
 import TournamentService from "../services/TournamentService";
 import Ticket from "../models/ticketModel";
@@ -188,18 +190,19 @@ class UsersController {
             "user",
         );
 
-        await new WebhookBuilder()
-            .addEmbed(
-                new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
-                    .setColor(DiscordUtils.webhookColors.lightOrange)
-                    .setDescription(
-                        `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
-                            user.isActiveVoter ? "active" : "inactive"
-                        }** voter`,
-                    ),
-            )
-            .send();
+        const webhook = new WebhookBuilder().addEmbed(
+            new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.lightOrange)
+                .setDescription(
+                    `Marked [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) as **${
+                        user.isActiveVoter ? "active" : "inactive"
+                    }** voter`,
+                ),
+        );
+
+        await appendRequiredVotesRecalibration(webhook, user.groups, req.session.mongoId!);
+        await webhook.send();
 
         res.json({
             message: `Set voting activity status as ${user.isActiveVoter ? "active" : "inactive"}!`,
@@ -259,19 +262,20 @@ class UsersController {
             "user",
         );
 
-        // Discord webhook
-        await new WebhookBuilder()
-            .addEmbed(
-                new EmbedBuilder()
-                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
-                    .setColor(join ? DiscordUtils.webhookColors.lightGreen : DiscordUtils.webhookColors.lightRed)
-                    .setDescription(
-                        `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
-                            join ? "to" : "from"
-                        } the **${groupName}**`,
-                    ),
-            )
-            .send();
+        const webhook = new WebhookBuilder().addEmbed(
+            new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(join ? DiscordUtils.webhookColors.lightGreen : DiscordUtils.webhookColors.lightRed)
+                .setDescription(
+                    `${join ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
+                        join ? "to" : "from"
+                    } the **${groupName}**`,
+                ),
+        );
+
+        // Include `group` even on leave so votes assigned to that group still recalibrate
+        await appendRequiredVotesRecalibration(webhook, [group], req.session.mongoId!);
+        await webhook.send();
 
         res.json({
             message: `User ${join ? "added to" : "removed from"} the **${groupName}** successfully!`,
@@ -469,6 +473,28 @@ class UsersController {
 
         res.json({ reports, votings });
     }
+}
+
+async function appendRequiredVotesRecalibration(
+    webhook: WebhookBuilder,
+    groups: UserGroup[],
+    actorId: string,
+): Promise<void> {
+    const changed = await VotingService.recalibrateActiveVotingsForGroups(groups);
+    if (!changed.length) return;
+
+    webhook.addEmbed(VotingService.buildRecalibrationEmbed(changed));
+
+    await LogService.generate(
+        actorId,
+        `Recalibrated required votes for: ${changed
+            .map(
+                ({ voting, result }) =>
+                    `[**${voting.title}**](${config.baseUrl}/votes/${voting._id}) (${result.previous} → ${result.next})`,
+            )
+            .join(", ")}`,
+        "voting",
+    );
 }
 
 export default new UsersController();

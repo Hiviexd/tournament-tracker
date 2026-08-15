@@ -26,6 +26,7 @@ const VotingSchema = new Schema<IVoting>(
         targetTournamentName: { type: String },
         targetTournamentLink: { type: String },
         requiredVotes: { type: Number, default: 1 },
+        forceFullParticipation: { type: Boolean, default: false },
         attachments: [{ type: Schema.Types.ObjectId, ref: "Attachment" }],
         isPublic: { type: Boolean, default: false },
         publicDescription: { type: String },

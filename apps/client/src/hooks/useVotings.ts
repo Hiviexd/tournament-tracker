@@ -172,3 +172,21 @@ export function useToggleAbstention(votingId: string) {
         },
     });
 }
+
+export function useRecalibrateRequiredVotes(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall<{ message: string; voting: IVoting }>({
+                method: "patch",
+                url: `/api/votes/${votingId}/recalibrateRequiredVotes`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+        },
+    });
+}

@@ -1,10 +1,39 @@
 import { IVoting } from "@tc/types/Voting";
 import { IVote } from "@tc/types/Vote";
-import { IUser } from "@tc/types/User";
+import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
 import utils from "@tc/utils/server";
-import { Document } from "mongoose";
+import config from "@tc/config";
+import { Document, HydratedDocument } from "mongoose";
+import User from "../models/userModel";
+import Voting from "../models/votingModel";
+import { EmbedBuilder } from "./discord/EmbedBuilder";
+import DiscordUtils from "./discord/DiscordUtils";
+
+const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
+
+export interface RequiredVotesComputation {
+    eligibleCount: number;
+    validAbstentionCount: number;
+    unclamped: number;
+    requiredVotes: number;
+}
+
+export interface RecalibrateRequiredVotesResult {
+    previous: number;
+    next: number;
+    changed: boolean;
+    eligibleCount: number;
+}
+
+export interface RecalibratedVoting {
+    voting: IVoting;
+    result: RecalibrateRequiredVotesResult;
+}
+
+type VotingForRequiredVotes = Pick<IVoting, "assignedGroups" | "forceFullParticipation" | "abstainedUsers">;
+type AbstainedUserRef = NonNullable<IVoting["abstainedUsers"]>[number] | { _id: { toString(): string } } | string;
 
 class VotingService {
     public censorVotingForNonCommittee(voting: Document & IVoting) {
@@ -19,6 +48,109 @@ class VotingService {
             author: undefined,
         })) as unknown as IVote[];
         return publicVoting;
+    }
+
+    public async computeRequiredVotes(voting: VotingForRequiredVotes): Promise<RequiredVotesComputation> {
+        const assignedGroups = this.normalizeAssignedGroups(voting.assignedGroups);
+
+        const eligibleUsers = await User.find({
+            groups: { $in: assignedGroups },
+            isActiveVoter: true,
+        }).select("_id");
+
+        const eligibleIds = new Set(eligibleUsers.map((user) => user._id.toString()));
+        const eligibleCount = eligibleIds.size;
+        const base = voting.forceFullParticipation
+            ? eligibleCount
+            : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * eligibleCount);
+
+        const validAbstentionCount = (voting.abstainedUsers ?? []).filter((user) =>
+            eligibleIds.has(this.getEntityId(user)),
+        ).length;
+
+        const unclamped = base - validAbstentionCount;
+
+        return {
+            eligibleCount,
+            validAbstentionCount,
+            unclamped,
+            requiredVotes: Math.max(1, unclamped),
+        };
+    }
+
+    public async recalibrateRequiredVotes(voting: HydratedDocument<IVoting>): Promise<RecalibrateRequiredVotesResult> {
+        const previous = voting.requiredVotes;
+        const computation = await this.computeRequiredVotes(voting);
+        const next = computation.requiredVotes;
+        const changed = previous !== next;
+
+        if (changed) {
+            voting.requiredVotes = next;
+            await voting.save();
+        }
+
+        return {
+            previous,
+            next,
+            changed,
+            eligibleCount: computation.eligibleCount,
+        };
+    }
+
+    public async recalibrateActiveVotingsForGroups(groups: UserGroup[] | UserGroup): Promise<RecalibratedVoting[]> {
+        const assignedGroups = this.committeeGroups(groups);
+        if (assignedGroups.length === 0) return [];
+
+        const votings = await Voting.find({
+            isActive: true,
+            assignedGroups: { $in: assignedGroups },
+        });
+
+        const changed: RecalibratedVoting[] = [];
+
+        for (const voting of votings) {
+            const result = await this.recalibrateRequiredVotes(voting);
+            if (result.changed) {
+                changed.push({ voting, result });
+            }
+        }
+
+        return changed;
+    }
+
+    public isEligibleVoter(user: Pick<IUser, "isActiveVoter" | "groups">, assignedGroups: UserGroup[]): boolean {
+        return utils.isEligibleVoter(user, this.normalizeAssignedGroups(assignedGroups));
+    }
+
+    public buildRecalibrationEmbed(items: RecalibratedVoting[]): EmbedBuilder {
+        const header = `Recalibrated required votes for **${utils.formatCount(items.length, "vote")}**`;
+
+        const lines = items.map(({ voting, result }) => {
+            const participation = voting.forceFullParticipation ? "100%" : "75%";
+            return `- [**${voting.title}**](${config.baseUrl}/votes/${voting._id}): **${result.previous} → ${result.next}** (${result.eligibleCount} eligible, ${participation})`;
+        });
+
+        return new EmbedBuilder()
+            .setColor(DiscordUtils.webhookColors.lightOrange)
+            .setDescription(`${header}\n\n${lines.join("\n")}`);
+    }
+
+    private committeeGroups(groups: UserGroup[] | UserGroup): UserGroup[] {
+        return [...new Set(this.normalizeAssignedGroups(groups))].filter(
+            (group): group is UserGroup => group === "tc" || group === "cc",
+        );
+    }
+
+    private normalizeAssignedGroups(assignedGroups: UserGroup[] | UserGroup): UserGroup[] {
+        return Array.isArray(assignedGroups) ? assignedGroups : [assignedGroups];
+    }
+
+    private getEntityId(entity: AbstainedUserRef): string {
+        if (typeof entity === "string") return entity;
+        if (entity && typeof entity === "object" && "_id" in entity && entity._id) {
+            return entity._id.toString();
+        }
+        return String(entity);
     }
 
     public generateDiscordVotingResults(voting: IVoting): IDiscordField[] {
