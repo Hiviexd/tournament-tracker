@@ -351,6 +351,9 @@ importers:
       '@types/multer':
         specifier: ^1.4.12
         version: 1.4.13
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.5.2
       typescript:
         specifier: ^5.2.2
         version: 5.9.2
