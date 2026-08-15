@@ -84,7 +84,7 @@ class AuthController {
         // Only redirect to same-origin or relative path to prevent open redirect
         const baseUrl = config.baseUrl?.trim() || "";
         let redirectTarget = "/";
-        if (lastPage && typeof lastPage === "string") {
+        if (lastPage) {
             const trimmed = lastPage.trim();
             if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
                 redirectTarget = trimmed;

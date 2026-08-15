@@ -3,7 +3,6 @@ import User from "../models/userModel";
 import ApiKey from "../models/apiKeyModel";
 import utils from "@tc/utils/server";
 import { IUser } from "@tc/types/User";
-import { Request } from "express";
 
 export default class ApiKeyService {
     /**
@@ -75,7 +74,10 @@ export default class ApiKeyService {
      * @param rawKey - the raw API key
      * @returns the user and API key
      */
-    static async validate(rawKey: string, req: Request): Promise<{ user: IUser; apiKey: IApiKey } | null> {
+    static async validate(
+        rawKey: string,
+        req: { originalUrl?: string },
+    ): Promise<{ user: IUser; apiKey: IApiKey } | null> {
         const { hashed } = utils.generateApiKey(rawKey);
 
         const apiKey = await ApiKey.findOne({ hashedKey: hashed });

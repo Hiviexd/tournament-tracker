@@ -4,7 +4,7 @@ import { IUser } from "@tc/types/User";
 export const WATCHLIST_PAGE_SIZE = 20;
 
 export function isTimeBasedType(i: IInfringement): boolean {
-    return (i.isTimeBased ?? TIME_BASED_TYPES.includes(i.type as InfringementType)) === true;
+    return (i.isTimeBased ?? TIME_BASED_TYPES.includes(i.type)) === true;
 }
 
 export function isExpiredInfringement(i: IInfringement): boolean {

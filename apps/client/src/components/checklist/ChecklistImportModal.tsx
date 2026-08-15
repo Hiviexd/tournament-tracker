@@ -73,8 +73,9 @@ export default function ChecklistImportModal({ opened, onClose, onImport, replac
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack gap="md">
                     <Text size="sm" c="dimmed">
-                        Paste a full checklist object with <Code bg="primary.10">tc</Code> and <Code bg="primary.10">cc</Code> arrays. This updates the
-                        editor only. Click Save Changes afterwards.
+                        Paste a full checklist object with <Code bg="primary.10">tc</Code> and{" "}
+                        <Code bg="primary.10">cc</Code> arrays. This updates the editor only. Click Save Changes
+                        afterwards.
                     </Text>
                     <Textarea
                         autosize

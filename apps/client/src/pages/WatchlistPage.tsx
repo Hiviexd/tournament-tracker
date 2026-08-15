@@ -15,6 +15,7 @@ import EmptyState from "../components/common/EmptyState";
 import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import { WATCHLIST_PAGE_SIZE } from "../components/watchlist/watchlistUtils";
+import { pickStringUnion } from "@tc/utils/client";
 
 interface FilterValues {
     type: InfringementType | "";
@@ -25,8 +26,7 @@ export default function WatchlistPage() {
     const setSelectedUser = useSetAtom(selectedUserAtom);
     const previousQueryBeforeUserModalRef = useRef<{ type: string; page: number } | null>(null);
 
-    const getDiscordThreadLink = (threadId: string) =>
-        `https://discord.com/channels/${DISCORD_SERVER_ID}/${threadId}`;
+    const getDiscordThreadLink = (threadId: string) => `https://discord.com/channels/${DISCORD_SERVER_ID}/${threadId}`;
 
     const [queryState, setQueryState] = useQueryStates(
         {
@@ -50,7 +50,8 @@ export default function WatchlistPage() {
         setSelectedUser(null);
     };
 
-    const handleUserSelect = (user: IUser) => {
+    const handleUserSelect = (user: IUser | null) => {
+        if (!user) return;
         setSelectedUser(user);
 
         if (!queryState.user) {
@@ -66,7 +67,7 @@ export default function WatchlistPage() {
     };
 
     const filters: FilterValues = useMemo(
-        () => ({ type: queryState.type as InfringementType | "" }),
+        () => ({ type: pickStringUnion(queryState.type, Object.values(InfringementType)) ?? "" }),
         [queryState.type],
     );
 
@@ -101,11 +102,7 @@ export default function WatchlistPage() {
         <Stack gap="md">
             <UserWatchlistModal userId={queryState.user} onClose={handleUserWatchlistModalClose} />
 
-            <WatchlistFilters
-                values={filters}
-                onChange={handleFilterChange}
-                onUserSelect={handleUserSelect as (user: IUser | null) => void}
-            />
+            <WatchlistFilters values={filters} onChange={handleFilterChange} onUserSelect={handleUserSelect} />
 
             <Button
                 onClick={() => setIsCreateModalOpen(true)}

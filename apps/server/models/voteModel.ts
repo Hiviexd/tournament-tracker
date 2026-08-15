@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IVote, VoteType, VariableVoteScore, RankedChoiceVoteScore } from "@tc/types/Vote";
+import { isNumber } from "@tc/utils/common";
 
 const VoteDataSchema = new Schema(
     {
@@ -35,18 +36,15 @@ const VoteSchema = new Schema<IVote>(
                 validator(data: VoteType) {
                     switch (data.type) {
                         case "classic":
-                            return typeof data.option === "number";
+                            return isNumber(data.option);
                         case "binary":
-                            return typeof data.score === "number" && data.score >= -5 && data.score <= 5;
+                            return isNumber(data.score) && data.score >= -5 && data.score <= 5;
                         case "variable":
                             return (
                                 Array.isArray(data.scores) &&
                                 data.scores.every(
                                     (s: VariableVoteScore) =>
-                                        typeof s.optionIndex === "number" &&
-                                        typeof s.score === "number" &&
-                                        s.score >= -5 &&
-                                        s.score <= 5,
+                                        isNumber(s.optionIndex) && isNumber(s.score) && s.score >= -5 && s.score <= 5,
                                 )
                             );
                         case "ranked-choice":
@@ -54,14 +52,11 @@ const VoteSchema = new Schema<IVote>(
                                 Array.isArray(data.scores) &&
                                 data.scores.every(
                                     (s: RankedChoiceVoteScore) =>
-                                        typeof s.optionIndex === "number" &&
-                                        typeof s.score === "number" &&
-                                        s.score >= -2 &&
-                                        s.score <= 2,
+                                        isNumber(s.optionIndex) && isNumber(s.score) && s.score >= -2 && s.score <= 2,
                                 )
                             );
                         case "binary-strict":
-                            return typeof data.score === "number" && data.score >= -1 && data.score <= 1;
+                            return isNumber(data.score) && data.score >= -1 && data.score <= 1;
                         default:
                             return false;
                     }

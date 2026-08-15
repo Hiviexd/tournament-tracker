@@ -38,7 +38,6 @@ export function escapeUsername(username: string) {
  * @returns Escaped string safe for new RegExp(str) or { $regex: str }
  */
 export function escapeRegexPattern(str: string): string {
-    if (typeof str !== "string") return "";
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -61,7 +60,7 @@ type DiscordTimestampType =
  * discordTimestamp(new Date(), "dayDateTime") // "Monday, May 26, 2025 12:00"
  */
 export function discordTimestamp(date: Date, type: DiscordTimestampType = "relative"): string {
-    const types: Record<DiscordTimestampType, string> = {
+    const types = {
         relative: "R",
         shortTime: "t",
         longTime: "T",
@@ -69,7 +68,7 @@ export function discordTimestamp(date: Date, type: DiscordTimestampType = "relat
         longDate: "D",
         dateTime: "f",
         dayDateTime: "F",
-    };
+    } as const satisfies Record<DiscordTimestampType, string>;
     return `<t:${Math.floor(date.getTime() / 1000)}:${types[type]}>`;
 }
 
@@ -267,7 +266,9 @@ export const consoleStyles = (text: string, styleNames: StyleName[]) => {
  * @param filename The filename to sanitize
  * @returns Object with sanitized ASCII filename and properly encoded UTF-8 version
  */
-export function sanitizeFilename(filename: string): { ascii: string; encoded: string } {
+type SanitizedFilename = { ascii: string; encoded: string };
+
+export function sanitizeFilename(filename: string): SanitizedFilename {
     const trimmed = filename.trim();
 
     // ASCII-safe fallback: only letters, numbers, -, _, .
@@ -287,7 +288,9 @@ export function sanitizeFilename(filename: string): { ascii: string; encoded: st
  * generateApiKey("1234567890") // { raw: "1234567890", hashed: "84d898...<sha256 hash>..." }
  * generateApiKey() // { raw: "randomBase64urlString", hashed: "sha256 hash of it" }
  */
-export function generateApiKey(rawKeyOverride?: string): { raw: string; hashed: string } {
+type GeneratedApiKey = { raw: string; hashed: string };
+
+export function generateApiKey(rawKeyOverride?: string): GeneratedApiKey {
     // 32 bytes random -> base64url
     const raw = rawKeyOverride || crypto.randomBytes(32).toString("base64url");
     const hashed = crypto.createHash("sha256").update(raw).digest("hex");
@@ -320,13 +323,13 @@ export function extractDiscordThreadId(input: string | null): string | null {
     return output || null;
 }
 
-const discordEmojis: Record<string, string> = {
+const discordEmojis = {
     osu: "<:osu:1123726872044380230>",
     taiko: "<:taiko:1123726858316423271>",
     catch: "<:catch:1123726862414250004>",
     fruits: "<:catch:1123726862414250004>",
     mania: "<:mania:1123726866705039460>",
-};
+} as const;
 
 /**
  * Returns a Discord custom emoji string for a given key

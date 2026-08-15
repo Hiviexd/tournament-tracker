@@ -1,10 +1,10 @@
 // Base
 import { useCreateVoting } from "../../hooks/useVotings";
-import { VotingCategory, type VotingFormData, VotingType } from "@tc/types/Voting";
+import { VotingCategory, type VotingFormData, VotingType, VOTING_TYPES } from "@tc/types/Voting";
 import { UserGroup } from "@tc/types/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import { useFileUpload } from "../../hooks/useFileUpload";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 //Mantine
@@ -30,14 +30,28 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const autoSaveKey = "voting-create-description";
     const navigate = useNavigate();
 
-    const form = useForm({
+    const form = useForm<{
+        title: string;
+        description: string;
+        category: VotingCategory | "";
+        assignedGroups: UserGroup[];
+        duration: number;
+        type: VotingType;
+        options: string[];
+        allowNeutralVotes: boolean;
+        targetUserId: string;
+        targetTournamentName: string;
+        targetTournamentLink: string;
+        forceFullParticipation: boolean;
+        binaryStrictPassThreshold: number;
+    }>({
         initialValues: {
             title: "",
             description: "",
-            category: "" as VotingCategory,
-            assignedGroups: [] as UserGroup[],
+            category: "",
+            assignedGroups: [],
             duration: 3,
-            type: "classic" as VotingType,
+            type: "classic",
             options: ["Support", "Oppose"],
             allowNeutralVotes: true,
             targetUserId: "",
@@ -84,6 +98,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     });
 
     const handleSubmit = async (values) => {
+        // SAFETY: FormData is the runtime type; voting fields are appended before submit.
         const formData = new FormData() as VotingFormData;
 
         // Handle arrays and single values differently
@@ -163,15 +178,20 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const handlePresetChange = (preset: string) => {
         if (!preset) return;
 
-        const selectedPreset = VOTE_PRESETS[preset as keyof typeof VOTE_PRESETS];
-        if (selectedPreset) {
-            form.setFieldValue("type", selectedPreset.type);
-            form.setFieldValue("options", [...selectedPreset.options]);
-            form.setFieldValue("duration", selectedPreset.duration);
-            form.setFieldValue("allowNeutralVotes", selectedPreset.allowNeutralVotes);
-            form.setFieldValue("forceFullParticipation", selectedPreset.forceFullParticipation);
-            form.setFieldValue("binaryStrictPassThreshold", selectedPreset.binaryStrictPassThreshold);
-        }
+        const presetKey = pickStringUnion(preset, [
+            "userAddition",
+            "tournamentBans",
+            "badgeSupport",
+            "topThreeBadgeSupport",
+        ] as const);
+        if (!presetKey) return;
+        const selectedPreset = VOTE_PRESETS[presetKey];
+        form.setFieldValue("type", selectedPreset.type);
+        form.setFieldValue("options", [...selectedPreset.options]);
+        form.setFieldValue("duration", selectedPreset.duration);
+        form.setFieldValue("allowNeutralVotes", selectedPreset.allowNeutralVotes);
+        form.setFieldValue("forceFullParticipation", selectedPreset.forceFullParticipation);
+        form.setFieldValue("binaryStrictPassThreshold", selectedPreset.binaryStrictPassThreshold);
     };
 
     const setDefaultOptionsForType = (type: VotingType, skipIfCustomOptions = false) => {
@@ -191,11 +211,11 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     };
 
     const handleTypeChange = (value: string | null) => {
-        if (value) {
-            const newType = value as VotingType;
-            form.setFieldValue("type", newType);
-            setDefaultOptionsForType(newType, true);
-        }
+        if (!value) return;
+        const newType = pickStringUnion(value, VOTING_TYPES);
+        if (!newType) return;
+        form.setFieldValue("type", newType);
+        setDefaultOptionsForType(newType, true);
     };
 
     const handleAllowNeutralVotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -388,7 +388,7 @@ class TournamentService {
         // Preserve the order of hosts based on hostIds
         const hosts = hostIds
             .map((id) => hostsUnordered.find((host) => host._id.toString() === id))
-            .filter((host) => host !== undefined) as typeof hostsUnordered;
+            .filter((host): host is NonNullable<typeof host> => host !== undefined);
 
         // Check for active infringements on any host
         const hostsWithInfringements = hosts.filter((host) => host.activeInfringement);

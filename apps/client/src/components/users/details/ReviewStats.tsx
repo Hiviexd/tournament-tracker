@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import dayjs from "dayjs";
 import { useReviewStats } from "../../../hooks/useUsers";
+import { isString } from "@tc/utils/client";
 import { IUser } from "@tc/types/User";
 import AlertText from "../../common/AlertText";
 
@@ -51,7 +52,7 @@ export default function ReviewStats({ user }: IProps) {
                 <NumberInput
                     label="Days"
                     value={days}
-                    onChange={(v) => setDays(typeof v === "string" ? parseInt(v, 10) || 180 : (v ?? 180))}
+                    onChange={(v) => setDays(isString(v) ? parseInt(v, 10) || 180 : (v ?? 180))}
                     min={1}
                     max={365}
                     w={100}

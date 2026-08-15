@@ -13,11 +13,15 @@ import config from "@tc/config";
 class InfringementsController {
     /** GET watchlist */
     public async getWatchlist(req: Request, res: Response) {
-        const reqQuery = req.query as Record<string, string | undefined>;
+        const infringementTypeRaw = utils.isString(req.query.infringementType) ? req.query.infringementType : undefined;
+        const pageRaw = utils.isString(req.query.page) ? req.query.page : undefined;
+        const limitRaw = utils.isString(req.query.limit) ? req.query.limit : undefined;
         const query: WatchlistQuery = {
-            infringementType: reqQuery.infringementType as WatchlistQuery["infringementType"],
-            page: reqQuery.page ? parseInt(reqQuery.page, 10) : undefined,
-            limit: reqQuery.limit ? parseInt(reqQuery.limit, 10) : undefined,
+            infringementType: infringementTypeRaw
+                ? utils.pickStringUnion(infringementTypeRaw, Object.values(InfringementType))
+                : undefined,
+            page: pageRaw ? parseInt(pageRaw, 10) : undefined,
+            limit: limitRaw ? parseInt(limitRaw, 10) : undefined,
         };
         const result = await InfringementService.getWatchlist(query);
         res.json(result);
@@ -29,9 +33,7 @@ class InfringementsController {
 
         try {
             const normalizedUserIds = Array.isArray(userIds) ? userIds : [userIds];
-            const validUserIds = normalizedUserIds.filter(
-                (id): id is string => typeof id === "string" && id.trim() !== "",
-            );
+            const validUserIds = normalizedUserIds.filter((id): id is string => utils.isString(id) && id.trim() !== "");
 
             if (validUserIds.length === 0) {
                 return res.status(400).json({ error: "At least one user ID is required" });
@@ -71,13 +73,13 @@ class InfringementsController {
             const firstInfringement = firstResult.infringement;
             const firstUser = firstResult.user;
 
-            const typeColorMap: { [key in InfringementType]: number } = {
+            const typeColorMap = {
                 [InfringementType.NOTE]: DiscordUtils.webhookColors.lightBlue,
                 [InfringementType.WARNING]: DiscordUtils.webhookColors.yellow,
                 [InfringementType.TOURNAMENT_BAN]: DiscordUtils.webhookColors.red,
                 [InfringementType.HOSTING_BAN]: DiscordUtils.webhookColors.red,
                 [InfringementType.STAFFING_BAN]: DiscordUtils.webhookColors.red,
-            };
+            } as const satisfies Record<InfringementType, number>;
 
             const isIndefinite = isTimeBased && !endDate;
 

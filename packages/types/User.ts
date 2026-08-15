@@ -2,9 +2,11 @@ import { IOsuCountry } from "./OsuApi";
 import { Model, Types } from "mongoose";
 import { IInfringement } from "./Infringement";
 
-export type UserGroup = "user" | "tc" | "cc" | "admin" | "alm" | "dev";
+export const USER_GROUPS = ["user", "tc", "cc", "admin", "alm", "dev"] as const;
+export type UserGroup = (typeof USER_GROUPS)[number];
 
-export type BadgedUserGroup = Exclude<UserGroup, "user" | "admin" | "dev">;
+export const BADGED_USER_GROUPS = ["tc", "cc", "alm"] as const;
+export type BadgedUserGroup = (typeof BADGED_USER_GROUPS)[number];
 
 export interface IUserHistory {
     date: Date;

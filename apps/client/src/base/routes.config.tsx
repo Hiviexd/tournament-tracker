@@ -1,3 +1,4 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import HomeHero from "../components/home/HomeHero";
@@ -31,7 +32,7 @@ interface RouteConfig {
     path: string;
     page: React.ReactNode;
     title: string;
-    icon: string;
+    icon: IconProp;
     permissions?: string[];
     parent?: {
         title: string;

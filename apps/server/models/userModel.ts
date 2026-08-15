@@ -99,11 +99,12 @@ UserSchema.virtual("latestAction").get(function (this: IUser) {
 });
 
 UserSchema.statics.findByUsernameOrOsuId = function (this: IUserStatics, userInput: string | number) {
-    const osuId = parseInt(userInput as string, 10);
+    const osuId = utils.isNumber(userInput) ? userInput : parseInt(userInput, 10);
+    const username = utils.isString(userInput) ? userInput : String(userInput);
 
     if (isNaN(osuId)) {
         return this.findOne({
-            username: new RegExp("^" + utils.escapeUsername(userInput as string) + "$", "i"),
+            username: new RegExp("^" + utils.escapeUsername(username) + "$", "i"),
         });
     } else {
         return this.findOne({ osuId });

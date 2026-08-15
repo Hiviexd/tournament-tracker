@@ -84,10 +84,8 @@ export default function MarkdownText({ content, className, allowHtml = false, si
                             {children}
                         </Text>
                     ),
-                    pre: (props) => {
-                        const codeBlockProps = { ...props };
-                        delete (codeBlockProps as { node?: unknown }).node;
-                        return <CodeBlock {...codeBlockProps}>{props.children}</CodeBlock>;
+                    pre: ({ node: _node, ...codeBlockProps }) => {
+                        return <CodeBlock {...codeBlockProps}>{codeBlockProps.children}</CodeBlock>;
                     },
                 }}>
                 {content}

@@ -22,11 +22,12 @@ import { loggedInUserAtom, tournamentViewModeAtom } from "../../store/atoms";
 import { tournamentCanUseMassEditAtom, tournamentMassEditModeAtom } from "../../store/tournamentMassEditAtoms";
 import { useAtom, useAtomValue } from "jotai";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
+import { pickStringUnion } from "@tc/utils/client";
 
 interface IProps {
     values: {
         search: string;
-        mode: GameMode;
+        mode: GameMode | "";
         host: string;
         type: TournamentType | "";
         status: TournamentStatus | "";
@@ -70,7 +71,8 @@ export default function TournamentFilters({ values, onChange }: IProps) {
     const preloadUser = isFirstRender && values.host ? values.host : undefined;
 
     const handleViewModeChange = (value: string) => {
-        const newMode = value as "cards" | "table" | "review";
+        const newMode = pickStringUnion(value, ["cards", "table", "review"] as const);
+        if (!newMode) return;
         setViewMode(newMode);
         setGlobalViewMode(newMode);
     };
@@ -112,7 +114,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         placeholder="Filter by game mode"
                         leftSection={<FontAwesomeIcon icon="gamepad" />}
                         value={values.mode}
-                        onChange={(value) => handleChange("mode", value as GameMode)}
+                        onChange={(value) => handleChange("mode", value)}
                         data={modeOptions}
                         clearable
                     />
@@ -123,7 +125,7 @@ export default function TournamentFilters({ values, onChange }: IProps) {
                         placeholder="Filter by type"
                         leftSection={<FontAwesomeIcon icon="trophy" />}
                         value={values.type}
-                        onChange={(value) => handleChange("type", value as TournamentType)}
+                        onChange={(value) => handleChange("type", value)}
                         data={typeOptions}
                         clearable
                         disabled={viewMode === "review"}

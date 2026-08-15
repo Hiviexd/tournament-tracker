@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
+import { isString } from "@tc/utils/common";
 import NotificationDispatchService from "../services/NotificationDispatchService";
 import NotificationJob from "../models/notificationJobModel";
+
+interface NotificationJobListFilter {
+    status?: string;
+    provider?: string;
+    kind?: { $regex: string; $options: string };
+}
 
 class DevController {
     private static readonly NOTIFICATION_LISTING_LIMIT = 30;
@@ -38,12 +45,12 @@ class DevController {
     public async getNotificationJobsListing(req: Request, res: Response) {
         const page = Math.max(1, Number(req.query.page) || 1);
         const limit = DevController.NOTIFICATION_LISTING_LIMIT;
-        const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
-        const provider = typeof req.query.provider === "string" ? req.query.provider.trim() : "";
-        const kind = typeof req.query.kind === "string" ? req.query.kind.trim() : "";
-        const payload = typeof req.query.payload === "string" ? req.query.payload.trim() : "";
+        const status = isString(req.query.status) ? req.query.status.trim() : "";
+        const provider = isString(req.query.provider) ? req.query.provider.trim() : "";
+        const kind = isString(req.query.kind) ? req.query.kind.trim() : "";
+        const payload = isString(req.query.payload) ? req.query.payload.trim() : "";
 
-        const query: Record<string, any> = {};
+        const query: NotificationJobListFilter = {};
         if (status) query.status = status;
         if (provider) query.provider = provider;
         if (kind) query.kind = { $regex: kind, $options: "i" };

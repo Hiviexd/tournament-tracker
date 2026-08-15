@@ -1,5 +1,5 @@
 import { Stack, Group, Avatar } from "@mantine/core";
-import { IUser, type UserGroup, type BadgedUserGroup } from "@tc/types/User";
+import { IUser, type UserGroup, type BadgedUserGroup, BADGED_USER_GROUPS } from "@tc/types/User";
 import UserGroupBadge from "./badges/UserGroupBadge";
 import UserLink from "./UserLink";
 import CountryFlag from "./CountryFlag";
@@ -30,7 +30,7 @@ export default function UserDisplay({
     let userGroups: BadgedUserGroup[] | null;
 
     if (user?.groups) {
-        userGroups = user.groups.filter((g) => ["tc", "cc", "alm"].includes(g)) as BadgedUserGroup[];
+        userGroups = user.groups.filter((g): g is BadgedUserGroup => BADGED_USER_GROUPS.some((group) => group === g));
     } else {
         userGroups = null;
     }
@@ -62,7 +62,9 @@ export default function UserDisplay({
                 />
                 <Group gap="0.5rem" align="center">
                     {showCountryFlag && user?.country && <CountryFlag country={user.country} />}
-                    {group && <UserGroupBadge group={group as BadgedUserGroup} tooltip={tooltips} />}
+                    {group && BADGED_USER_GROUPS.some((g) => g === group) && (
+                        <UserGroupBadge group={group} tooltip={tooltips} />
+                    )}
                     {userGroups?.map((g) => (
                         <UserGroupBadge key={g} group={g} tooltip={tooltips} />
                     ))}

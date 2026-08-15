@@ -37,30 +37,28 @@ const PIF_REPORT_COUNT_OFFSET = 17; // DO NOT CHANGE THIS
 class TicketsController {
     /** GET ticket listing */
     public async index(req: Request, res: Response) {
-        const {
-            type,
-            title,
-            content,
-            targetUser,
-            targetTournament,
-            assignedGroup,
-            isActive,
-            showOwn,
-            page = 1,
-        } = req.query;
+        const type = utils.isString(req.query.type) ? req.query.type : undefined;
+        const title = utils.isString(req.query.title) ? req.query.title : undefined;
+        const content = utils.isString(req.query.content) ? req.query.content : undefined;
+        const targetUser = utils.isString(req.query.targetUser) ? req.query.targetUser : undefined;
+        const targetTournament = utils.isString(req.query.targetTournament) ? req.query.targetTournament : undefined;
+        const assignedGroup = req.query.assignedGroup;
+        const isActive = req.query.isActive;
+        const showOwn = req.query.showOwn;
+        const page = req.query.page ?? 1;
 
         const user = res.locals!.user;
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
 
         // Check if we need content search
-        const needsContentSearch = content && (content as string).trim().length >= 3;
-        const needsUnifiedSearch = type === "ticket" && title && (title as string).trim().length >= 3;
+        const needsContentSearch = content && content.trim().length >= 3;
+        const needsUnifiedSearch = type === "ticket" && title && title.trim().length >= 3;
 
         let ticketIdsFromContent: any[] = [];
 
         // Handle content search with simple post-query processing
         if (needsContentSearch || needsUnifiedSearch) {
-            const searchTerm = needsContentSearch ? (content as string).trim() : (title as string).trim();
+            const searchTerm = (needsContentSearch ? content : title)?.trim() ?? "";
 
             // Find messages that match the content search
             const matchingMessages = await TicketService.searchMessageContent(searchTerm);
@@ -106,18 +104,18 @@ class TicketsController {
             query._id = { $in: ticketIdsFromContent };
         } else {
             // Apply title search only if not doing content search
-            if (type === "ticket" && title && (title as string).trim().length >= 3) {
-                query.title = new RegExp(utils.escapeRegexPattern(title as string), "i");
+            if (type === "ticket" && title && title.trim().length >= 3) {
+                query.title = new RegExp(utils.escapeRegexPattern(title), "i");
             }
         }
 
         if (type === "report") {
             if (targetUser) {
-                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser as string);
+                const targetUserDoc = await User.findByUsernameOrOsuId(targetUser);
                 if (targetUserDoc) query.targetUser = targetUserDoc._id;
             }
             if (targetTournament) {
-                query.targetTournamentName = new RegExp(utils.escapeRegexPattern(targetTournament as string), "i");
+                query.targetTournamentName = new RegExp(utils.escapeRegexPattern(targetTournament), "i");
             }
         }
         if (assignedGroup) query.assignedGroup = assignedGroup;
@@ -171,7 +169,7 @@ class TicketsController {
         const author = res.locals!.user!;
         const { title, message, type, assignedGroup, targetUserId, targetTournamentName, targetTournamentLink } =
             req.body;
-        const files = req.files as Express.Multer.File[];
+        const files = req.files;
 
         // Rate limiting check - prevent creating multiple tickets/reports of the same type within an hour
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
@@ -246,7 +244,7 @@ class TicketsController {
 
         // Handle file uploads
         initialMessage.attachments = await UploadService.handleFileUploads(
-            files,
+            files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,
             author.id,
@@ -311,7 +309,7 @@ class TicketsController {
         const { ticketId } = req.params;
         const { content } = req.body;
         const isNote = req.body.isNote === "true" || req.body.isNote === false;
-        const files = req.files as Express.Multer.File[];
+        const files = req.files;
 
         const ticket = await Ticket.findById(ticketId).populate(DEFAULT_POPULATE).orFail();
         const senderIsTicketAuthor = ticket.author._id.equals(currentUser._id);
@@ -339,7 +337,7 @@ class TicketsController {
 
         // Handle file uploads
         newMessage.attachments = await UploadService.handleFileUploads(
-            files,
+            files ?? [],
             FILE_UPLOAD_CATEGORY,
             ticket.id,
             currentUser.id,

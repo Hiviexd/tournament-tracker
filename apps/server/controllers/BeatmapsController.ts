@@ -12,7 +12,7 @@ class BeatmapsController {
     /** POST check mappool compliance */
     public async checkMappoolCompliance(req: Request, res: Response) {
         const input = req.body.input;
-        if (!input || typeof input !== "string") {
+        if (!utils.isString(input) || !input) {
             return res.status(400).json({ error: "Invalid input" });
         }
 
@@ -36,7 +36,7 @@ class BeatmapsController {
         // get beatmaps in batches of 50
         for (let i = 0; i < beatmapIds.size; i += 50) {
             const batch = Array.from(beatmapIds).slice(i, i + 50);
-            const beatmapsResponse = await OsuApiService.getBeatmaps(batch.map(String), botToken as string);
+            const beatmapsResponse = await OsuApiService.getBeatmaps(batch.map(String), botToken);
 
             await utils.delay(500);
 

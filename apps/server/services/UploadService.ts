@@ -76,14 +76,14 @@ class UploadService {
 
                     await attachment.save();
                     return attachment;
-                } catch (error) {
+                } catch {
                     throw new Error(`Failed to upload file ${file.originalname}`);
                 }
             });
 
             const attachments = await Promise.all(uploadPromises);
             return attachments;
-        } catch (error) {
+        } catch {
             throw new Error(`File upload failed`);
         }
     }

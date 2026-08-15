@@ -40,7 +40,9 @@ const getBinaryStrictDisplay = (score: number, options: string[], allowNeutralVo
     }
 };
 
-const getRankedChoiceDisplay = (score: number) => {
+type RankedChoiceDisplay = { icon: IconProp; count: number; tooltip: string };
+
+const getRankedChoiceDisplay = (score: number): RankedChoiceDisplay => {
     switch (score) {
         case -2:
             return { icon: "thumbs-down", count: 2, tooltip: "Strongly Disagree" };
@@ -177,7 +179,7 @@ export default function VoteCard({ vote, options, allowNeutralVotes }: IProps) {
                                                     }).map((_, index) => (
                                                         <FontAwesomeIcon
                                                             key={index}
-                                                            icon={getRankedChoiceDisplay(score.score).icon as IconProp}
+                                                            icon={getRankedChoiceDisplay(score.score).icon}
                                                             style={{
                                                                 marginRight:
                                                                     index <

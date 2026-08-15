@@ -72,7 +72,7 @@ class JobLoader {
                     try {
                         modulePath = `${basePath}.ts`;
                         module = await import(pathToFileURL(modulePath).href);
-                    } catch (tsError) {
+                    } catch {
                         throw jsError;
                     }
                 }

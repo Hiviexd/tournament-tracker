@@ -84,7 +84,7 @@ export default class StaleTicketsJob extends BaseJob {
                     .addUsers(Array.from(usersToPing))
                     .setMessage("Stale Ticket");
 
-                if (ticket.threadId && typeof ticket.threadId === "string" && ticket.threadId.length > 0) {
+                if (ticket.threadId && ticket.threadId.length > 0) {
                     webhookBuilder.setThreadId(ticket.threadId);
                 }
 
@@ -107,7 +107,7 @@ export default class StaleTicketsJob extends BaseJob {
 
                 const webhookBuilder = new WebhookBuilder().addEmbed(staleEmbedNoPing);
 
-                if (ticket.threadId && typeof ticket.threadId === "string" && ticket.threadId.length > 0) {
+                if (ticket.threadId && ticket.threadId.length > 0) {
                     webhookBuilder.setThreadId(ticket.threadId);
                 }
 

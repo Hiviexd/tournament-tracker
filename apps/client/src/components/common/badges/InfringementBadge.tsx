@@ -11,10 +11,10 @@ interface IProps {
 
 interface IBadgeConfig {
     color: string;
-    icon: string;
+    icon: IconProp;
 }
 
-const infringementConfig: Record<InfringementType, IBadgeConfig> = {
+const infringementConfig = {
     [InfringementType.NOTE]: {
         color: "blue",
         icon: "sticky-note",
@@ -35,7 +35,7 @@ const infringementConfig: Record<InfringementType, IBadgeConfig> = {
         color: "red",
         icon: "user-gear",
     },
-};
+} as const satisfies Record<InfringementType, IBadgeConfig>;
 
 export default function InfringementBadge({ infringement, variant = "light", size = "md" }: IProps) {
     if (!infringement) {
@@ -45,11 +45,7 @@ export default function InfringementBadge({ infringement, variant = "light", siz
     const config = infringementConfig[infringement.type];
 
     return (
-        <Badge
-            variant={variant}
-            color={config.color}
-            size={size}
-            leftSection={<FontAwesomeIcon icon={config.icon as IconProp} />}>
+        <Badge variant={variant} color={config.color} size={size} leftSection={<FontAwesomeIcon icon={config.icon} />}>
             {infringement.typeString}
         </Badge>
     );

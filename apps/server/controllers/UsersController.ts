@@ -1,4 +1,4 @@
-import { IUser, UserGroup, UserListQuery } from "@tc/types/User";
+import { IUser, IUserHistory, UserGroup } from "@tc/types/User";
 import User from "../models/userModel";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
@@ -23,10 +23,8 @@ class UsersController {
 
     /** GET users listing */
     public async index(req: Request, res: Response) {
-        const reqQuery = req.query as UserListQuery;
         const currentUser = res.locals!.user;
-
-        let userInput = reqQuery.userInput;
+        let userInput = utils.isString(req.query.userInput) ? req.query.userInput : undefined;
 
         if (userInput && utils.validateOsuProfileLink(userInput)) {
             userInput = utils.validateOsuProfileLink(userInput)!;
@@ -57,7 +55,8 @@ class UsersController {
 
         const sanitizedUsers = users.map((user) => UserService.sanitizeUser(user, currentUser));
 
-        res.json(reqQuery.limit ? sanitizedUsers.slice(0, parseInt(reqQuery.limit, 10)) : sanitizedUsers);
+        const limit = utils.isString(req.query.limit) ? req.query.limit : undefined;
+        res.json(limit ? sanitizedUsers.slice(0, parseInt(limit, 10)) : sanitizedUsers);
     }
 
     /** GET a user */
@@ -242,10 +241,10 @@ class UsersController {
         await user.save();
 
         // Create history entry
-        const historyEntry = {
+        const historyEntry: IUserHistory = {
             date: new Date(),
             group,
-            kind: join ? "join" : ("leave" as "join" | "leave"),
+            kind: join ? "join" : "leave",
         };
 
         user.history.push(historyEntry);

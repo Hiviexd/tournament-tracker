@@ -57,8 +57,7 @@ export function ensureCsrfInterceptor() {
                 }
 
                 if (csrfToken) {
-                    config.headers = config.headers || {};
-                    (config.headers as any)["X-CSRF-Token"] = csrfToken;
+                    config.headers.set("X-CSRF-Token", csrfToken);
                 }
             }
             return config;
@@ -85,8 +84,7 @@ export function ensureCsrfInterceptor() {
 
                 if (newToken) {
                     // Retry the original request with the new token
-                    originalRequest.headers = originalRequest.headers || {};
-                    (originalRequest.headers as any)["X-CSRF-Token"] = newToken;
+                    originalRequest.headers.set("X-CSRF-Token", newToken);
                     return axios(originalRequest);
                 }
             }

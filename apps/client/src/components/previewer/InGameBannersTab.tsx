@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import defaultStableBackground from "/assets/default-bg-stable.jpg";
 import defaultLazerBackground from "/assets/default-bg-lazer.jpg";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import OsuWebPreview from "./OsuWebPreview";
 
@@ -281,8 +281,10 @@ export default function InGameBannersTab() {
                     withItemsBorders={false}
                     value={previewMode}
                     onChange={(value) => {
-                        setPreviewMode(value as "stable" | "lazer" | "web");
-                        setIsLazer(value === "lazer");
+                        const next = pickStringUnion(value, ["stable", "lazer", "web"] as const);
+                        if (!next) return;
+                        setPreviewMode(next);
+                        setIsLazer(next === "lazer");
                     }}
                     data={[
                         { label: "osu!(stable)", value: "stable" },

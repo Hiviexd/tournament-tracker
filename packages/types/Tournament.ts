@@ -4,19 +4,23 @@ import { IAttachment } from "./Attachment";
 import { IReview } from "./Review";
 import { IMessage } from "./Message";
 
-export type TournamentType = "tournament" | "contest";
+export const TOURNAMENT_TYPES = ["tournament", "contest"] as const;
+export type TournamentType = (typeof TOURNAMENT_TYPES)[number];
 
-export type GameMode = "osu" | "taiko" | "catch" | "mania";
+export const GAME_MODES = ["osu", "taiko", "catch", "mania"] as const;
+export type GameMode = (typeof GAME_MODES)[number];
 
-export type TournamentStatus =
-    | "supportRequestReceived"
-    | "screeningConcluded"
-    | "reviewOngoing"
-    | "changesRequested"
-    | "onHold"
-    | "badgeApproved"
-    | "badgeRejected"
-    | "noBadgeRequested";
+export const TOURNAMENT_STATUSES = [
+    "supportRequestReceived",
+    "screeningConcluded",
+    "reviewOngoing",
+    "changesRequested",
+    "onHold",
+    "badgeApproved",
+    "badgeRejected",
+    "noBadgeRequested",
+] as const;
+export type TournamentStatus = (typeof TOURNAMENT_STATUSES)[number];
 
 export interface TournamentQueryParams {
     modes?: { $in: GameMode[] };
@@ -46,7 +50,8 @@ export interface ITournamentLog {
     createdAt: Date;
 }
 
-export type ReviewHistoryAction = "assign" | "remove" | "initial";
+export const REVIEW_HISTORY_ACTIONS = ["assign", "remove", "initial"] as const;
+export type ReviewHistoryAction = (typeof REVIEW_HISTORY_ACTIONS)[number];
 
 export interface ITournamentReviewHistoryEntry {
     user: Types.ObjectId;
@@ -60,8 +65,18 @@ export interface ITournamentCreateResponse {
     tournament: ITournament;
 }
 
-export type ExtraLinkType =
-    "news" | "wiki" | "challonge" | "sheet" | "website" | "mappersguild" | "contest" | "discord" | "twitch";
+export const EXTRA_LINK_TYPES = [
+    "news",
+    "wiki",
+    "challonge",
+    "sheet",
+    "website",
+    "mappersguild",
+    "contest",
+    "discord",
+    "twitch",
+] as const;
+export type ExtraLinkType = (typeof EXTRA_LINK_TYPES)[number];
 
 export interface ITournamentExtraLink {
     type: ExtraLinkType;

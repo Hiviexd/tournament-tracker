@@ -9,7 +9,12 @@ import {
     WatchlistQuery,
     WATCHLIST_DEFAULT_LIMIT,
 } from "@tc/types/Infringement";
+import { isFunction } from "@tc/utils/common";
 import utils from "@tc/utils/server";
+
+interface WatchlistInfringementFilter {
+    type?: InfringementType;
+}
 
 class InfringementService {
     public async addInfringement(
@@ -47,11 +52,11 @@ class InfringementService {
             }
         }
 
-        if (!reason || typeof reason !== "string" || reason?.trim() === "") {
+        if (!reason || reason.trim() === "") {
             throw { status: 400, error: "Reason is required and must be a non-empty string" };
         }
 
-        if ((threadId && typeof threadId !== "string") || threadId?.trim() === "") {
+        if (threadId !== undefined && threadId.trim() === "") {
             throw { status: 400, error: "Thread ID must be a non-empty string" };
         }
 
@@ -65,8 +70,8 @@ class InfringementService {
 
         // Auto-expire active time-based infringement when adding a new time-based one
         if (isTimeBased) {
-            const activeInfringement = await (Infringement as any).findActiveForUser(userId);
-            if (activeInfringement) {
+            const activeInfringement = await Infringement.findActiveForUser(userId);
+            if (activeInfringement && "save" in activeInfringement && isFunction(activeInfringement.save)) {
                 activeInfringement.endDate = new Date();
                 await activeInfringement.save();
             }
@@ -81,9 +86,9 @@ class InfringementService {
         };
 
         if (isTimeBased) {
-            infringementData.startDate = startDate ? new Date(startDate as string) : new Date();
+            infringementData.startDate = startDate ? new Date(startDate) : new Date();
             if (endDate) {
-                infringementData.endDate = new Date(endDate as string);
+                infringementData.endDate = new Date(endDate);
             }
         }
 
@@ -106,11 +111,11 @@ class InfringementService {
     ) {
         const { startDate, endDate, reason, threadId, enchantUrl } = data;
 
-        if (reason && (typeof reason !== "string" || reason?.trim() === "")) {
+        if (reason && reason.trim() === "") {
             throw { status: 400, error: "Reason must be a non-empty string" };
         }
 
-        if (threadId && (typeof threadId !== "string" || threadId?.trim() === "")) {
+        if (threadId && threadId.trim() === "") {
             throw { status: 400, error: "Thread ID must be a non-empty string" };
         }
 
@@ -144,10 +149,10 @@ class InfringementService {
 
         if (isTimeBased) {
             if (startDate !== undefined) {
-                infringement.startDate = startDate ? new Date(startDate as string) : undefined;
+                infringement.startDate = startDate ? new Date(startDate) : undefined;
             }
             if (endDate !== undefined) {
-                infringement.endDate = endDate ? new Date(endDate as string) : undefined;
+                infringement.endDate = endDate ? new Date(endDate) : undefined;
             }
         }
 
@@ -169,7 +174,7 @@ class InfringementService {
     }
 
     public async getWatchlist(query: WatchlistQuery) {
-        const infringementFilter: Record<string, unknown> = {};
+        const infringementFilter: WatchlistInfringementFilter = {};
 
         if (query.infringementType) {
             infringementFilter.type = query.infringementType;

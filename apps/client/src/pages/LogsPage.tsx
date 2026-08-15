@@ -1,9 +1,10 @@
 import { Stack, Group, Pagination, Card, Skeleton, Text } from "@mantine/core";
 import { useLogs } from "../hooks/useLogs";
-import { LogCategory } from "@tc/types/Log";
+import { LogCategory, LOG_CATEGORIES } from "@tc/types/Log";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import LogsFilters from "../components/logs/LogsFilters";
 import LogsTable from "../components/logs/LogsTable";
+import { pickStringUnion } from "@tc/utils/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function LogsLoadingState() {
@@ -37,7 +38,7 @@ function LogsEmptyState({ hasError }: { hasError: boolean }) {
 
 interface FilterValues {
     user: string;
-    category: LogCategory;
+    category: LogCategory | "";
     type: string;
     content: string;
 }
@@ -61,7 +62,7 @@ export default function LogsPage() {
     // Create filters object for LogsFilters component
     const filters: FilterValues = {
         user: queryState.user,
-        category: queryState.category as LogCategory,
+        category: pickStringUnion(queryState.category, LOG_CATEGORIES) ?? "",
         type: queryState.type,
         content: queryState.content,
     };
@@ -92,7 +93,7 @@ export default function LogsPage() {
         // TODO: fix typing in user param
         // @ts-expect-error - if it works, it works.
         user: queryState.user,
-        category: queryState.category as LogCategory,
+        category: pickStringUnion(queryState.category, LOG_CATEGORIES),
         type: queryState.type,
         page: queryState.page,
         content: queryState.content,

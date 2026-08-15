@@ -22,7 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface IPropTypes {
     page: React.ReactNode;
     title?: string;
-    icon?: string;
+    icon?: IconProp;
     parent?: { title: string; path: string };
     banner?: React.ReactNode;
 }
@@ -94,7 +94,7 @@ export default function Layout({ page, title, icon = "trophy", parent, banner }:
                         {title !== "Home" && (
                             <Container fluid className="page-header">
                                 <Flex align="center" gap="md">
-                                    <FontAwesomeIcon icon={icon as IconProp} />
+                                    <FontAwesomeIcon icon={icon} />
                                     {title && (
                                         <Breadcrumbs>
                                             {parent && (

@@ -3,39 +3,29 @@ import { IUser, UserGroup } from "@tc/types/User";
 import { IInfringement, TIME_BASED_TYPES } from "@tc/types/Infringement";
 import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
 
-/** Values that can arrive from I/O before a domain parser runs. Not `unknown`. */
-export type RuntimeValue =
-    | string
-    | number
-    | boolean
-    | bigint
-    | symbol
-    | object
-    | null
-    | undefined
-    | ((...args: never[]) => unknown);
-
-function typeTag(value: RuntimeValue): string {
+function typeTag<T>(value: T): string {
     return Object.prototype.toString.call(value);
 }
 
-export function isString(value: RuntimeValue): value is string {
+export function isString<T>(value: T): value is T & string {
     return typeTag(value) === "[object String]";
 }
 
-export function isNumber(value: RuntimeValue): value is number {
+export function isNumber<T>(value: T): value is T & number {
     return typeTag(value) === "[object Number]" && value === value;
 }
 
-export function isBoolean(value: RuntimeValue): value is boolean {
+export function isBoolean<T>(value: T): value is T & boolean {
     return typeTag(value) === "[object Boolean]";
 }
 
-export function isPlainObject(value: RuntimeValue): value is Record<string, RuntimeValue> {
+export function isPlainObject<T>(
+    value: T,
+): value is object & Exclude<T, string | number | boolean | bigint | symbol | null | undefined> {
     return typeTag(value) === "[object Object]";
 }
 
-export function isFunction(value: RuntimeValue): value is (...args: never[]) => unknown {
+export function isFunction<T>(value: T): value is T & ((...args: never[]) => void) {
     const tag = typeTag(value);
     return tag === "[object Function]" || tag === "[object AsyncFunction]";
 }
@@ -170,7 +160,7 @@ export const EXTRA_LINK_DEFAULTS = {
     contest: "Contest Listing",
     discord: "Discord",
     twitch: "Twitch",
-} as const satisfies Record<ExtraLinkType, string>;
+} satisfies Record<ExtraLinkType, string>;
 
 /**
  * Checks if a URL is valid for the given extra link type
@@ -488,16 +478,16 @@ export function getSearchTypes({
         voting: ["voting", "votings", "vote", "votes", "v"],
         ticket: ["ticket", "tickets", "tk"],
         resource: ["resource", "resources", "rs"],
-    } as const;
+    };
 
     const FRONTEND_SEARCH_TYPES = {
         page: ["page", "pages", "p"],
-    } as const;
+    };
 
     const PRIVATE_SEARCH_TYPES = {
         report: ["report", "reports", "r"],
         article: ["article", "articles", "doc", "docs", "d"],
-    } as const;
+    };
 
     if (searchType === "frontend") return FRONTEND_SEARCH_TYPES;
     if (searchType === "backend") {
@@ -520,14 +510,13 @@ export function getSearchTypes({
  * @param searchTypes The available search types mapping (frontend: page only, backend: all types)
  * @returns Object with searchType and searchContent
  */
-export function parseSearchQuery(
-    query: string,
-    searchTypes: Record<string, string[]>,
-): { searchType: string | null; searchContent: string } {
+type ParsedSearchQuery = { searchType: string | null; searchContent: string };
+type SearchTypeAliases = { readonly [type: string]: readonly string[] };
+
+export function parseSearchQuery(query: string, searchTypes: SearchTypeAliases): ParsedSearchQuery {
     const typePrefixMatch = query.match(/^(\w+):(.+)$/);
 
-    // default result
-    let result: { searchType: string | null; searchContent: string } = {
+    let result: ParsedSearchQuery = {
         searchType: null,
         searchContent: query,
     };

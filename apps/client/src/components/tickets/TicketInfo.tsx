@@ -19,6 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ITicket } from "@tc/types/Ticket";
 import UserLink from "../common/UserLink";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import { cssVars } from "../../themes/cssVars";
 import DateBadge from "../common/badges/DateBadge";
 import UserCard from "../common/UserCard";
 import { IUser } from "@tc/types/User";
@@ -121,9 +122,9 @@ export default function TicketInfo({ ticket }: IProps) {
             data-active={ticket.isActive}
             style={
                 ticket.isActive
-                    ? {
-                          ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor()}-6)`,
-                      }
+                    ? cssVars({
+                          "--card-status-color": `var(--mantine-color-${getStatusColor()}-6)`,
+                      })
                     : undefined
             }>
             <Stack gap="md">

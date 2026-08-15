@@ -36,7 +36,7 @@ export const baseComponents: MantineThemeComponents = {
             };
         },
         styles: (theme, props) => {
-            const borderColor = getThemeColor(theme, props?.color as string | undefined);
+            const borderColor = getThemeColor(theme, props?.color);
             return {
                 root: borderColor ? { borderColor } : {},
             };

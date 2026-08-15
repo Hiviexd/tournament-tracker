@@ -3,7 +3,6 @@ import { useCreateTournament } from "../../hooks/useTournaments";
 import { Modal, Stack, Button, Group, LoadingOverlay, Stepper } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { TournamentFormData } from "@tc/types/Tournament";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import utils from "@tc/utils/client";
 import { useNavigate } from "react-router";
@@ -115,7 +114,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                 ...values,
                 threadId: values.threadId || undefined,
                 winners: selectedWinners,
-            } as unknown as TournamentFormData);
+            });
 
             const tournamentId = res.tournament._id?.toString?.() ?? res.tournament.id;
 

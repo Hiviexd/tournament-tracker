@@ -53,7 +53,9 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
         return "disagree";
     };
 
-    const getResultColor = (winner: string) => {
+    type ResultColor = { text: string; icon: IconProp; color: string };
+
+    const getResultColor = (winner: string): ResultColor => {
         if (winner === "agree")
             return { text: agreeOption, icon: "check-circle", color: "var(--mantine-color-success-6)" };
         if (winner === "disagree")
@@ -82,8 +84,7 @@ export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFi
                 <Group align="center" gap="xs">
                     <Text fw={500}>Result:</Text>
                     <Text fw={500} c={getResultColor(getWinner()).color}>
-                        <FontAwesomeIcon icon={getResultColor(getWinner()).icon as IconProp} />{" "}
-                        {getResultColor(getWinner()).text}
+                        <FontAwesomeIcon icon={getResultColor(getWinner()).icon} /> {getResultColor(getWinner()).text}
                     </Text>
                 </Group>
             )}

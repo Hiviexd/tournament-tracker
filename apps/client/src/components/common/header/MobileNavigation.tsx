@@ -78,7 +78,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                                         label={link.title}
                                         component={Link}
                                         to={link.link || "#"}
-                                        leftSection={<FontAwesomeIcon icon={link.icon} />}
+                                        leftSection={link.icon ? <FontAwesomeIcon icon={link.icon} /> : undefined}
                                         active={location.pathname === link.link}
                                         onClick={handleSubLinkClick}
                                         variant="subtle"

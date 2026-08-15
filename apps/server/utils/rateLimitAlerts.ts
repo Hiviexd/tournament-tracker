@@ -126,7 +126,6 @@ async function flushRateLimitAlerts() {
 
 // Ensure a single interval even with hot reloads
 declare global {
-    // eslint-disable-next-line no-var
     var __rateLimitAlertsInterval: NodeJS.Timeout | undefined;
 }
 

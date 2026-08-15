@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateTheme } from "../../themes";
 import { HueSlider, Checkbox, Divider, Select } from "@mantine/core";
 import { DEFAULT_HUE, COLORBLIND_MODES, ColorblindMode, DEFAULT_COLORBLIND_MODE } from "../../constants";
+import { pickStringUnion } from "@tc/utils/client";
 import { useLocalPreference } from "../../hooks/useLocalPreferences";
 import { useSetAtom } from "jotai";
 import { seasonalEffectsAtom } from "../../store/atoms";
@@ -99,7 +100,12 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
                     description="Select your color vision type for optimal color differentiation"
                     placeholder="Choose accessibility mode"
                     value={colorblindMode}
-                    onChange={(value) => setColorblindMode(value as ColorblindMode)}
+                    onChange={(value) => {
+                        const next = value
+                            ? pickStringUnion(value, ["none", "deuteranopia", "protanopia", "tritanopia"] as const)
+                            : undefined;
+                        if (next) setColorblindMode(next);
+                    }}
                     data={Object.entries(COLORBLIND_MODES).map(([key, label]) => ({
                         value: key,
                         label,

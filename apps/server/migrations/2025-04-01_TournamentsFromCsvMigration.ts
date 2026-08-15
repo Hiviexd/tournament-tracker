@@ -13,6 +13,7 @@ import Message from "../models/messageModel";
 import mongoose from "mongoose";
 import UserService from "../services/UserService";
 import OsuBotService from "../services/OsuBotService";
+import { isString } from "@tc/utils/common";
 import { IReviewChecklistItem } from "@tc/types/Review";
 import { IChecklistCategory } from "@tc/types/Checklist";
 import ChecklistService from "../services/ChecklistService";
@@ -67,11 +68,12 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
 
         // Get access token for user creation
         const accessToken = await OsuBotService.getPublicBotToken();
-        if (typeof accessToken !== "string") {
+        if (!isString(accessToken)) {
             throw new Error("Failed to get public bot token");
         }
 
         // Parse CSV file
+        // SAFETY: csv-parse with columns:true yields objects keyed by this file's CSV headers.
         const parser = parseCsv(fileContent, {
             columns: true,
             skip_empty_lines: true,
@@ -157,7 +159,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge._id as any);
+                    badgeIds.push(badge._id);
                 }
                 if (row.BADGE2) {
                     const badge2 = await new Attachment({
@@ -170,7 +172,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge2._id as any);
+                    badgeIds.push(badge2._id);
                 }
                 if (row.BADGE3) {
                     const badge3 = await new Attachment({
@@ -183,7 +185,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                         uploadedBy: host?._id,
                         createdAt,
                     }).save();
-                    badgeIds.push(badge3._id as any);
+                    badgeIds.push(badge3._id);
                 }
 
                 // Update tournament with badges
@@ -221,7 +223,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                         checklist: this.constructChecklist(row.TYPE),
                         createdAt,
                     }).save();
-                    reviews.push(review1._id as any);
+                    reviews.push(review1._id);
                     this.log(`Migrated review 1 for ${row["T-NAME"]}`);
                 }
                 if (row["P2 VERDICT"] && assignedReviewers[1]) {
@@ -231,7 +233,7 @@ export default class TournamentsFromCsvMigration extends BaseMigration {
                         checklist: this.constructChecklist(row.TYPE),
                         createdAt,
                     }).save();
-                    reviews.push(review2._id as any);
+                    reviews.push(review2._id);
                     this.log(`Migrated review 2 for ${row["T-NAME"]}`);
                 }
 

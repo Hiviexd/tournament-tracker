@@ -2,8 +2,11 @@ import { Document } from "mongoose";
 import { IDiscordEmbed } from "./Discord";
 import { IOsuBotMessage } from "./OsuApi";
 
-export type NotificationProvider = "discord" | "osu";
-export type NotificationJobStatus = "pending" | "processing" | "sent" | "failed";
+export const NOTIFICATION_PROVIDERS = ["discord", "osu"] as const;
+export type NotificationProvider = (typeof NOTIFICATION_PROVIDERS)[number];
+
+export const NOTIFICATION_JOB_STATUSES = ["pending", "processing", "sent", "failed"] as const;
+export type NotificationJobStatus = (typeof NOTIFICATION_JOB_STATUSES)[number];
 
 export interface IDiscordNotificationPayload {
     location: "main" | "dev";

@@ -51,11 +51,11 @@ class MigrationRunner {
                 // Fall back to .js (for production)
                 try {
                     module = await import(pathToFileURL(`${basePath}.js`).href);
-                } catch (jsError) {
+                } catch {
                     // Last resort: try without extension
                     try {
                         module = await import(pathToFileURL(basePath).href);
-                    } catch (noExtError) {
+                    } catch {
                         throw tsError;
                     }
                 }

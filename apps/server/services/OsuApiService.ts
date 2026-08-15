@@ -2,23 +2,25 @@ import axios, { AxiosRequestConfig } from "axios";
 import querystring from "querystring";
 import { IBeatmap, IBeatmapResponse, IOsuAuthResponse, IOsuUser } from "@tc/types/OsuApi";
 import { ErrorResponse } from "@tc/types/Responses";
+import { isPlainObject, isString } from "@tc/utils/common";
 import config from "@tc/config";
 import OsuApiHealthService from "./OsuApiHealthService";
 
 export default class OsuApiService {
     static isOsuResponseError<T>(errorResponse: T | ErrorResponse): errorResponse is ErrorResponse {
-        return (errorResponse as ErrorResponse).error !== undefined;
+        return isPlainObject(errorResponse) && "error" in errorResponse && errorResponse.error !== undefined;
     }
 
-    private static buildErrorResponse(options: AxiosRequestConfig, error: unknown): ErrorResponse {
+    private static buildErrorResponse<T>(options: AxiosRequestConfig, error: T): ErrorResponse {
         if (axios.isAxiosError(error)) {
             const statusCode = error.response?.status;
-            const responseData = error.response?.data as any;
-            const message =
-                responseData?.error ||
-                responseData?.message ||
-                error.message ||
-                `osu! api request failed: ${options.method || "GET"} ${options.url || "unknown-url"}`;
+            const responseData = error.response?.data;
+            let message =
+                error.message || `osu! api request failed: ${options.method || "GET"} ${options.url || "unknown-url"}`;
+            if (isPlainObject(responseData)) {
+                if (isString(responseData.error)) message = responseData.error;
+                else if (isString(responseData.message)) message = responseData.message;
+            }
 
             return {
                 error: String(message),

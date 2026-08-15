@@ -115,9 +115,7 @@ export function useChecklistListEditor(
     const addItem = (categoryIndex: number) => {
         idsRef.current = {
             ...ids,
-            items: ids.items.map((itemIds, i) =>
-                i === categoryIndex ? [...itemIds, crypto.randomUUID()] : itemIds,
-            ),
+            items: ids.items.map((itemIds, i) => (i === categoryIndex ? [...itemIds, crypto.randomUUID()] : itemIds)),
         };
         const used = categories.flatMap((category) => category.items);
         emit(

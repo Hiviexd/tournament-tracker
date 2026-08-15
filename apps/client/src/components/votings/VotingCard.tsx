@@ -13,6 +13,7 @@ import { loggedInUserAtom } from "../../store/atoms";
 
 // Components
 import DueDateBadge from "../../components/common/badges/DueDateBadge";
+import { cssVars } from "../../themes/cssVars";
 import DateBadge from "../../components/common/badges/DateBadge";
 import VoteCountBadge from "../../components/common/badges/VoteCountBadge";
 import UserLink from "../common/UserLink";
@@ -47,9 +48,9 @@ export default function VotingCard({ voting }: IPropTypes) {
             data-active={voting.isActive}
             style={
                 voting.isActive
-                    ? {
-                          ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
-                      }
+                    ? cssVars({
+                          "--card-status-color": `var(--mantine-color-${getDueDateColor()}-6)`,
+                      })
                     : undefined
             }>
             <Group justify="space-between" mb="xs">

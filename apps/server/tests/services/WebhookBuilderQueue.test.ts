@@ -14,7 +14,10 @@ describe("WebhookBuilder queue integration", () => {
     });
 
     it("enqueues discord payload instead of sending directly", async () => {
-        vi.mocked(NotificationDispatchService.enqueueDiscordWebhook).mockResolvedValue({} as any);
+        vi.mocked(NotificationDispatchService.enqueueDiscordWebhook).mockResolvedValue(
+            // SAFETY: test only asserts enqueue was called, not the returned job document.
+            {} as Awaited<ReturnType<typeof NotificationDispatchService.enqueueDiscordWebhook>>,
+        );
 
         await new WebhookBuilder().addEmbed({ color: 123456, description: "bulk update" }).setMessage("test").send();
 

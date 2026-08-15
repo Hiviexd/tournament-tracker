@@ -10,6 +10,7 @@ import { useAtom } from "jotai";
 import VoteCountBadge from "../common/badges/VoteCountBadge";
 import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import { useImageLoad } from "../../hooks/useImageLoad";
+import { cssVars } from "../../themes/cssVars";
 
 interface IProps {
     tournament: ITournament;
@@ -31,15 +32,13 @@ export default function TournamentCard({ tournament }: IProps) {
             component={Link}
             to={`/tournaments/${tournament._id}`}
             data-active={tournament.isActive}
-            style={
-                {
-                    "--card-status-color": tournament.isActive
-                        ? "var(--mantine-color-success-6)"
-                        : "var(--mantine-color-danger-6)",
-                    "--banner-url": `url(${bannerImageUrl})`,
-                    "--banner-opacity": loading ? 0 : 1,
-                } as React.CSSProperties
-            }>
+            style={cssVars({
+                "--card-status-color": tournament.isActive
+                    ? "var(--mantine-color-success-6)"
+                    : "var(--mantine-color-danger-6)",
+                "--banner-url": `url(${bannerImageUrl})`,
+                "--banner-opacity": loading ? 0 : 1,
+            })}>
             <div className="tournament-card-banner" />
 
             {/* Loading spinner */}

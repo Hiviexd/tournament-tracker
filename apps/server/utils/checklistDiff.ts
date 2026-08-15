@@ -15,6 +15,11 @@ export interface ChecklistDiscordDiff {
     reordered: Array<"TC" | "CC">;
 }
 
+interface ListDiff {
+    fields: ChecklistDiscordField[];
+    reorderedCategories: boolean;
+}
+
 function sameItemSet(a: string[], b: string[]): boolean {
     if (a.length !== b.length) return false;
     const set = new Set(a);
@@ -128,11 +133,7 @@ function pairRenames(previous: IChecklistCategory[], next: IChecklistCategory[])
     return renamed;
 }
 
-function diffList(
-    listLabel: "TC" | "CC",
-    previous: IChecklistCategory[],
-    next: IChecklistCategory[],
-): { fields: ChecklistDiscordField[]; reorderedCategories: boolean } {
+function diffList(listLabel: "TC" | "CC", previous: IChecklistCategory[], next: IChecklistCategory[]): ListDiff {
     const previousByName = new Map(previous.map((category) => [category.category, category]));
     const previousNameSet = new Set(previous.map((category) => category.category));
     const nextNameSet = new Set(next.map((category) => category.category));

@@ -12,7 +12,7 @@ interface FilterValues {
     content: string;
     targetUser: string;
     targetTournament: string;
-    assignedGroup: UserGroup;
+    assignedGroup: UserGroup | "";
     status: string;
     showOwn: boolean;
 }
@@ -95,7 +95,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 placeholder="Filter by assigned committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
-                                onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                                onChange={(value) => handleChange("assignedGroup", value)}
                                 data={assignedGroupOptions}
                                 clearable
                             />
@@ -145,7 +145,7 @@ export default function TicketsFilters({ values, onChange, type }: IProps) {
                                 placeholder="Filter by assigned committee"
                                 leftSection={<FontAwesomeIcon icon="user-group" />}
                                 value={values.assignedGroup}
-                                onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                                onChange={(value) => handleChange("assignedGroup", value)}
                                 data={assignedGroupOptions}
                                 clearable
                             />

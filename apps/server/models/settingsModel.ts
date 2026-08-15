@@ -41,6 +41,7 @@ const SettingsSchema = new Schema<ISettings, ISettingsStatics>(
 SettingsSchema.pre("validate", async function () {
     if (!this.isNew) return;
 
+    // SAFETY: Document.constructor is the Settings model compiled from this schema.
     const existing = await (this.constructor as ISettingsStatics).exists({ _id: { $ne: this._id } });
     if (existing) {
         throw new Error("Settings collection can only contain one document");

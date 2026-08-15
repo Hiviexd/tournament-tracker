@@ -14,11 +14,18 @@ interface IProps {
 export default function ResourcesCreateModal({ opened, onClose, defaultType = "community" }: IProps) {
     const createResourceMutation = useCreateResource();
 
-    const form = useForm({
+    const form = useForm<{
+        title: string;
+        description: string;
+        category: ResourceCategory | "";
+        type: ResourceType;
+        link: string;
+        author: string;
+    }>({
         initialValues: {
             title: "",
             description: "",
-            category: "" as ResourceCategory,
+            category: "",
             type: defaultType,
             link: "",
             author: "",

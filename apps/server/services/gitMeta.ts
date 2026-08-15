@@ -1,3 +1,5 @@
+import { isNumber, isPlainObject, isString } from "@tc/utils/common";
+
 export type GitMeta = {
     hash: string;
     message: string;
@@ -7,31 +9,26 @@ export type GitMeta = {
     behind: number | null;
 };
 
-export function parseGitMeta(raw: unknown): GitMeta | null {
-    if (!raw || typeof raw !== "object") {
-        return null;
-    }
-
-    const record = raw as Record<string, unknown>;
-    if (typeof record.hash !== "string" || record.hash.length === 0) {
+export function parseGitMeta<T>(raw: T): GitMeta | null {
+    if (!isPlainObject(raw) || !("hash" in raw) || !isString(raw.hash) || raw.hash.length === 0) {
         return null;
     }
 
     const commitData: Record<string, number> = {};
-    if (record.commitData && typeof record.commitData === "object") {
-        for (const [date, count] of Object.entries(record.commitData as Record<string, unknown>)) {
-            if (typeof count === "number") {
+    if ("commitData" in raw && isPlainObject(raw.commitData)) {
+        for (const [date, count] of Object.entries(raw.commitData)) {
+            if (isNumber(count)) {
                 commitData[date] = count;
             }
         }
     }
 
     return {
-        hash: record.hash,
-        message: typeof record.message === "string" ? record.message : "",
-        branch: typeof record.branch === "string" ? record.branch : "unknown",
+        hash: raw.hash,
+        message: "message" in raw && isString(raw.message) ? raw.message : "",
+        branch: "branch" in raw && isString(raw.branch) ? raw.branch : "unknown",
         commitData,
-        ahead: typeof record.ahead === "number" ? record.ahead : null,
-        behind: typeof record.behind === "number" ? record.behind : null,
+        ahead: "ahead" in raw && isNumber(raw.ahead) ? raw.ahead : null,
+        behind: "behind" in raw && isNumber(raw.behind) ? raw.behind : null,
     };
 }

@@ -3,7 +3,7 @@ import { ExtraLinkType } from "@tc/types/Tournament";
 
 export { EXTRA_LINK_DEFAULTS, EXTRA_LINK_TYPES } from "./common";
 
-export const EXTRA_LINK_FA_ICONS: Partial<Record<ExtraLinkType, IconProp>> = {
+export const EXTRA_LINK_FA_ICONS = {
     news: "newspaper",
     wiki: "book",
     challonge: "trophy",
@@ -12,8 +12,8 @@ export const EXTRA_LINK_FA_ICONS: Partial<Record<ExtraLinkType, IconProp>> = {
     contest: "medal",
     discord: ["fab", "discord"],
     twitch: ["fab", "twitch"],
-};
+} as const satisfies Partial<Record<ExtraLinkType, IconProp>>;
 
-export const EXTRA_LINK_SVG_ICONS: Partial<Record<ExtraLinkType, string>> = {
+export const EXTRA_LINK_SVG_ICONS = {
     mappersguild: "/assets/mg-icon.svg",
-};
+} as const satisfies Partial<Record<ExtraLinkType, string>>;

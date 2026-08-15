@@ -43,7 +43,7 @@ export function useAddInfringement() {
             threadId?: string;
             enchantUrl?: string;
         }) => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<{ message: string; user?: IUser; users?: IUser[] }>({
                 method: "post",
                 url: "/api/infringements/add",
                 data: {
@@ -56,15 +56,13 @@ export function useAddInfringement() {
                     enchantUrl: data.enchantUrl,
                 },
             });
-            return utils.handleMutationResponse(response);
+            return utils.handleMutationResponse<{ message: string; user?: IUser; users?: IUser[] }>(response);
         },
-        onSuccess: (responseData) => {
+        onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["user"] });
-
-            const res = responseData as { message: string; user?: IUser; users?: IUser[] };
 
             if (res.user) {
                 setSelectedUser(res.user);
@@ -96,7 +94,7 @@ export function useUpdateInfringement() {
             threadId?: string;
             enchantUrl?: string;
         }) => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<{ message: string; user: IUser }>({
                 method: "patch",
                 url: `/api/infringements/${data.infringementId}/edit`,
                 data: {
@@ -108,15 +106,14 @@ export function useUpdateInfringement() {
                     enchantUrl: data.enchantUrl,
                 },
             });
-            return utils.handleMutationResponse(response);
+            return utils.handleMutationResponse<{ message: string; user: IUser }>(response);
         },
-        onSuccess: (responseData) => {
+        onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
             queryClient.invalidateQueries({ queryKey: ["user"] });
 
-            const res = responseData as { message: string; user: IUser };
             if (res.user) {
                 setSelectedUser(res.user);
                 // Update modal's useUser cache (URL uses osuId; key may be id or osuId)

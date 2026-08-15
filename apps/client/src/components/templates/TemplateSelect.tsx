@@ -34,24 +34,20 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
                 template.category.toLowerCase().includes(search.toLowerCase()),
         );
 
-        // Group by category
-        const grouped = filtered.reduce(
-            (acc, template) => {
-                if (!acc[template.category]) {
-                    acc[template.category] = [];
-                }
-                acc[template.category].push(template);
-                return acc;
-            },
-            {} as Record<string, ITemplate[]>,
-        );
+        const grouped: Record<string, ITemplate[]> = {};
+        for (const template of filtered) {
+            if (!grouped[template.category]) {
+                grouped[template.category] = [];
+            }
+            grouped[template.category].push(template);
+        }
 
         // Sort categories and templates within each category
         return Object.entries(grouped)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([category, categoryTemplates]) => ({
                 category,
-                templates: (categoryTemplates as ITemplate[]).sort((a, b) => a.name.localeCompare(b.name)),
+                templates: categoryTemplates.sort((a, b) => a.name.localeCompare(b.name)),
             }));
     }, [templates, search]);
 

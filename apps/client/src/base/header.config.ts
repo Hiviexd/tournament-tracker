@@ -1,6 +1,8 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+
 export interface IRoute {
     title: string;
-    icon?: string;
+    icon?: IconProp;
     permissions: string[];
     link?: string;
     links?: IRoute[];

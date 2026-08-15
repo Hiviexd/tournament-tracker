@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "@tc/types/Voting";
 import { IUser } from "@tc/types/User";
 import { useSubmitVote, useToggleAbstention } from "../../hooks/useVotings";
-import { VoteType, ClassicVote, BinaryVote, BinaryStrictVote, VariableVote, RankedChoiceVote } from "@tc/types/Vote";
+import { VoteType } from "@tc/types/Vote";
 import utils from "@tc/utils/client";
 import ClassicVoteInput from "./votes/ClassicVoteInput";
 import BinaryVoteInput from "./votes/BinaryVoteInput";
@@ -149,7 +149,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 return (
                     <ClassicVoteInput
                         options={voting.options}
-                        value={(voteData as ClassicVote).option}
+                        value={voteData.type === "classic" ? voteData.option : 0}
                         onChange={(value) => setVoteData({ type: "classic", option: value })}
                     />
                 );
@@ -158,7 +158,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 return (
                     <BinaryVoteInput
                         options={[voting.options[0], voting.options[1]]}
-                        value={(voteData as BinaryVote).score}
+                        value={voteData.type === "binary" ? voteData.score : 0}
                         onChange={(value) => setVoteData({ type: "binary", score: value })}
                     />
                 );
@@ -167,7 +167,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 return (
                     <BinaryStrictVoteInput
                         options={voting.options}
-                        value={voteData as BinaryStrictVote}
+                        value={voteData.type === "binary-strict" ? voteData : null}
                         onChange={(vote) => vote && setVoteData(vote)}
                         allowNeutralVotes={voting.allowNeutralVotes}
                     />
@@ -177,11 +177,12 @@ export default function VotingForm({ voting, user }: IProps) {
                 return (
                     <VariableVoteInput
                         options={voting.options}
-                        values={(voteData as VariableVote).scores}
+                        values={voteData.type === "variable" ? voteData.scores : []}
                         onChange={(optionIndex, score) => {
+                            if (voteData.type !== "variable") return;
                             setVoteData({
                                 type: "variable",
-                                scores: (voteData as VariableVote).scores.map((s) =>
+                                scores: voteData.scores.map((s) =>
                                     s.optionIndex === optionIndex ? { ...s, score } : s,
                                 ),
                             });
@@ -193,7 +194,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 return (
                     <RankedChoiceVoteInput
                         options={voting.options}
-                        value={voteData as RankedChoiceVote}
+                        value={voteData.type === "ranked-choice" ? voteData : null}
                         onChange={(vote) => vote && setVoteData(vote)}
                     />
                 );

@@ -27,7 +27,7 @@ describe("OsuSender", () => {
                     content: "hello",
                 },
             },
-        } as any);
+        });
 
         expect(result.ok).toBe(true);
     });
@@ -36,7 +36,7 @@ describe("OsuSender", () => {
         vi.mocked(OsuBotService.sendAnnouncementDirect).mockResolvedValue({
             error: "rate limited",
             statusCode: 429,
-        } as any);
+        });
 
         const result = await OsuSender.send({
             payload: {
@@ -49,7 +49,7 @@ describe("OsuSender", () => {
                     content: "hello",
                 },
             },
-        } as any);
+        });
 
         expect(result.ok).toBe(false);
         expect(result.retryable).toBe(true);

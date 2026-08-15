@@ -1,7 +1,12 @@
 import axios from "axios";
 import config from "@tc/config";
 import { IDiscordNotificationPayload, INotificationJob, NotificationJobPayload } from "@tc/types/NotificationJob";
+import { isNumber, isPlainObject, isString } from "@tc/utils/common";
 import { NotificationDispatchResult } from "../NotificationDispatchService";
+
+function isDiscordPayload(payload: NotificationJobPayload): payload is IDiscordNotificationPayload {
+    return "embeds" in payload;
+}
 
 class DiscordSender {
     private getWebhookLink(location: "main" | "dev", threadId?: string): string {
@@ -32,24 +37,31 @@ class DiscordSender {
         return `${rolePings} ${userPings} ${message}`.trim();
     }
 
-    public async send(job: INotificationJob): Promise<NotificationDispatchResult> {
-        const payload = job.payload as NotificationJobPayload;
-        const discordPayload = payload as IDiscordNotificationPayload;
+    public async send(job: Pick<INotificationJob, "payload">): Promise<NotificationDispatchResult> {
+        const payload = job.payload;
+        if (!isDiscordPayload(payload)) {
+            return { ok: false, retryable: false, error: "Invalid Discord webhook payload" };
+        }
 
         try {
-            const webhookUrl = this.getWebhookLink(discordPayload.location, discordPayload.threadId);
+            const webhookUrl = this.getWebhookLink(payload.location, payload.threadId);
             await axios.post(webhookUrl, {
                 username: config.discord.username,
                 avatar_url: config.discord.avatar_url,
-                embeds: discordPayload.embeds,
-                content: this.buildContent(discordPayload),
-                flags: discordPayload.notification === "silent" ? 1 << 12 : undefined,
+                embeds: payload.embeds,
+                content: this.buildContent(payload),
+                flags: payload.notification === "silent" ? 1 << 12 : undefined,
             });
 
             return { ok: true, retryable: false };
         } catch (error: any) {
-            const statusCode = error?.response?.status as number | undefined;
-            const errorMessage = error?.response?.data?.message || error?.message || "Discord webhook request failed";
+            const response = isPlainObject(error) ? error.response : undefined;
+            const statusCode = isPlainObject(response) && isNumber(response.status) ? response.status : undefined;
+            const responseData = isPlainObject(response) ? response.data : undefined;
+            const errorMessage =
+                (isPlainObject(responseData) && isString(responseData.message) && responseData.message) ||
+                (isPlainObject(error) && isString(error.message) && error.message) ||
+                "Discord webhook request failed";
 
             return {
                 ok: false,

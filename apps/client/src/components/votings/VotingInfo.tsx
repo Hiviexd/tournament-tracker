@@ -3,12 +3,7 @@ import dayjs from "@tc/utils/dayjs";
 import { useState } from "react";
 import { IVoting } from "@tc/types/Voting";
 import { IUser } from "@tc/types/User";
-import {
-    useToggleVotingStatus,
-    useDeleteVoting,
-    useToggleVotingPublic,
-    useClearVotes,
-} from "../../hooks/useVotings";
+import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic, useClearVotes } from "../../hooks/useVotings";
 import { useConfirmModal } from "../../hooks/useModals";
 
 // Mantine
@@ -46,6 +41,8 @@ import UserGroupBadge from "../common/badges/UserGroupBadge";
 import NotVotedBadge from "../common/badges/NotVotedBadge";
 import VotingTypeBadge from "../common/badges/VotingTypeBadge";
 import AlertText from "../common/AlertText";
+import { cssVars } from "../../themes/cssVars";
+import { pickStringUnion } from "@tc/utils/client";
 
 interface IProps {
     voting: IVoting;
@@ -76,9 +73,9 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
 
     const getGradientStyle = (): MantineStyleProp => {
         if (voting.isActive) {
-            return {
-                ["--card-status-color" as any]: `var(--mantine-color-${getDueDateColor()}-6)`,
-            };
+            return cssVars({
+                "--card-status-color": `var(--mantine-color-${getDueDateColor()}-6)`,
+            });
         }
         return;
     };
@@ -163,7 +160,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             size="xs"
                             color="primary"
                             value={descriptionType}
-                            onChange={(value) => setDescriptionType(value as "private" | "public")}
+                            onChange={(value) => {
+                                const next = pickStringUnion(value, ["private", "public"] as const);
+                                if (next) setDescriptionType(next);
+                            }}
                             data={[
                                 { label: "Private", value: "private" },
                                 { label: "Public", value: "public" },

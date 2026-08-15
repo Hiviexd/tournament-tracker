@@ -71,7 +71,7 @@ export default function ResourcesFilters({ values, onChange, onCreateClick }: IP
                         placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
-                        onChange={(value) => handleChange("category", value as ResourceCategory)}
+                        onChange={(value) => handleChange("category", value)}
                         data={categoryOptions}
                         clearable
                     />

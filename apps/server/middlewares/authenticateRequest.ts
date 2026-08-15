@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import ApiKeyService from "../services/ApiKeyService";
 import { type ApiScope } from "@tc/types/ApiKey";
+import { isString } from "@tc/utils/common";
 
-export async function authenticateRequest(req: Request, res: Response, next: NextFunction) {
+export const authenticateRequest: RequestHandler = async (req, res, next) => {
     const authz = req.headers["authorization"];
-    if (authz && typeof authz === "string" && authz.startsWith("Bearer ")) {
+    if (isString(authz) && authz.startsWith("Bearer ")) {
         const rawKey = authz.slice("Bearer ".length).trim();
         if (rawKey) {
             const result = await ApiKeyService.validate(rawKey, req);
@@ -27,7 +28,7 @@ export async function authenticateRequest(req: Request, res: Response, next: Nex
     res.locals.authMethod = "session";
     res.locals.isAccessibleViaKey = false; // Session routes are not accessible via API key by default
     return next();
-}
+};
 
 export function requireScopes(scopes: ApiScope[]) {
     return (req: Request, res: Response, next: NextFunction) => {

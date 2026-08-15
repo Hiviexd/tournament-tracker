@@ -17,14 +17,14 @@ class ResourcesController {
             const query: any = {};
 
             // Handle text search (title and description)
-            if (search) {
-                const escaped = utils.escapeRegexPattern(search as string);
+            if (utils.isString(search)) {
+                const escaped = utils.escapeRegexPattern(search);
                 query.$or = [{ title: new RegExp(escaped, "i") }, { description: new RegExp(escaped, "i") }];
             }
 
             // Handle filters
-            if (author) {
-                const user = await User.findByUsernameOrOsuId(author as string);
+            if (utils.isString(author)) {
+                const user = await User.findByUsernameOrOsuId(author);
                 if (user) query.author = user._id;
             }
             if (category) {

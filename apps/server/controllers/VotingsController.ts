@@ -1,8 +1,8 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
-import { VotingQueryParams, VotingListQuery } from "@tc/types/Voting";
+import { VotingQueryParams, VOTING_CATEGORIES } from "@tc/types/Voting";
 import User from "../models/userModel";
-import { IUser } from "@tc/types/User";
+import { IUser, USER_GROUPS } from "@tc/types/User";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
@@ -34,15 +34,26 @@ const FILE_UPLOAD_CATEGORY = "votings";
 class VotingsController {
     /** GET voting listing */
     public async index(req: Request, res: Response) {
-        const reqQuery = req.query as VotingListQuery;
+        const title = utils.isString(req.query.title) ? req.query.title : undefined;
+        const category = utils.isString(req.query.category)
+            ? utils.pickStringUnion(req.query.category, VOTING_CATEGORIES)
+            : undefined;
+        const assignedGroup = utils.isString(req.query.assignedGroup)
+            ? utils.pickStringUnion(req.query.assignedGroup, USER_GROUPS)
+            : undefined;
+        const visibility = utils.isString(req.query.visibility) ? req.query.visibility : undefined;
+        const status = utils.isString(req.query.status) ? req.query.status : undefined;
+        const showNeedsAttention = utils.isString(req.query.showNeedsAttention)
+            ? req.query.showNeedsAttention
+            : undefined;
         const dbQuery: VotingQueryParams = {};
         const user = res.locals!.user;
 
-        if (reqQuery.title) dbQuery.title = new RegExp(utils.escapeRegexPattern(reqQuery.title), "i");
-        if (reqQuery.category) dbQuery.category = reqQuery.category;
-        if (reqQuery.assignedGroup) dbQuery.assignedGroups = { $in: [reqQuery.assignedGroup] };
-        if (reqQuery.visibility) dbQuery.isPublic = reqQuery.visibility === "public";
-        if (reqQuery.status) dbQuery.isActive = reqQuery.status === "active";
+        if (title) dbQuery.title = new RegExp(utils.escapeRegexPattern(title), "i");
+        if (category) dbQuery.category = category;
+        if (assignedGroup) dbQuery.assignedGroups = { $in: [assignedGroup] };
+        if (visibility) dbQuery.isPublic = visibility === "public";
+        if (status) dbQuery.isActive = status === "active";
 
         // Only show concluded AND public votes to non-committee members
         if (!user || !user.isCommitteeOrAdmin) {
@@ -51,7 +62,7 @@ class VotingsController {
         }
 
         // Handle needs attention filter for committee members
-        if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
+        if (showNeedsAttention === "true" && user && user.isCommittee) {
             dbQuery.isActive = true;
             // First find votings where user is in assigned groups
             dbQuery.$or = [
@@ -60,7 +71,7 @@ class VotingsController {
             ];
         }
 
-        const page = Number(reqQuery.page || 1);
+        const page = Number((utils.isString(req.query.page) ? req.query.page : undefined) || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
 
         // Get total count before pagination
@@ -73,7 +84,7 @@ class VotingsController {
             .populate(DEFAULT_POPULATE);
 
         // Filter out votings where user has already voted if needs attention is true
-        if (reqQuery.showNeedsAttention === "true" && user && user.isCommittee) {
+        if (showNeedsAttention === "true" && user && user.isCommittee) {
             votings = votings.filter((voting) => !voting.votes.some((vote) => vote.author._id.equals(user._id)));
         }
 
@@ -127,7 +138,7 @@ class VotingsController {
             forceFullParticipation,
             binaryStrictPassThreshold,
         } = req.body;
-        const files = req.files as Express.Multer.File[];
+        const files = req.files;
 
         const author = res.locals!.user!;
         let targetUser: IUser;
@@ -298,12 +309,12 @@ class VotingsController {
         // Validate vote data based on type
         switch (data.type) {
             case "classic":
-                if (typeof data.option !== "number" || data.option >= voting.options.length) {
+                if (!utils.isNumber(data.option) || data.option >= voting.options.length) {
                     return res.status(400).json({ error: "Invalid option index" });
                 }
                 break;
             case "binary":
-                if (typeof data.score !== "number" || data.score < -5 || data.score > 5) {
+                if (!utils.isNumber(data.score) || data.score < -5 || data.score > 5) {
                     return res.status(400).json({ error: "Invalid score (must be between -5 and 5)" });
                 }
                 if (!voting.allowNeutralVotes && data.score === 0) {
@@ -317,9 +328,9 @@ class VotingsController {
                     !Array.isArray(data.scores) ||
                     !data.scores.every(
                         (s) =>
-                            typeof s.optionIndex === "number" &&
+                            utils.isNumber(s.optionIndex) &&
                             s.optionIndex < voting.options.length &&
-                            typeof s.score === "number" &&
+                            utils.isNumber(s.score) &&
                             s.score >= -5 &&
                             s.score <= 5,
                     )
@@ -333,7 +344,7 @@ class VotingsController {
                 }
                 break;
             case "binary-strict":
-                if (typeof data.score !== "number" || data.score < -1 || data.score > 1) {
+                if (!utils.isNumber(data.score) || data.score < -1 || data.score > 1) {
                     return res.status(400).json({ error: "Invalid score (must be between -1 and 1)" });
                 }
                 if (!voting.allowNeutralVotes && data.score === 0) {
@@ -347,9 +358,9 @@ class VotingsController {
                     !Array.isArray(data.scores) ||
                     !data.scores.every(
                         (s) =>
-                            typeof s.optionIndex === "number" &&
+                            utils.isNumber(s.optionIndex) &&
                             s.optionIndex < voting.options.length &&
-                            typeof s.score === "number" &&
+                            utils.isNumber(s.score) &&
                             s.score >= -2 &&
                             s.score <= 2,
                     )
@@ -743,9 +754,7 @@ class VotingsController {
         const result = await VotingService.recalibrateRequiredVotes(voting);
 
         res.json({
-            message: result.changed
-                ? `Required votes: ${result.previous} → ${result.next}`
-                : "Already up to date",
+            message: result.changed ? `Required votes: ${result.previous} → ${result.next}` : "Already up to date",
             voting,
         });
 

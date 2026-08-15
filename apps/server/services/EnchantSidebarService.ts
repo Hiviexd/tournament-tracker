@@ -2,12 +2,27 @@ import crypto from "crypto";
 import config from "@tc/config";
 import { IInfringement } from "@tc/types/Infringement";
 import { ITournament } from "@tc/types/Tournament";
-import { IUser } from "@tc/types/User";
+import { isNumber, isPlainObject, isString } from "@tc/utils/common";
 import utils from "@tc/utils/server";
 import Infringement from "../models/infringementModel";
 import Tournament from "../models/tournamentModel";
 
 const RESULT_CAP = 5;
+
+type PopulatedUserFields = { osuId: number; username: string };
+
+function populatedUser<T>(value: T): PopulatedUserFields | undefined {
+    if (
+        !isPlainObject(value) ||
+        !("osuId" in value) ||
+        !("username" in value) ||
+        !isNumber(value.osuId) ||
+        !isString(value.username)
+    ) {
+        return undefined;
+    }
+    return { osuId: value.osuId, username: value.username };
+}
 
 export default class EnchantSidebarService {
     /**
@@ -61,7 +76,8 @@ export default class EnchantSidebarService {
         const rows: string[] = [`<p><b>Tournament:</b> <a href="${tournamentUrl}">${name}</a></p>`];
 
         const hosts = (tournament.hosts || [])
-            .filter((host): host is IUser => !!host && typeof host === "object" && "osuId" in host)
+            .map((host) => populatedUser(host))
+            .filter((host) => host !== undefined)
             .map((host) => {
                 const username = utils.escapeHtml(host.username);
                 return `<a href="https://osu.ppy.sh/users/${host.osuId}">${username}</a>`;
@@ -89,7 +105,7 @@ export default class EnchantSidebarService {
     }
 
     private static renderInfringement(infringement: IInfringement): string {
-        const user = infringement.userId as unknown as IUser | undefined;
+        const user = populatedUser(infringement.userId);
         const rows: string[] = [];
 
         if (user?.osuId && user.username) {

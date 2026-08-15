@@ -40,7 +40,7 @@ app.set("trust proxy", true);
 // SEO
 import { handleCrawlers } from "./middlewares/seo";
 
-app.use(handleCrawlers as express.RequestHandler);
+app.use(handleCrawlers);
 
 // settings/middlewares
 app.use(logger);
@@ -50,6 +50,7 @@ app.use(
         verify: (req, _res, buf) => {
             // Capture raw body for Enchant HMAC verification
             if (req.headers["enchant-signature"]) {
+                // SAFETY: json verify receives IncomingMessage; rawBody is declared on Express Request.
                 (req as express.Request).rawBody = buf;
             }
         },
@@ -140,17 +141,17 @@ app.use("/api/enchant", enchantRouter);
 const apiRouter = express.Router();
 
 // Determine auth method (apiKey vs session)
-apiRouter.use(authenticateRequest as express.RequestHandler);
+apiRouter.use(authenticateRequest);
 
 // Conditionally enforce CORS
-apiRouter.use(conditionalCors as express.RequestHandler);
+apiRouter.use(conditionalCors);
 
 // Rate limit based on auth method
-apiRouter.use(sessionRateLimiter as express.RequestHandler);
-apiRouter.use(apiKeyRateLimiter as express.RequestHandler);
+apiRouter.use(sessionRateLimiter);
+apiRouter.use(apiKeyRateLimiter);
 
 // Conditionally enforce CSRF
-apiRouter.use(conditionalCsrf as express.RequestHandler);
+apiRouter.use(conditionalCsrf);
 
 // API routes
 apiRouter.use("/auth", authRouter);
@@ -214,7 +215,7 @@ app.use((req, res) => {
 });
 
 // error handler
-app.use(handleCsrfError as express.ErrorRequestHandler);
+app.use(handleCsrfError);
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     let customErrorMessage = "";

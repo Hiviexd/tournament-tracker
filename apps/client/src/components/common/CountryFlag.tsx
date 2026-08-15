@@ -10,6 +10,7 @@ interface CountryFlagProps {
 
 export default function CountryFlag({ country, showCountryName = false }: CountryFlagProps) {
     const FlagComponent = useMemo(() => {
+        // SAFETY: osu! country.code is an ISO alpha-2 string; country-flag-icons only types known pack keys, and missing flags already return null below.
         return countryFlags[country.code as keyof typeof countryFlags];
     }, [country.code]);
 

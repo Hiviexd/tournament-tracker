@@ -1,7 +1,7 @@
 import { Modal, TextInput, Select, Stack, Button, Textarea, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IResource, ResourceCategory } from "@tc/types/Resource";
+import { IResource } from "@tc/types/Resource";
 import { useDeleteResource, useUpdateResource } from "../../hooks/useResources";
 import { useConfirmModal } from "../../hooks/useModals";
 import UserSearch from "../common/UserSearch";
@@ -22,7 +22,7 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
         initialValues: {
             title: resource?.title || "",
             description: resource?.description || "",
-            category: resource?.category || ("" as ResourceCategory),
+            category: resource?.category || "",
             type: resource?.type || "community",
             link: resource?.link || "",
             author: resource?.author?._id || "",

@@ -1,5 +1,6 @@
 import { Card, Stack, Badge, Text, Box } from "@mantine/core";
 import { IReview } from "@tc/types/Review";
+import { IUser, UserGroup } from "@tc/types/User";
 import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import startCase from "lodash/startCase.js";
@@ -7,7 +8,6 @@ import { ITournament } from "@tc/types/Tournament";
 import utils from "@tc/utils/client";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
-import { UserGroup } from "@tc/types/User";
 import AlertText from "../common/AlertText";
 
 interface IProps {
@@ -43,12 +43,14 @@ export default function TournamentReviewCard({ tournament, review }: IProps) {
         return review.vote === "deny" && getCheckedItemsCount() === 0;
     };
 
-    const getUserDisplayProps = () => {
+    type ReviewerDisplayProps = { username: string; avatarUrl: string; group: UserGroup } | { user: IUser | undefined };
+
+    const getUserDisplayProps = (): ReviewerDisplayProps => {
         if (!user?.isCommitteeOrAdmin) {
             return {
                 username: "Reviewer",
                 avatarUrl: "/assets/logo-512.png",
-                group: (tournament.isTournament ? "tc" : "cc") as UserGroup,
+                group: tournament.isTournament ? "tc" : "cc",
             };
         }
         return {

@@ -1,5 +1,5 @@
 import { Stack, Group, Text, Timeline, Card, Title, Collapse, Tooltip, SegmentedControl, Box } from "@mantine/core";
-import { ITournament, ReviewHistoryAction } from "@tc/types/Tournament";
+import { ITournament, ITournamentReviewHistoryEntry, ReviewHistoryAction } from "@tc/types/Tournament";
 import { IUser } from "@tc/types/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dayjs from "@tc/utils/dayjs";
@@ -9,7 +9,14 @@ import MarkdownText from "../common/MarkdownText";
 import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import ExpandButton from "../common/buttons/ExpandButton";
-import { isPlainObject, isString, pickStringUnion } from "@tc/utils/client";
+import { isNumber, isPlainObject, isString, pickStringUnion } from "@tc/utils/client";
+
+type ReviewHistoryUser = ITournamentReviewHistoryEntry["user"] | IUser;
+
+function isPopulatedUser(value: ReviewHistoryUser): value is IUser {
+    if (!isPlainObject(value)) return false;
+    return "username" in value && isString(value.username) && "osuId" in value && isNumber(value.osuId);
+}
 
 interface IProps {
     tournament: ITournament;
@@ -45,9 +52,7 @@ export default function TournamentLogs({ tournament }: IProps) {
         ? tournament.logs!.toSorted((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         : [];
     const sortedReviewHistory = hasReviewHistory
-        ? tournament.reviewHistory!.toSorted(
-              (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
-          )
+        ? tournament.reviewHistory!.toSorted((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         : [];
 
     const showAll = segment === "all";
@@ -134,14 +139,8 @@ export default function TournamentLogs({ tournament }: IProps) {
                                                             <Text size="sm">
                                                                 {REVIEW_ACTION_CONFIG[entry.action].label}
                                                             </Text>
-                                                            {entry.user &&
-                                                            isPlainObject(entry.user) &&
-                                                            isString(entry.user.username) ? (
-                                                                <UserLink
-                                                                    size="sm"
-                                                                    // SAFETY: review history user is populated by the API as IUser despite the ObjectId schema type.
-                                                                    user={entry.user as IUser}
-                                                                />
+                                                            {isPopulatedUser(entry.user) ? (
+                                                                <UserLink size="sm" user={entry.user} />
                                                             ) : (
                                                                 <Text size="xs" c="dimmed">
                                                                     Reviewer

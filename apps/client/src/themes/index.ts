@@ -1,4 +1,3 @@
-import { MantineTheme } from "@mantine/core";
 import { theme as mainTheme } from "./main";
 import { deuteranopiaTheme, protanopiaTheme, tritanopiaTheme } from "./accessibility/colorblind";
 import { ColorblindMode, DEFAULT_COLORBLIND_MODE } from "../constants";
@@ -10,19 +9,19 @@ export { normalizeAlertColor, getThemeColor };
 /**
  * Get the appropriate theme based on colorblind mode setting
  */
-export const getTheme = (): MantineTheme => {
+export const getTheme = () => {
     const colorblindMode = getSavedPreference<ColorblindMode>("colorblindMode", DEFAULT_COLORBLIND_MODE);
 
     switch (colorblindMode) {
         case "deuteranopia":
-            return deuteranopiaTheme as MantineTheme;
+            return deuteranopiaTheme;
         case "protanopia":
-            return protanopiaTheme as MantineTheme;
+            return protanopiaTheme;
         case "tritanopia":
-            return tritanopiaTheme as MantineTheme;
+            return tritanopiaTheme;
         case "none":
         default:
-            return mainTheme as MantineTheme;
+            return mainTheme;
     }
 };
 

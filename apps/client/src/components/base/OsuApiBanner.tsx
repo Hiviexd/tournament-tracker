@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useStatus } from "../../hooks/useStatus";
+import { cssVars } from "../../themes/cssVars";
 
 const BANNER_MESSAGE = "The osu! API is temporarily unavailable. Some features may not work.";
 
@@ -50,11 +51,9 @@ export default function OsuApiBanner() {
         <Box
             ref={bannerRef}
             className="osu-api-banner"
-            style={
-                {
-                    "--osu-api-banner-background": "var(--mantine-color-red-9)",
-                } as React.CSSProperties
-            }>
+            style={cssVars({
+                "--osu-api-banner-background": "var(--mantine-color-red-9)",
+            })}>
             <Text size="xs" fw={600} className="banner-text">
                 <FontAwesomeIcon icon="triangle-exclamation" />
                 {BANNER_MESSAGE}

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { isNumber, isPlainObject, isString } from "@tc/utils/common";
 import ChecklistService from "../services/ChecklistService";
 import LogService from "../services/LogService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
@@ -7,8 +8,12 @@ import DiscordUtils from "../services/discord/DiscordUtils";
 import { diffReviewChecklists, hasChecklistDiscordDiff } from "../utils/checklistDiff";
 import config from "@tc/config";
 
-function isHttpError(error: unknown): error is { status: number; error: string } {
-    return !!error && typeof error === "object" && "status" in error && "error" in error;
+type HttpError = { status: number; error: string };
+
+function isHttpError<T>(error: T): error is T & HttpError {
+    return (
+        isPlainObject(error) && "status" in error && isNumber(error.status) && "error" in error && isString(error.error)
+    );
 }
 
 class ChecklistController {

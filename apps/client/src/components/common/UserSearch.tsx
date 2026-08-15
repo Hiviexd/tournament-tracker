@@ -82,7 +82,7 @@ export default function UserSearch({
         if (!search) return;
 
         try {
-            const data = (await createUserMutation.mutateAsync(search)) as { user: IUser; message: string };
+            const data = await createUserMutation.mutateAsync(search);
             if (data.user) handleSelect(data.user);
         } catch (error) {
             console.error("Failed to create user:", error);

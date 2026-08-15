@@ -15,13 +15,14 @@ import {
 import { useEffect, useState } from "react";
 import { parseAsString, parseAsInteger, useQueryStates } from "nuqs";
 import { useNotificationJobsListing, useNotificationQueueStats } from "../hooks/useDebug";
-import { INotificationJobListItem, NotificationJobStatus, NotificationProvider } from "@tc/types/NotificationJob";
+import { INotificationJobListItem, NOTIFICATION_JOB_STATUSES, NOTIFICATION_PROVIDERS } from "@tc/types/NotificationJob";
 import NotificationJobDetailModal from "../components/notification-jobs/NotificationJobDetailModal";
 import EmptyState from "../components/common/EmptyState";
 import DateBadge from "../components/common/badges/DateBadge";
 import NotificationJobsFilters, {
     NotificationJobFiltersValues,
 } from "../components/notification-jobs/NotificationJobsFilters";
+import { pickStringUnion } from "@tc/utils/client";
 
 function StatCard({ title, value, color = "primary" }: { title: string; value: number; color?: string }) {
     return (
@@ -160,8 +161,8 @@ export default function NotificationJobsPage() {
     } = useNotificationJobsListing(
         {
             page: queryState.page,
-            status: queryState.status as NotificationJobStatus | "",
-            provider: queryState.provider as NotificationProvider | "",
+            status: pickStringUnion(queryState.status, NOTIFICATION_JOB_STATUSES),
+            provider: pickStringUnion(queryState.provider, NOTIFICATION_PROVIDERS),
             kind: queryState.kind,
             payload: queryState.payload,
         },
@@ -175,8 +176,8 @@ export default function NotificationJobsPage() {
     const filters: NotificationJobFiltersValues = {
         kind: queryState.kind,
         payload: queryState.payload,
-        provider: queryState.provider as NotificationProvider | "",
-        status: queryState.status as NotificationJobStatus | "",
+        provider: pickStringUnion(queryState.provider, NOTIFICATION_PROVIDERS) ?? "",
+        status: pickStringUnion(queryState.status, NOTIFICATION_JOB_STATUSES) ?? "",
     };
 
     const handleFilterChange = (nextFilters: NotificationJobFiltersValues) => {

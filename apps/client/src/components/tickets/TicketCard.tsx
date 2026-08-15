@@ -13,6 +13,7 @@ import UserDisplay from "../common/UserDisplay";
 import UserLink from "../common/UserLink";
 import DateBadge from "../common/badges/DateBadge";
 import UserGroupBadge from "../common/badges/UserGroupBadge";
+import { cssVars } from "../../themes/cssVars";
 import ReportTypeBadge from "../common/badges/ReportTypeBadge";
 import { TruncatedText } from "../common/TruncatedText";
 
@@ -78,9 +79,9 @@ export default function TicketCard({ ticket }: ITicketCardProps) {
             data-dim={shouldDim}
             style={
                 ticket.isActive
-                    ? {
-                          ["--card-status-color" as any]: `var(--mantine-color-${getStatusColor}-6)`,
-                      }
+                    ? cssVars({
+                          "--card-status-color": `var(--mantine-color-${getStatusColor}-6)`,
+                      })
                     : undefined
             }>
             <Stack gap="md" justify="space-between" h="100%">

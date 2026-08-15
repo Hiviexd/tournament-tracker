@@ -144,11 +144,18 @@ function TextEditor({
             <MdEditor
                 ref={editorRef}
                 value={editorValue}
-                style={{
-                    minHeight,
-                    ...(maxHeight ? { maxHeight } : {}),
-                    ...style,
-                }}
+                style={
+                    maxHeight
+                        ? {
+                              minHeight,
+                              maxHeight,
+                              ...style,
+                          }
+                        : {
+                              minHeight,
+                              ...style,
+                          }
+                }
                 className={className}
                 htmlClass="markdown-content"
                 renderHTML={(text) => <MarkdownText content={text} allowHtml={allowHtml} />}

@@ -1,31 +1,35 @@
 import { INotificationJob, IOsuAnnouncementPayload, NotificationJobPayload } from "@tc/types/NotificationJob";
-import { ErrorResponse } from "@tc/types/Responses";
 import OsuBotService from "../OsuBotService";
 import { NotificationDispatchResult } from "../NotificationDispatchService";
 
+function isOsuPayload(payload: NotificationJobPayload): payload is IOsuAnnouncementPayload {
+    return "userIds" in payload;
+}
+
 class OsuSender {
-    public async send(job: INotificationJob): Promise<NotificationDispatchResult> {
-        const payload = job.payload as NotificationJobPayload;
-        const osuPayload = payload as IOsuAnnouncementPayload;
+    public async send(job: Pick<INotificationJob, "payload">): Promise<NotificationDispatchResult> {
+        const payload = job.payload;
+        if (!isOsuPayload(payload)) {
+            return { ok: false, retryable: false, error: "Invalid osu announcement payload" };
+        }
 
         try {
             const result = await OsuBotService.sendAnnouncementDirect(
-                osuPayload.userIds,
-                osuPayload.message,
-                osuPayload.fallbackId,
+                payload.userIds,
+                payload.message,
+                payload.fallbackId,
             );
 
             if (result === true) {
                 return { ok: true, retryable: false };
             }
 
-            const errorResult = result as ErrorResponse;
-            const statusCode = errorResult.statusCode;
+            const statusCode = result.statusCode;
             return {
                 ok: false,
                 retryable: statusCode === undefined || statusCode === 429 || statusCode >= 500,
                 statusCode,
-                error: errorResult.error || "osu announcement failed",
+                error: result.error || "osu announcement failed",
             };
         } catch (error: any) {
             return {

@@ -11,61 +11,57 @@ import { Types } from "mongoose";
  */
 export function createMockUser(overrides: Partial<IUser> = {}): IUser {
     const _id = new Types.ObjectId();
-    const defaultUser = {
+    const groups: UserGroup[] = overrides.groups ?? ["user"];
+    const country: IOsuCountry = {
+        code: "US",
+        name: "United States",
+    };
+    const osuId = overrides.osuId ?? Math.floor(Math.random() * 1000000) + 1000;
+    const isTournamentCommittee = groups.includes("tc");
+    const isContestCommittee = groups.includes("cc");
+    const isAdmin = groups.includes("admin");
+    const isDev = groups.includes("dev");
+    const isAlumni = groups.includes("alm");
+    const isCommittee = isTournamentCommittee || isContestCommittee || isAdmin || isDev;
+
+    const defaultUser: IUser = {
         _id,
         id: _id.toString(),
-        osuId: Math.floor(Math.random() * 1000000) + 1000,
+        osuId,
         username: `TestUser${Math.floor(Math.random() * 1000)}`,
-        groups: ["user"] as UserGroup[],
+        groups,
         history: [],
         isActiveReviewer: false,
         isActiveVoter: false,
         inBag: true,
         badgeValue: 0,
-        country: {
-            code: "US",
-            name: "United States",
-        } as IOsuCountry,
+        country,
         coverUrl: "https://example.com/cover.jpg",
+        infringements: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-
-        // Mock virtuals
         avatarUrl: "https://example.com/avatar.jpg",
-        osuProfileUrl: `https://osu.ppy.sh/users/${Math.floor(Math.random() * 1000000) + 1000}`,
-        isTournamentCommittee: false,
-        isContestCommittee: false,
-        isAdmin: false,
-        isDev: false,
-        isAlumni: false,
-        isCommittee: false,
+        osuProfileUrl: `https://osu.ppy.sh/users/${osuId}`,
+        isTournamentCommittee,
+        isContestCommittee,
+        isAdmin,
+        isDev,
+        isAlumni,
+        isCommittee,
+        isCommitteeOrAdmin: isCommittee || isAdmin,
         tcDuration: 0,
         ccDuration: 0,
-
         ...overrides,
-    } as IUser;
+    };
 
-    // Update computed virtuals based on groups
-    const user = defaultUser as any;
-    if (defaultUser.groups.includes("tc")) {
-        user.isTournamentCommittee = true;
-        user.isCommittee = true;
-    }
-    if (defaultUser.groups.includes("cc")) {
-        user.isContestCommittee = true;
-        user.isCommittee = true;
-    }
-    if (defaultUser.groups.includes("admin")) {
-        user.isAdmin = true;
-        user.isCommittee = true;
-    }
-    if (defaultUser.groups.includes("alm")) {
-        user.isAlumni = true;
-    }
-    if (defaultUser.groups.includes("dev")) {
-        user.isDev = true;
-        user.isCommittee = true;
-    }
+    defaultUser.isTournamentCommittee = defaultUser.groups.includes("tc");
+    defaultUser.isContestCommittee = defaultUser.groups.includes("cc");
+    defaultUser.isAdmin = defaultUser.groups.includes("admin");
+    defaultUser.isAlumni = defaultUser.groups.includes("alm");
+    defaultUser.isDev = defaultUser.groups.includes("dev");
+    defaultUser.isCommittee =
+        defaultUser.isTournamentCommittee || defaultUser.isContestCommittee || defaultUser.isAdmin || defaultUser.isDev;
+    defaultUser.isCommitteeOrAdmin = defaultUser.isCommittee || defaultUser.isAdmin;
 
     return defaultUser;
 }

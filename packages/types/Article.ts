@@ -1,10 +1,11 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import { IUser } from "./User";
 
-export type ArticleType = "documentation" | "resource"; // future types: "news", "changelog", "blog"
+export const ARTICLE_TYPES = ["documentation", "resource"] as const; // future types: "news", "changelog", "blog"
+export type ArticleType = (typeof ARTICLE_TYPES)[number];
 
 export interface IArticle extends Document {
-    _id: string;
+    _id: Types.ObjectId;
     title: string;
     content: string;
     slug: string;

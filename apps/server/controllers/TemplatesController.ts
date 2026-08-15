@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import startCase from "lodash/startCase.js";
+import { isString } from "@tc/utils/common";
 import Template from "../models/templateModel";
 import LogService from "../services/LogService";
 
@@ -15,15 +16,15 @@ class TemplatesController {
         const { name, content, category } = req.body;
         const currentUser = res.locals!.user!;
 
-        if (!name || typeof name !== "string" || name.trim().length === 0) {
+        if (!isString(name) || name.trim().length === 0) {
             return res.status(400).json({ error: "Template name is required" });
         }
 
-        if (!content || typeof content !== "string" || content.trim().length === 0) {
+        if (!isString(content) || content.trim().length === 0) {
             return res.status(400).json({ error: "Template content is required" });
         }
 
-        if (!category || typeof category !== "string" || category.trim().length === 0) {
+        if (!isString(category) || category.trim().length === 0) {
             return res.status(400).json({ error: "Category is required" });
         }
 
@@ -57,21 +58,21 @@ class TemplatesController {
         const template = await Template.findById(id).orFail();
 
         if (name !== undefined) {
-            if (!name || typeof name !== "string" || name.trim().length === 0) {
+            if (!isString(name) || name.trim().length === 0) {
                 return res.status(400).json({ error: "Template name is required" });
             }
             template.name = name.trim();
         }
 
         if (content !== undefined) {
-            if (!content || typeof content !== "string" || content.trim().length === 0) {
+            if (!isString(content) || content.trim().length === 0) {
                 return res.status(400).json({ error: "Template content is required" });
             }
             template.content = content.trim();
         }
 
         if (category !== undefined) {
-            if (!category || typeof category !== "string" || category.trim().length === 0) {
+            if (!isString(category) || category.trim().length === 0) {
                 return res.status(400).json({ error: "Category is required" });
             }
             template.category = startCase(category.toLowerCase().trim());

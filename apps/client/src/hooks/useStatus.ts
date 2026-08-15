@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import utils from "@tc/utils/client";
+import utils, { isPlainObject, isString } from "@tc/utils/client";
 import { StatusInfo } from "@tc/types/Status";
 
 const HEALTHY_REFETCH_INTERVAL_MS = 3 * 60 * 1000;
@@ -11,15 +11,20 @@ async function fetchStatus(): Promise<StatusInfo> {
         url: "/api/status",
     });
 
-    if (!result || typeof result !== "object" || "error" in result || !result.version?.hash) {
+    if (!isPlainObject(result) || "error" in result) {
         throw new Error(
-            result && typeof result === "object" && "error" in result && result.error
-                ? String(result.error)
+            isPlainObject(result) && "error" in result && isString(result.error)
+                ? result.error
                 : "Failed to fetch status",
         );
     }
 
-    return result;
+    if (!isPlainObject(result.version) || !isString(result.version.hash) || !result.version.hash) {
+        throw new Error("Failed to fetch status");
+    }
+
+    // SAFETY: status endpoint JSON matches StatusInfo after rejecting error payloads and requiring version.hash.
+    return result as StatusInfo;
 }
 
 export const useStatus = () => {

@@ -8,8 +8,10 @@ interface IProps {
     size?: MantineSize;
 }
 
+type TournamentTypeInfo = { icon: IconProp; text: string; color: string };
+
 export default function TournamentTypeBadge({ type, withText = false, size }: IProps) {
-    const getTournamentTypeInfo = () => {
+    const getTournamentTypeInfo = (): TournamentTypeInfo => {
         switch (type) {
             case "tournament":
                 return { icon: "trophy", text: "Tournament", color: "orange" };
@@ -23,7 +25,7 @@ export default function TournamentTypeBadge({ type, withText = false, size }: IP
         <Tooltip label={getTournamentTypeInfo().text}>
             <Badge color={getTournamentTypeInfo().color} variant="light" size={size}>
                 <Group gap={5}>
-                    <FontAwesomeIcon icon={getTournamentTypeInfo().icon as IconProp} />
+                    <FontAwesomeIcon icon={getTournamentTypeInfo().icon} />
                     {withText && getTournamentTypeInfo().text}
                 </Group>
             </Badge>

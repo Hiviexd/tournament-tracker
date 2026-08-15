@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import ApiKeyService from "../services/ApiKeyService";
 import { AvailableApiScopes } from "@tc/types/ApiKey";
+import { isString, pickStringUnion } from "@tc/utils/common";
 import LogService from "../services/LogService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
@@ -16,7 +17,11 @@ class ApiKeysController {
         }
 
         // validate scopes from enum
-        if (!scopes.every((scope) => Object.values(AvailableApiScopes).includes(scope as AvailableApiScopes))) {
+        const allowedScopes = Object.values(AvailableApiScopes);
+        if (
+            !Array.isArray(scopes) ||
+            !scopes.every((scope) => isString(scope) && pickStringUnion(scope, allowedScopes))
+        ) {
             return res.status(400).json({ error: "Invalid scopes" });
         }
 
@@ -54,7 +59,11 @@ class ApiKeysController {
         const { scopes } = req.body || {};
 
         // validate scopes from enum
-        if (!scopes.every((scope) => Object.values(AvailableApiScopes).includes(scope as AvailableApiScopes))) {
+        const allowedScopes = Object.values(AvailableApiScopes);
+        if (
+            !Array.isArray(scopes) ||
+            !scopes.every((scope) => isString(scope) && pickStringUnion(scope, allowedScopes))
+        ) {
             return res.status(400).json({ error: "Invalid scopes" });
         }
 

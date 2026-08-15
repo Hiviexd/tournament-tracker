@@ -222,28 +222,30 @@ export default function TournamentAwardsManager({ opened, onClose, tournament }:
     }
 
     const handleGenerateCommands = () => {
-        // Group winners by their badge assignment (filename and description)
-        const groupedWinners = form.values.winners.reduce(
-            (acc, winnerData) => {
-                const badge = badges[winnerData.badgeIndex];
-                if (!badge?.url) return acc;
+        type GroupedWinner = {
+            userIds: string[];
+            filename: string;
+            description: string;
+            forumUrl: string;
+        };
+        const groupedWinners: Record<string, GroupedWinner> = {};
+        for (const winnerData of form.values.winners) {
+            const badge = badges[winnerData.badgeIndex];
+            if (!badge?.url) continue;
 
-                const ext = badge.url.split(".").pop();
-                const key = `${winnerData.filename}.${ext}|${winnerData.description}`;
+            const ext = badge.url.split(".").pop();
+            const key = `${winnerData.filename}.${ext}|${winnerData.description}`;
 
-                if (!acc[key]) {
-                    acc[key] = {
-                        userIds: [],
-                        filename: `${winnerData.filename}.${ext}`,
-                        description: winnerData.description,
-                        forumUrl: tournament.forumUrl,
-                    };
-                }
-                acc[key].userIds.push(winnerData.winner.osuId);
-                return acc;
-            },
-            {} as Record<string, { userIds: string[]; filename: string; description: string; forumUrl: string }>,
-        );
+            if (!groupedWinners[key]) {
+                groupedWinners[key] = {
+                    userIds: [],
+                    filename: `${winnerData.filename}.${ext}`,
+                    description: winnerData.description,
+                    forumUrl: tournament.forumUrl,
+                };
+            }
+            groupedWinners[key].userIds.push(winnerData.winner.osuId);
+        }
 
         // Generate commands from grouped winners
         const commands = Object.values(groupedWinners).map(

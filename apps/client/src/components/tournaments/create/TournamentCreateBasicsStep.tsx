@@ -4,6 +4,7 @@ import { UseFormReturnType } from "@mantine/form";
 import dayjs from "@tc/utils/dayjs";
 import MultiSelect from "../../common/MultiSelect";
 import MultipleUsersInput from "../../common/MultipleUsersInput";
+import { isString } from "@tc/utils/client";
 import { IUser } from "@tc/types/User";
 import { TournamentCreateFormValues } from "./tournamentCreateForm";
 
@@ -41,7 +42,7 @@ export default function TournamentCreateBasicsStep({ form, selectedHosts, onHost
                 label="Hosts"
                 placeholder="Search for a host to add..."
                 required
-                error={form.errors.hostIds as string}
+                error={isString(form.errors.hostIds) ? form.errors.hostIds : undefined}
                 allowUserCreation
                 showActiveInfringementWarning
             />

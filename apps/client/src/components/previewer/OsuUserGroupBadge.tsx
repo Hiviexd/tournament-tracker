@@ -1,5 +1,5 @@
 import { Tooltip } from "@mantine/core";
-import { IOsuGroup, OsuGameMode } from "@tc/types/OsuApi";
+import { IOsuGroup } from "@tc/types/OsuApi";
 import GameModeIcon from "../common/GameModeIcon";
 
 export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
@@ -10,7 +10,7 @@ export default function OsuUserGroupBadge({ group }: { group: IOsuGroup }) {
                 <div className="gamemode-icons" id={`preview-gamemode-icons-${group.id}`}>
                     {group.playmodes.map((mode) => (
                         <div key={mode} style={{ fontWeight: 400 }}>
-                            <GameModeIcon mode={mode as OsuGameMode} noTooltip />
+                            <GameModeIcon mode={mode} noTooltip />
                         </div>
                     ))}
                 </div>

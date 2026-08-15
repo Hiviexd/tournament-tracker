@@ -36,10 +36,14 @@ export default function ApiKeySection() {
     const revokeKeyMutation = useRevokeApiKey();
     const confirmModal = useConfirmModal();
 
-    const form = useForm({
+    const form = useForm<{
+        name: string;
+        scopes: ApiScope[];
+        isElevated: boolean;
+    }>({
         initialValues: {
             name: "",
-            scopes: [] as ApiScope[],
+            scopes: [],
             isElevated: false,
         },
         validate: {

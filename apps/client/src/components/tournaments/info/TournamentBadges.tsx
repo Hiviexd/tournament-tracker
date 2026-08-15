@@ -80,19 +80,21 @@ export default function TournamentBadges({ tournament }: IProps) {
     const badges = tournament.badges || [];
 
     const createUserWithTournamentBadges = (osuUser: IOsuUser): LocalUser => {
+        const existingBadges: LocalBadge[] = (osuUser.badges ?? []).map((badge, index) => ({
+            ...badge,
+            localId: `osu-${osuUser.id}-${index}`,
+        }));
+        const tournamentBadges: LocalBadge[] = badges.map((badge, index) => ({
+            image_url: badge.url,
+            "image@2x_url": badge.url,
+            description: `${tournament.name} Winner`,
+            awarded_at: new Date(),
+            localId: `tournament-${tournament._id}-${index}`,
+        }));
         return {
             ...osuUser,
-            badges: [
-                ...(osuUser.badges || []),
-                ...badges.map((badge, index) => ({
-                    image_url: badge.url,
-                    "image@2x_url": badge.url,
-                    description: `${tournament.name} Winner`,
-                    awarded_at: new Date(),
-                    localId: `tournament-${tournament._id}-${index}`,
-                })),
-            ],
-        } as LocalUser;
+            badges: [...existingBadges, ...tournamentBadges],
+        };
     };
 
     return (

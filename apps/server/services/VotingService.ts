@@ -5,7 +5,7 @@ import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
 import utils from "@tc/utils/server";
 import config from "@tc/config";
-import { Document, HydratedDocument } from "mongoose";
+import { Document } from "mongoose";
 import User from "../models/userModel";
 import Voting from "../models/votingModel";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
@@ -27,18 +27,28 @@ export interface RecalibrateRequiredVotesResult {
     eligibleCount: number;
 }
 
+type AbstainedUserRef = NonNullable<IVoting["abstainedUsers"]>[number] | { _id: { toString(): string } } | string;
+
+type VotingForRequiredVotes = {
+    assignedGroups: UserGroup[] | UserGroup;
+    forceFullParticipation?: boolean;
+    abstainedUsers?: AbstainedUserRef[];
+};
+
+type VotingToRecalibrate = VotingForRequiredVotes & {
+    requiredVotes: number;
+    save(): Promise<{ requiredVotes: number } | void>;
+};
+
 export interface RecalibratedVoting {
-    voting: IVoting;
+    voting: Pick<IVoting, "_id" | "title" | "forceFullParticipation">;
     result: RecalibrateRequiredVotesResult;
 }
-
-type VotingForRequiredVotes = Pick<IVoting, "assignedGroups" | "forceFullParticipation" | "abstainedUsers">;
-type AbstainedUserRef = NonNullable<IVoting["abstainedUsers"]>[number] | { _id: { toString(): string } } | string;
 
 class VotingService {
     public censorVotingForNonCommittee(voting: Document & IVoting) {
         const publicVoting = voting.toObject();
-        publicVoting.author = undefined as unknown as IUser;
+        publicVoting.author = undefined;
         publicVoting.description = "";
         publicVoting.attachments = [];
         publicVoting.abstainedUsers = [];
@@ -46,7 +56,7 @@ class VotingService {
             ...vote,
             comment: undefined,
             author: undefined,
-        })) as unknown as IVote[];
+        }));
         return publicVoting;
     }
 
@@ -78,7 +88,7 @@ class VotingService {
         };
     }
 
-    public async recalibrateRequiredVotes(voting: HydratedDocument<IVoting>): Promise<RecalibrateRequiredVotesResult> {
+    public async recalibrateRequiredVotes(voting: VotingToRecalibrate): Promise<RecalibrateRequiredVotesResult> {
         const previous = voting.requiredVotes;
         const computation = await this.computeRequiredVotes(voting);
         const next = computation.requiredVotes;
@@ -118,7 +128,10 @@ class VotingService {
         return changed;
     }
 
-    public isEligibleVoter(user: Pick<IUser, "isActiveVoter" | "groups">, assignedGroups: UserGroup[]): boolean {
+    public isEligibleVoter(
+        user: Pick<IUser, "isActiveVoter" | "groups">,
+        assignedGroups: UserGroup[] | UserGroup,
+    ): boolean {
         return utils.isEligibleVoter(user, this.normalizeAssignedGroups(assignedGroups));
     }
 
@@ -146,8 +159,8 @@ class VotingService {
     }
 
     private getEntityId(entity: AbstainedUserRef): string {
-        if (typeof entity === "string") return entity;
-        if (entity && typeof entity === "object" && "_id" in entity && entity._id) {
+        if (utils.isString(entity)) return entity;
+        if ("_id" in entity && entity._id) {
             return entity._id.toString();
         }
         return String(entity);

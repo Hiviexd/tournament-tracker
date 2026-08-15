@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Types } from "mongoose";
 import { IVoting } from "@tc/types/Voting";
-import { IUser, UserGroup } from "@tc/types/User";
+import { IUser } from "@tc/types/User";
 import User from "../../models/userModel";
 import Voting from "../../models/votingModel";
 import { createMockUsers } from "../utils/users";
@@ -24,8 +24,14 @@ vi.mock("@tc/config", () => ({
 
 import VotingService from "../../services/VotingService";
 
-const mockUser = User as unknown as { find: ReturnType<typeof vi.fn> };
-const mockVoting = Voting as unknown as { find: ReturnType<typeof vi.fn> };
+interface MockFindModel {
+    find: ReturnType<typeof vi.fn>;
+}
+
+// SAFETY: vi.mock replaces mongoose models with find stubs.
+const mockUser = User as MockFindModel;
+// SAFETY: vi.mock replaces mongoose models with find stubs.
+const mockVoting = Voting as MockFindModel;
 
 function mockEligibleVoters(users: Pick<IUser, "_id">[]) {
     mockUser.find.mockReturnValue({
@@ -37,9 +43,9 @@ function votingInput(
     overrides: Partial<Pick<IVoting, "assignedGroups" | "forceFullParticipation" | "abstainedUsers">> = {},
 ) {
     return {
-        assignedGroups: ["tc"] as UserGroup[],
+        assignedGroups: ["tc"],
         forceFullParticipation: false,
-        abstainedUsers: [] as IUser[],
+        abstainedUsers: [],
         ...overrides,
     };
 }
@@ -70,9 +76,7 @@ describe("VotingService required votes", () => {
         it("uses 100% of eligible voters when forceFullParticipation is true", async () => {
             mockEligibleVoters(createMockUsers(10, { groups: ["tc"], isActiveVoter: true }));
 
-            const result = await VotingService.computeRequiredVotes(
-                votingInput({ forceFullParticipation: true }),
-            );
+            const result = await VotingService.computeRequiredVotes(votingInput({ forceFullParticipation: true }));
 
             expect(result).toMatchObject({
                 eligibleCount: 10,
@@ -131,7 +135,7 @@ describe("VotingService required votes", () => {
             const byObjectId = await VotingService.computeRequiredVotes(
                 votingInput({
                     forceFullParticipation: true,
-                    abstainedUsers: [voters[0]._id as unknown as IUser],
+                    abstainedUsers: [voters[0]._id],
                 }),
             );
             expect(byObjectId.validAbstentionCount).toBe(1);
@@ -170,7 +174,7 @@ describe("VotingService required votes", () => {
             mockEligibleVoters(createMockUsers(4, { groups: ["cc"], isActiveVoter: true }));
 
             await VotingService.computeRequiredVotes({
-                assignedGroups: "cc" as unknown as UserGroup[],
+                assignedGroups: "cc",
                 forceFullParticipation: false,
                 abstainedUsers: [],
             });
@@ -197,13 +201,13 @@ describe("VotingService required votes", () => {
             const save = vi.fn().mockResolvedValue(undefined);
             const voting = {
                 requiredVotes: 10,
-                assignedGroups: ["tc"] as UserGroup[],
+                assignedGroups: ["tc"],
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save,
             };
 
-            const result = await VotingService.recalibrateRequiredVotes(voting as never);
+            const result = await VotingService.recalibrateRequiredVotes(voting);
 
             expect(result).toEqual({
                 previous: 10,
@@ -220,13 +224,13 @@ describe("VotingService required votes", () => {
             const save = vi.fn().mockResolvedValue(undefined);
             const voting = {
                 requiredVotes: 8,
-                assignedGroups: ["tc"] as UserGroup[],
+                assignedGroups: ["tc"],
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save,
             };
 
-            const result = await VotingService.recalibrateRequiredVotes(voting as never);
+            const result = await VotingService.recalibrateRequiredVotes(voting);
 
             expect(result.changed).toBe(false);
             expect(result.next).toBe(8);
@@ -252,7 +256,7 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Stale quota",
                 requiredVotes: 10,
-                assignedGroups: ["tc"] as UserGroup[],
+                assignedGroups: ["tc"],
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save: vi.fn().mockResolvedValue(undefined),
@@ -261,7 +265,7 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Already current",
                 requiredVotes: 8,
-                assignedGroups: ["tc"] as UserGroup[],
+                assignedGroups: ["tc"],
                 forceFullParticipation: false,
                 abstainedUsers: [],
                 save: vi.fn().mockResolvedValue(undefined),
@@ -287,7 +291,7 @@ describe("VotingService required votes", () => {
             const user = createMockUsers(1, { groups: ["tc"], isActiveVoter: true })[0];
 
             expect(VotingService.isEligibleVoter(user, ["tc"])).toBe(true);
-            expect(VotingService.isEligibleVoter(user, "tc" as unknown as UserGroup[])).toBe(true);
+            expect(VotingService.isEligibleVoter(user, "tc")).toBe(true);
             expect(VotingService.isEligibleVoter({ ...user, isActiveVoter: false }, ["tc"])).toBe(false);
         });
     });
@@ -298,7 +302,7 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Badge support",
                 forceFullParticipation: true,
-            } as IVoting;
+            };
 
             const embed = VotingService.buildRecalibrationEmbed([
                 {
@@ -319,12 +323,12 @@ describe("VotingService required votes", () => {
                 _id: new Types.ObjectId(),
                 title: "Badge support",
                 forceFullParticipation: true,
-            } as IVoting;
+            };
             const second = {
                 _id: new Types.ObjectId(),
                 title: "User addition",
                 forceFullParticipation: false,
-            } as IVoting;
+            };
 
             const embed = VotingService.buildRecalibrationEmbed([
                 {

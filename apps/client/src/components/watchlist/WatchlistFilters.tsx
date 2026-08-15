@@ -1,6 +1,7 @@
 import { Card, Select, SimpleGrid, Stack } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InfringementType } from "@tc/types/Infringement";
+import { pickStringUnion } from "@tc/utils/client";
 import { IUser } from "@tc/types/User";
 import UserSearch from "../common/UserSearch";
 import startCase from "lodash/startCase.js";
@@ -45,7 +46,12 @@ export default function WatchlistFilters({ values, onChange, onUserSelect }: IPr
                         leftSection={<FontAwesomeIcon icon="exclamation-triangle" />}
                         data={infringementTypeOptions}
                         value={values.type}
-                        onChange={(value) => onChange({ ...values, type: (value || "") as InfringementType | "" })}
+                        onChange={(value) =>
+                            onChange({
+                                ...values,
+                                type: (value && pickStringUnion(value, Object.values(InfringementType))) || "",
+                            })
+                        }
                         clearable
                     />
                 </SimpleGrid>

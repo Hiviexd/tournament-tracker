@@ -65,7 +65,10 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
     tags: [
         { name: "Compliance", description: "Requires `compliance:read`" },
         { name: "Tournaments", description: "Requires `tournaments:read`" },
-        { name: "Votings", description: "Requires `votings:read`. Non-committee keys only see concluded public votes." },
+        {
+            name: "Votings",
+            description: "Requires `votings:read`. Non-committee keys only see concluded public votes.",
+        },
         { name: "Resources", description: "Requires `resources:read`" },
         { name: "Users", description: "Requires `users:read`" },
         {
@@ -116,7 +119,8 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
             TournamentState: {
                 type: "string",
                 enum: ["active", "archived", "concluded", "all"],
-                description: "`active` (default when omitted via client), `archived`/`concluded` = inactive, `all` = no filter",
+                description:
+                    "`active` (default when omitted via client), `archived`/`concluded` = inactive, `all` = no filter",
             },
             UserGroup: {
                 type: "string",
@@ -158,7 +162,8 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
             },
             Tournament: {
                 type: "object",
-                description: "Tournament document. Committee-only fields are censored for API key owners without committee access.",
+                description:
+                    "Tournament document. Committee-only fields are censored for API key owners without committee access.",
                 properties: {
                     _id: { type: "string" },
                     name: { type: "string" },
@@ -576,8 +581,7 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
             get: {
                 tags: ["Votings"],
                 summary: "Search votes",
-                description:
-                    "Non-committee API keys only receive concluded public votes regardless of filters.",
+                description: "Non-committee API keys only receive concluded public votes regardless of filters.",
                 security: [{ bearerAuth: [] }],
                 parameters: [
                     {

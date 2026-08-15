@@ -67,87 +67,106 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
         );
     };
 
+    const inner = (
+        <Stack gap="sm">
+            {/* Desktop version */}
+            <Group visibleFrom="sm" justify="space-between" align="flex-start" wrap="nowrap">
+                {cardContent("flex-end")}
+            </Group>
+
+            {/* Mobile version */}
+            <Stack hiddenFrom="sm" justify="space-between" align="flex-start">
+                {cardContent("flex-start")}
+            </Stack>
+
+            <Group justify="space-between" align="center">
+                <Group gap="xs">
+                    {infringement.createdAt && (
+                        <Group gap={6}>
+                            <Text size="xs" c="dimmed">
+                                Created:
+                            </Text>
+                            <DateBadge date={infringement.createdAt} size="xs" staticColor />
+                        </Group>
+                    )}
+                    {infringement.updatedAt && infringement.updatedAt > infringement.createdAt! && (
+                        <>
+                            <Divider orientation="vertical" />
+                            <Group gap={6}>
+                                <Text size="xs" c="dimmed">
+                                    Updated:
+                                </Text>
+                                <DateBadge date={infringement.updatedAt} size="xs" staticColor />
+                            </Group>
+                        </>
+                    )}
+                </Group>
+
+                {!userToNavigateTo && (
+                    <Group gap={4}>
+                        {infringement.type !== InfringementType.NOTE && !infringement.enchantUrl && (
+                            <Tooltip label="Missing Email Ticket">
+                                <ThemeIcon className="animation-pulse" variant="light" color="danger" size="md">
+                                    <FontAwesomeIcon icon="envelope" size="sm" />
+                                </ThemeIcon>
+                            </Tooltip>
+                        )}
+                        {infringement.enchantUrl && (
+                            <Tooltip label="Open Enchant ticket">
+                                <ActionIcon variant="subtle" onClick={handleOpenTicket} color="primary" size="md">
+                                    <FontAwesomeIcon icon="envelope" size="sm" />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+
+                        {infringement.threadId && (
+                            <CopyActionIcon
+                                value={getDiscordThreadLink(infringement.threadId)}
+                                tooltip="Copy Discord thread link"
+                                size="md"
+                                color="primary"
+                            />
+                        )}
+                        {onEdit && (
+                            <Tooltip label="Edit">
+                                <ActionIcon variant="subtle" color="info" onClick={handleEdit} aria-label="Edit">
+                                    <FontAwesomeIcon icon="edit" />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+                    </Group>
+                )}
+            </Group>
+        </Stack>
+    );
+
+    if (userToNavigateTo) {
+        return (
+            <Card
+                key={`${infringement.type}-${infringement.createdAt}`}
+                className="infringement-card"
+                component={Link}
+                to={`/watchlist?user=${userToNavigateTo}`}
+                bg="primary.10"
+                shadow="sm"
+                p="md"
+                radius="md"
+                data-clickable="true">
+                {inner}
+            </Card>
+        );
+    }
+
     return (
         <Card
             key={`${infringement.type}-${infringement.createdAt}`}
             className="infringement-card"
-            component={userToNavigateTo ? Link : ("div" as any)}
-            to={userToNavigateTo ? `/watchlist?user=${userToNavigateTo}` : undefined}
             bg="primary.10"
             shadow="sm"
             p="md"
             radius="md"
-            data-clickable={userToNavigateTo ? "true" : "false"}>
-            <Stack gap="sm">
-                {/* Desktop version */}
-                <Group visibleFrom="sm" justify="space-between" align="flex-start" wrap="nowrap">
-                    {cardContent("flex-end")}
-                </Group>
-
-                {/* Mobile version */}
-                <Stack hiddenFrom="sm" justify="space-between" align="flex-start">
-                    {cardContent("flex-start")}
-                </Stack>
-
-                <Group justify="space-between" align="center">
-                    <Group gap="xs">
-                        {infringement.createdAt && (
-                            <Group gap={6}>
-                                <Text size="xs" c="dimmed">
-                                    Created:
-                                </Text>
-                                <DateBadge date={infringement.createdAt} size="xs" staticColor />
-                            </Group>
-                        )}
-                        {infringement.updatedAt && infringement.updatedAt > infringement.createdAt! && (
-                            <>
-                                <Divider orientation="vertical" />
-                                <Group gap={6}>
-                                    <Text size="xs" c="dimmed">
-                                        Updated:
-                                    </Text>
-                                    <DateBadge date={infringement.updatedAt} size="xs" staticColor />
-                                </Group>
-                            </>
-                        )}
-                    </Group>
-
-                    {!userToNavigateTo && (
-                        <Group gap={4}>
-                            {infringement.type !== InfringementType.NOTE && !infringement.enchantUrl && (
-                                <Tooltip label="Missing Email Ticket">
-                                    <ThemeIcon className="animation-pulse" variant="light" color="danger" size="md">
-                                        <FontAwesomeIcon icon="envelope" size="sm" />
-                                    </ThemeIcon>
-                                </Tooltip>
-                            )}
-                            {infringement.enchantUrl && (
-                                <Tooltip label="Open Enchant ticket">
-                                    <ActionIcon variant="subtle" onClick={handleOpenTicket} color="primary" size="md">
-                                        <FontAwesomeIcon icon="envelope" size="sm" />
-                                    </ActionIcon>
-                                </Tooltip>
-                            )}
-
-                            {infringement.threadId && (
-                                <CopyActionIcon
-                                    value={getDiscordThreadLink(infringement.threadId)}
-                                    tooltip="Copy Discord thread link"
-                                    size="md"
-                                    color="primary"
-                                />
-                            )}
-                            {onEdit && (
-                                <Tooltip label="Edit">
-                                    <ActionIcon variant="subtle" color="info" onClick={handleEdit} aria-label="Edit">
-                                        <FontAwesomeIcon icon="edit" />
-                                    </ActionIcon>
-                                </Tooltip>
-                            )}
-                        </Group>
-                    )}
-                </Group>
-            </Stack>
+            data-clickable="false">
+            {inner}
         </Card>
     );
 }

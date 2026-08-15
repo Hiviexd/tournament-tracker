@@ -95,17 +95,17 @@ export default function Spotlight() {
                 {results.length > 0 && (
                     <>
                         {Object.entries(
-                            results.reduce(
-                                (groups, result) => {
+                            (() => {
+                                const groups: Record<string, typeof results> = {};
+                                for (const result of results) {
                                     const type = result.type;
                                     if (!groups[type]) {
                                         groups[type] = [];
                                     }
                                     groups[type].push(result);
-                                    return groups;
-                                },
-                                {} as Record<string, typeof results>,
-                            ),
+                                }
+                                return groups;
+                            })(),
                         ).map(([type, typeResults]) => (
                             <MantineSpotlight.ActionsGroup key={type} label={getGroupLabel(type)}>
                                 {typeResults.map((result) => (

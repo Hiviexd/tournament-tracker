@@ -15,15 +15,13 @@ export default function AlertText({ children, type, size = "sm", icon }: IProps)
         warning: "exclamation-triangle",
         danger: "circle-xmark",
         info: "circle-info",
-    };
+    } as const satisfies Record<IProps["type"], IconProp>;
+
+    const iconSize: SizeProp = size === "xs" || size === "sm" || size === "lg" ? size : "sm";
 
     return (
         <Flex gap={8} c={type} align="flex-start">
-            <FontAwesomeIcon
-                icon={icon ?? (IconTypeMap[type] as IconProp)}
-                size={size as SizeProp}
-                style={{ marginTop: "3px" }}
-            />
+            <FontAwesomeIcon icon={icon ?? IconTypeMap[type]} size={iconSize} style={{ marginTop: "3px" }} />
             <Text span fw={500} size={size}>
                 {children}
             </Text>

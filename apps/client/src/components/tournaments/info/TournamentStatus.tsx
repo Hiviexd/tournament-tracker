@@ -15,7 +15,7 @@ interface IProps {
     tournament: ITournament;
 }
 
-const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color: string } } = {
+const STATUS_PROGRESSION = {
     supportRequestReceived: { step: 1, color: "violet" },
     screeningConcluded: { step: 2, color: "info" },
     reviewOngoing: { step: 3, color: "yellow" },
@@ -24,7 +24,7 @@ const STATUS_PROGRESSION: { [key in TournamentStatusType]: { step: number; color
     badgeApproved: { step: 6, color: "success" },
     badgeRejected: { step: 6, color: "danger" },
     noBadgeRequested: { step: 6, color: "gray" },
-};
+} as const satisfies Record<TournamentStatusType, { step: number; color: string }>;
 
 export default function TournamentStatus({ tournament }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
@@ -131,7 +131,9 @@ export default function TournamentStatus({ tournament }: IProps) {
                     <Group gap="xs" w={{ base: "100%", xs: "50%" }}>
                         <TournamentStatusSelect
                             value={selectedStatus}
-                            onChange={(value) => setSelectedStatus(value as TournamentStatusType)}
+                            onChange={(value) => {
+                                if (value) setSelectedStatus(value);
+                            }}
                             allowDeselect={false}
                             clearable={false}
                         />

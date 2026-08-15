@@ -35,7 +35,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
 
         for (const tournament of tournaments) {
             try {
-                const logs = (tournament as any).logs || [];
+                const logs = tournament.logs || [];
                 const reviewHistory: {
                     user: Types.ObjectId;
                     action: "assign" | "remove" | "initial";
@@ -54,7 +54,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                             const user = await User.findOne({ osuId }).select("_id").lean();
                             if (user) {
                                 reviewHistory.push({
-                                    user: user._id as Types.ObjectId,
+                                    user: user._id,
                                     action: "initial",
                                     createdAt: logCreatedAt,
                                     updatedAt: logCreatedAt,
@@ -70,7 +70,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                             const user = await User.findOne({ osuId }).select("_id").lean();
                             if (user) {
                                 reviewHistory.push({
-                                    user: user._id as Types.ObjectId,
+                                    user: user._id,
                                     action: "assign",
                                     createdAt: logCreatedAt,
                                     updatedAt: logCreatedAt,
@@ -86,7 +86,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                             const user = await User.findOne({ osuId }).select("_id").lean();
                             if (user) {
                                 reviewHistory.push({
-                                    user: user._id as Types.ObjectId,
+                                    user: user._id,
                                     action: "remove",
                                     createdAt: logCreatedAt,
                                     updatedAt: logCreatedAt,
@@ -103,7 +103,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                             const oldUser = await User.findOne({ osuId: oldOsuId }).select("_id").lean();
                             if (oldUser) {
                                 reviewHistory.push({
-                                    user: oldUser._id as Types.ObjectId,
+                                    user: oldUser._id,
                                     action: "remove",
                                     createdAt: logCreatedAt,
                                     updatedAt: logCreatedAt,
@@ -116,7 +116,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                             const newUser = await User.findOne({ osuId: newOsuId }).select("_id").lean();
                             if (newUser) {
                                 reviewHistory.push({
-                                    user: newUser._id as Types.ObjectId,
+                                    user: newUser._id,
                                     action: "assign",
                                     createdAt: logCreatedAt,
                                     updatedAt: logCreatedAt,
@@ -134,7 +134,7 @@ export default class ReviewHistoryFromLogsMigration extends BaseMigration {
                     this.log(`✓ Migrated ${tournament.name}: ${reviewHistory.length} review history entries`);
                 }
             } catch (error) {
-                this.log(`✗ Failed to migrate tournament ${(tournament as any).name}: ${error}`);
+                this.log(`✗ Failed to migrate tournament ${tournament.name}: ${error}`);
                 errorCount++;
             }
         }

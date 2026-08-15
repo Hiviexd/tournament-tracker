@@ -7,7 +7,7 @@ class ComplianceController {
     /** POST validate beatmaps */
     public async validateBeatmaps(req: Request, res: Response) {
         const input = req.body.input;
-        if (!input || typeof input !== "string") {
+        if (!utils.isString(input) || !input) {
             return res.status(400).json({ error: "Invalid input" });
         }
 

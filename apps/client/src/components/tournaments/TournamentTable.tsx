@@ -102,7 +102,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
 
     return (
         <Card shadow="sm" p="lg" className={`tournament-table-card ${isMassEditMode ? "mass-edit-active" : ""}`}>
-            <Collapse expanded={isMassEditMode}> transitionDuration={220} transitionTimingFunction="ease">
+            <Collapse expanded={isMassEditMode} transitionDuration={220} transitionTimingFunction="ease">
                 <Group justify="space-between" align="flex-end" mb="md" wrap="wrap">
                     <Group gap="sm" align="flex-end" wrap="wrap">
                         <TournamentStatusSelect

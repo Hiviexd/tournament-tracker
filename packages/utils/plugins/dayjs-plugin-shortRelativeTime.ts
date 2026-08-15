@@ -5,14 +5,12 @@ import type { ConfigType, Dayjs, PluginFunc } from "dayjs";
  */
 const shortRelativeTimePlugin: PluginFunc = (_option, _dayjsClass, dayjs) => {
     dayjs.prototype.shortRelativeTime = function (this: Dayjs, now?: ConfigType): string {
-        const target = this as Dayjs;
-        const nowD = now !== undefined ? dayjs(now) : dayjs();
-
-        if (!target.isValid()) {
+        if (!this.isValid()) {
             return "invalid date";
         }
 
-        const diffMs = nowD.diff(target);
+        const nowD = now !== undefined ? dayjs(now) : dayjs();
+        const diffMs = nowD.diff(this);
         const isPast = diffMs > 0;
         const absDiffMs = Math.abs(diffMs);
 

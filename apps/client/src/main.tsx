@@ -40,12 +40,18 @@ loadIcons();
 import { ensureCsrfInterceptor } from "./lib/csrf";
 ensureCsrfInterceptor();
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+const root = document.getElementById("root");
+if (!root) throw new Error("Missing #root element");
+
+ReactDOM.createRoot(root).render(
     <AppErrorBoundary>
         <HelmetProvider>
             <StateProvider>
                 <QueryClientProvider client={queryClient}>
-                    <MantineProvider defaultColorScheme="dark" theme={theme} cssVariablesResolver={v8CssVariablesResolver}>
+                    <MantineProvider
+                        defaultColorScheme="dark"
+                        theme={theme}
+                        cssVariablesResolver={v8CssVariablesResolver}>
                         <ModalsProvider>
                             <DatesProvider settings={{ locale: "en", consistentWeeks: true, weekendDays: [0] }}>
                                 <ReactScan />

@@ -4,13 +4,21 @@ import { Modal, Stack, Select, TextInput, Button, Group, LoadingOverlay } from "
 import { ITicket } from "@tc/types/Ticket";
 import UserSearch from "../common/UserSearch";
 import { useEditTicket } from "../../hooks/useTickets";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 
 interface IProps {
     ticket: ITicket;
     opened: boolean;
     onClose: () => void;
 }
+
+const REPORT_TARGET_TYPES = ["user", "tournament"] as const;
+
+type ReportEditPayload = {
+    targetUserId?: string;
+    targetTournamentName?: string;
+    targetTournamentLink?: string;
+};
 
 export default function ReportEditModal({ ticket, opened, onClose }: IProps) {
     const editTicketMutation = useEditTicket(ticket.id);
@@ -46,7 +54,8 @@ export default function ReportEditModal({ ticket, opened, onClose }: IProps) {
     const handleReportTypeChange = (value: string | null) => {
         if (!value) return;
 
-        const type = value as "user" | "tournament";
+        const type = pickStringUnion(value, REPORT_TARGET_TYPES);
+        if (!type) return;
         setReportType(type);
 
         if (type === "user") {
@@ -65,18 +74,13 @@ export default function ReportEditModal({ ticket, opened, onClose }: IProps) {
 
     const handleSubmit = async (values) => {
         try {
-            const payload: {
-                targetUserId?: string;
-                targetTournamentName?: string;
-                targetTournamentLink?: string;
-            } = {};
-
-            if (reportType === "user") {
-                payload.targetUserId = values.targetUserId;
-            } else {
-                payload.targetTournamentName = values.targetTournamentName;
-                payload.targetTournamentLink = values.targetTournamentLink;
-            }
+            const payload: ReportEditPayload =
+                reportType === "user"
+                    ? { targetUserId: values.targetUserId }
+                    : {
+                          targetTournamentName: values.targetTournamentName,
+                          targetTournamentLink: values.targetTournamentLink,
+                      };
 
             await editTicketMutation.mutateAsync(payload);
             onClose();

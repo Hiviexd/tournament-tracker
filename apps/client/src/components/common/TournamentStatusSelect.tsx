@@ -1,7 +1,8 @@
 import { Select } from "@mantine/core";
 import type { HTMLAttributes, Ref } from "react";
-import { TournamentStatus } from "@tc/types/Tournament";
+import { TournamentStatus, TOURNAMENT_STATUSES } from "@tc/types/Tournament";
 import TournamentStatusBadge from "./badges/TournamentStatusBadge";
+import { pickStringUnion } from "@tc/utils/client";
 
 interface TournamentStatusSelectProps {
     value: TournamentStatus | "";
@@ -21,9 +22,10 @@ function StatusOption({
     label,
     ...props
 }: { value: string; label: string; ref?: Ref<HTMLDivElement> } & HTMLAttributes<HTMLDivElement>) {
+    const status = pickStringUnion(value, TOURNAMENT_STATUSES);
     return (
         <div ref={ref} aria-label={label} {...props}>
-            <TournamentStatusBadge status={value as TournamentStatus} size="sm" />
+            {status ? <TournamentStatusBadge status={status} size="sm" /> : label}
         </div>
     );
 }
@@ -68,7 +70,7 @@ export default function TournamentStatusSelect({
         <Select
             placeholder={placeholder}
             value={value}
-            onChange={(value) => onChange(value as TournamentStatus | null)}
+            onChange={(value) => onChange(value == null ? null : (pickStringUnion(value, TOURNAMENT_STATUSES) ?? null))}
             data={statusOptions}
             renderOption={(item) => <StatusOption value={item.option.value} label={item.option.label} />}
             clearable={clearable}

@@ -91,9 +91,10 @@ export class EmbedBuilder {
      * Build and return the embed object
      */
     public build(): IDiscordEmbed {
-        if (this.embed.color === undefined) {
+        const { color } = this.embed;
+        if (color === undefined) {
             throw new Error("Embed color is required");
         }
-        return this.embed as IDiscordEmbed;
+        return { ...this.embed, color };
     }
 }

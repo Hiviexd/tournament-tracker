@@ -52,17 +52,15 @@ class GlobalSearchService {
 
         // if isCommitteeOrAdmin, search all votes by title or description
         // else search only public and inactive votes by title or public description
-        const query = {
-            $and: searchTerms.map((term) => ({
-                $or: [
-                    { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
-                    isCommitteeOrAdmin
-                        ? { description: { $regex: utils.escapeRegexPattern(term), $options: "i" } }
-                        : { publicDescription: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
-                ],
-            })),
-            ...(isCommitteeOrAdmin ? {} : { isPublic: true, isActive: false }),
-        };
+        const $and = searchTerms.map((term) => ({
+            $or: [
+                { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
+                isCommitteeOrAdmin
+                    ? { description: { $regex: utils.escapeRegexPattern(term), $options: "i" } }
+                    : { publicDescription: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
+            ],
+        }));
+        const query = isCommitteeOrAdmin ? { $and } : { $and, isPublic: true, isActive: false };
 
         return await Voting.find(query)
             .select("_id title category isActive duration createdAt assignedGroups")
@@ -140,7 +138,10 @@ class GlobalSearchService {
     /**
      * Search articles by title or content
      */
-    public async searchArticles(searchType: string | null, searchContent: string): Promise<IArticle[]> {
+    public async searchArticles(
+        searchType: string | null,
+        searchContent: string,
+    ): Promise<Pick<IArticle, "_id" | "title" | "slug">[]> {
         if (searchType && searchType !== "article") {
             return [];
         }
@@ -166,7 +167,10 @@ class GlobalSearchService {
     /**
      * Search resources by title
      */
-    public async searchResources(searchType: string | null, searchContent: string): Promise<IResource[]> {
+    public async searchResources(
+        searchType: string | null,
+        searchContent: string,
+    ): Promise<Pick<IResource, "_id" | "title" | "category" | "link">[]> {
         if (searchType && searchType !== "resource") {
             return [];
         }

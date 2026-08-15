@@ -11,7 +11,7 @@ import { useState } from "react";
 
 interface FilterValues {
     user: string;
-    category: LogCategory;
+    category: LogCategory | "";
     type: string;
     content: string;
 }
@@ -91,7 +91,7 @@ export default function LogsFilters({ values, onChange }: IProps) {
                         placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
-                        onChange={(value) => handleChange("category", value as LogCategory)}
+                        onChange={(value) => handleChange("category", value)}
                         data={categoryOptions}
                         clearable
                     />

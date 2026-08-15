@@ -1,9 +1,9 @@
 import cors from "cors";
-import { NextFunction, Request, Response } from "express";
+import { RequestHandler } from "express";
 import config from "@tc/config";
 
 // CORS configuration that allows requests from client domain or API key requests
-export function conditionalCors(req: Request, res: Response, next: NextFunction) {
+export const conditionalCors: RequestHandler = (req, res, next) => {
     // Skip CORS in dev env
     if (process.env.NODE_ENV === "development") {
         return next();
@@ -51,4 +51,4 @@ export function conditionalCors(req: Request, res: Response, next: NextFunction)
     return res.status(403).json({
         error: "Access denied. This endpoint is only accessible from the client application or with a valid API key.",
     });
-}
+};

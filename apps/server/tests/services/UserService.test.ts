@@ -22,7 +22,14 @@ vi.mock("../../models/userModel", () => ({
 vi.mock("lodash/sampleSize.js", () => ({ default: lodashAssignMocks.sampleSize }));
 vi.mock("lodash/shuffle.js", () => ({ default: lodashAssignMocks.shuffle }));
 
-const mockUser = User as any;
+interface MockUserModel {
+    countDocuments: ReturnType<typeof vi.fn>;
+    find: ReturnType<typeof vi.fn>;
+    updateMany: ReturnType<typeof vi.fn>;
+}
+
+// SAFETY: vi.mock replaces the mongoose User model with count/find/update stubs.
+const mockUser = User as MockUserModel;
 
 describe("UserService", () => {
     beforeEach(() => {

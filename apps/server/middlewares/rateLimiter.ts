@@ -1,8 +1,15 @@
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import { RequestHandler } from "express";
+import { isString } from "@tc/utils/common";
 import { enqueueRateLimitAlert } from "../utils/rateLimitAlerts";
 
 function keyFromIp(req: { ip?: string }): string {
     return req.ip ? ipKeyGenerator(req.ip) : "unknown";
+}
+
+function authorizationValue(req: { headers: { authorization?: string | string[] } }): string | undefined {
+    const value = req.headers.authorization;
+    return isString(value) ? value : undefined;
 }
 
 export const csrfTokenFetchLimiter = rateLimit({
@@ -22,18 +29,18 @@ export const apiKeyManagementLimiter = rateLimit({
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => (req.session?.mongoId as string) || keyFromIp(req),
+    keyGenerator: (req) => req.session?.mongoId || keyFromIp(req),
 });
 
 // Session-based rate limiter
-export const sessionRateLimiter = rateLimit({
+export const sessionRateLimiter: RequestHandler = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 500, // 500 requests per minute
     message: { error: "Rate limit exceeded! Please wait a minute and try again." },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => (req.session?.mongoId as string) || keyFromIp(req),
+    keyGenerator: (req) => req.session?.mongoId || keyFromIp(req),
     skip: (req, res) => res.locals?.authMethod === "apiKey", // skip if API key
     handler: (req, res, _next, options) => {
         try {
@@ -42,32 +49,32 @@ export const sessionRateLimiter = rateLimit({
                 ip: req.ip || "unknown",
                 path: req.originalUrl || req.path || "unknown",
                 method: req.method,
-                identifier: (req.session?.mongoId as string) || undefined,
+                identifier: req.session?.mongoId || undefined,
                 username: req.session?.username || undefined,
                 osuId: req.session?.osuId ? String(req.session.osuId) : undefined,
             });
         } catch {
             console.error("Error enqueuing rate limit alert");
         }
-        const status = (options as any)?.statusCode ?? 429;
-        const body = (options as any)?.message ?? { error: "Rate limit exceeded! Please wait a minute and try again." };
+        const status = options.statusCode ?? 429;
+        const body = options.message ?? { error: "Rate limit exceeded! Please wait a minute and try again." };
         res.status(status).json(body);
     },
 });
 
 // API key rate limiter
-export const apiKeyRateLimiter = rateLimit({
+export const apiKeyRateLimiter: RequestHandler = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 100, // 100 requests per 10 minutes
     message: { error: "Rate limit exceeded! (>100 requests in 10 minutes)" },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req) => (req.headers["authorization"] as string) || keyFromIp(req),
+    keyGenerator: (req) => authorizationValue(req) || keyFromIp(req),
     skip: (req, res) => res.locals?.authMethod !== "apiKey", // apply only to API keys
     handler: (req, res, _next, options) => {
         try {
-            const rawAuth = (req.headers["authorization"] as string) || "";
+            const rawAuth = authorizationValue(req) || "";
             const masked = rawAuth ? `${rawAuth.slice(0, 6)}…(${rawAuth.length})` : undefined;
             enqueueRateLimitAlert({
                 type: "apiKey",
@@ -81,8 +88,8 @@ export const apiKeyRateLimiter = rateLimit({
         } catch {
             console.error("Error enqueuing rate limit alert");
         }
-        const status = (options as any)?.statusCode ?? 429;
-        const body = (options as any)?.message ?? { error: "Rate limit exceeded! (>100 requests in 10 minutes)" };
+        const status = options.statusCode ?? 429;
+        const body = options.message ?? { error: "Rate limit exceeded! (>100 requests in 10 minutes)" };
         res.status(status).json(body);
     },
 });

@@ -1,4 +1,5 @@
 import { Children, isValidElement, type HTMLAttributes, type ReactNode } from "react";
+import { isBoolean, isNumber, isString } from "@tc/utils/client";
 import CopyActionIcon from "./buttons/CopyActionIcon";
 
 interface IProps extends HTMLAttributes<HTMLPreElement> {
@@ -6,9 +7,9 @@ interface IProps extends HTMLAttributes<HTMLPreElement> {
 }
 
 function extractTextContent(node: ReactNode): string {
-    if (node == null || typeof node === "boolean") return "";
+    if (node == null || isBoolean(node)) return "";
 
-    if (typeof node === "string" || typeof node === "number") {
+    if (isString(node) || isNumber(node)) {
         return String(node);
     }
 

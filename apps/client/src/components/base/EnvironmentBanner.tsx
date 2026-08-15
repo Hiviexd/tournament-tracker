@@ -3,6 +3,7 @@ import { Box, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useStatus } from "../../hooks/useStatus";
 import utils from "@tc/utils/client";
+import { cssVars } from "../../themes/cssVars";
 
 export default function EnvironmentBanner() {
     const { data: status } = useStatus();
@@ -84,11 +85,9 @@ export default function EnvironmentBanner() {
         <Box
             ref={bannerRef}
             className="environment-banner"
-            style={
-                {
-                    "--environment-banner-background": getEnvironmentColor(),
-                } as React.CSSProperties
-            }>
+            style={cssVars({
+                "--environment-banner-background": getEnvironmentColor(),
+            })}>
             <Text size="xs" fw={600} className="banner-text">
                 <FontAwesomeIcon icon="code" />
                 {environmentName} INSTANCE {getBranchStatusText().toUpperCase()}

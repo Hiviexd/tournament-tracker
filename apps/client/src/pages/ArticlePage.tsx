@@ -28,10 +28,10 @@ import DateBadge from "../components/common/badges/DateBadge";
 import UserLink from "../components/common/UserLink";
 import { useConfirmModal } from "../hooks/useModals";
 
-const PREDEFINED_ARTICLE_SLUGS: Record<string, string> = {
+const PREDEFINED_ARTICLE_SLUGS = {
     "/resources/official": "official-resources",
     "/resources/community": "community-resources",
-};
+} as const satisfies Record<string, string>;
 
 function hasMarkdownHeadings(content?: string) {
     if (!content) {
@@ -60,7 +60,7 @@ function hasMarkdownHeadings(content?: string) {
 function ArticleLoadingState() {
     return (
         <Stack gap="lg">
-            <Grid gutter="lg" align="flex-start">
+            <Grid gap="lg" align="flex-start">
                 <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
                     <Card shadow="sm" p="md">
                         <Stack gap="xs">
@@ -142,7 +142,8 @@ export default function ArticlePage() {
     };
 
     const handleSave = () => {
-        const data: { title?: string; content?: string } = {};
+        type ArticleEditPayload = { title?: string; content?: string };
+        const data: ArticleEditPayload = {};
 
         if (editTitle !== article.title) {
             data.title = editTitle;
@@ -266,7 +267,7 @@ export default function ArticlePage() {
                 </Group>
             )}
 
-            <Grid gutter="lg" align="flex-start">
+            <Grid gap="lg" align="flex-start">
                 {showToc && (
                     <Grid.Col
                         span={{ base: 12, md: 3 }}

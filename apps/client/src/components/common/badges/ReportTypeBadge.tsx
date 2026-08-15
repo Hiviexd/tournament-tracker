@@ -8,10 +8,12 @@ interface IProps {
     size?: MantineSize;
 }
 
+type ReportTargetInfo = { text: string; icon: IconProp; color: string };
+
 export default function ReportTypeBadge({ report, size }: IProps) {
     if (report.isTicket) return null;
 
-    const getTargetInfo = () => {
+    const getTargetInfo = (): ReportTargetInfo => {
         if (report.targetUser) {
             return {
                 text: "User Report",
@@ -35,7 +37,7 @@ export default function ReportTypeBadge({ report, size }: IProps) {
     return (
         <Tooltip label={getTargetInfo().text}>
             <Badge color={getTargetInfo().color} variant="light" size={size}>
-                <FontAwesomeIcon icon={getTargetInfo().icon as IconProp} />
+                <FontAwesomeIcon icon={getTargetInfo().icon} />
             </Badge>
         </Tooltip>
     );

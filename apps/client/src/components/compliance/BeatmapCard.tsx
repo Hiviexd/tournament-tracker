@@ -5,14 +5,17 @@ import { Link } from "react-router-dom";
 import { IValidationResult } from "@tc/types/ComplianceApi";
 import MarkdownText from "../common/MarkdownText";
 import AlertText from "../common/AlertText";
+import { cssVars } from "../../themes/cssVars";
 
 interface BeatmapCardProps {
     beatmap: IValidationResult;
     notes?: string | null;
 }
 
+type StatusIconInfo = { icon: IconProp; color: string; label: string };
+
 export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
-    const getStatusIcon = (status: string): { icon: IconProp; color: string; label: string } => {
+    const getStatusIcon = (status: string): StatusIconInfo => {
         const statusLower = status.toLowerCase();
         switch (statusLower) {
             case "ranked":
@@ -44,11 +47,9 @@ export default function BeatmapCard({ beatmap }: BeatmapCardProps) {
             to={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapsetId}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={
-                {
-                    "--banner-url": `url(${beatmap.cover})`,
-                } as React.CSSProperties
-            }>
+            style={cssVars({
+                "--banner-url": `url(${beatmap.cover})`,
+            })}>
             <div className="beatmap-card-banner" />
             <Stack gap="xs" className="beatmap-card-content">
                 <Group gap="xs" align="center">

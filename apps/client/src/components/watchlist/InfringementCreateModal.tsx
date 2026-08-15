@@ -9,7 +9,7 @@ import { InfringementType, TIME_BASED_TYPES } from "@tc/types/Infringement";
 import { IUser } from "@tc/types/User";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import startCase from "lodash/startCase.js";
-import utils from "@tc/utils/client";
+import utils, { isString } from "@tc/utils/client";
 import { useConfirmModal } from "../../hooks/useModals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dayjs from "@tc/utils/dayjs";
@@ -35,12 +35,21 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
     const autoSaveKey = "infringement-create-reason";
     const confirmModal = useConfirmModal();
 
-    const form = useForm({
+    const form = useForm<{
+        userIds: string[];
+        type: InfringementType | "";
+        startDate: Date;
+        endDate: Date | null;
+        isIndefinite: boolean;
+        reason: string;
+        threadId: string;
+        enchantUrl: string;
+    }>({
         initialValues: {
-            userIds: preselectedUserId ? [preselectedUserId] : ([] as string[]),
-            type: "" as InfringementType,
+            userIds: preselectedUserId ? [preselectedUserId] : [],
+            type: "",
             startDate: new Date(),
-            endDate: null as Date | null,
+            endDate: null,
             isIndefinite: false,
             reason: "",
             threadId: "",
@@ -81,7 +90,8 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
         },
     });
 
-    const isNonTimeBased = !TIME_BASED_TYPES.includes(form.values.type);
+    const selectedType = form.values.type;
+    const isNonTimeBased = !selectedType || !TIME_BASED_TYPES.includes(selectedType);
 
     const infringementTypeOptions = [
         { value: InfringementType.NOTE, label: startCase(InfringementType.NOTE) },
@@ -179,7 +189,7 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                                     users.map((user) => user.id),
                                 );
                             }}
-                            error={typeof form.errors.userIds === "string" ? form.errors.userIds : undefined}
+                            error={isString(form.errors.userIds) ? form.errors.userIds : undefined}
                             required
                             allowUserCreation
                             showActiveInfringementWarning

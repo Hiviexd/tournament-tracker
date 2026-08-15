@@ -151,7 +151,7 @@ describe.skip("BeatmapService", () => {
             // This would need to be added to overrides.json for a real test
             // but we can test the logic flow
             const result = BeatmapService.isPartial(beatmapset);
-            expect(typeof result).toBe("boolean");
+            expect(result === true || result === false).toBe(true);
         });
     });
 

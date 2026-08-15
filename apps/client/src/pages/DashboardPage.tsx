@@ -8,6 +8,7 @@ import DashboardVotingsSection from "../components/dashboard/DashboardVotingsSec
 import DashboardReportsSection from "../components/dashboard/DashboardReportsSection";
 import DashboardTicketsSection from "../components/dashboard/DashboardTicketsSection";
 import DashboardInfringementsSection from "../components/dashboard/DashboardInfringementsSection";
+import { cssVars } from "../themes/cssVars";
 
 export default function DashboardPage() {
     const [user] = useAtom(loggedInUserAtom);
@@ -96,7 +97,7 @@ const LoadingState = () => (
                             p={0}
                             radius="md"
                             className="tournament-card"
-                            style={{ "--banner-url": "none" } as React.CSSProperties}>
+                            style={cssVars({ "--banner-url": "none" })}>
                             <Stack gap="md" p="lg" className="tournament-card-content">
                                 <Group justify="space-between" align="flex-start">
                                     <Stack gap="xs">

@@ -8,9 +8,17 @@ interface FlaggedArtistData {
     notes: string | null;
 }
 
+interface ArtistTextMatch {
+    found: boolean;
+    key: string | null;
+}
+
 type FlaggedArtists = {
     [key: string]: FlaggedArtistData;
 };
+
+// SAFETY: artist-permissions JSON is a name → { status, notes } map.
+const flaggedArtistsMap = flaggedArtists as FlaggedArtists;
 
 // Reference: https://github.com/hburn7/mappool-compliance-checker/blob/6a161ec8b707ba4b9d1f39857af041a9376d2309/src/validator.py
 /**
@@ -65,7 +73,7 @@ export default class BeatmapService {
      * @param text The text to check (artist name, title, etc.)
      * @returns Object with found status and matching key
      */
-    private static isArtistInText(text: string): { found: boolean; key: string | null } {
+    private static isArtistInText(text: string): ArtistTextMatch {
         const keys = Object.keys(flaggedArtists);
         const textLower = text.toLowerCase();
 
@@ -111,7 +119,7 @@ export default class BeatmapService {
      */
     private static getAllFlaggedArtistKeys(beatmapset: IBeatmapset): string[] {
         const keys: string[] = [];
-        const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+        const flaggedArtistsTyped = flaggedArtistsMap;
         const allKeys = Object.keys(flaggedArtistsTyped);
 
         // Check both artist and title fields
@@ -143,7 +151,7 @@ export default class BeatmapService {
             return null;
         }
 
-        const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+        const flaggedArtistsTyped = flaggedArtistsMap;
 
         // Return first disallowed artist found (most restrictive)
         for (const key of allKeys) {
@@ -239,7 +247,7 @@ export default class BeatmapService {
 
         const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
-            const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+            const flaggedArtistsTyped = flaggedArtistsMap;
             return flaggedArtistsTyped[key].status === this.PARTIAL_STATUS;
         }
 
@@ -274,7 +282,7 @@ export default class BeatmapService {
 
         const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
-            const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+            const flaggedArtistsTyped = flaggedArtistsMap;
             return flaggedArtistsTyped[key].status === this.DISALLOWED_STATUS;
         }
 
@@ -289,7 +297,7 @@ export default class BeatmapService {
     public static getNotes(beatmapset: IBeatmapset): string | null {
         const key = this.getFlaggedArtistKey(beatmapset);
         if (key !== null) {
-            const flaggedArtistsTyped = flaggedArtists as FlaggedArtists;
+            const flaggedArtistsTyped = flaggedArtistsMap;
             return flaggedArtistsTyped[key].notes;
         }
 

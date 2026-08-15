@@ -1,4 +1,5 @@
 import { OsuApiStatus } from "@tc/types/Status";
+import { isString } from "@tc/utils/common";
 import { ErrorResponse } from "@tc/types/Responses";
 
 const FAILURE_THRESHOLD = 3;
@@ -91,7 +92,7 @@ class OsuApiHealthService {
             const { default: OsuBotService } = await import("./OsuBotService");
             const result = await OsuBotService.getPublicBotToken();
 
-            if (typeof result === "string") {
+            if (isString(result)) {
                 this.recordSuccess();
             }
         } catch {
@@ -101,7 +102,6 @@ class OsuApiHealthService {
 }
 
 declare global {
-    // eslint-disable-next-line no-var
     var __osuApiRecoveryInterval: NodeJS.Timeout | undefined;
 }
 

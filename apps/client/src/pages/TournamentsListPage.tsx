@@ -14,7 +14,15 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useIsFirstRender } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ITournament, GameMode, TournamentType, TournamentStatus } from "@tc/types/Tournament";
+import {
+    ITournament,
+    GAME_MODES,
+    TOURNAMENT_TYPES,
+    TOURNAMENT_STATUSES,
+    GameMode,
+    TournamentType,
+    TournamentStatus,
+} from "@tc/types/Tournament";
 import TournamentFilters from "../components/tournaments/TournamentFilters";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import TournamentTable from "../components/tournaments/TournamentTable";
@@ -25,12 +33,14 @@ import { useAtom } from "jotai";
 import { IUser } from "@tc/types/User";
 import TournamentReviewBoard from "../components/tournaments/TournamentReviewBoard";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { cssVars } from "../themes/cssVars";
 import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 import { useTournamentMassEdit } from "../hooks/useTournamentMassEdit";
+import { pickStringUnion } from "@tc/utils/client";
 
 interface FilterValues {
     search: string;
-    mode: GameMode;
+    mode: GameMode | "";
     host: string;
     type: TournamentType | "";
     status: TournamentStatus | "";
@@ -49,7 +59,7 @@ function LoadingState({ viewMode, user }: { viewMode: "cards" | "table" | "revie
                         p={0}
                         radius="md"
                         className="tournament-card"
-                        style={{ "--banner-url": "none" } as React.CSSProperties}>
+                        style={cssVars({ "--banner-url": "none" })}>
                         <Stack gap="md" p="lg" className="tournament-card-content">
                             <Group justify="space-between" align="flex-start">
                                 <Stack gap="xs">
@@ -199,20 +209,20 @@ export default function TournamentListPage() {
     // Create filters object for TournamentFilters component
     const filters: FilterValues = {
         search: queryState.search,
-        mode: queryState.mode as GameMode,
+        mode: pickStringUnion(queryState.mode, GAME_MODES) ?? "",
         host: queryState.host,
-        type: queryState.type as TournamentType | "",
-        status: queryState.status as TournamentStatus | "",
+        type: pickStringUnion(queryState.type, TOURNAMENT_TYPES) ?? "",
+        status: pickStringUnion(queryState.status, TOURNAMENT_STATUSES) ?? "",
         state: queryState.state,
         showAllAssignedReviews: queryState.showAllAssignedReviews,
     };
 
     const { data, isLoading } = useTournaments({
         search: queryState.search,
-        mode: queryState.mode as GameMode,
+        mode: pickStringUnion(queryState.mode, GAME_MODES),
         host: queryState.host,
-        type: viewMode === "review" ? "tournament" : (queryState.type as TournamentType),
-        status: viewMode === "review" ? "reviewOngoing" : (queryState.status as TournamentStatus),
+        type: viewMode === "review" ? "tournament" : pickStringUnion(queryState.type, TOURNAMENT_TYPES),
+        status: viewMode === "review" ? "reviewOngoing" : pickStringUnion(queryState.status, TOURNAMENT_STATUSES),
         state: queryState.state,
         showAllAssignedReviews: queryState.showAllAssignedReviews,
         page: queryState.page,

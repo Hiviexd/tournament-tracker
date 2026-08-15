@@ -41,7 +41,8 @@ export const createUploadMiddleware = (options: UploadOptions = {}) => {
     }).array("files", finalOptions.maxFiles);
 
     return (req: Request, res: Response, next: NextFunction): void => {
-        middleware(req, res as any, (err) => {
+        // SAFETY: multer's handler requires Response.locals; this app's Response.locals is optional.
+        middleware(req, res as never, (err) => {
             if (err instanceof multer.MulterError) {
                 res.status(400).json({ error: `Upload error: ${err.message}` });
                 return;

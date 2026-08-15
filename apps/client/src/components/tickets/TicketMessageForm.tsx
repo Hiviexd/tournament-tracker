@@ -61,7 +61,10 @@ export default function TicketMessageForm({ ticket }: IProps) {
             return;
         }
 
+        // SAFETY: FormData is the runtime type; message fields are appended before submit.
         const formData = new FormData() as IMessageFormData;
+        formData.append("content", content);
+        formData.append("isNote", isNote.toString());
         formData.append("content", content);
         formData.append("isNote", isNote.toString());
         files.forEach((file) => formData.append("files", file));
@@ -88,7 +91,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
 
             // force a re-render of the TextEditor component to visually clear the content
             setSubmissionCount((count) => count + 1);
-        } catch (err) {
+        } catch {
             setError("Failed to send message. Please try again.");
         }
     };

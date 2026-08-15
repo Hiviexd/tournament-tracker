@@ -7,8 +7,10 @@ interface IPropTypes {
     size?: MantineSize;
 }
 
+type VotingTypeInfo = { icon: IconProp; text: string; color: string };
+
 export default function VotingTypeBadge({ type, size }: IPropTypes) {
-    const getVotingTypeInfo = (): { icon: IconProp; text: string; color: string } => {
+    const getVotingTypeInfo = (): VotingTypeInfo => {
         switch (type) {
             case "tournament":
                 return { icon: "trophy", text: "Tournament Vote", color: "orange" };

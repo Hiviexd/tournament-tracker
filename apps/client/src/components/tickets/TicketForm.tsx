@@ -51,6 +51,7 @@ export default function TicketForm() {
     });
 
     const handleSubmit = form.onSubmit(async (values) => {
+        // SAFETY: FormData is the runtime type; ticket fields are appended before submit.
         const formData = new FormData() as TicketFormData;
 
         // Remove type from values since we're adding it explicitly

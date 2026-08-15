@@ -38,7 +38,7 @@ export default class ExtraLinksTwitchChallongeMigration extends BaseMigration {
 
         for (const tournament of tournaments) {
             try {
-                const extraLinks = (tournament.extraLinks ?? []) as ITournamentExtraLink[];
+                const extraLinks = tournament.extraLinks ?? [];
                 let changed = false;
 
                 const updatedLinks = extraLinks.map((link) => {

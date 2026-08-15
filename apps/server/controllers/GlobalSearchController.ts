@@ -7,7 +7,7 @@ class GlobalSearchController {
     public async index(req: Request, res: Response) {
         const { query } = req.query;
 
-        if (!query || typeof query !== "string") {
+        if (!utils.isString(query) || !query) {
             return res.status(400).json({ error: "No valid search query provided" });
         }
 
@@ -16,7 +16,7 @@ class GlobalSearchController {
         try {
             // Parse type-specific search
             const searchTypes = utils.getSearchTypes({ user: currentUser, searchType: "backend" });
-            const { searchType, searchContent } = utils.parseSearchQuery(query as string, searchTypes);
+            const { searchType, searchContent } = utils.parseSearchQuery(query, searchTypes);
 
             const tournamentSearchQuery = TournamentService.createSearchQuery(searchContent);
 

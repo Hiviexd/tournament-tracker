@@ -2,6 +2,7 @@ import { Card, Stack, Title, Text, Group, Badge, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Link } from "react-router-dom";
+import { cssVars } from "../../themes/cssVars";
 
 export interface HomeFeature {
     icon: IconProp;
@@ -54,7 +55,7 @@ export default function HomeFeatureCard({ feature, index }: IProps) {
         radius: "md" as const,
         className: "feature-card",
         "data-disabled": feature.disabled,
-        style: { "--feature-index": index } as React.CSSProperties,
+        style: cssVars({ "--feature-index": index }),
     };
 
     if (feature.disabled) {

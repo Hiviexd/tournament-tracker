@@ -5,17 +5,26 @@ import type { StyleName } from "@tc/utils/backend";
 
 morgan.token("time-colored", () => utils.consoleStyles(dayjs().format("HH:mm:ss.SSS"), ["dim"]));
 
+function methodStyle(method: string): StyleName[] {
+    switch (method) {
+        case "GET":
+            return ["green"];
+        case "POST":
+            return ["cyan"];
+        case "PUT":
+            return ["yellow"];
+        case "PATCH":
+            return ["orange"];
+        case "DELETE":
+            return ["red"];
+        default:
+            return ["dim"];
+    }
+}
+
 morgan.token("method-colored", (req) => {
-    const method = req.method as string;
-    const methodColorMap: Record<string, StyleName[]> = {
-        GET: ["green"],
-        POST: ["cyan"],
-        PUT: ["yellow"],
-        PATCH: ["orange"],
-        DELETE: ["red"],
-    };
-    const style: StyleName[] = methodColorMap[method] || ["dim"];
-    return utils.consoleStyles(method, style);
+    const method = req.method ?? "";
+    return utils.consoleStyles(method, methodStyle(method));
 });
 
 morgan.token("status-colored", (req, res) => {
@@ -34,16 +43,8 @@ morgan.token("status-colored", (req, res) => {
 });
 
 morgan.token("method-colored", (req) => {
-    const method = req.method as string;
-    const methodColorMap: Record<string, StyleName[]> = {
-        GET: ["green"],
-        POST: ["cyan"],
-        PUT: ["yellow"],
-        PATCH: ["orange"],
-        DELETE: ["red"],
-    };
-    const style: StyleName[] = methodColorMap[method] || ["dim"];
-    return utils.consoleStyles(method, style);
+    const method = req.method ?? "";
+    return utils.consoleStyles(method, methodStyle(method));
 });
 
 morgan.token("username-colored", (req: any, res: any) => {

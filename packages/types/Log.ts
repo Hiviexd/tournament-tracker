@@ -1,8 +1,18 @@
 import { IUser } from "./User";
 import { Document } from "mongoose";
 
-export type LogCategory =
-    "account" | "user" | "tournament" | "voting" | "ticket" | "article" | "resource" | "api_key" | "settings";
+export const LOG_CATEGORIES = [
+    "account",
+    "user",
+    "tournament",
+    "voting",
+    "ticket",
+    "article",
+    "resource",
+    "api_key",
+    "settings",
+] as const;
+export type LogCategory = (typeof LOG_CATEGORIES)[number];
 
 export interface LogQueryParams {
     user?: IUser;

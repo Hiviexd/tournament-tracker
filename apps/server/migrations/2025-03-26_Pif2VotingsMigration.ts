@@ -49,7 +49,7 @@ export default class Pif2VotingsMigration extends BaseMigration {
     description = "Migrating pif2 votings";
 
     protected async execute(): Promise<void> {
-        const votings = [] as IPif2Voting[];
+        const votings: IPif2Voting[] = [];
 
         // Used to have code that loads pif2 jsons in here, but it got lost along the way
         // 99% this won't ever be needed, but otherwise, get fucked lolol

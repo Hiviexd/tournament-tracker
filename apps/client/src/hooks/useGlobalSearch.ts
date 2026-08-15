@@ -171,11 +171,7 @@ export function useGlobalSearch(query: string) {
  * @returns {Function} addSearchItem - A function to add a search item
  * @returns {Function} clearLastSearches - A function to clear the search history
  */
-export function useSearchHistory(): {
-    lastSearches: ISearchItem[];
-    addSearchItem: (item: ISearchItem) => void;
-    clearLastSearches: () => void;
-} {
+export function useSearchHistory() {
     const [lastSearches, setLastSearches] = useLocalPreference<ISearchItem[]>("lastSearches", []);
 
     const addSearchItem = (item: ISearchItem) => {

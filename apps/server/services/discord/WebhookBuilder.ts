@@ -12,7 +12,7 @@ export class WebhookBuilder {
     private threadId?: string;
     private notification: "silent" | "normal" = "normal";
     private users: string[] = [];
-    private roles: string[] = [];
+    private roles: ("tournament" | "contest")[] = [];
     private message: string = "";
 
     /**
@@ -83,7 +83,7 @@ export class WebhookBuilder {
             threadId: this.threadId,
             notification: this.notification,
             users: this.users,
-            roles: this.roles as ("tournament" | "contest")[],
+            roles: this.roles,
             message: this.message,
             embeds: this.embeds,
         };

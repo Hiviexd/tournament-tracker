@@ -143,7 +143,16 @@ export function useBadgePreviewer() {
             }
 
             // Add the badge to the badges array
-            const updatedBadges = [...badges, newBadge as LocalBadge];
+            const badge: LocalBadge = {
+                awarded_at: newBadge.awarded_at ?? new Date(),
+                description: newBadge.description,
+                image_url: newBadge.image_url ?? newBadge["image@2x_url"],
+                "image@2x_url": newBadge["image@2x_url"],
+                url: newBadge.url,
+                localId: newBadge.localId,
+                dimensions: newBadge.dimensions,
+            };
+            const updatedBadges = [...badges, badge];
 
             // Reset form without revoking URL (since it's now used in the badge list)
             setNewBadge({
@@ -188,11 +197,14 @@ export function useBadgePreviewer() {
 
     // Function to ensure all badges have localIds
     const ensureBadgeIds = useCallback(
-        (badges: IOsuBadge[] = []) => {
-            return badges.map((badge) => ({
-                ...badge,
-                localId: (badge as LocalBadge).localId || generateUniqueId(),
-            })) as LocalBadge[];
+        (badges: IOsuBadge[] = []): LocalBadge[] => {
+            return badges.map((badge): LocalBadge => {
+                const withOptionalId: IOsuBadge & { localId?: string } = badge;
+                return {
+                    ...badge,
+                    localId: withOptionalId.localId || generateUniqueId(),
+                };
+            });
         },
         [generateUniqueId],
     );

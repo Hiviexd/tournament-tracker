@@ -19,7 +19,7 @@ interface SpotlightActionProps {
 }
 
 export default function SpotlightAction({ searchItem, onClick }: SpotlightActionProps) {
-    const getIconForType = (searchItem: ISearchItem) => {
+    const getIconForType = (searchItem: ISearchItem): IconProp => {
         switch (searchItem.type) {
             case "route":
                 return "icon" in searchItem.object && searchItem.object.icon ? searchItem.object.icon : "file-alt";
@@ -105,6 +105,7 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
             case "ticket":
             case "report":
                 if (searchItem.type === "report") {
+                    // SAFETY: global search report hits are ticket documents; TS only types the spotlight object as a partial union.
                     badges.push(<ReportTypeBadge key="type" report={obj as ITicket} size="xs" />);
                 }
 
@@ -147,7 +148,7 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
             <Card className="spotlight-action-card" bg="primary.10" p="xs" radius="md" shadow="sm" w="100%">
                 <Group gap="xs" style={{ width: "100%" }}>
                     <FontAwesomeIcon
-                        icon={getIconForType(searchItem) as IconProp}
+                        icon={getIconForType(searchItem)}
                         size={getBadges().length > 0 ? "lg" : undefined}
                     />
                     <Stack gap={4} style={{ flex: 1 }}>

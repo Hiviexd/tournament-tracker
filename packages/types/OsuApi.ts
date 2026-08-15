@@ -1,4 +1,5 @@
-export type OsuGameMode = "osu" | "taiko" | "fruits" | "mania";
+export const OSU_GAME_MODES = ["osu", "taiko", "fruits", "mania"] as const;
+export type OsuGameMode = (typeof OSU_GAME_MODES)[number];
 
 /** Profile cover of an osu! user */
 export interface IOsuCover {

@@ -5,10 +5,10 @@ import { VotingCategory } from "@tc/types/Voting";
 import { IUser, UserGroup } from "@tc/types/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-interface FilterValues {
+export interface VotingFilterValues {
     title: string;
-    category: VotingCategory;
-    assignedGroup: UserGroup;
+    category: VotingCategory | "";
+    assignedGroup: UserGroup | "";
     status: string;
     showNeedsAttention: boolean;
     visibility: string;
@@ -16,8 +16,8 @@ interface FilterValues {
 
 interface IProps {
     user: IUser | null;
-    values: FilterValues;
-    onChange: (values: FilterValues) => void;
+    values: VotingFilterValues;
+    onChange: (values: VotingFilterValues) => void;
 }
 
 export default function VotingFilters({ user, values, onChange }: IProps) {
@@ -25,7 +25,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
     const [titleInput, setTitleInput] = useState(values.title);
 
     // Debounced onChange handler for title
-    const debouncedOnChange = useDebouncedCallback((newValues: FilterValues) => {
+    const debouncedOnChange = useDebouncedCallback((newValues: VotingFilterValues) => {
         onChange(newValues);
     }, 400);
 
@@ -50,7 +50,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
         { value: "private", label: "Private" },
     ];
 
-    const handleChange = (key: keyof FilterValues, value: any) => {
+    const handleChange = (key: keyof VotingFilterValues, value: any) => {
         // If toggling needs attention, also set status to active
         if (key === "showNeedsAttention" && value === true) {
             onChange({
@@ -83,7 +83,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                         placeholder="Filter by category"
                         leftSection={<FontAwesomeIcon icon="folder" />}
                         value={values.category}
-                        onChange={(value) => handleChange("category", value as VotingCategory)}
+                        onChange={(value) => handleChange("category", value)}
                         data={categoryOptions}
                         style={{ flex: 1, minWidth: 200 }}
                         clearable
@@ -92,7 +92,7 @@ export default function VotingFilters({ user, values, onChange }: IProps) {
                         placeholder="Filter by assigned group"
                         leftSection={<FontAwesomeIcon icon="user-group" />}
                         value={values.assignedGroup}
-                        onChange={(value) => handleChange("assignedGroup", value as UserGroup)}
+                        onChange={(value) => handleChange("assignedGroup", value)}
                         data={assignedGroupOptions}
                         style={{ flex: 1, minWidth: 200 }}
                         disabled={values.showNeedsAttention}

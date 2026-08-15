@@ -1,7 +1,6 @@
 import { Menu, Button, Group } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { routes } from "../../../base/header.config";
 import utils from "@tc/utils/client";
 import { IUser } from "@tc/types/User";
@@ -54,7 +53,7 @@ export default function MainNavigation({ user }: IProps) {
                                     key={menuLink.title}
                                     component={Link}
                                     to={menuLink.link || "#"}
-                                    leftSection={<FontAwesomeIcon icon={menuLink.icon as IconProp} />}>
+                                    leftSection={menuLink.icon ? <FontAwesomeIcon icon={menuLink.icon} /> : undefined}>
                                     {menuLink.title}
                                 </Menu.Item>
                             ))}

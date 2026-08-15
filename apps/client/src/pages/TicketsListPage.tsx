@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useTickets } from "../hooks/useTickets";
-import { UserGroup } from "@tc/types/User";
+import { UserGroup, USER_GROUPS } from "@tc/types/User";
 import { ITicket } from "@tc/types/Ticket";
 import { Stack, Card, SimpleGrid, Group, Pagination, Text, Skeleton, Divider } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +11,7 @@ import TicketsFilters from "../components/tickets/TicketsFilters";
 import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
+import { pickStringUnion } from "@tc/utils/client";
 
 function TicketsListLoadingState() {
     return (
@@ -70,7 +71,7 @@ interface FilterValues {
     content: string;
     targetUser: string;
     targetTournament: string;
-    assignedGroup: UserGroup;
+    assignedGroup: UserGroup | "";
     status: string;
     showOwn: boolean;
 }
@@ -113,7 +114,7 @@ export default function TicketsListPage() {
         content: queryState.content,
         targetUser: queryState.targetUser,
         targetTournament: queryState.targetTournament,
-        assignedGroup: queryState.assignedGroup as UserGroup,
+        assignedGroup: pickStringUnion(queryState.assignedGroup, USER_GROUPS) ?? "",
         status: queryState.status,
         showOwn: queryState.showOwn,
     };
@@ -158,7 +159,7 @@ export default function TicketsListPage() {
         content: queryState.content,
         targetUser: queryState.targetUser,
         targetTournament: queryState.targetTournament,
-        assignedGroup: queryState.assignedGroup as UserGroup,
+        assignedGroup: pickStringUnion(queryState.assignedGroup, USER_GROUPS),
         isActive: queryState.status ? queryState.status === "active" : undefined,
         showOwn: queryState.showOwn,
         page: queryState.page,

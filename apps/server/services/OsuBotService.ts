@@ -128,7 +128,7 @@ export default class OsuBotService extends OsuApiService {
     ): Promise<true | ErrorResponse> {
         const token = await this.getBotToken();
 
-        if (typeof token !== "string") {
+        if (OsuApiService.isOsuResponseError(token)) {
             return token;
         }
 
@@ -147,7 +147,7 @@ export default class OsuBotService extends OsuApiService {
             console.log(
                 "Non-production environment detected, but no fallback ID provided. Skipping osu! announcement.",
             );
-            return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" } as ErrorResponse;
+            return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" };
         }
 
         // Add delay to prevent rate limiting

@@ -14,7 +14,7 @@ interface IBadgeConfig {
     color: string;
 }
 
-const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
+const USER_GROUP_BADGES = {
     tc: {
         tooltip: "Tournament Committee",
         label: "TC",
@@ -30,7 +30,7 @@ const USER_GROUP_BADGES: Record<string, IBadgeConfig> = {
         label: "ALM",
         color: "var(--mantine-color-gray-6)",
     },
-};
+} as const satisfies Record<string, IBadgeConfig>;
 
 export default function UserGroupBadge({ group, tooltip, variant = "default", size }: IPropTypes) {
     if (!group) return null;

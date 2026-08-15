@@ -4,7 +4,7 @@
         "rootDir": ".",
         "noEmit": true,
         "jsx": "react-jsx",
-        "lib": ["ES2020", "ES2023.Array", "DOM", "DOM.Iterable"],
+        "lib": ["ES2020", "ES2021.Intl", "ES2023.Array", "DOM", "DOM.Iterable"],
         "types": ["node"]
     },
     "include": ["./**/*.ts", "./**/*.tsx"],

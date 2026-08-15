@@ -5,7 +5,7 @@ import MultiSelect from "../common/MultiSelect";
 import { ITournament } from "@tc/types/Tournament";
 import { IUser } from "@tc/types/User";
 import MultipleUsersInput from "../common/MultipleUsersInput";
-import utils from "@tc/utils/client";
+import utils, { isString } from "@tc/utils/client";
 import { useEditTournament } from "../../hooks/useTournaments";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../store/atoms";
@@ -106,7 +106,7 @@ export default function TournamentInfoEditModal({ tournament, opened, onClose }:
                         label="Hosts"
                         placeholder="Search for a host to add..."
                         required
-                        error={form.errors.hostIds as string}
+                        error={isString(form.errors.hostIds) ? form.errors.hostIds : undefined}
                         allowUserCreation
                         showActiveInfringementWarning
                     />

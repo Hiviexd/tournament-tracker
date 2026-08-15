@@ -1,14 +1,6 @@
 import React from "react";
 import { IUser } from "@tc/types/User";
-import {
-    IVote,
-    VoteType,
-    ClassicVote,
-    BinaryVote,
-    VariableVote,
-    BinaryStrictVote,
-    RankedChoiceVote,
-} from "@tc/types/Vote";
+import { IVote, VoteType } from "@tc/types/Vote";
 import { IVoting } from "@tc/types/Voting";
 import { ITournament, TournamentStatus } from "@tc/types/Tournament";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -43,7 +35,9 @@ export const handleMutationResponse = <T>(response: ApiResponse<T>): T => {
         color: "green",
     });
 
-    return response.data || (response as unknown as T);
+    if (response.data !== undefined) return response.data;
+    // SAFETY: mutation endpoints that omit `data` return the entity as the top-level JSON body.
+    return response as T;
 };
 
 /**
@@ -60,12 +54,14 @@ export const copyToClipboard = (text: string) => {
     });
 };
 
+type TournamentStatusStyle = { color: string; icon: IconProp };
+
 /**
  * Get tournament status styles (color and icon)
  * @param status The tournament status
  * @returns Object containing color and icon for the status
  */
-export const getTournamentStatusStyles = (status: TournamentStatus): { color: string; icon: IconProp } => {
+export const getTournamentStatusStyles = (status: TournamentStatus): TournamentStatusStyle => {
     switch (status) {
         case "supportRequestReceived":
             return { color: "violet", icon: "inbox" };
@@ -230,12 +226,11 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
 
     switch (voting.type) {
         case "classic":
-            return { type: "classic", option: 0 } as ClassicVote;
+            return { type: "classic", option: 0 };
         case "binary":
-            return { type: "binary", score: 0 } as BinaryVote;
+            return { type: "binary", score: 0 };
         case "binary-strict":
-            // Default to neutral (0) if allowed, otherwise default to agree (1)
-            return { type: "binary-strict", score: voting.allowNeutralVotes ? 0 : 1 } as BinaryStrictVote;
+            return { type: "binary-strict", score: voting.allowNeutralVotes ? 0 : 1 };
         case "variable":
             return {
                 type: "variable",
@@ -243,7 +238,7 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
                     optionIndex: index,
                     score: 0,
                 })),
-            } as VariableVote;
+            };
         case "ranked-choice":
             return {
                 type: "ranked-choice",
@@ -251,7 +246,7 @@ export function getInitialVoteData(voting: IVoting, userVote?: IVote): VoteType 
                     optionIndex: index,
                     score: 0,
                 })),
-            } as RankedChoiceVote;
+            };
     }
 }
 
@@ -364,7 +359,7 @@ export function formatElementsList(
     if (elements.length === 1) return elements;
 
     const { style = "long", type = "conjunction" } = options;
-    const formatter = new (Intl as any).ListFormat("en", { style, type });
+    const formatter = new Intl.ListFormat("en", { style, type });
 
     const result: React.ReactNode[] = [];
 

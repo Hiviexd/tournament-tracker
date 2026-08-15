@@ -1,8 +1,8 @@
 // Base
 import { useEffect } from "react";
 import { useVotings } from "../hooks/useVotings";
-import { IVoting, VotingCategory } from "@tc/types/Voting";
-import { UserGroup } from "@tc/types/User";
+import { IVoting, VOTING_CATEGORIES } from "@tc/types/Voting";
+import { USER_GROUPS } from "@tc/types/User";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
 import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 
@@ -14,7 +14,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // Components
 import VotingCreateModal from "../components/votings/VotingCreateModal";
 import VotingCard from "../components/votings/VotingCard";
-import VotingFilters from "../components/votings/VotingFilters";
+import VotingFilters, { type VotingFilterValues } from "../components/votings/VotingFilters";
+import { pickStringUnion } from "@tc/utils/client";
 
 // Atom
 import { useAtom } from "jotai";
@@ -83,10 +84,10 @@ export default function VotingListPage() {
     const [opened, { open, close }] = useDisclosure(false);
 
     // Create filters object for VotingFilters component
-    const filters = {
+    const filters: VotingFilterValues = {
         title: queryState.title,
-        category: queryState.category as VotingCategory,
-        assignedGroup: queryState.group as UserGroup,
+        category: pickStringUnion(queryState.category, VOTING_CATEGORIES) ?? "",
+        assignedGroup: pickStringUnion(queryState.group, USER_GROUPS) ?? "",
         status: queryState.status,
         showNeedsAttention: queryState.needsAttention,
         visibility: queryState.visibility,
@@ -115,8 +116,8 @@ export default function VotingListPage() {
 
     const { data, isLoading, error } = useVotings({
         title: queryState.title,
-        category: queryState.category as VotingCategory,
-        assignedGroup: queryState.group as UserGroup,
+        category: pickStringUnion(queryState.category, VOTING_CATEGORIES),
+        assignedGroup: pickStringUnion(queryState.group, USER_GROUPS),
         status: queryState.status,
         showNeedsAttention: queryState.needsAttention,
         visibility: queryState.visibility,

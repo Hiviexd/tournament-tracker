@@ -1,6 +1,25 @@
+import { MantineColorsTuple } from "@mantine/core";
+
 /**
  * Theme color helpers (kept separate from `index.ts` / `shared.ts` to avoid circular imports).
  */
+
+export function withDarkShades(generated: MantineColorsTuple, dark: string, darker: string): MantineColorsTuple {
+    return [
+        generated[0],
+        generated[1],
+        generated[2],
+        generated[3],
+        generated[4],
+        generated[5],
+        generated[6],
+        generated[7],
+        generated[8],
+        generated[9],
+        dark,
+        darker,
+    ];
+}
 
 /**
  * Normalize Alert color to always use shade 6 when no shade is specified.
@@ -24,8 +43,8 @@ export function getThemeColor(
     },
     color: string | undefined,
 ): string | undefined {
-    const name = typeof color === "string" && color.includes(".") ? color.split(".")[0] : (color ?? theme.primaryColor);
-    const shade = typeof color === "string" && color.includes(".") ? parseInt(color.split(".")[1], 10) : 6;
+    const name = color?.includes(".") ? color.split(".")[0] : (color ?? theme.primaryColor);
+    const shade = color?.includes(".") ? parseInt(color.split(".")[1], 10) : 6;
     const scale = theme.colors[name];
     if (!scale || !Number.isInteger(shade)) return theme.colors[theme.primaryColor]?.[6];
     return scale[shade];

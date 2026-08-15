@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useCreateArticle } from "../hooks/useArticle";
 import MarkdownText from "../components/common/MarkdownText";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArticleType } from "@tc/types/Article";
+import { ArticleType, ARTICLE_TYPES } from "@tc/types/Article";
+import { pickStringUnion } from "@tc/utils/client";
 import TextEditor from "../components/common/TextEditor";
 import TextLengthIndicator from "../components/common/TextLengthIndicator";
 import { clearAutoSavedValue } from "../hooks/useAutoSave";
@@ -61,7 +62,10 @@ export default function CreateArticlePage() {
                     <Select
                         label="Type"
                         value={type}
-                        onChange={(value) => setType(value as ArticleType)}
+                        onChange={(value) => {
+                            const next = value ? pickStringUnion(value, ARTICLE_TYPES) : undefined;
+                            if (next) setType(next);
+                        }}
                         data={[
                             { value: "documentation", label: "Documentation" },
                             { value: "resource", label: "Resource" },

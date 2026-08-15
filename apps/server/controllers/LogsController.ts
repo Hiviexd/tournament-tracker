@@ -1,6 +1,6 @@
 import Log from "../models/logModel";
 import User from "../models/userModel";
-import { LogQueryParams, LogListQuery } from "@tc/types/Log";
+import { LogQueryParams, LOG_CATEGORIES } from "@tc/types/Log";
 import { Request, Response } from "express";
 import utils from "@tc/utils/server";
 
@@ -16,20 +16,25 @@ const DEFAULT_LIMIT = 20;
 class LogsController {
     /** GET logs listing */
     public async index(req: Request, res: Response) {
-        const reqQuery = req.query as LogListQuery;
+        const user = utils.isString(req.query.user) ? req.query.user : undefined;
+        const category = utils.isString(req.query.category)
+            ? utils.pickStringUnion(req.query.category, LOG_CATEGORIES)
+            : undefined;
+        const type = utils.isString(req.query.type) ? req.query.type : undefined;
+        const content = utils.isString(req.query.content) ? req.query.content : undefined;
         const dbQuery: LogQueryParams = {};
 
-        if (reqQuery.user && reqQuery.user.length) {
-            const userDoc = await User.findByUsernameOrOsuId(reqQuery.user);
+        if (user && user.length) {
+            const userDoc = await User.findByUsernameOrOsuId(user);
             dbQuery.user = userDoc || undefined;
             dbQuery.isSystemLog = false;
         }
-        if (reqQuery.category) dbQuery.category = reqQuery.category;
-        if (reqQuery.type === "system") dbQuery.isSystemLog = true;
-        if (reqQuery.type === "user") dbQuery.isSystemLog = false;
-        if (reqQuery.content) dbQuery.action = { $regex: utils.escapeRegexPattern(reqQuery.content), $options: "i" };
+        if (category) dbQuery.category = category;
+        if (type === "system") dbQuery.isSystemLog = true;
+        if (type === "user") dbQuery.isSystemLog = false;
+        if (content) dbQuery.action = { $regex: utils.escapeRegexPattern(content), $options: "i" };
 
-        const page = Number(reqQuery.page || 1);
+        const page = Number((utils.isString(req.query.page) ? req.query.page : undefined) || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
 
         const [logs, total] = await Promise.all([
@@ -57,12 +62,12 @@ class LogsController {
             action: log.action,
         }));
 
-        const headers = ["timestamp", "username", "osuId", "category", "action"];
+        const headers = ["timestamp", "username", "osuId", "category", "action"] as const;
         const csvRows = [headers.join(",")];
 
         csvData.forEach((row) => {
             const values = headers.map((header) => {
-                const value = row[header as keyof typeof row];
+                const value = row[header];
                 const escapedValue = String(value).replace(/"/g, '""');
                 return `"${escapedValue}"`;
             });

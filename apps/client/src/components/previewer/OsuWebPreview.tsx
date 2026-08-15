@@ -1,5 +1,6 @@
 import { Card, Stack, ScrollArea } from "@mantine/core";
 import utils from "@tc/utils/client";
+import { cssVars } from "../../themes/cssVars";
 
 interface IProps {
     bannerUrl: string;
@@ -17,11 +18,9 @@ export default function OsuWebPreview({ bannerUrl }: IProps) {
             }}>
             <Card
                 className="osu-web-preview"
-                style={
-                    safeBannerUrl
-                        ? ({ "--banner-url": `url(${safeBannerUrl})` } as React.CSSProperties)
-                        : ({ "--banner-url": "none" } as React.CSSProperties)
-                }>
+                style={cssVars({
+                    "--banner-url": safeBannerUrl ? `url(${safeBannerUrl})` : "none",
+                })}>
                 <Stack gap={0}>
                     <div className="header-section">
                         <div className="header-section-icon" />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
+import { isFunction } from "@tc/utils/client";
 
 interface UseAutoSaveOptions<T = string> {
     key: string;
@@ -19,11 +20,14 @@ export function clearAutoSavedValue(key: string): void {
 
 export function useAutoSave<T = string>({
     key,
-    initialValue = "" as T,
+    initialValue,
     debounceMs = 500,
     serialize = (value: T) => String(value),
-    deserialize = (value: string) => value as T,
-}: UseAutoSaveOptions<T>) {
+    deserialize = (value: string): T => {
+        // SAFETY: default deserialize is identity; callers with a non-string T pass their own deserialize.
+        return value as T;
+    },
+}: UseAutoSaveOptions<T> & { initialValue: T }) {
     // Try to get saved value from localStorage, fallback to initialValue
     const [value, setValueInternal] = useState<T>(() => {
         try {
@@ -46,7 +50,13 @@ export function useAutoSave<T = string>({
     // Custom setValue that handles state transitions directly
     const setValue = useCallback(
         (newValue: T | ((prev: T) => T)) => {
-            const resolvedValue = typeof newValue === "function" ? (newValue as (prev: T) => T)(value) : newValue;
+            let resolvedValue: T;
+            if (isFunction(newValue)) {
+                // SAFETY: React setState updaters are (prev: T) => T; isFunction only types a generic function.
+                resolvedValue = (newValue as (prev: T) => T)(value);
+            } else {
+                resolvedValue = newValue;
+            }
             setValueInternal(resolvedValue);
 
             // If value changes and it's different from the last saved value, user is typing

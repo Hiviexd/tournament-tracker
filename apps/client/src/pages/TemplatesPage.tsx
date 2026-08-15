@@ -64,24 +64,20 @@ export default function TemplatesPage() {
         setSelectedTemplate(null);
     };
 
-    // Group templates by category
-    const groupedTemplates = templates.reduce(
-        (acc, template) => {
-            if (!acc[template.category]) {
-                acc[template.category] = [];
-            }
-            acc[template.category].push(template);
-            return acc;
-        },
-        {} as Record<string, ITemplate[]>,
-    );
+    const groupedTemplates: Record<string, ITemplate[]> = {};
+    for (const template of templates) {
+        if (!groupedTemplates[template.category]) {
+            groupedTemplates[template.category] = [];
+        }
+        groupedTemplates[template.category].push(template);
+    }
 
     // Sort categories and templates within each category
     const sortedCategories = Object.entries(groupedTemplates)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([category, categoryTemplates]) => ({
             category,
-            templates: (categoryTemplates as ITemplate[]).sort((a, b) => a.name.localeCompare(b.name)),
+            templates: categoryTemplates.sort((a, b) => a.name.localeCompare(b.name)),
         }));
 
     return (

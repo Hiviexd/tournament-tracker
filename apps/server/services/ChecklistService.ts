@@ -1,4 +1,5 @@
 import { IChecklistCategory, IReviewChecklists } from "@tc/types/Checklist";
+import { isPlainObject, isString } from "@tc/utils/common";
 import SettingsService from "./SettingsService";
 
 type HttpError = { status: number; error: string };
@@ -20,7 +21,7 @@ function toPlainChecklists(checklist: IReviewChecklists): IReviewChecklists {
     };
 }
 
-function normalizeList(list: unknown, label: "tc" | "cc"): IChecklistCategory[] {
+function normalizeList<T>(list: T, label: "tc" | "cc"): IChecklistCategory[] {
     if (!Array.isArray(list)) {
         throw httpError(400, `Checklist ${label} must be an array`);
     }
@@ -30,12 +31,11 @@ function normalizeList(list: unknown, label: "tc" | "cc"): IChecklistCategory[] 
     const itemTexts = new Set<string>();
 
     for (const raw of list) {
-        if (!raw || typeof raw !== "object") {
+        if (!isPlainObject(raw)) {
             throw httpError(400, `Invalid category in ${label}`);
         }
 
-        const rawCategory = (raw as IChecklistCategory).category;
-        const categoryName = typeof rawCategory === "string" ? rawCategory.trim() : "";
+        const categoryName = "category" in raw && isString(raw.category) ? raw.category.trim() : "";
 
         if (!categoryName) {
             throw httpError(400, `Category name is required in ${label}`);
@@ -46,14 +46,14 @@ function normalizeList(list: unknown, label: "tc" | "cc"): IChecklistCategory[] 
         }
         categoryNames.add(categoryName);
 
-        const rawItems = (raw as IChecklistCategory).items;
+        const rawItems = "items" in raw ? raw.items : undefined;
         if (!Array.isArray(rawItems) || rawItems.length === 0) {
             throw httpError(400, `Category "${categoryName}" in ${label} must have at least one item`);
         }
 
         const items: string[] = [];
         for (const rawItem of rawItems) {
-            if (typeof rawItem !== "string") {
+            if (!isString(rawItem)) {
                 throw httpError(400, `Invalid item in category "${categoryName}" (${label})`);
             }
             const item = rawItem.trim();
@@ -73,15 +73,14 @@ function normalizeList(list: unknown, label: "tc" | "cc"): IChecklistCategory[] 
     return categories;
 }
 
-export function normalizeChecklists(input: unknown): IReviewChecklists {
-    if (!input || typeof input !== "object") {
+export function normalizeChecklists<T>(input: T): IReviewChecklists {
+    if (!isPlainObject(input)) {
         throw httpError(400, "Checklist body is required");
     }
 
-    const body = input as Partial<IReviewChecklists>;
     return {
-        tc: normalizeList(body.tc, "tc"),
-        cc: normalizeList(body.cc, "cc"),
+        tc: normalizeList("tc" in input ? input.tc : undefined, "tc"),
+        cc: normalizeList("cc" in input ? input.cc : undefined, "cc"),
     };
 }
 
@@ -91,7 +90,7 @@ class ChecklistService {
         return toPlainChecklists(settings.checklist);
     }
 
-    public async updateChecklists(input: unknown): Promise<IReviewChecklists> {
+    public async updateChecklists<T>(input: T): Promise<IReviewChecklists> {
         const checklist = normalizeChecklists(input);
         const settings = await SettingsService.updateChecklist(checklist);
         return toPlainChecklists(settings.checklist);

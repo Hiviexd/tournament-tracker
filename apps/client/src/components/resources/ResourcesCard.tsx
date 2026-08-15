@@ -5,13 +5,13 @@ import { IResource, ResourceCategory } from "@tc/types/Resource";
 import UserLink from "../common/UserLink";
 import capitalize from "lodash/capitalize.js";
 
-const CATEGORY_ICONS: Record<ResourceCategory, IconProp> = {
+const CATEGORY_ICONS = {
     discord: ["fab", "discord"],
     tool: "wrench",
     guide: "book",
     spreadsheet: "table",
     article: "newspaper",
-};
+} as const satisfies Record<ResourceCategory, IconProp>;
 
 interface IProps {
     resource: IResource;

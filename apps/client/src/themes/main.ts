@@ -3,6 +3,7 @@ import { generateColors } from "@mantine/colors-generator";
 import utils from "@tc/utils/client";
 import { DEFAULT_HUE } from "../constants";
 import { baseThemeConfig, baseComponents, getMainThemeAnchorStyles } from "./shared";
+import { withDarkShades } from "./themeColorUtils";
 
 const danger: MantineColorsTuple = [
     "#ffe8e9",
@@ -62,15 +63,10 @@ const isGreyscale = localStorage.getItem("greyscale") === "true";
 const generateTheme = (hue: number, isGreyscale: boolean) => {
     const primaryHexColor = isGreyscale ? "#FFFF" : utils.hslToHex(hue, 0.5, 0.5);
 
-    const theme = generateColors(primaryHexColor) as unknown as string[];
-
-    // append the hsl(X, 10%, 15%) and hsl(X, 10%, 10%) versions manually
+    const generated = generateColors(primaryHexColor);
     const dark = isGreyscale ? "#262626" : utils.hslToHex(hue, 0.1, 0.15);
     const darker = isGreyscale ? "#1a1a1a" : utils.hslToHex(hue, 0.1, 0.1);
-    theme.push(dark);
-    theme.push(darker);
-
-    return theme as unknown as MantineColorsTuple;
+    return withDarkShades(generated, dark, darker);
 };
 
 export const updateTheme = (hue: number, isGreyscale: boolean) => {

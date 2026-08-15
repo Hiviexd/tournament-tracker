@@ -21,7 +21,7 @@ describe("DiscordSender", () => {
     });
 
     it("returns success for successful webhook requests", async () => {
-        vi.mocked(axios.post).mockResolvedValue({ data: {} } as any);
+        vi.mocked(axios.post).mockResolvedValue({ data: {} });
 
         const result = await DiscordSender.send({
             payload: {
@@ -29,7 +29,7 @@ describe("DiscordSender", () => {
                 embeds: [{ color: 123456, description: "hello" }],
                 message: "test",
             },
-        } as any);
+        });
 
         expect(result.ok).toBe(true);
         expect(result.retryable).toBe(false);
@@ -48,7 +48,7 @@ describe("DiscordSender", () => {
                 location: "main",
                 embeds: [{ color: 123456, description: "hello" }],
             },
-        } as any);
+        });
 
         expect(result.ok).toBe(false);
         expect(result.retryable).toBe(true);
@@ -57,7 +57,7 @@ describe("DiscordSender", () => {
 
     it("skips thread_id in development environment", async () => {
         process.env.NODE_ENV = "development";
-        vi.mocked(axios.post).mockResolvedValue({ data: {} } as any);
+        vi.mocked(axios.post).mockResolvedValue({ data: {} });
 
         await DiscordSender.send({
             payload: {
@@ -65,9 +65,9 @@ describe("DiscordSender", () => {
                 threadId: "1234567890",
                 embeds: [{ color: 123456, description: "dev channel root post" }],
             },
-        } as any);
+        });
 
-        const requestUrl = vi.mocked(axios.post).mock.calls[0][0] as string;
+        const requestUrl = String(vi.mocked(axios.post).mock.calls[0][0]);
         expect(requestUrl).not.toContain("thread_id=");
     });
 });

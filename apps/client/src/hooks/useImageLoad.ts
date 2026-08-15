@@ -65,7 +65,7 @@ export function useImageLoad(src: string | undefined, options: UseImageLoadOptio
                 setLoading(false);
                 setSuccess(false);
                 setError(true);
-                onError?.(event as Event);
+                if (event instanceof Event) onError?.(event);
             }
         };
 

@@ -1,5 +1,6 @@
 import { MantineColorsTuple } from "@mantine/core";
 import { generateColors } from "@mantine/colors-generator";
+import { withDarkShades } from "../themeColorUtils";
 
 /**
  * Research-based accessible color palettes for colorblind users
@@ -88,17 +89,9 @@ export const protanopiaColors = {
  * Adds extra dark colors at indices 10 and 11 to match main theme structure
  */
 export const generateAccessibleColorTuple = (baseColor: string): MantineColorsTuple => {
-    const colors = generateColors(baseColor) as unknown as string[];
-
-    // Extract the base color's hue for consistent dark colors
-    // For colorblind themes, we use fixed dark colors to maintain accessibility
-    const dark = "#262626"; // dark background color (index 10)
-    const darker = "#1a1a1a"; // darker background color (index 11)
-
-    colors.push(dark);
-    colors.push(darker);
-
-    return colors as unknown as MantineColorsTuple;
+    const dark = "#262626";
+    const darker = "#1a1a1a";
+    return withDarkShades(generateColors(baseColor), dark, darker);
 };
 
 /**

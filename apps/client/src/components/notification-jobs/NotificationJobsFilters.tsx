@@ -1,6 +1,12 @@
 import { Card, Select, SimpleGrid, Stack, TextInput } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NotificationJobStatus, NotificationProvider } from "@tc/types/NotificationJob";
+import {
+    NotificationJobStatus,
+    NotificationProvider,
+    NOTIFICATION_JOB_STATUSES,
+    NOTIFICATION_PROVIDERS,
+} from "@tc/types/NotificationJob";
+import { pickStringUnion } from "@tc/utils/client";
 
 export interface NotificationJobFiltersValues {
     kind: string;
@@ -53,7 +59,12 @@ export default function NotificationJobsFilters({ values, onChange }: IProps) {
                         placeholder="Filter by provider"
                         leftSection={<FontAwesomeIcon icon="paper-plane" />}
                         value={values.provider}
-                        onChange={(value) => onChange({ ...values, provider: (value as NotificationProvider) || "" })}
+                        onChange={(value) =>
+                            onChange({
+                                ...values,
+                                provider: (value && pickStringUnion(value, NOTIFICATION_PROVIDERS)) || "",
+                            })
+                        }
                         data={PROVIDER_OPTIONS}
                         clearable
                     />
@@ -61,7 +72,12 @@ export default function NotificationJobsFilters({ values, onChange }: IProps) {
                         placeholder="Filter by status"
                         leftSection={<FontAwesomeIcon icon="rotate" />}
                         value={values.status}
-                        onChange={(value) => onChange({ ...values, status: (value as NotificationJobStatus) || "" })}
+                        onChange={(value) =>
+                            onChange({
+                                ...values,
+                                status: (value && pickStringUnion(value, NOTIFICATION_JOB_STATUSES)) || "",
+                            })
+                        }
                         data={STATUS_OPTIONS}
                         clearable
                     />

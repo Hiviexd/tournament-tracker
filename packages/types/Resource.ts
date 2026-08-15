@@ -1,9 +1,11 @@
 import { Document, Types } from "mongoose";
 import { IUser } from "./User";
 
-export type ResourceCategory = "discord" | "tool" | "guide" | "spreadsheet" | "article";
+export const RESOURCE_CATEGORIES = ["discord", "tool", "guide", "spreadsheet", "article"] as const;
+export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[number];
 
-export type ResourceType = "official" | "community";
+export const RESOURCE_TYPES = ["official", "community"] as const;
+export type ResourceType = (typeof RESOURCE_TYPES)[number];
 
 export interface ResourceQueryParams {
     search?: string;

@@ -13,7 +13,7 @@ import {
 import { ITournamentExtraLink, ExtraLinkType } from "@tc/types/Tournament";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, Fragment } from "react";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 import { notifications } from "@mantine/notifications";
 import { EXTRA_LINK_DEFAULTS, EXTRA_LINK_FA_ICONS, EXTRA_LINK_SVG_ICONS, EXTRA_LINK_TYPES } from "@tc/utils/extraLinks";
 
@@ -72,7 +72,8 @@ function ExtraLinkTypeSelect({ value, onChange }: { value: ExtraLinkType; onChan
             withinPortal
             transitionProps={{ transition: "fade", duration: 150 }}
             onOptionSubmit={(type) => {
-                onChange(type as ExtraLinkType);
+                const next = pickStringUnion(type, EXTRA_LINK_TYPES);
+                if (next) onChange(next);
                 combobox.closeDropdown();
             }}>
             <Combobox.Target>

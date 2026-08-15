@@ -7,7 +7,7 @@ export function useValidateBeatmaps(input: string) {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await utils.apiCall({
+            const response = await utils.apiCall<IValidateBeatmapsResponse>({
                 method: "post",
                 url: "/api/compliance/validate",
                 data: { input },

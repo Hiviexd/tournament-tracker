@@ -2,6 +2,7 @@ import NotificationJob from "../models/notificationJobModel";
 import {
     IDiscordNotificationPayload,
     INotificationJob,
+    INotificationRuntimeStats,
     IOsuAnnouncementPayload,
     NotificationProvider,
 } from "@tc/types/NotificationJob";
@@ -18,7 +19,7 @@ export interface NotificationDispatchResult {
 }
 
 class NotificationDispatchService {
-    private runtimeCounters = {
+    private runtimeCounters: INotificationRuntimeStats = {
         enqueued: 0,
         sent: 0,
         retried: 0,
@@ -186,12 +187,7 @@ class NotificationDispatchService {
         return { pending, processing, sent, failed };
     }
 
-    public getRuntimeCounters(): {
-        enqueued: number;
-        sent: number;
-        retried: number;
-        failed: number;
-    } {
+    public getRuntimeCounters(): INotificationRuntimeStats {
         return { ...this.runtimeCounters };
     }
 }

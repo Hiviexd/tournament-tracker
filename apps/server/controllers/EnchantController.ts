@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import config from "@tc/config";
+import { isString } from "@tc/utils/common";
 import EnchantSidebarService from "../services/EnchantSidebarService";
 
 class EnchantController {
@@ -16,7 +17,7 @@ class EnchantController {
             return res.status(401).send("Unauthorized");
         }
 
-        const ticketId = typeof req.body?.id === "string" ? req.body.id : "";
+        const ticketId = isString(req.body?.id) ? req.body.id : "";
         if (!ticketId) {
             return res.status(200).send("");
         }

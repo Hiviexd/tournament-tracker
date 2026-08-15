@@ -7,7 +7,7 @@ import MarkdownText from "../common/MarkdownText";
 import UserSearch from "../common/UserSearch";
 import { useNavigate } from "react-router-dom";
 import { useCreateTicket } from "../../hooks/useTickets";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { type TicketFormData } from "@tc/types/Ticket";
 import TextLengthIndicator from "../common/TextLengthIndicator";
@@ -22,6 +22,8 @@ const GROUP_OPTIONS = [
     { value: "tc", label: "Tournament Committee" },
     { value: "cc", label: "Contest Committee" },
 ] as const;
+
+const REPORT_TARGET_TYPES = ["user", "tournament"] as const;
 
 export default function ReportForm() {
     const navigate = useNavigate();
@@ -39,7 +41,7 @@ export default function ReportForm() {
             targetUserId: "",
             targetTournamentName: "",
             targetTournamentLink: "",
-            reportType: undefined as "user" | "tournament" | undefined,
+            reportType: undefined,
         },
         validate: {
             message: (value) => {
@@ -78,7 +80,8 @@ export default function ReportForm() {
     const handleReportTypeChange = (value: string | null) => {
         if (!value) return;
 
-        const type = value as "user" | "tournament";
+        const type = pickStringUnion(value, REPORT_TARGET_TYPES);
+        if (!type) return;
         setReportType(type);
         form.setFieldValue("reportType", type);
 
@@ -99,6 +102,7 @@ export default function ReportForm() {
     };
 
     const handleSubmit = form.onSubmit(async (values) => {
+        // SAFETY: FormData is the runtime type; report fields are appended before submit.
         const formData = new FormData() as TicketFormData;
 
         // Remove type from values since we're adding it explicitly
@@ -172,10 +176,7 @@ You can report either:
                                 },
                             ]}
                             {...form.getInputProps("reportType")}
-                            onChange={(value) => {
-                                form.setFieldValue("reportType", value as "user" | "tournament");
-                                handleReportTypeChange(value);
-                            }}
+                            onChange={handleReportTypeChange}
                             withAsterisk
                             disabled={!user}
                         />

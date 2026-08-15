@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "express";
+import { RequestHandler } from "express";
 import { match } from "path-to-regexp";
+import { isPlainObject, isString } from "@tc/utils/common";
 import config from "@tc/config";
 import { seoRoutes, defaultMetadata, modelMap, type SEOMetadata } from "../constants/seo.config";
-import { Model } from "mongoose";
 
 const CRAWLER_USER_AGENTS = ["discord"];
 
-export async function handleCrawlers(req: Request, res: Response, next: NextFunction) {
+export const handleCrawlers: RequestHandler = async (req, res, next) => {
     if (req.path.startsWith("/assets/")) return next();
 
     const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
@@ -18,10 +18,10 @@ export async function handleCrawlers(req: Request, res: Response, next: NextFunc
         const metadata = await generateMetadata(req);
         const html = generateHTML(metadata);
         res.send(html);
-    } catch (error) {
+    } catch {
         next();
     }
-}
+};
 
 function formatTitle(pageTitle: string, isHome = false, dynamicName?: string, fullTitleOverride?: string) {
     if (isHome) {
@@ -50,7 +50,14 @@ function formatTitle(pageTitle: string, isHome = false, dynamicName?: string, fu
     };
 }
 
-async function generateMetadata(req: Request): Promise<SEOMetadata & { url: string }> {
+function entityLabel<T>(data: T): string | undefined {
+    if (!isPlainObject(data)) return undefined;
+    if ("name" in data && isString(data.name)) return data.name;
+    if ("title" in data && isString(data.title)) return data.title;
+    return undefined;
+}
+
+async function generateMetadata(req: { path: string }): Promise<SEOMetadata & { url: string }> {
     const path = req.path;
     const baseUrl = config.baseUrl;
 
@@ -87,24 +94,17 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
         const matchFn = match(route.path, { decode: decodeURIComponent });
         const matchResult = matchFn(path);
 
-        if (matchResult && typeof matchResult !== "boolean") {
+        if (matchResult) {
             const id = matchResult.params[route.modelId];
-            const Model = modelMap[route.model] as Model<any>;
-
-            let defaultPopulate: any = null;
-            if (route.model === "Tournament") {
-                defaultPopulate = { path: "host", select: "username" };
-            }
-            if (route.model === "Voting") {
-                defaultPopulate = { path: "author", select: "username" };
-            }
-            if (route.model === "Ticket") {
-                defaultPopulate = { path: "author", select: "username" };
-            }
-
-            const data = defaultPopulate
-                ? await Model.findById(id).populate(defaultPopulate).lean()
-                : await Model.findById(id).lean();
+            const authorPopulate = { path: "author", select: "username" };
+            const data =
+                route.model === "Tournament"
+                    ? await modelMap.Tournament.findById(id).populate({ path: "host", select: "username" }).lean()
+                    : route.model === "Voting"
+                      ? await modelMap.Voting.findById(id).populate(authorPopulate).lean()
+                      : route.model === "Ticket"
+                        ? await modelMap.Ticket.findById(id).populate(authorPopulate).lean()
+                        : null;
             if (data && route.getMetadata) {
                 const customMetadata = route.getMetadata(data);
 
@@ -115,12 +115,7 @@ async function generateMetadata(req: Request): Promise<SEOMetadata & { url: stri
                     };
                 }
 
-                const titleFormat = formatTitle(
-                    route.name,
-                    false,
-                    (data as any).name || (data as any).title,
-                    customMetadata.title,
-                );
+                const titleFormat = formatTitle(route.name, false, entityLabel(data), customMetadata.title);
 
                 return {
                     ...customMetadata,

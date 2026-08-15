@@ -4,7 +4,7 @@ import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Divider, Al
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
-import { ResourceCategory, ResourceType, IResource } from "@tc/types/Resource";
+import { ResourceCategory, ResourceType, IResource, RESOURCE_CATEGORIES } from "@tc/types/Resource";
 import { useResources } from "../hooks/useResources";
 import ResourcesFilters from "../components/resources/ResourcesFilters";
 import ResourcesCard from "../components/resources/ResourcesCard";
@@ -13,6 +13,7 @@ import ResourcesEditModal from "../components/resources/ResourcesEditModal";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import MarkdownText from "../components/common/MarkdownText";
+import { pickStringUnion } from "@tc/utils/client";
 
 function ResourcesLoadingState() {
     return (
@@ -81,7 +82,7 @@ export default function ResourcesPage() {
     const filters: FilterValues = {
         search: queryState.search,
         author: queryState.author,
-        category: queryState.category as ResourceCategory | "",
+        category: pickStringUnion(queryState.category, RESOURCE_CATEGORIES) ?? "",
         type,
     };
 
@@ -129,7 +130,7 @@ export default function ResourcesPage() {
     const { data, isLoading } = useResources({
         search: queryState.search,
         author: queryState.author,
-        category: (queryState.category as ResourceCategory) || undefined,
+        category: pickStringUnion(queryState.category, RESOURCE_CATEGORIES),
         type,
         page: queryState.page,
     });
@@ -187,11 +188,7 @@ export default function ResourcesPage() {
 
             <ResourcesCreateModal opened={createOpened} onClose={closeCreate} defaultType={type} />
 
-            <ResourcesEditModal
-                opened={editOpened}
-                onClose={handleCloseEdit}
-                resource={selectedResource as IResource}
-            />
+            <ResourcesEditModal opened={editOpened} onClose={handleCloseEdit} resource={selectedResource} />
         </Stack>
     );
 }

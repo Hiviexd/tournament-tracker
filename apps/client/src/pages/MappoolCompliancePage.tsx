@@ -114,7 +114,7 @@ Check out the Discord bot version of this tool here: [**OMCC**](https://github.c
         );
     };
 
-    const complianceData = data as IValidateBeatmapsResponse | undefined;
+    const complianceData = data;
 
     return (
         <Stack gap="lg">
