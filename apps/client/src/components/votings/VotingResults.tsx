@@ -101,7 +101,7 @@ export default function VotingResults({ voting, user }: IProps) {
                                 {opened ? "Hide Votes" : "Show Votes"}
                             </ExpandButton>
                         </Group>
-                        <Collapse in={opened}>
+                        <Collapse expanded={opened}>
                             {voting.abstainedUsers?.length ? (
                                 <Stack gap={5} mb="md">
                                     <Text size="sm" fw={500}>

@@ -48,6 +48,7 @@ export default function TournamentNotes({ tournament }: IProps) {
             return;
         }
 
+        // SAFETY: FormData is the runtime type; note fields are appended before submit.
         const formData = new FormData() as IMessageFormData;
         formData.append("content", content);
         formData.append("isNote", "true");
@@ -62,7 +63,7 @@ export default function TournamentNotes({ tournament }: IProps) {
 
             // force a re-render of the TextEditor component to visually clear the content
             setSubmissionCount((count) => count + 1);
-        } catch (err) {
+        } catch {
             setError("Failed to add note. Please try again.");
         }
     };
@@ -92,7 +93,7 @@ export default function TournamentNotes({ tournament }: IProps) {
                     </Text>
                 )}
 
-                <Collapse in={opened}>
+                <Collapse expanded={opened}>
                     <Stack gap="xl">
                         <Divider />
                         {/* Note creation form */}

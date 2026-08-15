@@ -82,7 +82,7 @@ export default function AssignedReviewersList({
                     ))}
                 </Group>
 
-                <Collapse in={showEditList}>
+                <Collapse expanded={showEditList}>
                     <Stack gap="md">
                         <Divider />
                         <List spacing={6} listStyleType="disc" size="sm">

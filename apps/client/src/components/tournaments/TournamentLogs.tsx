@@ -1,5 +1,5 @@
 import { Stack, Group, Text, Timeline, Card, Title, Collapse, Tooltip, SegmentedControl, Box } from "@mantine/core";
-import { ITournament, ITournamentReviewHistoryEntry, ReviewHistoryAction } from "@tc/types/Tournament";
+import { ITournament, ReviewHistoryAction } from "@tc/types/Tournament";
 import { IUser } from "@tc/types/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dayjs from "@tc/utils/dayjs";
@@ -9,16 +9,17 @@ import MarkdownText from "../common/MarkdownText";
 import UserLink from "../common/UserLink";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import ExpandButton from "../common/buttons/ExpandButton";
+import { isPlainObject, isString, pickStringUnion } from "@tc/utils/client";
 
 interface IProps {
     tournament: ITournament;
 }
 
-const REVIEW_ACTION_CONFIG: Record<ReviewHistoryAction, { label: string; color: "primary" | "green" | "red" }> = {
+const REVIEW_ACTION_CONFIG = {
     initial: { label: "Assigned", color: "primary" },
     assign: { label: "Added", color: "green" },
     remove: { label: "Removed", color: "red" },
-};
+} as const satisfies Record<ReviewHistoryAction, { label: string; color: "primary" | "green" | "red" }>;
 
 export default function TournamentLogs({ tournament }: IProps) {
     const [opened, { toggle }] = useDisclosure(false);
@@ -44,7 +45,7 @@ export default function TournamentLogs({ tournament }: IProps) {
         ? tournament.logs!.toSorted((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
         : [];
     const sortedReviewHistory = hasReviewHistory
-        ? (tournament.reviewHistory as ITournamentReviewHistoryEntry[]).toSorted(
+        ? tournament.reviewHistory!.toSorted(
               (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
           )
         : [];
@@ -71,7 +72,7 @@ export default function TournamentLogs({ tournament }: IProps) {
                 </Group>
 
                 {(hasLogs || hasReviewHistory) && (
-                    <Collapse in={opened}>
+                    <Collapse expanded={opened}>
                         <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
                             <Box style={{ flex: 1, minWidth: 0 }}>
                                 {showAll &&
@@ -80,7 +81,13 @@ export default function TournamentLogs({ tournament }: IProps) {
                                             {sortedLogs.map((log, index) => (
                                                 <Timeline.Item
                                                     key={index}
-                                                    bullet={<FontAwesomeIcon icon={log.icon as IconProp} size="sm" />}
+                                                    bullet={
+                                                        <FontAwesomeIcon
+                                                            // SAFETY: log.icon is a Font Awesome icon name stored as string by the API.
+                                                            icon={log.icon as IconProp}
+                                                            size="sm"
+                                                        />
+                                                    }
                                                     title={
                                                         <Group gap="5">
                                                             <Text size="sm" lineClamp={2}>
@@ -128,11 +135,12 @@ export default function TournamentLogs({ tournament }: IProps) {
                                                                 {REVIEW_ACTION_CONFIG[entry.action].label}
                                                             </Text>
                                                             {entry.user &&
-                                                            typeof entry.user === "object" &&
-                                                            "username" in entry.user ? (
+                                                            isPlainObject(entry.user) &&
+                                                            isString(entry.user.username) ? (
                                                                 <UserLink
                                                                     size="sm"
-                                                                    user={entry.user as unknown as IUser}
+                                                                    // SAFETY: review history user is populated by the API as IUser despite the ObjectId schema type.
+                                                                    user={entry.user as IUser}
                                                                 />
                                                             ) : (
                                                                 <Text size="xs" c="dimmed">
@@ -160,7 +168,10 @@ export default function TournamentLogs({ tournament }: IProps) {
                             <SegmentedControl
                                 value={segment}
                                 color="primary"
-                                onChange={(v) => setSegment(v as "all" | "review")}
+                                onChange={(v) => {
+                                    const next = pickStringUnion(v, ["all", "review"] as const);
+                                    if (next) setSegment(next);
+                                }}
                                 data={[
                                     { label: "All logs", value: "all" },
                                     { label: "Review logs", value: "review" },

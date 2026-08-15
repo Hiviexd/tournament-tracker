@@ -2,6 +2,7 @@ import { Stack, Checkbox, Radio, Group, Button, Text, Alert, Collapse, Loader, C
 import { useDisclosure } from "@mantine/hooks";
 import { ITournament } from "@tc/types/Tournament";
 import { IChecklistCategory } from "@tc/types/Checklist";
+import { REVIEW_VOTE_TYPES } from "@tc/types/Review";
 import { useState, useMemo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ExpandButton from "../common/buttons/ExpandButton";
@@ -9,6 +10,7 @@ import { useSubmitReview } from "../../hooks/useTournaments";
 import { isReviewChecklists, useReviewChecklists } from "../../hooks/useChecklist";
 import { loggedInUserAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import { pickStringUnion } from "@tc/utils/client";
 import TextEditor from "../common/TextEditor";
 import ReviewStatusBanner from "../common/banners/ReviewStatusBanner";
 import { useAutoSave, clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -57,7 +59,7 @@ function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
     const autoSaveKey = `tournament-review-${tournament._id}`;
     const checklistAutoSaveKey = `tournament-review-checklist-${tournament._id}`;
 
-    const getDefaultChecklistState = useCallback((): ChecklistState => {
+    const getDefaultChecklistState = useCallback(() => {
         const initialState: ChecklistState = {};
 
         for (const category of reviewChecklist) {
@@ -135,10 +137,10 @@ function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
             return hasChecklistChanges || hasCommentChanges || hasDecisionChanges;
         }
 
-        const savedChecklist = userReview.checklist.reduce((acc, item) => {
-            acc[item.item] = item.checked;
-            return acc;
-        }, {} as ChecklistState);
+        const savedChecklist: ChecklistState = {};
+        for (const item of userReview.checklist) {
+            savedChecklist[item.item] = item.checked;
+        }
 
         const hasChecklistChanges = JSON.stringify(checkedState) !== JSON.stringify(savedChecklist);
         const hasCommentChanges = comment !== (userReview.comment || "");
@@ -167,7 +169,7 @@ function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
                 </Text>
                 <ExpandButton radius={1000} size="compact-xs" variant="light" expanded={opened} onClick={toggle} />
             </Group>
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 <Stack gap="md">
                     <Text size="xs" c="dimmed">
                         If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
@@ -220,7 +222,10 @@ function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
                 label="Decision"
                 my="md"
                 value={decision || ""}
-                onChange={(value) => setDecision(value as typeof decision)}
+                onChange={(value) => {
+                    const next = pickStringUnion(value, REVIEW_VOTE_TYPES);
+                    setDecision(next ?? null);
+                }}
                 required>
                 <Group mt="xs">
                     <Radio value="approve" label="Approve" />

@@ -52,7 +52,7 @@ export default function MobileUserSection({ onClose, onOpenCustomize, onOpenSett
         <Stack>
             <MobileUserSectionCard user={user} opened={opened} onClick={toggle} />
 
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 <Stack px="xs" pb="xs">
                     {user.isCommittee && (
                         <UnstyledButton onClick={handleDashboard}>

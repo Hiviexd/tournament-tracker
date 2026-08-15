@@ -4,7 +4,6 @@ import { loggedInUserAtom } from "../../../store/atoms";
 import { routes } from "../../../base/header.config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import utils from "@tc/utils/client";
 import { useState } from "react";
 import { IRoute } from "../../../base/header.config";
@@ -55,7 +54,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                 <Stack key={route.title} gap={0}>
                     <NavLink
                         label={route.title}
-                        leftSection={route.icon && <FontAwesomeIcon icon={route.icon as IconProp} />}
+                        leftSection={route.icon && <FontAwesomeIcon icon={route.icon} />}
                         active={isRouteActive(route)}
                         onClick={() => handleRouteClick(route)}
                         rightSection={
@@ -71,7 +70,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                         }
                     />
                     {route.links?.length && (
-                        <Collapse in={expandedRoute === route.title}>
+                        <Collapse expanded={expandedRoute === route.title}>
                             <Stack gap={0} pl="md">
                                 {route.links.map((link) => (
                                     <NavLink
@@ -79,7 +78,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                                         label={link.title}
                                         component={Link}
                                         to={link.link || "#"}
-                                        leftSection={<FontAwesomeIcon icon={link.icon as IconProp} />}
+                                        leftSection={<FontAwesomeIcon icon={link.icon} />}
                                         active={location.pathname === link.link}
                                         onClick={handleSubLinkClick}
                                         variant="subtle"

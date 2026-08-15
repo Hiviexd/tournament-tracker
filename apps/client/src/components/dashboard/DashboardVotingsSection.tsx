@@ -71,7 +71,7 @@ export default function DashboardVotingsSection({ votings, user }: IProps) {
                 <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 {votingsNeedingVote.length > 0 || otherVotings.length > 0 ? (
                     <Stack gap="lg">
                         <Stack gap="sm">

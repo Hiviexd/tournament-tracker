@@ -24,7 +24,7 @@ import TournamentTypeBadge from "../common/badges/TournamentTypeBadge";
 import CopyActionIcon from "../common/buttons/CopyActionIcon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TruncatedText } from "../common/TruncatedText";
-import utils from "@tc/utils/client";
+import utils, { pickStringUnion } from "@tc/utils/client";
 import TournamentStatusSelect from "../common/TournamentStatusSelect";
 
 interface TournamentTableMassEditState {
@@ -102,7 +102,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
 
     return (
         <Card shadow="sm" p="lg" className={`tournament-table-card ${isMassEditMode ? "mass-edit-active" : ""}`}>
-            <Collapse in={isMassEditMode} transitionDuration={220} transitionTimingFunction="ease">
+            <Collapse expanded={isMassEditMode}> transitionDuration={220} transitionTimingFunction="ease">
                 <Group justify="space-between" align="flex-end" mb="md" wrap="wrap">
                     <Group gap="sm" align="flex-end" wrap="wrap">
                         <TournamentStatusSelect
@@ -128,7 +128,9 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
                     <Group gap="sm" align="flex-end" wrap="wrap">
                         <Select
                             value={massStateValue}
-                            onChange={(value) => onMassStateChange((value as "active" | "archived" | null) || "")}
+                            onChange={(value) =>
+                                onMassStateChange(pickStringUnion(value ?? "", ["active", "archived"] as const) ?? "")
+                            }
                             data={[
                                 { value: "active", label: "Active" },
                                 { value: "archived", label: "Archived" },

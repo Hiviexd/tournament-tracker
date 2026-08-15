@@ -30,7 +30,7 @@ export default function DashboardInfringementsSection({ users }: IProps) {
                 <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 <Stack gap="sm">
                     {users.length > 0 && (
                         <Group align="center" gap="xs">

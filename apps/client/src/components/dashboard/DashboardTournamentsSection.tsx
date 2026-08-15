@@ -79,7 +79,7 @@ export default function DashboardTournamentsSection({ tournaments, inactiveRevie
                 <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
 
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 {tournamentsNeedingReview.length > 0 ||
                 inactiveReviewerTournaments.length > 0 ||
                 otherTournaments.length > 0 ? (

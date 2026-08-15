@@ -24,7 +24,7 @@ export default function DashboardTicketsSection({ tickets }: IProps) {
                 </Tooltip>
                 <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 {tickets.length > 0 ? (
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                         {tickets.map((ticket) => (

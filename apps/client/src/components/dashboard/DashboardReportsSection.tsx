@@ -24,7 +24,7 @@ export default function DashboardReportsSection({ reports }: IProps) {
                 </Tooltip>
                 <ExpandButton radius={1000} size="compact-sm" variant="light" expanded={opened} onClick={toggle} />
             </Group>
-            <Collapse in={opened}>
+            <Collapse expanded={opened}>
                 {reports.length > 0 ? (
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                         {reports.map((report) => (
