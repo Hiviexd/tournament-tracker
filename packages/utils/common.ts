@@ -3,6 +3,50 @@ import { IUser, UserGroup } from "@tc/types/User";
 import { IInfringement, TIME_BASED_TYPES } from "@tc/types/Infringement";
 import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
 
+/** Values that can arrive from I/O before a domain parser runs. Not `unknown`. */
+export type RuntimeValue =
+    | string
+    | number
+    | boolean
+    | bigint
+    | symbol
+    | object
+    | null
+    | undefined
+    | ((...args: never[]) => unknown);
+
+function typeTag(value: RuntimeValue): string {
+    return Object.prototype.toString.call(value);
+}
+
+export function isString(value: RuntimeValue): value is string {
+    return typeTag(value) === "[object String]";
+}
+
+export function isNumber(value: RuntimeValue): value is number {
+    return typeTag(value) === "[object Number]" && value === value;
+}
+
+export function isBoolean(value: RuntimeValue): value is boolean {
+    return typeTag(value) === "[object Boolean]";
+}
+
+export function isPlainObject(value: RuntimeValue): value is Record<string, RuntimeValue> {
+    return typeTag(value) === "[object Object]";
+}
+
+export function isFunction(value: RuntimeValue): value is (...args: never[]) => unknown {
+    const tag = typeTag(value);
+    return tag === "[object Function]" || tag === "[object AsyncFunction]";
+}
+
+export function pickStringUnion<T extends string>(value: string, allowed: readonly T[]): T | undefined {
+    for (const item of allowed) {
+        if (item === value) return item;
+    }
+    return undefined;
+}
+
 /**
  * Shortens a string
  * @param string String to shorten
@@ -116,7 +160,7 @@ export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
     "twitch",
 ];
 
-export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
+export const EXTRA_LINK_DEFAULTS = {
     news: "News Post",
     wiki: "Wiki Page",
     challonge: "Challonge",
@@ -126,7 +170,7 @@ export const EXTRA_LINK_DEFAULTS: Record<ExtraLinkType, string> = {
     contest: "Contest Listing",
     discord: "Discord",
     twitch: "Twitch",
-};
+} as const satisfies Record<ExtraLinkType, string>;
 
 /**
  * Checks if a URL is valid for the given extra link type
@@ -266,7 +310,7 @@ export function isValidUrl(url: string, options: IsValidUrlOptions = {}): boolea
         const allowed = options.allowedProtocols ?? ["https"];
         const normalized = allowed.map((p) => (p.endsWith(":") ? p : `${p}:`));
         return normalized.includes(parsed.protocol);
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -298,7 +342,7 @@ const SAFE_CSS_NAMED_COLORS = new Set([
  * @param value Raw color value (e.g. from API)
  */
 export function sanitizeCssColor(value: string | null | undefined): string | undefined {
-    if (value == null || typeof value !== "string") return undefined;
+    if (value == null) return undefined;
     const trimmed = value.trim();
     if (!trimmed) return undefined;
     // Hex: 3, 4, 6, or 8 hex digits
@@ -438,32 +482,34 @@ export function getSearchTypes({
 }: {
     user?: IUser | null;
     searchType?: "frontend" | "backend" | "all";
-}): Record<string, string[]> {
-    const BASE_SEARCH_TYPES: Record<string, string[]> = {
+}) {
+    const BASE_SEARCH_TYPES = {
         tournament: ["tournament", "tournaments", "t"],
         voting: ["voting", "votings", "vote", "votes", "v"],
         ticket: ["ticket", "tickets", "tk"],
         resource: ["resource", "resources", "rs"],
-    };
+    } as const;
 
-    const FRONTEND_SEARCH_TYPES: Record<string, string[]> = {
+    const FRONTEND_SEARCH_TYPES = {
         page: ["page", "pages", "p"],
-    };
+    } as const;
 
-    const PRIVATE_SEARCH_TYPES: Record<string, string[]> = {
+    const PRIVATE_SEARCH_TYPES = {
         report: ["report", "reports", "r"],
         article: ["article", "articles", "doc", "docs", "d"],
-    };
+    } as const;
 
     if (searchType === "frontend") return FRONTEND_SEARCH_TYPES;
-    if (searchType === "backend")
-        return { ...BASE_SEARCH_TYPES, ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}) };
-    if (searchType === "all")
-        return {
-            ...FRONTEND_SEARCH_TYPES,
-            ...BASE_SEARCH_TYPES,
-            ...(user?.isCommitteeOrAdmin ? PRIVATE_SEARCH_TYPES : {}),
-        };
+    if (searchType === "backend") {
+        if (user?.isCommitteeOrAdmin) return { ...BASE_SEARCH_TYPES, ...PRIVATE_SEARCH_TYPES };
+        return BASE_SEARCH_TYPES;
+    }
+    if (searchType === "all") {
+        if (user?.isCommitteeOrAdmin) {
+            return { ...FRONTEND_SEARCH_TYPES, ...BASE_SEARCH_TYPES, ...PRIVATE_SEARCH_TYPES };
+        }
+        return { ...FRONTEND_SEARCH_TYPES, ...BASE_SEARCH_TYPES };
+    }
 
     return BASE_SEARCH_TYPES;
 }
@@ -481,14 +527,16 @@ export function parseSearchQuery(
     const typePrefixMatch = query.match(/^(\w+):(.+)$/);
 
     // default result
-    let result = { searchType: null as string | null, searchContent: query };
+    let result: { searchType: string | null; searchContent: string } = {
+        searchType: null,
+        searchContent: query,
+    };
 
     if (typePrefixMatch) {
         const [, type, content] = typePrefixMatch;
         const normalizedType = type.toLowerCase();
 
-        // Create alias map from search types
-        const searchAliasMap: Record<string, string> = Object.fromEntries(
+        const searchAliasMap = Object.fromEntries(
             Object.entries(searchTypes).flatMap(([canonical, aliases]) => aliases.map((alias) => [alias, canonical])),
         );
 
@@ -570,7 +618,7 @@ export function formatHostsList(
     if (!hosts || hosts.length === 0) return "";
 
     const { style = "long", type = "conjunction", mdLinks = false } = options;
-    const formatter = new (Intl as any).ListFormat("en", { style, type });
+    const formatter = new Intl.ListFormat("en", { style, type });
 
     return formatter.format(
         hosts.map((host) => (mdLinks ? `[**${host.username}**](${host.osuProfileUrl})` : host.username)),
