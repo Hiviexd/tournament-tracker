@@ -73,7 +73,7 @@ export default function InfringementEditModal({ opened, onClose, infringement, u
                 enchantUrl: infringement.enchantUrl || "",
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react/exhaustive-deps
     }, [infringement]);
 
     const handleSubmit = async (values: typeof form.values) => {

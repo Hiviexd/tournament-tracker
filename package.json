@@ -19,7 +19,7 @@
         "build-client": "pnpm --filter @tc/client build",
         "build-client-preview": "pnpm --filter @tc/client build:preview",
         "build-server": "pnpm --filter @tc/server build",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "lint": "oxlint",
         "tsc": "pnpm --filter @tc/server typecheck",
         "typecheck": "pnpm -r run typecheck",
         "test": "pnpm --filter @tc/server test",
@@ -34,15 +34,18 @@
         "docker:preview:down": "docker compose -f docker-compose.preview.yml down"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^7.2.0",
-        "@typescript-eslint/parser": "^7.2.0",
+        "@oxlint/plugins": "1.78.0",
         "cross-env": "^7.0.3",
-        "eslint": "^8.57.0",
-        "eslint-config-prettier": "^10.1.5",
-        "eslint-plugin-react-hooks": "^4.6.0",
-        "eslint-plugin-react-refresh": "^0.4.6",
         "eslint-plugin-react-you-might-not-need-an-effect": "^0.5.1",
+        "oxlint": "1.78.0",
         "prettier": "^3.5.3",
         "typescript": "^5.2.2"
+    },
+    "pnpm": {
+        "peerDependencyRules": {
+            "ignoreMissing": [
+                "eslint"
+            ]
+        }
     }
 }

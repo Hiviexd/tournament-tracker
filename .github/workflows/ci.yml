@@ -30,7 +30,7 @@ jobs:
             - name: Setup config files for CI
               run: cp config.example.json config.json
 
-            - name: Run ESLint
+            - name: Run lint
               run: pnpm lint
 
             - name: Run TypeScript check

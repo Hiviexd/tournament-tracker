@@ -35,7 +35,7 @@ export default function ThemeCustomizeModal({ opened, onClose }: IProps) {
             setInitialIsGreyscale(isGreyscale);
             setInitialColorblindMode(colorblindMode);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react/exhaustive-deps
     }, [opened]);
 
     const isColorblindMode = colorblindMode !== "none";

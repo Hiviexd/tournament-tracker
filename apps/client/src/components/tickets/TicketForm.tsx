@@ -54,7 +54,7 @@ export default function TicketForm() {
         const formData = new FormData() as TicketFormData;
 
         // Remove type from values since we're adding it explicitly
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line no-unused-vars
         const { type, ...restValues } = values;
 
         // Add form fields

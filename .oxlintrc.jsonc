@@ -1,0 +1,137 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["eslint", "typescript", "react"],
+    "jsPlugins": [
+        { "name": "codestyle", "specifier": "./tools/oxlint/codestyle/index.ts" },
+        "eslint-plugin-react-you-might-not-need-an-effect"
+    ],
+    "env": {
+        "browser": true,
+        "es2020": true
+    },
+    "ignorePatterns": [
+        "**/dist/**",
+        "**/node_modules/**",
+        "**/public/**",
+        "tools/oxlint/codestyle/**",
+        "**/*.{js,jsx,mjs,cjs}"
+    ],
+    "categories": {
+        "correctness": "off"
+    },
+    "options": {
+        "maxWarnings": 0,
+        "reportUnusedDisableDirectives": "error"
+    },
+    "rules": {
+        // eslint:recommended, minus rules TypeScript already covers, rules Prettier owns,
+        // and no-octal (not implemented in Oxlint; TypeScript rejects octal literals)
+        "for-direction": "error",
+        "no-async-promise-executor": "error",
+        "no-case-declarations": "error",
+        "no-class-assign": "error",
+        "no-compare-neg-zero": "error",
+        "no-cond-assign": "error",
+        "no-constant-condition": "error",
+        "no-control-regex": "error",
+        "no-debugger": "error",
+        "no-delete-var": "error",
+        "no-dupe-else-if": "error",
+        "no-duplicate-case": "error",
+        "no-empty": "error",
+        "no-empty-character-class": "error",
+        "no-empty-pattern": "error",
+        "no-ex-assign": "error",
+        "no-extra-boolean-cast": "error",
+        "no-fallthrough": "error",
+        "no-global-assign": "error",
+        "no-inner-declarations": "error",
+        "no-invalid-regexp": "error",
+        "no-irregular-whitespace": "error",
+        "no-loss-of-precision": "error",
+        "no-misleading-character-class": "error",
+        "no-nonoctal-decimal-escape": "error",
+        "no-prototype-builtins": "error",
+        "no-regex-spaces": "error",
+        "no-self-assign": "error",
+        "no-shadow-restricted-names": "error",
+        "no-sparse-arrays": "error",
+        "no-unsafe-finally": "error",
+        "no-unsafe-optional-chaining": "error",
+        "no-unused-labels": "error",
+        "no-useless-backreference": "error",
+        "no-useless-catch": "error",
+        "no-useless-escape": "error",
+        "no-with": "error",
+        "require-yield": "error",
+        "use-isnan": "error",
+        "valid-typeof": "error",
+
+        // typescript-eslint recommended overlay (v7)
+        "no-var": "error",
+        "prefer-const": "error",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error",
+        "typescript/ban-ts-comment": "error",
+        "typescript/ban-types": "error",
+        "no-array-constructor": "error",
+        "typescript/no-duplicate-enum-values": "error",
+        "typescript/no-explicit-any": "off",
+        "typescript/no-extra-non-null-assertion": "error",
+        "typescript/no-misused-new": "error",
+        "typescript/no-namespace": "error",
+        "typescript/no-non-null-asserted-optional-chain": "error",
+        "typescript/no-this-alias": "error",
+        "typescript/no-unnecessary-type-constraint": "error",
+        "typescript/no-unsafe-declaration-merging": "error",
+        "no-unused-vars": "error",
+        "typescript/no-var-requires": "error",
+        "typescript/prefer-as-const": "error",
+        "typescript/triple-slash-reference": "error",
+
+        // react-hooks recommended + react-refresh
+        "react/rules-of-hooks": "error",
+        "react/exhaustive-deps": "warn",
+        "react/only-export-components": ["warn", { "allowConstantExport": true }],
+
+        // previously explicit ESLint rules
+        "object-shorthand": "error",
+        "require-await": "error",
+
+        // react-you-might-not-need-an-effect legacy-recommended (v0.5.1)
+        "react-you-might-not-need-an-effect/no-empty-effect": "warn",
+        "react-you-might-not-need-an-effect/no-adjust-state-on-prop-change": "warn",
+        "react-you-might-not-need-an-effect/no-reset-all-state-on-prop-change": "warn",
+        "react-you-might-not-need-an-effect/no-event-handler": "warn",
+        "react-you-might-not-need-an-effect/no-pass-live-state-to-parent": "warn",
+        "react-you-might-not-need-an-effect/no-pass-data-to-parent": "warn",
+        "react-you-might-not-need-an-effect/no-manage-parent": "warn",
+        "react-you-might-not-need-an-effect/no-initialize-state": "warn",
+        "react-you-might-not-need-an-effect/no-chain-state-updates": "warn",
+        "react-you-might-not-need-an-effect/no-derived-state": "warn",
+
+        "codestyle/no-chained-type-assertions": "error",
+        "codestyle/no-conditional-empty-object-spread": "error",
+        "codestyle/no-known-value-widening": "error",
+        "codestyle/no-module-mocking": "error",
+        "codestyle/no-object-parameters": "error",
+        "codestyle/no-reflect-apply": "error",
+        "codestyle/no-reflect-get": "error",
+        "codestyle/no-runtime-typeof": "error",
+        "codestyle/no-shape-in-symbol-names": "error",
+        "codestyle/no-unknown-parameters": "error",
+        "codestyle/no-unknown-returns": "error",
+        "codestyle/no-unknown-type-aliases": "error",
+        "codestyle/no-unsafe-dictionary-type": "error",
+        "codestyle/no-widen-then-assert": "error",
+        "codestyle/require-safety-comment-for-type-assertion": "error"
+    },
+    "overrides": [
+        {
+            "files": ["apps/server/routers/*.ts"],
+            "rules": {
+                "typescript/ban-ts-comment": "off"
+            }
+        }
+    ]
+}

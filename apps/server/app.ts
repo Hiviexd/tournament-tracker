@@ -215,7 +215,7 @@ app.use((req, res) => {
 
 // error handler
 app.use(handleCsrfError as express.ErrorRequestHandler);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     let customErrorMessage = "";
     let statusCode = 500;

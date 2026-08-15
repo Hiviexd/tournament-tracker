@@ -42,7 +42,7 @@ export default function TemplateEditModal({ opened, onClose, template }: IProps)
                 category: template.category,
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react/exhaustive-deps
     }, [template]);
 
     const handleSubmit = async (values: { name: string; content: string; category: string }) => {

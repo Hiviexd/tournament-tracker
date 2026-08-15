@@ -55,7 +55,7 @@ export default function ResourcesEditModal({ opened, onClose, resource }: IProps
                 author: resource.author?._id || "",
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react/exhaustive-deps
     }, [resource]);
 
     const categoryOptions = [

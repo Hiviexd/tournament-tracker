@@ -84,7 +84,7 @@ export function useImageLoad(src: string | undefined, options: UseImageLoadOptio
                 imageRef.current = null;
             }
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react/exhaustive-deps
     }, [src]);
 
     // Retry function to reload the image

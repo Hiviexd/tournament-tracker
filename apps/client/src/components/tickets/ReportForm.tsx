@@ -102,7 +102,7 @@ export default function ReportForm() {
         const formData = new FormData() as TicketFormData;
 
         // Remove type from values since we're adding it explicitly
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line no-unused-vars
         const { type, reportType, ...restValues } = values;
 
         // Add form fields with null/undefined checks
