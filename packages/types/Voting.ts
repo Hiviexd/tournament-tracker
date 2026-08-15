@@ -69,6 +69,7 @@ export interface IVoting {
     targetTournamentName?: string;
     targetTournamentLink?: string;
     requiredVotes: number;
+    forceFullParticipation: boolean;
     attachments: IAttachment[];
     createdAt: Date;
     updatedAt: Date;

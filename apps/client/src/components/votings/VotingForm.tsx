@@ -61,6 +61,7 @@ export default function VotingForm({ voting, user }: IProps) {
             false,
         [voting.abstainedUsers, user._id],
     );
+    const canStartAbstaining = utils.isEligibleVoter(user, voting.assignedGroups);
 
     // We want comments to always be required now.
     // Keeping previous logic commented out for preservation
@@ -244,7 +245,7 @@ export default function VotingForm({ voting, user }: IProps) {
                 )}
 
                 <Group justify={userVote ? "flex-end" : "space-between"}>
-                    {!userVote && (
+                    {!userVote && (isAbstained || canStartAbstaining) && (
                         <Button
                             color="gray"
                             variant={isAbstained ? "outline" : "filled"}

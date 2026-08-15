@@ -29,8 +29,6 @@ const DEFAULT_POPULATE = [
 
 const DEFAULT_LIMIT = 10;
 
-const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
-
 const FILE_UPLOAD_CATEGORY = "votings";
 
 class VotingsController {
@@ -134,17 +132,7 @@ class VotingsController {
         const author = res.locals!.user!;
         let targetUser: IUser;
 
-        // Count only active voters in assigned groups
-        const assignedUsersCount = await User.countDocuments({
-            groups: { $in: assignedGroups },
-            isActiveVoter: true,
-        });
-
         const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";
-
-        const requiredVotes = forceFullParticipationBool
-            ? assignedUsersCount
-            : Math.ceil(STRICT_PARTICIPATION_PERCENTAGE * assignedUsersCount);
 
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;
@@ -158,9 +146,9 @@ class VotingsController {
             duration,
             type,
             options,
-            requiredVotes,
             allowNeutralVotes: neutralVotesSettingOverride,
             binaryStrictPassThreshold: type === "binary-strict" ? binaryStrictPassThreshold : undefined,
+            forceFullParticipation: forceFullParticipationBool,
         });
 
         if (category === "user") {
@@ -199,6 +187,9 @@ class VotingsController {
                 author.id,
             );
         }
+
+        const { requiredVotes } = await VotingService.computeRequiredVotes(voting);
+        voting.requiredVotes = requiredVotes;
 
         await voting.save();
 
@@ -687,21 +678,28 @@ class VotingsController {
         if (userIndex >= 0) {
             // user is abstained, remove them
             voting.abstainedUsers.splice(userIndex, 1);
-            voting.requiredVotes++;
             isAbstained = false;
         } else {
+            if (!VotingService.isEligibleVoter(user, voting.assignedGroups)) {
+                return res.status(400).json({
+                    error: "Only active voters in the assigned group(s) can abstain from this vote!",
+                });
+            }
+
             // user is not abstained, add them
             voting.abstainedUsers.push(user);
-            voting.requiredVotes--;
             isAbstained = true;
         }
 
-        if (voting.requiredVotes < 1) {
+        const computation = await VotingService.computeRequiredVotes(voting);
+
+        if (isAbstained && computation.unclamped < 1) {
             return res.status(400).json({
                 error: "Cannot abstain: would result in no required votes!",
             });
         }
 
+        voting.requiredVotes = computation.requiredVotes;
         await voting.save();
 
         res.json({
@@ -729,6 +727,41 @@ class VotingsController {
                     )
                     .setColor(isAbstained ? DiscordUtils.webhookColors.darkGray : DiscordUtils.webhookColors.white)
                     .setFooter(`Required votes: ${originalRequiredVotes} → ${voting.requiredVotes}`),
+            )
+            .send();
+    }
+
+    /** PATCH recalibrate required votes from the current active-voter roster */
+    public async recalibrateRequiredVotes(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+
+        if (!voting.isActive) {
+            return res.status(400).json({ error: "Cannot recalibrate concluded votes!" });
+        }
+
+        const result = await VotingService.recalibrateRequiredVotes(voting);
+
+        res.json({
+            message: result.changed
+                ? `Required votes: ${result.previous} → ${result.next}`
+                : "Already up to date",
+            voting,
+        });
+
+        if (!result.changed) return;
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `Recalibrated required votes for [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) from **${result.previous}** to **${result.next}**`,
+            "voting",
+        );
+
+        await new WebhookBuilder()
+            .addEmbed(
+                VotingService.buildRecalibrationEmbed(voting, result).setAuthor(
+                    DiscordUtils.defaultWebhookAuthor(req.session),
+                ),
             )
             .send();
     }

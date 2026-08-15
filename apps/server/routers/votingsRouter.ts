@@ -22,5 +22,11 @@ votingsRouter.patch(
     auth.isCommittee,
     VotingsController.toggleAbstention,
 );
+votingsRouter.patch(
+    "/:votingId/recalibrateRequiredVotes",
+    auth.isLoggedIn,
+    auth.isCommittee,
+    VotingsController.recalibrateRequiredVotes,
+);
 
 export default votingsRouter;
