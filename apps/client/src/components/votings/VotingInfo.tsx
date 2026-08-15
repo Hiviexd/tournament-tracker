@@ -8,7 +8,6 @@ import {
     useDeleteVoting,
     useToggleVotingPublic,
     useClearVotes,
-    useRecalibrateRequiredVotes,
 } from "../../hooks/useVotings";
 import { useConfirmModal } from "../../hooks/useModals";
 
@@ -61,7 +60,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const togglePublicMutation = useToggleVotingPublic(voting.id);
     const deleteVotingMutation = useDeleteVoting(voting.id);
     const clearVotesMutation = useClearVotes(voting.id);
-    const recalibrateMutation = useRecalibrateRequiredVotes(voting.id);
     const sortedGroups = voting.assignedGroups.toSorted((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
 
@@ -149,22 +147,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         )
             return;
         await clearVotesMutation.mutateAsync();
-    };
-
-    const handleRecalibrateRequiredVotes = async () => {
-        if (
-            !(await confirmModal({
-                title: "Recalibrate Required Votes?",
-                text: "Recalculate required votes from the current active-voter roster?",
-                confirmText: "Recalibrate",
-                confirmProps: {
-                    leftSection: <FontAwesomeIcon icon="arrows-rotate" />,
-                    color: "blue",
-                },
-            }))
-        )
-            return;
-        await recalibrateMutation.mutateAsync();
     };
 
     const handleUserCardClick = (targetUser: IUser) => {
@@ -345,16 +327,6 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
                                 {voting.isActive ? "Conclude" : "Reopen"}
                             </Button>
-                            {voting.isActive && (
-                                <Button
-                                    variant="outline"
-                                    color="blue"
-                                    onClick={handleRecalibrateRequiredVotes}
-                                    loading={recalibrateMutation.isPending}
-                                    leftSection={<FontAwesomeIcon icon="arrows-rotate" />}>
-                                    Recalibrate
-                                </Button>
-                            )}
                             {!voting.isActive && (
                                 <Button
                                     variant="filled"
