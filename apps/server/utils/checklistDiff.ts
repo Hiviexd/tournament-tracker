@@ -134,7 +134,6 @@ function diffList(
     next: IChecklistCategory[],
 ): { fields: ChecklistDiscordField[]; reorderedCategories: boolean } {
     const previousByName = new Map(previous.map((category) => [category.category, category]));
-    const nextByName = new Map(next.map((category) => [category.category, category]));
     const previousNameSet = new Set(previous.map((category) => category.category));
     const nextNameSet = new Set(next.map((category) => category.category));
     const renamed = pairRenames(previous, next);
