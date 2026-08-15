@@ -7,6 +7,7 @@ import utils from "@tc/utils/server";
 import config from "@tc/config";
 import { Document, HydratedDocument } from "mongoose";
 import User from "../models/userModel";
+import Voting from "../models/votingModel";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
 
@@ -24,6 +25,11 @@ export interface RecalibrateRequiredVotesResult {
     next: number;
     changed: boolean;
     eligibleCount: number;
+}
+
+export interface RecalibratedVoting {
+    voting: IVoting;
+    result: RecalibrateRequiredVotesResult;
 }
 
 type VotingForRequiredVotes = Pick<IVoting, "assignedGroups" | "forceFullParticipation" | "abstainedUsers">;
@@ -91,19 +97,48 @@ class VotingService {
         };
     }
 
+    public async recalibrateActiveVotingsForGroups(groups: UserGroup[] | UserGroup): Promise<RecalibratedVoting[]> {
+        const assignedGroups = this.committeeGroups(groups);
+        if (assignedGroups.length === 0) return [];
+
+        const votings = await Voting.find({
+            isActive: true,
+            assignedGroups: { $in: assignedGroups },
+        });
+
+        const changed: RecalibratedVoting[] = [];
+
+        for (const voting of votings) {
+            const result = await this.recalibrateRequiredVotes(voting);
+            if (result.changed) {
+                changed.push({ voting, result });
+            }
+        }
+
+        return changed;
+    }
+
     public isEligibleVoter(user: Pick<IUser, "isActiveVoter" | "groups">, assignedGroups: UserGroup[]): boolean {
         return utils.isEligibleVoter(user, this.normalizeAssignedGroups(assignedGroups));
     }
 
-    public buildRecalibrationEmbed(voting: IVoting, result: RecalibrateRequiredVotesResult): EmbedBuilder {
+    public buildRecalibrationEmbed(items: RecalibratedVoting[]): EmbedBuilder {
+        const header = `Recalibrated required votes for **${utils.formatCount(items.length, "vote")}**`;
+
+        const lines = items.map(({ voting, result }) => {
+            const participation = voting.forceFullParticipation ? "100%" : "75%";
+            return `- [**${voting.title}**](${config.baseUrl}/votes/${voting._id}): **${result.previous} → ${result.next}** (${result.eligibleCount} eligible, ${participation})`;
+        });
+
         return new EmbedBuilder()
             .setColor(DiscordUtils.webhookColors.lightOrange)
-            .setDescription(
-                `Recalibrated required votes for [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
-            )
-            .addField("Required Votes", `${result.previous} → ${result.next}`, true)
-            .addField("Eligible Voters", result.eligibleCount.toString(), true)
-            .addField("Participation Requirement", voting.forceFullParticipation ? "100%" : "75%");
+            .setDescription(`${header}\n\n${lines.join("\n")}`);
+    }
+
+    private committeeGroups(groups: UserGroup[] | UserGroup): UserGroup[] {
+        return [...new Set(this.normalizeAssignedGroups(groups))].filter(
+            (group): group is UserGroup => group === "tc" || group === "cc",
+        );
     }
 
     private normalizeAssignedGroups(assignedGroups: UserGroup[] | UserGroup): UserGroup[] {

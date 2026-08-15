@@ -759,7 +759,7 @@ class VotingsController {
 
         await new WebhookBuilder()
             .addEmbed(
-                VotingService.buildRecalibrationEmbed(voting, result).setAuthor(
+                VotingService.buildRecalibrationEmbed([{ voting, result }]).setAuthor(
                     DiscordUtils.defaultWebhookAuthor(req.session),
                 ),
             )

@@ -3,9 +3,16 @@ import { Types } from "mongoose";
 import { IVoting } from "@tc/types/Voting";
 import { IUser, UserGroup } from "@tc/types/User";
 import User from "../../models/userModel";
+import Voting from "../../models/votingModel";
 import { createMockUsers } from "../utils/users";
 
 vi.mock("../../models/userModel", () => ({
+    default: {
+        find: vi.fn(),
+    },
+}));
+
+vi.mock("../../models/votingModel", () => ({
     default: {
         find: vi.fn(),
     },
@@ -18,6 +25,7 @@ vi.mock("@tc/config", () => ({
 import VotingService from "../../services/VotingService";
 
 const mockUser = User as unknown as { find: ReturnType<typeof vi.fn> };
+const mockVoting = Voting as unknown as { find: ReturnType<typeof vi.fn> };
 
 function mockEligibleVoters(users: Pick<IUser, "_id">[]) {
     mockUser.find.mockReturnValue({
@@ -226,6 +234,54 @@ describe("VotingService required votes", () => {
         });
     });
 
+    describe("recalibrateActiveVotingsForGroups", () => {
+        it("returns no votings when there are no committee groups", async () => {
+            const changed = await VotingService.recalibrateActiveVotingsForGroups(["user"]);
+
+            expect(changed).toEqual([]);
+            expect(mockVoting.find).not.toHaveBeenCalled();
+        });
+
+        it("recalibrates active votings in those groups and returns only changes", async () => {
+            const voters = createMockUsers(10, { groups: ["tc"], isActiveVoter: true });
+            mockUser.find.mockReturnValue({
+                select: vi.fn().mockResolvedValue(voters),
+            });
+
+            const stale = {
+                _id: new Types.ObjectId(),
+                title: "Stale quota",
+                requiredVotes: 10,
+                assignedGroups: ["tc"] as UserGroup[],
+                forceFullParticipation: false,
+                abstainedUsers: [],
+                save: vi.fn().mockResolvedValue(undefined),
+            };
+            const current = {
+                _id: new Types.ObjectId(),
+                title: "Already current",
+                requiredVotes: 8,
+                assignedGroups: ["tc"] as UserGroup[],
+                forceFullParticipation: false,
+                abstainedUsers: [],
+                save: vi.fn().mockResolvedValue(undefined),
+            };
+            mockVoting.find.mockResolvedValue([stale, current]);
+
+            const changed = await VotingService.recalibrateActiveVotingsForGroups(["tc", "user"]);
+
+            expect(mockVoting.find).toHaveBeenCalledWith({
+                isActive: true,
+                assignedGroups: { $in: ["tc"] },
+            });
+            expect(changed).toHaveLength(1);
+            expect(changed[0].voting).toBe(stale);
+            expect(changed[0].result).toMatchObject({ previous: 10, next: 8, changed: true });
+            expect(stale.save).toHaveBeenCalledOnce();
+            expect(current.save).not.toHaveBeenCalled();
+        });
+    });
+
     describe("isEligibleVoter", () => {
         it("delegates to the shared helper and accepts a single assigned group", () => {
             const user = createMockUsers(1, { groups: ["tc"], isActiveVoter: true })[0];
@@ -237,29 +293,57 @@ describe("VotingService required votes", () => {
     });
 
     describe("buildRecalibrationEmbed", () => {
-        it("includes old/new quota, eligible count, and participation mode", () => {
+        it("lists a single vote's quota change", () => {
             const voting = {
                 _id: new Types.ObjectId(),
                 title: "Badge support",
                 forceFullParticipation: true,
             } as IVoting;
 
-            const embed = VotingService.buildRecalibrationEmbed(voting, {
-                previous: 8,
-                next: 7,
-                changed: true,
-                eligibleCount: 7,
-            }).build();
+            const embed = VotingService.buildRecalibrationEmbed([
+                {
+                    voting,
+                    result: { previous: 8, next: 7, changed: true, eligibleCount: 7 },
+                },
+            ]).build();
 
+            expect(embed.description).toContain("Recalibrated required votes for **1 vote**");
             expect(embed.description).toContain("Badge support");
-            expect(embed.description).toContain("https://tcomm.test/votes/");
-            expect(embed.fields).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({ name: "Required Votes", value: "8 → 7" }),
-                    expect.objectContaining({ name: "Eligible Voters", value: "7" }),
-                    expect.objectContaining({ name: "Participation Requirement", value: "100%" }),
-                ]),
-            );
+            expect(embed.description).toContain("- [**Badge support**]");
+            expect(embed.description).toContain("**8 → 7** (7 eligible, 100%)");
+            expect(embed.fields).toBeUndefined();
+        });
+
+        it("combines multiple vote quota changes into one embed", () => {
+            const first = {
+                _id: new Types.ObjectId(),
+                title: "Badge support",
+                forceFullParticipation: true,
+            } as IVoting;
+            const second = {
+                _id: new Types.ObjectId(),
+                title: "User addition",
+                forceFullParticipation: false,
+            } as IVoting;
+
+            const embed = VotingService.buildRecalibrationEmbed([
+                {
+                    voting: first,
+                    result: { previous: 8, next: 7, changed: true, eligibleCount: 7 },
+                },
+                {
+                    voting: second,
+                    result: { previous: 10, next: 9, changed: true, eligibleCount: 12 },
+                },
+            ]).build();
+
+            expect(embed.description).toContain("Recalibrated required votes for **2 votes**");
+            expect(embed.description).toContain("- [**Badge support**]");
+            expect(embed.description).toContain("**8 → 7**");
+            expect(embed.description).toContain("- [**User addition**]");
+            expect(embed.description).toContain("**10 → 9**");
+            expect(embed.description).toContain("75%");
+            expect(embed.fields).toBeUndefined();
         });
     });
 });
