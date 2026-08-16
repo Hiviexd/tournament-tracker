@@ -15,8 +15,8 @@ mongoose.plugin((schema) => {
 // Make queries strict like in v5
 mongoose.set("strictQuery", true);
 
-// Get migration name from CLI arguments
-const migrationName = process.argv[2];
+// Get migration name from CLI arguments (`pnpm migrate Name` and `pnpm migrate -- Name` both work)
+const migrationName = process.argv.slice(2).find((arg) => arg !== "--");
 
 if (!migrationName) {
     console.error(utils.consoleStyles("✗ Error: Migration name is required", ["red", "bold"]));

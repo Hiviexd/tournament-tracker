@@ -22,7 +22,7 @@ const VotingSchema = new Schema<IVoting>(
         },
         options: [{ type: String, required: true }],
         votes: [{ type: Schema.Types.ObjectId, ref: "Vote" }],
-        targetUser: { type: Schema.Types.ObjectId, ref: "User" },
+        targetUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         targetTournamentName: { type: String },
         targetTournamentLink: { type: String },
         requiredVotes: { type: Number, default: 1 },
@@ -37,7 +37,7 @@ const VotingSchema = new Schema<IVoting>(
         isSanctionVote: { type: Boolean, default: false },
         sanctionType: { type: String, enum: SANCTION_BAN_TYPES },
         sanctionPost: { type: String, maxlength: 1000 },
-        sanctionInfringementId: { type: Schema.Types.ObjectId, ref: "Infringement" },
+        sanctionInfringementIds: [{ type: Schema.Types.ObjectId, ref: "Infringement" }],
         sanctionAppliedAt: { type: Date },
         sanctionAnnouncementChannelId: { type: Number },
         sanctionAnnouncementSentCount: { type: Number },
@@ -73,8 +73,8 @@ VotingSchema.pre("save", function (next) {
             next(new Error("Sanction votes must have category user"));
             return;
         }
-        if (!this.targetUser) {
-            next(new Error("Sanction votes must have a target user"));
+        if (!this.targetUsers?.length) {
+            next(new Error("Sanction votes must have at least one target user"));
             return;
         }
         if (!this.sanctionType || !SANCTION_BAN_TYPES.includes(this.sanctionType)) {

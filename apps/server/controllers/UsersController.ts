@@ -465,7 +465,7 @@ class UsersController {
             Ticket.find({ type: "report", targetUser: user._id }).populate([
                 { path: "author", select: "username osuId groups coverUrl country" },
             ]),
-            Voting.find({ category: "user", targetUser: user._id }).populate([
+            Voting.find({ category: "user", targetUsers: user._id }).populate([
                 { path: "author", select: "username osuId groups coverUrl country" },
             ]),
         ]);

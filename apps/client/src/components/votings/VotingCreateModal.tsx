@@ -8,11 +8,11 @@ import {
     VotingType,
     VOTING_TYPES,
 } from "@tc/types/Voting";
-import { UserGroup } from "@tc/types/User";
+import { UserGroup, IUser } from "@tc/types/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import startCase from "lodash/startCase.js";
 import { useFileUpload } from "../../hooks/useFileUpload";
-import utils, { pickStringUnion } from "@tc/utils/client";
+import utils, { pickStringUnion, isString } from "@tc/utils/client";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 
 //Mantine
@@ -22,7 +22,7 @@ import { useState } from "react";
 import { useForm } from "@mantine/form";
 
 // Components
-import UserSearch from "../common/UserSearch";
+import MultipleUsersInput from "../common/MultipleUsersInput";
 import FileUploadInput from "../common/FileUploadInput";
 import OptionSearch from "../common/OptionSearch";
 import TextEditor from "../common/TextEditor";
@@ -40,6 +40,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const sanctionPostAutoSaveKey = "voting-create-sanction-post";
     const navigate = useNavigate();
     const [preset, setPreset] = useState<string | null>(null);
+    const [selectedUsers, setSelectedUsers] = useState<IUser[]>([]);
 
     const form = useForm<{
         title: string;
@@ -50,7 +51,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         type: VotingType;
         options: string[];
         allowNeutralVotes: boolean;
-        targetUserId: string;
+        targetUserIds: string[];
         targetTournamentName: string;
         targetTournamentLink: string;
         forceFullParticipation: boolean;
@@ -68,7 +69,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             type: "classic",
             options: ["Support", "Oppose"],
             allowNeutralVotes: true,
-            targetUserId: "",
+            targetUserIds: [],
             targetTournamentName: "",
             targetTournamentLink: "",
             forceFullParticipation: false,
@@ -94,7 +95,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 return null;
             },
             type: (value) => (!value ? "Vote type is required" : null),
-            targetUserId: (value, values) => (values.category === "user" && !value ? "Target user is required" : null),
+            targetUserIds: (value, values) =>
+                values.category === "user" && value.length === 0 ? "At least one target user is required" : null,
             targetTournamentName: (value, values) => {
                 if (values.category === "tournament") {
                     if (!value || !value.trim()) return "Tournament name is required";
@@ -176,6 +178,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
             form.reset();
             setPreset(null);
+            setSelectedUsers([]);
             onClose();
 
             navigate(`/votes/${res.voting._id}`);
@@ -385,12 +388,21 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     />
 
                     {form.values.category === "user" && (
-                        <UserSearch
-                            label="Target User"
-                            onChange={(value) => form.setFieldValue("targetUserId", value?.id || "")}
-                            error={form.errors.targetUserId}
+                        <MultipleUsersInput
+                            value={selectedUsers}
+                            onChange={(users) => {
+                                setSelectedUsers(users);
+                                form.setFieldValue(
+                                    "targetUserIds",
+                                    users.map((user) => user.id),
+                                );
+                            }}
+                            label="Target Users"
+                            placeholder="Search for a user to add..."
                             required
+                            error={isString(form.errors.targetUserIds) ? form.errors.targetUserIds : undefined}
                             allowUserCreation
+                            showActiveInfringementWarning
                         />
                     )}
 

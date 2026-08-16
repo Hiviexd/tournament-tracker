@@ -12,7 +12,12 @@ import {
     useUndoSanction,
 } from "../../hooks/useVotings";
 import { useConfirmModal } from "../../hooks/useModals";
-import { getActiveInfringement, getSanctionAnnouncementChannel, getSanctionApplyState } from "@tc/utils/client";
+import {
+    getActiveInfringement,
+    getSanctionAnnouncementChannel,
+    getSanctionApplyState,
+    formatHostsList,
+} from "@tc/utils/client";
 import startCase from "lodash/startCase.js";
 
 // Mantine
@@ -71,7 +76,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const sortedGroups = voting.assignedGroups.toSorted((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
     const sanctionState = getSanctionApplyState(voting);
-    const hasActiveInfringement = Boolean(getActiveInfringement(voting.targetUser));
+    const hasActiveInfringement = (voting.targetUsers ?? []).some((user) => getActiveInfringement(user));
 
     const theme = useMantineTheme();
     const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
@@ -176,11 +181,13 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     <Text span fw={600}>
                         {startCase(sanctionState.infringementType)}
                     </Text>{" "}
-                    to {voting.targetUser?.username || "the target user"}?
+                    to {formatHostsList(voting.targetUsers ?? []) || "the target users"}?
                 </Text>
                 {hasActiveInfringement && !sanctionState.isWarning && (
                     <AlertText type="warning">
-                        This user already has an active infringement. Applying this sanction will expire it.
+                        {voting.targetUsers && voting.targetUsers.length > 1
+                            ? "Some of these users already have an active infringement. Applying this sanction will expire those."
+                            : "This user already has an active infringement. Applying this sanction will expire it."}
                     </AlertText>
                 )}
                 <Text size="sm" fw={600}>
@@ -239,7 +246,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             again.
                         </Text>
                         <AlertText type="warning">
-                            The osu! announcement cannot be undone. The user will still have the original messages.
+                            The osu! announcement cannot be undone. Users will still have the original messages.
                         </AlertText>
                     </Stack>
                 ),
@@ -390,18 +397,23 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             <Divider />
                             {renderDescription()}
                             <Divider />
-                            {voting.targetUser && (
+                            {voting.targetUsers && voting.targetUsers.length > 0 && (
                                 <>
                                     <Stack gap="sm">
                                         <Text size="sm" c="dimmed">
-                                            Target User
+                                            {voting.targetUsers.length === 1 ? "Target User" : "Target Users"}
                                         </Text>
-                                        <UserCard
-                                            user={voting.targetUser}
-                                            onSelect={() => handleUserCardClick(voting.targetUser!)}
-                                            static
-                                            fullWidth={isMobile}
-                                        />
+                                        <Group gap="sm" wrap="wrap">
+                                            {voting.targetUsers.map((targetUser) => (
+                                                <UserCard
+                                                    key={targetUser.id}
+                                                    user={targetUser}
+                                                    onSelect={() => handleUserCardClick(targetUser)}
+                                                    static
+                                                    fullWidth={isMobile}
+                                                />
+                                            ))}
+                                        </Group>
                                     </Stack>
                                 </>
                             )}
@@ -439,7 +451,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
 
                     {user?.isCommittee && sanctionState.reason === "tie" && (
                         <AlertText type="warning">
-                            This sanction vote is tied. Handle the tie manually before applying a sanction.
+                            This sanction vote is tied. You need to handle the email and watchlist manually.
                         </AlertText>
                     )}
 
@@ -476,7 +488,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     (voting.isPublic ||
                                         Boolean(
                                             voting.isSanctionVote &&
-                                            (voting.sanctionAppliedAt || voting.sanctionInfringementId),
+                                            (voting.sanctionAppliedAt || voting.sanctionInfringementIds?.length),
                                         ))
                                 }
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>

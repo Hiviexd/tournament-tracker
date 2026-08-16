@@ -421,20 +421,22 @@ describe("VotingService.censorVotingForNonCommittee", () => {
                 attachments: [{}],
                 abstainedUsers: [{}],
                 votes: [{ comment: "secret", author: {} }],
-                targetUser: {
-                    username: "player",
-                    infringements: [{ reason: "watchlist" }],
-                    activeInfringement: { reason: "watchlist" },
-                    latestAction: { reason: "watchlist" },
-                },
+                targetUsers: [
+                    {
+                        username: "player",
+                        infringements: [{ reason: "watchlist" }],
+                        activeInfringement: { reason: "watchlist" },
+                        latestAction: { reason: "watchlist" },
+                    },
+                ],
             }),
         } as never);
 
         expect(publicVoting.description).toBe("");
         expect(publicVoting.sanctionPost).toBeUndefined();
-        expect(publicVoting.targetUser?.infringements).toBeUndefined();
-        expect(publicVoting.targetUser?.activeInfringement).toBeUndefined();
-        expect(publicVoting.targetUser?.latestAction).toBeUndefined();
-        expect(publicVoting.targetUser?.username).toBe("player");
+        expect(publicVoting.targetUsers?.[0]?.infringements).toBeUndefined();
+        expect(publicVoting.targetUsers?.[0]?.activeInfringement).toBeUndefined();
+        expect(publicVoting.targetUsers?.[0]?.latestAction).toBeUndefined();
+        expect(publicVoting.targetUsers?.[0]?.username).toBe("player");
     });
 });

@@ -5,7 +5,7 @@ import { areSanctionVoteOptions } from "@tc/utils";
 import startCase from "lodash/startCase.js";
 import { TIME_BASED_TYPES } from "@tc/types/Infringement";
 import User from "../models/userModel";
-import { IUser, USER_GROUPS } from "@tc/types/User";
+import { USER_GROUPS } from "@tc/types/User";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
@@ -26,7 +26,7 @@ const DEFAULT_POPULATE = [
         },
     },
     {
-        path: "targetUser",
+        path: "targetUsers",
         select: "username osuId groups coverUrl country",
         populate: { path: "infringements" },
     },
@@ -137,7 +137,7 @@ class VotingsController {
             description,
             duration,
             options,
-            targetUserId,
+            targetUserIds,
             targetTournamentName,
             targetTournamentLink,
             type,
@@ -151,7 +151,6 @@ class VotingsController {
         const files = req.files;
 
         const author = res.locals!.user!;
-        let targetUser: IUser;
 
         const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";
         const isSanctionVoteBool = isSanctionVote === true || isSanctionVote === "true";
@@ -195,12 +194,20 @@ class VotingsController {
         }
 
         if (category === "user") {
-            if (!targetUserId) {
-                return res.status(400).json({ error: "Missing target user ID" });
+            const targetUserIdArray = Array.isArray(targetUserIds)
+                ? targetUserIds.map(String)
+                : targetUserIds
+                  ? [String(targetUserIds)]
+                  : [];
+            if (targetUserIdArray.length === 0) {
+                return res.status(400).json({ error: "At least one target user is required" });
             }
 
-            targetUser = await User.findById(targetUserId).orFail();
-            voting.targetUser = targetUser;
+            const loaded = await loadUsersByIds(targetUserIdArray);
+            if ("error" in loaded) {
+                return res.status(400).json({ error: loaded.error });
+            }
+            voting.targetUsers = loaded.users;
         }
 
         if (category === "tournament") {
@@ -266,10 +273,10 @@ class VotingsController {
                 `${utils.discordTimestamp(voting.deadline)} (${utils.discordTimestamp(voting.deadline, "dateTime")})`,
             );
 
-        if (voting.targetUser) {
+        if (voting.targetUsers?.length) {
             embed.addField(
-                "Target User",
-                `[**${voting.targetUser.username}**](https://osu.ppy.sh/users/${voting.targetUser.osuId})`,
+                voting.targetUsers.length === 1 ? "Target User" : "Target Users",
+                utils.formatHostsList(voting.targetUsers, { mdLinks: true }),
             );
         }
 
@@ -470,7 +477,11 @@ class VotingsController {
         const votingId = req.params.votingId;
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
-        if (!voting.isActive && voting.isSanctionVote && (voting.sanctionAppliedAt || voting.sanctionInfringementId)) {
+        if (
+            !voting.isActive &&
+            voting.isSanctionVote &&
+            (voting.sanctionAppliedAt || voting.sanctionInfringementIds?.length)
+        ) {
             return res.status(400).json({
                 error: "Cannot reopen a sanction vote after a watchlist entry has been created",
             });
@@ -529,7 +540,7 @@ class VotingsController {
             publicDescription,
             allowNeutralVotes,
             category,
-            targetUserId,
+            targetUserIds,
             targetTournamentName,
             targetTournamentLink,
             sanctionType,
@@ -537,15 +548,25 @@ class VotingsController {
         } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
+        const targetUserIdArray = Array.isArray(targetUserIds)
+            ? targetUserIds.map(String)
+            : targetUserIds
+              ? [String(targetUserIds)]
+              : [];
 
         if (voting.isSanctionVote && category && category !== "user") {
             return res.status(400).json({ error: "Sanction votes must keep category user" });
         }
 
-        if (voting.isSanctionVote && targetUserId) {
-            const currentTargetId = voting.targetUser?.toString();
-            if (currentTargetId && currentTargetId !== String(targetUserId)) {
-                return res.status(400).json({ error: "Cannot change the target user of a sanction vote" });
+        if (voting.isSanctionVote && targetUserIdArray.length > 0) {
+            const currentTargetIds = (voting.targetUsers ?? []).map((user) => (user._id ?? user).toString()).sort();
+            const nextTargetIds = [...targetUserIdArray].sort();
+            if (
+                currentTargetIds.length > 0 &&
+                (currentTargetIds.length !== nextTargetIds.length ||
+                    currentTargetIds.some((id, index) => id !== nextTargetIds[index]))
+            ) {
+                return res.status(400).json({ error: "Cannot change the target users of a sanction vote" });
             }
         }
 
@@ -571,7 +592,7 @@ class VotingsController {
                     sanctionFieldsChanged = true;
                 }
             }
-            if (sanctionFieldsChanged && voting.sanctionInfringementId) {
+            if (sanctionFieldsChanged && voting.sanctionInfringementIds?.length) {
                 voting.sanctionAnnouncementChannelId = undefined;
                 voting.sanctionAnnouncementSentCount = undefined;
             }
@@ -581,19 +602,20 @@ class VotingsController {
             if (category) {
                 voting.category = category;
 
-                if (category === "user" && targetUserId) {
-                    // user vote - assign user and clear tournament details
-                    voting.targetUser = await User.findById(targetUserId).orFail();
+                if (category === "user" && targetUserIdArray.length > 0) {
+                    const loaded = await loadUsersByIds(targetUserIdArray);
+                    if ("error" in loaded) {
+                        return res.status(400).json({ error: loaded.error });
+                    }
+                    voting.targetUsers = loaded.users;
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
                 } else if (category === "tournament" && targetTournamentName && targetTournamentLink) {
-                    // tournament vote - assign tournament details and clear user details
                     voting.targetTournamentName = targetTournamentName;
                     voting.targetTournamentLink = targetTournamentLink;
-                    voting.targetUser = undefined;
+                    voting.targetUsers = [];
                 } else if (category === "discussion") {
-                    // discussion vote - clear all details
-                    voting.targetUser = undefined;
+                    voting.targetUsers = [];
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
                 }
@@ -869,11 +891,11 @@ class VotingsController {
                 voting: populated,
             });
 
-            const targetUser = populated.targetUser;
+            const targetUsersLabel = formatWatchlistUserLinks(populated.targetUsers);
             const typeLabel = startCase(result.infringementType);
             await LogService.generate(
                 req.session.mongoId!,
-                `Applied **${typeLabel}** from vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to [**${targetUser?.username}**](${config.baseUrl}/watchlist?user=${targetUser?.osuId})`,
+                `Applied **${typeLabel}** from vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${targetUsersLabel}`,
                 "voting",
             );
 
@@ -882,7 +904,7 @@ class VotingsController {
                 .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                 .setColor(result.isWarning ? DiscordUtils.webhookColors.yellow : DiscordUtils.webhookColors.red)
                 .setDescription(
-                    `Applied **${typeLabel}** from [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to [**${targetUser?.username}**](${config.baseUrl}/watchlist?user=${targetUser?.osuId})`,
+                    `Applied **${typeLabel}** from [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to ${targetUsersLabel}`,
                 )
                 .addField("Outcome", result.winnerOption);
 
@@ -916,13 +938,11 @@ class VotingsController {
                 voting: populated,
             });
 
-            const targetUser = populated.targetUser;
+            const targetUsersLabel = formatWatchlistUserLinks(populated.targetUsers);
             await LogService.generate(
                 req.session.mongoId!,
                 `Undid sanction from vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})${
-                    targetUser
-                        ? ` for [**${targetUser.username}**](${config.baseUrl}/watchlist?user=${targetUser.osuId})`
-                        : ""
+                    targetUsersLabel ? ` for ${targetUsersLabel}` : ""
                 }`,
                 "voting",
             );
@@ -934,9 +954,7 @@ class VotingsController {
                         .setColor(DiscordUtils.webhookColors.orange)
                         .setDescription(
                             `Undid sanction from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})${
-                                targetUser
-                                    ? ` for [**${targetUser.username}**](${config.baseUrl}/watchlist?user=${targetUser.osuId})`
-                                    : ""
+                                targetUsersLabel ? ` for ${targetUsersLabel}` : ""
                             }`,
                         ),
                 )
@@ -948,6 +966,26 @@ class VotingsController {
             throw error;
         }
     }
+}
+
+async function loadUsersByIds(ids: string[]) {
+    const unordered = await User.find({ _id: { $in: ids } });
+    if (unordered.length !== ids.length) {
+        return { error: "One or more target user IDs are invalid" };
+    }
+
+    const users = ids
+        .map((id) => unordered.find((user) => user._id.toString() === id))
+        .filter((user): user is NonNullable<typeof user> => user !== undefined);
+
+    return { users };
+}
+
+function formatWatchlistUserLinks(users: { username: string; osuId: number }[] | undefined): string {
+    if (!users?.length) return "";
+    return new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(
+        users.map((user) => `[**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`),
+    );
 }
 
 export default new VotingsController();

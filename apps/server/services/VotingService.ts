@@ -65,10 +65,12 @@ class VotingService {
             comment: undefined,
             author: undefined,
         }));
-        if (publicVoting.targetUser) {
-            publicVoting.targetUser.infringements = undefined;
-            publicVoting.targetUser.activeInfringement = undefined;
-            publicVoting.targetUser.latestAction = undefined;
+        if (publicVoting.targetUsers?.length) {
+            for (const targetUser of publicVoting.targetUsers) {
+                targetUser.infringements = undefined;
+                targetUser.activeInfringement = undefined;
+                targetUser.latestAction = undefined;
+            }
         }
         return publicVoting;
     }
@@ -497,42 +499,52 @@ class VotingService {
             throw { status: 400, error: "Sanction vote is missing a valid sanction type" };
         }
 
-        const targetUser = voting.targetUser;
-        if (!targetUser?._id || !targetUser.osuId) {
-            throw { status: 400, error: "Sanction votes must have a populated target user" };
+        const targetUsers = voting.targetUsers ?? [];
+        if (!targetUsers.length || targetUsers.some((user) => !user?._id || !user.osuId)) {
+            throw { status: 400, error: "Sanction votes must have populated target users" };
         }
 
         const reason = voting.sanctionPost!.trim();
         const dates = applyState.isWarning ? {} : getSanctionInfringementDates(applyState.winnerOption);
-        if (!voting.sanctionInfringementId) {
-            const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
-                type: applyState.infringementType,
-                reason,
-                ...dates,
-            });
-            voting.sanctionInfringementId = infringement._id ?? infringement.id;
-            await voting.save();
-        } else {
-            const synced = await InfringementService.syncSanctionInfringement(
-                voting.sanctionInfringementId,
-                targetUser._id.toString(),
-                { type: applyState.infringementType, reason },
-            );
-            if (!synced) {
+        const nextInfringementIds = [...(voting.sanctionInfringementIds ?? [])];
+
+        for (let i = 0; i < targetUsers.length; i++) {
+            const targetUser = targetUsers[i];
+            const existingId = nextInfringementIds[i];
+            if (!existingId) {
                 const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
                     type: applyState.infringementType,
                     reason,
                     ...dates,
                 });
-                voting.sanctionInfringementId = infringement._id ?? infringement.id;
-                voting.sanctionAnnouncementChannelId = undefined;
-                voting.sanctionAnnouncementSentCount = undefined;
+                nextInfringementIds[i] = infringement._id ?? infringement.id;
+                voting.sanctionInfringementIds = nextInfringementIds;
                 await voting.save();
-            } else if (synced.changed) {
-                voting.sanctionAnnouncementChannelId = undefined;
-                voting.sanctionAnnouncementSentCount = undefined;
+            } else {
+                const synced = await InfringementService.syncSanctionInfringement(
+                    existingId,
+                    targetUser._id.toString(),
+                    { type: applyState.infringementType, reason },
+                );
+                if (!synced) {
+                    const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
+                        type: applyState.infringementType,
+                        reason,
+                        ...dates,
+                    });
+                    nextInfringementIds[i] = infringement._id ?? infringement.id;
+                    voting.sanctionInfringementIds = nextInfringementIds;
+                    voting.sanctionAnnouncementChannelId = undefined;
+                    voting.sanctionAnnouncementSentCount = undefined;
+                    await voting.save();
+                } else if (synced.changed) {
+                    voting.sanctionAnnouncementChannelId = undefined;
+                    voting.sanctionAnnouncementSentCount = undefined;
+                }
             }
         }
+
+        voting.sanctionInfringementIds = nextInfringementIds;
 
         if (voting.sanctionAppliedAt) {
             throw { status: 400, error: "Sanction has already been applied" };
@@ -549,7 +561,7 @@ class VotingService {
             sentCount: voting.sanctionAnnouncementSentCount,
         };
         const announcementResult = await OsuBotService.sendAnnouncementDirect(
-            [targetUser.osuId],
+            targetUsers.map((user) => user.osuId),
             announcement,
             currentUser.osuId,
         );
@@ -587,17 +599,17 @@ class VotingService {
             throw { status: 400, error: "Sanction has not been applied" };
         }
 
-        if (voting.sanctionInfringementId) {
-            await InfringementService.deleteInfringement(voting.sanctionInfringementId);
+        if (voting.sanctionInfringementIds?.length) {
+            await Promise.all(voting.sanctionInfringementIds.map((id) => InfringementService.deleteInfringement(id)));
         }
 
-        voting.sanctionInfringementId = undefined;
+        voting.sanctionInfringementIds = undefined;
         voting.sanctionAppliedAt = undefined;
         voting.sanctionAnnouncementChannelId = undefined;
         voting.sanctionAnnouncementSentCount = undefined;
         await voting.updateOne({
             $unset: {
-                sanctionInfringementId: 1,
+                sanctionInfringementIds: 1,
                 sanctionAppliedAt: 1,
                 sanctionAnnouncementChannelId: 1,
                 sanctionAnnouncementSentCount: 1,

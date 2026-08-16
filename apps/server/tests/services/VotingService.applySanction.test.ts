@@ -36,10 +36,10 @@ interface SanctionVotingFixture {
     options?: IVoting["options"];
     sanctionType?: IVoting["sanctionType"];
     sanctionPost?: IVoting["sanctionPost"];
-    targetUser?: IVoting["targetUser"];
+    targetUsers?: IVoting["targetUsers"];
     votes?: SanctionVoteBallot[];
     sanctionAppliedAt?: Date;
-    sanctionInfringementId?: Types.ObjectId;
+    sanctionInfringementIds?: Types.ObjectId[];
     sanctionAnnouncementChannelId?: number;
     sanctionAnnouncementSentCount?: number;
     save?: SanctionVotingDoc["save"];
@@ -67,11 +67,13 @@ function makeVoting(overrides: SanctionVotingFixture = {}): SanctionVotingDoc {
         options: [...TOURNAMENT_OPTIONS],
         sanctionType: InfringementType.TOURNAMENT_BAN,
         sanctionPost: "Official reason",
-        targetUser: {
-            _id: new Types.ObjectId(),
-            osuId: 123,
-            username: "player",
-        },
+        targetUsers: [
+            {
+                _id: new Types.ObjectId(),
+                osuId: 123,
+                username: "player",
+            },
+        ],
         votes: [rankedVote(2)],
         save: vi.fn().mockResolvedValue(undefined),
         updateOne: vi.fn().mockResolvedValue(undefined),
@@ -154,6 +156,23 @@ describe("VotingService.applySanction", () => {
         );
     });
 
+    it("applies the sanction to every target user", async () => {
+        await VotingService.applySanction(
+            makeVoting({
+                targetUsers: [
+                    // SAFETY: fixture only supplies the sanction fields and persist methods used by apply/undo.
+                    { _id: new Types.ObjectId(), osuId: 123, username: "player" } as IUser,
+                    // SAFETY: fixture only supplies the sanction fields and persist methods used by apply/undo.
+                    { _id: new Types.ObjectId(), osuId: 456, username: "other" } as IUser,
+                ],
+            }),
+            currentUser,
+        );
+
+        expect(mockAddInfringement).toHaveBeenCalledTimes(2);
+        expect(mockSendAnnouncement).toHaveBeenCalledWith([123, 456], expect.any(Object), 999);
+    });
+
     it("retries announcement only after a failed send", async () => {
         const infringementId = new Types.ObjectId();
         mockSendAnnouncement.mockResolvedValueOnce({ error: "osu down", statusCode: 500 });
@@ -162,12 +181,12 @@ describe("VotingService.applySanction", () => {
         await expect(VotingService.applySanction(voting, currentUser)).rejects.toMatchObject({
             status: 500,
         });
-        expect(voting.sanctionInfringementId).toEqual(expect.anything());
+        expect(voting.sanctionInfringementIds).toEqual(expect.anything());
         expect(voting.sanctionAppliedAt).toBeUndefined();
 
         mockSendAnnouncement.mockResolvedValueOnce(true);
         const retryVoting = makeVoting({
-            sanctionInfringementId: infringementId,
+            sanctionInfringementIds: [infringementId],
             save: vi.fn().mockResolvedValue(undefined),
         });
         await VotingService.applySanction(retryVoting, currentUser);
@@ -188,7 +207,7 @@ describe("VotingService.applySanction", () => {
         mockSyncSanctionInfringement.mockResolvedValueOnce({ changed: true });
 
         const voting = makeVoting({
-            sanctionInfringementId: new Types.ObjectId(),
+            sanctionInfringementIds: [new Types.ObjectId()],
             sanctionPost: "Edited reason",
             sanctionAnnouncementChannelId: 44,
             sanctionAnnouncementSentCount: 2,
@@ -197,7 +216,7 @@ describe("VotingService.applySanction", () => {
 
         expect(mockAddInfringement).not.toHaveBeenCalled();
         expect(mockSyncSanctionInfringement).toHaveBeenCalledWith(
-            voting.sanctionInfringementId,
+            voting.sanctionInfringementIds?.[0],
             expect.any(String),
             expect.objectContaining({ reason: "Edited reason" }),
         );
@@ -256,17 +275,17 @@ describe("VotingService.undoSanction", () => {
         const infringementId = new Types.ObjectId();
         const voting = makeVoting({
             sanctionAppliedAt: new Date(),
-            sanctionInfringementId: infringementId,
+            sanctionInfringementIds: [infringementId],
         });
 
         await VotingService.undoSanction(voting);
 
         expect(mockDeleteInfringement).toHaveBeenCalledWith(infringementId);
-        expect(voting.sanctionInfringementId).toBeUndefined();
+        expect(voting.sanctionInfringementIds).toBeUndefined();
         expect(voting.sanctionAppliedAt).toBeUndefined();
         expect(voting.updateOne).toHaveBeenCalledWith({
             $unset: {
-                sanctionInfringementId: 1,
+                sanctionInfringementIds: 1,
                 sanctionAppliedAt: 1,
                 sanctionAnnouncementChannelId: 1,
                 sanctionAnnouncementSentCount: 1,
@@ -278,7 +297,7 @@ describe("VotingService.undoSanction", () => {
         mockDeleteInfringement.mockResolvedValueOnce(null);
         const voting = makeVoting({
             sanctionAppliedAt: new Date(),
-            sanctionInfringementId: new Types.ObjectId(),
+            sanctionInfringementIds: [new Types.ObjectId()],
         });
 
         await VotingService.undoSanction(voting);

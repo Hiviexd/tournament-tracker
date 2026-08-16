@@ -87,7 +87,7 @@ export interface IVoting {
     type: VotingType;
     options: string[];
     votes: IVote[];
-    targetUser?: IUser;
+    targetUsers?: IUser[];
     targetTournamentName?: string;
     targetTournamentLink?: string;
     requiredVotes: number;
@@ -104,7 +104,7 @@ export interface IVoting {
     isSanctionVote?: boolean;
     sanctionType?: SanctionBanType;
     sanctionPost?: string;
-    sanctionInfringementId?: Types.ObjectId;
+    sanctionInfringementIds?: Types.ObjectId[];
     sanctionAppliedAt?: Date;
     sanctionAnnouncementChannelId?: number;
     sanctionAnnouncementSentCount?: number;
