@@ -132,7 +132,7 @@ export function buildSanctionAnnouncementMessages(params: {
 
     const intro = `Hello,
 
-You are receiving this email because we have found you to be in breach of osu!'s official ${domain} support expectations (linked [here](${wiki})), resulting in ${restrictions} being placed on your account. This message serves as an official notice that you are being issued ${article} **${phrase} effective immediately.**${appealSentence}${roleSentence}
+You are receiving this notice because we have found you to be in breach of osu!'s official ${domain} support expectations (linked [here](${wiki})), resulting in ${restrictions} being placed on your account. This message serves as an official notice that you are being issued ${article} **${phrase} effective immediately.**${appealSentence}${roleSentence}
 
 **Reason for sanction**:`;
 
@@ -146,7 +146,7 @@ You are receiving this email because we have found you to be in breach of osu!'s
         );
         outroLines.push(
             "",
-            `To appeal this sanction, please send an e-mail to tournaments@ppy.sh with the subject "${appealSubject}".`,
+            `To appeal this sanction, please send an e-mail to tournaments@ppy.sh with the subject \`${appealSubject}\`.`,
         );
     }
 
