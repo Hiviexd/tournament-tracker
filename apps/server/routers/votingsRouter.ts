@@ -28,5 +28,7 @@ votingsRouter.patch(
     auth.isCommittee,
     VotingsController.recalibrateRequiredVotes,
 );
+votingsRouter.post("/:votingId/apply-sanction", auth.isLoggedIn, auth.isCommittee, VotingsController.applySanction);
+votingsRouter.post("/:votingId/undo-sanction", auth.isLoggedIn, auth.isAdmin, VotingsController.undoSanction);
 
 export default votingsRouter;

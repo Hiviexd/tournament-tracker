@@ -244,6 +244,10 @@ class InfringementService {
     public async findActiveForUser(userId: string | Types.ObjectId): Promise<IInfringement | null> {
         return await Infringement.findActiveForUser(userId);
     }
+
+    public async deleteInfringement(infringementId: string | Types.ObjectId) {
+        return await Infringement.findByIdAndDelete(infringementId);
+    }
 }
 
 export default new InfringementService();

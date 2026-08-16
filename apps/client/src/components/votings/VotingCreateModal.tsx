@@ -1,8 +1,9 @@
 // Base
 import { useCreateVoting } from "../../hooks/useVotings";
-import { VotingCategory, type VotingFormData, VotingType, VOTING_TYPES } from "@tc/types/Voting";
+import { SANCTION_BAN_TYPES, SanctionBanType, VotingCategory, type VotingFormData, VotingType, VOTING_TYPES } from "@tc/types/Voting";
 import { UserGroup } from "@tc/types/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
+import startCase from "lodash/startCase.js";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import utils, { pickStringUnion } from "@tc/utils/client";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -10,6 +11,7 @@ import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 //Mantine
 import MultiSelect from "../common/MultiSelect";
 import { Modal, TextInput, Stack, Select, NumberInput, Button, Group, Pill, Text, Box, Checkbox } from "@mantine/core";
+import { useState } from "react";
 import { useForm } from "@mantine/form";
 
 // Components
@@ -28,7 +30,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
     const { files, handleFileChange } = useFileUpload();
     const autoSaveKey = "voting-create-description";
+    const sanctionPostAutoSaveKey = "voting-create-sanction-post";
     const navigate = useNavigate();
+    const [preset, setPreset] = useState<string | null>(null);
 
     const form = useForm<{
         title: string;
@@ -44,6 +48,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         targetTournamentLink: string;
         forceFullParticipation: boolean;
         binaryStrictPassThreshold: number;
+        isSanctionVote: boolean;
+        sanctionType: SanctionBanType | "";
+        sanctionPost: string;
     }>({
         initialValues: {
             title: "",
@@ -59,6 +66,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             targetTournamentLink: "",
             forceFullParticipation: false,
             binaryStrictPassThreshold: 50,
+            isSanctionVote: false,
+            sanctionType: "",
+            sanctionPost: "",
         },
         validate: {
             title: (value) => (!value ? "Title is required" : null),
@@ -94,8 +104,42 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 }
                 return null;
             },
+            sanctionType: (value, values) =>
+                values.isSanctionVote && !value ? "Sanction type is required" : null,
+            sanctionPost: (value, values) => {
+                if (!values.isSanctionVote) return null;
+                if (!value.trim()) return "Sanction post is required";
+                if (value.trim().length > 1000) return "Sanction post cannot exceed 1000 characters";
+                return null;
+            },
         },
     });
+
+    const applyTournamentBanPreset = () => {
+        const selectedPreset = VOTE_PRESETS.tournamentBans;
+        form.setFieldValue("type", selectedPreset.type);
+        form.setFieldValue("options", [...selectedPreset.options]);
+        form.setFieldValue("duration", selectedPreset.duration);
+        form.setFieldValue("allowNeutralVotes", selectedPreset.allowNeutralVotes);
+        form.setFieldValue("forceFullParticipation", selectedPreset.forceFullParticipation);
+        form.setFieldValue("binaryStrictPassThreshold", selectedPreset.binaryStrictPassThreshold);
+        form.setFieldValue("category", "user");
+        form.setFieldValue("targetTournamentName", "");
+        form.setFieldValue("targetTournamentLink", "");
+        setPreset("tournamentBans");
+    };
+
+    const handleSanctionVoteChange = (checked: boolean) => {
+        form.setFieldValue("isSanctionVote", checked);
+        if (checked) {
+            applyTournamentBanPreset();
+            return;
+        }
+        form.setFieldValue("sanctionType", "");
+        form.setFieldValue("sanctionPost", "");
+        clearAutoSavedValue(sanctionPostAutoSaveKey);
+        setPreset(null);
+    };
 
     const handleSubmit = async (values) => {
         // SAFETY: FormData is the runtime type; voting fields are appended before submit.
@@ -122,6 +166,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
 
             // Clear autosaved content after successful submission
             clearAutoSavedValue(autoSaveKey);
+            clearAutoSavedValue(sanctionPostAutoSaveKey);
 
             form.reset();
             onClose();
@@ -186,6 +231,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         ] as const);
         if (!presetKey) return;
         const selectedPreset = VOTE_PRESETS[presetKey];
+        setPreset(presetKey);
         form.setFieldValue("type", selectedPreset.type);
         form.setFieldValue("options", [...selectedPreset.options]);
         form.setFieldValue("duration", selectedPreset.duration);
@@ -271,11 +317,57 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         )}
                     </Box>
 
+                    <Checkbox
+                        label="Sanction vote"
+                        description="Locks the Tournament Ban preset and prepares a watchlist sanction after the vote concludes"
+                        checked={form.values.isSanctionVote}
+                        onChange={(event) => handleSanctionVoteChange(event.currentTarget.checked)}
+                    />
+
+                    {form.values.isSanctionVote && (
+                        <>
+                            <Select
+                                label="Sanction type"
+                                placeholder="Select sanction type"
+                                data={SANCTION_BAN_TYPES.map((type) => ({
+                                    value: type,
+                                    label: startCase(type),
+                                }))}
+                                withAsterisk
+                                allowDeselect={false}
+                                {...form.getInputProps("sanctionType")}
+                            />
+                            <Box>
+                                <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                        Sanction post<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                    </Box>
+                                    <Text size="xs" c="dimmed">
+                                        {form.values.sanctionPost.trim().length}/1000
+                                    </Text>
+                                </Box>
+                                <TextEditor
+                                    value={form.values.sanctionPost}
+                                    onChange={(value) => form.setFieldValue("sanctionPost", value)}
+                                    placeholder="Official reason sent to the user and stored on the watchlist"
+                                    className={form.errors.sanctionPost ? "error" : ""}
+                                    autoSaveKey={sanctionPostAutoSaveKey}
+                                />
+                                {form.errors.sanctionPost && (
+                                    <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                        {form.errors.sanctionPost}
+                                    </Box>
+                                )}
+                            </Box>
+                        </>
+                    )}
+
                     <Select
                         label="Category"
                         placeholder="Select vote category"
                         data={categoryOptions}
                         withAsterisk
+                        disabled={form.values.isSanctionVote}
                         {...form.getInputProps("category")}
                     />
 
@@ -318,6 +410,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         label="Force full participation"
                         description="Raises the participation requirement from 75% to 100%"
                         checked={form.values.forceFullParticipation}
+                        disabled={form.values.isSanctionVote}
                         onChange={(event) => form.setFieldValue("forceFullParticipation", event.currentTarget.checked)}
                     />
 
@@ -326,6 +419,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         placeholder="Enter duration in days"
                         withAsterisk
                         min={1}
+                        disabled={form.values.isSanctionVote}
                         {...form.getInputProps("duration")}
                     />
 
@@ -333,8 +427,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         label="Vote Preset"
                         placeholder="Select a preset configuration"
                         data={presetOptions}
+                        value={preset}
                         onChange={(value) => handlePresetChange(value || "")}
-                        clearable
+                        clearable={!form.values.isSanctionVote}
+                        disabled={form.values.isSanctionVote}
                     />
 
                     <Select
@@ -345,6 +441,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         value={form.values.type}
                         onChange={handleTypeChange}
                         error={form.errors.type}
+                        disabled={form.values.isSanctionVote}
                     />
 
                     {(form.values.type === "binary" || form.values.type === "variable") && (
@@ -388,7 +485,9 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 form.values.options.map((option, index) => (
                                     <Pill
                                         key={index}
-                                        withRemoveButton={form.values.type !== "binary-strict"}
+                                        withRemoveButton={
+                                            !form.values.isSanctionVote && form.values.type !== "binary-strict"
+                                        }
                                         onRemove={() => handleRemoveOption(option)}
                                         variant="subtle"
                                         style={{
@@ -413,6 +512,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                             }}
                             error={form.errors.options}
                             disabled={
+                                form.values.isSanctionVote ||
                                 (form.values.type === "binary" && form.values.options.length >= 2) ||
                                 (form.values.type === "binary-strict" && form.values.options.length >= 2)
                             }

@@ -1,8 +1,9 @@
 // Base
 import { useState } from "react";
 import { useUpdateVoting, useRecalibrateRequiredVotes } from "../../hooks/useVotings";
-import { IVoting } from "@tc/types/Voting";
+import { IVoting, SANCTION_BAN_TYPES } from "@tc/types/Voting";
 import { VOTE_COLORS } from "../../constants";
+import startCase from "lodash/startCase.js";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import utils from "@tc/utils/client";
 
@@ -42,6 +43,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
     const hasVotes = voting.votes.length > 0;
     const privateDescriptionAutoSaveKey = `voting-edit-private-description-${voting._id}`;
     const publicDescriptionAutoSaveKey = `voting-edit-public-description-${voting._id}`;
+    const sanctionPostAutoSaveKey = `voting-edit-sanction-post-${voting._id}`;
 
     const form = useForm({
         initialValues: {
@@ -56,6 +58,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             targetUserId: voting.targetUser?.id || "",
             targetTournamentName: voting.targetTournamentName || "",
             targetTournamentLink: voting.targetTournamentLink || "",
+            sanctionType: voting.sanctionType || "",
+            sanctionPost: voting.sanctionPost || "",
         },
         validate: {
             title: (value) => {
@@ -107,6 +111,14 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                 }
                 return null;
             },
+            sanctionType: (value) =>
+                voting.isSanctionVote && !voting.sanctionAppliedAt && !value ? "Sanction type is required" : null,
+            sanctionPost: (value) => {
+                if (!voting.isSanctionVote || voting.sanctionAppliedAt) return null;
+                if (!value.trim()) return "Sanction post is required";
+                if (value.trim().length > 1000) return "Sanction post cannot exceed 1000 characters";
+                return null;
+            },
         },
     });
 
@@ -117,6 +129,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             // Clear autosaved content after successful submission
             clearAutoSavedValue(privateDescriptionAutoSaveKey);
             clearAutoSavedValue(publicDescriptionAutoSaveKey);
+            clearAutoSavedValue(sanctionPostAutoSaveKey);
 
             // Reset the editor key to ensure it re-renders with the new content
             setEditorKey((prev) => prev + 1);
@@ -201,6 +214,44 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                         />
                     )}
 
+                    {voting.isSanctionVote && !voting.sanctionAppliedAt && (
+                        <>
+                            <Select
+                                label="Sanction type"
+                                placeholder="Select sanction type"
+                                data={SANCTION_BAN_TYPES.map((type) => ({
+                                    value: type,
+                                    label: startCase(type),
+                                }))}
+                                withAsterisk
+                                allowDeselect={false}
+                                {...form.getInputProps("sanctionType")}
+                            />
+                            <Box>
+                                <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
+                                        Sanction post<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                    </Box>
+                                    <Text size="xs" c="dimmed">
+                                        {form.values.sanctionPost.trim().length}/1000
+                                    </Text>
+                                </Box>
+                                <TextEditor
+                                    value={form.values.sanctionPost}
+                                    onChange={(value) => form.setFieldValue("sanctionPost", value)}
+                                    placeholder="Official reason sent to the user and stored on the watchlist"
+                                    className={form.errors.sanctionPost ? "error" : ""}
+                                    autoSaveKey={sanctionPostAutoSaveKey}
+                                />
+                                {form.errors.sanctionPost && (
+                                    <Box mt={5} style={{ color: "var(--mantine-color-red-filled)", fontSize: "12px" }}>
+                                        {form.errors.sanctionPost}
+                                    </Box>
+                                )}
+                            </Box>
+                        </>
+                    )}
+
                     {!voting.isActive && (
                         <>
                             <Select
@@ -208,6 +259,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 placeholder="Select vote category"
                                 data={categoryOptions}
                                 withAsterisk
+                                disabled={voting.isSanctionVote}
                                 {...form.getInputProps("category")}
                             />
 

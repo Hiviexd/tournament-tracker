@@ -2,6 +2,26 @@ import { Types } from "mongoose";
 import { UserGroup, IUser } from "./User";
 import { IVote } from "./Vote";
 import { IAttachment } from "./Attachment";
+import { InfringementType } from "./Infringement";
+
+export const SANCTION_BAN_TYPES = [
+    InfringementType.TOURNAMENT_BAN,
+    InfringementType.HOSTING_BAN,
+    InfringementType.STAFFING_BAN,
+] as const;
+export type SanctionBanType = (typeof SANCTION_BAN_TYPES)[number];
+
+export const TOURNAMENT_OPTIONS = [
+    "No action required",
+    "Warning",
+    "1 month",
+    "3 months",
+    "6 months",
+    "1 year",
+    "2 years",
+    "Indefinite",
+] as const;
+export type TournamentOption = (typeof TOURNAMENT_OPTIONS)[number];
 
 export const VOTING_CATEGORIES = ["tournament", "user", "discussion"] as const;
 export type VotingCategory = (typeof VOTING_CATEGORIES)[number];
@@ -81,6 +101,11 @@ export interface IVoting {
     allowNeutralVotes: boolean;
     abstainedUsers?: IUser[];
     binaryStrictPassThreshold?: number;
+    isSanctionVote?: boolean;
+    sanctionType?: SanctionBanType;
+    sanctionPost?: string;
+    sanctionInfringementId?: Types.ObjectId;
+    sanctionAppliedAt?: Date;
 
     // virtuals
     deadline: Date;

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IVoting } from "@tc/types/Voting";
+import { IVoting, SANCTION_BAN_TYPES, TOURNAMENT_OPTIONS } from "@tc/types/Voting";
 
 const VotingSchema = new Schema<IVoting>(
     {
@@ -34,6 +34,11 @@ const VotingSchema = new Schema<IVoting>(
         allowNeutralVotes: { type: Boolean, default: true },
         abstainedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
         binaryStrictPassThreshold: { type: Number, default: 50 },
+        isSanctionVote: { type: Boolean, default: false },
+        sanctionType: { type: String, enum: SANCTION_BAN_TYPES },
+        sanctionPost: { type: String, maxlength: 1000 },
+        sanctionInfringementId: { type: Schema.Types.ObjectId, ref: "Infringement" },
+        sanctionAppliedAt: { type: Date },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
@@ -58,6 +63,34 @@ VotingSchema.pre("save", function (next) {
         const uniqueUserIds = new Set(this.abstainedUsers.map((userId) => userId.toString()));
         if (uniqueUserIds.size !== this.abstainedUsers.length) {
             next(new Error("Duplicate users found in abstainedUsers"));
+        }
+    }
+
+    if (this.isSanctionVote) {
+        if (this.category !== "user") {
+            next(new Error("Sanction votes must have category user"));
+            return;
+        }
+        if (!this.targetUser) {
+            next(new Error("Sanction votes must have a target user"));
+            return;
+        }
+        if (!this.sanctionType || !SANCTION_BAN_TYPES.includes(this.sanctionType)) {
+            next(new Error("Sanction votes must have a valid sanction type"));
+            return;
+        }
+        const sanctionPost = this.sanctionPost?.trim() ?? "";
+        if (!sanctionPost || sanctionPost.length > 1000) {
+            next(new Error("Sanction votes must have a sanction post between 1 and 1000 characters"));
+            return;
+        }
+        this.sanctionPost = sanctionPost;
+        if (
+            this.options.length !== TOURNAMENT_OPTIONS.length ||
+            TOURNAMENT_OPTIONS.some((option, index) => this.options[index] !== option)
+        ) {
+            next(new Error("Sanction votes must use the tournament ban options"));
+            return;
         }
     }
 

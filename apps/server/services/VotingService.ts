@@ -1,9 +1,15 @@
-import { IVoting } from "@tc/types/Voting";
+import { IVoting, SANCTION_BAN_TYPES } from "@tc/types/Voting";
 import { IVote } from "@tc/types/Vote";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
+import { InfringementType } from "@tc/types/Infringement";
 import utils from "@tc/utils/server";
+import {
+    getSanctionApplyState,
+    getSanctionAnnouncementChannel,
+    getSanctionInfringementDates,
+} from "@tc/utils";
 import config from "@tc/config";
 import { Document } from "mongoose";
 import User from "../models/userModel";
@@ -11,6 +17,8 @@ import Vote from "../models/voteModel";
 import Voting from "../models/votingModel";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
+import InfringementService from "./InfringementService";
+import OsuBotService from "./OsuBotService";
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
@@ -447,6 +455,113 @@ class VotingService {
         }
 
         return fields;
+    }
+
+    public async applySanction(voting: IVoting & { save(): Promise<unknown> }, currentUser: IUser) {
+        const applyState = getSanctionApplyState({
+            isSanctionVote: voting.isSanctionVote,
+            isActive: voting.isActive,
+            sanctionAppliedAt: voting.sanctionAppliedAt,
+            assignedGroups: voting.assignedGroups,
+            options: voting.options,
+            votes: voting.votes,
+            sanctionType: voting.sanctionType,
+            sanctionPost: voting.sanctionPost,
+        });
+
+        if (!voting.isSanctionVote) {
+            throw { status: 400, error: "This vote is not a sanction vote" };
+        }
+        if (voting.isActive) {
+            throw { status: 400, error: "Cannot apply a sanction while the vote is still active" };
+        }
+        if (voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has already been applied" };
+        }
+        if (applyState.reason === "tie") {
+            throw { status: 400, error: "Cannot apply a sanction while the vote is tied. Handle the tie manually." };
+        }
+        if (applyState.reason === "no-action") {
+            throw { status: 400, error: "Cannot apply a sanction when the winning option is no action required" };
+        }
+        if (applyState.reason === "invalid" || !applyState.winnerOption || !applyState.messages || !applyState.infringementType) {
+            throw { status: 400, error: "Sanction vote is missing a valid outcome, type, or post" };
+        }
+        if (!voting.sanctionType || !SANCTION_BAN_TYPES.includes(voting.sanctionType)) {
+            throw { status: 400, error: "Sanction vote is missing a valid sanction type" };
+        }
+
+        const targetUser = voting.targetUser;
+        if (!targetUser?._id || !targetUser.osuId) {
+            throw { status: 400, error: "Sanction votes must have a populated target user" };
+        }
+
+        if (!voting.sanctionInfringementId) {
+            const dates = applyState.isWarning ? {} : getSanctionInfringementDates(applyState.winnerOption);
+            const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
+                type: applyState.infringementType,
+                reason: voting.sanctionPost!.trim(),
+                ...dates,
+            });
+            voting.sanctionInfringementId = infringement._id ?? infringement.id;
+            await voting.save();
+        }
+
+        if (voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has already been applied" };
+        }
+
+        const announcementResult = await OsuBotService.sendAnnouncement(
+            [targetUser.osuId],
+            {
+                channel: getSanctionAnnouncementChannel({
+                    isWarning: applyState.isWarning,
+                    isContest: applyState.isContest,
+                    sanctionType: voting.sanctionType,
+                }),
+                content: applyState.messages,
+            },
+            currentUser.osuId,
+        );
+
+        if (announcementResult !== true) {
+            throw {
+                status: announcementResult.statusCode || 500,
+                error: announcementResult.error || "Failed to send sanction announcement",
+            };
+        }
+
+        voting.sanctionAppliedAt = new Date();
+        await voting.save();
+
+        return {
+            voting,
+            infringementType: applyState.infringementType as InfringementType,
+            winnerOption: applyState.winnerOption,
+            isWarning: applyState.isWarning,
+            phrase: applyState.phrase,
+        };
+    }
+
+    public async undoSanction(voting: IVoting & { updateOne(update: Record<string, unknown>): Promise<unknown> }) {
+        if (!voting.isSanctionVote) {
+            throw { status: 400, error: "This vote is not a sanction vote" };
+        }
+        if (!voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has not been applied" };
+        }
+
+        if (voting.sanctionInfringementId) {
+            await InfringementService.deleteInfringement(voting.sanctionInfringementId);
+        }
+
+        voting.sanctionInfringementId = undefined;
+        voting.sanctionAppliedAt = undefined;
+        await voting.updateOne({
+            $unset: { sanctionInfringementId: 1, sanctionAppliedAt: 1 },
+        });
+
+        return { voting };
     }
 }
 

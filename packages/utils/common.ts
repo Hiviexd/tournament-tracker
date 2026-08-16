@@ -389,13 +389,15 @@ export function isValidEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+export interface SchulzeResult {
+    ranking: number[];
+    isFirstPlaceTie: boolean;
+}
+
 /**
- * Calculates the Schulze method winner ranking for ranked choice voting
- * @param votes Array of ranked choice votes
- * @param optionCount Number of options
- * @returns Array of option indices in ranking order (0 = winner, 1 = second place, etc.)
+ * Calculates the Schulze method ranking and whether first place is tied
  */
-export function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: number): number[] {
+export function getSchulzeResult(votes: RankedChoiceVote[], optionCount: number): SchulzeResult {
     // Create preference matrix - d[i][j] is number of voters who prefer option i over option j
     const d: number[][] = Array(optionCount)
         .fill(null)
@@ -456,7 +458,20 @@ export function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: n
     // Sort by number of wins (descending)
     ranking.sort((a, b) => b.wins - a.wins);
 
-    return ranking.map((r) => r.index);
+    return {
+        ranking: ranking.map((r) => r.index),
+        isFirstPlaceTie: ranking.length > 1 && ranking[0].wins === ranking[1].wins,
+    };
+}
+
+/**
+ * Calculates the Schulze method winner ranking for ranked choice voting
+ * @param votes Array of ranked choice votes
+ * @param optionCount Number of options
+ * @returns Array of option indices in ranking order (0 = winner, 1 = second place, etc.)
+ */
+export function calculateSchulzeWinner(votes: RankedChoiceVote[], optionCount: number): number[] {
+    return getSchulzeResult(votes, optionCount).ranking;
 }
 
 /**

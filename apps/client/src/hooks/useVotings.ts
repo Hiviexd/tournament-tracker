@@ -173,6 +173,44 @@ export function useToggleAbstention(votingId: string) {
     });
 }
 
+export function useUndoSanction(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall<{ message: string; voting: IVoting }>({
+                method: "post",
+                url: `/api/votes/${votingId}/undo-sanction`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+        },
+    });
+}
+
+export function useApplySanction(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall<{ message: string; voting: IVoting }>({
+                method: "post",
+                url: `/api/votes/${votingId}/apply-sanction`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+        },
+    });
+}
+
 export function useRecalibrateRequiredVotes(votingId: string) {
     const queryClient = useQueryClient();
 

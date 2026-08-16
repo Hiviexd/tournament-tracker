@@ -1,3 +1,7 @@
+import { TOURNAMENT_OPTIONS } from "@tc/types/Voting";
+
+export { TOURNAMENT_OPTIONS };
+
 export const VOTE_COLORS = [
     "var(--mantine-color-success-6)",
     "var(--mantine-color-warning-5)",
@@ -24,17 +28,6 @@ export const PREDEFINED_OPTIONS = [
     "I have no issues or concerns with this user becoming a member of the team",
     "I have minor issues or concerns with this user becoming a member of the team",
     "I protest this user becoming a member of the team due to major concerns or issues",
-] as const;
-
-export const TOURNAMENT_OPTIONS = [
-    "No action required",
-    "Warning",
-    "1-month ban",
-    "3-month ban",
-    "6-month ban",
-    "1-year ban",
-    "2-year ban",
-    "Indefinite ban",
 ] as const;
 
 export const BADGE_SUPPORT_OPTIONS = [

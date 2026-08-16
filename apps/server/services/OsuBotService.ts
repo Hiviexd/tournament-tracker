@@ -150,10 +150,17 @@ export default class OsuBotService extends OsuApiService {
             return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" };
         }
 
+        const contents = (Array.isArray(message.content) ? message.content : [message.content]).map((entry) =>
+            entry.trim(),
+        );
+        if (contents.length === 0 || contents.some((entry) => !entry)) {
+            return { error: "Announcement messages cannot be empty", statusCode: 400, source: "osu-bot" };
+        }
+
         // Add delay to prevent rate limiting
         await utils.delay(500);
 
-        const options: AxiosRequestConfig = {
+        const createResponse = await this.executeRequest({
             url: "https://osu.ppy.sh/api/v2/chat/channels/",
             method: "POST",
             headers: {
@@ -162,16 +169,43 @@ export default class OsuBotService extends OsuApiService {
             },
             data: {
                 channel: message.channel,
-                message: message.content,
+                message: contents[0],
                 target_ids: finalUserIds,
                 type: "ANNOUNCE",
             },
-        };
+        });
 
-        const response = await this.executeRequest(options);
+        if (OsuApiService.isOsuResponseError(createResponse)) {
+            return { ...createResponse, source: "osu-bot" };
+        }
 
-        if (OsuApiService.isOsuResponseError(response)) {
-            return { ...response, source: "osu-bot" };
+        if (contents.length === 1) {
+            return true;
+        }
+
+        const channelId = createResponse.channel_id;
+        if (!channelId) {
+            return { error: "osu! API did not return a channel_id", statusCode: 500, source: "osu-bot" };
+        }
+
+        for (const extra of contents.slice(1)) {
+            await utils.delay(500);
+            const sendResponse = await this.executeRequest({
+                url: `https://osu.ppy.sh/api/v2/chat/channels/${channelId}/messages`,
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: {
+                    message: extra,
+                    is_action: false,
+                },
+            });
+
+            if (OsuApiService.isOsuResponseError(sendResponse)) {
+                return { ...sendResponse, source: "osu-bot" };
+            }
         }
 
         return true;

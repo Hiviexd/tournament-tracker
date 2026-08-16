@@ -1,6 +1,9 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
-import { VotingQueryParams, VOTING_CATEGORIES } from "@tc/types/Voting";
+import { VotingQueryParams, VOTING_CATEGORIES, SANCTION_BAN_TYPES } from "@tc/types/Voting";
+import { areSanctionVoteOptions } from "@tc/utils";
+import startCase from "lodash/startCase.js";
+import { TIME_BASED_TYPES } from "@tc/types/Infringement";
 import User from "../models/userModel";
 import { IUser, USER_GROUPS } from "@tc/types/User";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
@@ -22,7 +25,11 @@ const DEFAULT_POPULATE = [
             select: "username osuId groups coverUrl country",
         },
     },
-    { path: "targetUser", select: "username osuId groups coverUrl country" },
+    {
+        path: "targetUser",
+        select: "username osuId groups coverUrl country",
+        populate: { path: "infringements" },
+    },
     { path: "attachments", select: "originalName url size type" },
     { path: "abstainedUsers", select: "username osuId groups coverUrl country" },
 ];
@@ -137,6 +144,9 @@ class VotingsController {
             allowNeutralVotes,
             forceFullParticipation,
             binaryStrictPassThreshold,
+            isSanctionVote,
+            sanctionType,
+            sanctionPost,
         } = req.body;
         const files = req.files;
 
@@ -144,6 +154,7 @@ class VotingsController {
         let targetUser: IUser;
 
         const forceFullParticipationBool = forceFullParticipation === true || forceFullParticipation === "true";
+        const isSanctionVoteBool = isSanctionVote === true || isSanctionVote === "true";
 
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;
@@ -160,7 +171,28 @@ class VotingsController {
             allowNeutralVotes: neutralVotesSettingOverride,
             binaryStrictPassThreshold: type === "binary-strict" ? binaryStrictPassThreshold : undefined,
             forceFullParticipation: forceFullParticipationBool,
+            isSanctionVote: isSanctionVoteBool,
         });
+
+        if (isSanctionVoteBool) {
+            if (category !== "user") {
+                return res.status(400).json({ error: "Sanction votes must have category user" });
+            }
+            const parsedSanctionType = utils.pickStringUnion(String(sanctionType || ""), SANCTION_BAN_TYPES);
+            const trimmedPost = utils.isString(sanctionPost) ? sanctionPost.trim() : "";
+            const optionList = Array.isArray(options) ? options : [options];
+            if (!parsedSanctionType) {
+                return res.status(400).json({ error: "Sanction type is required" });
+            }
+            if (!trimmedPost || trimmedPost.length > 1000) {
+                return res.status(400).json({ error: "Sanction post must be between 1 and 1000 characters" });
+            }
+            if (!areSanctionVoteOptions(optionList)) {
+                return res.status(400).json({ error: "Sanction votes must use the tournament ban options" });
+            }
+            voting.sanctionType = parsedSanctionType;
+            voting.sanctionPost = trimmedPost;
+        }
 
         if (category === "user") {
             if (!targetUserId) {
@@ -494,9 +526,32 @@ class VotingsController {
             targetUserId,
             targetTournamentName,
             targetTournamentLink,
+            sanctionType,
+            sanctionPost,
         } = req.body;
 
         const voting = await Voting.findById(votingId).orFail();
+
+        if (voting.isSanctionVote && category && category !== "user") {
+            return res.status(400).json({ error: "Sanction votes must keep category user" });
+        }
+
+        if (voting.isSanctionVote && !voting.sanctionAppliedAt) {
+            if (sanctionType) {
+                const parsedSanctionType = utils.pickStringUnion(String(sanctionType), SANCTION_BAN_TYPES);
+                if (!parsedSanctionType) {
+                    return res.status(400).json({ error: "Invalid sanction type" });
+                }
+                voting.sanctionType = parsedSanctionType;
+            }
+            if (sanctionPost !== undefined) {
+                const trimmedPost = utils.isString(sanctionPost) ? sanctionPost.trim() : "";
+                if (!trimmedPost || trimmedPost.length > 1000) {
+                    return res.status(400).json({ error: "Sanction post must be between 1 and 1000 characters" });
+                }
+                voting.sanctionPost = trimmedPost;
+            }
+        }
 
         if (!voting.isActive) {
             if (category) {
@@ -773,6 +828,101 @@ class VotingsController {
                 ),
             )
             .send();
+    }
+
+    /** POST apply a concluded sanction vote */
+    public async applySanction(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+        const currentUser = res.locals!.user!;
+        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+
+        try {
+            const result = await VotingService.applySanction(voting, currentUser);
+            const populated = await Voting.findById(voting.id).populate(DEFAULT_POPULATE).orFail();
+
+            res.json({
+                message: "Sanction applied successfully!",
+                voting: populated,
+            });
+
+            const targetUser = populated.targetUser;
+            const typeLabel = startCase(result.infringementType);
+            await LogService.generate(
+                req.session.mongoId!,
+                `Applied **${typeLabel}** from vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to [**${targetUser?.username}**](${config.baseUrl}/watchlist?user=${targetUser?.osuId})`,
+                "voting",
+            );
+
+            const isTimeBased = TIME_BASED_TYPES.includes(result.infringementType);
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(result.isWarning ? DiscordUtils.webhookColors.yellow : DiscordUtils.webhookColors.red)
+                .setDescription(
+                    `Applied **${typeLabel}** from [**${voting.title}**](${config.baseUrl}/votes/${voting._id}) to [**${targetUser?.username}**](${config.baseUrl}/watchlist?user=${targetUser?.osuId})`,
+                )
+                .addField("Outcome", result.winnerOption);
+
+            if (isTimeBased && result.phrase) {
+                embed.addField("Duration", startCase(result.phrase));
+            }
+            if (voting.sanctionPost) {
+                embed.addField("Reason", utils.shorten(voting.sanctionPost, 1024));
+            }
+
+            await new WebhookBuilder().addEmbed(embed).send();
+        } catch (error: any) {
+            if (error?.status && error?.error) {
+                return res.status(error.status).json({ error: error.error });
+            }
+            throw error;
+        }
+    }
+
+    /** POST undo an applied sanction vote */
+    public async undoSanction(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+
+        try {
+            await VotingService.undoSanction(voting);
+            const populated = await Voting.findById(voting.id).populate(DEFAULT_POPULATE).orFail();
+
+            res.json({
+                message: "Sanction undone successfully!",
+                voting: populated,
+            });
+
+            const targetUser = populated.targetUser;
+            await LogService.generate(
+                req.session.mongoId!,
+                `Undid sanction from vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})${
+                    targetUser
+                        ? ` for [**${targetUser.username}**](${config.baseUrl}/watchlist?user=${targetUser.osuId})`
+                        : ""
+                }`,
+                "voting",
+            );
+
+            await new WebhookBuilder()
+                .addEmbed(
+                    new EmbedBuilder()
+                        .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                        .setColor(DiscordUtils.webhookColors.orange)
+                        .setDescription(
+                            `Undid sanction from [**${voting.title}**](${config.baseUrl}/votes/${voting._id})${
+                                targetUser
+                                    ? ` for [**${targetUser.username}**](${config.baseUrl}/watchlist?user=${targetUser.osuId})`
+                                    : ""
+                            }`,
+                        ),
+                )
+                .send();
+        } catch (error: any) {
+            if (error?.status && error?.error) {
+                return res.status(error.status).json({ error: error.error });
+            }
+            throw error;
+        }
     }
 }
 
