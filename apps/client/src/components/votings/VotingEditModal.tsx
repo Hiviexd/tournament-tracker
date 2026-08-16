@@ -259,52 +259,50 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                     )}
 
                     {!voting.isActive && (
+                        <Select
+                            label="Category"
+                            placeholder="Select vote category"
+                            data={categoryOptions}
+                            withAsterisk
+                            disabled={voting.isSanctionVote}
+                            {...form.getInputProps("category")}
+                        />
+                    )}
+
+                    {(!voting.isActive || voting.isSanctionVote) && form.values.category === "user" && (
+                        <MultipleUsersInput
+                            value={selectedUsers}
+                            onChange={(users) => {
+                                setSelectedUsers(users);
+                                form.setFieldValue(
+                                    "targetUserIds",
+                                    users.map((user) => user.id),
+                                );
+                            }}
+                            label="Target Users"
+                            placeholder="Search for a user to add..."
+                            required
+                            error={isString(form.errors.targetUserIds) ? form.errors.targetUserIds : undefined}
+                            allowUserCreation
+                            disabled={voting.isSanctionVote && !voting.isActive}
+                            showActiveInfringementWarning
+                        />
+                    )}
+
+                    {!voting.isActive && form.values.category === "tournament" && (
                         <>
-                            <Select
-                                label="Category"
-                                placeholder="Select vote category"
-                                data={categoryOptions}
+                            <TextInput
+                                label="Tournament Name"
+                                placeholder="Enter tournament name..."
+                                {...form.getInputProps("targetTournamentName")}
                                 withAsterisk
-                                disabled={voting.isSanctionVote}
-                                {...form.getInputProps("category")}
                             />
-
-                            {form.values.category === "user" && (
-                                <MultipleUsersInput
-                                    value={selectedUsers}
-                                    onChange={(users) => {
-                                        setSelectedUsers(users);
-                                        form.setFieldValue(
-                                            "targetUserIds",
-                                            users.map((user) => user.id),
-                                        );
-                                    }}
-                                    label="Target Users"
-                                    placeholder="Search for a user to add..."
-                                    required
-                                    error={isString(form.errors.targetUserIds) ? form.errors.targetUserIds : undefined}
-                                    allowUserCreation
-                                    disabled={voting.isSanctionVote}
-                                    showActiveInfringementWarning
-                                />
-                            )}
-
-                            {form.values.category === "tournament" && (
-                                <>
-                                    <TextInput
-                                        label="Tournament Name"
-                                        placeholder="Enter tournament name..."
-                                        {...form.getInputProps("targetTournamentName")}
-                                        withAsterisk
-                                    />
-                                    <TextInput
-                                        label="Tournament Forum URL"
-                                        placeholder="https://osu.ppy.sh/community/forums/topics/..."
-                                        {...form.getInputProps("targetTournamentLink")}
-                                        withAsterisk
-                                    />
-                                </>
-                            )}
+                            <TextInput
+                                label="Tournament Forum URL"
+                                placeholder="https://osu.ppy.sh/community/forums/topics/..."
+                                {...form.getInputProps("targetTournamentLink")}
+                                withAsterisk
+                            />
                         </>
                     )}
                     <Box>

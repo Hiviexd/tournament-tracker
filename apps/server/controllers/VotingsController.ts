@@ -558,7 +558,7 @@ class VotingsController {
             return res.status(400).json({ error: "Sanction votes must keep category user" });
         }
 
-        if (voting.isSanctionVote && targetUserIdArray.length > 0) {
+        if (voting.isSanctionVote && !voting.isActive && targetUserIdArray.length > 0) {
             const currentTargetIds = (voting.targetUsers ?? []).map((user) => (user._id ?? user).toString()).sort();
             const nextTargetIds = [...targetUserIdArray].sort();
             if (
@@ -620,6 +620,12 @@ class VotingsController {
                     voting.targetTournamentLink = undefined;
                 }
             }
+        } else if (voting.isSanctionVote && targetUserIdArray.length > 0) {
+            const loaded = await loadUsersByIds(targetUserIdArray);
+            if ("error" in loaded) {
+                return res.status(400).json({ error: loaded.error });
+            }
+            voting.targetUsers = loaded.users;
         }
 
         voting.title = title;
