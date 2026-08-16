@@ -48,17 +48,17 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
     });
 
     it("creates the channel then sends follow-up messages", async () => {
-        executeRequest.mockResolvedValueOnce({ channel_id: 44 }).mockResolvedValueOnce({ message_id: 2 }).mockResolvedValueOnce({
-            message_id: 3,
-        });
+        executeRequest
+            .mockResolvedValueOnce({ channel_id: 44 })
+            .mockResolvedValueOnce({ message_id: 2 })
+            .mockResolvedValueOnce({
+                message_id: 3,
+            });
 
-        const result = await OsuBotService.sendAnnouncementDirect(
-            [1],
-            {
-                channel: { name: "Notice of Tournament Sanction", description: "Immediate Action Required" },
-                content: ["intro", "reason", "outro"],
-            },
-        );
+        const result = await OsuBotService.sendAnnouncementDirect([1], {
+            channel: { name: "Notice of Tournament Sanction", description: "Immediate Action Required" },
+            content: ["intro", "reason", "outro"],
+        });
 
         expect(result).toBe(true);
         expect(executeRequest).toHaveBeenCalledTimes(3);

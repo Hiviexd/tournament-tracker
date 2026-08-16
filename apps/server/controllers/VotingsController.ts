@@ -470,11 +470,7 @@ class VotingsController {
         const votingId = req.params.votingId;
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
-        if (
-            !voting.isActive &&
-            voting.isSanctionVote &&
-            (voting.sanctionAppliedAt || voting.sanctionInfringementId)
-        ) {
+        if (!voting.isActive && voting.isSanctionVote && (voting.sanctionAppliedAt || voting.sanctionInfringementId)) {
             return res.status(400).json({
                 error: "Cannot reopen a sanction vote after a watchlist entry has been created",
             });

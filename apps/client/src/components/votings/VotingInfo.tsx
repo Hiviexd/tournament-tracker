@@ -476,7 +476,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                     (voting.isPublic ||
                                         Boolean(
                                             voting.isSanctionVote &&
-                                                (voting.sanctionAppliedAt || voting.sanctionInfringementId),
+                                            (voting.sanctionAppliedAt || voting.sanctionInfringementId),
                                         ))
                                 }
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>

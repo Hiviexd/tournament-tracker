@@ -93,7 +93,9 @@ describe("VotingService.applySanction", () => {
     });
 
     it("rejects no-action outcomes", async () => {
-        await expect(VotingService.applySanction(makeVoting({ votes: [rankedVote(0)] }), currentUser)).rejects.toMatchObject({
+        await expect(
+            VotingService.applySanction(makeVoting({ votes: [rankedVote(0)] }), currentUser),
+        ).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("no action required"),
         });

@@ -228,9 +228,12 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                 {...form.getInputProps("sanctionType")}
                             />
                             <Box>
-                                <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Box
+                                    mb={5}
+                                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
-                                        Sanction post<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                        Sanction post
+                                        <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
                                     </Box>
                                     <Text size="xs" c="dimmed">
                                         {form.values.sanctionPost.trim().length}/1000

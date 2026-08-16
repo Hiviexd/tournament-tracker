@@ -4,11 +4,7 @@ import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
 import utils from "@tc/utils/server";
-import {
-    getSanctionApplyState,
-    getSanctionAnnouncementChannel,
-    getSanctionInfringementDates,
-} from "@tc/utils";
+import { getSanctionApplyState, getSanctionAnnouncementChannel, getSanctionInfringementDates } from "@tc/utils";
 import config from "@tc/config";
 import { Document } from "mongoose";
 import User from "../models/userModel";
@@ -489,7 +485,12 @@ class VotingService {
         if (applyState.reason === "no-action") {
             throw { status: 400, error: "Cannot apply a sanction when the winning option is no action required" };
         }
-        if (applyState.reason === "invalid" || !applyState.winnerOption || !applyState.messages || !applyState.infringementType) {
+        if (
+            applyState.reason === "invalid" ||
+            !applyState.winnerOption ||
+            !applyState.messages ||
+            !applyState.infringementType
+        ) {
             throw { status: 400, error: "Sanction vote is missing a valid outcome, type, or post" };
         }
         if (!voting.sanctionType || !SANCTION_BAN_TYPES.includes(voting.sanctionType)) {

@@ -177,10 +177,7 @@ function getRankedChoiceVotes(votes: SanctionVoteBallot[]): RankedChoiceVote[] {
         .map((vote) => vote.data);
 }
 
-export function getSanctionVoteResult(
-    options: string[],
-    votes: SanctionVoteBallot[],
-): SanctionVoteResult {
+export function getSanctionVoteResult(options: string[], votes: SanctionVoteBallot[]): SanctionVoteResult {
     const rankedChoiceVotes = getRankedChoiceVotes(votes);
     const { ranking, isFirstPlaceTie } = getSchulzeResult(rankedChoiceVotes, options.length);
     const winnerOption = ranking.length ? (options[ranking[0]] ?? null) : null;

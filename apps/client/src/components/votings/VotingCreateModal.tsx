@@ -1,6 +1,13 @@
 // Base
 import { useCreateVoting } from "../../hooks/useVotings";
-import { SANCTION_BAN_TYPES, SanctionBanType, VotingCategory, type VotingFormData, VotingType, VOTING_TYPES } from "@tc/types/Voting";
+import {
+    SANCTION_BAN_TYPES,
+    SanctionBanType,
+    VotingCategory,
+    type VotingFormData,
+    VotingType,
+    VOTING_TYPES,
+} from "@tc/types/Voting";
 import { UserGroup } from "@tc/types/User";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import startCase from "lodash/startCase.js";
@@ -104,8 +111,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                 }
                 return null;
             },
-            sanctionType: (value, values) =>
-                values.isSanctionVote && !value ? "Sanction type is required" : null,
+            sanctionType: (value, values) => (values.isSanctionVote && !value ? "Sanction type is required" : null),
             sanctionPost: (value, values) => {
                 if (!values.isSanctionVote) return null;
                 if (!value.trim()) return "Sanction post is required";
@@ -342,9 +348,12 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 {...form.getInputProps("sanctionType")}
                             />
                             <Box>
-                                <Box mb={5} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Box
+                                    mb={5}
+                                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <Box component="label" style={{ fontWeight: 500, fontSize: "14px" }}>
-                                        Sanction post<span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
+                                        Sanction post
+                                        <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
                                     </Box>
                                     <Text size="xs" c="dimmed">
                                         {form.values.sanctionPost.trim().length}/1000
