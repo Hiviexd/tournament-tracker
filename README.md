@@ -61,7 +61,7 @@ pnpm docker:preview:down
 
 ### Automation jobs
 
-If you need all automation jobs to run when the project starts, use `pnpm dev:automation`.
+If you need automation jobs to run when the project starts, use `pnpm dev:automation`. Pass a job name to run only that job immediately (`pnpm dev:automation PendingSanctionReminder`); omit it to run all jobs.
 
 For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/jobs/README.md) page.
 

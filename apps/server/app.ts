@@ -252,9 +252,12 @@ const environmentStyled = process.env.NODE_ENV
     ? utils.consoleStyles(process.env.NODE_ENV, ["yellow", "underline"])
     : utils.consoleStyles("⚠ Unknown", ["orange", "underline"]);
 
+const automationJob = process.env.AUTOMATION_JOB?.trim();
 const mode =
     process.env.AUTOMATION_DEBUG === "true"
-        ? "Auto-start Automation Jobs"
+        ? automationJob
+            ? `Auto-start Job: ${automationJob}`
+            : "Auto-start Automation Jobs"
         : process.env.MIGRATION === "true"
           ? "Run Migrations"
           : null;

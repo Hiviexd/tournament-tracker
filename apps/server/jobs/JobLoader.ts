@@ -127,8 +127,14 @@ class JobLoader {
 
         // Run immediately for testing
         if (process.env.AUTOMATION_DEBUG === "true") {
-            console.log(utils.consoleStyles("Running all jobs immediately...", ["yellow", "bold"]));
-            this.runAllNow();
+            const jobName = process.env.AUTOMATION_JOB?.trim();
+            if (jobName) {
+                console.log(utils.consoleStyles(`Running job "${jobName}" immediately...`, ["yellow", "bold"]));
+                this.runNow(jobName);
+            } else {
+                console.log(utils.consoleStyles("Running all jobs immediately...", ["yellow", "bold"]));
+                this.runAllNow();
+            }
         }
     }
 
@@ -139,11 +145,28 @@ class JobLoader {
         console.log(utils.consoleStyles("All jobs stopped!", ["yellow", "bold", "underline"]));
     }
 
+    public async runNow(jobName: string): Promise<void> {
+        const job = this.findJob(jobName);
+        if (!job) {
+            const available = this.jobs.map((loadedJob) => loadedJob.name).join(", ") || "none";
+            console.error(utils.consoleStyles(`✗ Unknown job "${jobName}". Available: ${available}`, ["red", "bold"]));
+            return;
+        }
+
+        await job.runNow();
+        console.log(utils.consoleStyles(`Job "${job.name}" run successfully!`, ["green", "bold", "underline"]));
+    }
+
     public async runAllNow(): Promise<void> {
         for (const job of this.jobs) {
             await job.runNow();
         }
         console.log(utils.consoleStyles("All jobs run successfully!", ["green", "bold", "underline"]));
+    }
+
+    private findJob(jobName: string): BaseJob | undefined {
+        const normalized = jobName.replace(/Job$/i, "").toLowerCase();
+        return this.jobs.find((job) => job.name.replace(/Job$/i, "").toLowerCase() === normalized);
     }
 
     public getJobs(): BaseJob[] {
