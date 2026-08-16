@@ -2,6 +2,17 @@ import { TOURNAMENT_OPTIONS } from "@tc/types/Voting";
 
 export { TOURNAMENT_OPTIONS };
 
+export const VOTE_BADGE_COLORS = [
+    "success",
+    "warning",
+    "danger",
+    "info",
+    "orange",
+    "violet",
+    "pink",
+    "cyan",
+] as const;
+
 export const VOTE_COLORS = [
     "var(--mantine-color-success-6)",
     "var(--mantine-color-warning-5)",

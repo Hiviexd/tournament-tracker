@@ -1,14 +1,7 @@
 import { Stack, Group, Text, Table } from "@mantine/core";
 import { IVoting } from "@tc/types/Voting";
 import { BinaryVote } from "@tc/types/Vote";
-
-const getScoreColor = (score: number) => {
-    if (score === 0) return "gray.2";
-    const intensity = Math.abs(score);
-    const level = Math.round((intensity / 5) * 8); // Map 0-5 to color levels 1-8
-    const color = score > 0 ? "green" : "red";
-    return `${color}.${level}`;
-};
+import { getScoreColor } from "./voteScoreColor";
 
 interface IProps {
     voting: IVoting;
