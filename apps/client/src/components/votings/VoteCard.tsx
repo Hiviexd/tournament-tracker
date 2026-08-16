@@ -170,7 +170,7 @@ export default function VoteCard({ vote, options, allowNeutralVotes }: IProps) {
                                             <Tooltip label={getRankedChoiceDisplay(score.score).tooltip}>
                                                 <Badge
                                                     size="sm"
-                                                    variant="light"
+                                                    variant="outline"
                                                     color={color}
                                                     w={{ base: 100, xs: 40 }}
                                                     style={{ textAlign: "center" }}>

@@ -244,6 +244,27 @@ class InfringementService {
     public async findActiveForUser(userId: string | Types.ObjectId): Promise<IInfringement | null> {
         return await Infringement.findActiveForUser(userId);
     }
+
+    public async deleteInfringement(infringementId: string | Types.ObjectId) {
+        return await Infringement.findByIdAndDelete(infringementId);
+    }
+
+    public async syncSanctionInfringement(
+        infringementId: string | Types.ObjectId,
+        userId: string,
+        data: { type: InfringementType; reason: string },
+    ) {
+        const infringement = await Infringement.findById(infringementId);
+        if (!infringement || infringement.userId.toString() !== userId) return null;
+
+        const changed = infringement.type !== data.type || infringement.reason !== data.reason;
+        if (!changed) return { infringement, changed: false };
+
+        infringement.type = data.type;
+        infringement.reason = data.reason;
+        await infringement.save();
+        return { infringement, changed: true };
+    }
 }
 
 export default new InfringementService();

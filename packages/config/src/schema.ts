@@ -23,6 +23,7 @@ export const configSchema = z.object({
     osuBot: z.object({
         id: z.number(),
         secret: z.string(),
+        allowUserMessages: z.boolean().default(false),
     }),
     discord: z.object({
         username: z.string(),

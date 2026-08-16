@@ -10,7 +10,8 @@
     },
     "osuBot": {
         "id": 0,
-        "secret": ""
+        "secret": "",
+        "allowUserMessages": false
     },
     "discord": {
         "username": "Tournament Tracker",

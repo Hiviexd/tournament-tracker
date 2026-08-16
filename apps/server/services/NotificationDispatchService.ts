@@ -149,6 +149,7 @@ class NotificationDispatchService {
                 processingBy: null,
                 lastError: error,
                 lastHttpStatus: statusCode ?? null,
+                payload: job.payload,
             },
         });
         this.runtimeCounters.retried += 1;

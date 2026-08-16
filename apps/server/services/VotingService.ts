@@ -1,9 +1,10 @@
-import { IVoting } from "@tc/types/Voting";
+import { IVoting, SANCTION_BAN_TYPES } from "@tc/types/Voting";
 import { IVote } from "@tc/types/Vote";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
 import utils from "@tc/utils/server";
+import { getSanctionApplyState, getSanctionAnnouncementChannel, getSanctionInfringementDates } from "@tc/utils";
 import config from "@tc/config";
 import { Document } from "mongoose";
 import User from "../models/userModel";
@@ -11,6 +12,8 @@ import Vote from "../models/voteModel";
 import Voting from "../models/votingModel";
 import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
+import InfringementService from "./InfringementService";
+import OsuBotService from "./OsuBotService";
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
@@ -54,6 +57,7 @@ class VotingService {
         const publicVoting = voting.toObject();
         publicVoting.author = undefined;
         publicVoting.description = "";
+        publicVoting.sanctionPost = undefined;
         publicVoting.attachments = [];
         publicVoting.abstainedUsers = [];
         publicVoting.votes = publicVoting.votes.map((vote) => ({
@@ -61,6 +65,13 @@ class VotingService {
             comment: undefined,
             author: undefined,
         }));
+        if (publicVoting.targetUsers?.length) {
+            for (const targetUser of publicVoting.targetUsers) {
+                targetUser.infringements = undefined;
+                targetUser.activeInfringement = undefined;
+                targetUser.latestAction = undefined;
+            }
+        }
         return publicVoting;
     }
 
@@ -407,19 +418,17 @@ class VotingService {
                         },
                     );
                 } else {
-                    // Calculate Schulze ranking
-                    const schulzeRanking = utils.calculateSchulzeWinner(
+                    const { ranking, places, isFirstPlaceTie } = utils.getSchulzeResult(
                         rankedChoiceVotes.map((v) => v.data),
                         voting.options.length,
                     );
 
-                    const resultsText = schulzeRanking
-                        .map((optionIndex, rank) => {
-                            const position = rank + 1;
-                            const option = voting.options[optionIndex];
-                            return `${position}. **${option}**`;
-                        })
+                    const resultsText = ranking
+                        .map((optionIndex, i) => `${places[i]}. **${voting.options[optionIndex]}**`)
                         .join("\n");
+
+                    const winners = ranking.filter((_, i) => places[i] === 1);
+                    const winnerText = winners.map((optionIndex) => `🏆 **${voting.options[optionIndex]}**`).join("\n");
 
                     fields.push(
                         {
@@ -437,8 +446,8 @@ class VotingService {
                             value: resultsText,
                         },
                         {
-                            name: "Winner",
-                            value: `🏆 **${voting.options[schulzeRanking[0]]}**`,
+                            name: isFirstPlaceTie ? "Winner(s)" : "Winner",
+                            value: winnerText,
                         },
                     );
                 }
@@ -447,6 +456,165 @@ class VotingService {
         }
 
         return fields;
+    }
+
+    public async applySanction(voting: Document & IVoting, currentUser: Pick<IUser, "osuId">) {
+        const applyState = getSanctionApplyState({
+            isSanctionVote: voting.isSanctionVote,
+            isActive: voting.isActive,
+            sanctionAppliedAt: voting.sanctionAppliedAt,
+            assignedGroups: voting.assignedGroups,
+            options: voting.options,
+            votes: voting.votes,
+            sanctionType: voting.sanctionType,
+            sanctionPost: voting.sanctionPost,
+        });
+
+        if (!voting.isSanctionVote) {
+            throw { status: 400, error: "This vote is not a sanction vote" };
+        }
+        if (voting.isActive) {
+            throw { status: 400, error: "Cannot apply a sanction while the vote is still active" };
+        }
+        if (voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has already been applied" };
+        }
+        if (applyState.reason === "tie") {
+            throw { status: 400, error: "Cannot apply a sanction while the vote is tied. Handle the tie manually." };
+        }
+        if (applyState.reason === "no-action") {
+            throw { status: 400, error: "Cannot apply a sanction when the winning option is no action required" };
+        }
+        if (
+            applyState.reason === "invalid" ||
+            !applyState.winnerOption ||
+            !applyState.messages ||
+            !applyState.infringementType
+        ) {
+            throw { status: 400, error: "Sanction vote is missing a valid outcome, type, or post" };
+        }
+        if (!voting.sanctionType || !SANCTION_BAN_TYPES.includes(voting.sanctionType)) {
+            throw { status: 400, error: "Sanction vote is missing a valid sanction type" };
+        }
+
+        const targetUsers = voting.targetUsers ?? [];
+        if (!targetUsers.length || targetUsers.some((user) => !user?._id || !user.osuId)) {
+            throw { status: 400, error: "Sanction votes must have populated target users" };
+        }
+
+        const reason = voting.sanctionPost!.trim();
+        const dates = applyState.isWarning ? {} : getSanctionInfringementDates(applyState.winnerOption);
+        const nextInfringementIds = [...(voting.sanctionInfringementIds ?? [])];
+
+        for (let i = 0; i < targetUsers.length; i++) {
+            const targetUser = targetUsers[i];
+            const existingId = nextInfringementIds[i];
+            if (!existingId) {
+                const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
+                    type: applyState.infringementType,
+                    reason,
+                    ...dates,
+                });
+                nextInfringementIds[i] = infringement._id ?? infringement.id;
+                voting.sanctionInfringementIds = nextInfringementIds;
+                await voting.save();
+            } else {
+                const synced = await InfringementService.syncSanctionInfringement(
+                    existingId,
+                    targetUser._id.toString(),
+                    { type: applyState.infringementType, reason },
+                );
+                if (!synced) {
+                    const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
+                        type: applyState.infringementType,
+                        reason,
+                        ...dates,
+                    });
+                    nextInfringementIds[i] = infringement._id ?? infringement.id;
+                    voting.sanctionInfringementIds = nextInfringementIds;
+                    voting.sanctionAnnouncementChannelId = undefined;
+                    voting.sanctionAnnouncementSentCount = undefined;
+                    await voting.save();
+                } else if (synced.changed) {
+                    voting.sanctionAnnouncementChannelId = undefined;
+                    voting.sanctionAnnouncementSentCount = undefined;
+                }
+            }
+        }
+
+        voting.sanctionInfringementIds = nextInfringementIds;
+
+        if (voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has already been applied" };
+        }
+
+        const announcement = {
+            channel: getSanctionAnnouncementChannel({
+                isWarning: applyState.isWarning,
+                isContest: applyState.isContest,
+                sanctionType: voting.sanctionType,
+            }),
+            content: applyState.messages,
+            channelId: voting.sanctionAnnouncementChannelId,
+            sentCount: voting.sanctionAnnouncementSentCount,
+        };
+        const announcementResult = await OsuBotService.sendAnnouncementDirect(
+            targetUsers.map((user) => user.osuId),
+            announcement,
+            currentUser.osuId,
+        );
+
+        if (announcement.channelId) {
+            voting.sanctionAnnouncementChannelId = announcement.channelId;
+            voting.sanctionAnnouncementSentCount = announcement.sentCount;
+        }
+
+        if (announcementResult !== true) {
+            await voting.save();
+            throw {
+                status: announcementResult.statusCode || 500,
+                error: announcementResult.error || "Failed to send sanction announcement",
+            };
+        }
+
+        voting.sanctionAppliedAt = new Date();
+        await voting.save();
+
+        return {
+            voting,
+            infringementType: applyState.infringementType,
+            winnerOption: applyState.winnerOption,
+            isWarning: applyState.isWarning,
+            phrase: applyState.phrase,
+        };
+    }
+
+    public async undoSanction(voting: Document & IVoting) {
+        if (!voting.isSanctionVote) {
+            throw { status: 400, error: "This vote is not a sanction vote" };
+        }
+        if (!voting.sanctionAppliedAt) {
+            throw { status: 400, error: "Sanction has not been applied" };
+        }
+
+        if (voting.sanctionInfringementIds?.length) {
+            await Promise.all(voting.sanctionInfringementIds.map((id) => InfringementService.deleteInfringement(id)));
+        }
+
+        voting.sanctionInfringementIds = undefined;
+        voting.sanctionAppliedAt = undefined;
+        voting.sanctionAnnouncementChannelId = undefined;
+        voting.sanctionAnnouncementSentCount = undefined;
+        await voting.updateOne({
+            $unset: {
+                sanctionInfringementIds: 1,
+                sanctionAppliedAt: 1,
+                sanctionAnnouncementChannelId: 1,
+                sanctionAnnouncementSentCount: 1,
+            },
+        });
+
+        return { voting };
     }
 }
 

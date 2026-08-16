@@ -3,8 +3,22 @@ import dayjs from "@tc/utils/dayjs";
 import { useState } from "react";
 import { IVoting } from "@tc/types/Voting";
 import { IUser } from "@tc/types/User";
-import { useToggleVotingStatus, useDeleteVoting, useToggleVotingPublic, useClearVotes } from "../../hooks/useVotings";
+import {
+    useToggleVotingStatus,
+    useDeleteVoting,
+    useToggleVotingPublic,
+    useClearVotes,
+    useApplySanction,
+    useUndoSanction,
+} from "../../hooks/useVotings";
 import { useConfirmModal } from "../../hooks/useModals";
+import {
+    getActiveInfringement,
+    getSanctionAnnouncementChannel,
+    getSanctionApplyState,
+    formatHostsList,
+} from "@tc/utils/client";
+import startCase from "lodash/startCase.js";
 
 // Mantine
 import {
@@ -57,8 +71,12 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
     const togglePublicMutation = useToggleVotingPublic(voting.id);
     const deleteVotingMutation = useDeleteVoting(voting.id);
     const clearVotesMutation = useClearVotes(voting.id);
+    const applySanctionMutation = useApplySanction(voting.id);
+    const undoSanctionMutation = useUndoSanction(voting.id);
     const sortedGroups = voting.assignedGroups.toSorted((a, b) => b.localeCompare(a));
     const confirmModal = useConfirmModal();
+    const sanctionState = getSanctionApplyState(voting);
+    const hasActiveInfringement = (voting.targetUsers ?? []).some((user) => getActiveInfringement(user));
 
     const theme = useMantineTheme();
     const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
@@ -144,6 +162,104 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
         )
             return;
         await clearVotesMutation.mutateAsync();
+    };
+
+    const handleApplySanction = async () => {
+        if (!sanctionState.showButton || sanctionState.disabled || !sanctionState.messages || !voting.sanctionType)
+            return;
+
+        const channel = getSanctionAnnouncementChannel({
+            isWarning: sanctionState.isWarning,
+            isContest: sanctionState.isContest,
+            sanctionType: voting.sanctionType,
+        });
+
+        const preview = (
+            <Stack gap="sm">
+                <Text size="sm">
+                    Apply a{" "}
+                    <Text span fw={600}>
+                        {startCase(sanctionState.infringementType)}
+                    </Text>{" "}
+                    to {formatHostsList(voting.targetUsers ?? []) || "the target users"}?
+                </Text>
+                {hasActiveInfringement && !sanctionState.isWarning && (
+                    <AlertText type="warning">
+                        {voting.targetUsers && voting.targetUsers.length > 1
+                            ? "Some of these users already have an active infringement. Applying this sanction will expire those."
+                            : "This user already has an active infringement. Applying this sanction will expire it."}
+                    </AlertText>
+                )}
+                <Text size="sm" fw={600}>
+                    Announcement preview
+                </Text>
+                <Box
+                    p="sm"
+                    style={{
+                        border: "1px solid var(--mantine-color-default-border)",
+                        borderRadius: "var(--mantine-radius-sm)",
+                    }}>
+                    <Text fw={600}>{channel.name}</Text>
+                    <Text size="sm" c="dimmed">
+                        {channel.description}
+                    </Text>
+                </Box>
+                {sanctionState.messages.map((message, index) => (
+                    <Box
+                        key={index}
+                        p="sm"
+                        style={{
+                            border: "1px solid var(--mantine-color-default-border)",
+                            borderRadius: "var(--mantine-radius-sm)",
+                        }}>
+                        <MarkdownText content={message} />
+                    </Box>
+                ))}
+            </Stack>
+        );
+
+        if (
+            !(await confirmModal({
+                title: "Apply Sanction?",
+                size: "xl",
+                children: preview,
+                confirmText: "Apply Sanction",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon="gavel" />,
+                    color: "danger",
+                },
+            }))
+        )
+            return;
+
+        await applySanctionMutation.mutateAsync();
+    };
+
+    const handleUndoSanction = async () => {
+        if (
+            !(await confirmModal({
+                title: "Undo Sanction?",
+                children: (
+                    <Stack gap="sm">
+                        <Text size="sm">
+                            This will remove the watchlist entry and reset the vote so the sanction can be applied
+                            again.
+                        </Text>
+                        <AlertText type="warning">
+                            The osu! announcement cannot be undone. Users will still have the original messages.
+                        </AlertText>
+                    </Stack>
+                ),
+                confirmText: "Undo Sanction",
+                confirmProps: {
+                    leftSection: <FontAwesomeIcon icon="undo" />,
+                    color: "danger",
+                },
+            }))
+        )
+            return;
+
+        await undoSanctionMutation.mutateAsync();
     };
 
     const handleUserCardClick = (targetUser: IUser) => {
@@ -235,6 +351,13 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </Stack>
                         <Group gap="xs">
                             <VotingTypeBadge type={voting.category} />
+                            {voting.isSanctionVote && (
+                                <Tooltip label="Sanction Vote">
+                                    <Badge color="danger" variant="light">
+                                        <FontAwesomeIcon icon="gavel" />
+                                    </Badge>
+                                </Tooltip>
+                            )}
                             {!voting.isActive && (
                                 <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>
                                     <Badge color={voting.isPublic ? "blue" : "gray"} variant="light">
@@ -248,6 +371,11 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             <Badge color={voting.isActive ? "success" : "gray"} variant="light">
                                 {voting.isActive ? "Active" : "Concluded"}
                             </Badge>
+                            {voting.isSanctionVote && voting.sanctionAppliedAt && (
+                                <Badge color="red" variant="light">
+                                    Sanction applied
+                                </Badge>
+                            )}
                         </Group>
                     </Group>
 
@@ -269,18 +397,23 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                             <Divider />
                             {renderDescription()}
                             <Divider />
-                            {voting.targetUser && (
+                            {voting.targetUsers && voting.targetUsers.length > 0 && (
                                 <>
                                     <Stack gap="sm">
                                         <Text size="sm" c="dimmed">
-                                            Target User
+                                            {voting.targetUsers.length === 1 ? "Target User" : "Target Users"}
                                         </Text>
-                                        <UserCard
-                                            user={voting.targetUser}
-                                            onSelect={() => handleUserCardClick(voting.targetUser!)}
-                                            static
-                                            fullWidth={isMobile}
-                                        />
+                                        <Group gap="sm" wrap="wrap">
+                                            {voting.targetUsers.map((targetUser) => (
+                                                <UserCard
+                                                    key={targetUser.id}
+                                                    user={targetUser}
+                                                    onSelect={() => handleUserCardClick(targetUser)}
+                                                    static
+                                                    fullWidth={isMobile}
+                                                />
+                                            ))}
+                                        </Group>
                                     </Stack>
                                 </>
                             )}
@@ -316,14 +449,48 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                         </>
                     )}
 
+                    {user?.isCommittee && sanctionState.reason === "tie" && (
+                        <AlertText type="warning">
+                            This sanction vote is tied. You need to handle the email and watchlist manually.
+                        </AlertText>
+                    )}
+
                     {user?.isCommittee && (
                         <Group wrap="wrap">
+                            {sanctionState.showButton && (
+                                <Button
+                                    variant="filled"
+                                    color="danger"
+                                    onClick={handleApplySanction}
+                                    loading={applySanctionMutation.isPending}
+                                    disabled={sanctionState.disabled}
+                                    leftSection={<FontAwesomeIcon icon="gavel" />}>
+                                    {sanctionState.reason === "applied" ? "Sanction Applied" : "Apply Sanction"}
+                                </Button>
+                            )}
+                            {user?.isAdmin && sanctionState.reason === "applied" && (
+                                <Button
+                                    variant="outline"
+                                    color="danger"
+                                    onClick={handleUndoSanction}
+                                    loading={undoSanctionMutation.isPending}
+                                    leftSection={<FontAwesomeIcon icon="undo" />}>
+                                    Undo Sanction
+                                </Button>
+                            )}
                             <Button
                                 variant={voting.isActive ? "filled" : "outline"}
                                 color="warning"
                                 onClick={handleToggleStatus}
                                 loading={toggleStatusMutation.isPending}
-                                disabled={!voting.isActive && voting.isPublic}
+                                disabled={
+                                    !voting.isActive &&
+                                    (voting.isPublic ||
+                                        Boolean(
+                                            voting.isSanctionVote &&
+                                            (voting.sanctionAppliedAt || voting.sanctionInfringementIds?.length),
+                                        ))
+                                }
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
                                 {voting.isActive ? "Conclude" : "Reopen"}
                             </Button>

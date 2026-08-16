@@ -64,7 +64,7 @@ export default function MultipleUsersInput({
                     {value.map((user) => (
                         <Pill
                             key={user.id}
-                            withRemoveButton
+                            withRemoveButton={!disabled}
                             onRemove={() => handleRemoveUser(user.id)}
                             styles={{
                                 root: {

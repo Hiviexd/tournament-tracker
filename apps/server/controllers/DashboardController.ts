@@ -34,7 +34,7 @@ const VOTING_POPULATE = [
             select: "username osuId groups coverUrl",
         },
     },
-    { path: "targetUser", select: "username osuId groups coverUrl country" },
+    { path: "targetUsers", select: "username osuId groups coverUrl country" },
     { path: "abstainedUsers", select: "username osuId groups coverUrl country" },
 ];
 

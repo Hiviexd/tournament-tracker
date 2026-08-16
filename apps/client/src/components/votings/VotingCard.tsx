@@ -82,6 +82,13 @@ export default function VotingCard({ voting }: IPropTypes) {
                 <Group gap="xs">
                     {/* Voting type */}
                     <VotingTypeBadge type={voting.category} />
+                    {voting.isSanctionVote && (
+                        <Tooltip label="Sanction Vote">
+                            <Badge color="danger" variant="light">
+                                <FontAwesomeIcon icon="gavel" />
+                            </Badge>
+                        </Tooltip>
+                    )}
                     {/* Public/Private */}
                     {!voting.isActive && (
                         <Tooltip label={voting.isPublic ? "Public Vote" : "Private Vote"}>

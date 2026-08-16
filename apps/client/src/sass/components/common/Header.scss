@@ -2,8 +2,8 @@
 
 .header {
     background: transparent;
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     box-shadow: none;
     z-index: 100;
     border-bottom: 1px solid transparent;
@@ -11,8 +11,8 @@
         background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         border-bottom-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        -webkit-backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     .nav-group {
         // only on desktop
@@ -58,8 +58,8 @@
 
 .mantine-AppShell-navbar {
     background: color-mix(in srgb, var(--mantine-color-primary-11) 70%, transparent);
-    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
 }
 
 .header .nav-group,

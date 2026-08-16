@@ -6,7 +6,7 @@
     "packageManager": "pnpm@10.17.1",
     "scripts": {
         "dev": "pnpm run --parallel --filter @tc/server --filter @tc/client dev",
-        "dev:automation": "cross-env AUTOMATION_DEBUG=true pnpm run --parallel --filter @tc/server --filter @tc/client dev",
+        "dev:automation": "node scripts/dev-automation.mjs",
         "dev-client": "pnpm --filter @tc/client dev",
         "dev-server": "pnpm --filter @tc/server dev",
         "preview-dev": "pnpm run --parallel --filter @tc/server --filter @tc/client dev:preview",

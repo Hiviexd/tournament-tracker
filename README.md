@@ -33,7 +33,7 @@ For a guide on how to use the Mappool Compliance API in your mappooling sheets, 
   - `baseUrl`: base URL of the website
   - `automation`: boolean for whether to run automation jobs or not
   - `osuApp`: credentials for the osu! API v2 client
-  - `osuBot`: credentials for the osu! bot API client
+  - `osuBot`: credentials for the osu! bot API client (`allowUserMessages` sends announcements to real users; defaults to `false`, which uses the actor as a fallback recipient)
   - `discord`: Discord webhook setup
   - `r2`: the Cloudflare R2 bucket's credentials (optional)
   - `complianceApi`: the [Mappool Compliance API](https://github.com/hburn7/omc-api)'s credentials (optional)
@@ -61,7 +61,7 @@ pnpm docker:preview:down
 
 ### Automation jobs
 
-If you need all automation jobs to run when the project starts, use `pnpm dev:automation`.
+If you need automation jobs to run when the project starts, use `pnpm dev:automation`. Pass a job name to run only that job immediately (`pnpm dev:automation PendingSanctionReminder`); omit it to run all jobs.
 
 For documentation on how to create a new automation job, see the [jobs README](https://github.com/Hiviexd/tournament-tracker/blob/main/apps/server/jobs/README.md) page.
 

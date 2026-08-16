@@ -72,7 +72,9 @@ export interface IOsuMessageChannel {
 
 export interface IOsuBotMessage {
     channel: IOsuMessageChannel;
-    content: string;
+    content: string | string[];
+    channelId?: number;
+    sentCount?: number;
 }
 
 export interface IBeatmap {

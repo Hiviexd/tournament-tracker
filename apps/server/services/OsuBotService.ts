@@ -95,7 +95,7 @@ export default class OsuBotService extends OsuApiService {
      * Enqueues an announcement to specified users through the osu! chat
      * @param userIds - Array of osu! user IDs to send the announcement to
      * @param message - The message object containing channel info and content
-     * @param fallbackId - The osu! user ID to send the announcement to if in dev environment
+     * @param fallbackId - Recipient used when `osuBot.allowUserMessages` is false
      * @returns true if enqueue succeeds, ErrorResponse if enqueue fails
      */
     public static async sendAnnouncement(
@@ -134,44 +134,82 @@ export default class OsuBotService extends OsuApiService {
 
         const finalUserIds: number[] = [];
 
-        // Prevent sending announcements to actual users in dev env
-        // TODO: isolate fallbackId to this method and try to remove the extra param from the main method
-        // ? Possibly look into saving the req.ession into env? or try to somehow access it from here
-        if (process.env.NODE_ENV === "production") {
+        if (config.osuBot.allowUserMessages) {
             finalUserIds.push(...userIds);
         } else if (fallbackId) {
-            console.log("Non-production environment detected, sending osu! announcement to fallback ID: " + fallbackId);
+            console.log("osuBot.allowUserMessages is false, sending announcement to fallback ID: " + fallbackId);
             console.log("OG User IDs: " + userIds);
             finalUserIds.push(fallbackId);
         } else {
-            console.log(
-                "Non-production environment detected, but no fallback ID provided. Skipping osu! announcement.",
-            );
+            console.log("osuBot.allowUserMessages is false, and no fallback ID was provided. Skipping announcement.");
             return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" };
         }
 
-        // Add delay to prevent rate limiting
-        await utils.delay(500);
+        const contents = (Array.isArray(message.content) ? message.content : [message.content]).map((entry) =>
+            entry.trim(),
+        );
+        if (contents.length === 0 || contents.some((entry) => !entry)) {
+            return { error: "Announcement messages cannot be empty", statusCode: 400, source: "osu-bot" };
+        }
 
-        const options: AxiosRequestConfig = {
-            url: "https://osu.ppy.sh/api/v2/chat/channels/",
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            data: {
-                channel: message.channel,
-                message: message.content,
-                target_ids: finalUserIds,
-                type: "ANNOUNCE",
-            },
-        };
+        let channelId = message.channelId;
+        let sentCount = message.sentCount ?? (channelId ? 1 : 0);
 
-        const response = await this.executeRequest(options);
+        if (!channelId) {
+            await utils.delay(500);
+            const createResponse = await this.executeRequest({
+                url: "https://osu.ppy.sh/api/v2/chat/channels/",
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: {
+                    channel: message.channel,
+                    message: contents[0],
+                    target_ids: finalUserIds,
+                    type: "ANNOUNCE",
+                },
+            });
 
-        if (OsuApiService.isOsuResponseError(response)) {
-            return { ...response, source: "osu-bot" };
+            if (OsuApiService.isOsuResponseError(createResponse)) {
+                return { ...createResponse, source: "osu-bot" };
+            }
+
+            channelId = createResponse.channel_id;
+            if (!channelId) {
+                return { error: "osu! API did not return a channel_id", statusCode: 500, source: "osu-bot" };
+            }
+
+            message.channelId = channelId;
+            message.sentCount = 1;
+            sentCount = 1;
+        }
+
+        if (contents.length === 1 || sentCount >= contents.length) {
+            return true;
+        }
+
+        for (let index = sentCount; index < contents.length; index++) {
+            await utils.delay(500);
+            const sendResponse = await this.executeRequest({
+                url: `https://osu.ppy.sh/api/v2/chat/channels/${channelId}/messages`,
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: {
+                    message: contents[index],
+                    is_action: false,
+                },
+            });
+
+            if (OsuApiService.isOsuResponseError(sendResponse)) {
+                return { ...sendResponse, source: "osu-bot" };
+            }
+
+            message.sentCount = index + 1;
         }
 
         return true;
