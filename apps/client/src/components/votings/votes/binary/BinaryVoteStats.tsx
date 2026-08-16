@@ -1,7 +1,7 @@
 import { Stack, Group, Text, Table } from "@mantine/core";
 import { IVoting } from "@tc/types/Voting";
 import { BinaryVote } from "@tc/types/Vote";
-import { getScoreColor } from "./voteScoreColor";
+import { getScoreColor } from "../voteScoreColor";
 
 interface IProps {
     voting: IVoting;

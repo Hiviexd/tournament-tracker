@@ -4,7 +4,7 @@ import { IVoting } from "@tc/types/Voting";
 import { BinaryStrictVote } from "@tc/types/Vote";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../../store/atoms";
+import { loggedInUserAtom } from "../../../../store/atoms";
 import { useMemo } from "react";
 
 interface IProps {

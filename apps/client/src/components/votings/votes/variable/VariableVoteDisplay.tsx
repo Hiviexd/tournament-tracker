@@ -1,7 +1,7 @@
 import { Badge, Card, Group, Stack, parseThemeColor, rgba, useMantineTheme } from "@mantine/core";
 import { VariableVoteScore } from "@tc/types/Vote";
-import { TruncatedText } from "../../common/TruncatedText";
-import { formatSignedScore, getScoreColor } from "./voteScoreColor";
+import { TruncatedText } from "../../../common/TruncatedText";
+import { formatSignedScore, getScoreColor } from "../voteScoreColor";
 
 interface IProps {
     scores: VariableVoteScore[];

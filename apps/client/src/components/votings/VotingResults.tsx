@@ -10,11 +10,11 @@ import { useDisclosure } from "@mantine/hooks";
 // Components
 import ExpandButton from "../common/buttons/ExpandButton";
 import VoteCard from "./VoteCard";
-import ClassicVoteStats from "./votes/ClassicVoteStats";
-import BinaryVoteStats from "./votes/BinaryVoteStats";
-import BinaryStrictVoteStats from "./votes/BinaryStrictVoteStats";
-import VariableVoteStats from "./votes/VariableVoteStats";
-import RankedChoiceVoteStats from "./votes/RankedChoiceVoteStats";
+import ClassicVoteStats from "./votes/classic/ClassicVoteStats";
+import BinaryVoteStats from "./votes/binary/BinaryVoteStats";
+import BinaryStrictVoteStats from "./votes/binary-strict/BinaryStrictVoteStats";
+import VariableVoteStats from "./votes/variable/VariableVoteStats";
+import RankedChoiceVoteStats from "./votes/ranked-choice/RankedChoiceVoteStats";
 import { IUser } from "@tc/types/User";
 import UserLink from "../common/UserLink";
 

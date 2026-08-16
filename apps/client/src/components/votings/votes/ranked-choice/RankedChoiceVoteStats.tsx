@@ -2,7 +2,7 @@ import { Stack, Group, Text, Box, Badge, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "@tc/types/Voting";
 import { RankedChoiceVote } from "@tc/types/Vote";
-import { VOTE_COLORS } from "../../../constants";
+import { VOTE_COLORS } from "../../../../constants";
 import utils from "@tc/utils/client";
 
 interface IProps {

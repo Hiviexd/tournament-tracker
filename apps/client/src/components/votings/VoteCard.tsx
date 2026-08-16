@@ -4,11 +4,11 @@ import UserDisplay from "../common/UserDisplay";
 import MarkdownText from "../common/MarkdownText";
 import DateBadge from "../common/badges/DateBadge";
 import { VOTE_COLORS } from "../../constants";
-import ClassicVoteDisplay from "./votes/ClassicVoteDisplay";
-import BinaryVoteDisplay from "./votes/BinaryVoteDisplay";
-import BinaryStrictVoteDisplay from "./votes/BinaryStrictVoteDisplay";
-import VariableVoteDisplay from "./votes/VariableVoteDisplay";
-import RankedChoiceVoteDisplay from "./votes/RankedChoiceVoteDisplay";
+import ClassicVoteDisplay from "./votes/classic/ClassicVoteDisplay";
+import BinaryVoteDisplay from "./votes/binary/BinaryVoteDisplay";
+import BinaryStrictVoteDisplay from "./votes/binary-strict/BinaryStrictVoteDisplay";
+import VariableVoteDisplay from "./votes/variable/VariableVoteDisplay";
+import RankedChoiceVoteDisplay from "./votes/ranked-choice/RankedChoiceVoteDisplay";
 import { getScoreCssVar } from "./votes/voteScoreColor";
 
 interface IProps {

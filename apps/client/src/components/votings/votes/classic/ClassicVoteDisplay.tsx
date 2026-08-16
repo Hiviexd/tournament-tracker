@@ -1,5 +1,5 @@
 import { Badge } from "@mantine/core";
-import { VOTE_BADGE_COLORS } from "../../../constants";
+import { VOTE_BADGE_COLORS } from "../../../../constants";
 
 interface IProps {
     option: number;

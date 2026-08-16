@@ -1,7 +1,7 @@
 import { Badge, Card, Group, Stack, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RankedChoiceVoteScore } from "@tc/types/Vote";
-import { TruncatedText } from "../../common/TruncatedText";
+import { TruncatedText } from "../../../common/TruncatedText";
 
 interface IProps {
     scores: RankedChoiceVoteScore[];

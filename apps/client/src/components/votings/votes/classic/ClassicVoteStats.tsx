@@ -1,9 +1,9 @@
 import { Box, Group, Text, ActionIcon, Tooltip, Progress } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "@tc/types/Voting";
-import { VOTE_COLORS } from "../../../constants";
+import { VOTE_COLORS } from "../../../../constants";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../../../store/atoms";
+import { loggedInUserAtom } from "../../../../store/atoms";
 import { useMemo } from "react";
 
 interface IProps {

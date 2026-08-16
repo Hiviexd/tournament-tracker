@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
-import { TruncatedText } from "../../common/TruncatedText";
-import { formatSignedScore, getScoreColor } from "./voteScoreColor";
+import { TruncatedText } from "../../../common/TruncatedText";
+import { formatSignedScore, getScoreColor } from "../voteScoreColor";
 
 interface IProps {
     score: number;
