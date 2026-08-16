@@ -391,6 +391,8 @@ export function isValidEmail(email: string): boolean {
 
 export interface SchulzeResult {
     ranking: number[];
+    /** 1-based competition places aligned with `ranking`. Tied options share a place (1, 1, 3). */
+    places: number[];
     isFirstPlaceTie: boolean;
 }
 
@@ -455,11 +457,12 @@ export function getSchulzeResult(votes: RankedChoiceVote[], optionCount: number)
         ranking.push({ index: i, wins });
     }
 
-    // Sort by number of wins (descending)
     ranking.sort((a, b) => b.wins - a.wins);
+    const places = ranking.map((entry) => 1 + ranking.filter((other) => other.wins > entry.wins).length);
 
     return {
         ranking: ranking.map((r) => r.index),
+        places,
         isFirstPlaceTie: ranking.length > 1 && ranking[0].wins === ranking[1].wins,
     };
 }

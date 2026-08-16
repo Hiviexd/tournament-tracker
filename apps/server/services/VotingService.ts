@@ -418,19 +418,17 @@ class VotingService {
                         },
                     );
                 } else {
-                    // Calculate Schulze ranking
-                    const schulzeRanking = utils.calculateSchulzeWinner(
+                    const { ranking, places, isFirstPlaceTie } = utils.getSchulzeResult(
                         rankedChoiceVotes.map((v) => v.data),
                         voting.options.length,
                     );
 
-                    const resultsText = schulzeRanking
-                        .map((optionIndex, rank) => {
-                            const position = rank + 1;
-                            const option = voting.options[optionIndex];
-                            return `${position}. **${option}**`;
-                        })
+                    const resultsText = ranking
+                        .map((optionIndex, i) => `${places[i]}. **${voting.options[optionIndex]}**`)
                         .join("\n");
+
+                    const winners = ranking.filter((_, i) => places[i] === 1);
+                    const winnerText = winners.map((optionIndex) => `🏆 **${voting.options[optionIndex]}**`).join("\n");
 
                     fields.push(
                         {
@@ -448,8 +446,8 @@ class VotingService {
                             value: resultsText,
                         },
                         {
-                            name: "Winner",
-                            value: `🏆 **${voting.options[schulzeRanking[0]]}**`,
+                            name: isFirstPlaceTie ? "Winner(s)" : "Winner",
+                            value: winnerText,
                         },
                     );
                 }

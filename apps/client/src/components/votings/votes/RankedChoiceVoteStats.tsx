@@ -1,4 +1,4 @@
-import { Stack, Group, Text, Box, Badge } from "@mantine/core";
+import { Stack, Group, Text, Box, Badge, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IVoting } from "@tc/types/Voting";
 import { RankedChoiceVote } from "@tc/types/Vote";
@@ -15,8 +15,7 @@ export default function RankedChoiceVoteStats({ voting }: IProps) {
         (v): v is typeof v & { data: RankedChoiceVote } => v.data.type === "ranked-choice",
     );
 
-    // Calculate Schulze ranking
-    const schulzeRanking = utils.calculateSchulzeWinner(
+    const { ranking, places } = utils.getSchulzeResult(
         rankedChoiceVotes.map((v) => v.data),
         voting.options.length,
     );
@@ -32,18 +31,25 @@ export default function RankedChoiceVoteStats({ voting }: IProps) {
                 Schulze Method Results:
             </Text>
 
-            {schulzeRanking.map((optionIndex, rank) => {
+            {ranking.map((optionIndex, i) => {
                 const option = voting.options[optionIndex];
-                const isWinner = rank === 0;
+                const place = places[i];
+                const isWinner = place === 1;
+                const isTie = places.filter((p) => p === place).length > 1;
 
                 return (
                     <Box key={optionIndex}>
                         <Group gap="xs" mb="sm" align="center">
-                            {isWinner && <FontAwesomeIcon icon="trophy" color="var(--mantine-color-yellow-6)" />}
-                            {!isWinner && (
-                                <Text size="sm" fw={500} c="dimmed">
-                                    #{rank + 1}
-                                </Text>
+                            {isWinner ? (
+                                <Tooltip label={isTie ? "Tied for 1st" : "Winner"}>
+                                    <FontAwesomeIcon icon="trophy" color="var(--mantine-color-yellow-6)" />
+                                </Tooltip>
+                            ) : (
+                                <Tooltip disabled={!isTie} label={`Tied for ${place}`}>
+                                    <Text size="sm" fw={500} c="dimmed">
+                                        #{place}
+                                    </Text>
+                                </Tooltip>
                             )}
                             <Badge
                                 variant="light"
