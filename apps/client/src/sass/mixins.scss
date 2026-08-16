@@ -1,10 +1,10 @@
 @mixin glass-bg($bg: var(--mantine-color-primary-11), $border: true) {
     background: color-mix(in srgb, #{$bg} 70%, transparent);
-    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
 
     @if $border {
-        border: 1px solid color-mix(in srgb, #fff 30%, $bg 70%);
+        border: 1px solid color-mix(in srgb, #fff 30%, #{$bg} 70%);
     }
 
     box-shadow:
@@ -12,5 +12,4 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.5),
         inset 0 -1px 0 rgba(255, 255, 255, 0.1),
         inset 0 0 20px 10px rgba(255, 255, 255, 0.7);
-    overflow: hidden;
 }

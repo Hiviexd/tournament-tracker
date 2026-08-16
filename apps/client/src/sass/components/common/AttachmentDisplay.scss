@@ -60,8 +60,8 @@
 
 .attachment-modal-content {
     background: color-mix(in srgb, var(--mantine-color-primary-11) 82%, transparent);
-    backdrop-filter: blur(0.875em);
     -webkit-backdrop-filter: blur(0.875em);
+    backdrop-filter: blur(0.875em);
 }
 
 .attachment-modal-header {
