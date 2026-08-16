@@ -14,7 +14,7 @@ const SCORE_MAX = 5;
 const DOT = 8;
 const DOT_GAP = 2;
 
-export default function BinaryVoteStats({ voting }: IProps) {
+export default function BinaryVoteResults({ voting }: IProps) {
     const binaryVotes = voting.votes.filter((v): v is typeof v & { data: BinaryVote } => v.data.type === "binary");
     const scores = binaryVotes.map((v) => v.data.score);
     const totalVotes = scores.length;

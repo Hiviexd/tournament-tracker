@@ -10,11 +10,11 @@ import { useDisclosure } from "@mantine/hooks";
 // Components
 import ExpandButton from "../common/buttons/ExpandButton";
 import VoteCard from "./VoteCard";
-import ClassicVoteStats from "./votes/classic/ClassicVoteStats";
-import BinaryVoteStats from "./votes/binary/BinaryVoteStats";
-import BinaryStrictVoteStats from "./votes/binary-strict/BinaryStrictVoteStats";
-import VariableVoteStats from "./votes/variable/VariableVoteStats";
-import RankedChoiceVoteStats from "./votes/ranked-choice/RankedChoiceVoteStats";
+import ClassicVoteResults from "./votes/classic/ClassicVoteResults";
+import BinaryVoteResults from "./votes/binary/BinaryVoteResults";
+import BinaryStrictVoteResults from "./votes/binary-strict/BinaryStrictVoteResults";
+import VariableVoteResults from "./votes/variable/VariableVoteResults";
+import RankedChoiceVoteResults from "./votes/ranked-choice/RankedChoiceVoteResults";
 import { IUser } from "@tc/types/User";
 import UserLink from "../common/UserLink";
 
@@ -60,30 +60,30 @@ export default function VotingResults({ voting, user }: IProps) {
 
     const filteredVotes = filterVotesByOption(voting.votes, filteredOptionIndex);
 
-    const renderVotingStats = () => {
+    const renderVoteTypeResults = () => {
         switch (voting.type) {
             case "classic":
                 return (
-                    <ClassicVoteStats
+                    <ClassicVoteResults
                         voting={voting}
                         onFilterChange={setFilteredOptionIndex}
                         activeFilter={filteredOptionIndex}
                     />
                 );
             case "binary":
-                return <BinaryVoteStats voting={voting} />;
+                return <BinaryVoteResults voting={voting} />;
             case "binary-strict":
                 return (
-                    <BinaryStrictVoteStats
+                    <BinaryStrictVoteResults
                         voting={voting}
                         onFilterChange={setFilteredOptionIndex}
                         activeFilter={filteredOptionIndex}
                     />
                 );
             case "variable":
-                return <VariableVoteStats voting={voting} />;
+                return <VariableVoteResults voting={voting} />;
             case "ranked-choice":
-                return <RankedChoiceVoteStats voting={voting} />;
+                return <RankedChoiceVoteResults voting={voting} />;
         }
     };
 
@@ -91,7 +91,7 @@ export default function VotingResults({ voting, user }: IProps) {
         <Card shadow="sm" p="lg" radius="md">
             <Stack gap="lg">
                 <Title order={3}>Results</Title>
-                {renderVotingStats()}
+                {renderVoteTypeResults()}
                 {user?.isCommitteeOrAdmin && (
                     <>
                         <Divider />

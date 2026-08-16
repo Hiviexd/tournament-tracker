@@ -9,7 +9,7 @@ interface IProps {
     voting: IVoting;
 }
 
-export default function VariableVoteStats({ voting }: IProps) {
+export default function VariableVoteResults({ voting }: IProps) {
     const variableVotes = voting.votes.filter(
         (v): v is typeof v & { data: VariableVote } => v.data.type === "variable",
     );

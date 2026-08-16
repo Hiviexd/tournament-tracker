@@ -13,7 +13,7 @@ interface IProps {
     activeFilter?: number | null;
 }
 
-export default function ClassicVoteStats({ voting, onFilterChange, activeFilter }: IProps) {
+export default function ClassicVoteResults({ voting, onFilterChange, activeFilter }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const canFilter = useMemo(() => user?.isCommitteeOrAdmin && onFilterChange, [user, onFilterChange]);
 

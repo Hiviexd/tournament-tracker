@@ -9,7 +9,7 @@ interface IProps {
     voting: IVoting;
 }
 
-export default function RankedChoiceVoteStats({ voting }: IProps) {
+export default function RankedChoiceVoteResults({ voting }: IProps) {
     const rankedChoiceVotes = voting.votes.filter(
         (v): v is typeof v & { data: RankedChoiceVote } => v.data.type === "ranked-choice",
     );

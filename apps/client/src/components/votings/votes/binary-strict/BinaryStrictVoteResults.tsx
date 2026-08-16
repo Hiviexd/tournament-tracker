@@ -15,7 +15,7 @@ interface IProps {
 
 type StrictResult = "none" | "tie" | "passed" | "failed";
 
-export default function BinaryStrictVoteStats({ voting, onFilterChange, activeFilter }: IProps) {
+export default function BinaryStrictVoteResults({ voting, onFilterChange, activeFilter }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const canFilter = useMemo(() => user?.isCommitteeOrAdmin && onFilterChange, [user, onFilterChange]);
 
