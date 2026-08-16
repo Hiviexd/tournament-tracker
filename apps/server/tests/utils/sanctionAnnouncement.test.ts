@@ -43,6 +43,7 @@ describe("sanction announcement helpers", () => {
             isContest: false,
             phrase: "1 month tournament ban",
             reason: "Broke the rules",
+            sanctionType: InfringementType.TOURNAMENT_BAN,
         });
 
         expect(intro).toContain("tournament support expectations");
@@ -50,6 +51,7 @@ describe("sanction announcement helpers", () => {
         expect(intro).toContain("tournament restrictions");
         expect(intro).toContain("a **1 month tournament ban effective immediately.**");
         expect(intro).toContain("72 hours to appeal");
+        expect(intro).toContain("streamer, commentator, or graphic designer");
         expect(intro).toContain("**Reason for sanction**:");
         expect(reason).toBe("Broke the rules");
         expect(outro).toContain("72 hours from now");
@@ -64,9 +66,11 @@ describe("sanction announcement helpers", () => {
             isContest: false,
             phrase: "warning",
             reason: "Be nicer",
+            sanctionType: InfringementType.TOURNAMENT_BAN,
         });
 
         expect(intro).not.toContain("72 hours to appeal");
+        expect(intro).not.toContain("streamer, commentator, or graphic designer");
         expect(intro).toContain("a **warning effective immediately.**");
         expect(outro).not.toContain("72 hours");
         expect(outro).not.toContain("tournaments@ppy.sh");
@@ -79,14 +83,29 @@ describe("sanction announcement helpers", () => {
             isContest: true,
             phrase: "6 months tournament ban",
             reason: "Contest incident",
+            sanctionType: InfringementType.TOURNAMENT_BAN,
         });
 
         expect(intro).toContain("contest support expectations");
         expect(intro).toContain("https://osu.ppy.sh/wiki/en/Contests/Official_support");
         expect(intro).toContain("contest and tournament restrictions");
+        expect(intro).not.toContain("streamer, commentator, or graphic designer");
         expect(outro).toContain("contest expectations");
         expect(outro).toContain("tournaments@ppy.sh");
         expect(outro).toContain("Contest Sanction Appeal");
+    });
+
+    it("omits the tournament-ban role sentence for hosting bans", () => {
+        const [intro] = buildSanctionAnnouncementMessages({
+            isWarning: false,
+            isContest: false,
+            phrase: "1 month hosting ban",
+            reason: "Hosted unsanctioned",
+            sanctionType: InfringementType.HOSTING_BAN,
+        });
+
+        expect(intro).toContain("a **1 month hosting ban effective immediately.**");
+        expect(intro).not.toContain("streamer, commentator, or graphic designer");
     });
 
     it("sets the announcement title from the sanction outcome", () => {

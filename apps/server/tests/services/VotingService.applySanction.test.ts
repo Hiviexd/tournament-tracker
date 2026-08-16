@@ -7,6 +7,7 @@ import { SanctionVoteBallot } from "@tc/utils";
 
 const mockAddInfringement = vi.hoisted(() => vi.fn());
 const mockDeleteInfringement = vi.hoisted(() => vi.fn());
+const mockSyncSanctionInfringement = vi.hoisted(() => vi.fn());
 const mockSendAnnouncement = vi.hoisted(() => vi.fn());
 
 vi.mock("../../models/userModel", () => ({ default: { find: vi.fn() } }));
@@ -14,10 +15,14 @@ vi.mock("../../models/voteModel", () => ({ default: { find: vi.fn() } }));
 vi.mock("../../models/votingModel", () => ({ default: { find: vi.fn() } }));
 vi.mock("@tc/config", () => ({ default: { baseUrl: "https://tcomm.test" } }));
 vi.mock("../../services/InfringementService", () => ({
-    default: { addInfringement: mockAddInfringement, deleteInfringement: mockDeleteInfringement },
+    default: {
+        addInfringement: mockAddInfringement,
+        deleteInfringement: mockDeleteInfringement,
+        syncSanctionInfringement: mockSyncSanctionInfringement,
+    },
 }));
 vi.mock("../../services/OsuBotService", () => ({
-    default: { sendAnnouncement: mockSendAnnouncement },
+    default: { sendAnnouncementDirect: mockSendAnnouncement },
 }));
 
 import VotingService from "../../services/VotingService";
@@ -35,6 +40,8 @@ interface SanctionVotingFixture {
     votes?: SanctionVoteBallot[];
     sanctionAppliedAt?: Date;
     sanctionInfringementId?: Types.ObjectId;
+    sanctionAnnouncementChannelId?: number;
+    sanctionAnnouncementSentCount?: number;
     save?: SanctionVotingDoc["save"];
     updateOne?: SanctionVotingDoc["updateOne"];
 }
@@ -82,6 +89,7 @@ describe("VotingService.applySanction", () => {
             user: {},
         });
         mockSendAnnouncement.mockResolvedValue(true);
+        mockSyncSanctionInfringement.mockResolvedValue({ changed: false });
     });
 
     it("rejects no-action outcomes", async () => {
@@ -163,7 +171,58 @@ describe("VotingService.applySanction", () => {
         await VotingService.applySanction(retryVoting, currentUser);
 
         expect(mockAddInfringement).toHaveBeenCalledTimes(1);
+        expect(mockSyncSanctionInfringement).toHaveBeenCalledWith(
+            infringementId,
+            expect.any(String),
+            expect.objectContaining({
+                type: InfringementType.TOURNAMENT_BAN,
+                reason: "Official reason",
+            }),
+        );
         expect(retryVoting.sanctionAppliedAt).toBeInstanceOf(Date);
+    });
+
+    it("resyncs the watchlist and starts a new announcement after an edit", async () => {
+        mockSyncSanctionInfringement.mockResolvedValueOnce({ changed: true });
+
+        const voting = makeVoting({
+            sanctionInfringementId: new Types.ObjectId(),
+            sanctionPost: "Edited reason",
+            sanctionAnnouncementChannelId: 44,
+            sanctionAnnouncementSentCount: 2,
+        });
+        await VotingService.applySanction(voting, currentUser);
+
+        expect(mockAddInfringement).not.toHaveBeenCalled();
+        expect(mockSyncSanctionInfringement).toHaveBeenCalledWith(
+            voting.sanctionInfringementId,
+            expect.any(String),
+            expect.objectContaining({ reason: "Edited reason" }),
+        );
+        expect(mockSendAnnouncement).toHaveBeenCalledWith(
+            [123],
+            expect.objectContaining({
+                channelId: undefined,
+                sentCount: undefined,
+            }),
+            999,
+        );
+    });
+
+    it("saves announcement progress when a follow-up message fails", async () => {
+        mockSendAnnouncement.mockImplementation((_ids, message) => {
+            message.channelId = 44;
+            message.sentCount = 1;
+            return { error: "osu down", statusCode: 500 };
+        });
+
+        const voting = makeVoting();
+        await expect(VotingService.applySanction(voting, currentUser)).rejects.toMatchObject({
+            status: 500,
+        });
+        expect(voting.sanctionAnnouncementChannelId).toBe(44);
+        expect(voting.sanctionAnnouncementSentCount).toBe(1);
+        expect(voting.sanctionAppliedAt).toBeUndefined();
     });
 });
 
@@ -204,7 +263,12 @@ describe("VotingService.undoSanction", () => {
         expect(voting.sanctionInfringementId).toBeUndefined();
         expect(voting.sanctionAppliedAt).toBeUndefined();
         expect(voting.updateOne).toHaveBeenCalledWith({
-            $unset: { sanctionInfringementId: 1, sanctionAppliedAt: 1 },
+            $unset: {
+                sanctionInfringementId: 1,
+                sanctionAppliedAt: 1,
+                sanctionAnnouncementChannelId: 1,
+                sanctionAnnouncementSentCount: 1,
+            },
         });
     });
 

@@ -410,3 +410,31 @@ describe("VotingService required votes", () => {
         });
     });
 });
+
+describe("VotingService.censorVotingForNonCommittee", () => {
+    it("strips sanction post and target user watchlist data", () => {
+        // SAFETY: censor only reads toObject(); this fixture is not a mongoose document.
+        const publicVoting = VotingService.censorVotingForNonCommittee({
+            toObject: () => ({
+                description: "private notes",
+                sanctionPost: "official reason",
+                attachments: [{}],
+                abstainedUsers: [{}],
+                votes: [{ comment: "secret", author: {} }],
+                targetUser: {
+                    username: "player",
+                    infringements: [{ reason: "watchlist" }],
+                    activeInfringement: { reason: "watchlist" },
+                    latestAction: { reason: "watchlist" },
+                },
+            }),
+        } as never);
+
+        expect(publicVoting.description).toBe("");
+        expect(publicVoting.sanctionPost).toBeUndefined();
+        expect(publicVoting.targetUser?.infringements).toBeUndefined();
+        expect(publicVoting.targetUser?.activeInfringement).toBeUndefined();
+        expect(publicVoting.targetUser?.latestAction).toBeUndefined();
+        expect(publicVoting.targetUser?.username).toBe("player");
+    });
+});

@@ -61,6 +61,7 @@ class VotingService {
         const publicVoting = voting.toObject();
         publicVoting.author = undefined;
         publicVoting.description = "";
+        publicVoting.sanctionPost = undefined;
         publicVoting.attachments = [];
         publicVoting.abstainedUsers = [];
         publicVoting.votes = publicVoting.votes.map((vote) => ({
@@ -68,6 +69,11 @@ class VotingService {
             comment: undefined,
             author: undefined,
         }));
+        if (publicVoting.targetUser) {
+            publicVoting.targetUser.infringements = undefined;
+            publicVoting.targetUser.activeInfringement = undefined;
+            publicVoting.targetUser.latestAction = undefined;
+        }
         return publicVoting;
     }
 
@@ -495,35 +501,65 @@ class VotingService {
             throw { status: 400, error: "Sanction votes must have a populated target user" };
         }
 
+        const reason = voting.sanctionPost!.trim();
+        const dates = applyState.isWarning ? {} : getSanctionInfringementDates(applyState.winnerOption);
         if (!voting.sanctionInfringementId) {
-            const dates = applyState.isWarning ? {} : getSanctionInfringementDates(applyState.winnerOption);
             const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
                 type: applyState.infringementType,
-                reason: voting.sanctionPost!.trim(),
+                reason,
                 ...dates,
             });
             voting.sanctionInfringementId = infringement._id ?? infringement.id;
             await voting.save();
+        } else {
+            const synced = await InfringementService.syncSanctionInfringement(
+                voting.sanctionInfringementId,
+                targetUser._id.toString(),
+                { type: applyState.infringementType, reason },
+            );
+            if (!synced) {
+                const { infringement } = await InfringementService.addInfringement(targetUser._id.toString(), {
+                    type: applyState.infringementType,
+                    reason,
+                    ...dates,
+                });
+                voting.sanctionInfringementId = infringement._id ?? infringement.id;
+                voting.sanctionAnnouncementChannelId = undefined;
+                voting.sanctionAnnouncementSentCount = undefined;
+                await voting.save();
+            } else if (synced.changed) {
+                voting.sanctionAnnouncementChannelId = undefined;
+                voting.sanctionAnnouncementSentCount = undefined;
+            }
         }
 
         if (voting.sanctionAppliedAt) {
             throw { status: 400, error: "Sanction has already been applied" };
         }
 
-        const announcementResult = await OsuBotService.sendAnnouncement(
+        const announcement = {
+            channel: getSanctionAnnouncementChannel({
+                isWarning: applyState.isWarning,
+                isContest: applyState.isContest,
+                sanctionType: voting.sanctionType,
+            }),
+            content: applyState.messages,
+            channelId: voting.sanctionAnnouncementChannelId,
+            sentCount: voting.sanctionAnnouncementSentCount,
+        };
+        const announcementResult = await OsuBotService.sendAnnouncementDirect(
             [targetUser.osuId],
-            {
-                channel: getSanctionAnnouncementChannel({
-                    isWarning: applyState.isWarning,
-                    isContest: applyState.isContest,
-                    sanctionType: voting.sanctionType,
-                }),
-                content: applyState.messages,
-            },
+            announcement,
             currentUser.osuId,
         );
 
+        if (announcement.channelId) {
+            voting.sanctionAnnouncementChannelId = announcement.channelId;
+            voting.sanctionAnnouncementSentCount = announcement.sentCount;
+        }
+
         if (announcementResult !== true) {
+            await voting.save();
             throw {
                 status: announcementResult.statusCode || 500,
                 error: announcementResult.error || "Failed to send sanction announcement",
@@ -556,8 +592,15 @@ class VotingService {
 
         voting.sanctionInfringementId = undefined;
         voting.sanctionAppliedAt = undefined;
+        voting.sanctionAnnouncementChannelId = undefined;
+        voting.sanctionAnnouncementSentCount = undefined;
         await voting.updateOne({
-            $unset: { sanctionInfringementId: 1, sanctionAppliedAt: 1 },
+            $unset: {
+                sanctionInfringementId: 1,
+                sanctionAppliedAt: 1,
+                sanctionAnnouncementChannelId: 1,
+                sanctionAnnouncementSentCount: 1,
+            },
         });
 
         return { voting };

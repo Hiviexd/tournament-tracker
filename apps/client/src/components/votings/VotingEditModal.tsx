@@ -271,6 +271,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                     required
                                     allowUserCreation
                                     preloadUser={voting.targetUser?.id}
+                                    disabled={voting.isSanctionVote}
                                 />
                             )}
 

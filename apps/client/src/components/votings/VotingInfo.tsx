@@ -178,7 +178,7 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                     </Text>{" "}
                     to {voting.targetUser?.username || "the target user"}?
                 </Text>
-                {hasActiveInfringement && (
+                {hasActiveInfringement && !sanctionState.isWarning && (
                     <AlertText type="warning">
                         This user already has an active infringement. Applying this sanction will expire it.
                     </AlertText>
@@ -471,7 +471,14 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 color="warning"
                                 onClick={handleToggleStatus}
                                 loading={toggleStatusMutation.isPending}
-                                disabled={!voting.isActive && voting.isPublic}
+                                disabled={
+                                    !voting.isActive &&
+                                    (voting.isPublic ||
+                                        Boolean(
+                                            voting.isSanctionVote &&
+                                                (voting.sanctionAppliedAt || voting.sanctionInfringementId),
+                                        ))
+                                }
                                 leftSection={<FontAwesomeIcon icon={voting.isActive ? "lock" : "lock-open"} />}>
                                 {voting.isActive ? "Conclude" : "Reopen"}
                             </Button>

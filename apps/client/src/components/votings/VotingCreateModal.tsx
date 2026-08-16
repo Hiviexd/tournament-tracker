@@ -169,6 +169,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             clearAutoSavedValue(sanctionPostAutoSaveKey);
 
             form.reset();
+            setPreset(null);
             onClose();
 
             navigate(`/votes/${res.voting._id}`);
@@ -221,7 +222,10 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
     ];
 
     const handlePresetChange = (preset: string) => {
-        if (!preset) return;
+        if (!preset) {
+            setPreset(null);
+            return;
+        }
 
         const presetKey = pickStringUnion(preset, [
             "userAddition",

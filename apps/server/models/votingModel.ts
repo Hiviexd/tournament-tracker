@@ -39,6 +39,8 @@ const VotingSchema = new Schema<IVoting>(
         sanctionPost: { type: String, maxlength: 1000 },
         sanctionInfringementId: { type: Schema.Types.ObjectId, ref: "Infringement" },
         sanctionAppliedAt: { type: Date },
+        sanctionAnnouncementChannelId: { type: Number },
+        sanctionAnnouncementSentCount: { type: Number },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );

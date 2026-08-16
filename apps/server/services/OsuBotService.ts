@@ -157,38 +157,45 @@ export default class OsuBotService extends OsuApiService {
             return { error: "Announcement messages cannot be empty", statusCode: 400, source: "osu-bot" };
         }
 
-        // Add delay to prevent rate limiting
-        await utils.delay(500);
+        let channelId = message.channelId;
+        let sentCount = message.sentCount ?? (channelId ? 1 : 0);
 
-        const createResponse = await this.executeRequest({
-            url: "https://osu.ppy.sh/api/v2/chat/channels/",
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            data: {
-                channel: message.channel,
-                message: contents[0],
-                target_ids: finalUserIds,
-                type: "ANNOUNCE",
-            },
-        });
+        if (!channelId) {
+            await utils.delay(500);
+            const createResponse = await this.executeRequest({
+                url: "https://osu.ppy.sh/api/v2/chat/channels/",
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: {
+                    channel: message.channel,
+                    message: contents[0],
+                    target_ids: finalUserIds,
+                    type: "ANNOUNCE",
+                },
+            });
 
-        if (OsuApiService.isOsuResponseError(createResponse)) {
-            return { ...createResponse, source: "osu-bot" };
+            if (OsuApiService.isOsuResponseError(createResponse)) {
+                return { ...createResponse, source: "osu-bot" };
+            }
+
+            channelId = createResponse.channel_id;
+            if (!channelId) {
+                return { error: "osu! API did not return a channel_id", statusCode: 500, source: "osu-bot" };
+            }
+
+            message.channelId = channelId;
+            message.sentCount = 1;
+            sentCount = 1;
         }
 
-        if (contents.length === 1) {
+        if (contents.length === 1 || sentCount >= contents.length) {
             return true;
         }
 
-        const channelId = createResponse.channel_id;
-        if (!channelId) {
-            return { error: "osu! API did not return a channel_id", statusCode: 500, source: "osu-bot" };
-        }
-
-        for (const extra of contents.slice(1)) {
+        for (let index = sentCount; index < contents.length; index++) {
             await utils.delay(500);
             const sendResponse = await this.executeRequest({
                 url: `https://osu.ppy.sh/api/v2/chat/channels/${channelId}/messages`,
@@ -198,7 +205,7 @@ export default class OsuBotService extends OsuApiService {
                     Authorization: `Bearer ${token}`,
                 },
                 data: {
-                    message: extra,
+                    message: contents[index],
                     is_action: false,
                 },
             });
@@ -206,6 +213,8 @@ export default class OsuBotService extends OsuApiService {
             if (OsuApiService.isOsuResponseError(sendResponse)) {
                 return { ...sendResponse, source: "osu-bot" };
             }
+
+            message.sentCount = index + 1;
         }
 
         return true;

@@ -470,6 +470,16 @@ class VotingsController {
         const votingId = req.params.votingId;
         const voting = await Voting.findById(votingId).populate("votes").orFail();
 
+        if (
+            !voting.isActive &&
+            voting.isSanctionVote &&
+            (voting.sanctionAppliedAt || voting.sanctionInfringementId)
+        ) {
+            return res.status(400).json({
+                error: "Cannot reopen a sanction vote after a watchlist entry has been created",
+            });
+        }
+
         voting.isActive = !voting.isActive;
         voting.concludedAt = voting.isActive ? undefined : new Date();
         await voting.save();
@@ -536,20 +546,38 @@ class VotingsController {
             return res.status(400).json({ error: "Sanction votes must keep category user" });
         }
 
+        if (voting.isSanctionVote && targetUserId) {
+            const currentTargetId = voting.targetUser?.toString();
+            if (currentTargetId && currentTargetId !== String(targetUserId)) {
+                return res.status(400).json({ error: "Cannot change the target user of a sanction vote" });
+            }
+        }
+
         if (voting.isSanctionVote && !voting.sanctionAppliedAt) {
+            let sanctionFieldsChanged = false;
             if (sanctionType) {
                 const parsedSanctionType = utils.pickStringUnion(String(sanctionType), SANCTION_BAN_TYPES);
                 if (!parsedSanctionType) {
                     return res.status(400).json({ error: "Invalid sanction type" });
                 }
-                voting.sanctionType = parsedSanctionType;
+                if (voting.sanctionType !== parsedSanctionType) {
+                    voting.sanctionType = parsedSanctionType;
+                    sanctionFieldsChanged = true;
+                }
             }
             if (sanctionPost !== undefined) {
                 const trimmedPost = utils.isString(sanctionPost) ? sanctionPost.trim() : "";
                 if (!trimmedPost || trimmedPost.length > 1000) {
                     return res.status(400).json({ error: "Sanction post must be between 1 and 1000 characters" });
                 }
-                voting.sanctionPost = trimmedPost;
+                if (voting.sanctionPost !== trimmedPost) {
+                    voting.sanctionPost = trimmedPost;
+                    sanctionFieldsChanged = true;
+                }
+            }
+            if (sanctionFieldsChanged && voting.sanctionInfringementId) {
+                voting.sanctionAnnouncementChannelId = undefined;
+                voting.sanctionAnnouncementSentCount = undefined;
             }
         }
 

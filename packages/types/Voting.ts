@@ -106,6 +106,8 @@ export interface IVoting {
     sanctionPost?: string;
     sanctionInfringementId?: Types.ObjectId;
     sanctionAppliedAt?: Date;
+    sanctionAnnouncementChannelId?: number;
+    sanctionAnnouncementSentCount?: number;
 
     // virtuals
     deadline: Date;

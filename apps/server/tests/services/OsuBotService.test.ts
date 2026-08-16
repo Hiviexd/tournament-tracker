@@ -71,6 +71,26 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
         expect(delay).toHaveBeenCalledTimes(3);
     });
 
+    it("resumes follow-up messages on an existing channel", async () => {
+        executeRequest.mockResolvedValueOnce({ message_id: 3 });
+
+        const message = {
+            channel: { name: "Notice" },
+            content: ["intro", "reason", "outro"],
+            channelId: 44,
+            sentCount: 2,
+        };
+        const result = await OsuBotService.sendAnnouncementDirect([1], message);
+
+        expect(result).toBe(true);
+        expect(executeRequest).toHaveBeenCalledTimes(1);
+        expect(executeRequest.mock.calls[0][0]).toMatchObject({
+            url: "https://osu.ppy.sh/api/v2/chat/channels/44/messages",
+            data: { message: "outro", is_action: false },
+        });
+        expect(message.sentCount).toBe(3);
+    });
+
     it("rejects empty message arrays", async () => {
         const result = await OsuBotService.sendAnnouncementDirect([1], {
             channel: { name: "Notice" },

@@ -111,8 +111,9 @@ export function buildSanctionAnnouncementMessages(params: {
     isContest: boolean;
     phrase: string;
     reason: string;
+    sanctionType?: SanctionBanType;
 }): [string, string, string] {
-    const { isWarning, isContest, phrase, reason } = params;
+    const { isWarning, isContest, phrase, reason, sanctionType } = params;
     const domain = isContest ? "contest" : "tournament";
     const wiki = isContest
         ? "https://osu.ppy.sh/wiki/en/Contests/Official_support"
@@ -124,9 +125,14 @@ export function buildSanctionAnnouncementMessages(params: {
         ? ""
         : " However, in the interest of fairness, you will be allowed 72 hours to appeal this decision.";
 
+    const roleSentence =
+        !isWarning && !isContest && sanctionType === InfringementType.TOURNAMENT_BAN
+            ? " Please note that you may still enlist as a streamer, commentator, or graphic designer while under a tournament ban."
+            : "";
+
     const intro = `Hello,
 
-You are receiving this email because we have found you to be in breach of osu!'s official ${domain} support expectations (linked [here](${wiki})), resulting in ${restrictions} being placed on your account. This message serves as an official notice that you are being issued ${article} **${phrase} effective immediately.**${appealSentence} Please note that you may still enlist as a streamer, commentator, or graphic designer while under a tournament ban.
+You are receiving this email because we have found you to be in breach of osu!'s official ${domain} support expectations (linked [here](${wiki})), resulting in ${restrictions} being placed on your account. This message serves as an official notice that you are being issued ${article} **${phrase} effective immediately.**${appealSentence}${roleSentence}
 
 **Reason for sanction**:`;
 
@@ -219,6 +225,7 @@ export function getSanctionApplyState(voting: {
         isContest,
         phrase,
         reason: voting.sanctionPost.trim(),
+        sanctionType: voting.sanctionType,
     });
     const infringementType = isWarning ? InfringementType.WARNING : voting.sanctionType;
 
