@@ -1,6 +1,7 @@
-import { Box, Group, Stack, Text } from "@mantine/core";
+import { Group, Stack, Text } from "@mantine/core";
 import { TruncatedText } from "../../../common/TruncatedText";
 import { formatSignedScore, getScoreColor } from "../voteScoreColor";
+import ScoreMeter from "../ScoreMeter";
 
 interface IProps {
     score: number;
@@ -24,33 +25,12 @@ export default function BinaryVoteDisplay({ score, options }: IProps) {
                     {options[0] ?? ""}
                 </TruncatedText>
             </Group>
-            <Box
-                h={8}
-                bg="dark.5"
-                pos="relative"
-                style={{ borderRadius: 999 }}
-                role="meter"
-                aria-valuemin={-5}
-                aria-valuemax={5}
-                aria-valuenow={score}
-                aria-label={
+            <ScoreMeter
+                score={score}
+                label={
                     score === 0 ? "Neutral score" : `Score ${formatSignedScore(score)} toward ${toward ?? "option"}`
-                }>
-                <Box pos="absolute" left="50%" top={0} bottom={0} w={1} bg="dark.3" />
-                {score !== 0 && (
-                    <Box
-                        pos="absolute"
-                        top={0}
-                        bottom={0}
-                        bg={color}
-                        style={{
-                            left: `${score >= 0 ? 50 : ((score + 5) / 10) * 100}%`,
-                            width: `${(Math.abs(score) / 10) * 100}%`,
-                            borderRadius: 999,
-                        }}
-                    />
-                )}
-            </Box>
+                }
+            />
         </Stack>
     );
 }

@@ -393,6 +393,8 @@ export interface SchulzeResult {
     ranking: number[];
     /** 1-based competition places aligned with `ranking`. Tied options share a place (1, 1, 3). */
     places: number[];
+    /** Pairwise Schulze wins aligned with `ranking`. */
+    wins: number[];
     isFirstPlaceTie: boolean;
 }
 
@@ -463,6 +465,7 @@ export function getSchulzeResult(votes: RankedChoiceVote[], optionCount: number)
     return {
         ranking: ranking.map((r) => r.index),
         places,
+        wins: ranking.map((r) => r.wins),
         isFirstPlaceTie: ranking.length > 1 && ranking[0].wins === ranking[1].wins,
     };
 }

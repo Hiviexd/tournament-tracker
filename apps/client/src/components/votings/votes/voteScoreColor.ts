@@ -9,6 +9,7 @@ export function getScoreCssVar(score: number) {
     return `var(--mantine-color-${getScoreColor(score, "-")})`;
 }
 
-export function formatSignedScore(score: number) {
-    return score > 0 ? `+${score}` : String(score);
+export function formatSignedScore(score: number, digits?: number) {
+    const value = digits === undefined ? String(score) : score.toFixed(digits);
+    return score > 0 ? `+${value}` : value;
 }
