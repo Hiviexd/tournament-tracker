@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const executeRequest = vi.hoisted(() => vi.fn());
 const delay = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
+const osuBotConfig = vi.hoisted(() => ({ id: "1", secret: "secret", allowUserMessages: true }));
+
 vi.mock("@tc/config", () => ({
-    default: { osuBot: { id: "1", secret: "secret" } },
+    default: { osuBot: osuBotConfig },
 }));
 vi.mock("@tc/utils/server", () => ({
     default: { delay },
@@ -23,7 +25,7 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
         vi.spyOn(OsuBotService as any, "getBotToken").mockResolvedValue("token");
         // SAFETY: executeRequest is protected static; the test replaces the HTTP boundary.
         vi.spyOn(OsuApiService as any, "executeRequest").mockImplementation(executeRequest);
-        process.env.NODE_ENV = "production";
+        osuBotConfig.allowUserMessages = true;
     });
 
     it("keeps the single-message create-channel path", async () => {
@@ -95,6 +97,32 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
         const result = await OsuBotService.sendAnnouncementDirect([1], {
             channel: { name: "Notice" },
             content: ["intro", "   "],
+        });
+
+        expect(result).toMatchObject({ statusCode: 400 });
+        expect(executeRequest).not.toHaveBeenCalled();
+    });
+
+    it("sends to the fallback ID when allowUserMessages is false", async () => {
+        osuBotConfig.allowUserMessages = false;
+        executeRequest.mockResolvedValueOnce({ channel_id: 10 });
+
+        const result = await OsuBotService.sendAnnouncementDirect(
+            [1],
+            { channel: { name: "Notice", description: "Now" }, content: "hello" },
+            2,
+        );
+
+        expect(result).toBe(true);
+        expect(executeRequest.mock.calls[0][0].data.target_ids).toEqual([2]);
+    });
+
+    it("skips sending when allowUserMessages is false and no fallback ID is provided", async () => {
+        osuBotConfig.allowUserMessages = false;
+
+        const result = await OsuBotService.sendAnnouncementDirect([1], {
+            channel: { name: "Notice" },
+            content: "hello",
         });
 
         expect(result).toMatchObject({ statusCode: 400 });

@@ -95,7 +95,7 @@ export default class OsuBotService extends OsuApiService {
      * Enqueues an announcement to specified users through the osu! chat
      * @param userIds - Array of osu! user IDs to send the announcement to
      * @param message - The message object containing channel info and content
-     * @param fallbackId - The osu! user ID to send the announcement to if in dev environment
+     * @param fallbackId - Recipient used when `osuBot.allowUserMessages` is false
      * @returns true if enqueue succeeds, ErrorResponse if enqueue fails
      */
     public static async sendAnnouncement(
@@ -134,19 +134,14 @@ export default class OsuBotService extends OsuApiService {
 
         const finalUserIds: number[] = [];
 
-        // Prevent sending announcements to actual users in dev env
-        // TODO: isolate fallbackId to this method and try to remove the extra param from the main method
-        // ? Possibly look into saving the req.ession into env? or try to somehow access it from here
-        if (process.env.NODE_ENV === "production") {
+        if (config.osuBot.allowUserMessages) {
             finalUserIds.push(...userIds);
         } else if (fallbackId) {
-            console.log("Non-production environment detected, sending osu! announcement to fallback ID: " + fallbackId);
+            console.log("osuBot.allowUserMessages is false, sending announcement to fallback ID: " + fallbackId);
             console.log("OG User IDs: " + userIds);
             finalUserIds.push(fallbackId);
         } else {
-            console.log(
-                "Non-production environment detected, but no fallback ID provided. Skipping osu! announcement.",
-            );
+            console.log("osuBot.allowUserMessages is false, and no fallback ID was provided. Skipping announcement.");
             return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" };
         }
 
