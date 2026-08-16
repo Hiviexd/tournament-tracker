@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 import { InfringementType } from "@tc/types/Infringement";
-import { TOURNAMENT_OPTIONS } from "@tc/types/Voting";
+import { IUser } from "@tc/types/User";
+import { IVoting, TOURNAMENT_OPTIONS } from "@tc/types/Voting";
+import { SanctionVoteBallot } from "@tc/utils";
 
 const mockAddInfringement = vi.hoisted(() => vi.fn());
 const mockDeleteInfringement = vi.hoisted(() => vi.fn());
@@ -20,10 +22,27 @@ vi.mock("../../services/OsuBotService", () => ({
 
 import VotingService from "../../services/VotingService";
 
-function rankedVote(winnerIndex: number) {
+type SanctionVotingDoc = Document & IVoting;
+
+interface SanctionVotingFixture {
+    isSanctionVote?: boolean;
+    isActive?: boolean;
+    assignedGroups?: IVoting["assignedGroups"];
+    options?: IVoting["options"];
+    sanctionType?: IVoting["sanctionType"];
+    sanctionPost?: IVoting["sanctionPost"];
+    targetUser?: IVoting["targetUser"];
+    votes?: SanctionVoteBallot[];
+    sanctionAppliedAt?: Date;
+    sanctionInfringementId?: Types.ObjectId;
+    save?: SanctionVotingDoc["save"];
+    updateOne?: SanctionVotingDoc["updateOne"];
+}
+
+function rankedVote(winnerIndex: number): SanctionVoteBallot {
     return {
         data: {
-            type: "ranked-choice" as const,
+            type: "ranked-choice",
             scores: TOURNAMENT_OPTIONS.map((_, index) => ({
                 optionIndex: index,
                 score: index === winnerIndex ? 2 : -2,
@@ -32,7 +51,8 @@ function rankedVote(winnerIndex: number) {
     };
 }
 
-function makeVoting(overrides: Record<string, unknown> = {}) {
+function makeVoting(overrides: SanctionVotingFixture = {}): SanctionVotingDoc {
+    // SAFETY: fixture only supplies the sanction fields and persist methods used by apply/undo.
     return {
         isSanctionVote: true,
         isActive: false,
@@ -49,10 +69,10 @@ function makeVoting(overrides: Record<string, unknown> = {}) {
         save: vi.fn().mockResolvedValue(undefined),
         updateOne: vi.fn().mockResolvedValue(undefined),
         ...overrides,
-    };
+    } as SanctionVotingDoc;
 }
 
-const currentUser = { osuId: 999 } as any;
+const currentUser = { osuId: 999 } satisfies Pick<IUser, "osuId">;
 
 describe("VotingService.applySanction", () => {
     beforeEach(() => {
@@ -65,9 +85,7 @@ describe("VotingService.applySanction", () => {
     });
 
     it("rejects no-action outcomes", async () => {
-        await expect(
-            VotingService.applySanction(makeVoting({ votes: [rankedVote(0)] }) as any, currentUser),
-        ).rejects.toMatchObject({
+        await expect(VotingService.applySanction(makeVoting({ votes: [rankedVote(0)] }), currentUser)).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("no action required"),
         });
@@ -75,7 +93,7 @@ describe("VotingService.applySanction", () => {
     });
 
     it("rejects first-place ties", async () => {
-        await expect(VotingService.applySanction(makeVoting({ votes: [] }) as any, currentUser)).rejects.toMatchObject({
+        await expect(VotingService.applySanction(makeVoting({ votes: [] }), currentUser)).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("tied"),
         });
@@ -83,7 +101,7 @@ describe("VotingService.applySanction", () => {
 
     it("rejects already applied sanctions", async () => {
         await expect(
-            VotingService.applySanction(makeVoting({ sanctionAppliedAt: new Date() }) as any, currentUser),
+            VotingService.applySanction(makeVoting({ sanctionAppliedAt: new Date() }), currentUser),
         ).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("already been applied"),
@@ -91,7 +109,7 @@ describe("VotingService.applySanction", () => {
     });
 
     it("creates a warning infringement without dates", async () => {
-        await VotingService.applySanction(makeVoting({ votes: [rankedVote(1)] }) as any, currentUser);
+        await VotingService.applySanction(makeVoting({ votes: [rankedVote(1)] }), currentUser);
 
         expect(mockAddInfringement).toHaveBeenCalledWith(
             expect.any(String),
@@ -113,7 +131,7 @@ describe("VotingService.applySanction", () => {
     });
 
     it("creates a timed ban from the selected type and duration", async () => {
-        await VotingService.applySanction(makeVoting({ votes: [rankedVote(2)] }) as any, currentUser);
+        await VotingService.applySanction(makeVoting({ votes: [rankedVote(2)] }), currentUser);
 
         expect(mockAddInfringement).toHaveBeenCalledWith(
             expect.any(String),
@@ -131,7 +149,7 @@ describe("VotingService.applySanction", () => {
         mockSendAnnouncement.mockResolvedValueOnce({ error: "osu down", statusCode: 500 });
 
         const voting = makeVoting();
-        await expect(VotingService.applySanction(voting as any, currentUser)).rejects.toMatchObject({
+        await expect(VotingService.applySanction(voting, currentUser)).rejects.toMatchObject({
             status: 500,
         });
         expect(voting.sanctionInfringementId).toEqual(expect.anything());
@@ -142,7 +160,7 @@ describe("VotingService.applySanction", () => {
             sanctionInfringementId: infringementId,
             save: vi.fn().mockResolvedValue(undefined),
         });
-        await VotingService.applySanction(retryVoting as any, currentUser);
+        await VotingService.applySanction(retryVoting, currentUser);
 
         expect(mockAddInfringement).toHaveBeenCalledTimes(1);
         expect(retryVoting.sanctionAppliedAt).toBeInstanceOf(Date);
@@ -157,7 +175,7 @@ describe("VotingService.undoSanction", () => {
 
     it("rejects votes that are not sanction votes", async () => {
         await expect(
-            VotingService.undoSanction(makeVoting({ isSanctionVote: false, sanctionAppliedAt: new Date() }) as any),
+            VotingService.undoSanction(makeVoting({ isSanctionVote: false, sanctionAppliedAt: new Date() })),
         ).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("not a sanction vote"),
@@ -166,7 +184,7 @@ describe("VotingService.undoSanction", () => {
     });
 
     it("rejects votes that have not been applied", async () => {
-        await expect(VotingService.undoSanction(makeVoting() as any)).rejects.toMatchObject({
+        await expect(VotingService.undoSanction(makeVoting())).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("has not been applied"),
         });
@@ -180,7 +198,7 @@ describe("VotingService.undoSanction", () => {
             sanctionInfringementId: infringementId,
         });
 
-        await VotingService.undoSanction(voting as any);
+        await VotingService.undoSanction(voting);
 
         expect(mockDeleteInfringement).toHaveBeenCalledWith(infringementId);
         expect(voting.sanctionInfringementId).toBeUndefined();
@@ -197,7 +215,7 @@ describe("VotingService.undoSanction", () => {
             sanctionInfringementId: new Types.ObjectId(),
         });
 
-        await VotingService.undoSanction(voting as any);
+        await VotingService.undoSanction(voting);
 
         expect(voting.sanctionAppliedAt).toBeUndefined();
         expect(voting.updateOne).toHaveBeenCalled();

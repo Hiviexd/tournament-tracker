@@ -19,7 +19,9 @@ import OsuBotService from "../../services/OsuBotService";
 describe("OsuBotService.sendAnnouncementDirect", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // SAFETY: getBotToken is private static; the test only needs a resolved token.
         vi.spyOn(OsuBotService as any, "getBotToken").mockResolvedValue("token");
+        // SAFETY: executeRequest is protected static; the test replaces the HTTP boundary.
         vi.spyOn(OsuApiService as any, "executeRequest").mockImplementation(executeRequest);
         process.env.NODE_ENV = "production";
     });

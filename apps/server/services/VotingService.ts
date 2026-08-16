@@ -3,7 +3,6 @@ import { IVote } from "@tc/types/Vote";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
-import { InfringementType } from "@tc/types/Infringement";
 import utils from "@tc/utils/server";
 import {
     getSanctionApplyState,
@@ -457,7 +456,7 @@ class VotingService {
         return fields;
     }
 
-    public async applySanction(voting: IVoting & { save(): Promise<unknown> }, currentUser: IUser) {
+    public async applySanction(voting: Document & IVoting, currentUser: Pick<IUser, "osuId">) {
         const applyState = getSanctionApplyState({
             isSanctionVote: voting.isSanctionVote,
             isActive: voting.isActive,
@@ -536,14 +535,14 @@ class VotingService {
 
         return {
             voting,
-            infringementType: applyState.infringementType as InfringementType,
+            infringementType: applyState.infringementType,
             winnerOption: applyState.winnerOption,
             isWarning: applyState.isWarning,
             phrase: applyState.phrase,
         };
     }
 
-    public async undoSanction(voting: IVoting & { updateOne(update: Record<string, unknown>): Promise<unknown> }) {
+    public async undoSanction(voting: Document & IVoting) {
         if (!voting.isSanctionVote) {
             throw { status: 400, error: "This vote is not a sanction vote" };
         }

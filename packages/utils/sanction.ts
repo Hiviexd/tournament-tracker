@@ -8,19 +8,39 @@ import { getSchulzeResult } from "./common";
 export const SANCTION_NO_ACTION_OPTION = "No action required" satisfies TournamentOption;
 export const SANCTION_WARNING_OPTION = "Warning" satisfies TournamentOption;
 
-const DURATION_MONTHS: Record<string, number> = {
+const DURATION_MONTHS = {
     "1 month": 1,
     "3 months": 3,
     "6 months": 6,
     "1 year": 12,
     "2 years": 24,
-};
+} as const satisfies Record<string, number>;
 
-const SANCTION_TYPE_LABELS: Record<SanctionBanType, string> = {
+const SANCTION_TYPE_LABELS = {
     [InfringementType.TOURNAMENT_BAN]: "tournament ban",
     [InfringementType.HOSTING_BAN]: "hosting ban",
     [InfringementType.STAFFING_BAN]: "staffing ban",
-};
+} as const satisfies Record<SanctionBanType, string>;
+
+export interface SanctionDuration {
+    months?: number;
+    indefinite: boolean;
+}
+
+export interface SanctionInfringementDates {
+    startDate?: Date;
+    endDate?: Date;
+}
+
+export interface SanctionAnnouncementChannel {
+    name: string;
+    description: string;
+}
+
+export interface SanctionVoteResult {
+    winnerOption: string | null;
+    isFirstPlaceTie: boolean;
+}
 
 export function areSanctionVoteOptions(options: string[]): boolean {
     return (
@@ -33,7 +53,7 @@ export function isContestSanctionVote(assignedGroups: UserGroup[] | string[]): b
     return assignedGroups.length === 1 && assignedGroups[0] === "cc";
 }
 
-export function parseSanctionDuration(option: string): { months?: number; indefinite: boolean } | null {
+export function parseSanctionDuration(option: string): SanctionDuration | null {
     if (option === SANCTION_NO_ACTION_OPTION || option === SANCTION_WARNING_OPTION) return null;
     if (option === "Indefinite") return { indefinite: true };
     const months = DURATION_MONTHS[option];
@@ -41,7 +61,7 @@ export function parseSanctionDuration(option: string): { months?: number; indefi
     return { months, indefinite: false };
 }
 
-export function getSanctionInfringementDates(winnerOption: string): { startDate?: Date; endDate?: Date } {
+export function getSanctionInfringementDates(winnerOption: string): SanctionInfringementDates {
     const duration = parseSanctionDuration(winnerOption);
     if (!duration) return {};
 
@@ -69,7 +89,7 @@ export function getSanctionAnnouncementChannel(params: {
     isWarning: boolean;
     isContest: boolean;
     sanctionType: SanctionBanType;
-}): { name: string; description: string } {
+}): SanctionAnnouncementChannel {
     const { isWarning, isContest, sanctionType } = params;
     let name = "Notice of Tournament Ban";
     if (isWarning) {
@@ -154,7 +174,7 @@ function getRankedChoiceVotes(votes: SanctionVoteBallot[]): RankedChoiceVote[] {
 export function getSanctionVoteResult(
     options: string[],
     votes: SanctionVoteBallot[],
-): { winnerOption: string | null; isFirstPlaceTie: boolean } {
+): SanctionVoteResult {
     const rankedChoiceVotes = getRankedChoiceVotes(votes);
     const { ranking, isFirstPlaceTie } = getSchulzeResult(rankedChoiceVotes, options.length);
     const winnerOption = ranking.length ? (options[ranking[0]] ?? null) : null;
