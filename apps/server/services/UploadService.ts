@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "@tc/config";
 import { IAttachment } from "@tc/types/Attachment";
+import utils from "@tc/utils/server";
 import Attachment from "../models/attachmentModel";
 
 class UploadService {
@@ -22,24 +23,27 @@ class UploadService {
      * @param file File to upload
      * @param category Category of the file (e.g. tickets, votings)
      * @param categoryObjectId ID of the category object (e.g. ticket ID, voting ID)
-     * @returns URL of the uploaded file
+     * @returns URL and sanitized filename of the uploaded file
      */
-    private async uploadFile(file: Express.Multer.File, category: string, categoryObjectId: string): Promise<string> {
+    private async uploadFile(
+        file: Express.Multer.File,
+        category: string,
+        categoryObjectId: string,
+    ): Promise<{ url: string; filename: string }> {
         const timestamp = Date.now();
-        const fileName = `${config.r2.baseFolder}/${category}/${categoryObjectId}/${timestamp}-${file.originalname}`;
+        const { ascii: filename } = utils.sanitizeFilename(file.originalname);
+        const filePath = `${config.r2.baseFolder}/${category}/${categoryObjectId}/${timestamp}-${filename}`;
 
         const command = new PutObjectCommand({
             Bucket: config.r2.bucketName,
-            Key: fileName,
+            Key: filePath,
             Body: file.buffer,
             ContentType: file.mimetype,
         });
 
         await this.client.send(command);
 
-        const encodedFilename = encodeURIComponent(file.originalname);
-        const path = `${config.r2.baseFolder}/${category}/${categoryObjectId}/${timestamp}-${encodedFilename}`;
-        return `${config.r2.baseUrl}/${path}`;
+        return { url: `${config.r2.baseUrl}/${filePath}`, filename };
     }
 
     /**
@@ -62,10 +66,10 @@ class UploadService {
         try {
             const uploadPromises = files.map(async (file) => {
                 try {
-                    const url = await this.uploadFile(file, category, categoryObjectId);
+                    const { url, filename } = await this.uploadFile(file, category, categoryObjectId);
 
                     const attachment = new Attachment({
-                        originalName: file.originalname,
+                        originalName: filename,
                         url,
                         size: file.size,
                         type: file.mimetype,

@@ -261,8 +261,9 @@ export const consoleStyles = (text: string, styleNames: StyleName[]) => {
 };
 
 /**
- * Sanitizes a filename for safe use in HTTP Content-Disposition headers
- * Replaces unsafe characters with safe alternatives and provides both ASCII and UTF-8 encoded versions
+ * Sanitizes a filename for safe use in HTTP Content-Disposition headers and storage keys.
+ * Replaces non-ASCII / unsafe characters with `_` and provides both ASCII and UTF-8 encoded versions.
+ * If the ASCII name without extension is empty (e.g. a fully non-ASCII filename), a random hex name is used.
  * @param filename The filename to sanitize
  * @returns Object with sanitized ASCII filename and properly encoded UTF-8 version
  */
@@ -272,7 +273,15 @@ export function sanitizeFilename(filename: string): SanitizedFilename {
     const trimmed = filename.trim();
 
     // ASCII-safe fallback: only letters, numbers, -, _, .
-    const ascii = trimmed.replace(/[^a-zA-Z0-9-_.]+/g, "_");
+    let ascii = trimmed.replace(/[^a-zA-Z0-9-_.]+/g, "_");
+
+    const lastDot = ascii.lastIndexOf(".");
+    const base = lastDot > 0 ? ascii.slice(0, lastDot) : ascii;
+    const ext = lastDot > 0 ? ascii.slice(lastDot) : "";
+
+    if (!base.replace(/_/g, "").length) {
+        ascii = `${crypto.randomBytes(8).toString("hex")}${ext}`;
+    }
 
     // RFC 5987 encoded UTF-8 version for headers
     const encoded = `UTF-8''${encodeURIComponent(trimmed)}`;
