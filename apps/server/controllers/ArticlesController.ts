@@ -163,10 +163,6 @@ class ArticlesController {
         try {
             const subscribers = await User.find({ isSubscribedToNews: true }).select("osuId");
             if (subscribers.length > 0) {
-                const header = `A new Tournament Tracker news post has been published:\n\n**${article.title}**\n\n`;
-                const footer = `\n\n[Read it here](${newsUrl})`;
-                const bodyLimit = Math.max(0, OsuBotService.MESSAGE_MAX_LENGTH - header.length - footer.length);
-
                 await OsuBotService.sendAnnouncement(
                     subscribers.map((subscriber) => subscriber.osuId),
                     {
@@ -174,7 +170,7 @@ class ArticlesController {
                             name: "News From The Tournament Committee",
                             description: utils.shorten(article.title, 100),
                         },
-                        content: `${header}${utils.shorten(article.content, bodyLimit)}${footer}`,
+                        content: `A new Tournament Committee news post has been published:\n\n[**${article.title}**](${newsUrl})`,
                     },
                     res.locals!.user!.osuId,
                 );
