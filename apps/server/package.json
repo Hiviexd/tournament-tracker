@@ -4,8 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development tsx watch --tsconfig tsconfig.json app.ts",
-        "dev:preview": "cross-env NODE_ENV=preview tsx watch --tsconfig tsconfig.json app.ts",
+        "dev": "cross-env NODE_ENV=development tsx watch --include ../../config.json --tsconfig tsconfig.json app.ts",
+        "dev:preview": "cross-env NODE_ENV=preview tsx watch --include ../../config.json --tsconfig tsconfig.json app.ts",
         "build": "tsup",
         "start": "node dist/app.js",
         "migrate": "tsx --tsconfig tsconfig.json migrate.ts",
