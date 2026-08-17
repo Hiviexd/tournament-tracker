@@ -167,9 +167,9 @@ function TournamentReviewForm({ tournament, reviewChecklist }: IFormProps) {
                 <Text component="label" fw={700} size="md">
                     Review Checklist
                 </Text>
-                <ExpandButton radius={1000} size="compact-xs" variant="light" expanded={opened} onClick={toggle} />
+                <ExpandButton radius={1000} size="compact-xs" variant="light" expanded={!opened} onClick={toggle} />
             </Group>
-            <Collapse expanded={opened}>
+            <Collapse expanded={!opened}>
                 <Stack gap="md">
                     <Text size="xs" c="dimmed">
                         If something is inapplicable (i.e. not a LAN, no qualifiers, etc.), please mark it as cleared!
