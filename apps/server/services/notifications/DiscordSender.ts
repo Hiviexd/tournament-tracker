@@ -60,17 +60,16 @@ class DiscordSender {
 
             return { ok: true, retryable: false, statusCode: isNumber(response.status) ? response.status : 204 };
         } catch (error: unknown) {
-            const response = axios.isAxiosError(error)
-                ? error.response
-                : isPlainObject(error)
-                  ? error.response
-                  : undefined;
+            const response = axios.isAxiosError(error) ? error.response : undefined;
             const statusCode = isNumber(response?.status) ? response.status : undefined;
             const responseData = response?.data;
             const errorMessage =
-                (isPlainObject(responseData) && isString(responseData.message) && responseData.message) ||
+                (isPlainObject(responseData) &&
+                    "message" in responseData &&
+                    isString(responseData.message) &&
+                    responseData.message) ||
                 (error instanceof Error && error.message) ||
-                (isPlainObject(error) && isString(error.message) && error.message) ||
+                (isPlainObject(error) && "message" in error && isString(error.message) && error.message) ||
                 "Discord webhook request failed";
 
             return {
