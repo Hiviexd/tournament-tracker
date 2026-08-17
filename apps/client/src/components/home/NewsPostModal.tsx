@@ -1,8 +1,9 @@
 import { Modal, Stack, Skeleton, Text, Group, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import dayjs from "@tc/utils/dayjs";
+import { IArticle } from "@tc/types/Article";
 import { useNewsPost } from "../../hooks/useNewsPosts";
 import MarkdownText from "../common/MarkdownText";
 
@@ -23,7 +24,14 @@ function NewsPostModalLoadingState() {
 
 export default function NewsPostModal({ slug, onClose }: IProps) {
     const { data: article, isLoading } = useNewsPost(slug);
+    const lastArticleRef = useRef<IArticle | null>(null);
     const [opened, { open, close }] = useDisclosure(false);
+
+    if (article && !("error" in article)) {
+        lastArticleRef.current = article;
+    }
+
+    const displayedArticle = article && !("error" in article) ? article : lastArticleRef.current;
 
     const handleClose = useCallback(() => {
         onClose();
@@ -49,30 +57,34 @@ export default function NewsPostModal({ slug, onClose }: IProps) {
         }
     }, [slug, isLoading, article, handleClose]);
 
+    const showSkeleton = Boolean(slug) && (isLoading || !displayedArticle || displayedArticle.slug !== slug);
     const showUpdated =
-        article && !("error" in article) && dayjs(article.updatedAt).diff(dayjs(article.createdAt), "seconds") > 2;
+        displayedArticle && dayjs(displayedArticle.updatedAt).diff(dayjs(displayedArticle.createdAt), "seconds") > 2;
 
     return (
         <Modal opened={opened} onClose={handleClose} size="xl" title="News from the Tournament Committee">
-            {isLoading || !article || "error" in article ? (
+            {showSkeleton || !displayedArticle ? (
                 <NewsPostModalLoadingState />
             ) : (
                 <Stack gap="md">
                     <Group gap="md">
-                        <Tooltip label={dayjs(article.createdAt).format("LLL")}>
+                        <Tooltip label={dayjs(displayedArticle.createdAt).format("LLL")}>
                             <Text size="sm" c="dimmed">
-                                Posted {dayjs(article.createdAt).fromNow()}
+                                Posted {dayjs(displayedArticle.createdAt).fromNow()}
                             </Text>
                         </Tooltip>
                         {showUpdated && (
-                            <Tooltip label={dayjs(article.updatedAt).format("LLL")}>
+                            <Tooltip label={dayjs(displayedArticle.updatedAt).format("LLL")}>
                                 <Text size="sm" c="dimmed">
-                                    Updated {dayjs(article.updatedAt).fromNow()}
+                                    Updated {dayjs(displayedArticle.updatedAt).fromNow()}
                                 </Text>
                             </Tooltip>
                         )}
                     </Group>
-                    <MarkdownText content={`# ${article.title}\n\n${article.content}`} allowHtml={false} />
+                    <MarkdownText
+                        content={`# ${displayedArticle.title}\n\n${displayedArticle.content}`}
+                        allowHtml={false}
+                    />
                 </Stack>
             )}
         </Modal>
