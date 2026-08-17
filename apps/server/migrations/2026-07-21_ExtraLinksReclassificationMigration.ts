@@ -3,9 +3,9 @@ import Tournament from "../models/tournamentModel";
 import utils from "@tc/utils/server";
 import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
 
-export default class ExtraLinksTwitchChallongeMigration extends BaseMigration {
-    name = "ExtraLinksTwitchChallonge";
-    description = "Reclassify tournament extra links with Twitch/Challonge URLs to their proper types";
+export default class ExtraLinksReclassificationMigration extends BaseMigration {
+    name = "ExtraLinksReclassification";
+    description = "Reclassify tournament extra links with Twitch/Challonge/YouTube URLs to their proper types";
 
     private classifyLink(link: ITournamentExtraLink): ITournamentExtraLink | null {
         let newType: ExtraLinkType | null = null;
@@ -14,6 +14,8 @@ export default class ExtraLinksTwitchChallongeMigration extends BaseMigration {
             newType = "twitch";
         } else if (utils.isChallongeLink(link.url) && link.type !== "challonge") {
             newType = "challonge";
+        } else if (utils.isYoutubeLink(link.url) && link.type !== "youtube") {
+            newType = "youtube";
         }
 
         if (!newType) return null;

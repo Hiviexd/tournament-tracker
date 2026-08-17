@@ -103,6 +103,17 @@ export function isTwitchLink(link: string): boolean {
 }
 
 /**
+ * Checks if a link is a YouTube link
+ * @param link Link to check
+ */
+export function isYoutubeLink(link: string): boolean {
+    return (
+        /^https:\/\/((www|m|music)\.)?youtube\.com\/.+/.test(link) ||
+        /^https:\/\/youtu\.be\/[\w-]+(?:\?.*)?$/.test(link)
+    );
+}
+
+/**
  * Checks if a link is a Google Docs link
  * @param link Link to check
  */
@@ -148,6 +159,7 @@ export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
     "contest",
     "discord",
     "twitch",
+    "youtube",
 ];
 
 export const EXTRA_LINK_DEFAULTS = {
@@ -160,6 +172,7 @@ export const EXTRA_LINK_DEFAULTS = {
     contest: "Contest Listing",
     discord: "Discord",
     twitch: "Twitch",
+    youtube: "YouTube",
 } satisfies Record<ExtraLinkType, string>;
 
 /**
@@ -185,6 +198,8 @@ export function isExtraLinkUrlValid(type: ExtraLinkType, url: string): boolean {
             return isDiscordLink(url);
         case "twitch":
             return isTwitchLink(url);
+        case "youtube":
+            return isYoutubeLink(url);
         default:
             return false;
     }

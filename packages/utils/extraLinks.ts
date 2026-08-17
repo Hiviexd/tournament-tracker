@@ -12,6 +12,7 @@ export const EXTRA_LINK_FA_ICONS = {
     contest: "medal",
     discord: ["fab", "discord"],
     twitch: ["fab", "twitch"],
+    youtube: ["fab", "youtube"],
 } as const satisfies Partial<Record<ExtraLinkType, IconProp>>;
 
 export const EXTRA_LINK_SVG_ICONS = {

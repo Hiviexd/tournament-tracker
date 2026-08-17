@@ -75,6 +75,7 @@ export const EXTRA_LINK_TYPES = [
     "contest",
     "discord",
     "twitch",
+    "youtube",
 ] as const;
 export type ExtraLinkType = (typeof EXTRA_LINK_TYPES)[number];
 

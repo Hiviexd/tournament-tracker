@@ -72,6 +72,7 @@ const TournamentSchema = new Schema<ITournament>(
                         "contest",
                         "discord",
                         "twitch",
+                        "youtube",
                     ],
                     required: true,
                 },
