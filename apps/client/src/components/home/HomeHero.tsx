@@ -1,10 +1,15 @@
 import { Card, Stack, Title, Text, Group, Box, Image, SimpleGrid, Button, Skeleton, ScrollArea } from "@mantine/core";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAtom } from "jotai";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IArticle } from "@tc/types/Article";
+import { loggedInUserAtom } from "../../store/atoms";
 import { useNewsPosts } from "../../hooks/useNewsPosts";
+import { useUpdateNewsSubscription } from "../../hooks/useUsers";
+import { useConfirmModal } from "../../hooks/useModals";
 import NewsPostCard from "./NewsPostCard";
 import NewsPostModal from "./NewsPostModal";
-import { IArticle } from "@tc/types/Article";
 
 const OLDER_NEWS_SCROLL_THRESHOLD = 6;
 
@@ -63,7 +68,10 @@ function NewsCardsLoadingState() {
 
 export default function HomeHero() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [user] = useAtom(loggedInUserAtom);
     const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useNewsPosts();
+    const updateNewsSubscription = useUpdateNewsSubscription();
+    const confirmModal = useConfirmModal();
 
     const articles = data?.pages.flatMap((page) => page.articles) ?? [];
     const [featured, ...rest] = articles;
@@ -77,15 +85,42 @@ export default function HomeHero() {
         setSearchParams({});
     };
 
+    const handleSubscribe = async () => {
+        const confirmed = await confirmModal({
+            title: "Receive osu! notifications?",
+            text: "You'll get an osu! chat announcement whenever the Tournament Committee publishes a news post. You can opt out anytime in Settings.",
+            confirmText: "Subscribe",
+        });
+
+        if (confirmed) {
+            try {
+                await updateNewsSubscription.mutateAsync(true);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+
     return (
         <Card padding="md" radius="md" className="home-hero" shadow="sm">
             <Box className="home-hero-glow" aria-hidden />
             <Stack gap="lg" className="home-hero-content">
-                <Group gap="sm" wrap="nowrap" className="home-hero-header">
-                    <Image src="/assets/logo-main.svg?20260211" alt="" w={36} h={36} className="home-hero-logo" />
-                    <Title order={2} className="home-hero-title">
-                        Tournament Tracker
-                    </Title>
+                <Group justify="space-between" align="center" wrap="wrap" gap="sm" className="home-hero-header">
+                    <Group gap="sm" wrap="nowrap">
+                        <Image src="/assets/logo-main.svg?20260211" alt="" w={36} h={36} className="home-hero-logo" />
+                        <Title order={2} className="home-hero-title">
+                            Tournament Tracker
+                        </Title>
+                    </Group>
+                    {user && !user.isSubscribedToNews && (
+                        <Button
+                            size="xs"
+                            leftSection={<FontAwesomeIcon icon="bell" />}
+                            onClick={handleSubscribe}
+                            loading={updateNewsSubscription.isPending}>
+                            Receive osu! notifications
+                        </Button>
+                    )}
                 </Group>
 
                 {isLoading ? (

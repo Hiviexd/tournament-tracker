@@ -7,6 +7,7 @@ import DiscordIdSetting from "./settings/DiscordIdSetting";
 import EmailSetting from "./settings/EmailSetting";
 import ApiKeySection from "./settings/ApiKeySection";
 import AutomaticTypeFilterSetting from "./settings/AutomaticTypeFilterSetting";
+import NewsSubscriptionSetting from "./settings/NewsSubscriptionSetting";
 
 interface IProps {
     opened: boolean;
@@ -18,23 +19,26 @@ export default function SettingsModal({ opened, onClose }: IProps) {
 
     return (
         <Modal opened={opened} onClose={onClose} title="Settings" size="lg">
-            <Tabs defaultValue={user?.isCommittee ? "preferences" : "api-key"}>
+            <Tabs defaultValue="preferences">
                 <Tabs.List>
-                    {user?.isCommittee && <Tabs.Tab value="preferences">Preferences</Tabs.Tab>}
+                    <Tabs.Tab value="preferences">Preferences</Tabs.Tab>
                     <Tabs.Tab value="api-key">API Key</Tabs.Tab>
                 </Tabs.List>
 
-                {user?.isCommittee && (
-                    <Tabs.Panel value="preferences" mt="md">
-                        <Stack>
-                            <ReviewerStatusSetting />
-                            <VoterStatusSetting />
-                            <AutomaticTypeFilterSetting />
-                            <DiscordIdSetting />
-                            <EmailSetting />
-                        </Stack>
-                    </Tabs.Panel>
-                )}
+                <Tabs.Panel value="preferences" mt="md">
+                    <Stack>
+                        <NewsSubscriptionSetting />
+                        {user?.isCommittee && (
+                            <>
+                                <ReviewerStatusSetting />
+                                <VoterStatusSetting />
+                                <AutomaticTypeFilterSetting />
+                                <DiscordIdSetting />
+                                <EmailSetting />
+                            </>
+                        )}
+                    </Stack>
+                </Tabs.Panel>
                 <Tabs.Panel value="api-key" mt="md">
                     <ApiKeySection />
                 </Tabs.Panel>

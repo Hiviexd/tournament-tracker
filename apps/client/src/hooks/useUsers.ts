@@ -84,6 +84,26 @@ export function useOsuUserInfo(userInput: string) {
     });
 }
 
+export function useUpdateNewsSubscription() {
+    const queryClient = useQueryClient();
+    const [, setLoggedInUser] = useAtom(loggedInUserAtom);
+
+    return useMutation({
+        mutationFn: async (isSubscribedToNews: boolean) => {
+            const response = await utils.apiCall<UserMutationResult>({
+                method: "patch",
+                url: "/api/users/me/newsSubscription",
+                data: { isSubscribedToNews },
+            });
+            return utils.handleMutationResponse<UserMutationResult>(response);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+            setLoggedInUser(data.user);
+        },
+    });
+}
+
 export function useToggleReviewerStatus(userId: string) {
     const queryClient = useQueryClient();
     const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);

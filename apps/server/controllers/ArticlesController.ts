@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Article from "../models/articleModel";
+import User from "../models/userModel";
 import LogService from "../services/LogService";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
@@ -8,11 +9,13 @@ import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import NotificationDispatchService from "../services/NotificationDispatchService";
+import OsuBotService from "../services/OsuBotService";
 
 const NEWS_PAGE_SIZE = 3;
 const NEWS_PUBLIC_MAX_LIMIT = 20;
 const NEWS_COMMITTEE_MAX_LIMIT = 200;
 const DISCORD_EMBED_DESCRIPTION_LIMIT = 2000;
+const OSU_ANNOUNCEMENT_CONTENT_LIMIT = 1000;
 
 function getNewsUrl(slug: string): string {
     return `${config.baseUrl}/?news=${slug}`;
@@ -138,9 +141,9 @@ class ArticlesController {
             article,
         });
 
-        try {
-            const newsUrl = getNewsUrl(article.slug);
+        const newsUrl = getNewsUrl(article.slug);
 
+        try {
             await LogService.generate(
                 req.session.mongoId!,
                 `Created a new news article: [**${article.title}**](${newsUrl})`,
@@ -156,6 +159,29 @@ class ArticlesController {
             await enqueueNewsWebhook(builder, String(article._id));
         } catch (error) {
             console.error("Failed to publish news post to Discord:", error);
+        }
+
+        try {
+            const subscribers = await User.find({ isSubscribedToNews: true }).select("osuId");
+            if (subscribers.length > 0) {
+                const header = `A new Tournament Tracker news post has been published:\n\n**${article.title}**\n\n`;
+                const footer = `\n\n[Read it here](${newsUrl})`;
+                const bodyLimit = Math.max(0, OSU_ANNOUNCEMENT_CONTENT_LIMIT - header.length - footer.length);
+
+                await OsuBotService.sendAnnouncement(
+                    subscribers.map((subscriber) => subscriber.osuId),
+                    {
+                        channel: {
+                            name: "News From The Tournament Committee",
+                            description: utils.shorten(article.title, 100),
+                        },
+                        content: `${header}${utils.shorten(article.content, bodyLimit)}${footer}`,
+                    },
+                    res.locals!.user!.osuId,
+                );
+            }
+        } catch (error) {
+            console.error("Failed to send news osu announcement:", error);
         }
     }
 

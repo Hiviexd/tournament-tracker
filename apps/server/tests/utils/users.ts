@@ -33,6 +33,7 @@ export function createMockUser(overrides: Partial<IUser> = {}): IUser {
         history: [],
         isActiveReviewer: false,
         isActiveVoter: false,
+        isSubscribedToNews: false,
         inBag: true,
         badgeValue: 0,
         country,

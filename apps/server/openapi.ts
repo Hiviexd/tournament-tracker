@@ -151,6 +151,7 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                     discordId: { type: "string" },
                     isActiveReviewer: { type: "boolean" },
                     isActiveVoter: { type: "boolean" },
+                    isSubscribedToNews: { type: "boolean" },
                     coverUrl: { type: "string" },
                     country: { type: "object" },
                     badgeValue: { type: "integer" },
