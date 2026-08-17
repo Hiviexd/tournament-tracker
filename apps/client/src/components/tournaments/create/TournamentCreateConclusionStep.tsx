@@ -11,6 +11,7 @@ interface IProps {
     onWinnersChange: (winners: IUser[]) => void;
     files: File[];
     onFilesChange: (files: File[]) => void;
+    fileError?: string | null;
 }
 
 export default function TournamentCreateConclusionStep({
@@ -19,6 +20,7 @@ export default function TournamentCreateConclusionStep({
     onWinnersChange,
     files,
     onFilesChange,
+    fileError,
 }: IProps) {
     return (
         <Stack gap="md" mt="md">
@@ -39,6 +41,7 @@ export default function TournamentCreateConclusionStep({
                 placeholder="Up to 8 badges"
                 options={badgeUploadOptions}
                 accept={[".png"]}
+                error={fileError}
             />
 
             <TextInput

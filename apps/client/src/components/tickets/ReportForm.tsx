@@ -29,7 +29,7 @@ export default function ReportForm() {
     const navigate = useNavigate();
     const createTicketMutation = useCreateTicket();
     const [reportType, setReportType] = useState<"user" | "tournament">();
-    const { files, handleFileChange } = useFileUpload();
+    const { files, handleFileChange, error: fileError } = useFileUpload();
     const [user] = useAtom(loggedInUserAtom);
 
     const form = useForm<ITicketFormValues>({
@@ -244,7 +244,12 @@ You can report either:
                             )}
                         </Box>
 
-                        <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
+                        <FileUploadInput
+                            value={files}
+                            onChange={handleFileChange}
+                            disabled={!user}
+                            error={fileError}
+                        />
 
                         <Group justify="flex-end" mt="md">
                             <Button

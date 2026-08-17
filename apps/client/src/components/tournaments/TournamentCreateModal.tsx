@@ -30,7 +30,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const [selectedWinners, setSelectedWinners] = useState<IUser[]>([]);
     const [active, setActive] = useState(0);
     const [isUploadingBadges, setIsUploadingBadges] = useState(false);
-    const { files, handleFileChange, clearFiles } = useFileUpload(badgeUploadOptions);
+    const { files, handleFileChange, clearFiles, error: fileError } = useFileUpload(badgeUploadOptions);
     const navigate = useNavigate();
 
     const form = useForm<TournamentCreateFormValues>({
@@ -199,6 +199,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                                 onWinnersChange={setSelectedWinners}
                                 files={files}
                                 onFilesChange={handleFileChange}
+                                fileError={fileError}
                             />
                         </Stepper.Step>
 

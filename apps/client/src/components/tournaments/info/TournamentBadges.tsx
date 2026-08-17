@@ -51,7 +51,7 @@ export default function TournamentBadges({ tournament }: IProps) {
         maxSize: 5 * 1024 * 1024, // 5MB
         allowedTypes: ["image/png"],
     };
-    const { files, handleFileChange, clearFiles } = useFileUpload(serverUploadOptions);
+    const { files, handleFileChange, clearFiles, error: fileError } = useFileUpload(serverUploadOptions);
     const [awardsManagerOpened, { toggle: toggleAwardsManager }] = useDisclosure(false);
     const [profilePreviewOpened, { open: openProfilePreview, close: closeProfilePreview }] = useDisclosure(false);
 
@@ -176,16 +176,27 @@ export default function TournamentBadges({ tournament }: IProps) {
                     {"Badge" + (badges.length === 1 ? "" : "s")}
                 </Text>
                 {isEditingBadges ? (
-                    <ActionIcon
-                        variant="subtle"
-                        onClick={() => {
-                            setIsEditingBadges(false);
-                            clearFiles();
-                        }}
-                        color="danger"
-                        title="Cancel">
-                        <FontAwesomeIcon icon="xmark" />
-                    </ActionIcon>
+                    <Group gap={4}>
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={() => {
+                                setIsEditingBadges(false);
+                                clearFiles();
+                            }}
+                            color="danger"
+                            title="Cancel">
+                            <FontAwesomeIcon icon="xmark" />
+                        </ActionIcon>
+                        <ActionIcon
+                            variant="subtle"
+                            onClick={handleUploadBadges}
+                            color="success"
+                            title="Save"
+                            loading={uploadBadgesMutation.isPending}
+                            disabled={!files.length}>
+                            <FontAwesomeIcon icon="save" />
+                        </ActionIcon>
+                    </Group>
                 ) : user?.isCommitteeOrAdmin ? (
                     <Group gap={4}>
                         {tournament.isActive && (
@@ -238,29 +249,16 @@ export default function TournamentBadges({ tournament }: IProps) {
                                 ))}
                             </Group>
                         )}
-                        <Group align="end" w={{ base: "100%", xs: "50%" }}>
-                            <Box style={{ flex: 1 }}>
-                                <FileUploadInput
-                                    value={files}
-                                    onChange={handleFileChange}
-                                    label="Upload Badges"
-                                    description="Badge(s) must be .png and 172x80px"
-                                    placeholder="Up to 8 badges"
-                                    options={serverUploadOptions}
-                                    accept={clientAcceptedTypes}
-                                />
-                            </Box>
-                            <ActionIcon
-                                variant="subtle"
-                                onClick={handleUploadBadges}
-                                color="success"
-                                title="Save"
-                                mb={4}
-                                loading={uploadBadgesMutation.isPending}
-                                disabled={!files.length}>
-                                <FontAwesomeIcon icon="save" />
-                            </ActionIcon>
-                        </Group>
+                        <FileUploadInput
+                            value={files}
+                            onChange={handleFileChange}
+                            label="Upload Badges"
+                            description="Badge(s) must be .png and 172x80px"
+                            placeholder="Up to 8 badges"
+                            options={serverUploadOptions}
+                            accept={clientAcceptedTypes}
+                            error={fileError}
+                        />
                     </Stack>
                 ) : badges.length > 0 ? (
                     <Group gap="xs">

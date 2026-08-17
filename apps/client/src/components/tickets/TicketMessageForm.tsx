@@ -24,7 +24,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
     const [content, setContent] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [submissionCount, setSubmissionCount] = useState(0);
-    const { files, handleFileChange, clearFiles } = useFileUpload();
+    const { files, handleFileChange, clearFiles, error: fileError } = useFileUpload();
     const createMessageMutation = useSendMessage(ticket.id);
     const autoSaveKey = `ticket-message-${ticket.id}`;
     const textEditorRef = useRef<TextEditorRef>(null);
@@ -123,7 +123,7 @@ export default function TicketMessageForm({ ticket }: IProps) {
                         </Box>
                     )}
                 </Box>
-                <FileUploadInput value={files} onChange={handleFileChange} />
+                <FileUploadInput value={files} onChange={handleFileChange} error={fileError} />
                 <Group justify="end" align="center">
                     {user?.isCommittee && (
                         <>

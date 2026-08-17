@@ -1,13 +1,16 @@
-import { Card, Image, Stack, Text, Tooltip, Transition } from "@mantine/core";
+import { ActionIcon, Card, Image, Stack, Text, Tooltip, Transition } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IAttachment } from "@tc/types/Attachment";
 
+export type AttachmentPreview = Pick<IAttachment, "id" | "originalName" | "url" | "type">;
+
 interface IProps {
-    attachment: IAttachment;
+    attachment: AttachmentPreview;
     cardSize: number;
     iconSize?: "2x" | "3x";
     onClick?: () => void;
+    onRemove?: () => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
     hovered?: boolean;
@@ -18,6 +21,7 @@ export default function AttachmentItem({
     cardSize,
     iconSize = "2x",
     onClick,
+    onRemove,
     onMouseEnter,
     onMouseLeave,
     hovered = false,
@@ -49,6 +53,20 @@ export default function AttachmentItem({
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}>
+            {onRemove && (
+                <ActionIcon
+                    className="attachment-remove"
+                    size="xs"
+                    variant="subtle"
+                    color="gray"
+                    aria-label={`Remove ${attachment.originalName}`}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onRemove();
+                    }}>
+                    <FontAwesomeIcon icon="xmark" />
+                </ActionIcon>
+            )}
             {onClick && (
                 <Transition mounted={hovered} transition="fade" duration={200}>
                     {(styles) => (

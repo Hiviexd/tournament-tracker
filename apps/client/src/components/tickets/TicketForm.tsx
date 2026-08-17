@@ -23,7 +23,7 @@ const GROUP_OPTIONS = [
 export default function TicketForm() {
     const navigate = useNavigate();
     const createTicketMutation = useCreateTicket();
-    const { files, handleFileChange } = useFileUpload();
+    const { files, handleFileChange, error: fileError } = useFileUpload();
     const [user] = useAtom(loggedInUserAtom);
     const autoSaveKey = "ticket-create-form-message";
 
@@ -149,7 +149,12 @@ If you want to maintain your anonymity and/or confidentiality of the subject, pl
                             )}
                         </Box>
 
-                        <FileUploadInput value={files} onChange={handleFileChange} disabled={!user} />
+                        <FileUploadInput
+                            value={files}
+                            onChange={handleFileChange}
+                            disabled={!user}
+                            error={fileError}
+                        />
 
                         <Group justify="flex-end" mt="md">
                             <Button

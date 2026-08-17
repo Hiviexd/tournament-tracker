@@ -2,15 +2,15 @@ import { Box, Button, Group, Image, Modal, Stack, Text, UnstyledButton } from "@
 import { Carousel } from "@mantine/carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { IAttachment } from "@tc/types/Attachment";
-import AttachmentItem from "./AttachmentItem";
+import AttachmentItem, { type AttachmentPreview } from "./AttachmentItem";
 
 interface IProps {
-    attachments: IAttachment[];
+    attachments: AttachmentPreview[];
     size?: number;
+    onRemove?: (index: number) => void;
 }
 
-export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
+export default function AttachmentDisplay({ attachments, size = 120, onRemove }: IProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [opened, setOpened] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -31,6 +31,7 @@ export default function AttachmentDisplay({ attachments, size = 120 }: IProps) {
                             attachment={attachment}
                             cardSize={size}
                             hovered={hovered}
+                            onRemove={onRemove ? () => onRemove(index) : undefined}
                             onMouseEnter={() => setHoveredIndex(index)}
                             onMouseLeave={() => setHoveredIndex(null)}
                             onClick={() => {

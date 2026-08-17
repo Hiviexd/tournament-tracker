@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { showNotification } from "@mantine/notifications";
 
 export interface UseFileUploadOptions {
     maxFiles?: number;
@@ -24,6 +23,7 @@ const defaultOptions = {
 
 export function useFileUpload(options: UseFileUploadOptions = {}) {
     const [files, setFiles] = useState<File[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const { maxFiles, maxSize, allowedTypes } = { ...defaultOptions, ...options };
 
     const validateFiles = (files: File[]): string | null => {
@@ -38,19 +38,24 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
     };
 
     const handleFileChange = (newFiles: File[]) => {
-        const error = validateFiles(newFiles);
-        if (error) {
-            showNotification({ message: error, color: "red" });
+        const validationError = validateFiles(newFiles);
+        if (validationError) {
+            setError(validationError);
             return false;
         }
+        setError(null);
         setFiles(newFiles);
         return true;
     };
 
-    const clearFiles = () => setFiles([]);
+    const clearFiles = () => {
+        setFiles([]);
+        setError(null);
+    };
 
     return {
         files,
+        error,
         handleFileChange,
         clearFiles,
     };

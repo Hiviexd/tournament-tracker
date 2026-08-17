@@ -25,7 +25,7 @@ export default function TournamentNotes({ tournament }: IProps) {
     const [error, setError] = useState<string | null>(null);
     const [submissionCount, setSubmissionCount] = useState(0);
     const [opened, { toggle }] = useDisclosure(false);
-    const { files, handleFileChange, clearFiles } = useFileUpload();
+    const { files, handleFileChange, clearFiles, error: fileError } = useFileUpload();
     const createNoteMutation = useCreateNote(tournament.id);
     const autoSaveKey = `tournament-note-${tournament._id}`;
 
@@ -122,7 +122,7 @@ export default function TournamentNotes({ tournament }: IProps) {
                                     </Box>
                                 )}
                             </Box>
-                            <FileUploadInput value={files} onChange={handleFileChange} />
+                            <FileUploadInput value={files} onChange={handleFileChange} error={fileError} />
                             <Group justify="end" align="center">
                                 <Text fs="italic" size="xs" c="dimmed">
                                     Notes are only visible to committee members

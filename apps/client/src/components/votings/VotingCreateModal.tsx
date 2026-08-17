@@ -35,7 +35,7 @@ interface IProps {
 
 export default function VotingCreateModal({ opened, onClose }: IProps) {
     const createVotingMutation = useCreateVoting();
-    const { files, handleFileChange } = useFileUpload();
+    const { files, handleFileChange, error: fileError } = useFileUpload();
     const autoSaveKey = "voting-create-description";
     const sanctionPostAutoSaveKey = "voting-create-sanction-post";
     const navigate = useNavigate();
@@ -544,7 +544,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                         />
                     </Stack>
 
-                    <FileUploadInput value={files} onChange={handleFileChange} />
+                    <FileUploadInput value={files} onChange={handleFileChange} error={fileError} />
 
                     <Group justify="flex-end" mt="md">
                         <Button variant="subtle" onClick={onClose}>
