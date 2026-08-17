@@ -14,22 +14,24 @@ describe("OsuSender", () => {
     });
 
     it("returns success when direct osu send succeeds", async () => {
-        vi.mocked(OsuBotService.sendAnnouncementDirect).mockResolvedValue(true);
+        vi.mocked(OsuBotService.sendAnnouncementDirect).mockResolvedValue({ sentTo: [1] });
 
-        const result = await OsuSender.send({
-            payload: {
-                userIds: [1],
-                message: {
-                    channel: {
-                        name: "test",
-                        description: "desc",
-                    },
-                    content: "hello",
+        const payload = {
+            userIds: [1],
+            message: {
+                channel: {
+                    name: "test",
+                    description: "desc",
                 },
+                content: "hello",
             },
-        });
+        };
+
+        const result = await OsuSender.send({ payload });
 
         expect(result.ok).toBe(true);
+        expect(result.statusCode).toBe(200);
+        expect(payload.sentTo).toEqual([1]);
     });
 
     it("marks 429 as retryable", async () => {

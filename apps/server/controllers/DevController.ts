@@ -88,6 +88,11 @@ class DevController {
             limit,
         });
     }
+
+    public async retryNotificationJob(req: Request, res: Response) {
+        const job = await NotificationDispatchService.retryJob(req.params.id);
+        res.json({ message: "Notification job queued for retry!", job });
+    }
 }
 
 export default new DevController();

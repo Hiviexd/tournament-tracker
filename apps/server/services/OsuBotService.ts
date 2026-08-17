@@ -125,7 +125,7 @@ export default class OsuBotService extends OsuApiService {
         userIds: number[],
         message: IOsuBotMessage,
         fallbackId?: number,
-    ): Promise<true | ErrorResponse> {
+    ): Promise<{ sentTo: number[] } | ErrorResponse> {
         const token = await this.getBotToken();
 
         if (OsuApiService.isOsuResponseError(token)) {
@@ -187,7 +187,7 @@ export default class OsuBotService extends OsuApiService {
         }
 
         if (contents.length === 1 || sentCount >= contents.length) {
-            return true;
+            return { sentTo: finalUserIds };
         }
 
         for (let index = sentCount; index < contents.length; index++) {
@@ -212,6 +212,6 @@ export default class OsuBotService extends OsuApiService {
             message.sentCount = index + 1;
         }
 
-        return true;
+        return { sentTo: finalUserIds };
     }
 }

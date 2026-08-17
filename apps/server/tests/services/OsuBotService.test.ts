@@ -37,7 +37,7 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
             2,
         );
 
-        expect(result).toBe(true);
+        expect(result).toEqual({ sentTo: [1] });
         expect(executeRequest).toHaveBeenCalledTimes(1);
         expect(executeRequest.mock.calls[0][0]).toMatchObject({
             url: "https://osu.ppy.sh/api/v2/chat/channels/",
@@ -62,7 +62,7 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
             content: ["intro", "reason", "outro"],
         });
 
-        expect(result).toBe(true);
+        expect(result).toEqual({ sentTo: [1] });
         expect(executeRequest).toHaveBeenCalledTimes(3);
         expect(executeRequest.mock.calls[0][0].data.message).toBe("intro");
         expect(executeRequest.mock.calls[1][0]).toMatchObject({
@@ -84,7 +84,7 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
         };
         const result = await OsuBotService.sendAnnouncementDirect([1], message);
 
-        expect(result).toBe(true);
+        expect(result).toEqual({ sentTo: [1] });
         expect(executeRequest).toHaveBeenCalledTimes(1);
         expect(executeRequest.mock.calls[0][0]).toMatchObject({
             url: "https://osu.ppy.sh/api/v2/chat/channels/44/messages",
@@ -113,7 +113,7 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
             2,
         );
 
-        expect(result).toBe(true);
+        expect(result).toEqual({ sentTo: [2] });
         expect(executeRequest.mock.calls[0][0].data.target_ids).toEqual([2]);
     });
 

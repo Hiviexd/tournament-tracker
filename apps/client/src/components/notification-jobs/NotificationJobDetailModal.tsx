@@ -1,7 +1,10 @@
-import { Badge, Divider, Group, Modal, ScrollArea, Stack, Text } from "@mantine/core";
+import { Badge, Button, Divider, Group, Modal, ScrollArea, Stack, Text } from "@mantine/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { INotificationJobListItem } from "@tc/types/NotificationJob";
 import dayjs from "@tc/utils/dayjs";
 import { CSSProperties } from "react";
+import { useRetryNotificationJob } from "../../hooks/useDebug";
+import { useConfirmModal } from "../../hooks/useModals";
 
 interface IProps {
     job: INotificationJobListItem | null;
@@ -38,6 +41,23 @@ function JobStatusBadge({ status }: { status: INotificationJobListItem["status"]
 }
 
 export default function NotificationJobDetailModal({ job, opened, onClose }: IProps) {
+    const retryMutation = useRetryNotificationJob();
+    const confirmModal = useConfirmModal();
+
+    const handleRetry = async () => {
+        if (!job) return;
+
+        const confirmed = await confirmModal({
+            title: "Retry notification job?",
+            text: "This will requeue the job for dispatch. If it already sent, the notification will be sent again.",
+            confirmText: "Retry",
+            confirmProps: { leftSection: <FontAwesomeIcon icon="rotate" /> },
+        });
+        if (!confirmed) return;
+
+        retryMutation.mutate(job.id || job._id, { onSuccess: onClose });
+    };
+
     return (
         <Modal opened={opened} onClose={onClose} title="Notification Job Details" size="xl">
             {!job ? null : (
@@ -46,7 +66,17 @@ export default function NotificationJobDetailModal({ job, opened, onClose }: IPr
                         <Text fw={600} size="sm">
                             {job.provider}.{job.kind}
                         </Text>
-                        <JobStatusBadge status={job.status} />
+                        <Group gap="xs">
+                            <JobStatusBadge status={job.status} />
+                            <Button
+                                size="xs"
+                                variant="light"
+                                leftSection={<FontAwesomeIcon icon="rotate" />}
+                                loading={retryMutation.isPending}
+                                onClick={handleRetry}>
+                                Retry
+                            </Button>
+                        </Group>
                     </Group>
 
                     <Text size="sm" c="dimmed">
@@ -55,6 +85,11 @@ export default function NotificationJobDetailModal({ job, opened, onClose }: IPr
                     <Text size="sm" c="dimmed">
                         Last HTTP Status: {job.lastHttpStatus ?? "N/A"}
                     </Text>
+                    {"userIds" in job.payload && (
+                        <Text size="sm" c="dimmed">
+                            Sent To: {job.payload.sentTo?.length ? job.payload.sentTo.join(", ") : "N/A"}
+                        </Text>
+                    )}
                     <Text size="sm" c="dimmed">
                         Created: {dayjs(job.createdAt).format("LLL")}
                     </Text>

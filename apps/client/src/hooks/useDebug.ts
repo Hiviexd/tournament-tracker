@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import utils from "@tc/utils/client";
 import {
+    INotificationJobListItem,
     INotificationJobsListQuery,
     INotificationJobsListResponse,
     INotificationStatsResponse,
@@ -47,6 +48,24 @@ export function useNotificationQueueStats() {
                 method: "get",
                 url: "/api/dev/notifications/stats",
             }),
+    });
+}
+
+export function useRetryNotificationJob() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (jobId: string) => {
+            const response = await utils.apiCall<{ message: string; job: INotificationJobListItem }>({
+                method: "post",
+                url: `/api/dev/notifications/${jobId}/retry`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["notificationJobsListing"] });
+            queryClient.invalidateQueries({ queryKey: ["notificationQueueStats"] });
+        },
     });
 }
 

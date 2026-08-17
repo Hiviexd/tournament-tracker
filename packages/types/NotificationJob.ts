@@ -22,6 +22,7 @@ export interface IOsuAnnouncementPayload {
     userIds: number[];
     message: IOsuBotMessage;
     fallbackId?: number;
+    sentTo?: number[];
 }
 
 export type NotificationJobPayload = IDiscordNotificationPayload | IOsuAnnouncementPayload;

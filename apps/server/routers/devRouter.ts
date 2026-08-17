@@ -9,5 +9,6 @@ devRouter.get("/session", auth.isLoggedIn, auth.isDev, DevController.getSession)
 devRouter.post("/session/update", auth.isLoggedIn, auth.isDev, DevController.updateSession);
 devRouter.get("/notifications/stats", auth.isLoggedIn, auth.isDev, DevController.getNotificationQueueStats);
 devRouter.get("/notifications", auth.isLoggedIn, auth.isDev, DevController.getNotificationJobsListing);
+devRouter.post("/notifications/:id/retry", auth.isLoggedIn, auth.isDev, DevController.retryNotificationJob);
 
 export default devRouter;

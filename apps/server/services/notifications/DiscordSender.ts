@@ -45,7 +45,7 @@ class DiscordSender {
 
         try {
             const webhookUrl = this.getWebhookLink(payload.location, payload.threadId);
-            await axios.post(webhookUrl, {
+            const response = await axios.post(webhookUrl, {
                 username: config.discord.username,
                 avatar_url: config.discord.avatar_url,
                 embeds: payload.embeds,
@@ -53,13 +53,18 @@ class DiscordSender {
                 flags: payload.notification === "silent" ? 1 << 12 : undefined,
             });
 
-            return { ok: true, retryable: false };
-        } catch (error: any) {
-            const response = isPlainObject(error) ? error.response : undefined;
-            const statusCode = isPlainObject(response) && isNumber(response.status) ? response.status : undefined;
-            const responseData = isPlainObject(response) ? response.data : undefined;
+            return { ok: true, retryable: false, statusCode: isNumber(response.status) ? response.status : 204 };
+        } catch (error: unknown) {
+            const response = axios.isAxiosError(error)
+                ? error.response
+                : isPlainObject(error)
+                  ? error.response
+                  : undefined;
+            const statusCode = isNumber(response?.status) ? response.status : undefined;
+            const responseData = response?.data;
             const errorMessage =
                 (isPlainObject(responseData) && isString(responseData.message) && responseData.message) ||
+                (error instanceof Error && error.message) ||
                 (isPlainObject(error) && isString(error.message) && error.message) ||
                 "Discord webhook request failed";
 

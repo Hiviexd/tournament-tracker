@@ -47,7 +47,7 @@ export default class NotificationDispatchJob extends BaseJob {
         }
 
         if (result.ok) {
-            await NotificationDispatchService.markSent(job.id);
+            await NotificationDispatchService.markSent(job.id, result.statusCode, job.payload);
             counters.sent += 1;
             return;
         }

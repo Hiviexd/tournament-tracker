@@ -4,6 +4,7 @@ import {
     INotificationJob,
     INotificationRuntimeStats,
     IOsuAnnouncementPayload,
+    NotificationJobPayload,
     NotificationProvider,
 } from "@tc/types/NotificationJob";
 
@@ -110,7 +111,7 @@ class NotificationDispatchService {
         return result.modifiedCount;
     }
 
-    public async markSent(jobId: string): Promise<void> {
+    public async markSent(jobId: string, statusCode: number | undefined, payload: NotificationJobPayload): Promise<void> {
         await NotificationJob.findByIdAndUpdate(jobId, {
             $set: {
                 status: "sent",
@@ -118,7 +119,8 @@ class NotificationDispatchService {
                 lockedAt: null,
                 processingBy: null,
                 lastError: null,
-                lastHttpStatus: null,
+                lastHttpStatus: statusCode ?? null,
+                payload,
             },
         });
         this.runtimeCounters.sent += 1;
@@ -135,6 +137,22 @@ class NotificationDispatchService {
             },
         });
         this.runtimeCounters.failed += 1;
+    }
+
+    public async retryJob(jobId: string): Promise<INotificationJob> {
+        return await NotificationJob.findByIdAndUpdate(
+            jobId,
+            {
+                $set: {
+                    status: "pending",
+                    nextAttemptAt: new Date(),
+                    lockedAt: null,
+                    processingBy: null,
+                    attempts: 0,
+                },
+            },
+            { new: true },
+        ).orFail();
     }
 
     public async scheduleRetry(job: INotificationJob, error: string, statusCode?: number): Promise<void> {

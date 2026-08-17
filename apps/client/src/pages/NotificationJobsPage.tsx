@@ -87,8 +87,8 @@ function JobsLoadingState() {
     );
 }
 
-function HttpStatusBadge({ statusCode }: { statusCode: number | null }) {
-    if (statusCode === null) {
+function HttpStatusBadge({ statusCode }: { statusCode: number | null | undefined }) {
+    if (statusCode == null) {
         return (
             <Badge color="gray" variant="light">
                 N/A

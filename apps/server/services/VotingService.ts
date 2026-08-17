@@ -14,6 +14,7 @@ import { EmbedBuilder } from "./discord/EmbedBuilder";
 import DiscordUtils from "./discord/DiscordUtils";
 import InfringementService from "./InfringementService";
 import OsuBotService from "./OsuBotService";
+import OsuApiService from "./OsuApiService";
 
 const STRICT_PARTICIPATION_PERCENTAGE = 0.75;
 
@@ -569,7 +570,7 @@ class VotingService {
             voting.sanctionAnnouncementSentCount = announcement.sentCount;
         }
 
-        if (announcementResult !== true) {
+        if (OsuApiService.isOsuResponseError(announcementResult)) {
             await voting.save();
             throw {
                 status: announcementResult.statusCode || 500,

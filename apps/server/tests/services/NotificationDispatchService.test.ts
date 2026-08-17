@@ -1,5 +1,22 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import NotificationDispatchService from "../../services/NotificationDispatchService";
+import NotificationJob from "../../models/notificationJobModel";
+
+vi.mock("../../models/notificationJobModel", () => ({
+    default: {
+        findOneAndUpdate: vi.fn(),
+        findByIdAndUpdate: vi.fn(),
+        countDocuments: vi.fn(),
+        create: vi.fn(),
+    },
+}));
+
+interface MockNotificationJobModel {
+    findByIdAndUpdate: ReturnType<typeof vi.fn>;
+}
+
+// SAFETY: vi.mock replaces the mongoose NotificationJob model with update stubs.
+const mockNotificationJob = NotificationJob as MockNotificationJobModel;
 
 describe("NotificationDispatchService", () => {
     it("calculates bounded exponential backoff with jitter", () => {
@@ -22,5 +39,29 @@ describe("NotificationDispatchService", () => {
         expect(NotificationDispatchService.shouldRetry({ ok: false, retryable: false, statusCode: 429 })).toBe(true);
         expect(NotificationDispatchService.shouldRetry({ ok: false, retryable: false, statusCode: 503 })).toBe(true);
         expect(NotificationDispatchService.shouldRetry({ ok: false, retryable: false, statusCode: 400 })).toBe(false);
+    });
+
+    it("requeues any job and resets attempts", async () => {
+        const retriedJob = { id: "job-1", status: "pending", attempts: 0 };
+        const orFail = vi.fn().mockResolvedValue(retriedJob);
+        mockNotificationJob.findByIdAndUpdate.mockReturnValue({ orFail });
+
+        const result = await NotificationDispatchService.retryJob("job-1");
+
+        expect(result).toBe(retriedJob);
+        expect(mockNotificationJob.findByIdAndUpdate).toHaveBeenCalledWith(
+            "job-1",
+            {
+                $set: {
+                    status: "pending",
+                    nextAttemptAt: expect.any(Date),
+                    lockedAt: null,
+                    processingBy: null,
+                    attempts: 0,
+                },
+            },
+            { new: true },
+        );
+        expect(orFail).toHaveBeenCalled();
     });
 });
