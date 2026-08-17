@@ -31,10 +31,12 @@ export const configSchema = z.object({
         roles: z.object({
             tournament: z.string(),
             contest: z.string(),
+            news: z.string(),
         }),
         webhooks: z.object({
             main: webhookSchema,
             dev: webhookSchema,
+            news: webhookSchema,
         }),
     }),
     r2: z.object({

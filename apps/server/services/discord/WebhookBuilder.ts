@@ -1,5 +1,5 @@
 import { IDiscordEmbed } from "@tc/types/Discord";
-import { IDiscordNotificationPayload } from "@tc/types/NotificationJob";
+import { DiscordRoleName, DiscordWebhookLocation, IDiscordNotificationPayload } from "@tc/types/NotificationJob";
 import { EmbedBuilder } from "./EmbedBuilder";
 import NotificationDispatchService from "../NotificationDispatchService";
 
@@ -8,11 +8,11 @@ import NotificationDispatchService from "../NotificationDispatchService";
  */
 export class WebhookBuilder {
     private embeds: IDiscordEmbed[] = [];
-    private location: "main" | "dev" = "main";
+    private location: DiscordWebhookLocation = "main";
     private threadId?: string;
     private notification: "silent" | "normal" = "normal";
     private users: string[] = [];
-    private roles: ("tournament" | "contest")[] = [];
+    private roles: DiscordRoleName[] = [];
     private message: string = "";
 
     /**
@@ -28,10 +28,10 @@ export class WebhookBuilder {
     }
 
     /**
-     * Set the webhook location (`main` or `dev` channels)
+     * Set the webhook location (`main`, `dev`, or `news` channels)
      * Default is `main`
      */
-    public setLocation(location: "main" | "dev"): this {
+    public setLocation(location: DiscordWebhookLocation): this {
         this.location = location;
         return this;
     }
@@ -64,7 +64,7 @@ export class WebhookBuilder {
     /**
      * Add roles to ping before the message
      */
-    public addRoles(roles: ("tournament" | "contest")[]): this {
+    public addRoles(roles: DiscordRoleName[]): this {
         this.roles.push(...roles);
         return this;
     }

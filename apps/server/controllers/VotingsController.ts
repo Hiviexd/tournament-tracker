@@ -1,6 +1,7 @@
 import Voting from "../models/votingModel";
 import Vote from "../models/voteModel";
 import { VotingQueryParams, VOTING_CATEGORIES, SANCTION_BAN_TYPES } from "@tc/types/Voting";
+import { DiscordRoleName } from "@tc/types/NotificationJob";
 import { areSanctionVoteOptions } from "@tc/utils";
 import startCase from "lodash/startCase.js";
 import { TIME_BASED_TYPES } from "@tc/types/Infringement";
@@ -256,7 +257,7 @@ class VotingsController {
         );
 
         // Discord
-        const roles: ("tournament" | "contest")[] = [];
+        const roles: DiscordRoleName[] = [];
 
         if (voting.assignedGroups.includes("tc")) roles.push("tournament");
         if (voting.assignedGroups.includes("cc")) roles.push("contest");

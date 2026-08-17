@@ -18,7 +18,8 @@
         "avatar_url": "https://raw.githubusercontent.com/Hiviexd/tournament-tracker/refs/heads/main/public/assets/tcommlogo.jpg",
         "roles": {
             "tournament": "",
-            "contest": ""
+            "contest": "",
+            "news": ""
         },
         "webhooks": {
             "main": {
@@ -28,6 +29,12 @@
                 "serverId": ""
             },
             "dev": {
+                "id": "",
+                "token": "",
+                "channelId": "",
+                "serverId": ""
+            },
+            "news": {
                 "id": "",
                 "token": "",
                 "channelId": "",

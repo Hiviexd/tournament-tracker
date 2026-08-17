@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 import { IUser } from "./User";
 
-export const ARTICLE_TYPES = ["documentation", "resource"] as const; // future types: "news", "changelog", "blog"
+export const ARTICLE_TYPES = ["documentation", "resource", "news"] as const; // future types: "changelog", "blog"
 export type ArticleType = (typeof ARTICLE_TYPES)[number];
 
 export interface IArticle extends Document {
@@ -14,4 +14,6 @@ export interface IArticle extends Document {
     lastEditor: IUser;
     createdAt: Date;
     updatedAt: Date;
+    isDocumentation?: boolean;
+    isNews?: boolean;
 }

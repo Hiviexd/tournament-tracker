@@ -20,7 +20,7 @@ const articleSchema = new Schema<IArticle>(
         type: {
             type: String,
             required: true,
-            enum: ["documentation", "resource"],
+            enum: ["documentation", "resource", "news"],
         },
         isPublic: {
             type: Boolean,
@@ -38,28 +38,32 @@ const articleSchema = new Schema<IArticle>(
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
-// Generate slug before saving
+// Generate slug before saving. News slugs stay stable after create so public links do not break.
 articleSchema.pre("save", async function (next) {
-    if (this.isModified("title")) {
-        // Generate base slug from title
-        const baseSlug = slugify(this.title, { lower: true, strict: true });
-
-        // Check if slug exists
-        let slug = baseSlug;
-        let counter = 1;
-
-        while (await Article.exists({ slug, _id: { $ne: this._id } })) {
-            slug = `${baseSlug}-${counter}`;
-            counter++;
-        }
-
-        this.slug = slug;
+    const shouldGenerateSlug = !this.slug || (this.isModified("title") && this.type !== "news");
+    if (!shouldGenerateSlug) {
+        return next();
     }
+
+    const baseSlug = slugify(this.title, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (await Article.exists({ slug, _id: { $ne: this._id } })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+    }
+
+    this.slug = slug;
     next();
 });
 
 articleSchema.virtual("isDocumentation").get(function (this: IArticle) {
     return this.type === "documentation";
+});
+
+articleSchema.virtual("isNews").get(function (this: IArticle) {
+    return this.type === "news";
 });
 
 const Article = model<IArticle>("Article", articleSchema);

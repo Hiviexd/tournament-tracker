@@ -1,6 +1,11 @@
 import axios from "axios";
 import config from "@tc/config";
-import { IDiscordNotificationPayload, INotificationJob, NotificationJobPayload } from "@tc/types/NotificationJob";
+import {
+    DiscordWebhookLocation,
+    IDiscordNotificationPayload,
+    INotificationJob,
+    NotificationJobPayload,
+} from "@tc/types/NotificationJob";
 import { isNumber, isPlainObject, isString } from "@tc/utils/common";
 import { NotificationDispatchResult } from "../NotificationDispatchService";
 
@@ -9,7 +14,7 @@ function isDiscordPayload(payload: NotificationJobPayload): payload is IDiscordN
 }
 
 class DiscordSender {
-    private getWebhookLink(location: "main" | "dev", threadId?: string): string {
+    private getWebhookLink(location: DiscordWebhookLocation, threadId?: string): string {
         let url = `https://discord.com/api/webhooks/${config.discord.webhooks[location].id}/${config.discord.webhooks[location].token}`;
 
         // In development, always post to channel root (no thread_id) for easier visibility.

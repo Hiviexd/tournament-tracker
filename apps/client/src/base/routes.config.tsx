@@ -27,6 +27,7 @@ import ApiKeysPage from "../pages/ApiKeysPage";
 import WatchlistPage from "../pages/WatchlistPage";
 import NotificationJobsPage from "../pages/NotificationJobsPage";
 import ChecklistPage from "../pages/ChecklistPage";
+import NewsPage from "../pages/NewsPage";
 
 interface RouteConfig {
     path: string;
@@ -243,6 +244,13 @@ const routes: RouteConfig[] = [
         page: <QuotesPage />,
         title: "Quotes",
         icon: "quote-left",
+        permissions: ["committee"],
+    },
+    {
+        path: "/news",
+        page: <NewsPage />,
+        title: "News",
+        icon: "newspaper",
         permissions: ["committee"],
     },
     {

@@ -35,6 +35,7 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
             case "resource":
                 return "file-alt";
             case "article":
+            case "news":
                 return "newspaper";
             default:
                 return "search";
@@ -136,7 +137,8 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
                 break;
 
             case "article":
-                // Articles only have title, no additional badges
+            case "news":
+                // Articles and news only have title, no additional badges
                 break;
         }
 

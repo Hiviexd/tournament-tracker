@@ -26,7 +26,7 @@ class GlobalSearchController {
                 GlobalSearchService.searchVotings(searchType, searchContent, currentUser?.isCommitteeOrAdmin ?? false),
                 GlobalSearchService.searchTickets(searchType, searchContent),
                 currentUser?.isCommitteeOrAdmin ? GlobalSearchService.searchReports(searchType, searchContent) : [],
-                currentUser?.isCommitteeOrAdmin ? GlobalSearchService.searchArticles(searchType, searchContent) : [],
+                GlobalSearchService.searchArticles(searchType, searchContent, currentUser?.isCommitteeOrAdmin ?? false),
                 GlobalSearchService.searchResources(searchType, searchContent),
             ]);
 
