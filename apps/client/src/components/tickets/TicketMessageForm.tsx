@@ -65,8 +65,6 @@ export default function TicketMessageForm({ ticket }: IProps) {
         const formData = new FormData() as IMessageFormData;
         formData.append("content", content);
         formData.append("isNote", isNote.toString());
-        formData.append("content", content);
-        formData.append("isNote", isNote.toString());
         files.forEach((file) => formData.append("files", file));
 
         if (user?.isCommittee) {
