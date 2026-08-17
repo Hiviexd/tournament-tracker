@@ -1,14 +1,19 @@
 import { Stack, Group, Text, Title, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useAtom } from "jotai";
 import { IUser } from "@tc/types/User";
 import { useSyncUser } from "../../../hooks/useUsers";
+import { loggedInUserAtom } from "../../../store/atoms";
+import utils from "@tc/utils/client";
 
 interface IProps {
     user: IUser;
 }
 
 export default function UserStatus({ user }: IProps) {
+    const [loggedInUser] = useAtom(loggedInUserAtom);
     const syncUserMutation = useSyncUser(user.id || "");
+    const objectId = user.id || String(user._id);
 
     const handleSync = async () => {
         try {
@@ -30,6 +35,13 @@ export default function UserStatus({ user }: IProps) {
                 loading={syncUserMutation.isPending}>
                 Sync osu! data
             </Button>
+
+            {utils.hasRequiredPermissions(loggedInUser, ["admin"]) && (
+                <Group gap="xs">
+                    <FontAwesomeIcon icon="code" color="var(--mantine-color-info-6)" />
+                    <Text size="sm">ID: {objectId}</Text>
+                </Group>
+            )}
 
             <Group gap="xs">
                 <FontAwesomeIcon
