@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Text, Stack, Paper, Center, Group, Card, Button, Flex, SegmentedControl } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import { useDropzone } from "react-dropzone";
 import { notifications } from "@mantine/notifications";
 import defaultStableBackground from "/assets/default-bg-stable.jpg";
@@ -18,7 +19,7 @@ interface BannerPreview {
 export default function InGameBannersTab() {
     const [currentBannerUrl, setCurrentBannerUrl] = useState<string | null>(null);
     const [currentBackgroundUrl, setCurrentBackgroundUrl] = useState<string | null>(null);
-    const [isHovered, setIsHovered] = useState(false);
+    const { hovered, ref: hoverRef } = useHover();
     const [isLazer, setIsLazer] = useState(false);
     const [previewMode, setPreviewMode] = useState<"stable" | "lazer" | "web">("stable");
     const bannerImageRef = useRef<HTMLImageElement>(null);
@@ -194,16 +195,12 @@ export default function InGameBannersTab() {
 
     // Handle hover events
     const handleMouseEnter = useCallback(() => {
-        setIsHovered(true);
-
         if (!isLazer && bannerImageRef.current) {
             animateStableBanner(1.1);
         }
     }, [isLazer, animateStableBanner]);
 
     const handleMouseLeave = useCallback(() => {
-        setIsHovered(false);
-
         if (!isLazer && bannerImageRef.current) {
             animateStableBanner(1.0);
         }
@@ -344,6 +341,7 @@ export default function InGameBannersTab() {
 
                     {/* Banner Image */}
                     <div
+                        ref={hoverRef}
                         style={{
                             position: "absolute",
                             bottom: 0,
@@ -370,14 +368,14 @@ export default function InGameBannersTab() {
                                 maxWidth: "100%",
                                 maxHeight: "120px",
                                 objectFit: "contain",
-                                transform: isLazer ? `scale(${isHovered ? 1.05 : 1})` : undefined,
+                                transform: isLazer ? `scale(${hovered ? 1.05 : 1})` : undefined,
                                 transformOrigin: "bottom center",
                                 transition: isLazer
-                                    ? isHovered
+                                    ? hovered
                                         ? "transform 2s cubic-bezier(0.23, 1, 0.32, 1), filter 2s cubic-bezier(0.23, 1, 0.32, 1)"
                                         : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1)"
                                     : undefined,
-                                filter: isHovered && isLazer ? "brightness(1.1)" : "brightness(1)",
+                                filter: hovered && isLazer ? "brightness(1.1)" : "brightness(1)",
                                 display: "block",
                                 marginBottom: 0,
                             }}

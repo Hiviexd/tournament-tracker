@@ -1,7 +1,7 @@
 import { Input, Text, Stack, Group, ThemeIcon, Box, Kbd } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useOs } from "@mantine/hooks";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useHover, useMergedRef, useOs } from "@mantine/hooks";
+import { useCallback, useEffect, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import type { UseFileUploadOptions } from "../../hooks/useFileUpload";
 import AttachmentDisplay from "./AttachmentDisplay";
@@ -30,7 +30,7 @@ export default function FileUploadInput({
     disabled = false,
     error,
 }: IProps) {
-    const [isHovered, setIsHovered] = useState(false);
+    const { hovered, ref: hoverRef } = useHover();
     const modifierKey = useOs() === "macos" ? "⌘" : "Ctrl";
 
     const onDrop = useCallback(
@@ -52,9 +52,11 @@ export default function FileUploadInput({
         disabled,
         multiple: options?.maxFiles !== 1,
     });
+    const { ref: dropzoneRef, ...rootProps } = getRootProps();
+    const mergedRef = useMergedRef(hoverRef, dropzoneRef);
 
     useEffect(() => {
-        if (disabled || !isHovered) return;
+        if (disabled || !hovered) return;
 
         const handlePaste = (event: ClipboardEvent) => {
             const clipboardFiles = event.clipboardData?.files;
@@ -73,7 +75,7 @@ export default function FileUploadInput({
 
         window.addEventListener("paste", handlePaste);
         return () => window.removeEventListener("paste", handlePaste);
-    }, [disabled, isHovered, onDrop]);
+    }, [disabled, hovered, onDrop]);
 
     const previews = useMemo<AttachmentPreview[]>(
         () =>
@@ -104,10 +106,8 @@ export default function FileUploadInput({
         <Input.Wrapper label={label} description={description} error={error}>
             <Stack gap="sm" my="sm">
                 <Box
-                    {...getRootProps({
-                        onMouseEnter: () => setIsHovered(true),
-                        onMouseLeave: () => setIsHovered(false),
-                    })}
+                    {...rootProps}
+                    ref={mergedRef}
                     className="file-upload-dropzone"
                     p="md"
                     data-dragging={isDragActive || undefined}
