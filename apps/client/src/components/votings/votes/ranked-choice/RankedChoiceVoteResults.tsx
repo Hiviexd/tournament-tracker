@@ -41,6 +41,8 @@ export default function RankedChoiceVoteResults({ voting }: IProps) {
                 </Text>
                 <Tooltip
                     label="Rankings use the Schulze method, which considers pairwise comparisons between all options."
+                    multiline
+                    ta="center"
                     maw={280}>
                     <ActionIcon variant="subtle" color="gray" size="sm" aria-label="About Schulze ranking">
                         <FontAwesomeIcon icon="info-circle" />
