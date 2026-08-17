@@ -7,11 +7,36 @@ import { isString } from "@tc/utils/common";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
+import NotificationDispatchService from "../services/NotificationDispatchService";
 
 const NEWS_PAGE_SIZE = 3;
 const NEWS_PUBLIC_MAX_LIMIT = 20;
 const NEWS_COMMITTEE_MAX_LIMIT = 200;
-const DISCORD_EMBED_DESCRIPTION_LIMIT = 4096;
+const DISCORD_EMBED_DESCRIPTION_LIMIT = 2000;
+
+function getNewsUrl(slug: string): string {
+    return `${config.baseUrl}/?news=${slug}`;
+}
+
+function buildNewsWebhook(article: { title: string; content: string; slug: string }): WebhookBuilder {
+    return new WebhookBuilder()
+        .addEmbed(
+            new EmbedBuilder()
+                .setColor(DiscordUtils.webhookColors.lightBlue)
+                .setTitle(`📢 ${article.title}`)
+                .setUrl(getNewsUrl(article.slug))
+                .setDescription(utils.shorten(article.content, DISCORD_EMBED_DESCRIPTION_LIMIT)),
+        )
+        .setLocation("news");
+}
+
+async function enqueueNewsWebhook(builder: WebhookBuilder, articleId?: string): Promise<void> {
+    await NotificationDispatchService.enqueueDiscordWebhook(
+        builder.toPayload(),
+        "discord.news",
+        articleId ? { articleId } : undefined,
+    );
+}
 
 class ArticlesController {
     /** GET article by slug */
@@ -113,29 +138,25 @@ class ArticlesController {
             article,
         });
 
-        const newsUrl = `${config.baseUrl}/?news=${article.slug}`;
+        try {
+            const newsUrl = getNewsUrl(article.slug);
 
-        await LogService.generate(
-            req.session.mongoId!,
-            `Created a new news article: [**${article.title}**](${newsUrl})`,
-            "article",
-        );
+            await LogService.generate(
+                req.session.mongoId!,
+                `Created a new news article: [**${article.title}**](${newsUrl})`,
+                "article",
+            );
 
-        const builder = new WebhookBuilder()
-            .addEmbed(
-                new EmbedBuilder()
-                    .setColor(DiscordUtils.webhookColors.lightBlue)
-                    .setTitle(`📢 ${article.title}`)
-                    .setUrl(newsUrl)
-                    .setDescription(utils.shorten(article.content, DISCORD_EMBED_DESCRIPTION_LIMIT)),
-            )
-            .setLocation("news");
+            const builder = buildNewsWebhook(article).waitForMessage();
 
-        if (pingNewsRole === true) {
-            builder.addRoles(["news"]);
+            if (pingNewsRole === true) {
+                builder.addRoles(["news"]);
+            }
+
+            await enqueueNewsWebhook(builder, String(article._id));
+        } catch (error) {
+            console.error("Failed to publish news post to Discord:", error);
         }
-
-        await builder.send();
     }
 
     /** PUT edit a news post */
@@ -177,13 +198,21 @@ class ArticlesController {
             article,
         });
 
-        await LogService.generate(
-            req.session.mongoId!,
-            `Updated the news article: [**${oldTitle ? `${oldTitle} → ` : ""}${article.title}**](${
-                config.baseUrl
-            }/?news=${article.slug})`,
-            "article",
-        );
+        try {
+            await LogService.generate(
+                req.session.mongoId!,
+                `Updated the news article: [**${oldTitle ? `${oldTitle} → ` : ""}${article.title}**](${getNewsUrl(
+                    article.slug,
+                )})`,
+                "article",
+            );
+
+            if (isEdited && article.discordMessageId) {
+                await enqueueNewsWebhook(buildNewsWebhook(article).editMessage(article.discordMessageId));
+            }
+        } catch (error) {
+            console.error("Failed to update news post on Discord:", error);
+        }
     }
 
     /** POST create article */

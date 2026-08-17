@@ -5,6 +5,7 @@ import DiscordSender from "../../services/notifications/DiscordSender";
 vi.mock("axios", () => ({
     default: {
         post: vi.fn(),
+        patch: vi.fn(),
         isAxiosError: (error: { isAxiosError?: boolean }) => Boolean(error.isAxiosError),
     },
 }));
@@ -39,6 +40,7 @@ describe("DiscordSender", () => {
 
     it("returns retryable for 429 responses", async () => {
         vi.mocked(axios.post).mockRejectedValue({
+            isAxiosError: true,
             response: {
                 status: 429,
                 data: { message: "rate limited" },
@@ -94,5 +96,50 @@ describe("DiscordSender", () => {
 
         const requestUrl = String(vi.mocked(axios.post).mock.calls[0][0]);
         expect(requestUrl).not.toContain("thread_id=");
+    });
+
+    it("waits for the created message and returns its id", async () => {
+        vi.mocked(axios.post).mockResolvedValue({ data: { id: "123456789012345678" }, status: 200 });
+
+        const result = await DiscordSender.send({
+            payload: {
+                location: "main",
+                embeds: [{ color: 123456, description: "news" }],
+                wait: true,
+            },
+        });
+
+        const requestUrl = String(vi.mocked(axios.post).mock.calls[0][0]);
+        expect(requestUrl).toContain("/api/v10/webhooks/");
+        expect(requestUrl).toContain("wait=true");
+        expect(result.ok).toBe(true);
+        expect(result.messageId).toBe("123456789012345678");
+    });
+
+    it("edits an existing webhook message without changing content", async () => {
+        vi.mocked(axios.patch).mockResolvedValue({ data: { id: "999888777666555444" }, status: 200 });
+
+        const embeds = [{ color: 123456, description: "updated news" }];
+        const result = await DiscordSender.send({
+            payload: {
+                location: "main",
+                embeds,
+                editMessageId: "999888777666555444",
+                wait: true,
+            },
+        });
+
+        expect(axios.post).not.toHaveBeenCalled();
+        expect(axios.patch).toHaveBeenCalledTimes(1);
+
+        const requestUrl = String(vi.mocked(axios.patch).mock.calls[0][0]);
+        expect(requestUrl).toContain("/messages/999888777666555444");
+        expect(requestUrl).not.toContain("wait=");
+        expect(vi.mocked(axios.patch).mock.calls[0][1]).toEqual({
+            embeds,
+            flags: undefined,
+        });
+        expect(result.ok).toBe(true);
+        expect(result.messageId).toBe("999888777666555444");
     });
 });

@@ -5,6 +5,7 @@ const NotificationJobSchema = new Schema<INotificationJob>(
     {
         provider: { type: String, enum: ["discord", "osu"], required: true },
         kind: { type: String, required: true },
+        meta: { type: Schema.Types.Mixed },
         payload: { type: Schema.Types.Mixed, required: true },
         status: { type: String, enum: ["pending", "processing", "sent", "failed"], default: "pending", required: true },
         attempts: { type: Number, default: 0, min: 0 },

@@ -34,6 +34,9 @@ const articleSchema = new Schema<IArticle>(
             type: Schema.Types.ObjectId,
             ref: "User",
         },
+        discordMessageId: {
+            type: String,
+        },
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );

@@ -1,11 +1,6 @@
 import axios from "axios";
 import config from "@tc/config";
-import {
-    DiscordWebhookLocation,
-    IDiscordNotificationPayload,
-    INotificationJob,
-    NotificationJobPayload,
-} from "@tc/types/NotificationJob";
+import { IDiscordNotificationPayload, INotificationJob, NotificationJobPayload } from "@tc/types/NotificationJob";
 import { isNumber, isPlainObject, isString } from "@tc/utils/common";
 import { NotificationDispatchResult } from "../NotificationDispatchService";
 
@@ -14,15 +9,34 @@ function isDiscordPayload(payload: NotificationJobPayload): payload is IDiscordN
 }
 
 class DiscordSender {
-    private getWebhookLink(location: DiscordWebhookLocation, threadId?: string): string {
-        let url = `https://discord.com/api/webhooks/${config.discord.webhooks[location].id}/${config.discord.webhooks[location].token}`;
+    private getWebhookUrl(payload: IDiscordNotificationPayload): string {
+        const webhook = config.discord.webhooks[payload.location];
+        if (!webhook?.id || !webhook.token) {
+            throw new Error(`Missing Discord webhook config for location "${payload.location}"`);
+        }
+
+        const base = `https://discord.com/api/v10/webhooks/${webhook.id}/${webhook.token}`;
+        const url = payload.editMessageId ? `${base}/messages/${payload.editMessageId}` : base;
+        const params = new URLSearchParams();
+
+        if (payload.wait && !payload.editMessageId) {
+            params.set("wait", "true");
+        }
 
         // In development, always post to channel root (no thread_id) for easier visibility.
-        const shouldAppendThreadId = process.env.NODE_ENV !== "development";
-        if (threadId && shouldAppendThreadId) {
-            url += `?thread_id=${threadId}`;
+        if (payload.threadId && process.env.NODE_ENV !== "development") {
+            params.set("thread_id", payload.threadId);
         }
-        return url;
+
+        const query = params.toString();
+        return query ? `${url}?${query}` : url;
+    }
+
+    private parseMessageId<T>(data: T): string | undefined {
+        if (isPlainObject(data) && "id" in data && isString(data.id)) {
+            return data.id;
+        }
+        return undefined;
     }
 
     private buildContent(payload: IDiscordNotificationPayload): string {
@@ -49,16 +63,36 @@ class DiscordSender {
         }
 
         try {
-            const webhookUrl = this.getWebhookLink(payload.location, payload.threadId);
-            const response = await axios.post(webhookUrl, {
-                username: config.discord.username,
-                avatar_url: config.discord.avatar_url,
-                embeds: payload.embeds,
-                content: this.buildContent(payload),
-                flags: payload.notification === "silent" ? 1 << 12 : undefined,
-            });
+            const webhookUrl = this.getWebhookUrl(payload);
+            const flags = payload.notification === "silent" ? 1 << 12 : undefined;
+            const headers = { "User-Agent": `DiscordBot (${config.baseUrl}, 1.0.0)` };
+            const response = payload.editMessageId
+                ? await axios.patch(
+                      webhookUrl,
+                      {
+                          embeds: payload.embeds,
+                          flags,
+                      },
+                      { headers },
+                  )
+                : await axios.post(
+                      webhookUrl,
+                      {
+                          username: config.discord.username,
+                          avatar_url: config.discord.avatar_url,
+                          embeds: payload.embeds,
+                          content: this.buildContent(payload),
+                          flags,
+                      },
+                      { headers },
+                  );
 
-            return { ok: true, retryable: false, statusCode: isNumber(response.status) ? response.status : 204 };
+            return {
+                ok: true,
+                retryable: false,
+                statusCode: isNumber(response.status) ? response.status : 204,
+                messageId: this.parseMessageId(response.data),
+            };
         } catch (error: unknown) {
             const response = axios.isAxiosError(error) ? error.response : undefined;
             const statusCode = isNumber(response?.status) ? response.status : undefined;

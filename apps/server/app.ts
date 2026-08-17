@@ -239,6 +239,11 @@ app.use((err, req, res, next) => {
     const isDev = req.app.get("env") === "development";
     const responseMessage = customErrorMessage || (isDev ? err.message : "Something went wrong!");
 
+    if (res.headersSent) {
+        console.error(err);
+        return;
+    }
+
     res.status(statusCode).json({ error: responseMessage });
 
     if (!isDev) console.error(err);

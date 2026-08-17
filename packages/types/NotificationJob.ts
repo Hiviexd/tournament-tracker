@@ -22,6 +22,8 @@ export interface IDiscordNotificationPayload {
     users?: string[];
     roles?: DiscordRoleName[];
     message?: string;
+    wait?: boolean;
+    editMessageId?: string;
 }
 
 export interface IOsuAnnouncementPayload {
@@ -33,9 +35,14 @@ export interface IOsuAnnouncementPayload {
 
 export type NotificationJobPayload = IDiscordNotificationPayload | IOsuAnnouncementPayload;
 
+export interface INotificationJobMeta {
+    articleId?: string;
+}
+
 export interface INotificationJob extends Document {
     provider: NotificationProvider;
     kind: string;
+    meta?: INotificationJobMeta;
     payload: NotificationJobPayload;
     status: NotificationJobStatus;
     attempts: number;

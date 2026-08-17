@@ -14,6 +14,8 @@ export class WebhookBuilder {
     private users: string[] = [];
     private roles: DiscordRoleName[] = [];
     private message: string = "";
+    private wait = false;
+    private editMessageId?: string;
 
     /**
      * Add an embed to the webhook (accepts EmbedBuilder or IDiscordEmbed)
@@ -77,8 +79,24 @@ export class WebhookBuilder {
         return this;
     }
 
-    private toPayload(): IDiscordNotificationPayload {
-        return {
+    /**
+     * Wait for Discord to confirm the send and return the created message (`?wait=true`).
+     */
+    public waitForMessage(): this {
+        this.wait = true;
+        return this;
+    }
+
+    /**
+     * Edit a previously sent webhook message instead of creating a new one.
+     */
+    public editMessage(messageId: string): this {
+        this.editMessageId = messageId;
+        return this;
+    }
+
+    public toPayload(): IDiscordNotificationPayload {
+        const payload: IDiscordNotificationPayload = {
             location: this.location,
             threadId: this.threadId,
             notification: this.notification,
@@ -87,6 +105,16 @@ export class WebhookBuilder {
             message: this.message,
             embeds: this.embeds,
         };
+
+        if (this.wait) {
+            payload.wait = true;
+        }
+
+        if (this.editMessageId) {
+            payload.editMessageId = this.editMessageId;
+        }
+
+        return payload;
     }
 
     /**

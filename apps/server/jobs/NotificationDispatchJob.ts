@@ -4,6 +4,7 @@ import DiscordSender from "../services/notifications/DiscordSender";
 import OsuSender from "../services/notifications/OsuSender";
 import { INotificationJob } from "@tc/types/NotificationJob";
 import DiscordUtils from "../services/discord/DiscordUtils";
+import Article from "../models/articleModel";
 
 const STALE_PROCESSING_TIMEOUT_MS = 5 * 60_000;
 const DEFAULT_CLAIM_LIMIT = 1;
@@ -47,6 +48,7 @@ export default class NotificationDispatchJob extends BaseJob {
         }
 
         if (result.ok) {
+            await this.persistDiscordMessageId(job, result.messageId);
             await NotificationDispatchService.markSent(job.id, result.statusCode, job.payload);
             counters.sent += 1;
             return;
@@ -92,6 +94,19 @@ export default class NotificationDispatchJob extends BaseJob {
             job.provider,
         );
         counters.failed += 1;
+    }
+
+    private async persistDiscordMessageId(job: INotificationJob, messageId?: string): Promise<void> {
+        const articleId = job.meta?.articleId;
+        if (!messageId || !articleId) {
+            return;
+        }
+
+        try {
+            await Article.findByIdAndUpdate(articleId, { $set: { discordMessageId: messageId } });
+        } catch (error) {
+            this.log(`Failed to persist Discord message id for article ${articleId}: ${error}`);
+        }
     }
 
     protected async execute(): Promise<void> {

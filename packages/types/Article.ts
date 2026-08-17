@@ -12,6 +12,7 @@ export interface IArticle extends Document {
     type: ArticleType;
     isPublic: boolean;
     lastEditor: IUser;
+    discordMessageId?: string;
     createdAt: Date;
     updatedAt: Date;
     isDocumentation?: boolean;
