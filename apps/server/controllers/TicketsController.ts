@@ -3,6 +3,7 @@ import Ticket from "../models/ticketModel";
 import Message from "../models/messageModel";
 import User from "../models/userModel";
 import { IUser } from "@tc/types/User";
+import { DiscordRoleName } from "@tc/types/NotificationJob";
 import LogService from "../services/LogService";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
@@ -262,7 +263,7 @@ class TicketsController {
         );
 
         // Discord webhook
-        const roles: ("tournament" | "contest")[] = [];
+        const roles: DiscordRoleName[] = [];
 
         if (ticket.assignedGroup === "tc") roles.push("tournament");
         if (ticket.assignedGroup === "cc") roles.push("contest");

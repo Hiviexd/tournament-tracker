@@ -141,16 +141,30 @@ class GlobalSearchService {
     public async searchArticles(
         searchType: string | null,
         searchContent: string,
-    ): Promise<Pick<IArticle, "_id" | "title" | "slug">[]> {
-        if (searchType && searchType !== "article") {
+        isCommitteeOrAdmin: boolean,
+    ): Promise<Pick<IArticle, "_id" | "title" | "slug" | "type">[]> {
+        if (searchType && searchType !== "article" && searchType !== "news") {
             return [];
         }
 
-        const effectiveLimit = searchType === "article" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
+        if (searchType === "article" && !isCommitteeOrAdmin) {
+            return [];
+        }
+
+        const effectiveLimit = searchType === "article" || searchType === "news" ? DEFAULT_LIMIT * 2 : DEFAULT_LIMIT;
+        const typeFilter =
+            searchType === "news"
+                ? { type: "news" }
+                : searchType === "article"
+                  ? { type: "documentation" }
+                  : isCommitteeOrAdmin
+                    ? { type: { $in: ["news", "documentation"] } }
+                    : { type: "news" };
 
         const searchTerms = utils.splitSearchTerms(searchContent);
 
         return await Article.find({
+            ...typeFilter,
             $and: searchTerms.map((term) => ({
                 $or: [
                     { title: { $regex: utils.escapeRegexPattern(term), $options: "i" } },
@@ -158,7 +172,7 @@ class GlobalSearchService {
                 ],
             })),
         })
-            .select("_id title slug")
+            .select("_id title slug type")
             .sort({ createdAt: -1 })
             .limit(effectiveLimit)
             .lean();

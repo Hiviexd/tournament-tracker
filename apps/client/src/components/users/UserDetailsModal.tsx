@@ -50,8 +50,7 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
     const handleClose = useCallback(() => {
         onClose();
         close();
-        setSelectedUser(null);
-    }, [close, onClose, setSelectedUser]);
+    }, [close, onClose]);
 
     // Open or close modal immediately if userId changes
     useEffect(() => {
@@ -93,8 +92,13 @@ export default function UserDetailsModal({ userId, onClose }: IProps) {
     }, [userId, isLoading, fetchedUser, shouldFetch, selectedUserMatches, handleClose, setSelectedUser]);
 
     return (
-        <Modal opened={opened} onClose={handleClose} title="User Details" size="xl">
-            {isLoading ? (
+        <Modal
+            opened={opened}
+            onClose={handleClose}
+            title="User Details"
+            size="xl"
+            transitionProps={{ onExited: () => setSelectedUser(null) }}>
+            {userId && isLoading && !selectedUserMatches ? (
                 <UserDetailsModalLoadingState />
             ) : selectedUser ? (
                 <Stack gap="md">

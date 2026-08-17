@@ -8,6 +8,7 @@ const usersRouter = express.Router();
 
 usersRouter.get("/", auth.optionalAuth, UsersController.index);
 usersRouter.get("/me", requireScopes(["users:read"]), auth.isLoggedIn, UsersController.getSelf);
+usersRouter.patch("/me/newsSubscription", auth.isLoggedIn, UsersController.updateNewsSubscription);
 usersRouter.get("/getCommittee", auth.optionalAuth, UsersController.getCommittee);
 usersRouter.post("/create", auth.isLoggedIn, UsersController.create);
 usersRouter.get(

@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IVoting, SANCTION_BAN_TYPES, TOURNAMENT_OPTIONS } from "@tc/types/Voting";
+import { OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
 
 const VotingSchema = new Schema<IVoting>(
     {
@@ -36,7 +37,7 @@ const VotingSchema = new Schema<IVoting>(
         binaryStrictPassThreshold: { type: Number, default: 50 },
         isSanctionVote: { type: Boolean, default: false },
         sanctionType: { type: String, enum: SANCTION_BAN_TYPES },
-        sanctionPost: { type: String, maxlength: 1000 },
+        sanctionPost: { type: String, maxlength: OSU_CHAT_MESSAGE_MAX_LENGTH },
         sanctionInfringementIds: [{ type: Schema.Types.ObjectId, ref: "Infringement" }],
         sanctionAppliedAt: { type: Date },
         sanctionAnnouncementChannelId: { type: Number },
@@ -82,8 +83,12 @@ VotingSchema.pre("save", function (next) {
             return;
         }
         const sanctionPost = this.sanctionPost?.trim() ?? "";
-        if (!sanctionPost || sanctionPost.length > 1000) {
-            next(new Error("Sanction votes must have a sanction post between 1 and 1000 characters"));
+        if (!sanctionPost || sanctionPost.length > OSU_CHAT_MESSAGE_MAX_LENGTH) {
+            next(
+                new Error(
+                    `Sanction votes must have a sanction post between 1 and ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`,
+                ),
+            );
             return;
         }
         this.sanctionPost = sanctionPost;

@@ -1,5 +1,5 @@
 import { IDiscordEmbed } from "@tc/types/Discord";
-import { IDiscordNotificationPayload } from "@tc/types/NotificationJob";
+import { DiscordRoleName, DiscordWebhookLocation, IDiscordNotificationPayload } from "@tc/types/NotificationJob";
 import { EmbedBuilder } from "./EmbedBuilder";
 import NotificationDispatchService from "../NotificationDispatchService";
 
@@ -8,12 +8,14 @@ import NotificationDispatchService from "../NotificationDispatchService";
  */
 export class WebhookBuilder {
     private embeds: IDiscordEmbed[] = [];
-    private location: "main" | "dev" = "main";
+    private location: DiscordWebhookLocation = "main";
     private threadId?: string;
     private notification: "silent" | "normal" = "normal";
     private users: string[] = [];
-    private roles: ("tournament" | "contest")[] = [];
+    private roles: DiscordRoleName[] = [];
     private message: string = "";
+    private wait = false;
+    private editMessageId?: string;
 
     /**
      * Add an embed to the webhook (accepts EmbedBuilder or IDiscordEmbed)
@@ -28,10 +30,10 @@ export class WebhookBuilder {
     }
 
     /**
-     * Set the webhook location (`main` or `dev` channels)
+     * Set the webhook location (`main`, `dev`, or `news` channels)
      * Default is `main`
      */
-    public setLocation(location: "main" | "dev"): this {
+    public setLocation(location: DiscordWebhookLocation): this {
         this.location = location;
         return this;
     }
@@ -64,7 +66,7 @@ export class WebhookBuilder {
     /**
      * Add roles to ping before the message
      */
-    public addRoles(roles: ("tournament" | "contest")[]): this {
+    public addRoles(roles: DiscordRoleName[]): this {
         this.roles.push(...roles);
         return this;
     }
@@ -77,8 +79,24 @@ export class WebhookBuilder {
         return this;
     }
 
-    private toPayload(): IDiscordNotificationPayload {
-        return {
+    /**
+     * Wait for Discord to confirm the send and return the created message (`?wait=true`).
+     */
+    public waitForMessage(): this {
+        this.wait = true;
+        return this;
+    }
+
+    /**
+     * Edit a previously sent webhook message instead of creating a new one.
+     */
+    public editMessage(messageId: string): this {
+        this.editMessageId = messageId;
+        return this;
+    }
+
+    public toPayload(): IDiscordNotificationPayload {
+        const payload: IDiscordNotificationPayload = {
             location: this.location,
             threadId: this.threadId,
             notification: this.notification,
@@ -87,6 +105,16 @@ export class WebhookBuilder {
             message: this.message,
             embeds: this.embeds,
         };
+
+        if (this.wait) {
+            payload.wait = true;
+        }
+
+        if (this.editMessageId) {
+            payload.editMessageId = this.editMessageId;
+        }
+
+        return payload;
     }
 
     /**

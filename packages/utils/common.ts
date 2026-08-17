@@ -514,6 +514,7 @@ export function getSearchTypes({
         voting: ["voting", "votings", "vote", "votes", "v"],
         ticket: ["ticket", "tickets", "tk"],
         resource: ["resource", "resources", "rs"],
+        news: ["news", "n"],
     };
 
     const FRONTEND_SEARCH_TYPES = {

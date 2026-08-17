@@ -1,4 +1,5 @@
 import { IUser, IUserHistory, UserGroup } from "@tc/types/User";
+import { isBoolean } from "@tc/utils/common";
 import User from "../models/userModel";
 import utils from "@tc/utils/server";
 import UserService from "../services/UserService";
@@ -138,6 +139,28 @@ class UsersController {
             .send();
 
         res.json({ message: "User created successfully!", user });
+    }
+
+    /** PATCH update news subscription */
+    public async updateNewsSubscription(req: Request, res: Response) {
+        const { isSubscribedToNews } = req.body;
+
+        if (!isBoolean(isSubscribedToNews)) {
+            return res.status(400).json({ error: "isSubscribedToNews must be a boolean" });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            res.locals!.user!._id,
+            { isSubscribedToNews },
+            { new: true },
+        ).orFail();
+
+        res.json({
+            message: isSubscribedToNews
+                ? "You'll receive osu! notifications for news posts!"
+                : "Unsubscribed from news notifications.",
+            user: UserService.sanitizeUser(user, user),
+        });
     }
 
     /** POST toggle isActiveReviewer */

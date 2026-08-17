@@ -146,12 +146,13 @@ export function useGlobalSearch(query: string) {
                 });
             });
 
-            // Add articles
+            // Add articles (docs) and news posts
             apiResults.articles.forEach((article) => {
+                const isNews = article.type === "news";
                 searchResults.push({
                     object: article,
-                    type: "article",
-                    link: `/docs/${article.slug}`,
+                    type: isNews ? "news" : "article",
+                    link: isNews ? `/?news=${article.slug}` : `/docs/${article.slug}`,
                 });
             });
         }

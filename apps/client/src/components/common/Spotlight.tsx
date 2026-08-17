@@ -45,6 +45,7 @@ export default function Spotlight() {
     const formatType = (type: string) => {
         if (type === "voting") return "Votes";
         if (type === "article") return "Documentation";
+        if (type === "news") return "News";
         return type.charAt(0).toUpperCase() + type.slice(1) + "s";
     };
 
@@ -64,6 +65,8 @@ export default function Spotlight() {
                 return "Resources";
             case "article":
                 return "Documentation";
+            case "news":
+                return "News";
             default:
                 return type.charAt(0).toUpperCase() + type.slice(1);
         }

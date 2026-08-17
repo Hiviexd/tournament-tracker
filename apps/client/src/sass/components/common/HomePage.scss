@@ -6,7 +6,7 @@
 .home-hero {
     position: relative;
     overflow: hidden;
-    padding: clamp(2rem, 5vw, 3.25rem) 1.25rem;
+    padding: clamp(1.25rem, 3vw, 1.75rem) 1.25rem;
     background: linear-gradient(
         165deg,
         color-mix(in srgb, var(--mantine-color-primary-filled) 22%, var(--mantine-color-primary-11)) 0%,
@@ -53,24 +53,67 @@
     z-index: 1;
 }
 
+.home-hero-header {
+    animation: home-fade-up 0.45s ease both;
+}
+
 .home-hero-logo {
+    flex-shrink: 0;
     filter: drop-shadow(0 4px 16px color-mix(in srgb, var(--mantine-color-primary-6) 40%, transparent));
-    animation: home-fade-up 0.55s ease both;
 }
 
 .home-hero-title {
     letter-spacing: -0.02em;
     line-height: 1.15;
-    animation: home-fade-up 0.55s ease 0.06s both;
 }
 
-.home-hero-tagline {
-    line-height: 1.55;
-    animation: home-fade-up 0.55s ease 0.12s both;
+.news-post-card {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
+    border-top: 4px solid color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        background: linear-gradient(180deg, var(--mantine-color-primary-6) -120%, var(--mantine-color-primary-11) 2rem);
+        pointer-events: none;
+    }
+
+    .news-post-card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--mantine-color-primary-6) 28%, transparent);
+        border-top-color: var(--mantine-color-primary-6);
+        box-shadow: var(--mantine-shadow-md);
+
+        &::after {
+            opacity: 1;
+        }
+    }
+
+    &--featured {
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+    }
 }
 
-.home-hero-cta {
-    animation: home-fade-up 0.55s ease 0.18s both;
+.news-post-card-title {
+    letter-spacing: -0.02em;
+}
+
+.news-post-card-preview {
+    text-wrap: pretty;
 }
 
 .home-section-title {
@@ -145,13 +188,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .home-hero-logo,
-    .home-hero-title,
-    .home-hero-tagline,
-    .home-hero-cta,
+    .home-hero-header,
     .home-features-header .home-section-title,
     .home-features-header .home-section-subtitle,
-    .home-features .feature-card {
+    .home-features .feature-card,
+    .news-post-card {
         animation: none;
+        transition: none;
     }
 }

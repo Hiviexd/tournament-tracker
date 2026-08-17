@@ -40,6 +40,7 @@ export interface IUser {
     discordId?: string;
     isActiveReviewer: boolean;
     isActiveVoter: boolean;
+    isSubscribedToNews: boolean;
     inBag: boolean;
     coverUrl?: string;
     country?: IOsuCountry;

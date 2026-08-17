@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { IOsuBotMessage } from "@tc/types/OsuApi";
+import { IOsuBotMessage, OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
 import { ErrorResponse } from "@tc/types/Responses";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
@@ -12,6 +12,8 @@ interface TokenInfo {
 }
 
 export default class OsuBotService extends OsuApiService {
+    public static readonly MESSAGE_MAX_LENGTH = OSU_CHAT_MESSAGE_MAX_LENGTH;
+
     private static tokenInfo: TokenInfo = {
         expiresAt: null,
         token: "",
@@ -103,6 +105,11 @@ export default class OsuBotService extends OsuApiService {
         message: IOsuBotMessage,
         fallbackId?: number,
     ): Promise<true | ErrorResponse> {
+        const contents = this.getAnnouncementContents(message);
+        if (OsuApiService.isOsuResponseError(contents)) {
+            return contents;
+        }
+
         try {
             await NotificationDispatchService.enqueueOsuAnnouncement({
                 userIds,
@@ -126,6 +133,11 @@ export default class OsuBotService extends OsuApiService {
         message: IOsuBotMessage,
         fallbackId?: number,
     ): Promise<{ sentTo: number[] } | ErrorResponse> {
+        const contents = this.getAnnouncementContents(message);
+        if (OsuApiService.isOsuResponseError(contents)) {
+            return contents;
+        }
+
         const token = await this.getBotToken();
 
         if (OsuApiService.isOsuResponseError(token)) {
@@ -143,13 +155,6 @@ export default class OsuBotService extends OsuApiService {
         } else {
             console.log("osuBot.allowUserMessages is false, and no fallback ID was provided. Skipping announcement.");
             return { error: "No user IDs provided", statusCode: 400, source: "osu-bot" };
-        }
-
-        const contents = (Array.isArray(message.content) ? message.content : [message.content]).map((entry) =>
-            entry.trim(),
-        );
-        if (contents.length === 0 || contents.some((entry) => !entry)) {
-            return { error: "Announcement messages cannot be empty", statusCode: 400, source: "osu-bot" };
         }
 
         let channelId = message.channelId;
@@ -213,5 +218,22 @@ export default class OsuBotService extends OsuApiService {
         }
 
         return { sentTo: finalUserIds };
+    }
+
+    private static getAnnouncementContents(message: IOsuBotMessage): string[] | ErrorResponse {
+        const contents = (Array.isArray(message.content) ? message.content : [message.content]).map((entry) =>
+            entry.trim(),
+        );
+        if (contents.length === 0 || contents.some((entry) => !entry)) {
+            return { error: "Announcement messages cannot be empty", statusCode: 400, source: "osu-bot" };
+        }
+        if (contents.some((entry) => entry.length > this.MESSAGE_MAX_LENGTH)) {
+            return {
+                error: `Announcement messages cannot exceed ${this.MESSAGE_MAX_LENGTH} characters`,
+                statusCode: 400,
+                source: "osu-bot",
+            };
+        }
+        return contents;
     }
 }

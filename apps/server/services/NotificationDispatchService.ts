@@ -2,6 +2,7 @@ import NotificationJob from "../models/notificationJobModel";
 import {
     IDiscordNotificationPayload,
     INotificationJob,
+    INotificationJobMeta,
     INotificationRuntimeStats,
     IOsuAnnouncementPayload,
     NotificationJobPayload,
@@ -17,6 +18,7 @@ export interface NotificationDispatchResult {
     retryable: boolean;
     error?: string;
     statusCode?: number;
+    messageId?: string;
 }
 
 class NotificationDispatchService {
@@ -30,25 +32,29 @@ class NotificationDispatchService {
     public async enqueueDiscordWebhook(
         payload: IDiscordNotificationPayload,
         kind: string = "discord.webhook",
+        meta?: INotificationJobMeta,
     ): Promise<INotificationJob> {
-        return await this.enqueue("discord", kind, payload);
+        return await this.enqueue("discord", kind, payload, meta);
     }
 
     public async enqueueOsuAnnouncement(
         payload: IOsuAnnouncementPayload,
         kind: string = "osu.announcement",
+        meta?: INotificationJobMeta,
     ): Promise<INotificationJob> {
-        return await this.enqueue("osu", kind, payload);
+        return await this.enqueue("osu", kind, payload, meta);
     }
 
     private async enqueue(
         provider: NotificationProvider,
         kind: string,
         payload: IDiscordNotificationPayload | IOsuAnnouncementPayload,
+        meta?: INotificationJobMeta,
     ): Promise<INotificationJob> {
         const job = await NotificationJob.create({
             provider,
             kind,
+            meta,
             payload,
             status: "pending",
             attempts: 0,

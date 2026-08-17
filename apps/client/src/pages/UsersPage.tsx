@@ -19,7 +19,6 @@ export default function UsersPage() {
 
     const handleUserModalClose = () => {
         setSearchParams({});
-        setSelectedUser(null);
     };
 
     const handleUserSelect = (user: IUser | null) => {

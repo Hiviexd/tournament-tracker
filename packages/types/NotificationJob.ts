@@ -8,14 +8,22 @@ export type NotificationProvider = (typeof NOTIFICATION_PROVIDERS)[number];
 export const NOTIFICATION_JOB_STATUSES = ["pending", "processing", "sent", "failed"] as const;
 export type NotificationJobStatus = (typeof NOTIFICATION_JOB_STATUSES)[number];
 
+export const DISCORD_WEBHOOK_LOCATIONS = ["main", "dev", "news"] as const;
+export type DiscordWebhookLocation = (typeof DISCORD_WEBHOOK_LOCATIONS)[number];
+
+export const DISCORD_ROLE_NAMES = ["tournament", "contest", "news"] as const;
+export type DiscordRoleName = (typeof DISCORD_ROLE_NAMES)[number];
+
 export interface IDiscordNotificationPayload {
-    location: "main" | "dev";
+    location: DiscordWebhookLocation;
     embeds: IDiscordEmbed[];
     threadId?: string;
     notification?: "silent" | "normal";
     users?: string[];
-    roles?: ("tournament" | "contest")[];
+    roles?: DiscordRoleName[];
     message?: string;
+    wait?: boolean;
+    editMessageId?: string;
 }
 
 export interface IOsuAnnouncementPayload {
@@ -27,9 +35,14 @@ export interface IOsuAnnouncementPayload {
 
 export type NotificationJobPayload = IDiscordNotificationPayload | IOsuAnnouncementPayload;
 
+export interface INotificationJobMeta {
+    articleId?: string;
+}
+
 export interface INotificationJob extends Document {
     provider: NotificationProvider;
     kind: string;
+    meta?: INotificationJobMeta;
     payload: NotificationJobPayload;
     status: NotificationJobStatus;
     attempts: number;
