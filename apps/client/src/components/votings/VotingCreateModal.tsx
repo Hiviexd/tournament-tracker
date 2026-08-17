@@ -9,6 +9,7 @@ import {
     VOTING_TYPES,
 } from "@tc/types/Voting";
 import { UserGroup, IUser } from "@tc/types/User";
+import { OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
 import { VOTE_COLORS, PREDEFINED_OPTIONS, VOTE_PRESETS } from "../../constants";
 import startCase from "lodash/startCase.js";
 import { useFileUpload } from "../../hooks/useFileUpload";
@@ -117,7 +118,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
             sanctionPost: (value, values) => {
                 if (!values.isSanctionVote) return null;
                 if (!value.trim()) return "Sanction post is required";
-                if (value.trim().length > 1000) return "Sanction post cannot exceed 1000 characters";
+                if (value.trim().length > OSU_CHAT_MESSAGE_MAX_LENGTH)
+                    return `Sanction post cannot exceed ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`;
                 return null;
             },
         },
@@ -359,7 +361,7 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                         <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
                                     </Box>
                                     <Text size="xs" c="dimmed">
-                                        {form.values.sanctionPost.trim().length}/1000
+                                        {form.values.sanctionPost.trim().length}/{OSU_CHAT_MESSAGE_MAX_LENGTH}
                                     </Text>
                                 </Box>
                                 <TextEditor

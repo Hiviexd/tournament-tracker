@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useUpdateVoting, useRecalibrateRequiredVotes } from "../../hooks/useVotings";
 import { IVoting, SANCTION_BAN_TYPES } from "@tc/types/Voting";
 import { IUser } from "@tc/types/User";
+import { OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
 import { VOTE_COLORS } from "../../constants";
 import startCase from "lodash/startCase.js";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
@@ -119,7 +120,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
             sanctionPost: (value) => {
                 if (!voting.isSanctionVote || voting.sanctionAppliedAt) return null;
                 if (!value.trim()) return "Sanction post is required";
-                if (value.trim().length > 1000) return "Sanction post cannot exceed 1000 characters";
+                if (value.trim().length > OSU_CHAT_MESSAGE_MAX_LENGTH)
+                    return `Sanction post cannot exceed ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`;
                 return null;
             },
         },
@@ -239,7 +241,7 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                                         <span style={{ color: "var(--mantine-color-red-filled)" }}> *</span>
                                     </Box>
                                     <Text size="xs" c="dimmed">
-                                        {form.values.sanctionPost.trim().length}/1000
+                                        {form.values.sanctionPost.trim().length}/{OSU_CHAT_MESSAGE_MAX_LENGTH}
                                     </Text>
                                 </Box>
                                 <TextEditor

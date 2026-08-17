@@ -70,6 +70,9 @@ export interface IOsuMessageChannel {
     description?: string;
 }
 
+/** osu! chat messages, including announcement bodies, cannot exceed this length. */
+export const OSU_CHAT_MESSAGE_MAX_LENGTH = 1000;
+
 export interface IOsuBotMessage {
     channel: IOsuMessageChannel;
     content: string | string[];

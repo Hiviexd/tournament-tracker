@@ -93,6 +93,16 @@ describe("OsuBotService.sendAnnouncementDirect", () => {
         expect(message.sentCount).toBe(3);
     });
 
+    it("rejects messages over the osu! chat length limit", async () => {
+        const result = await OsuBotService.sendAnnouncementDirect([1], {
+            channel: { name: "Notice" },
+            content: "x".repeat(OsuBotService.MESSAGE_MAX_LENGTH + 1),
+        });
+
+        expect(result).toMatchObject({ statusCode: 400 });
+        expect(executeRequest).not.toHaveBeenCalled();
+    });
+
     it("rejects empty message arrays", async () => {
         const result = await OsuBotService.sendAnnouncementDirect([1], {
             channel: { name: "Notice" },

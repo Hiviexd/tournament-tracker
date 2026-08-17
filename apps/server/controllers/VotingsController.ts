@@ -5,6 +5,7 @@ import { DiscordRoleName } from "@tc/types/NotificationJob";
 import { areSanctionVoteOptions } from "@tc/utils";
 import startCase from "lodash/startCase.js";
 import { TIME_BASED_TYPES } from "@tc/types/Infringement";
+import { OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
 import User from "../models/userModel";
 import { USER_GROUPS } from "@tc/types/User";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
@@ -184,8 +185,10 @@ class VotingsController {
             if (!parsedSanctionType) {
                 return res.status(400).json({ error: "Sanction type is required" });
             }
-            if (!trimmedPost || trimmedPost.length > 1000) {
-                return res.status(400).json({ error: "Sanction post must be between 1 and 1000 characters" });
+            if (!trimmedPost || trimmedPost.length > OSU_CHAT_MESSAGE_MAX_LENGTH) {
+                return res
+                    .status(400)
+                    .json({ error: `Sanction post must be between 1 and ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters` });
             }
             if (!areSanctionVoteOptions(optionList)) {
                 return res.status(400).json({ error: "Sanction votes must use the tournament ban options" });
@@ -585,8 +588,12 @@ class VotingsController {
             }
             if (sanctionPost !== undefined) {
                 const trimmedPost = utils.isString(sanctionPost) ? sanctionPost.trim() : "";
-                if (!trimmedPost || trimmedPost.length > 1000) {
-                    return res.status(400).json({ error: "Sanction post must be between 1 and 1000 characters" });
+                if (!trimmedPost || trimmedPost.length > OSU_CHAT_MESSAGE_MAX_LENGTH) {
+                    return res
+                        .status(400)
+                        .json({
+                            error: `Sanction post must be between 1 and ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`,
+                        });
                 }
                 if (voting.sanctionPost !== trimmedPost) {
                     voting.sanctionPost = trimmedPost;

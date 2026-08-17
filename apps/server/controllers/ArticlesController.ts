@@ -15,7 +15,6 @@ const NEWS_PAGE_SIZE = 3;
 const NEWS_PUBLIC_MAX_LIMIT = 20;
 const NEWS_COMMITTEE_MAX_LIMIT = 200;
 const DISCORD_EMBED_DESCRIPTION_LIMIT = 2000;
-const OSU_ANNOUNCEMENT_CONTENT_LIMIT = 1000;
 
 function getNewsUrl(slug: string): string {
     return `${config.baseUrl}/?news=${slug}`;
@@ -166,7 +165,7 @@ class ArticlesController {
             if (subscribers.length > 0) {
                 const header = `A new Tournament Tracker news post has been published:\n\n**${article.title}**\n\n`;
                 const footer = `\n\n[Read it here](${newsUrl})`;
-                const bodyLimit = Math.max(0, OSU_ANNOUNCEMENT_CONTENT_LIMIT - header.length - footer.length);
+                const bodyLimit = Math.max(0, OsuBotService.MESSAGE_MAX_LENGTH - header.length - footer.length);
 
                 await OsuBotService.sendAnnouncement(
                     subscribers.map((subscriber) => subscriber.osuId),
