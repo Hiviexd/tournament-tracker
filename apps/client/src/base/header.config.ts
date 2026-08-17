@@ -135,13 +135,13 @@ export const routes: IRoute[] = [
                 title: "API Keys",
                 link: "/keys",
                 icon: "key",
-                permissions: ["dev"],
+                permissions: ["admin"],
             },
             {
                 title: "Notification Jobs",
                 link: "/notification-jobs",
                 icon: "bell",
-                permissions: ["dev"],
+                permissions: ["admin"],
             },
             // {
             //     title: "Create Article",

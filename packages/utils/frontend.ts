@@ -114,6 +114,7 @@ export function getReviewerCommitteeOptions(
 
 /**
  * Check if the user has the required permissions to view a component
+ * Hierarchy: dev (full override) -> admin (bypasses all except "dev") -> everyone else
  * @param user The user object
  * @param permissions Array of permissions required to view the component
  */
@@ -124,8 +125,11 @@ export function hasRequiredPermissions(user: IUser | null, permissions: string[]
     // No user, only allow if no permissions are required
     if (!user) return !permissions.length;
 
-    // Admin/dev bypass
-    if (user.isAdmin || user.isDev) return true;
+    // Dev is the true full override
+    if (user.isDev) return true;
+
+    // Admin bypasses all non-dev requirements (committee, admin, etc.)
+    if (user.isAdmin && !permissions.includes("dev")) return true;
 
     // Check if user has the required permissions
     if (

@@ -2,9 +2,11 @@ import { Badge, Button, Divider, Group, Modal, ScrollArea, Stack, Text } from "@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { INotificationJobListItem } from "@tc/types/NotificationJob";
 import dayjs from "@tc/utils/dayjs";
+import { useAtom } from "jotai";
 import { CSSProperties } from "react";
 import { useRetryNotificationJob } from "../../hooks/useDebug";
 import { useConfirmModal } from "../../hooks/useModals";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
     job: INotificationJobListItem | null;
@@ -41,6 +43,7 @@ function JobStatusBadge({ status }: { status: INotificationJobListItem["status"]
 }
 
 export default function NotificationJobDetailModal({ job, opened, onClose }: IProps) {
+    const [user] = useAtom(loggedInUserAtom);
     const retryMutation = useRetryNotificationJob();
     const confirmModal = useConfirmModal();
 
@@ -68,14 +71,16 @@ export default function NotificationJobDetailModal({ job, opened, onClose }: IPr
                         </Text>
                         <Group gap="xs">
                             <JobStatusBadge status={job.status} />
-                            <Button
-                                size="xs"
-                                variant="light"
-                                leftSection={<FontAwesomeIcon icon="rotate" />}
-                                loading={retryMutation.isPending}
-                                onClick={handleRetry}>
-                                Retry
-                            </Button>
+                            {user?.isDev && (
+                                <Button
+                                    size="xs"
+                                    variant="light"
+                                    leftSection={<FontAwesomeIcon icon="rotate" />}
+                                    loading={retryMutation.isPending}
+                                    onClick={handleRetry}>
+                                    Retry
+                                </Button>
+                            )}
                         </Group>
                     </Group>
 

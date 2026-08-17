@@ -1,26 +1,26 @@
 import User from "../models/userModel";
 import utils from "@tc/utils/server";
 import OsuApiService from "../services/OsuApiService";
+import { IUser } from "@tc/types/User";
 import { Request, Response, NextFunction } from "express";
 
-/**
- * Unauthorized middleware
- * @param req
- * @param res
- * @param next
- */
-function unauthorize(req: Request, res: Response, next: NextFunction) {
-    // Admin bypass
-    const user = res.locals!.user || null;
-    if (user && (user.isAdmin || user.isDev)) {
-        return next();
-    }
-
+function deny(req: Request, res: Response) {
     if (req.accepts(["html", "json"]) === "json") {
         res.status(401).json({ error: "Unauthorized, login first" });
     } else {
         res.redirect("/");
     }
+}
+
+function requireRole(isAllowed: (user: IUser) => boolean) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (!checkApiKeyAccess(res)) return;
+
+        const user = res.locals!.user;
+        if (user && isAllowed(user)) return next();
+
+        deny(req, res);
+    };
 }
 
 /**
@@ -48,7 +48,7 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
     const user = await User.findById(req.session.mongoId || res.locals!.user?._id);
 
     if (!user) {
-        return unauthorize(req, res, next);
+        return deny(req, res);
     }
 
     // Refresh if less than 2 hours left for some possible edge cases
@@ -70,50 +70,10 @@ async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-/**
- * Check if user is part of a committee
- * @param req
- * @param res
- * @param next
- */
-function isCommittee(req: Request, res: Response, next: NextFunction) {
-    if (!checkApiKeyAccess(res)) return;
-
-    const user = res.locals!.user;
-    if (!user || !user.isCommittee) return unauthorize(req, res, next);
-
-    next();
-}
-
-/**
- * Check if user is admin
- * @param req
- * @param res
- * @param next
- */
-function isAdmin(req: Request, res: Response, next: NextFunction) {
-    if (!checkApiKeyAccess(res)) return;
-
-    const user = res.locals!.user;
-    if (!user || !user.isAdmin) return unauthorize(req, res, next);
-
-    next();
-}
-
-/**
- * Check if user is dev
- * @param req
- * @param res
- * @param next
- */
-function isDev(req: Request, res: Response, next: NextFunction) {
-    if (!checkApiKeyAccess(res)) return;
-
-    const user = res.locals!.user;
-    if (!user || !user.isDev) return unauthorize(req, res, next);
-
-    next();
-}
+// Hierarchy: each role includes everyone above it (dev -> admin -> committee)
+const isDev = requireRole((user) => user.isDev);
+const isAdmin = requireRole((user) => user.isDev || user.isAdmin);
+const isCommittee = requireRole((user) => user.isDev || user.isAdmin || user.isCommittee);
 
 /**
  * Optional authentication middleware

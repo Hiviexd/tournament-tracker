@@ -257,14 +257,14 @@ const routes: RouteConfig[] = [
         page: <ApiKeysPage />,
         title: "API Keys",
         icon: "key",
-        permissions: ["dev"],
+        permissions: ["admin"],
     },
     {
         path: "/notification-jobs",
         page: <NotificationJobsPage />,
         title: "Notification Jobs",
         icon: "bell",
-        permissions: ["dev"],
+        permissions: ["admin"],
     },
     {
         path: "/watchlist",
