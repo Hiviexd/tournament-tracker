@@ -8,7 +8,7 @@ export interface INewsListResponse {
 }
 
 const NEWS_INITIAL_PAGE_SIZE = 3;
-const NEWS_LOAD_MORE_SIZE = 2;
+const NEWS_LOAD_MORE_SIZE = 4;
 
 export function useNewsPosts() {
     return useInfiniteQuery({
