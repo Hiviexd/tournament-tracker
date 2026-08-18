@@ -1,4 +1,4 @@
-import { Modal, Stack, Skeleton, Text, Group, Tooltip } from "@mantine/core";
+import { Modal, Stack, Skeleton, Text, Group, Title, Divider } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useRef } from "react";
@@ -6,6 +6,8 @@ import dayjs from "@tc/utils/dayjs";
 import { IArticle } from "@tc/types/Article";
 import { useNewsPost } from "../../hooks/useNewsPosts";
 import MarkdownText from "../common/MarkdownText";
+import NewsCategoryIcons from "../news/NewsCategoryIcons";
+import DateBadge from "../common/badges/DateBadge";
 
 interface IProps {
     slug: string | null;
@@ -67,24 +69,31 @@ export default function NewsPostModal({ slug, onClose }: IProps) {
                 <NewsPostModalLoadingState />
             ) : (
                 <Stack gap="md">
-                    <Group gap="md">
-                        <Tooltip label={dayjs(displayedArticle.createdAt).format("LLL")}>
-                            <Text size="sm" c="dimmed">
-                                Posted {dayjs(displayedArticle.createdAt).fromNow()}
+                    <Title order={2}>
+                        <NewsCategoryIcons categories={displayedArticle.categories} />
+                        {displayedArticle.title}
+                    </Title>
+                    <Group gap="xs">
+                        <Group gap={6}>
+                            <Text size="xs" c="dimmed">
+                                Posted
                             </Text>
-                        </Tooltip>
+                            <DateBadge date={displayedArticle.createdAt} size="xs" staticColor />
+                        </Group>
                         {showUpdated && (
-                            <Tooltip label={dayjs(displayedArticle.updatedAt).format("LLL")}>
-                                <Text size="sm" c="dimmed">
-                                    Updated {dayjs(displayedArticle.updatedAt).fromNow()}
-                                </Text>
-                            </Tooltip>
+                            <>
+                                <Divider orientation="vertical" />
+                                <Group gap={6}>
+                                    <Text size="xs" c="dimmed">
+                                        Updated
+                                    </Text>
+                                    <DateBadge date={displayedArticle.updatedAt} size="xs" staticColor />
+                                </Group>
+                            </>
                         )}
                     </Group>
-                    <MarkdownText
-                        content={`# ${displayedArticle.title}\n\n${displayedArticle.content}`}
-                        allowHtml={false}
-                    />
+                    <Divider />
+                    <MarkdownText content={displayedArticle.content} allowHtml={false} />
                 </Stack>
             )}
         </Modal>

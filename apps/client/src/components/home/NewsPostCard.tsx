@@ -3,6 +3,7 @@ import DateBadge from "../common/badges/DateBadge";
 import { IArticle } from "@tc/types/Article";
 import dayjs from "@tc/utils/dayjs";
 import { getNewsPreview } from "./newsPreview";
+import NewsCategoryIcons from "../news/NewsCategoryIcons";
 
 interface IProps {
     article: IArticle;
@@ -20,6 +21,7 @@ export default function NewsPostCard({ article, featured = false, onSelect }: IP
             onClick={() => onSelect(article)}>
             <Stack gap={featured ? "sm" : "xs"} className="news-post-card-body">
                 <Title order={featured ? 2 : 4} className="news-post-card-title" lineClamp={2}>
+                    <NewsCategoryIcons categories={article.categories} />
                     {article.title}
                 </Title>
                 <Text size={featured ? "md" : "sm"} c="dimmed" lineClamp={1} className="news-post-card-preview">

@@ -1,9 +1,11 @@
-import { Modal, TextInput, Stack, Button, Box, Checkbox } from "@mantine/core";
+import { Modal, TextInput, Stack, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCreateNewsPost } from "../../hooks/useNewsPosts";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
+import MultiSelect from "../common/MultiSelect";
+import { NEWS_CATEGORY_OPTIONS } from "./NewsCategoryIcons";
 
 interface IProps {
     opened: boolean;
@@ -18,15 +20,16 @@ export default function NewsPostCreateModal({ opened, onClose }: IProps) {
         initialValues: {
             title: "",
             content: "",
-            pingNewsRole: false,
+            categories: [] as string[],
         },
         validate: {
             title: (value) => (value.trim().length < 3 ? "Title must be at least 3 characters" : null),
             content: (value) => (value.trim().length < 10 ? "Content must be at least 10 characters" : null),
+            categories: (value) => (value.length === 0 ? "Select at least one category" : null),
         },
     });
 
-    const handleSubmit = async (values: { title: string; content: string; pingNewsRole: boolean }) => {
+    const handleSubmit = async (values: { title: string; content: string; categories: string[] }) => {
         try {
             await createNewsPostMutation.mutateAsync(values);
             clearAutoSavedValue(autoSaveKey);
@@ -67,9 +70,12 @@ export default function NewsPostCreateModal({ opened, onClose }: IProps) {
                             </Box>
                         )}
                     </Box>
-                    <Checkbox
-                        label="Ping the news role on Discord"
-                        {...form.getInputProps("pingNewsRole", { type: "checkbox" })}
+                    <MultiSelect
+                        withAsterisk
+                        label="Category"
+                        placeholder="Select tournament and/or contest"
+                        data={NEWS_CATEGORY_OPTIONS}
+                        {...form.getInputProps("categories")}
                     />
                     <Button
                         type="submit"

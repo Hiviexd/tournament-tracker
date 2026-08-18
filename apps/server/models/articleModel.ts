@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IArticle } from "@tc/types/Article";
+import { TOURNAMENT_TYPES } from "@tc/types/Tournament";
 import slugify from "slugify";
 
 const articleSchema = new Schema<IArticle>(
@@ -22,6 +23,7 @@ const articleSchema = new Schema<IArticle>(
             required: true,
             enum: ["documentation", "resource", "news"],
         },
+        categories: [{ type: String, enum: TOURNAMENT_TYPES }],
         isPublic: {
             type: Boolean,
             default: false,

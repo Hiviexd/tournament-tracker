@@ -19,7 +19,8 @@
         "roles": {
             "tournament": "",
             "contest": "",
-            "news": ""
+            "tournamentNews": "",
+            "contestNews": ""
         },
         "webhooks": {
             "main": {

@@ -142,7 +142,7 @@ class GlobalSearchService {
         searchType: string | null,
         searchContent: string,
         isCommitteeOrAdmin: boolean,
-    ): Promise<Pick<IArticle, "_id" | "title" | "slug" | "type">[]> {
+    ): Promise<Pick<IArticle, "_id" | "title" | "slug" | "type" | "categories">[]> {
         if (searchType && searchType !== "article" && searchType !== "news") {
             return [];
         }
@@ -172,7 +172,7 @@ class GlobalSearchService {
                 ],
             })),
         })
-            .select("_id title slug type")
+            .select("_id title slug type categories")
             .sort({ createdAt: -1 })
             .limit(effectiveLimit)
             .lean();

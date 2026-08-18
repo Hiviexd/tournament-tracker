@@ -31,7 +31,8 @@ export const configSchema = z.object({
         roles: z.object({
             tournament: z.string(),
             contest: z.string(),
-            news: z.string(),
+            tournamentNews: z.string(),
+            contestNews: z.string(),
         }),
         webhooks: z.object({
             main: webhookSchema,

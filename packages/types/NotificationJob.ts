@@ -11,7 +11,7 @@ export type NotificationJobStatus = (typeof NOTIFICATION_JOB_STATUSES)[number];
 export const DISCORD_WEBHOOK_LOCATIONS = ["main", "dev", "news"] as const;
 export type DiscordWebhookLocation = (typeof DISCORD_WEBHOOK_LOCATIONS)[number];
 
-export const DISCORD_ROLE_NAMES = ["tournament", "contest", "news"] as const;
+export const DISCORD_ROLE_NAMES = ["tournament", "contest", "tournamentNews", "contestNews"] as const;
 export type DiscordRoleName = (typeof DISCORD_ROLE_NAMES)[number];
 
 export interface IDiscordNotificationPayload {

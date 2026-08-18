@@ -137,8 +137,16 @@ export default function SpotlightAction({ searchItem, onClick }: SpotlightAction
                 break;
 
             case "article":
+                break;
+
             case "news":
-                // Articles and news only have title, no additional badges
+                if ("categories" in obj && Array.isArray(obj.categories)) {
+                    badges.push(
+                        ...obj.categories.map((category) => (
+                            <TournamentTypeBadge key={category} type={category} size="xs" />
+                        )),
+                    );
+                }
                 break;
         }
 

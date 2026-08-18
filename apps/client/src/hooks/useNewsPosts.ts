@@ -69,7 +69,7 @@ export function useCreateNewsPost() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (data: { title: string; content: string; pingNewsRole: boolean }) => {
+        mutationFn: async (data: { title: string; content: string; categories: string[] }) => {
             const response = await utils.apiCall({
                 method: "post",
                 url: "/api/articles/news/create",
@@ -87,7 +87,7 @@ export function useEditNewsPost(slug: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (data: { title?: string; content?: string }) => {
+        mutationFn: async (data: { title?: string; content?: string; categories?: string[] }) => {
             const response = await utils.apiCall({
                 method: "put",
                 url: `/api/articles/news/${slug}/edit`,

@@ -7,6 +7,7 @@ import dayjs from "@tc/utils/dayjs";
 import { useAllNewsPosts } from "../hooks/useNewsPosts";
 import NewsPostCreateModal from "../components/news/NewsPostCreateModal";
 import NewsPostEditModal from "../components/news/NewsPostEditModal";
+import NewsCategoryIcons from "../components/news/NewsCategoryIcons";
 import EmptyState from "../components/common/EmptyState";
 
 function NewsLoadingState() {
@@ -74,7 +75,10 @@ export default function NewsPage() {
                             onClick={() => handleEdit(article)}
                             style={{ cursor: "pointer" }}>
                             <Group justify="space-between" align="flex-start" wrap="nowrap">
-                                <Text fw={500}>{article.title}</Text>
+                                <Text fw={500} lineClamp={2} style={{ minWidth: 0 }}>
+                                    <NewsCategoryIcons categories={article.categories} />
+                                    {article.title}
+                                </Text>
                                 <Tooltip label={dayjs(article.createdAt).format("LLL")}>
                                     <Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>
                                         {dayjs(article.createdAt).fromNow()}

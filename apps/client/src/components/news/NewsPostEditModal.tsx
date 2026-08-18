@@ -6,6 +6,8 @@ import { useEditNewsPost } from "../../hooks/useNewsPosts";
 import { useEffect } from "react";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
+import MultiSelect from "../common/MultiSelect";
+import { NEWS_CATEGORY_OPTIONS } from "./NewsCategoryIcons";
 
 interface IProps {
     opened: boolean;
@@ -21,10 +23,12 @@ export default function NewsPostEditModal({ opened, onClose, article }: IProps) 
         initialValues: {
             title: article?.title || "",
             content: article?.content || "",
+            categories: article?.categories ?? [],
         },
         validate: {
             title: (value) => (value.trim().length < 3 ? "Title must be at least 3 characters" : null),
             content: (value) => (value.trim().length < 10 ? "Content must be at least 10 characters" : null),
+            categories: (value) => (value.length === 0 ? "Select at least one category" : null),
         },
     });
 
@@ -33,12 +37,13 @@ export default function NewsPostEditModal({ opened, onClose, article }: IProps) 
             form.setValues({
                 title: article.title,
                 content: article.content,
+                categories: article.categories ?? [],
             });
         }
         // eslint-disable-next-line react/exhaustive-deps
     }, [article]);
 
-    const handleSubmit = async (values: { title: string; content: string }) => {
+    const handleSubmit = async (values: { title: string; content: string; categories: string[] }) => {
         try {
             await editNewsPostMutation.mutateAsync(values);
             clearAutoSavedValue(autoSaveKey);
@@ -78,6 +83,13 @@ export default function NewsPostEditModal({ opened, onClose, article }: IProps) 
                             </Box>
                         )}
                     </Box>
+                    <MultiSelect
+                        withAsterisk
+                        label="Category"
+                        placeholder="Select tournament and/or contest"
+                        data={NEWS_CATEGORY_OPTIONS}
+                        {...form.getInputProps("categories")}
+                    />
                     <Button
                         type="submit"
                         loading={editNewsPostMutation.isPending}

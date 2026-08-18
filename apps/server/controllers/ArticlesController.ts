@@ -5,6 +5,8 @@ import LogService from "../services/LogService";
 import config from "@tc/config";
 import utils from "@tc/utils/server";
 import { isString } from "@tc/utils/common";
+import { DiscordRoleName } from "@tc/types/NotificationJob";
+import { TOURNAMENT_TYPES, TournamentType } from "@tc/types/Tournament";
 import { EmbedBuilder } from "../services/discord/EmbedBuilder";
 import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
@@ -18,6 +20,22 @@ const DISCORD_EMBED_DESCRIPTION_LIMIT = 2000;
 
 function getNewsUrl(slug: string): string {
     return `${config.baseUrl}/?news=${slug}`;
+}
+
+function parseNewsCategories(values: string[]): TournamentType[] {
+    const categories: TournamentType[] = [];
+    for (const item of values) {
+        const category = utils.pickStringUnion(item, TOURNAMENT_TYPES);
+        if (category && !categories.includes(category)) categories.push(category);
+    }
+    return categories;
+}
+
+function newsPingRoles(categories: TournamentType[]): DiscordRoleName[] {
+    const roles: DiscordRoleName[] = [];
+    if (categories.includes("tournament")) roles.push("tournamentNews");
+    if (categories.includes("contest")) roles.push("contestNews");
+    return roles;
 }
 
 function buildNewsWebhook(article: { title: string; content: string; slug: string }): WebhookBuilder {
@@ -115,7 +133,7 @@ class ArticlesController {
 
     /** POST create a news post */
     public async createNewsPost(req: Request, res: Response) {
-        const { title, content, pingNewsRole } = req.body;
+        const { title, content, categories: rawCategories } = req.body;
 
         if (!isString(title) || title.trim().length === 0) {
             return res.status(400).json({ error: "Title is required" });
@@ -125,10 +143,20 @@ class ArticlesController {
             return res.status(400).json({ error: "Content is required" });
         }
 
+        if (!Array.isArray(rawCategories) || !rawCategories.every(isString)) {
+            return res.status(400).json({ error: "At least one category is required" });
+        }
+
+        const categories = parseNewsCategories(rawCategories);
+        if (categories.length === 0) {
+            return res.status(400).json({ error: "At least one category is required" });
+        }
+
         const article = new Article({
             title: title.trim(),
             content: content.trim(),
             type: "news",
+            categories,
             isPublic: true,
             lastEditor: res.locals!.user!,
         });
@@ -150,10 +178,8 @@ class ArticlesController {
             );
 
             const builder = buildNewsWebhook(article).waitForMessage();
-
-            if (pingNewsRole === true) {
-                builder.addRoles(["news"]);
-            }
+            const roles = newsPingRoles(article.categories);
+            if (roles.length) builder.addRoles(roles);
 
             await enqueueNewsWebhook(builder, String(article._id));
         } catch (error) {
@@ -183,7 +209,7 @@ class ArticlesController {
     /** PUT edit a news post */
     public async editNewsPost(req: Request, res: Response) {
         const { slug } = req.params;
-        const { title, content } = req.body;
+        const { title, content, categories: rawCategories } = req.body;
 
         const article = await Article.findOne({
             type: "news",
@@ -206,6 +232,25 @@ class ArticlesController {
         if (isString(content) && content.trim() !== "" && content.trim() !== article.content.trim()) {
             article.content = content.trim();
             isEdited = true;
+        }
+
+        if (rawCategories !== undefined) {
+            if (!Array.isArray(rawCategories) || !rawCategories.every(isString)) {
+                return res.status(400).json({ error: "At least one category is required" });
+            }
+
+            const categories = parseNewsCategories(rawCategories);
+            if (categories.length === 0) {
+                return res.status(400).json({ error: "At least one category is required" });
+            }
+
+            const current = article.categories ?? [];
+            const same =
+                current.length === categories.length && categories.every((category) => current.includes(category));
+            if (!same) {
+                article.categories = categories;
+                isEdited = true;
+            }
         }
 
         if (isEdited) {
