@@ -337,7 +337,14 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
             },
             StatusInfo: {
                 type: "object",
+                required: ["status", "version", "osuApi"],
                 properties: {
+                    status: {
+                        type: "string",
+                        enum: ["healthy", "degraded", "unhealthy"],
+                        description:
+                            "Overall health. degraded = osu! API down; unhealthy = database disconnected.",
+                    },
                     version: {
                         type: "object",
                         properties: {
@@ -813,7 +820,8 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
             get: {
                 tags: ["Status"],
                 summary: "Service status",
-                description: "Public health/version endpoint. No authentication required.",
+                description:
+                    "Public health/version endpoint. No authentication required. Overall `status` is `healthy`, `degraded` (osu! API down), or `unhealthy` (database disconnected).",
                 security: [],
                 responses: {
                     "200": {

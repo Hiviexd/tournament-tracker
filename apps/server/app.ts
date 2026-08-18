@@ -137,6 +137,9 @@ app.use(
 // Enchant sidebar skips CORS/CSRF, gated via HMAC
 app.use("/api/enchant", enchantRouter);
 
+// Public health/version endpoint (for uptime monitoring)
+app.use("/api/status", statusRouter);
+
 // setup api routes
 const apiRouter = express.Router();
 
@@ -164,7 +167,6 @@ apiRouter.use("/articles", articlesRouter);
 apiRouter.use("/dev", devRouter);
 apiRouter.use("/resources", resourcesRouter);
 apiRouter.use("/beatmaps", beatmapsRouter);
-apiRouter.use("/status", statusRouter);
 apiRouter.use("/quotes", quotesRouter);
 apiRouter.use("/templates", templatesRouter);
 apiRouter.use("/dashboard", dashboardRouter);
