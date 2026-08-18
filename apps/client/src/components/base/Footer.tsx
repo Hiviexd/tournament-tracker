@@ -30,6 +30,11 @@ export default function Footer() {
             label: "The Team",
             href: "https://osu.ppy.sh/wiki/en/People/Tournament_Committee",
         },
+        {
+            icon: "heart-pulse",
+            label: "Status",
+            href: "https://status.hivie.tn/status",
+        },
     ];
 
     return (

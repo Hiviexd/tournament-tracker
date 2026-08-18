@@ -113,6 +113,7 @@ import {
     faLightbulb,
     faUpRightFromSquare,
     faBell,
+    faHeartPulse,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function loadIcons() {
@@ -231,5 +232,6 @@ export default function loadIcons() {
         faLightbulb,
         faUpRightFromSquare,
         faBell,
+        faHeartPulse,
     );
 }

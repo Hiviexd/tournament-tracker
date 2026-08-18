@@ -1,6 +1,6 @@
 # [Tournament Tracker](https://tcomm.hivie.tn/)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker) ![GitHub last commit](https://img.shields.io/github/last-commit/Hiviexd/tournament-tracker) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Hiviexd/tournament-tracker/deploy-production.yml) ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m798812390-8b85ac6ef54622c9cfbd1301)
+[![CodeFactor](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker/badge)](https://www.codefactor.io/repository/github/hiviexd/tournament-tracker) ![GitHub last commit](https://img.shields.io/github/last-commit/Hiviexd/tournament-tracker) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Hiviexd/tournament-tracker/deploy-production.yml) [![Uptime Kuma ratio (30 days)](https://status.hivie.tn/api/badge/1/uptime/168?label=uptime%20(30d))](https://status.hivie.tn/status)
 
 The one-stop shop for all official osu! tournament correspondence and information!
 
