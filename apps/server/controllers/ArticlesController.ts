@@ -38,6 +38,14 @@ function newsPingRoles(categories: TournamentType[]): DiscordRoleName[] {
     return roles;
 }
 
+function newsCommitteeLabel(categories: TournamentType[]): string {
+    const hasTournament = categories.includes("tournament");
+    const hasContest = categories.includes("contest");
+    if (hasTournament && hasContest) return "Tournament/Contest Committee";
+    if (hasContest) return "Contest Committee";
+    return "Tournament Committee";
+}
+
 function buildNewsWebhook(article: { title: string; content: string; slug: string }): WebhookBuilder {
     return new WebhookBuilder()
         .addEmbed(
@@ -189,14 +197,15 @@ class ArticlesController {
         try {
             const subscribers = await User.find({ isSubscribedToNews: true }).select("osuId");
             if (subscribers.length > 0) {
+                const committee = newsCommitteeLabel(article.categories);
                 await OsuBotService.sendAnnouncement(
                     subscribers.map((subscriber) => subscriber.osuId),
                     {
                         channel: {
-                            name: "News From The Tournament Committee",
+                            name: `News From The ${committee}`,
                             description: utils.shorten(article.title, 100),
                         },
-                        content: `A new Tournament Committee news post has been published:\n\n[**${article.title}**](${newsUrl})`,
+                        content: `A new ${committee} news post has been published:\n\nRead here: [**${article.title}**](${newsUrl})`,
                     },
                     res.locals!.user!.osuId,
                 );
