@@ -155,6 +155,12 @@ class UsersController {
             { new: true },
         ).orFail();
 
+        await LogService.generate(
+            req.session.mongoId!,
+            isSubscribedToNews ? "Subscribed to news notifications" : "Unsubscribed from news notifications",
+            "account",
+        );
+
         res.json({
             message: isSubscribedToNews
                 ? "You'll receive osu! notifications for news posts!"
