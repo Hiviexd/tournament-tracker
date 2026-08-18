@@ -161,6 +161,29 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                     updatedAt: { type: "string", format: "date-time" },
                 },
             },
+            ExtraLinkType: {
+                type: "string",
+                enum: [
+                    "news",
+                    "wiki",
+                    "challonge",
+                    "sheet",
+                    "website",
+                    "mappersguild",
+                    "contest",
+                    "discord",
+                    "twitch",
+                    "youtube",
+                ],
+            },
+            TournamentExtraLink: {
+                type: "object",
+                properties: {
+                    type: { $ref: "#/components/schemas/ExtraLinkType" },
+                    name: { type: "string" },
+                    url: { type: "string" },
+                },
+            },
             Tournament: {
                 type: "object",
                 description:
@@ -178,6 +201,7 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                     isActive: { type: "boolean" },
                     bannerUrl: { type: "string" },
                     tags: { type: "array", items: { type: "string" } },
+                    extraLinks: { type: "array", items: { $ref: "#/components/schemas/TournamentExtraLink" } },
                     statusString: { type: "string" },
                     winners: { type: "array", items: { $ref: "#/components/schemas/UserSummary" } },
                     createdAt: { type: "string", format: "date-time" },
@@ -202,9 +226,15 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                 type: "string",
                 enum: ["tournament", "user", "discussion"],
             },
+            SanctionBanType: {
+                type: "string",
+                enum: ["tournament_ban", "hosting_ban", "staffing_ban"],
+            },
             Voting: {
                 type: "object",
-                description: "Voting document. Non-committee keys receive a censored public view.",
+                description:
+                    "Voting document. Non-committee keys receive a censored public view " +
+                    "(description/author/attachments/abstentions stripped; vote comments and authors omitted; `sanctionPost` omitted).",
                 properties: {
                     _id: { type: "string" },
                     title: { type: "string" },
@@ -219,6 +249,10 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                         enum: ["variable", "binary", "classic", "binary-strict", "ranked-choice"],
                     },
                     options: { type: "array", items: { type: "string" } },
+                    targetUsers: { type: "array", items: { $ref: "#/components/schemas/UserSummary" } },
+                    isSanctionVote: { type: "boolean" },
+                    sanctionType: { $ref: "#/components/schemas/SanctionBanType" },
+                    sanctionAppliedAt: { type: "string", format: "date-time" },
                     duration: { type: "integer" },
                     createdAt: { type: "string", format: "date-time" },
                     concludedAt: { type: "string", format: "date-time" },
@@ -350,14 +384,26 @@ If these limits block a legitimate use case, reach out on Discord (hivie).
                         properties: {
                             hash: { type: "string" },
                             message: { type: "string" },
-                            branchStatus: { type: "string" },
+                            branchStatus: {
+                                type: "object",
+                                description: "Only included in preview environments",
+                                properties: {
+                                    currentBranch: { type: "string" },
+                                    ahead: { type: "integer" },
+                                    behind: { type: "integer" },
+                                },
+                            },
                         },
                     },
                     osuApi: {
                         type: "object",
                         properties: {
                             status: { type: "string", enum: ["healthy", "down"] },
-                            since: { type: ["string", "null"] },
+                            since: {
+                                type: ["string", "null"],
+                                format: "date-time",
+                                description: "When the osu! API was marked down; null when healthy",
+                            },
                         },
                     },
                 },
