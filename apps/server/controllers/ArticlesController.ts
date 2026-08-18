@@ -205,7 +205,7 @@ class ArticlesController {
                             name: `News From The ${committee}`,
                             description: utils.shorten(article.title, 100),
                         },
-                        content: `A new ${committee} news post has been published:\n\nRead here: [**${article.title}**](${newsUrl})`,
+                        content: `A new ${committee} news article has been published:\n\nRead here: [**${article.title}**](${newsUrl})`,
                     },
                     res.locals!.user!.osuId,
                 );

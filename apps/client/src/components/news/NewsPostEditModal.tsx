@@ -2,12 +2,13 @@ import { Modal, TextInput, Stack, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IArticle } from "@tc/types/Article";
+import { TOURNAMENT_TYPES } from "@tc/types/Tournament";
+import startCase from "lodash/startCase.js";
 import { useEditNewsPost } from "../../hooks/useNewsPosts";
 import { useEffect } from "react";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import MultiSelect from "../common/MultiSelect";
-import { NEWS_CATEGORY_OPTIONS } from "./NewsCategoryIcons";
 
 interface IProps {
     opened: boolean;
@@ -87,7 +88,7 @@ export default function NewsPostEditModal({ opened, onClose, article }: IProps) 
                         withAsterisk
                         label="Category"
                         placeholder="Select tournament and/or contest"
-                        data={NEWS_CATEGORY_OPTIONS}
+                        data={TOURNAMENT_TYPES.map((value) => ({ value, label: startCase(value) }))}
                         {...form.getInputProps("categories")}
                     />
                     <Button

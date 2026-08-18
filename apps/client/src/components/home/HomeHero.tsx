@@ -148,7 +148,8 @@ export default function HomeHero() {
                             {hasNextPage && (
                                 <Group justify="center">
                                     <Button
-                                        variant="light"
+                                        variant="subtle"
+                                        size="compact-sm"
                                         onClick={() => fetchNextPage()}
                                         loading={isFetchingNextPage}>
                                         Show more

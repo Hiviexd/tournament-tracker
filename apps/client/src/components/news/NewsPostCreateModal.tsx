@@ -1,11 +1,12 @@
 import { Modal, TextInput, Stack, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import startCase from "lodash/startCase.js";
+import { TOURNAMENT_TYPES } from "@tc/types/Tournament";
 import { useCreateNewsPost } from "../../hooks/useNewsPosts";
 import TextEditor from "../common/TextEditor";
 import { clearAutoSavedValue } from "../../hooks/useAutoSave";
 import MultiSelect from "../common/MultiSelect";
-import { NEWS_CATEGORY_OPTIONS } from "./NewsCategoryIcons";
 
 interface IProps {
     opened: boolean;
@@ -16,11 +17,11 @@ export default function NewsPostCreateModal({ opened, onClose }: IProps) {
     const createNewsPostMutation = useCreateNewsPost();
     const autoSaveKey = "news-post-create-content";
 
-    const form = useForm({
+    const form = useForm<{ title: string; content: string; categories: string[] }>({
         initialValues: {
             title: "",
             content: "",
-            categories: [] as string[],
+            categories: [],
         },
         validate: {
             title: (value) => (value.trim().length < 3 ? "Title must be at least 3 characters" : null),
@@ -73,8 +74,9 @@ export default function NewsPostCreateModal({ opened, onClose }: IProps) {
                     <MultiSelect
                         withAsterisk
                         label="Category"
+                        description="This determines the role(s) to ping in Discord"
                         placeholder="Select tournament and/or contest"
-                        data={NEWS_CATEGORY_OPTIONS}
+                        data={TOURNAMENT_TYPES.map((value) => ({ value, label: startCase(value) }))}
                         {...form.getInputProps("categories")}
                     />
                     <Button

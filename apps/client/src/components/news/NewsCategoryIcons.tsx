@@ -2,15 +2,10 @@ import { Group, Tooltip } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TOURNAMENT_TYPES, TournamentType } from "@tc/types/Tournament";
 
-export const NEWS_CATEGORY_OPTIONS = [
-    { value: "tournament", label: "Tournament" },
-    { value: "contest", label: "Contest" },
-];
-
-const CATEGORY_ICONS: Record<TournamentType, { icon: "trophy" | "award"; label: string }> = {
+const CATEGORY_ICONS = {
     tournament: { icon: "trophy", label: "Tournament" },
     contest: { icon: "award", label: "Contest" },
-};
+} as const satisfies Record<TournamentType, { icon: "trophy" | "award"; label: string }>;
 
 interface IProps {
     categories?: TournamentType[];
