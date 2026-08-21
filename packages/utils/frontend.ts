@@ -78,7 +78,7 @@ export const getTournamentStatusStyles = (status: TournamentStatus): TournamentS
         case "badgeRejected":
             return { color: "danger", icon: "times-circle" };
         case "noBadgeRequested":
-            return { color: "gray.6", icon: "question-circle" };
+            return { color: "gray", icon: "question-circle" };
         default:
             return { color: "gray", icon: "circle" };
     }
