@@ -66,16 +66,16 @@ export interface ITournamentCreateResponse {
 }
 
 export const EXTRA_LINK_TYPES = [
-    "news",
-    "wiki",
-    "challonge",
     "sheet",
-    "website",
-    "mappersguild",
-    "contest",
     "discord",
     "twitch",
     "youtube",
+    "challonge",
+    "website",
+    "wiki",
+    "news",
+    "mappersguild",
+    "contest",
 ] as const;
 export type ExtraLinkType = (typeof EXTRA_LINK_TYPES)[number];
 

@@ -121,7 +121,7 @@ function ExtraLinkTypeSelect({ value, onChange }: { value: ExtraLinkType; onChan
     );
 }
 
-function createDraftRow(type: ExtraLinkType = "news") {
+function createDraftRow(type: ExtraLinkType = EXTRA_LINK_TYPES[0]) {
     return {
         type,
         name: EXTRA_LINK_DEFAULTS[type],

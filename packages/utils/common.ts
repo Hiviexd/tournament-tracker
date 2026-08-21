@@ -1,7 +1,9 @@
 import { RankedChoiceVote, RankedChoiceVoteScore } from "@tc/types/Vote";
 import { IUser, UserGroup } from "@tc/types/User";
 import { IInfringement, TIME_BASED_TYPES } from "@tc/types/Infringement";
-import type { ExtraLinkType, ITournamentExtraLink } from "@tc/types/Tournament";
+import { EXTRA_LINK_TYPES, type ExtraLinkType, type ITournamentExtraLink } from "@tc/types/Tournament";
+
+export { EXTRA_LINK_TYPES };
 
 function typeTag<T>(value: T): string {
     return Object.prototype.toString.call(value);
@@ -149,30 +151,17 @@ export function isDiscordLink(link: string): boolean {
     );
 }
 
-export const EXTRA_LINK_TYPES: ExtraLinkType[] = [
-    "news",
-    "wiki",
-    "challonge",
-    "sheet",
-    "website",
-    "mappersguild",
-    "contest",
-    "discord",
-    "twitch",
-    "youtube",
-];
-
 export const EXTRA_LINK_DEFAULTS = {
-    news: "News Post",
-    wiki: "Wiki Page",
-    challonge: "Challonge",
     sheet: "Main Sheet",
-    website: "Website",
-    mappersguild: "Mapper's Guild",
-    contest: "Contest Listing",
     discord: "Discord",
     twitch: "Twitch",
     youtube: "YouTube",
+    challonge: "Challonge",
+    website: "Website",
+    wiki: "Wiki Page",
+    news: "News Post",
+    mappersguild: "Mapper's Guild",
+    contest: "Contest Listing",
 } satisfies Record<ExtraLinkType, string>;
 
 /**
