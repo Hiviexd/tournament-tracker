@@ -98,6 +98,6 @@ export const COLORBLIND_MODES = {
 
 export const DEFAULT_COLORBLIND_MODE: ColorblindMode = "none";
 
-export const DISCORD_SERVER_ID = "589557574702071819";
+export const DISCORD_SERVER_ID = "90072389919997952";
 
 export const R2_BASE_URL = "https://assets.hivie.tn";
