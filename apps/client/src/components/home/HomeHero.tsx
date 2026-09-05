@@ -103,11 +103,19 @@ export default function HomeHero() {
 
     return (
         <Card padding="md" radius="md" className="home-hero" shadow="sm">
-            <Box className="home-hero-glow" aria-hidden />
-            <Stack gap="lg" className="home-hero-content">
-                <Group justify="space-between" align="center" wrap="wrap" gap="sm" className="home-hero-header">
+            <Stack gap="lg">
+                <Group justify="space-between" align="center" wrap="wrap" gap="sm">
                     <Group gap="sm" wrap="nowrap">
-                        <Image src="/assets/logo-main.svg?20260211" alt="" w={36} h={36} className="home-hero-logo" />
+                        <Box className="home-hero-logo-wrap">
+                            <Box className="home-hero-glow" aria-hidden />
+                            <Image
+                                src="/assets/logo-main.svg?20260211"
+                                alt=""
+                                w={36}
+                                h={36}
+                                className="home-hero-logo"
+                            />
+                        </Box>
                         <Title order={2} className="home-hero-title">
                             Tournament Tracker
                         </Title>

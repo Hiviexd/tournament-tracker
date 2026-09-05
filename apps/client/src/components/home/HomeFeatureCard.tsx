@@ -2,7 +2,6 @@ import { Card, Stack, Title, Text, Group, Badge, Box } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Link } from "react-router-dom";
-import { cssVars } from "../../themes/cssVars";
 
 export interface HomeFeature {
     icon: IconProp;
@@ -15,10 +14,9 @@ export interface HomeFeature {
 
 interface IProps {
     feature: HomeFeature;
-    index: number;
 }
 
-export default function HomeFeatureCard({ feature, index }: IProps) {
+export default function HomeFeatureCard({ feature }: IProps) {
     const content = (
         <Stack gap={6} className="feature-card-body">
             <Group gap="sm" wrap="nowrap" align="center">
@@ -55,7 +53,6 @@ export default function HomeFeatureCard({ feature, index }: IProps) {
         radius: "md" as const,
         className: "feature-card",
         "data-disabled": feature.disabled,
-        style: cssVars({ "--feature-index": index }),
     };
 
     if (feature.disabled) {

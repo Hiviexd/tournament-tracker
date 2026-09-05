@@ -71,9 +71,11 @@ function CommitteeSubgroupCard({
 
     return (
         <Card shadow="sm" p="md">
-            <Stack gap="md">
-                <Title order={3}>{title}</Title>
-                <Divider />
+            <Stack gap="sm">
+                <Title order={3} className="header-border-left">
+                    {title}
+                </Title>
+                <Divider className="home-divider" />
                 <CommitteeUserGrid users={sortedUsers} onSelect={onSelect} showBadges={showBadges} />
             </Stack>
         </Card>

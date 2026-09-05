@@ -55,17 +55,17 @@ const features: HomeFeature[] = [
 export default function HomeFeaturesSection() {
     return (
         <Stack gap="md">
-            <Stack gap={4} className="home-features-header">
-                <Title order={2} className="home-section-title">
+            <Stack gap={4}>
+                <Title order={2} className="home-section-title header-border-left">
                     Explore
                 </Title>
                 <Text size="sm" c="dimmed" className="home-section-subtitle">
                     Tools and resources for tournament hosts, players, and the committee
                 </Text>
             </Stack>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" className="home-features">
-                {features.map((feature, index) => (
-                    <HomeFeatureCard key={feature.link} feature={feature} index={index} />
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                {features.map((feature) => (
+                    <HomeFeatureCard key={feature.link} feature={feature} />
                 ))}
             </SimpleGrid>
         </Stack>
