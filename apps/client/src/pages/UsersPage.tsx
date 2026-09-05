@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { Card, Divider, Stack, Button, Group } from "@mantine/core";
-import { useSetAtom } from "jotai";
-import { selectedUserAtom } from "../store/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import { loggedInUserAtom, selectedUserAtom } from "../store/atoms";
 import UserDetailsModal from "../components/users/UserDetailsModal";
 import UserEmailsModal from "../components/users/UserEmailsModal";
 import CycleBagModal from "../components/users/CycleBagModal";
@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function UsersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const loggedInUser = useAtomValue(loggedInUserAtom);
     const setSelectedUser = useSetAtom(selectedUserAtom);
     const [emailsModalOpened, { open: openEmailsModal, close: closeEmailsModal }] = useDisclosure(false);
     const [cycleBagModalOpened, { open: openCycleBag, close: closeCycleBagModal }] = useDisclosure(false);
@@ -32,7 +33,7 @@ export default function UsersPage() {
         <Stack gap="lg">
             <UserDetailsModal userId={searchParams.get("id")} onClose={handleUserModalClose} />
             <UserEmailsModal opened={emailsModalOpened} onClose={closeEmailsModal} />
-            <CycleBagModal opened={cycleBagModalOpened} onClose={closeCycleBagModal} />
+            {loggedInUser?.isAdmin && <CycleBagModal opened={cycleBagModalOpened} onClose={closeCycleBagModal} />}
             <Card shadow="sm" p="md">
                 <Stack gap="lg">
                     <UserSearch
@@ -48,9 +49,14 @@ export default function UsersPage() {
                             leftSection={<FontAwesomeIcon icon="envelope" />}>
                             Emails list
                         </Button>
-                        <Button variant="light" onClick={openCycleBag} leftSection={<FontAwesomeIcon icon="rotate" />}>
-                            Cycle Assignments
-                        </Button>
+                        {loggedInUser?.isAdmin && (
+                            <Button
+                                variant="light"
+                                onClick={openCycleBag}
+                                leftSection={<FontAwesomeIcon icon="rotate" />}>
+                                Cycle Assignments
+                            </Button>
+                        )}
                     </Group>
                 </Stack>
             </Card>
