@@ -1,5 +1,5 @@
 import { Modal, Stack, Text, Table, Group, Button, Alert } from "@mantine/core";
-import { useCommitteeUsers, useCycleBag } from "../../hooks/useUsers";
+import { useCommitteeUsers, useCycleBag, useToggleBag } from "../../hooks/useUsers";
 import UserDisplay from "../common/UserDisplay";
 import { useState } from "react";
 import { IUser } from "@tc/types/User";
@@ -17,9 +17,10 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
     const [user] = useAtom(loggedInUserAtom);
     const { data: committeeUsers, isLoading } = useCommitteeUsers();
     const cycleBagMutation = useCycleBag();
+    const toggleBagMutation = useToggleBag();
     const [bagResponse, setBagResponse] = useState<{ message: string; reviewers: IUser[] } | null>(null);
 
-    const sortedUsers = committeeUsers?.sort((a: IUser, b: IUser) => {
+    const sortedUsers = committeeUsers?.toSorted((a: IUser, b: IUser) => {
         return a.username.localeCompare(b.username);
     });
 
@@ -34,10 +35,22 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
     };
 
     const renderUserRows = (users: IUser[]) => {
-        return users.map((user) => (
-            <Table.Tr key={user.id}>
+        return users.map((rowUser) => (
+            <Table.Tr key={rowUser.id}>
                 <Table.Td>
-                    <UserDisplay user={user} />
+                    <Group justify="space-between" wrap="nowrap">
+                        <UserDisplay user={rowUser} />
+                        <Button
+                            size="xs"
+                            variant="light"
+                            color={rowUser.inBag ? "danger" : "success"}
+                            leftSection={<FontAwesomeIcon icon={rowUser.inBag ? "user-minus" : "user-plus"} />}
+                            onClick={() => toggleBagMutation.mutate(rowUser.id)}
+                            loading={toggleBagMutation.isPending && toggleBagMutation.variables === rowUser.id}
+                            disabled={!user?.isAdmin || toggleBagMutation.isPending}>
+                            {rowUser.inBag ? "Move out of pool" : "Move into pool"}
+                        </Button>
+                    </Group>
                 </Table.Td>
             </Table.Tr>
         ));
@@ -54,7 +67,7 @@ export default function CycleBagModal({ opened, onClose }: IProps) {
             ) : (
                 <Stack gap="md">
                     <Group justify="space-between" align="center">
-                        <AlertText type="warning">Avoid using this button unless investigating issues.</AlertText>
+                        <AlertText type="warning">Avoid using buttons here unless you really need to.</AlertText>
                         <Button
                             leftSection={<FontAwesomeIcon icon="rotate" />}
                             onClick={handleCycleBag}

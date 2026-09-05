@@ -32,6 +32,7 @@ usersRouter.patch("/:userId/sync", auth.isLoggedIn, auth.isCommittee, UsersContr
 usersRouter.patch("/:userId/updateDiscordId", auth.isLoggedIn, auth.isCommittee, UsersController.updateDiscordId);
 usersRouter.patch("/:userId/updateEmail", auth.isLoggedIn, auth.isCommittee, UsersController.updateEmail);
 usersRouter.get("/:userId/reviewStats", auth.isLoggedIn, auth.isCommittee, UsersController.getReviewStats);
+usersRouter.patch("/:userId/toggleBag", auth.isLoggedIn, auth.isAdmin, UsersController.toggleBag);
 usersRouter.patch("/cycleBag", auth.isLoggedIn, auth.isAdmin, UsersController.cycleBag);
 
 export default usersRouter;

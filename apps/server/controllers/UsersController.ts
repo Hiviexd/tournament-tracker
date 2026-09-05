@@ -463,6 +463,29 @@ class UsersController {
         });
     }
 
+    /** PATCH toggle inBag */
+    public async toggleBag(req: Request, res: Response): Promise<void> {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).orFail();
+
+        user.inBag = !user.inBag;
+        await user.save();
+
+        await LogService.generate(
+            req.session.mongoId!,
+            `${user.inBag ? "Added" : "Removed"} [**${user.username}**](https://osu.ppy.sh/users/${user.osuId}) ${
+                user.inBag ? "to" : "from"
+            } the selection pool`,
+            "user",
+        );
+
+        res.json({
+            message: user.inBag ? "Moved into selection pool!" : "Moved out of selection pool!",
+            user,
+        });
+    }
+
     /** PATCH cycle bag */
     public async cycleBag(req: Request, res: Response) {
         const reviewers = await UserService.assignReviewers("tc");

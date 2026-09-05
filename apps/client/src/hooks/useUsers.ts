@@ -280,6 +280,23 @@ export function useReviewStats(userId: string, days: number = 180) {
     });
 }
 
+export function useToggleBag() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (userId: string) => {
+            const response = await utils.apiCall<UserMutationResult>({
+                method: "patch",
+                url: `/api/users/${userId}/toggleBag`,
+            });
+            return utils.handleMutationResponse<UserMutationResult>(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+        },
+    });
+}
+
 export function useCycleBag() {
     const queryClient = useQueryClient();
 
