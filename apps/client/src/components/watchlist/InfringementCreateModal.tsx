@@ -84,7 +84,8 @@ export default function InfringementCreateModal({ opened, onClose, preselectedUs
                 return null;
             },
             enchantUrl: (value) => {
-                if (value && !utils.isEnchantTicketLink(value)) return "Invalid Enchant ticket URL format";
+                if (value && !utils.isInfringementTicketLink(value))
+                    return "Invalid Enchant ticket or osu! announcement URL format";
                 return null;
             },
         },

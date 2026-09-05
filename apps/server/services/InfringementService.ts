@@ -60,8 +60,8 @@ class InfringementService {
             throw { status: 400, error: "Thread ID must be a non-empty string" };
         }
 
-        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
-            throw { status: 400, error: "Invalid Enchant ticket URL format" };
+        if (enchantUrl && !utils.isInfringementTicketLink(enchantUrl)) {
+            throw { status: 400, error: "Invalid Enchant ticket or osu! announcement URL format" };
         }
 
         const extractedThreadId = utils.extractDiscordThreadId(threadId ?? null) || undefined;
@@ -119,8 +119,8 @@ class InfringementService {
             throw { status: 400, error: "Thread ID must be a non-empty string" };
         }
 
-        if (enchantUrl && !utils.isEnchantTicketLink(enchantUrl)) {
-            throw { status: 400, error: "Invalid Enchant ticket URL format" };
+        if (enchantUrl && !utils.isInfringementTicketLink(enchantUrl)) {
+            throw { status: 400, error: "Invalid Enchant ticket or osu! announcement URL format" };
         }
 
         const infringement = await Infringement.findById(infringementId);
@@ -247,6 +247,17 @@ class InfringementService {
 
     public async deleteInfringement(infringementId: string | Types.ObjectId) {
         return await Infringement.findByIdAndDelete(infringementId);
+    }
+
+    public async setEnchantUrl(
+        infringementIds: (string | Types.ObjectId)[],
+        enchantUrl: string,
+    ) {
+        if (!infringementIds.length) return;
+        if (!utils.isInfringementTicketLink(enchantUrl)) {
+            throw { status: 400, error: "Invalid Enchant ticket or osu! announcement URL format" };
+        }
+        await Infringement.updateMany({ _id: { $in: infringementIds } }, { $set: { enchantUrl } });
     }
 
     public async syncSanctionInfringement(

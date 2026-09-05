@@ -4,7 +4,12 @@ import { IUser, UserGroup } from "@tc/types/User";
 import { IDiscordField } from "@tc/types/Discord";
 import { BinaryVote, VariableVote, BinaryStrictVote, RankedChoiceVote } from "@tc/types/Vote";
 import utils from "@tc/utils/server";
-import { getSanctionApplyState, getSanctionAnnouncementChannel, getSanctionInfringementDates } from "@tc/utils";
+import {
+    buildOsuAnnouncementChatUrl,
+    getSanctionApplyState,
+    getSanctionAnnouncementChannel,
+    getSanctionInfringementDates,
+} from "@tc/utils";
 import config from "@tc/config";
 import { Document } from "mongoose";
 import User from "../models/userModel";
@@ -568,6 +573,10 @@ class VotingService {
         if (announcement.channelId) {
             voting.sanctionAnnouncementChannelId = announcement.channelId;
             voting.sanctionAnnouncementSentCount = announcement.sentCount;
+            await InfringementService.setEnchantUrl(
+                nextInfringementIds,
+                buildOsuAnnouncementChatUrl(announcement.channelId),
+            );
         }
 
         if (OsuApiService.isOsuResponseError(announcementResult)) {

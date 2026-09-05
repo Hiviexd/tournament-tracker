@@ -3,11 +3,14 @@ import { InfringementType } from "@tc/types/Infringement";
 import { TOURNAMENT_OPTIONS } from "@tc/types/Voting";
 import {
     articleForPhrase,
+    buildOsuAnnouncementChatUrl,
     buildSanctionAnnouncementMessages,
     buildSanctionPhrase,
     getSanctionAnnouncementChannel,
     getSanctionApplyState,
     isContestSanctionVote,
+    isInfringementTicketLink,
+    isOsuAnnouncementChatLink,
     parseSanctionDuration,
 } from "@tc/utils";
 
@@ -106,6 +109,14 @@ describe("sanction announcement helpers", () => {
 
         expect(intro).toContain("a **1 month hosting ban effective immediately.**");
         expect(intro).not.toContain("streamer, commentator, or graphic designer");
+    });
+
+    it("builds an osu! announcement chat URL", () => {
+        expect(buildOsuAnnouncementChatUrl(44)).toBe("https://osu.ppy.sh/community/chat?channel_id=44");
+        expect(isOsuAnnouncementChatLink("https://osu.ppy.sh/community/chat?channel_id=44")).toBe(true);
+        expect(isInfringementTicketLink("https://osu.ppy.sh/community/chat?channel_id=44")).toBe(true);
+        expect(isInfringementTicketLink("https://osu.enchant.com/spa/inbox/ticket/abc")).toBe(true);
+        expect(isOsuAnnouncementChatLink("https://osu.enchant.com/spa/inbox/ticket/abc")).toBe(false);
     });
 
     it("sets the announcement title from the sanction outcome", () => {

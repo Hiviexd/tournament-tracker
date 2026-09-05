@@ -8,6 +8,7 @@ import { SanctionVoteBallot } from "@tc/utils";
 const mockAddInfringement = vi.hoisted(() => vi.fn());
 const mockDeleteInfringement = vi.hoisted(() => vi.fn());
 const mockSyncSanctionInfringement = vi.hoisted(() => vi.fn());
+const mockSetEnchantUrl = vi.hoisted(() => vi.fn());
 const mockSendAnnouncement = vi.hoisted(() => vi.fn());
 
 vi.mock("../../models/userModel", () => ({ default: { find: vi.fn() } }));
@@ -19,6 +20,7 @@ vi.mock("../../services/InfringementService", () => ({
         addInfringement: mockAddInfringement,
         deleteInfringement: mockDeleteInfringement,
         syncSanctionInfringement: mockSyncSanctionInfringement,
+        setEnchantUrl: mockSetEnchantUrl,
     },
 }));
 vi.mock("../../services/OsuBotService", () => ({
@@ -90,8 +92,15 @@ describe("VotingService.applySanction", () => {
             infringement: { _id: new Types.ObjectId(), id: "inf-1" },
             user: {},
         });
-        mockSendAnnouncement.mockResolvedValue(true);
+        mockSendAnnouncement.mockImplementation((_ids, message) => {
+            if (!message.channelId) {
+                message.channelId = 10;
+                message.sentCount = 1;
+            }
+            return { sentTo: [1] };
+        });
         mockSyncSanctionInfringement.mockResolvedValue({ changed: false });
+        mockSetEnchantUrl.mockResolvedValue(undefined);
     });
 
     it("rejects no-action outcomes", async () => {
@@ -140,6 +149,10 @@ describe("VotingService.applySanction", () => {
             }),
             999,
         );
+        expect(mockSetEnchantUrl).toHaveBeenCalledWith(
+            expect.anything(),
+            "https://osu.ppy.sh/community/chat?channel_id=10",
+        );
     });
 
     it("creates a timed ban from the selected type and duration", async () => {
@@ -183,8 +196,13 @@ describe("VotingService.applySanction", () => {
         });
         expect(voting.sanctionInfringementIds).toEqual(expect.anything());
         expect(voting.sanctionAppliedAt).toBeUndefined();
+        expect(mockSetEnchantUrl).not.toHaveBeenCalled();
 
-        mockSendAnnouncement.mockResolvedValueOnce(true);
+        mockSendAnnouncement.mockImplementationOnce((_ids, message) => {
+            message.channelId = 10;
+            message.sentCount = 1;
+            return { sentTo: [1] };
+        });
         const retryVoting = makeVoting({
             sanctionInfringementIds: [infringementId],
             save: vi.fn().mockResolvedValue(undefined),
@@ -201,10 +219,21 @@ describe("VotingService.applySanction", () => {
             }),
         );
         expect(retryVoting.sanctionAppliedAt).toBeInstanceOf(Date);
+        expect(mockSetEnchantUrl).toHaveBeenCalledWith(
+            [infringementId],
+            "https://osu.ppy.sh/community/chat?channel_id=10",
+        );
     });
 
     it("resyncs the watchlist and starts a new announcement after an edit", async () => {
         mockSyncSanctionInfringement.mockResolvedValueOnce({ changed: true });
+        const incoming: { channelId?: number; sentCount?: number }[] = [];
+        mockSendAnnouncement.mockImplementation((_ids, message) => {
+            incoming.push({ channelId: message.channelId, sentCount: message.sentCount });
+            message.channelId = 55;
+            message.sentCount = 1;
+            return { sentTo: [1] };
+        });
 
         const voting = makeVoting({
             sanctionInfringementIds: [new Types.ObjectId()],
@@ -220,13 +249,10 @@ describe("VotingService.applySanction", () => {
             expect.any(String),
             expect.objectContaining({ reason: "Edited reason" }),
         );
-        expect(mockSendAnnouncement).toHaveBeenCalledWith(
-            [123],
-            expect.objectContaining({
-                channelId: undefined,
-                sentCount: undefined,
-            }),
-            999,
+        expect(incoming).toEqual([{ channelId: undefined, sentCount: undefined }]);
+        expect(mockSetEnchantUrl).toHaveBeenCalledWith(
+            voting.sanctionInfringementIds,
+            "https://osu.ppy.sh/community/chat?channel_id=55",
         );
     });
 
@@ -244,6 +270,10 @@ describe("VotingService.applySanction", () => {
         expect(voting.sanctionAnnouncementChannelId).toBe(44);
         expect(voting.sanctionAnnouncementSentCount).toBe(1);
         expect(voting.sanctionAppliedAt).toBeUndefined();
+        expect(mockSetEnchantUrl).toHaveBeenCalledWith(
+            expect.anything(),
+            "https://osu.ppy.sh/community/chat?channel_id=44",
+        );
     });
 });
 

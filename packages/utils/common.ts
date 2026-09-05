@@ -250,6 +250,30 @@ export function buildEnchantTicketUrl(ticketId: string): string {
 }
 
 /**
+ * Builds an osu! web chat URL for an announcement channel
+ * @param channelId osu! announcement channel id
+ */
+export function buildOsuAnnouncementChatUrl(channelId: number): string {
+    return `https://osu.ppy.sh/community/chat?channel_id=${channelId}`;
+}
+
+/**
+ * Checks if a link is an osu! announcement chat link
+ * @param link Link to check
+ */
+export function isOsuAnnouncementChatLink(link: string): boolean {
+    return /^https:\/\/osu\.ppy\.sh\/community\/chat\?channel_id=\d+$/.test(link);
+}
+
+/**
+ * Checks if a link is a valid infringement ticket URL (Enchant or osu! announcement)
+ * @param link Link to check
+ */
+export function isInfringementTicketLink(link: string): boolean {
+    return isEnchantTicketLink(link) || isOsuAnnouncementChatLink(link);
+}
+
+/**
  * Escapes text for safe HTML interpolation (basic entity encoding)
  * @param value Text to escape
  */
