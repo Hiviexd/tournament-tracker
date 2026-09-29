@@ -1,21 +1,11 @@
-import { useEffect, useRef, useImperativeHandle, type Ref } from "react";
-import MdEditor, { Plugins } from "react-markdown-editor-lite";
+import { type CSSProperties, type Ref } from "react";
+import { Box, SimpleGrid } from "@mantine/core";
 import MarkdownText from "./MarkdownText";
 import { useAutoSave } from "../../hooks/useAutoSave";
-import "react-markdown-editor-lite/lib/index.css";
-import AutoSaveBadge from "./badges/AutoSaveBadge";
-import MarkdownGuidePlugin from "./editor/MarkdownGuidePlugin";
+import EditorToolbar from "./editor/EditorToolbar";
+import { useTextEditor, type TextEditorRef } from "./editor/useTextEditor";
 
-function getEditorDomId(autoSaveKey?: string) {
-    if (autoSaveKey) return `editor-${autoSaveKey}`;
-    // fallback: random id
-    return `editor-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-export interface TextEditorRef {
-    insertText: (text: string) => void;
-    focus: () => void;
-}
+export type { TextEditorRef };
 
 interface IProps {
     value: string;
@@ -26,12 +16,120 @@ interface IProps {
     className?: string;
     disabled?: boolean;
     autoSaveKey?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     allowHtml?: boolean;
+    ref?: Ref<TextEditorRef>;
+}
+
+interface EditorSurfaceProps extends Omit<IProps, "autoSaveKey" | "placeholder" | "minHeight" | "maxHeight" | "disabled" | "allowHtml"> {
+    placeholder: string;
+    minHeight: number;
+    maxHeight: number;
+    disabled: boolean;
+    allowHtml: boolean;
+    showAutoSave: boolean;
+    saveVisible: boolean;
+}
+
+function EditorSurface({
+    ref,
+    value,
+    onChange,
+    placeholder,
+    minHeight,
+    maxHeight,
+    className,
+    disabled,
+    style,
+    allowHtml,
+    showAutoSave,
+    saveVisible,
+}: EditorSurfaceProps) {
+    const editor = useTextEditor({ ref, value, onChange, disabled, minHeight, maxHeight });
+    const invalid = className?.split(/\s+/).includes("error");
+    const border = invalid ? "var(--mantine-color-red-filled)" : "var(--mantine-color-default-border)";
+
+    return (
+        <Box className={className} bg="primary.10" bdrs="sm" bd={`1px solid ${border}`} style={{ overflow: "hidden", ...style }}>
+            <EditorToolbar
+                disabled={disabled}
+                showAutoSave={showAutoSave}
+                saveVisible={saveVisible}
+                nextView={editor.nextView}
+                onNextView={() => editor.setView(editor.nextView)}
+                rememberSelection={editor.rememberSelection}
+                run={editor.run}
+                editSelection={editor.editSelection}
+            />
+            <SimpleGrid
+                cols={editor.view === "split" ? { base: 1, sm: 2 } : 1}
+                spacing={0}
+                verticalSpacing={0}
+                bg="primary.11"
+                mih={minHeight}
+                pos="relative">
+                <textarea
+                    ref={editor.textareaRef}
+                    className="text-editor-input"
+                    defaultValue={value}
+                    style={editor.inputStyle}
+                    placeholder={placeholder}
+                    readOnly={disabled}
+                    tabIndex={editor.view === "preview" ? -1 : undefined}
+                    aria-hidden={editor.view === "preview" || undefined}
+                    onInput={editor.onInput}
+                    onKeyDown={editor.onKeyDown}
+                    onPaste={editor.onPaste}
+                    onSelect={editor.rememberSelection}
+                    onKeyUp={editor.rememberSelection}
+                    onMouseUp={editor.rememberSelection}
+                    onBlur={editor.rememberSelection}
+                />
+                {editor.view !== "write" && (
+                    <Box
+                        ref={editor.previewRef}
+                        className={editor.view === "split" ? "text-editor-preview-split" : undefined}
+                        mih={minHeight}
+                        mah={maxHeight}
+                        miw={0}
+                        p="md"
+                        bg="primary.11"
+                        style={{ overflow: "auto", boxSizing: "border-box" }}>
+                        <MarkdownText content={value} allowHtml={allowHtml} />
+                    </Box>
+                )}
+            </SimpleGrid>
+        </Box>
+    );
+}
+
+function AutosaveTextEditor({
+    autoSaveKey,
+    value,
+    onChange,
+    ...rest
+}: EditorSurfaceProps & { autoSaveKey: string }) {
+    // Read once. Feeding later parent `value` changes back in would replace a restored draft.
+    const { value: savedValue, setValue, isSaved, isTyping } = useAutoSave({
+        key: autoSaveKey,
+        initialValue: value,
+    });
+
+    return (
+        <EditorSurface
+            {...rest}
+            value={savedValue}
+            onChange={(next) => {
+                setValue(next);
+                onChange(next);
+            }}
+            showAutoSave
+            saveVisible={isSaved && !isTyping}
+        />
+    );
 }
 
 function TextEditor({
-    ref,
     value,
     onChange,
     placeholder = "Type your content here...",
@@ -42,142 +140,28 @@ function TextEditor({
     autoSaveKey,
     style,
     allowHtml = false,
-}: IProps & { ref?: Ref<TextEditorRef> }) {
-    const isAutoSaveEnabled = !!autoSaveKey;
-    const {
-        value: autoSavedValue,
-        setValue: setAutoSavedValue,
-        isSaved: autoSaveIsSaved,
-        isTyping: autoSaveIsTyping,
-    } = useAutoSave({
-        key: autoSaveKey || "temp-editor-key",
-        initialValue: value,
-    });
-
-    const editorValue = isAutoSaveEnabled ? autoSavedValue : value;
-
-    const handleChange = (content: { text: string }) => {
-        if (isAutoSaveEnabled) {
-            setAutoSavedValue(content.text);
-        }
-        onChange(content.text);
+    ref,
+}: IProps) {
+    const surfaceProps: EditorSurfaceProps = {
+        ref,
+        value,
+        onChange,
+        placeholder,
+        minHeight,
+        maxHeight,
+        className,
+        disabled,
+        style,
+        allowHtml,
+        showAutoSave: false,
+        saveVisible: false,
     };
 
-    // Disable plugins
-    MdEditor.unuse(Plugins.FontUnderline);
-    MdEditor.unuse(Plugins.FullScreen);
+    if (autoSaveKey) {
+        return <AutosaveTextEditor {...surfaceProps} autoSaveKey={autoSaveKey} />;
+    }
 
-    // Auto resize plugin
-    MdEditor.use(Plugins.AutoResize, {
-        min: minHeight,
-        max: maxHeight,
-    });
-
-    // Markdown guide plugin
-    MdEditor.use(MarkdownGuidePlugin);
-
-    // Show save indicator when content is saved and not typing
-    const showSaveIndicator = isAutoSaveEnabled && autoSaveIsSaved && !autoSaveIsTyping;
-
-    // Generate a unique id for this editor instance
-    const editorDomId = useRef(getEditorDomId(autoSaveKey));
-    const editorRef = useRef<MdEditor>(null);
-
-    // Expose methods to parent components
-    useImperativeHandle(
-        ref,
-        () => ({
-            insertText: (text: string) => {
-                const editor = editorRef.current;
-                if (editor) {
-                    const mdEditor = editor.getMdElement();
-                    if (mdEditor) {
-                        const start = mdEditor.selectionStart;
-                        const end = mdEditor.selectionEnd;
-                        const currentValue = editorValue;
-                        const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
-
-                        if (isAutoSaveEnabled) {
-                            setAutoSavedValue(newValue);
-                        }
-                        onChange(newValue);
-
-                        // Set cursor position after inserted text
-                        setTimeout(() => {
-                            const newCursorPosition = start + text.length;
-                            mdEditor.setSelectionRange(newCursorPosition, newCursorPosition);
-                            mdEditor.focus();
-                        }, 0);
-                    }
-                }
-            },
-            focus: () => {
-                const editor = editorRef.current;
-                if (editor) {
-                    const mdEditor = editor.getMdElement();
-                    if (mdEditor) {
-                        mdEditor.focus();
-                    }
-                }
-            },
-        }),
-        [editorValue, isAutoSaveEnabled, setAutoSavedValue, onChange],
-    );
-
-    // Add autosave badge via DOM injection, scoped to this editor instance
-    const badgeRef = useRef<HTMLSpanElement>(null);
-    useEffect(() => {
-        const toolbar = document.querySelector(
-            `#${editorDomId.current} .rc-md-navigation .navigation-nav.right .button-wrap`,
-        );
-        if (toolbar && badgeRef.current && !toolbar.contains(badgeRef.current)) {
-            toolbar.insertBefore(badgeRef.current, toolbar.firstChild);
-        }
-    });
-
-    return (
-        <div id={editorDomId.current}>
-            <span ref={badgeRef}>
-                <AutoSaveBadge isVisible={showSaveIndicator} />
-            </span>
-
-            <MdEditor
-                ref={editorRef}
-                value={editorValue}
-                style={
-                    maxHeight
-                        ? {
-                              minHeight,
-                              maxHeight,
-                              ...style,
-                          }
-                        : {
-                              minHeight,
-                              ...style,
-                          }
-                }
-                className={className}
-                htmlClass="markdown-content"
-                renderHTML={(text) => <MarkdownText content={text} allowHtml={allowHtml} />}
-                onChange={handleChange}
-                placeholder={placeholder}
-                readOnly={disabled}
-                view={{
-                    menu: true,
-                    md: true,
-                    html: false, // false to switch to markdown input only, true to switch to split view
-                }}
-                canView={{
-                    menu: true,
-                    md: true,
-                    html: true,
-                    both: true,
-                    fullScreen: false,
-                    hideMenu: false,
-                }}
-            />
-        </div>
-    );
+    return <EditorSurface {...surfaceProps} />;
 }
 
 export default TextEditor;

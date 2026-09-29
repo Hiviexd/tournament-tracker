@@ -44,7 +44,6 @@
         "react-dropzone": "^14.3.8",
         "react-helmet-async": "^3.0.0",
         "react-markdown": "^10.1.0",
-        "react-markdown-editor-lite": "^1.4.2",
         "react-router": "^7.13.0",
         "react-router-dom": "^7.13.0",
         "react-snow-overlay": "^1.0.12",
