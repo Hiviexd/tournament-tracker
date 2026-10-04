@@ -31,6 +31,7 @@ export default function TournamentCreateConclusionStep({
                 placeholder="Search for a winner to add..."
                 allowUserCreation
                 showActiveInfringementWarning
+                enableBatchMode
             />
 
             <FileUploadInput

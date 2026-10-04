@@ -105,6 +105,7 @@ export default function TournamentWinners({ tournament }: IProps) {
                     onChange={setWinners}
                     placeholder="Search for a user to add..."
                     allowUserCreation
+                    enableBatchMode
                 />
             ) : (
                 <Box>

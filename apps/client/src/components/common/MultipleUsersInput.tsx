@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
-import { Stack, Group, Pill, ActionIcon } from "@mantine/core";
+import { Stack, Group, Pill, ActionIcon, Box, Textarea, Text, Tooltip } from "@mantine/core";
 import { IUser } from "@tc/types/User";
 import UserSearch, { UserSearchRef } from "./UserSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
+import utils from "@tc/utils/client";
+import { useResolveUsers } from "../../hooks/useUsers";
 import AlertText from "./AlertText";
 
 interface IProps {
@@ -16,6 +18,7 @@ interface IProps {
     allowUserCreation?: boolean;
     showActiveInfringementWarning?: boolean;
     disabled?: boolean;
+    enableBatchMode?: boolean;
 }
 
 export default function MultipleUsersInput({
@@ -28,9 +31,14 @@ export default function MultipleUsersInput({
     allowUserCreation = false,
     showActiveInfringementWarning = false,
     disabled = false,
+    enableBatchMode = false,
 }: IProps) {
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+    const [batchMode, setBatchMode] = useState(false);
+    const [batchText, setBatchText] = useState("");
     const userSearchRef = useRef<UserSearchRef>(null);
+    const resolveUsersMutation = useResolveUsers();
+    const showBatchInput = enableBatchMode && batchMode;
 
     const handleAddUser = (user: IUser) => {
         if (!value.some((u) => u._id === user._id)) {
@@ -49,6 +57,39 @@ export default function MultipleUsersInput({
 
     const handleRemoveUser = (userId: string) => {
         onChange(value.filter((u) => u.id !== userId));
+    };
+
+    const handleAddBatch = async () => {
+        const { identifiers, invalid } = utils.parseBatchUserInput(batchText);
+        if (identifiers.length === 0 && invalid.length === 0) return;
+
+        const result = await resolveUsersMutation.mutateAsync({ identifiers, allowUserCreation });
+        const failed = [...invalid, ...result.failed];
+        const added: IUser[] = [];
+        let alreadyCount = 0;
+        const knownIds = new Set(value.map((user) => user.id));
+
+        for (const user of result.users) {
+            if (knownIds.has(user.id)) {
+                alreadyCount += 1;
+                continue;
+            }
+            knownIds.add(user.id);
+            added.push(user);
+        }
+
+        if (added.length > 0) onChange([...value, ...added]);
+        setBatchText(failed.join("\n"));
+
+        const parts: string[] = [];
+        if (added.length > 0) parts.push(`${utils.formatCount(added.length, "user")} added.`);
+        if (alreadyCount > 0) parts.push(`${alreadyCount} already in the list.`);
+        if (failed.length > 0) parts.push(`Couldn't add: ${failed.join(", ")}`);
+        notifications.show({
+            title: "Batch add",
+            message: parts.join(" "),
+            color: failed.length > 0 ? "yellow" : "green",
+        });
     };
 
     return (
@@ -90,34 +131,71 @@ export default function MultipleUsersInput({
             )}
 
             <Group align="flex-start" gap="xs" w="100%" wrap="nowrap">
-                <UserSearch
-                    ref={userSearchRef}
-                    onChange={setSelectedUser}
-                    onEnterWhenSelected={() => {
-                        if (selectedUser) {
-                            handleAddUser(selectedUser);
-                        }
-                    }}
-                    placeholder={placeholder}
-                    allowUserCreation={allowUserCreation}
-                    disabled={disabled}
-                    error={error}
-                />
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                    {showBatchInput ? (
+                        <Textarea
+                            value={batchText}
+                            onChange={(event) => setBatchText(event.currentTarget.value)}
+                            placeholder="Input user list here..."
+                            autosize
+                            minRows={2}
+                            maxRows={8}
+                            error={error}
+                            disabled={disabled || resolveUsersMutation.isPending}
+                        />
+                    ) : (
+                        <UserSearch
+                            ref={userSearchRef}
+                            onChange={setSelectedUser}
+                            onEnterWhenSelected={() => {
+                                if (selectedUser) {
+                                    handleAddUser(selectedUser);
+                                }
+                            }}
+                            placeholder={placeholder}
+                            allowUserCreation={allowUserCreation}
+                            disabled={disabled}
+                            error={error}
+                        />
+                    )}
+                </Box>
                 <ActionIcon
                     variant="light"
                     onClick={() => {
-                        if (selectedUser) {
-                            handleAddUser(selectedUser);
+                        if (showBatchInput) {
+                            handleAddBatch();
+                            return;
                         }
+                        if (selectedUser) handleAddUser(selectedUser);
                     }}
                     color="success"
                     size="lg"
-                    disabled={!selectedUser || disabled}
-                    title="Add user"
+                    loading={resolveUsersMutation.isPending}
+                    disabled={showBatchInput ? !batchText.trim() || disabled : !selectedUser || disabled}
+                    title={showBatchInput ? "Add users" : "Add user"}
                     style={{ flexShrink: 0 }}>
                     <FontAwesomeIcon icon="plus" />
                 </ActionIcon>
+                {enableBatchMode && (
+                    <Tooltip label={batchMode ? "Single user search" : "Batch add mode"}>
+                        <ActionIcon
+                            variant={batchMode ? "filled" : "light"}
+                            onClick={() => setBatchMode((current) => !current)}
+                            color="info"
+                            size="lg"
+                            disabled={disabled || resolveUsersMutation.isPending}
+                            style={{ flexShrink: 0 }}>
+                            <FontAwesomeIcon icon={batchMode ? "search" : "list"} />
+                        </ActionIcon>
+                    </Tooltip>
+                )}
             </Group>
+
+            {showBatchInput && (
+                <Text size="xs" c="dimmed">
+                    Usernames, user IDs, or osu! profile links, separated by spaces, commas, or new lines
+                </Text>
+            )}
 
             {showActiveInfringementWarning && value.some((user) => user.activeInfringement) && (
                 <AlertText size="xs" type="danger">

@@ -40,6 +40,59 @@ export function useCreateUser() {
     });
 }
 
+export function useResolveUsers() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            identifiers,
+            allowUserCreation,
+        }: {
+            identifiers: string[];
+            allowUserCreation: boolean;
+        }) => {
+            const users: IUser[] = [];
+            const failed: string[] = [];
+            let created = false;
+
+            for (const identifier of identifiers) {
+                const listed = await utils.apiCall<IUser[]>({
+                    method: "get",
+                    url: "/api/users",
+                    params: { userInput: identifier },
+                });
+
+                const normalized = identifier.toLowerCase();
+                let user = Array.isArray(listed)
+                    ? (listed.find(
+                          (item) => String(item.osuId) === identifier || item.username.toLowerCase() === normalized,
+                      ) ?? null)
+                    : null;
+
+                if (!user && allowUserCreation) {
+                    const response = await utils.apiCall<UserMutationResult>({
+                        method: "post",
+                        url: "/api/users/create",
+                        data: { userInput: identifier },
+                    });
+                    if (response && !("error" in response) && response.user) {
+                        user = response.user;
+                        created = true;
+                    }
+                }
+
+                if (user) users.push(user);
+                else failed.push(identifier);
+            }
+
+            return { users, failed, created };
+        },
+        onSuccess: (result) => {
+            if (result.created) queryClient.invalidateQueries({ queryKey: ["users"] });
+        },
+    });
+}
+
 export function useCommitteeUsers(options: { enabled?: boolean; includeAlumni?: boolean } = {}) {
     return useQuery({
         queryKey: ["committeeUsers", options.includeAlumni],

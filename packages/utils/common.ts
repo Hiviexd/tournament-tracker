@@ -80,6 +80,51 @@ export function isOsuNewsLink(link: string): boolean {
     return /^https:\/\/osu\.ppy\.sh\/home\/news\/[\w-]+(?:\?.*)?$/.test(link);
 }
 
+/** Id or username from an osu! profile link, or from `id/mode` / `username/mode`. A leading @ and anything after the id are ignored. */
+export function parseOsuProfileLink(input: string): string | null {
+    const trimmed = input.trim();
+    return (
+        trimmed.match(/^(?:https?:\/\/)?osu\.ppy\.sh\/(?:users|u)\/@?([^/?#\s]+)(?:[/?#].*)?$/i)?.[1] ??
+        trimmed.match(/^([\w\-[\]]+)\/.*$/)?.[1] ??
+        null
+    );
+}
+
+export interface ParsedBatchUserInput {
+    identifiers: string[];
+    invalid: string[];
+}
+
+/** Splits on spaces, newlines, or commas into usernames, numeric user ids, osu! profile links, or `id/mode` forms. */
+export function parseBatchUserInput(input: string): ParsedBatchUserInput {
+    const identifiers: string[] = [];
+    const invalid: string[] = [];
+
+    for (const raw of input.split(/[\s,]+/)) {
+        if (!raw) continue;
+
+        const fromLink = parseOsuProfileLink(raw);
+        if (fromLink) {
+            identifiers.push(fromLink);
+            continue;
+        }
+        if (isNumeric(raw)) {
+            identifiers.push(raw);
+            continue;
+        }
+        if (/[:/]/.test(raw)) {
+            invalid.push(raw);
+            continue;
+        }
+
+        const username = raw.replace(/^@/, "");
+        if (username) identifiers.push(username);
+        else invalid.push(raw);
+    }
+
+    return { identifiers, invalid };
+}
+
 /**
  * Checks if a link is an osu! wiki page link
  * @param link Link to check

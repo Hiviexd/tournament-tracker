@@ -3,6 +3,7 @@ import { IValidationResult } from "@tc/types/ComplianceApi";
 import { IDiscordField } from "@tc/types/Discord";
 import { IAttachment } from "@tc/types/Attachment";
 import crypto from "crypto";
+import { parseOsuProfileLink } from "./common";
 
 /**
  * Sets the session with the oauth response
@@ -119,25 +120,7 @@ export function getAttachmentsField(attachments: IAttachment[]): IDiscordField |
  * @returns The username if valid, otherwise `null`
  */
 export function validateOsuProfileLink(input: string): string | null {
-    const urlPattern = /^(?:https?:\/\/)?osu\.ppy\.sh\/users\/([\w\-[\]]+)(?:\/.*)?$/i;
-
-    const urlMatch = input.match(urlPattern);
-
-    if (urlMatch) {
-        const value = urlMatch[1];
-        return value;
-    }
-
-    // Handle cases like "14102976/osu" or "username/taiko"
-    const simplePattern = /^([\w\-[\]]+)\/.*$/;
-    const simpleMatch = input.match(simplePattern);
-
-    if (simpleMatch) {
-        const value = simpleMatch[1];
-        return value;
-    }
-
-    return null;
+    return parseOsuProfileLink(input);
 }
 
 /** * Delay execution for specified milliseconds */
