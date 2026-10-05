@@ -215,21 +215,23 @@ class VotingsController {
         }
 
         if (category === "tournament") {
-            if (!targetTournamentName || !targetTournamentLink) {
-                return res.status(400).json({ error: "Missing target tournament details" });
+            if (!targetTournamentName) {
+                return res.status(400).json({ error: "Missing target tournament name" });
             }
 
             const sanitizedTournamentName = targetTournamentName.trim();
-            const sanitizedTournamentLink = targetTournamentLink.trim();
 
             if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120)
                 return res.status(400).json({ error: "Tournament name must be between 5 and 120 characters" });
 
-            if (!utils.isOsuForumLink(sanitizedTournamentLink))
-                return res.status(400).json({ error: "Invalid tournament forum link" });
-
             voting.targetTournamentName = sanitizedTournamentName;
-            voting.targetTournamentLink = sanitizedTournamentLink;
+
+            if (targetTournamentLink) {
+                const sanitizedTournamentLink = targetTournamentLink.trim();
+                if (!utils.isValidUrl(sanitizedTournamentLink))
+                    return res.status(400).json({ error: "Invalid tournament link" });
+                voting.targetTournamentLink = sanitizedTournamentLink;
+            }
         }
 
         // Handle file uploads
@@ -284,8 +286,11 @@ class VotingsController {
             );
         }
 
-        if (voting.targetTournamentName && voting.targetTournamentLink) {
-            embed.addField("Target Tournament", `[**${voting.targetTournamentName}**](${voting.targetTournamentLink})`);
+        if (voting.targetTournamentName) {
+            const tournamentValue = voting.targetTournamentLink
+                ? `[**${voting.targetTournamentName}**](${voting.targetTournamentLink})`
+                : `**${voting.targetTournamentName}**`;
+            embed.addField("Target Tournament", tournamentValue);
         }
 
         embed.addField("Description", utils.shorten(voting.description, 1024));
@@ -589,11 +594,9 @@ class VotingsController {
             if (sanctionPost !== undefined) {
                 const trimmedPost = utils.isString(sanctionPost) ? sanctionPost.trim() : "";
                 if (!trimmedPost || trimmedPost.length > OSU_CHAT_MESSAGE_MAX_LENGTH) {
-                    return res
-                        .status(400)
-                        .json({
-                            error: `Sanction post must be between 1 and ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`,
-                        });
+                    return res.status(400).json({
+                        error: `Sanction post must be between 1 and ${OSU_CHAT_MESSAGE_MAX_LENGTH} characters`,
+                    });
                 }
                 if (voting.sanctionPost !== trimmedPost) {
                     voting.sanctionPost = trimmedPost;
@@ -618,10 +621,30 @@ class VotingsController {
                     voting.targetUsers = loaded.users;
                     voting.targetTournamentName = undefined;
                     voting.targetTournamentLink = undefined;
-                } else if (category === "tournament" && targetTournamentName && targetTournamentLink) {
-                    voting.targetTournamentName = targetTournamentName;
-                    voting.targetTournamentLink = targetTournamentLink;
+                } else if (category === "tournament") {
+                    if (!targetTournamentName || !String(targetTournamentName).trim()) {
+                        return res.status(400).json({ error: "Missing target tournament name" });
+                    }
+
+                    const sanitizedTournamentName = String(targetTournamentName).trim();
+                    if (sanitizedTournamentName.length < 5 || sanitizedTournamentName.length > 120) {
+                        return res.status(400).json({ error: "Tournament name must be between 5 and 120 characters" });
+                    }
+
+                    voting.targetTournamentName = sanitizedTournamentName;
                     voting.targetUsers = [];
+
+                    const sanitizedTournamentLink = utils.isString(targetTournamentLink)
+                        ? targetTournamentLink.trim()
+                        : "";
+                    if (sanitizedTournamentLink) {
+                        if (!utils.isValidUrl(sanitizedTournamentLink)) {
+                            return res.status(400).json({ error: "Invalid tournament link" });
+                        }
+                        voting.targetTournamentLink = sanitizedTournamentLink;
+                    } else {
+                        voting.targetTournamentLink = undefined;
+                    }
                 } else if (category === "discussion") {
                     voting.targetUsers = [];
                     voting.targetTournamentName = undefined;

@@ -23,6 +23,7 @@ import { useState } from "react";
 import { useForm } from "@mantine/form";
 
 // Components
+import AlertText from "../common/AlertText";
 import MultipleUsersInput from "../common/MultipleUsersInput";
 import FileUploadInput from "../common/FileUploadInput";
 import OptionSearch from "../common/OptionSearch";
@@ -103,14 +104,12 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                     if (!value || !value.trim()) return "Tournament name is required";
                     if (value.length < 5) return "Tournament name must be at least 5 characters";
                     if (value.length > 120) return "Tournament name cannot exceed 120 characters";
-                    if (value && !values.targetTournamentLink) return "Forum URL is required for tournament reports";
                 }
                 return null;
             },
             targetTournamentLink: (value, values) => {
-                if (values.category === "tournament") {
-                    if (!value) return "Forum URL is required";
-                    if (!utils.isOsuForumLink(value)) return "Invalid osu! forum URL format";
+                if (values.category === "tournament" && value && !utils.isValidUrl(value)) {
+                    return "Invalid URL";
                 }
                 return null;
             },
@@ -416,12 +415,19 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
                                 {...form.getInputProps("targetTournamentName")}
                                 withAsterisk
                             />
-                            <TextInput
-                                label="Tournament Forum URL"
-                                placeholder="https://osu.ppy.sh/community/forums/topics/..."
-                                {...form.getInputProps("targetTournamentLink")}
-                                withAsterisk
-                            />
+                            <Stack gap="xs">
+                                <TextInput
+                                    label="Tournament Link"
+                                    placeholder="https://..."
+                                    {...form.getInputProps("targetTournamentLink")}
+                                />
+                                {utils.isValidUrl(form.values.targetTournamentLink) &&
+                                    !utils.isOsuForumLink(form.values.targetTournamentLink) && (
+                                        <AlertText type="warning">
+                                            This isn't an osu! forum URL. Is that intentional?
+                                        </AlertText>
+                                    )}
+                            </Stack>
                         </>
                     )}
 
