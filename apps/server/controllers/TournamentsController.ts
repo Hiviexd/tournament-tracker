@@ -555,8 +555,8 @@ class TournamentsController {
             .addField("Start Date", dayjs(tournament.startDate).format("YYYY-MM-DD"), true)
             .addField("End Date", dayjs(tournament.endDate).format("YYYY-MM-DD"), true)
             .addField(
-                utils.formatCount(tournament.modes.length, "Mode", { includeCount: false }),
-                tournament.modes.map((mode) => utils.getDiscordEmoji(mode)).join(" "),
+                utils.formatCount(tournament.modes.length, "Game Mode", { includeCount: false }),
+                tournament.modes.map((mode) => utils.formatGameMode(mode)).join(", "),
                 true,
             )
             .addField("Forum URL", tournament.forumUrl.length ? tournament.forumUrl : "*None*")
