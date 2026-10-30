@@ -3,13 +3,16 @@ import { Stack, TagsInput, Pill, Text, Box, Group } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ExtraLinksEditor from "../info/ExtraLinksEditor";
+import { ExtraLinkDraft } from "@tc/utils/extraLinks";
 import { TournamentCreateFormValues, generateSuggestedTagFromName } from "./tournamentCreateForm";
 
 interface IProps {
     form: UseFormReturnType<TournamentCreateFormValues>;
+    extraLinkDraft: ExtraLinkDraft;
+    onExtraLinkDraftChange: (draft: ExtraLinkDraft) => void;
 }
 
-export default function TournamentCreateMetadataStep({ form }: IProps) {
+export default function TournamentCreateMetadataStep({ form, extraLinkDraft, onExtraLinkDraftChange }: IProps) {
     const suggestedTags = useMemo(() => {
         const tag = generateSuggestedTagFromName(form.values.name);
         if (!tag) return [];
@@ -33,6 +36,8 @@ export default function TournamentCreateMetadataStep({ form }: IProps) {
                 <ExtraLinksEditor
                     value={form.values.extraLinks}
                     onChange={(links) => form.setFieldValue("extraLinks", links)}
+                    draftRow={extraLinkDraft}
+                    onDraftRowChange={onExtraLinkDraftChange}
                 />
                 {form.errors.extraLinks && (
                     <Text size="xs" c="red" mt={4}>

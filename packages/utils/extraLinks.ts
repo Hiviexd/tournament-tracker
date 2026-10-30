@@ -1,7 +1,22 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { ExtraLinkType } from "@tc/types/Tournament";
+import { EXTRA_LINK_DEFAULTS, EXTRA_LINK_TYPES } from "./common";
 
-export { EXTRA_LINK_DEFAULTS, EXTRA_LINK_TYPES } from "./common";
+export { EXTRA_LINK_DEFAULTS, EXTRA_LINK_TYPES };
+
+export type ExtraLinkDraft = {
+    type: ExtraLinkType;
+    name: string;
+    url: string;
+};
+
+export function createExtraLinkDraft(type: ExtraLinkType = EXTRA_LINK_TYPES[0]): ExtraLinkDraft {
+    return {
+        type,
+        name: EXTRA_LINK_DEFAULTS[type],
+        url: "",
+    };
+}
 
 export const EXTRA_LINK_FA_ICONS = {
     news: "newspaper",

@@ -15,7 +15,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, Fragment } from "react";
 import utils, { pickStringUnion } from "@tc/utils/client";
 import { notifications } from "@mantine/notifications";
-import { EXTRA_LINK_DEFAULTS, EXTRA_LINK_FA_ICONS, EXTRA_LINK_SVG_ICONS, EXTRA_LINK_TYPES } from "@tc/utils/extraLinks";
+import {
+    createExtraLinkDraft,
+    EXTRA_LINK_DEFAULTS,
+    EXTRA_LINK_FA_ICONS,
+    EXTRA_LINK_SVG_ICONS,
+    EXTRA_LINK_TYPES,
+    ExtraLinkDraft,
+} from "@tc/utils/extraLinks";
 
 const ICON_PX = { xs: 12, sm: 14 } as const;
 
@@ -121,28 +128,36 @@ function ExtraLinkTypeSelect({ value, onChange }: { value: ExtraLinkType; onChan
     );
 }
 
-function createDraftRow(type: ExtraLinkType = EXTRA_LINK_TYPES[0]) {
-    return {
-        type,
-        name: EXTRA_LINK_DEFAULTS[type],
-        url: "",
-    };
-}
-
 interface ExtraLinksEditorProps {
     value: ITournamentExtraLink[];
     onChange: (links: ITournamentExtraLink[]) => void;
+    draftRow?: ExtraLinkDraft;
+    onDraftRowChange?: (draft: ExtraLinkDraft) => void;
 }
 
-export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorProps) {
-    const [draftRow, setDraftRow] = useState(createDraftRow());
+export default function ExtraLinksEditor({
+    value,
+    onChange,
+    draftRow: draftRowProp,
+    onDraftRowChange,
+}: ExtraLinksEditorProps) {
+    const [uncontrolledDraft, setUncontrolledDraft] = useState(createExtraLinkDraft);
+    const draftRow = draftRowProp ?? uncontrolledDraft;
+
+    const setDraftRow = (next: ExtraLinkDraft) => {
+        if (onDraftRowChange) {
+            onDraftRowChange(next);
+            return;
+        }
+        setUncontrolledDraft(next);
+    };
 
     const handleTypeChange = (newType: ExtraLinkType) => {
-        setDraftRow((prev) => ({
-            ...prev,
+        setDraftRow({
+            ...draftRow,
             type: newType,
-            name: prev.name === EXTRA_LINK_DEFAULTS[prev.type] ? EXTRA_LINK_DEFAULTS[newType] : prev.name,
-        }));
+            name: draftRow.name === EXTRA_LINK_DEFAULTS[draftRow.type] ? EXTRA_LINK_DEFAULTS[newType] : draftRow.name,
+        });
     };
 
     const handleAdd = () => {
@@ -163,7 +178,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
         }
 
         onChange([...value, entry]);
-        setDraftRow(createDraftRow(draftRow.type));
+        setDraftRow(createExtraLinkDraft(draftRow.type));
     };
 
     const handleRemove = (index: number) => {
@@ -177,8 +192,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
                 <TextInput
                     value={draftRow.name}
                     onChange={(event) => {
-                        const name = event.currentTarget.value;
-                        setDraftRow((prev) => ({ ...prev, name }));
+                        setDraftRow({ ...draftRow, name: event.currentTarget.value });
                     }}
                     placeholder="Name"
                     style={{ flex: 1 }}
@@ -186,8 +200,7 @@ export default function ExtraLinksEditor({ value, onChange }: ExtraLinksEditorPr
                 <TextInput
                     value={draftRow.url}
                     onChange={(event) => {
-                        const url = event.currentTarget.value;
-                        setDraftRow((prev) => ({ ...prev, url }));
+                        setDraftRow({ ...draftRow, url: event.currentTarget.value });
                     }}
                     placeholder="URL"
                     style={{ flex: 2 }}

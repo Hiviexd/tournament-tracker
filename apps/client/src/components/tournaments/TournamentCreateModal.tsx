@@ -18,6 +18,7 @@ import TournamentCreateBasicsStep from "./create/TournamentCreateBasicsStep";
 import TournamentCreateMetadataStep from "./create/TournamentCreateMetadataStep";
 import TournamentCreateConclusionStep from "./create/TournamentCreateConclusionStep";
 import TournamentCreateOverviewStep from "./create/TournamentCreateOverviewStep";
+import { createExtraLinkDraft, ExtraLinkDraft } from "@tc/utils/extraLinks";
 
 interface IProps {
     opened: boolean;
@@ -28,6 +29,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const createTournamentMutation = useCreateTournament();
     const [selectedHosts, setSelectedHosts] = useState<IUser[]>([]);
     const [selectedWinners, setSelectedWinners] = useState<IUser[]>([]);
+    const [extraLinkDraft, setExtraLinkDraft] = useState<ExtraLinkDraft>(createExtraLinkDraft);
     const [active, setActive] = useState(0);
     const [isUploadingBadges, setIsUploadingBadges] = useState(false);
     const { files, handleFileChange, clearFiles, error: fileError } = useFileUpload(badgeUploadOptions);
@@ -69,13 +71,9 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
         form.reset();
         setSelectedHosts([]);
         setSelectedWinners([]);
+        setExtraLinkDraft(createExtraLinkDraft());
         clearFiles();
         setActive(0);
-    };
-
-    const handleClose = () => {
-        resetFormState();
-        onClose();
     };
 
     const handleHostsChange = (hosts: IUser[]) => {
@@ -174,7 +172,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
     const isLastStep = active === STEPS.length - 1;
 
     return (
-        <Modal opened={opened} onClose={handleClose} title="Create New Tournament" size="xl">
+        <Modal opened={opened} onClose={onClose} title="Create New Tournament" size="xl" keepMounted>
             <LoadingOverlay visible={isPending} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
 
             <form onSubmit={(event) => event.preventDefault()}>
@@ -189,7 +187,11 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                         </Stepper.Step>
 
                         <Stepper.Step label="Metadata" description="Tags & links">
-                            <TournamentCreateMetadataStep form={form} />
+                            <TournamentCreateMetadataStep
+                                form={form}
+                                extraLinkDraft={extraLinkDraft}
+                                onExtraLinkDraftChange={setExtraLinkDraft}
+                            />
                         </Stepper.Step>
 
                         <Stepper.Step label="Conclusion" description="Winners & badges">
@@ -214,7 +216,7 @@ export default function TournamentCreateModal({ opened, onClose }: IProps) {
                     </Stepper>
 
                     <Group justify="space-between" mt="md">
-                        <Button type="button" variant="subtle" onClick={handleClose} disabled={isPending}>
+                        <Button type="button" variant="subtle" onClick={onClose} disabled={isPending}>
                             Cancel
                         </Button>
                         <Group gap="xs">
