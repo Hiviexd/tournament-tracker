@@ -99,7 +99,7 @@ async function generateMetadata(req: { path: string }): Promise<SEOMetadata & { 
             const authorPopulate = { path: "author", select: "username" };
             const data =
                 route.model === "Tournament"
-                    ? await modelMap.Tournament.findById(id).populate({ path: "host", select: "username" }).lean()
+                    ? await modelMap.Tournament.findById(id).populate({ path: "hosts", select: "username" }).lean()
                     : route.model === "Voting"
                       ? await modelMap.Voting.findById(id).populate(authorPopulate).lean()
                       : route.model === "Ticket"
