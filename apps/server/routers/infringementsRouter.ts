@@ -13,5 +13,11 @@ infringementsRouter.patch(
     auth.isCommittee,
     InfringementsController.updateInfringement,
 );
+infringementsRouter.delete(
+    "/:infringementId/delete",
+    auth.isLoggedIn,
+    auth.isAdmin,
+    InfringementsController.deleteInfringement,
+);
 
 export default infringementsRouter;

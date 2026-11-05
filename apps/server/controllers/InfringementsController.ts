@@ -160,6 +160,45 @@ class InfringementsController {
             throw err;
         }
     }
+
+    /** DELETE infringement */
+    public async deleteInfringement(req: Request, res: Response) {
+        const { infringementId } = req.params;
+
+        try {
+            const { infringement, user } = await InfringementService.removeInfringement(infringementId);
+
+            res.json({ message: "Infringement deleted successfully!", user });
+
+            const userLink = `[**${user.username}**](${config.baseUrl}/watchlist?user=${user.osuId})`;
+
+            await LogService.generate(
+                req.session.mongoId!,
+                `Deleted **${infringement.typeString}** infringement of ${userLink}`,
+                "user",
+            );
+
+            const embed = new EmbedBuilder()
+                .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                .setColor(DiscordUtils.webhookColors.darkRed)
+                .setDescription(`Deleted **${infringement.typeString}** from ${userLink}`)
+                .setFooter(`ID: ${infringement.id}`)
+                .addField("Reason", utils.shorten(infringement.reason, 1024));
+
+            const webhookBuilder = new WebhookBuilder().addEmbed(embed);
+
+            if (infringement.threadId) {
+                webhookBuilder.setThreadId(infringement.threadId);
+            }
+
+            await webhookBuilder.send();
+        } catch (err: any) {
+            if (err.status) {
+                return res.status(err.status).json({ error: err.error });
+            }
+            throw err;
+        }
+    }
 }
 
 export default new InfringementsController();

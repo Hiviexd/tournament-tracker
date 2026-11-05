@@ -123,3 +123,32 @@ export function useUpdateInfringement() {
         },
     });
 }
+
+export function useDeleteInfringement() {
+    const queryClient = useQueryClient();
+    const [, setSelectedUser] = useAtom(selectedUserAtom);
+
+    return useMutation({
+        mutationFn: async (infringementId: string) => {
+            const response = await utils.apiCall<{ message: string; user: IUser }>({
+                method: "delete",
+                url: `/api/infringements/${infringementId}/delete`,
+            });
+            return utils.handleMutationResponse<{ message: string; user: IUser }>(response);
+        },
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });
+            queryClient.invalidateQueries({ queryKey: ["user"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+
+            if (res.user) {
+                setSelectedUser(res.user);
+                // Update modal's useUser cache (URL uses osuId; key may be id or osuId)
+                queryClient.setQueryData(["user", res.user.osuId.toString()], res.user);
+                if (res.user.id) queryClient.setQueryData(["user", res.user.id], res.user);
+            }
+        },
+    });
+}

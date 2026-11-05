@@ -5,13 +5,22 @@ import { IUser } from "@tc/types/User";
 import InfringementCard from "./InfringementCard";
 import EmptyState from "../common/EmptyState";
 import { useState } from "react";
+import { useAtomValue } from "jotai";
 import InfringementEditModal from "./InfringementEditModal";
+import AlertText from "../common/AlertText";
+import { useConfirmModal } from "../../hooks/useModals";
+import { useDeleteInfringement } from "../../hooks/useInfringements";
+import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
     user: IUser;
 }
 
 export default function UserInfringementsList({ user }: IProps) {
+    const loggedInUser = useAtomValue(loggedInUserAtom);
+    const confirmModal = useConfirmModal();
+    const deleteInfringementMutation = useDeleteInfringement();
+
     const infringements = user?.infringements ?? [];
     const activeInfringement = user?.activeInfringement;
 
@@ -42,6 +51,31 @@ export default function UserInfringementsList({ user }: IProps) {
         closeEditInfringementModal();
     };
 
+    const handleDeleteInfringement = async (infringement: IInfringement) => {
+        if (
+            !(await confirmModal({
+                preset: "delete",
+                title: "Delete Infringement?",
+                children: (
+                    <Stack gap="sm">
+                        <Text size="sm">
+                            This permanently removes this {infringement.typeString} from the watchlist.
+                        </Text>
+                        <AlertText type="warning">
+                            Any osu! announcement stays sent, and a linked sanction vote stays marked as applied.
+                            Only proceed if you REALLY know what you're doing.
+                        </AlertText>
+                    </Stack>
+                ),
+            }))
+        )
+            return;
+
+        await deleteInfringementMutation.mutateAsync(infringement.id!);
+    };
+
+    const onDelete = loggedInUser?.isAdmin ? handleDeleteInfringement : undefined;
+
     return (
         <Stack gap="md">
             <Group gap="xs" align="baseline">
@@ -58,7 +92,11 @@ export default function UserInfringementsList({ user }: IProps) {
                     <Text size="md" fw={500} className="header-border-left">
                         Active Infringement
                     </Text>
-                    <InfringementCard infringement={activeInfringement} onEdit={handleEditInfringement} />
+                    <InfringementCard
+                        infringement={activeInfringement}
+                        onEdit={handleEditInfringement}
+                        onDelete={onDelete}
+                    />
                 </>
             )}
 
@@ -74,6 +112,7 @@ export default function UserInfringementsList({ user }: IProps) {
                                 key={`${infringement.type}-${infringement.createdAt}`}
                                 infringement={infringement}
                                 onEdit={handleEditInfringement}
+                                onDelete={onDelete}
                             />
                         ))}
                     </Stack>

@@ -14,9 +14,10 @@ interface IProps {
     infringement: IInfringement;
     userToNavigateTo?: number;
     onEdit?: (infringement: IInfringement) => void;
+    onDelete?: (infringement: IInfringement) => void;
 }
 
-export default function InfringementCard({ infringement, userToNavigateTo, onEdit }: IProps) {
+export default function InfringementCard({ infringement, userToNavigateTo, onEdit, onDelete }: IProps) {
     const getDiscordThreadLink = (threadId: string) => {
         return `https://discord.com/channels/${DISCORD_SERVER_ID}/${threadId}`;
     };
@@ -131,6 +132,17 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
                             <Tooltip label="Edit">
                                 <ActionIcon variant="subtle" color="info" onClick={handleEdit} aria-label="Edit">
                                     <FontAwesomeIcon icon="edit" />
+                                </ActionIcon>
+                            </Tooltip>
+                        )}
+                        {onDelete && (
+                            <Tooltip label="Delete">
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="danger"
+                                    onClick={() => onDelete(infringement)}
+                                    aria-label="Delete">
+                                    <FontAwesomeIcon icon="trash" />
                                 </ActionIcon>
                             </Tooltip>
                         )}

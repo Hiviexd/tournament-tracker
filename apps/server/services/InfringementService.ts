@@ -249,6 +249,22 @@ class InfringementService {
         return await Infringement.findByIdAndDelete(infringementId);
     }
 
+    /**
+     * Deletes one watchlist entry. A sanction vote that created it keeps its id on purpose:
+     * sanctionInfringementIds is matched to targetUsers by index, so removing it would shift the other users' entries.
+     */
+    public async removeInfringement(infringementId: string) {
+        const infringement = await this.deleteInfringement(infringementId);
+
+        if (!infringement) {
+            throw { status: 404, error: "Infringement not found" };
+        }
+
+        const user = await User.findById(infringement.userId).populate("infringements").orFail();
+
+        return { infringement, user };
+    }
+
     public async setEnchantUrl(
         infringementIds: (string | Types.ObjectId)[],
         enchantUrl: string,

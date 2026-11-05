@@ -28,7 +28,7 @@ export default class DiscordUtils {
      * Webhook color constants
      */
     public static readonly webhookColors = {
-        darkRed: this.parseColor("#861615"), // deleteVoting, revokeApiKey, indefiniteInfringement, overdueReview(18d+)
+        darkRed: this.parseColor("#861615"), // deleteVoting, revokeApiKey, indefiniteInfringement, deleteInfringement, overdueReview(18d+)
         red: this.parseColor("#EE2629"), // embedError, overdueVote, staleTicket(10d+), bans, overdueReview(15d+), removeReviewer, clearVotes
         lightRed: this.parseColor("#FF7373"), // createReport, badgeRejected, denyReview, dueSoonVote, overdueReview(12d+), removeUserFromGroup
         darkOrange: this.parseColor("#CE5310"), // unused
