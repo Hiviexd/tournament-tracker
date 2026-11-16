@@ -306,6 +306,25 @@ html {
     scrollbar-color: var(--mantine-color-primary-6) var(--mantine-color-primary-11);
 }
 
+/*
+ * Modals/drawers lock scrolling via react-remove-scroll-bar, which offsets the page by the scrollbar width
+ * to make up for hiding it. scrollbar-gutter: stable above already keeps that space reserved, so the offset
+ * is applied twice and nudges the page (and the fixed header) to the left. Cancel the offset; the lock stays.
+ * The extra `html` raises specificity over the library's injected `body[data-scroll-locked]` rules.
+ */
+html body[data-scroll-locked] {
+    margin-right: 0 !important;
+    --removed-body-scroll-bar-size: 0px;
+}
+
+html .right-scroll-bar-position {
+    right: 0 !important;
+}
+
+html .width-before-scroll-bar {
+    margin-right: 0 !important;
+}
+
 /* Chrome/Edge/Safari */
 ::-webkit-scrollbar {
     width: 12px;
