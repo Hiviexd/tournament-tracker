@@ -6,6 +6,7 @@ import LogsFilters from "../components/logs/LogsFilters";
 import LogsTable from "../components/logs/LogsTable";
 import { pickStringUnion } from "@tc/utils/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 function LogsLoadingState() {
     return (
@@ -100,22 +101,28 @@ export default function LogsPage() {
     });
 
     return (
-        <Stack gap="md">
-            <LogsFilters values={filters} onChange={handleFilterChange} />
+        <PageSections>
+            <PageSection>
+                <LogsFilters values={filters} onChange={handleFilterChange} />
+            </PageSection>
 
-            {isLoading ? (
-                <LogsLoadingState />
-            ) : !data || data.logs.length === 0 ? (
-                <LogsEmptyState hasError={!!error} />
-            ) : (
-                <LogsTable logs={data.logs} />
-            )}
+            <PageSection>
+                <Stack gap="md">
+                    {isLoading ? (
+                        <LogsLoadingState />
+                    ) : !data || data.logs.length === 0 ? (
+                        <LogsEmptyState hasError={!!error} />
+                    ) : (
+                        <LogsTable logs={data.logs} />
+                    )}
 
-            {data && data.pages > 1 && (
-                <Group justify="center" mt="xs">
-                    <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
-                </Group>
-            )}
-        </Stack>
+                    {data && data.pages > 1 && (
+                        <Group justify="center" mt="xs">
+                            <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
+                        </Group>
+                    )}
+                </Stack>
+            </PageSection>
+        </PageSections>
     );
 }

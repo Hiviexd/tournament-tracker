@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Divider, Alert } from "@mantine/core";
+import { Stack, SimpleGrid, Group, Pagination, Text, Skeleton, Card, Alert } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
@@ -15,6 +15,7 @@ import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
 import MarkdownText from "../components/common/MarkdownText";
 import { pickStringUnion } from "@tc/utils/client";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 function ResourcesLoadingState() {
     return (
@@ -151,60 +152,65 @@ export default function ResourcesPage() {
     });
 
     return (
-        <Stack gap="md">
-            {type === "community" && (
-                <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
-                    <MarkdownText
-                        size="sm"
-                        content={`If you want a resource to be added here, please contact a member of the Tournament Committee, or open [**a ticket**](/tickets/create).`}
-                    />
-                </Alert>
-            )}
-            <ResourcesFilters values={filters} onChange={handleFilterChange} onCreateClick={openCreate} />
-            <Divider />
-
-            {isLoading ? (
-                <ResourcesLoadingState />
-            ) : !data || data.resources.length === 0 ? (
-                <ResourcesEmptyState />
-            ) : (
+        <PageSections>
+            <PageSection>
                 <Stack gap="md">
-                    {data.pagination.total > 1 && (
-                        <Group justify="center" my="xs">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={handlePageChange}
-                                total={data.pagination.total}
+                    {type === "community" && (
+                        <Alert color="info" icon={<FontAwesomeIcon icon="circle-info" />} title="Info">
+                            <MarkdownText
+                                size="sm"
+                                content={`If you want a resource to be added here, please contact a member of the Tournament Committee, or open [**a ticket**](/tickets/create).`}
                             />
-                        </Group>
+                        </Alert>
                     )}
-
-                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                        {data.resources.map((resource) => (
-                            <ResourcesCard
-                                key={resource._id}
-                                resource={resource}
-                                onEdit={user?.isCommittee ? handleEditResource : undefined}
-                                onRestore={handleRestoreResource}
-                            />
-                        ))}
-                    </SimpleGrid>
-
-                    {data.pagination.total > 1 && (
-                        <Group justify="center" mt="xs">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={handlePageChange}
-                                total={data.pagination.total}
-                            />
-                        </Group>
-                    )}
+                    <ResourcesFilters values={filters} onChange={handleFilterChange} onCreateClick={openCreate} />
                 </Stack>
-            )}
+            </PageSection>
 
-            <ResourcesCreateModal opened={createOpened} onClose={closeCreate} defaultType={type} />
+            <PageSection>
+                {isLoading ? (
+                    <ResourcesLoadingState />
+                ) : !data || data.resources.length === 0 ? (
+                    <ResourcesEmptyState />
+                ) : (
+                    <Stack gap="md">
+                        {data.pagination.total > 1 && (
+                            <Group justify="center" my="xs">
+                                <Pagination
+                                    value={queryState.page}
+                                    onChange={handlePageChange}
+                                    total={data.pagination.total}
+                                />
+                            </Group>
+                        )}
 
-            <ResourcesEditModal opened={editOpened} onClose={handleCloseEdit} resource={selectedResource} />
-        </Stack>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                            {data.resources.map((resource) => (
+                                <ResourcesCard
+                                    key={resource._id}
+                                    resource={resource}
+                                    onEdit={user?.isCommittee ? handleEditResource : undefined}
+                                    onRestore={handleRestoreResource}
+                                />
+                            ))}
+                        </SimpleGrid>
+
+                        {data.pagination.total > 1 && (
+                            <Group justify="center" mt="xs">
+                                <Pagination
+                                    value={queryState.page}
+                                    onChange={handlePageChange}
+                                    total={data.pagination.total}
+                                />
+                            </Group>
+                        )}
+                    </Stack>
+                )}
+
+                <ResourcesCreateModal opened={createOpened} onClose={closeCreate} defaultType={type} />
+
+                <ResourcesEditModal opened={editOpened} onClose={handleCloseEdit} resource={selectedResource} />
+            </PageSection>
+        </PageSections>
     );
 }

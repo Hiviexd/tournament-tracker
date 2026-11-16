@@ -1,7 +1,6 @@
 import {
     Badge,
     Card,
-    Divider,
     Group,
     Pagination,
     ScrollArea,
@@ -23,6 +22,7 @@ import NotificationJobsFilters, {
     NotificationJobFiltersValues,
 } from "../components/notification-jobs/NotificationJobsFilters";
 import { pickStringUnion } from "@tc/utils/client";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 function StatCard({ title, value, color = "primary" }: { title: string; value: number; color?: string }) {
     return (
@@ -209,19 +209,30 @@ export default function NotificationJobsPage() {
     }, [queryState.tab, setQueryState]);
 
     return (
-        <Stack gap="md">
-            <NotificationJobDetailModal opened={!!selectedJob} job={selectedJob} onClose={() => setSelectedJob(null)} />
+        <PageSections>
+            <PageSection>
+                <NotificationJobDetailModal
+                    opened={!!selectedJob}
+                    job={selectedJob}
+                    onClose={() => setSelectedJob(null)}
+                />
 
-            <Tabs value={queryState.tab} onChange={(value) => setQueryState({ tab: value || "jobs", page: 1 })}>
-                <Tabs.List>
-                    <Tabs.Tab value="jobs">Jobs</Tabs.Tab>
-                    <Tabs.Tab value="stats">Stats</Tabs.Tab>
-                </Tabs.List>
-
-                <Tabs.Panel value="jobs" pt="md">
-                    <Stack gap="md">
+                <Stack gap="md">
+                    <Tabs value={queryState.tab} onChange={(value) => setQueryState({ tab: value || "jobs", page: 1 })}>
+                        <Tabs.List>
+                            <Tabs.Tab value="jobs">Jobs</Tabs.Tab>
+                            <Tabs.Tab value="stats">Stats</Tabs.Tab>
+                        </Tabs.List>
+                    </Tabs>
+                    {queryState.tab === "jobs" && (
                         <NotificationJobsFilters values={filters} onChange={handleFilterChange} />
-                        <Divider />
+                    )}
+                </Stack>
+            </PageSection>
+
+            <PageSection>
+                {queryState.tab === "jobs" && (
+                    <Stack gap="md">
                         {isListingLoading ? (
                             <JobsLoadingState />
                         ) : listingError ? (
@@ -309,10 +320,10 @@ export default function NotificationJobsPage() {
                             </Stack>
                         )}
                     </Stack>
-                </Tabs.Panel>
+                )}
 
-                <Tabs.Panel value="stats" pt="md">
-                    {isStatsLoading ? (
+                {queryState.tab === "stats" &&
+                    (isStatsLoading ? (
                         <StatsLoadingState />
                     ) : statsError || !statsData ? (
                         <EmptyState
@@ -335,9 +346,8 @@ export default function NotificationJobsPage() {
                                 <StatCard title="Runtime Failed" value={statsData.runtime.failed} color="danger" />
                             </SimpleGrid>
                         </Stack>
-                    )}
-                </Tabs.Panel>
-            </Tabs>
-        </Stack>
+                    ))}
+            </PageSection>
+        </PageSections>
     );
 }

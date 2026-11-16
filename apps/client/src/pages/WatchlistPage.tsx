@@ -1,6 +1,6 @@
 import { DISCORD_SERVER_ID } from "../constants";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Stack, Button, Group, Pagination, Divider } from "@mantine/core";
+import { Stack, Button, Group, Pagination } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { useWatchlist } from "../hooks/useInfringements";
@@ -16,6 +16,7 @@ import { useSetAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import { WATCHLIST_PAGE_SIZE } from "../components/watchlist/watchlistUtils";
 import { pickStringUnion } from "@tc/utils/client";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 interface FilterValues {
     type: InfringementType | "";
@@ -99,58 +100,65 @@ export default function WatchlistPage() {
     }, [data, queryState.page, setQueryState]);
 
     return (
-        <Stack gap="md">
-            <UserWatchlistModal userId={queryState.user} onClose={handleUserWatchlistModalClose} />
+        <PageSections>
+            <PageSection>
+                <Stack gap="md">
+                    <UserWatchlistModal userId={queryState.user} onClose={handleUserWatchlistModalClose} />
 
-            <WatchlistFilters values={filters} onChange={handleFilterChange} onUserSelect={handleUserSelect} />
+                    <WatchlistFilters values={filters} onChange={handleFilterChange} onUserSelect={handleUserSelect} />
 
-            <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                leftSection={<FontAwesomeIcon icon="plus" />}
-                variant="filled"
-                color="primary"
-                fullWidth>
-                Add Infringement
-            </Button>
+                    <Button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        leftSection={<FontAwesomeIcon icon="plus" />}
+                        variant="filled"
+                        color="primary"
+                        fullWidth>
+                        Add Infringement
+                    </Button>
+                </Stack>
+            </PageSection>
 
-            {isLoading ? (
-                <WatchlistTableSkeleton />
-            ) : !users.length ? (
-                <EmptyState
-                    icon="user-shield"
-                    title="No users found"
-                    description={error ? "Try refreshing the page" : "Try adjusting your filters"}
-                />
-            ) : (
-                <>
-                    <Divider />
-                    {totalPages > 1 && (
-                        <Group justify="center">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={(page) => setQueryState({ page })}
-                                total={totalPages}
+            <PageSection>
+                <Stack gap="md">
+                    {isLoading ? (
+                        <WatchlistTableSkeleton />
+                    ) : !users.length ? (
+                        <EmptyState
+                            icon="user-shield"
+                            title="No users found"
+                            description={error ? "Try refreshing the page" : "Try adjusting your filters"}
+                        />
+                    ) : (
+                        <>
+                            {totalPages > 1 && (
+                                <Group justify="center">
+                                    <Pagination
+                                        value={queryState.page}
+                                        onChange={(page) => setQueryState({ page })}
+                                        total={totalPages}
+                                    />
+                                </Group>
+                            )}
+                            <WatchlistTable
+                                users={users}
+                                onUserSelect={handleUserSelect}
+                                getDiscordThreadLink={getDiscordThreadLink}
                             />
-                        </Group>
+                            {totalPages > 1 && (
+                                <Group justify="center">
+                                    <Pagination
+                                        value={queryState.page}
+                                        onChange={(page) => setQueryState({ page })}
+                                        total={totalPages}
+                                    />
+                                </Group>
+                            )}
+                        </>
                     )}
-                    <WatchlistTable
-                        users={users}
-                        onUserSelect={handleUserSelect}
-                        getDiscordThreadLink={getDiscordThreadLink}
-                    />
-                    {totalPages > 1 && (
-                        <Group justify="center">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={(page) => setQueryState({ page })}
-                                total={totalPages}
-                            />
-                        </Group>
-                    )}
-                </>
-            )}
 
-            <InfringementCreateModal opened={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
-        </Stack>
+                    <InfringementCreateModal opened={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+                </Stack>
+            </PageSection>
+        </PageSections>
     );
 }

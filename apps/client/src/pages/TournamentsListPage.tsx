@@ -1,17 +1,5 @@
 import { useEffect } from "react";
-import {
-    Stack,
-    Group,
-    Button,
-    Card,
-    Text,
-    Pagination,
-    Skeleton,
-    SimpleGrid,
-    Divider,
-    Table,
-    ScrollArea,
-} from "@mantine/core";
+import { Stack, Group, Button, Card, Text, Pagination, Skeleton, SimpleGrid, Table, ScrollArea } from "@mantine/core";
 import { useDisclosure, useIsFirstRender } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -37,6 +25,7 @@ import { cssVars } from "../themes/cssVars";
 import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 import { useTournamentMassEdit } from "../hooks/useTournamentMassEdit";
 import { pickStringUnion } from "@tc/utils/client";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 interface FilterValues {
     search: string;
@@ -268,64 +257,72 @@ export default function TournamentListPage() {
     }, [viewMode, user?.isCommittee, setViewMode]);
 
     return (
-        <Stack gap="md">
-            <TournamentFilters values={filters} onChange={handleFiltersChange} />
-
-            {user?.isCommittee && (
-                <Button onClick={open} leftSection={<FontAwesomeIcon icon="plus" />} variant="filled" color="primary">
-                    New Tournament
-                </Button>
-            )}
-
-            <TournamentCreateModal opened={opened} onClose={close} />
-
-            <Divider />
-
-            {isLoading ? (
-                <LoadingState viewMode={viewMode} user={user} />
-            ) : !data || data.tournaments.length === 0 ? (
-                <EmptyState hasError={false} />
-            ) : (
+        <PageSections>
+            <PageSection>
                 <Stack gap="md">
-                    {data.pages > 1 && (
-                        <Group justify="center">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={handlePageChange}
-                                total={data.pages}
-                                color="primary"
-                            />
-                        </Group>
+                    <TournamentFilters values={filters} onChange={handleFiltersChange} />
+
+                    {user?.isCommittee && (
+                        <Button
+                            onClick={open}
+                            leftSection={<FontAwesomeIcon icon="plus" />}
+                            variant="filled"
+                            color="primary">
+                            New Tournament
+                        </Button>
                     )}
-                    {viewMode === "review" ? (
-                        <TournamentReviewBoard tournaments={data.tournaments} />
-                    ) : viewMode === "table" ? (
-                        <TournamentTable
-                            tournaments={data.tournaments}
-                            total={data.total}
-                            currentPage={data.page}
-                            massEdit={massEdit.tableMassEdit}
-                        />
-                    ) : (
-                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                            {data.tournaments.map((tournament: ITournament) => (
-                                <TournamentCard key={tournament.id} tournament={tournament} />
-                            ))}
-                        </SimpleGrid>
-                    )}
-                    {data.pages > 1 && (
-                        <Group justify="center">
-                            <Pagination
-                                value={queryState.page}
-                                onChange={handlePageChange}
-                                total={data.pages}
-                                color="primary"
-                            />
-                        </Group>
-                    )}
+
+                    <TournamentCreateModal opened={opened} onClose={close} />
                 </Stack>
-            )}
-        </Stack>
+            </PageSection>
+
+            <PageSection>
+                {isLoading ? (
+                    <LoadingState viewMode={viewMode} user={user} />
+                ) : !data || data.tournaments.length === 0 ? (
+                    <EmptyState hasError={false} />
+                ) : (
+                    <Stack gap="md">
+                        {data.pages > 1 && (
+                            <Group justify="center">
+                                <Pagination
+                                    value={queryState.page}
+                                    onChange={handlePageChange}
+                                    total={data.pages}
+                                    color="primary"
+                                />
+                            </Group>
+                        )}
+                        {viewMode === "review" ? (
+                            <TournamentReviewBoard tournaments={data.tournaments} />
+                        ) : viewMode === "table" ? (
+                            <TournamentTable
+                                tournaments={data.tournaments}
+                                total={data.total}
+                                currentPage={data.page}
+                                massEdit={massEdit.tableMassEdit}
+                            />
+                        ) : (
+                            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                                {data.tournaments.map((tournament: ITournament) => (
+                                    <TournamentCard key={tournament.id} tournament={tournament} />
+                                ))}
+                            </SimpleGrid>
+                        )}
+                        {data.pages > 1 && (
+                            <Group justify="center">
+                                <Pagination
+                                    value={queryState.page}
+                                    onChange={handlePageChange}
+                                    total={data.pages}
+                                    color="primary"
+                                />
+                            </Group>
+                        )}
+                    </Stack>
+                )}
+            </PageSection>
+        </PageSections>
     );
 }
 

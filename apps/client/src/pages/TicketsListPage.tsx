@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useTickets } from "../hooks/useTickets";
 import { UserGroup, USER_GROUPS } from "@tc/types/User";
 import { ITicket } from "@tc/types/Ticket";
-import { Stack, Card, SimpleGrid, Group, Pagination, Text, Skeleton, Divider } from "@mantine/core";
+import { Stack, Card, SimpleGrid, Group, Pagination, Text, Skeleton } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "nuqs";
 import TicketCard from "../components/tickets/TicketCard";
@@ -12,6 +12,7 @@ import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import { getSavedPreference } from "../hooks/useLocalPreferences";
 import { pickStringUnion } from "@tc/utils/client";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 function TicketsListLoadingState() {
     return (
@@ -171,34 +172,36 @@ export default function TicketsListPage() {
     };
 
     return (
-        <Stack gap="md">
-            <TicketsFilters values={filters} onChange={handleFilterChange} type={type} />
+        <PageSections>
+            <PageSection>
+                <TicketsFilters values={filters} onChange={handleFilterChange} type={type} />
+            </PageSection>
 
-            <Divider />
+            <PageSection>
+                {isLoading ? (
+                    <TicketsListLoadingState />
+                ) : !data || data.tickets.length === 0 ? (
+                    <TicketsListEmptyState
+                        type={type}
+                        hasError={!!error}
+                        showAdjustFilters={type === "ticket" || !!user?.isCommittee}
+                    />
+                ) : (
+                    <Stack gap="md">
+                        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                            {data.tickets.map((ticket: ITicket) => (
+                                <TicketCard key={ticket.id} ticket={ticket} />
+                            ))}
+                        </SimpleGrid>
 
-            {isLoading ? (
-                <TicketsListLoadingState />
-            ) : !data || data.tickets.length === 0 ? (
-                <TicketsListEmptyState
-                    type={type}
-                    hasError={!!error}
-                    showAdjustFilters={type === "ticket" || !!user?.isCommittee}
-                />
-            ) : (
-                <Stack gap="md">
-                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                        {data.tickets.map((ticket: ITicket) => (
-                            <TicketCard key={ticket.id} ticket={ticket} />
-                        ))}
-                    </SimpleGrid>
-
-                    {data.pages > 1 && (
-                        <Group justify="center" mt="xs">
-                            <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
-                        </Group>
-                    )}
-                </Stack>
-            )}
-        </Stack>
+                        {data.pages > 1 && (
+                            <Group justify="center" mt="xs">
+                                <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
+                            </Group>
+                        )}
+                    </Stack>
+                )}
+            </PageSection>
+        </PageSections>
     );
 }

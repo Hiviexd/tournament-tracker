@@ -8,7 +8,7 @@ import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean } from "n
 
 // Mantine
 import { useDisclosure } from "@mantine/hooks";
-import { Card, Stack, Group, Pagination, Text, Button, Skeleton, Divider } from "@mantine/core";
+import { Card, Stack, Group, Pagination, Text, Button, Skeleton } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Components
@@ -20,6 +20,7 @@ import { pickStringUnion } from "@tc/utils/client";
 // Atom
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
+import { PageSection, PageSections } from "../components/common/PageSection";
 
 function VotingListLoadingState() {
     return (
@@ -137,46 +138,50 @@ export default function VotingListPage() {
     }, [data, queryState.page, setQueryState]);
 
     return (
-        <Stack gap="md">
+        <PageSections>
             {/* Only show filters and create button for committee members */}
-            <Stack gap="md">
-                <VotingFilters user={user} values={filters} onChange={handleFilterChange} />
-                {user?.isCommittee && (
-                    <Button
-                        onClick={open}
-                        leftSection={<FontAwesomeIcon icon="plus" />}
-                        variant="filled"
-                        color="primary"
-                        fullWidth>
-                        New Vote
-                    </Button>
-                )}
-            </Stack>
+            <PageSection>
+                <Stack gap="md">
+                    <VotingFilters user={user} values={filters} onChange={handleFilterChange} />
+                    {user?.isCommittee && (
+                        <Button
+                            onClick={open}
+                            leftSection={<FontAwesomeIcon icon="plus" />}
+                            variant="filled"
+                            color="primary"
+                            fullWidth>
+                            New Vote
+                        </Button>
+                    )}
+                </Stack>
 
-            {/* Create voting modal */}
-            <VotingCreateModal opened={opened} onClose={close} />
-
-            <Divider />
+                {/* Create voting modal */}
+                <VotingCreateModal opened={opened} onClose={close} />
+            </PageSection>
 
             {/* Content area */}
-            {isLoading ? (
-                <VotingListLoadingState />
-            ) : !data || data.votings.length === 0 ? (
-                <VotingListEmptyState hasError={!!error} showCommitteeHint={!!user?.isCommittee} />
-            ) : (
+            <PageSection>
                 <Stack gap="md">
-                    {data.votings.map((voting: IVoting) => (
-                        <VotingCard key={voting.id} voting={voting} />
-                    ))}
-                </Stack>
-            )}
+                    {isLoading ? (
+                        <VotingListLoadingState />
+                    ) : !data || data.votings.length === 0 ? (
+                        <VotingListEmptyState hasError={!!error} showCommitteeHint={!!user?.isCommittee} />
+                    ) : (
+                        <Stack gap="md">
+                            {data.votings.map((voting: IVoting) => (
+                                <VotingCard key={voting.id} voting={voting} />
+                            ))}
+                        </Stack>
+                    )}
 
-            {/* Pagination */}
-            {!isLoading && data && data.pages > 1 && (
-                <Group justify="center" mt="xs">
-                    <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
-                </Group>
-            )}
-        </Stack>
+                    {/* Pagination */}
+                    {!isLoading && data && data.pages > 1 && (
+                        <Group justify="center" mt="xs">
+                            <Pagination value={queryState.page} onChange={handlePageChange} total={data.pages} />
+                        </Group>
+                    )}
+                </Stack>
+            </PageSection>
+        </PageSections>
     );
 }
