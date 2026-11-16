@@ -8,6 +8,28 @@ export interface IRoute {
     links?: IRoute[];
 }
 
+/**
+ * Whether `pathname` is `link` itself or a page nested under it (e.g. "/tickets/123" under "/tickets").
+ * "/" only matches exactly, since it is a prefix of every path.
+ */
+export function isPathUnder(pathname: string, link?: string): boolean {
+    if (!link) return false;
+    if (link === "/") return pathname === "/";
+    return pathname === link || pathname.startsWith(`${link}/`);
+}
+
+/** The most specific link (longest match) among `links` that `pathname` falls under. */
+export function getActiveLink(links: IRoute[] | undefined, pathname: string): IRoute | undefined {
+    return links
+        ?.filter((link) => isPathUnder(pathname, link.link))
+        .sort((a, b) => (b.link?.length ?? 0) - (a.link?.length ?? 0))[0];
+}
+
+/** Whether a top-level header route should be highlighted for `pathname`. */
+export function isRouteActive(route: IRoute, pathname: string): boolean {
+    return isPathUnder(pathname, route.link) || !!getActiveLink(route.links, pathname);
+}
+
 export const routes: IRoute[] = [
     {
         title: "Home",

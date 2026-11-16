@@ -1,7 +1,7 @@
 import { Stack, NavLink, Collapse } from "@mantine/core";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../../../store/atoms";
-import { routes } from "../../../base/header.config";
+import { routes, isRouteActive, getActiveLink } from "../../../base/header.config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import utils from "@tc/utils/client";
@@ -26,13 +26,6 @@ export default function MobileNavigation({ onClose }: IProps) {
             links: route.links?.filter((link) => utils.hasRequiredPermissions(user, link.permissions)),
         }));
 
-    const isRouteActive = (route: IRoute) => {
-        // Direct match
-        if (location.pathname === route.link) return true;
-        // Match any child route
-        return route.links?.some((link) => location.pathname === link.link);
-    };
-
     const handleRouteClick = (route: IRoute) => {
         if (route.links?.length) {
             // Toggle dropdown if route has children
@@ -55,7 +48,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                     <NavLink
                         label={route.title}
                         leftSection={route.icon && <FontAwesomeIcon icon={route.icon} />}
-                        active={isRouteActive(route)}
+                        active={isRouteActive(route, location.pathname)}
                         onClick={() => handleRouteClick(route)}
                         rightSection={
                             route.links?.length ? (
@@ -79,7 +72,7 @@ export default function MobileNavigation({ onClose }: IProps) {
                                         component={Link}
                                         to={link.link || "#"}
                                         leftSection={link.icon ? <FontAwesomeIcon icon={link.icon} /> : undefined}
-                                        active={location.pathname === link.link}
+                                        active={getActiveLink(route.links, location.pathname) === link}
                                         onClick={handleSubLinkClick}
                                         variant="subtle"
                                     />

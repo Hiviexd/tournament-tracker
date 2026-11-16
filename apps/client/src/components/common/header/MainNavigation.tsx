@@ -1,7 +1,7 @@
 import { Menu, Button, Group } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { routes } from "../../../base/header.config";
+import { routes, isRouteActive } from "../../../base/header.config";
 import utils from "@tc/utils/client";
 import { IUser } from "@tc/types/User";
 
@@ -12,20 +12,7 @@ interface IProps {
 export default function MainNavigation({ user }: IProps) {
     const location = useLocation();
 
-    const mainRoute = routes.find((route) => route.link === location.pathname);
-    // "/" is a prefix of every path, so it only counts as an exact match (handled by mainRoute)
-    const parentByPrefix = routes.find(
-        (route) => route.link && route.link !== "/" && location.pathname.startsWith(route.link),
-    );
-    const parentByNestedLink = routes.find((route) => route.links?.some((link) => link.link === location.pathname));
-
-    const selectedRoute = mainRoute
-        ? mainRoute.title
-        : parentByPrefix
-          ? parentByPrefix.title
-          : parentByNestedLink
-            ? parentByNestedLink.title
-            : null;
+    const selectedRoute = routes.find((route) => isRouteActive(route, location.pathname))?.title ?? null;
 
     const visibleRoutes = routes
         .filter((route) => utils.hasRequiredPermissions(user, route.permissions))
