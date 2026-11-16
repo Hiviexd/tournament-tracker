@@ -91,23 +91,21 @@ export default function Layout({ page, title, icon = "trophy", parent, banner }:
                 <AppShell.Main style={{ paddingBottom: bottomBannerPadding }}>
                     {banner && <div className="layout-banner">{banner}</div>}
                     <div className="main-layout">
-                        {title !== "Home" && (
-                            <Container fluid className="page-header">
-                                <Flex align="center" gap="md">
-                                    <FontAwesomeIcon icon={icon} />
-                                    {title && (
-                                        <Breadcrumbs>
-                                            {parent && (
-                                                <Link to={parent.path} className="breadcrumb-link">
-                                                    {parent.title}
-                                                </Link>
-                                            )}
-                                            <span>{title}</span>
-                                        </Breadcrumbs>
-                                    )}
-                                </Flex>
-                            </Container>
-                        )}
+                        <Container fluid className="page-header">
+                            <Flex align="center" gap="md">
+                                <FontAwesomeIcon icon={icon} />
+                                {title && (
+                                    <Breadcrumbs>
+                                        {parent && (
+                                            <Link to={parent.path} className="breadcrumb-link">
+                                                {parent.title}
+                                            </Link>
+                                        )}
+                                        <span>{title}</span>
+                                    </Breadcrumbs>
+                                )}
+                            </Flex>
+                        </Container>
                         <Container className="layout-body" px={{ base: 10, sm: 20 }} py={20} fluid>
                             {page}
                         </Container>

@@ -1,4 +1,4 @@
-import { Card, Stack, Title, Text, Group, Box, Image, SimpleGrid, Button, Skeleton, ScrollArea } from "@mantine/core";
+import { Stack, Title, Text, Group, Box, Button, Skeleton, ScrollArea, SimpleGrid } from "@mantine/core";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAtom } from "jotai";
@@ -12,6 +12,8 @@ import NewsPostCard from "./NewsPostCard";
 import NewsPostModal from "./NewsPostModal";
 
 const OLDER_NEWS_SCROLL_THRESHOLD = 6;
+// Room for the cards' hover lift (4px) and shadow, which the scroll viewport would otherwise clip.
+const HOVER_GUTTER = 12;
 
 function OlderNewsList({ articles, onSelect }: { articles: IArticle[]; onSelect: (article: IArticle) => void }) {
     const gridRef = useRef<HTMLDivElement>(null);
@@ -25,14 +27,15 @@ function OlderNewsList({ articles, onSelect }: { articles: IArticle[]; onSelect:
             return;
         }
 
-        const cards = grid.querySelectorAll(".news-post-card");
-        const sixth = cards[OLDER_NEWS_SCROLL_THRESHOLD - 1];
-        if (!(sixth instanceof HTMLElement)) {
+        const rows = grid.querySelectorAll(".news-post-card");
+        const last = rows[OLDER_NEWS_SCROLL_THRESHOLD - 1];
+        if (!(last instanceof HTMLElement)) {
             setMaxHeight(undefined);
             return;
         }
 
-        setMaxHeight(sixth.offsetTop + sixth.offsetHeight);
+        const bottom = last.getBoundingClientRect().bottom - grid.getBoundingClientRect().top;
+        setMaxHeight(bottom + HOVER_GUTTER);
     }, [articles.length]);
 
     useLayoutEffect(() => {
@@ -42,9 +45,11 @@ function OlderNewsList({ articles, onSelect }: { articles: IArticle[]; onSelect:
     }, [updateMaxHeight]);
 
     return (
-        <ScrollArea.Autosize mah={shouldScroll ? maxHeight : undefined} type="hover">
-            <Box ref={gridRef}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        // The scroll viewport clips overflow, so pad it (and pull it back out with a negative margin)
+        // to leave room for the cards' hover lift and shadow.
+        <ScrollArea.Autosize mah={shouldScroll ? maxHeight : undefined} type="hover" m={-HOVER_GUTTER}>
+            <Box ref={gridRef} p={HOVER_GUTTER}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                     {articles.map((article) => (
                         <NewsPostCard key={article.slug} article={article} onSelect={onSelect} />
                     ))}
@@ -56,17 +61,17 @@ function OlderNewsList({ articles, onSelect }: { articles: IArticle[]; onSelect:
 
 function NewsCardsLoadingState() {
     return (
-        <Stack gap="md">
-            <Skeleton height={140} radius="md" />
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                <Skeleton height={110} radius="md" />
-                <Skeleton height={110} radius="md" />
+        <Stack gap="sm">
+            <Skeleton height={170} radius="md" />
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                <Skeleton height={84} radius="md" />
+                <Skeleton height={84} radius="md" />
             </SimpleGrid>
         </Stack>
     );
 }
 
-export default function HomeHero() {
+export default function HomeNewsSection() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [user] = useAtom(loggedInUserAtom);
     const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useNewsPosts();
@@ -102,73 +107,52 @@ export default function HomeHero() {
     };
 
     return (
-        <Card padding="md" radius="md" className="home-hero" shadow="sm">
-            <Stack gap="lg">
-                <Group justify="space-between" align="center" wrap="wrap" gap="sm">
-                    <Group gap="sm" wrap="nowrap">
-                        <Box className="home-hero-logo-wrap">
-                            <Box className="home-hero-glow" aria-hidden />
-                            <Image
-                                src="/assets/logo-main.svg?20260211"
-                                alt=""
-                                w={36}
-                                h={36}
-                                className="home-hero-logo"
-                            />
-                        </Box>
-                        <Title order={2} className="home-hero-title">
-                            Tournament Tracker
-                        </Title>
-                    </Group>
-                    {user && !user.isSubscribedToNews && (
-                        <Button
-                            size="xs"
-                            leftSection={<FontAwesomeIcon icon="bell" />}
-                            onClick={handleSubscribe}
-                            loading={updateNewsSubscription.isPending}>
-                            Receive osu! notifications
-                        </Button>
-                    )}
-                </Group>
-
-                {isLoading ? (
-                    <Stack gap="md">
-                        <Text size="sm" c="dimmed">
-                            news from the committee:
-                        </Text>
-                        <NewsCardsLoadingState />
-                    </Stack>
-                ) : (
-                    articles.length > 0 && (
-                        <Stack gap="md">
-                            <Text size="sm" c="dimmed">
-                                news from the committee:
+        <>
+            {(isLoading || articles.length > 0) && (
+                <Stack gap="md">
+                    <Group justify="space-between" align="flex-end" wrap="wrap" gap="sm">
+                        <Stack gap={4}>
+                            <Title order={2} className="home-section-title header-border-left">
+                                Latest News
+                            </Title>
+                            <Text size="sm" c="dimmed" className="home-section-subtitle">
+                                Announcements from the Tournament Committee
                             </Text>
+                        </Stack>
+                        {user && !user.isSubscribedToNews && (
+                            <Button
+                                size="xs"
+                                variant="light"
+                                leftSection={<FontAwesomeIcon icon="bell" />}
+                                onClick={handleSubscribe}
+                                loading={updateNewsSubscription.isPending}>
+                                Receive osu! notifications
+                            </Button>
+                        )}
+                    </Group>
+                    {isLoading ? (
+                        <NewsCardsLoadingState />
+                    ) : (
+                        <>
                             {featured && <NewsPostCard article={featured} featured onSelect={handleSelect} />}
-                            {rest.length > 0 && (
-                                <>
-                                    <Text size="sm" c="dimmed">
-                                        older news:
-                                    </Text>
-                                    <OlderNewsList articles={rest} onSelect={handleSelect} />
-                                </>
-                            )}
+                            {rest.length > 0 && <OlderNewsList articles={rest} onSelect={handleSelect} />}
                             {hasNextPage && (
                                 <Group justify="center">
                                     <Button
                                         variant="subtle"
                                         size="compact-sm"
+                                        rightSection={<FontAwesomeIcon icon="chevron-down" />}
                                         onClick={() => fetchNextPage()}
                                         loading={isFetchingNextPage}>
-                                        Show more
+                                        Show older posts
                                     </Button>
                                 </Group>
                             )}
-                        </Stack>
-                    )
-                )}
-            </Stack>
+                        </>
+                    )}
+                </Stack>
+            )}
             <NewsPostModal slug={newsSlug} onClose={handleModalClose} />
-        </Card>
+        </>
     );
 }

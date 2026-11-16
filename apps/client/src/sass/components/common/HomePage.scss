@@ -1,60 +1,27 @@
-.home-page {
-    padding-block: 0.5rem 1.5rem;
-}
-
-/* —— Hero —— */
-.home-hero {
-    padding: clamp(1.25rem, 3vw, 1.75rem) 1.25rem;
-    background: linear-gradient(
-        165deg,
-        color-mix(in srgb, var(--mantine-color-primary-filled) 22%, var(--mantine-color-primary-11)) 0%,
-        var(--mantine-color-primary-11) 55%,
-        var(--mantine-color-primary-11) 100%
-    );
-    border: 1px solid color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
-}
-
-.home-hero-logo-wrap {
-    position: relative;
+/* —— News —— */
+/* Shared chevron that slides in on hover, like the Explore cards */
+.news-chevron {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    font-size: 0.7rem;
+    color: var(--mantine-color-dimmed);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        color 0.2s ease;
 }
 
-.home-hero-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    width: 72px;
-    height: 72px;
-    background: radial-gradient(
-        ellipse at center,
-        color-mix(in srgb, var(--mantine-color-primary-6) 35%, transparent),
-        transparent 70%
-    );
-    pointer-events: none;
-    filter: blur(8px);
-}
-
-.home-hero-logo {
-    position: relative;
-    z-index: 1;
-}
-
-.home-hero-title {
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-}
-
+/* Same treatment as .feature-card in the Explore section */
+.news-feature,
 .news-post-card {
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
-    border-top: 4px solid color-mix(in srgb, var(--mantine-color-primary-6) 18%, transparent);
+    border: 1px solid transparent;
+    border-top: 4px solid transparent;
     transition:
+        transform 0.2s ease,
         border-color 0.2s ease,
         box-shadow 0.2s ease;
 
@@ -62,19 +29,16 @@
         content: "";
         position: absolute;
         inset: 0;
-        z-index: 0;
+        z-index: 1;
         opacity: 0;
         transition: opacity 0.2s ease;
         background: linear-gradient(180deg, var(--mantine-color-primary-6) -120%, var(--mantine-color-primary-11) 2rem);
         pointer-events: none;
     }
 
-    .news-post-card-body {
-        position: relative;
-        z-index: 1;
-    }
-
-    &:hover {
+    &:hover,
+    &:focus-visible {
+        transform: translateY(-4px);
         border-color: color-mix(in srgb, var(--mantine-color-primary-6) 28%, transparent);
         border-top-color: var(--mantine-color-primary-6);
         box-shadow: var(--mantine-shadow-md);
@@ -82,19 +46,77 @@
         &::after {
             opacity: 1;
         }
+
+        .news-chevron {
+            opacity: 1;
+            transform: translateX(0);
+            color: var(--mantine-color-primary-4);
+        }
     }
 
-    &--featured {
-        padding: clamp(1.25rem, 3vw, 1.75rem);
+    &:focus-visible {
+        outline: 2px solid var(--mantine-color-primary-5);
+        outline-offset: 2px;
     }
 }
 
-.news-post-card-title {
-    letter-spacing: -0.02em;
+.news-post-card > * {
+    position: relative;
+    z-index: 2;
 }
 
-.news-post-card-preview {
-    text-wrap: pretty;
+/* Lead story keeps its banner, so its hover fade must stay see-through */
+.news-feature {
+    padding: clamp(1.25rem, 3vw, 1.75rem) !important;
+
+    &::after {
+        background: linear-gradient(180deg, var(--mantine-color-primary-6) -120%, transparent 2rem);
+    }
+
+    .news-feature-banner {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: url("/assets/default-banner.jpg") center / cover no-repeat;
+        opacity: 0.45;
+        transition: opacity 0.2s ease;
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--mantine-color-primary-11) 30%, transparent 130%);
+        }
+    }
+
+    .news-feature-body {
+        position: relative;
+        z-index: 2;
+    }
+
+    .news-feature-title {
+        letter-spacing: -0.02em;
+        max-width: 32ch;
+    }
+
+    .news-feature-preview {
+        max-width: 62ch;
+        text-wrap: pretty;
+    }
+
+    .news-feature-cta {
+        color: var(--mantine-color-primary-3);
+    }
+
+    .news-chevron {
+        opacity: 0.7;
+        transform: none;
+        color: inherit;
+    }
+
+    &:hover .news-feature-banner {
+        opacity: 0.6;
+    }
 }
 
 .home-section-title {

@@ -1,13 +1,20 @@
-import { Stack, Divider } from "@mantine/core";
+import { PageSection, PageSections } from "../components/common/PageSection";
+import HomeNewsSection from "../components/home/HomeNewsSection";
 import HomeFeaturesSection from "../components/home/HomeFeaturesSection";
 import HomeCommitteeSection from "../components/home/HomeCommitteeSection";
 
 export default function HomePage() {
     return (
-        <Stack gap="xl" className="home-page">
-            <HomeFeaturesSection />
-            <Divider className="home-divider" />
-            <HomeCommitteeSection />
-        </Stack>
+        <PageSections>
+            <PageSection>
+                <HomeNewsSection />
+            </PageSection>
+            <PageSection>
+                <HomeFeaturesSection />
+            </PageSection>
+            <PageSection>
+                <HomeCommitteeSection />
+            </PageSection>
+        </PageSections>
     );
 }

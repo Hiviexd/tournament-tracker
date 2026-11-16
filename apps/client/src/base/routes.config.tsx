@@ -1,7 +1,6 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
-import HomeHero from "../components/home/HomeHero";
 import {
     ArticleDeletedBanner,
     TournamentDeletedBanner,
@@ -51,7 +50,6 @@ const routes: RouteConfig[] = [
     {
         path: "/",
         page: <HomePage />,
-        banner: <HomeHero />,
         title: "Home",
         icon: "home",
         permissions: [],
