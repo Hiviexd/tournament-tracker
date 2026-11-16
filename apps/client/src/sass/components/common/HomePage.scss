@@ -104,14 +104,22 @@
         text-wrap: pretty;
     }
 
+    /* Label and arrow dim together, and both brighten on hover */
     .news-feature-cta {
         color: var(--mantine-color-primary-3);
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+
+        .news-chevron {
+            opacity: 1;
+            transform: none;
+            color: inherit;
+        }
     }
 
-    .news-chevron {
-        opacity: 0.7;
-        transform: none;
-        color: inherit;
+    &:hover .news-feature-cta,
+    &:focus-visible .news-feature-cta {
+        opacity: 1;
     }
 
     &:hover .news-feature-banner {
