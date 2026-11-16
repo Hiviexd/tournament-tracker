@@ -87,13 +87,8 @@ export default function VotingEditModal({ voting, opened, onClose }: IProps) {
                 if (voting.type === "binary" && value.length !== 2) {
                     return "Binary votes must have exactly 2 options";
                 }
-                if (voting.type === "binary-strict") {
-                    if (form.values.allowNeutralVotes && value.length !== 3) {
-                        return "Binary strict votes with neutral allowed must have exactly 3 options";
-                    }
-                    if (!form.values.allowNeutralVotes && value.length !== 2) {
-                        return "Binary strict votes without neutral must have exactly 2 options";
-                    }
+                if (voting.type === "binary-strict" && value.length !== 2) {
+                    return "Binary strict votes must have exactly 2 options";
                 }
                 return null;
             },

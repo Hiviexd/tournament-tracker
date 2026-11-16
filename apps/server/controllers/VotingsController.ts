@@ -166,6 +166,7 @@ class VotingsController {
 
         let neutralVotesSettingOverride = allowNeutralVotes;
         if (type === "ranked-choice") neutralVotesSettingOverride = true;
+        if (type === "binary-strict") neutralVotesSettingOverride = false;
 
         const voting = new Voting({
             author,
@@ -670,7 +671,7 @@ class VotingsController {
         voting.description = description;
         voting.duration = duration;
         voting.publicDescription = publicDescription;
-        voting.allowNeutralVotes = allowNeutralVotes;
+        voting.allowNeutralVotes = voting.type === "binary-strict" ? false : allowNeutralVotes;
 
         // only update options when there is no votes
         if (!voting.votes.length) voting.options = options;

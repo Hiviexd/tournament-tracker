@@ -275,6 +275,8 @@ export default function VotingCreateModal({ opened, onClose }: IProps) {
         const newType = pickStringUnion(value, VOTING_TYPES);
         if (!newType) return;
         form.setFieldValue("type", newType);
+        // Strict binary is always exactly Support/Oppose; the neutral checkbox is hidden for it.
+        if (newType === "binary-strict") form.setFieldValue("allowNeutralVotes", false);
         setDefaultOptionsForType(newType, true);
     };
 
