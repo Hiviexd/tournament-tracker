@@ -68,6 +68,39 @@
     box-shadow: inset 0 2px 3px -1px rgba(0, 0, 0, 0.25);
 }
 
+/*
+ * Sectioned pages (<PageSections> / <PageSection>): instead of one panel, each section is its own card.
+ * The page header stays attached to the first section; the rest are separated by gaps.
+ */
+.main-layout:has(> .layout-body > .page-sections) {
+    background-color: transparent;
+
+    > .layout-body {
+        padding: 0 !important;
+        box-shadow: none;
+    }
+}
+
+.page-section {
+    background-color: var(--mantine-color-primary-10);
+    border-radius: 4px;
+    padding: 20px 10px;
+
+    @media (min-width: 48em) {
+        padding: 20px;
+    }
+
+    // A section whose content rendered nothing (e.g. no news yet) shouldn't leave an empty card behind
+    &:empty {
+        display: none;
+    }
+
+    &:first-child {
+        border-radius: 0 0 4px 4px;
+        box-shadow: inset 0 2px 3px -1px rgba(0, 0, 0, 0.25);
+    }
+}
+
 .layout-banner:empty {
     display: none;
 }
