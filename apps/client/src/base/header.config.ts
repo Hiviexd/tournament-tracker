@@ -12,7 +12,7 @@ export const routes: IRoute[] = [
     {
         title: "Home",
         permissions: [],
-        link: "/home",
+        link: "/",
         // links: [
         //     { title: "Team", link: "/team", icon: "users", permissions: [] },
         //     { title: "Changelog", link: "/changelog", icon: "clipboard-list", permissions: [] },

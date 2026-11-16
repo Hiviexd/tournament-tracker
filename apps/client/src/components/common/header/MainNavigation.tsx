@@ -13,7 +13,10 @@ export default function MainNavigation({ user }: IProps) {
     const location = useLocation();
 
     const mainRoute = routes.find((route) => route.link === location.pathname);
-    const parentByPrefix = routes.find((route) => route.link && location.pathname.startsWith(route.link));
+    // "/" is a prefix of every path, so it only counts as an exact match (handled by mainRoute)
+    const parentByPrefix = routes.find(
+        (route) => route.link && route.link !== "/" && location.pathname.startsWith(route.link),
+    );
     const parentByNestedLink = routes.find((route) => route.links?.some((link) => link.link === location.pathname));
 
     const selectedRoute = mainRoute
