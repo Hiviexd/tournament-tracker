@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { ISoftDeletable } from "./SoftDelete";
 import { IUser } from "./User";
 
 export const RESOURCE_CATEGORIES = ["discord", "tool", "guide", "spreadsheet", "article"] as const;
@@ -25,7 +26,7 @@ export interface IResourceFormData {
 
 export type ResourceFormData = Partial<IResource> & FormData;
 
-export interface IResource extends Document {
+export interface IResource extends Document, ISoftDeletable {
     _id: Types.ObjectId;
     id: string;
     title: string;

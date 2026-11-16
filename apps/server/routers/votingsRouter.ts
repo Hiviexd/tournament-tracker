@@ -14,6 +14,7 @@ votingsRouter.post("/:votingId/submitVote", auth.isLoggedIn, auth.isCommittee, V
 votingsRouter.patch("/:votingId/toggleStatus", auth.isLoggedIn, auth.isCommittee, VotingsController.toggleVotingStatus);
 votingsRouter.put("/:votingId/update", auth.isLoggedIn, auth.isCommittee, VotingsController.updateVoting);
 votingsRouter.delete("/:votingId/delete", auth.isLoggedIn, auth.isCommittee, VotingsController.deleteVoting);
+votingsRouter.post("/:votingId/restore", auth.isLoggedIn, auth.isAdmin, VotingsController.restoreVoting);
 votingsRouter.patch("/:votingId/togglePublic", auth.isLoggedIn, auth.isCommittee, VotingsController.toggleVotingPublic);
 votingsRouter.delete("/:votingId/clearVotes", auth.isLoggedIn, auth.isAdmin, VotingsController.clearVotes);
 votingsRouter.patch(

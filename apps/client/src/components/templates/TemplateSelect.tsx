@@ -29,9 +29,10 @@ export function TemplateSelect({ onTemplateSelect, buttonProps, placeholder = "T
     const filteredAndGroupedTemplates = useMemo(() => {
         const filtered = templates.filter(
             (template) =>
-                template.name.toLowerCase().includes(search.toLowerCase()) ||
-                template.content.toLowerCase().includes(search.toLowerCase()) ||
-                template.category.toLowerCase().includes(search.toLowerCase()),
+                !template.deletedAt &&
+                (template.name.toLowerCase().includes(search.toLowerCase()) ||
+                    template.content.toLowerCase().includes(search.toLowerCase()) ||
+                    template.category.toLowerCase().includes(search.toLowerCase())),
         );
 
         const grouped: Record<string, ITemplate[]> = {};

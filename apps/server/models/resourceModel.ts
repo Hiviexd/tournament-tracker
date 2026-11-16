@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IResource } from "@tc/types/Resource";
+import { softDeletePlugin } from "../plugins/softDeletePlugin";
 
 const ResourceSchema = new Schema<IResource>(
     {
@@ -12,6 +13,8 @@ const ResourceSchema = new Schema<IResource>(
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+ResourceSchema.plugin(softDeletePlugin);
 
 const Resource = mongoose.model<IResource>("Resource", ResourceSchema);
 

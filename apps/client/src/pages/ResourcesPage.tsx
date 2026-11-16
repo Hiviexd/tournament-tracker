@@ -5,7 +5,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { ResourceCategory, ResourceType, IResource, RESOURCE_CATEGORIES } from "@tc/types/Resource";
-import { useResources } from "../hooks/useResources";
+import { useResources, useRestoreResource } from "../hooks/useResources";
+import { useConfirmModal } from "../hooks/useModals";
 import ResourcesFilters from "../components/resources/ResourcesFilters";
 import ResourcesCard from "../components/resources/ResourcesCard";
 import ResourcesCreateModal from "../components/resources/ResourcesCreateModal";
@@ -57,6 +58,20 @@ interface FilterValues {
 
 export default function ResourcesPage() {
     const [user] = useAtom(loggedInUserAtom);
+    const restoreResourceMutation = useRestoreResource();
+    const confirmModal = useConfirmModal();
+
+    const handleRestoreResource = async (resource: IResource) => {
+        if (
+            await confirmModal({
+                preset: "restore",
+                title: "Restore resource?",
+                text: `Are you sure you want to restore "${resource.title}"? It will be visible to everyone again.`,
+            })
+        ) {
+            restoreResourceMutation.mutate(resource._id.toString());
+        }
+    };
     const location = useLocation();
     const type = location.pathname.includes("/official") ? "official" : "community";
 
@@ -170,6 +185,7 @@ export default function ResourcesPage() {
                                 key={resource._id}
                                 resource={resource}
                                 onEdit={user?.isCommittee ? handleEditResource : undefined}
+                                onRestore={handleRestoreResource}
                             />
                         ))}
                     </SimpleGrid>

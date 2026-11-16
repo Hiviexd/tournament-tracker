@@ -66,3 +66,20 @@ export function useDeleteResource(resourceId: string) {
         },
     });
 }
+
+export function useRestoreResource() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (resourceId: string) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/resources/${resourceId}/restore`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["resources"] });
+        },
+    });
+}

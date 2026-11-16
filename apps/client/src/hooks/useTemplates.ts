@@ -67,3 +67,20 @@ export function useDeleteTemplate(templateId: string) {
         },
     });
 }
+
+export function useRestoreTemplate() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (templateId: string) => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/templates/${templateId}/restore`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
+        },
+    });
+}

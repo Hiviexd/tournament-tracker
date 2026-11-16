@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 import { IInfringement, IInfringementStatics, InfringementType, TIME_BASED_TYPES } from "@tc/types/Infringement";
 import startCase from "lodash/startCase.js";
+import { softDeletePlugin } from "../plugins/softDeletePlugin";
 
 const InfringementSchema = new Schema<IInfringement, IInfringementStatics>(
     {
@@ -53,6 +54,8 @@ InfringementSchema.statics.findActiveForUser = async function (
         endDate: { $gt: new Date() },
     }).sort({ createdAt: -1 });
 };
+
+InfringementSchema.plugin(softDeletePlugin);
 
 const Infringement = mongoose.model<IInfringement, IInfringementStatics>("Infringement", InfringementSchema);
 

@@ -116,6 +116,27 @@ export function useDeleteVoting(votingId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["votings"] });
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        },
+    });
+}
+
+export function useRestoreVoting(votingId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/votes/${votingId}/restore`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["votings"] });
+            queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 }
@@ -188,6 +209,7 @@ export function useUndoSanction(votingId: string) {
             queryClient.invalidateQueries({ queryKey: ["voting", votingId] });
             queryClient.invalidateQueries({ queryKey: ["votings"] });
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+            queryClient.invalidateQueries({ queryKey: ["deletedInfringements"] });
         },
     });
 }

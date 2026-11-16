@@ -77,3 +77,21 @@ export function useDeleteArticle(slug: string) {
         },
     });
 }
+
+export function useRestoreArticle(slug: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/articles/${slug}/restore`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["article", slug] });
+            queryClient.invalidateQueries({ queryKey: ["documentation"] });
+        },
+    });
+}

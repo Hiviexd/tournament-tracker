@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import { IArticle } from "@tc/types/Article";
 import { TOURNAMENT_TYPES } from "@tc/types/Tournament";
 import slugify from "slugify";
+import { softDeletePlugin, WITH_DELETED } from "../plugins/softDeletePlugin";
 
 const articleSchema = new Schema<IArticle>(
     {
@@ -54,7 +55,8 @@ articleSchema.pre("save", async function (next) {
     let slug = baseSlug;
     let counter = 1;
 
-    while (await Article.exists({ slug, _id: { $ne: this._id } })) {
+    // Soft-deleted articles keep their slug, and the unique index still applies to them
+    while (await Article.exists({ slug, _id: { $ne: this._id } }).setOptions(WITH_DELETED)) {
         slug = `${baseSlug}-${counter}`;
         counter++;
     }
@@ -70,6 +72,8 @@ articleSchema.virtual("isDocumentation").get(function (this: IArticle) {
 articleSchema.virtual("isNews").get(function (this: IArticle) {
     return this.type === "news";
 });
+
+articleSchema.plugin(softDeletePlugin);
 
 const Article = model<IArticle>("Article", articleSchema);
 

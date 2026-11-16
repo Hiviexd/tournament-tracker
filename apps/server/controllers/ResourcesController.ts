@@ -3,6 +3,7 @@ import Resource from "../models/resourceModel";
 import LogService from "../services/LogService";
 import User from "../models/userModel";
 import utils from "@tc/utils/server";
+import { WITH_DELETED, deletedVisibility, restoreDeleted, softDelete } from "../plugins/softDeletePlugin";
 
 const DEFAULT_POPULATE = [{ path: "author", select: "username osuId groups coverUrl country" }];
 
@@ -13,6 +14,7 @@ class ResourcesController {
     public async index(req: Request, res: Response) {
         try {
             const { search, author, category, type, page = 1 } = req.query;
+            const visibility = deletedVisibility(res.locals!.user);
 
             const query: any = {};
 
@@ -62,12 +64,13 @@ class ResourcesController {
                     // Remove the temporary sorting field
                     { $project: { categoryOrder: 0 } },
                 ])
+                    .option(visibility)
                     .exec()
                     .then((resources) =>
                         // Populate after aggregation
                         Resource.populate(resources, DEFAULT_POPULATE),
                     ),
-                Resource.countDocuments(query),
+                Resource.countDocuments(query).setOptions(visibility),
             ]);
 
             return res.json({
@@ -185,11 +188,37 @@ class ResourcesController {
                 return res.status(404).json({ error: "Resource not found" });
             }
 
-            await resource.deleteOne();
+            await softDelete(resource, user._id);
 
             await LogService.generate(user.id, `Deleted resource: **${resource.title}**`, "resource");
 
             return res.json({ message: "Resource deleted successfully!" });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: "Internal server error" });
+        }
+    }
+
+    /** POST restore soft-deleted resource */
+    public async restore(req: Request, res: Response) {
+        try {
+            const user = res.locals!.user!;
+            const { id } = req.params;
+
+            const resource = await Resource.findById(id).setOptions(WITH_DELETED);
+            if (!resource) {
+                return res.status(404).json({ error: "Resource not found" });
+            }
+
+            if (!resource.deletedAt) {
+                return res.status(400).json({ error: "Resource is not deleted" });
+            }
+
+            await restoreDeleted(resource);
+
+            await LogService.generate(user.id, `Restored resource: **${resource.title}**`, "resource");
+
+            return res.json({ message: "Resource restored successfully!" });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: "Internal server error" });

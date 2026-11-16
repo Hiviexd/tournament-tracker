@@ -16,14 +16,20 @@ const CATEGORY_ICONS = {
 interface IProps {
     resource: IResource;
     onEdit?: (resource: IResource) => void;
+    onRestore?: (resource: IResource) => void;
 }
 
-export default function ResourcesCard({ resource, onEdit }: IProps) {
+export default function ResourcesCard({ resource, onEdit, onRestore }: IProps) {
     const icon = CATEGORY_ICONS[resource.category];
 
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent the card's link from activating
         onEdit?.(resource);
+    };
+
+    const handleRestore = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent the card's link from activating
+        onRestore?.(resource);
     };
 
     return (
@@ -34,7 +40,8 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
             component="a"
             href={resource.link}
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+            mod={{ deleted: !!resource.deletedAt }}>
             <Group mb="xs" wrap="nowrap">
                 <Tooltip label={capitalize(resource.category)}>
                     <FontAwesomeIcon icon={icon} size="lg" style={{ color: "var(--mantine-color-primary-6)" }} />
@@ -42,7 +49,18 @@ export default function ResourcesCard({ resource, onEdit }: IProps) {
                 <Title order={4} style={{ flex: 1 }}>
                     {resource.title}
                 </Title>
-                {onEdit && (
+                {resource.deletedAt && onRestore && (
+                    <Tooltip label="Restore resource">
+                        <ActionIcon
+                            variant="subtle"
+                            color="success"
+                            onClick={handleRestore}
+                            aria-label="Restore resource">
+                            <FontAwesomeIcon icon="undo" />
+                        </ActionIcon>
+                    </Tooltip>
+                )}
+                {onEdit && !resource.deletedAt && (
                     <Tooltip label="Edit resource">
                         <ActionIcon variant="subtle" color="info" onClick={handleClick} aria-label="Edit resource">
                             <FontAwesomeIcon icon="edit" />

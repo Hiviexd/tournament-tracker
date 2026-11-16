@@ -5,7 +5,7 @@ import { modals } from "@mantine/modals";
 type ConfirmModalProps = Parameters<typeof modals.openConfirmModal>[0];
 
 interface BaseProps {
-    preset?: "confirm" | "delete";
+    preset?: "confirm" | "delete" | "restore";
     title?: string;
     size?: ConfirmModalProps["size"];
     confirmText?: string;
@@ -44,11 +44,13 @@ export function useConfirmModal() {
         new Promise<boolean>((resolve) => {
             const { preset, title, size, children, text, confirmText, cancelText, confirmProps, cancelProps } = options;
 
-            const presetConfirmText = preset === "delete" ? "Delete" : "Confirm";
+            const presetConfirmText = preset === "delete" ? "Delete" : preset === "restore" ? "Restore" : "Confirm";
             const presetConfirmProps =
                 preset === "delete"
                     ? { leftSection: <FontAwesomeIcon icon="trash" />, color: "red" }
-                    : { leftSection: <FontAwesomeIcon icon="check" /> };
+                    : preset === "restore"
+                      ? { leftSection: <FontAwesomeIcon icon="undo" />, color: "success" }
+                      : { leftSection: <FontAwesomeIcon icon="check" /> };
 
             modals.openConfirmModal({
                 title: title || "Confirm your action",

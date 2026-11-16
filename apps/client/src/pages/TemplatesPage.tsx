@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Stack, Group, Button, Card, Text, ActionIcon, Skeleton, Divider, Title, Alert, Anchor } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useTemplates } from "../hooks/useTemplates";
+import { useRestoreTemplate, useTemplates } from "../hooks/useTemplates";
+import { useConfirmModal } from "../hooks/useModals";
 import { ITemplate } from "@tc/types/Template";
 import TemplateCreateModal from "../components/templates/TemplateCreateModal";
 import TemplateEditModal from "../components/templates/TemplateEditModal";
@@ -50,6 +51,20 @@ function TemplatesEmptyState() {
 export default function TemplatesPage() {
     const [user] = useAtom(loggedInUserAtom);
     const { data: templates = [], isLoading } = useTemplates(user?.isCommittee ?? false);
+    const restoreTemplateMutation = useRestoreTemplate();
+    const confirmModal = useConfirmModal();
+
+    const handleRestoreTemplate = async (template: ITemplate) => {
+        if (
+            await confirmModal({
+                preset: "restore",
+                title: "Restore template?",
+                text: `Are you sure you want to restore "${template.name}"? It will be available in ticket replies again.`,
+            })
+        ) {
+            restoreTemplateMutation.mutate(template.id);
+        }
+    };
     const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
     const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
     const [selectedTemplate, setSelectedTemplate] = useState<ITemplate | null>(null);
@@ -122,18 +137,28 @@ export default function TemplatesPage() {
                                 <Stack gap="md">
                                     {templates.map((template) => (
                                         <Group key={template.id} justify="space-between" align="flex-start">
-                                            <Stack gap="xs" style={{ flex: 1 }}>
+                                            <Stack gap="xs" style={{ flex: 1 }} mod={{ deleted: !!template.deletedAt }}>
                                                 <Text fw={500}>{template.name}</Text>
                                                 <Text size="sm" c="dimmed" lineClamp={2}>
                                                     {template.content}
                                                 </Text>
                                             </Stack>
-                                            <ActionIcon
-                                                variant="subtle"
-                                                color="blue"
-                                                onClick={() => handleEditTemplate(template)}>
-                                                <FontAwesomeIcon icon="edit" />
-                                            </ActionIcon>
+                                            {template.deletedAt ? (
+                                                <ActionIcon
+                                                    variant="subtle"
+                                                    color="success"
+                                                    aria-label="Restore template"
+                                                    onClick={() => handleRestoreTemplate(template)}>
+                                                    <FontAwesomeIcon icon="undo" />
+                                                </ActionIcon>
+                                            ) : (
+                                                <ActionIcon
+                                                    variant="subtle"
+                                                    color="blue"
+                                                    onClick={() => handleEditTemplate(template)}>
+                                                    <FontAwesomeIcon icon="edit" />
+                                                </ActionIcon>
+                                            )}
                                         </Group>
                                     ))}
                                 </Stack>

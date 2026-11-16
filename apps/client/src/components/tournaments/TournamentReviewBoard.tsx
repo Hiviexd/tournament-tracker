@@ -66,7 +66,7 @@ export default function TournamentReviewBoard({ tournaments }: IProps) {
                     <Table.Tbody>
                         {sortedTournaments.map((tournament) => {
                             return (
-                                <Table.Tr key={tournament.id}>
+                                <Table.Tr key={tournament.id} mod={{ deleted: !!tournament.deletedAt }}>
                                     <Table.Td>
                                         <Text fw={500} truncate>
                                             <Link to={`/tournaments/${tournament.id}`}>

@@ -32,6 +32,7 @@ export default function TournamentCard({ tournament }: IProps) {
             component={Link}
             to={`/tournaments/${tournament._id}`}
             data-active={tournament.isActive}
+            mod={{ deleted: !!tournament.deletedAt }}
             style={cssVars({
                 "--card-status-color": tournament.isActive
                     ? "var(--mantine-color-success-6)"

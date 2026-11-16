@@ -3,11 +3,14 @@ import startCase from "lodash/startCase.js";
 import { isString } from "@tc/utils/common";
 import Template from "../models/templateModel";
 import LogService from "../services/LogService";
+import { WITH_DELETED, deletedVisibility, restoreDeleted, softDelete } from "../plugins/softDeletePlugin";
 
 class TemplatesController {
     /** GET all templates */
     public async index(_: Request, res: Response) {
-        const templates = await Template.find().sort({ category: 1, name: 1 });
+        const templates = await Template.find()
+            .setOptions(deletedVisibility(res.locals!.user))
+            .sort({ category: 1, name: 1 });
         res.json(templates);
     }
 
@@ -100,7 +103,7 @@ class TemplatesController {
 
         const template = await Template.findById(id).orFail();
 
-        await template.deleteOne();
+        await softDelete(template, currentUser._id);
 
         res.json({
             message: "Template deleted successfully!",
@@ -110,6 +113,32 @@ class TemplatesController {
         await LogService.generate(
             currentUser.id,
             `Deleted template **${template.name}** from category **${template.category}**`,
+            "ticket",
+        );
+    }
+
+    /** POST restore a soft-deleted template */
+    public async restore(req: Request, res: Response) {
+        const { id } = req.params;
+        const currentUser = res.locals!.user!;
+
+        const template = await Template.findById(id).setOptions(WITH_DELETED).orFail();
+
+        if (!template.deletedAt) {
+            return res.status(400).json({ error: "Template is not deleted" });
+        }
+
+        await restoreDeleted(template);
+
+        res.json({
+            message: "Template restored successfully!",
+            template,
+        });
+
+        // Logger
+        await LogService.generate(
+            currentUser.id,
+            `Restored template **${template.name}** in category **${template.category}**`,
             "ticket",
         );
     }

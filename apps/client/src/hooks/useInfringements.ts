@@ -3,6 +3,7 @@ import utils from "@tc/utils/client";
 import { useAtom } from "jotai";
 import { selectedUserAtom } from "../store/atoms";
 import { IUser } from "@tc/types/User";
+import { IInfringement } from "@tc/types/Infringement";
 
 export interface WatchlistResponse {
     users: IUser[];
@@ -124,6 +125,18 @@ export function useUpdateInfringement() {
     });
 }
 
+export function useDeletedInfringements(userId: string, enabled: boolean) {
+    return useQuery({
+        queryKey: ["deletedInfringements", userId],
+        queryFn: () =>
+            utils.apiCall<{ infringements: IInfringement[] }>({
+                method: "get",
+                url: `/api/infringements/user/${userId}/deleted`,
+            }),
+        enabled,
+    });
+}
+
 export function useDeleteInfringement() {
     const queryClient = useQueryClient();
     const [, setSelectedUser] = useAtom(selectedUserAtom);
@@ -137,6 +150,7 @@ export function useDeleteInfringement() {
             return utils.handleMutationResponse<{ message: string; user: IUser }>(response);
         },
         onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ["deletedInfringements"] });
             queryClient.invalidateQueries({ queryKey: ["watchlist"] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             queryClient.invalidateQueries({ queryKey: ["committeeUsers"] });

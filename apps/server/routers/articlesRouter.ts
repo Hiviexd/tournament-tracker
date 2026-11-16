@@ -14,5 +14,6 @@ articleRouter.post("/create", auth.isLoggedIn, auth.isAdmin, controller.createAr
 articleRouter.get("/:slug", auth.optionalAuth, controller.getArticle);
 articleRouter.put("/:slug/edit", auth.isLoggedIn, auth.isCommittee, controller.editArticle);
 articleRouter.delete("/:slug/delete", auth.isLoggedIn, auth.isAdmin, controller.deleteArticle);
+articleRouter.post("/:slug/restore", auth.isLoggedIn, auth.isAdmin, controller.restoreArticle);
 
 export default articleRouter;

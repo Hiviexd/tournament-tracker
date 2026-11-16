@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IVoting, SANCTION_BAN_TYPES, TOURNAMENT_OPTIONS } from "@tc/types/Voting";
 import { OSU_CHAT_MESSAGE_MAX_LENGTH } from "@tc/types/OsuApi";
+import { softDeletePlugin } from "../plugins/softDeletePlugin";
 
 const VotingSchema = new Schema<IVoting>(
     {
@@ -131,6 +132,8 @@ VotingSchema.virtual("isTournamentCommitteeVote").get(function (this: IVoting) {
 VotingSchema.virtual("isContestCommitteeVote").get(function (this: IVoting) {
     return this.assignedGroups.includes("cc");
 });
+
+VotingSchema.plugin(softDeletePlugin);
 
 const Voting = mongoose.model<IVoting>("Voting", VotingSchema);
 

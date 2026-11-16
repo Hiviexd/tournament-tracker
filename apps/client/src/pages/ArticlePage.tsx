@@ -182,7 +182,7 @@ export default function ArticlePage() {
         const confirm = await confirmModal({
             preset: "delete",
             title: "Delete Article?",
-            text: "Are you sure you want to delete this article? This action is irreversible.",
+            text: "Are you sure you want to delete this article? Only admins will be able to view or restore it.",
         });
         if (!confirm) return;
 
@@ -197,7 +197,7 @@ export default function ArticlePage() {
                         <Title order={2} className="header-border-left">
                             {article.title}
                         </Title>
-                        {user?.isCommittee && (
+                        {user?.isCommittee && !article.deletedAt && (
                             <Group gap="xs">
                                 <Tooltip label="Edit article">
                                     <ActionIcon size="md" variant="subtle" color="blue" onClick={handleEdit}>

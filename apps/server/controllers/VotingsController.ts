@@ -17,6 +17,7 @@ import utils from "@tc/utils/server";
 import { Request, Response } from "express";
 import UploadService from "../services/UploadService";
 import VotingService from "../services/VotingService";
+import { WITH_DELETED, deletedVisibility, restoreDeleted, softDelete } from "../plugins/softDeletePlugin";
 
 const DEFAULT_POPULATE = [
     { path: "author", select: "username osuId groups coverUrl country" },
@@ -82,11 +83,14 @@ class VotingsController {
 
         const page = Number((utils.isString(req.query.page) ? req.query.page : undefined) || 1);
         const skip = (page - 1) * DEFAULT_LIMIT;
+        // "Needs attention" is a to-do list, so deleted votes stay out of it
+        const deletedOptions = showNeedsAttention === "true" ? { withDeleted: false } : deletedVisibility(user);
 
         // Get total count before pagination
-        const total = await Voting.countDocuments(dbQuery);
+        const total = await Voting.countDocuments(dbQuery).setOptions(deletedOptions);
 
         let votings = await Voting.find(dbQuery)
+            .setOptions(deletedOptions)
             .skip(skip)
             .limit(DEFAULT_LIMIT)
             .sort({ createdAt: -1 })
@@ -115,7 +119,10 @@ class VotingsController {
         const votingId = req.params.votingId;
         const user = res.locals!.user;
 
-        const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
+        const voting = await Voting.findById(votingId)
+            .setOptions(deletedVisibility(user))
+            .populate(DEFAULT_POPULATE)
+            .orFail();
 
         // Non-committee members can only view concluded public votes
         if ((!user || !user.isCommitteeOrAdmin) && (voting.isActive || !voting.isPublic)) {
@@ -697,7 +704,7 @@ class VotingsController {
             return res.status(400).json({ error: "Cannot delete voting with votes!" });
         }
 
-        await voting.deleteOne();
+        await softDelete(voting, res.locals!.user!._id);
 
         res.json({
             message: "Vote deleted successfully!",
@@ -717,6 +724,40 @@ class VotingsController {
                     .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
                     .setDescription(`Deleted a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
                     .setColor(DiscordUtils.webhookColors.darkRed),
+            )
+            .send();
+    }
+
+    /** POST restore a soft-deleted voting */
+    public async restoreVoting(req: Request, res: Response) {
+        const votingId = req.params.votingId;
+
+        const voting = await Voting.findById(votingId).setOptions(WITH_DELETED).orFail();
+
+        if (!voting.deletedAt) {
+            return res.status(400).json({ error: "Vote is not deleted" });
+        }
+
+        await restoreDeleted(voting);
+
+        res.json({
+            message: "Vote restored successfully!",
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Restored the vote [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`,
+            "voting",
+        );
+
+        // Discord
+        await new WebhookBuilder()
+            .addEmbed(
+                new EmbedBuilder()
+                    .setAuthor(DiscordUtils.defaultWebhookAuthor(req.session))
+                    .setDescription(`Restored a vote: [**${voting.title}**](${config.baseUrl}/votes/${voting._id})`)
+                    .setColor(DiscordUtils.webhookColors.lightPurple),
             )
             .send();
     }
@@ -967,7 +1008,7 @@ class VotingsController {
         const voting = await Voting.findById(votingId).populate(DEFAULT_POPULATE).orFail();
 
         try {
-            await VotingService.undoSanction(voting);
+            await VotingService.undoSanction(voting, res.locals!.user!._id);
             const populated = await Voting.findById(voting.id).populate(DEFAULT_POPULATE).orFail();
 
             res.json({

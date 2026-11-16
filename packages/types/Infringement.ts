@@ -1,4 +1,5 @@
 import { Model, Types } from "mongoose";
+import { ISoftDeletable } from "./SoftDelete";
 
 export enum InfringementType {
     NOTE = "note",
@@ -14,7 +15,7 @@ export const TIME_BASED_TYPES: InfringementType[] = [
     InfringementType.STAFFING_BAN,
 ];
 
-export interface IInfringement {
+export interface IInfringement extends ISoftDeletable {
     _id?: Types.ObjectId;
     id?: string;
     userId: Types.ObjectId;

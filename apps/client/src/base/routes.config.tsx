@@ -2,6 +2,11 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Navigate } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import HomeHero from "../components/home/HomeHero";
+import {
+    ArticleDeletedBanner,
+    TournamentDeletedBanner,
+    VotingDeletedBanner,
+} from "../components/common/banners/RouteDeletedBanners";
 import ErrorPage from "../pages/ErrorPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import VotingListPage from "../pages/VotingListPage";
@@ -82,6 +87,7 @@ const routes: RouteConfig[] = [
     {
         path: "/votes/:votingId",
         page: <VotingDetailsPage />,
+        banner: <VotingDeletedBanner />,
         title: "Vote Details",
         icon: "poll-h",
         permissions: [],
@@ -121,6 +127,7 @@ const routes: RouteConfig[] = [
     {
         path: "/tournaments/:tournamentId",
         page: <TournamentDetailsPage />,
+        banner: <TournamentDeletedBanner />,
         title: "Tournament Details",
         icon: "trophy",
         permissions: [],
@@ -189,6 +196,7 @@ const routes: RouteConfig[] = [
     {
         path: "/docs/:slug",
         page: <ArticlePage />,
+        banner: <ArticleDeletedBanner />,
         title: "Article",
         icon: "book",
         permissions: ["committee"],

@@ -11,6 +11,7 @@ import { loggedInUserAtom } from "../store/atoms";
 import { useAtom } from "jotai";
 import MappoolCompliancePage from "./MappoolCompliancePage";
 import { useDocumentTitle } from "@mantine/hooks";
+import DeletedReadOnly from "../components/common/DeletedReadOnly";
 
 function TournamentDetailsLoadingState() {
     return (
@@ -88,16 +89,18 @@ export default function TournamentDetailsPage() {
                 />
             ) : (
                 tournament && (
-                    <Stack gap="xl">
-                        <TournamentPageHeader tournament={tournament} />
-                        <TournamentPageInfo tournament={tournament} reports={reports} votings={votings} />
-                        {user?.isCommitteeOrAdmin && <TournamentNotes tournament={tournament} />}
-                        {user?.isCommitteeOrAdmin && <TournamentLogs tournament={tournament} />}
-                        <TournamentReviewSection tournament={tournament} />
-                        {user?.isCommittee && tournament.isTournament && (
-                            <MappoolCompliancePage header="Mappool Compliance Checker" radius="md" />
-                        )}
-                    </Stack>
+                    <DeletedReadOnly deleted={!!tournament.deletedAt}>
+                        <Stack gap="xl">
+                            <TournamentPageHeader tournament={tournament} />
+                            <TournamentPageInfo tournament={tournament} reports={reports} votings={votings} />
+                            {user?.isCommitteeOrAdmin && <TournamentNotes tournament={tournament} />}
+                            {user?.isCommitteeOrAdmin && <TournamentLogs tournament={tournament} />}
+                            <TournamentReviewSection tournament={tournament} />
+                            {user?.isCommittee && tournament.isTournament && (
+                                <MappoolCompliancePage header="Mappool Compliance Checker" radius="md" />
+                            )}
+                        </Stack>
+                    </DeletedReadOnly>
                 )
             )}
         </>

@@ -11,7 +11,7 @@ import {
     getSanctionInfringementDates,
 } from "@tc/utils";
 import config from "@tc/config";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import User from "../models/userModel";
 import Vote from "../models/voteModel";
 import Voting from "../models/votingModel";
@@ -599,7 +599,7 @@ class VotingService {
         };
     }
 
-    public async undoSanction(voting: Document & IVoting) {
+    public async undoSanction(voting: Document & IVoting, deletedBy: Types.ObjectId | string) {
         if (!voting.isSanctionVote) {
             throw { status: 400, error: "This vote is not a sanction vote" };
         }
@@ -608,7 +608,9 @@ class VotingService {
         }
 
         if (voting.sanctionInfringementIds?.length) {
-            await Promise.all(voting.sanctionInfringementIds.map((id) => InfringementService.deleteInfringement(id)));
+            await Promise.all(
+                voting.sanctionInfringementIds.map((id) => InfringementService.deleteInfringement(id, deletedBy)),
+            );
         }
 
         voting.sanctionInfringementIds = undefined;

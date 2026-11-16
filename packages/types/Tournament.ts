@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { ISoftDeletable } from "./SoftDelete";
 import { IUser } from "./User";
 import { IAttachment } from "./Attachment";
 import { IReview } from "./Review";
@@ -85,7 +86,7 @@ export interface ITournamentExtraLink {
     url: string;
 }
 
-export interface ITournament {
+export interface ITournament extends ISoftDeletable {
     _id: Types.ObjectId;
     id: string;
     name: string;

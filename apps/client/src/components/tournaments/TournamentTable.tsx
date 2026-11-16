@@ -185,6 +185,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
                             return (
                                 <Table.Tr
                                     key={tournament.id}
+                                    mod={{ deleted: !!tournament.deletedAt }}
                                     className={isMassEditMode && isSelected ? "tournament-row-selected" : undefined}>
                                     <Table.Td className={`mass-edit-select-col ${isMassEditMode ? "is-visible" : ""}`}>
                                         <span className="mass-edit-checkbox-wrap">
@@ -192,7 +193,7 @@ export default function TournamentTable({ tournaments, total, currentPage, massE
                                                 checked={isSelected}
                                                 onChange={() => onToggleRowSelection(tournament._id.toString())}
                                                 aria-label={`Select ${tournament.name}`}
-                                                disabled={!isMassEditMode}
+                                                disabled={!isMassEditMode || !!tournament.deletedAt}
                                                 tabIndex={isMassEditMode ? 0 : -1}
                                             />
                                         </span>

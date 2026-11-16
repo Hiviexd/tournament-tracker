@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Tournament from "../models/tournamentModel";
 import UserService from "../services/UserService";
+import { WITH_DELETED, deletedVisibility, restoreDeleted, softDelete } from "../plugins/softDeletePlugin";
 import {
     TournamentQueryParams,
     TournamentType,
@@ -296,6 +297,8 @@ class TournamentsController {
         }
 
         const skip = (Number(page) - 1) * DEFAULT_LIMIT;
+        // A personal review queue is a to-do list, so deleted tournaments stay out of it
+        const visibility = showAllAssignedReviews === "true" ? { withDeleted: false } : deletedVisibility(user);
 
         const [tournaments, total] = await Promise.all([
             Tournament.aggregate([
@@ -362,6 +365,7 @@ class TournamentsController {
                     },
                 },
             ])
+                .option(visibility)
                 .exec()
                 .then((tournaments: ITournament[]) => Tournament.populate(tournaments, defaultPopulate))
                 .then((tournaments: ITournament[]) =>
@@ -369,7 +373,7 @@ class TournamentsController {
                         TournamentService.sanitizeTournamentListing(Tournament.hydrate(t).toJSON(), user),
                     ),
                 ),
-            Tournament.countDocuments(query),
+            Tournament.countDocuments(query).setOptions(visibility),
         ]);
 
         res.json({
@@ -387,6 +391,7 @@ class TournamentsController {
         const isCommitteeOrAdmin = !!user && user.isCommitteeOrAdmin;
 
         let tournament = await Tournament.findById(tournamentId)
+            .setOptions(deletedVisibility(user))
             .select(selectFields(isCommitteeOrAdmin))
             .populate(defaultPopulate)
             .orFail();
@@ -1538,9 +1543,38 @@ class TournamentsController {
                 .json({ error: "Cannot delete tournament that isn't in support request received status!" });
         }
 
-        await Tournament.findByIdAndDelete(tournamentId);
+        await softDelete(tournament, res.locals!.user!._id);
 
         res.json({ message: "Tournament deleted successfully!" });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Deleted the tournament [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+            "tournament",
+        );
+    }
+
+    /** POST restore soft-deleted tournament */
+    public async restore(req: Request, res: Response) {
+        const tournamentId = req.params.tournamentId;
+
+        const tournament = await Tournament.findById(tournamentId).setOptions(WITH_DELETED).orFail();
+
+        if (!tournament.deletedAt) {
+            return res.status(400).json({ error: "Tournament is not deleted" });
+        }
+
+        await restoreDeleted(tournament);
+
+        res.json({ message: "Tournament restored successfully!" });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Restored the tournament [**${tournament.name}**](${config.baseUrl}/tournaments/${tournament._id})`,
+            "tournament",
+        );
     }
 }
 

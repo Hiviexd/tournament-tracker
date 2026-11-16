@@ -11,5 +11,6 @@ router.get("/", TemplatesController.index);
 router.post("/create", TemplatesController.create);
 router.put("/:id/update", TemplatesController.update);
 router.delete("/:id/delete", TemplatesController.delete);
+router.post("/:id/restore", auth.isAdmin, TemplatesController.restore);
 
 export default router;

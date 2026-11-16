@@ -65,7 +65,8 @@ export default function DocumentationListPage() {
                         radius="md"
                         className="hover-card"
                         component={Link}
-                        to={`/docs/${welcomeArticle.slug}`}>
+                        to={`/docs/${welcomeArticle.slug}`}
+                        mod={{ deleted: !!welcomeArticle.deletedAt }}>
                         <Title order={2} ta="center">
                             Welcome to the Tournament Committee!
                         </Title>
@@ -85,7 +86,8 @@ export default function DocumentationListPage() {
                             radius="md"
                             className="hover-card"
                             component={Link}
-                            to={`/docs/${article.slug}`}>
+                            to={`/docs/${article.slug}`}
+                            mod={{ deleted: !!article.deletedAt }}>
                             <Title order={3} size="h4" ta="center">
                                 {article.title}
                             </Title>

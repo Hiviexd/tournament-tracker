@@ -35,7 +35,10 @@ export function useTournamentMassEdit({ tournaments }: UseTournamentMassEditProp
     const confirmModal = useConfirmModal();
 
     const visibleTournamentIds = useMemo(
-        () => tournaments.map((tournament: ITournament) => tournament._id.toString()),
+        () =>
+            tournaments
+                .filter((tournament: ITournament) => !tournament.deletedAt)
+                .map((tournament: ITournament) => tournament._id.toString()),
         [tournaments],
     );
 

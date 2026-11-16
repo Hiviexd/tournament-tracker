@@ -105,13 +105,15 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
 
                 {!userToNavigateTo && (
                     <Group gap={4}>
-                        {infringement.type !== InfringementType.NOTE && !infringement.enchantUrl && (
-                            <Tooltip label="Missing Email Ticket">
-                                <ThemeIcon className="animation-pulse" variant="light" color="danger" size="md">
-                                    <FontAwesomeIcon icon="envelope" size="sm" />
-                                </ThemeIcon>
-                            </Tooltip>
-                        )}
+                        {infringement.type !== InfringementType.NOTE &&
+                            !infringement.enchantUrl &&
+                            !infringement.deletedAt && (
+                                <Tooltip label="Missing Email Ticket">
+                                    <ThemeIcon className="animation-pulse" variant="light" color="danger" size="md">
+                                        <FontAwesomeIcon icon="envelope" size="sm" />
+                                    </ThemeIcon>
+                                </Tooltip>
+                            )}
                         {infringement.enchantUrl && (
                             <Tooltip label="Open Enchant ticket">
                                 <ActionIcon variant="subtle" onClick={handleOpenTicket} color="primary" size="md">
@@ -177,7 +179,8 @@ export default function InfringementCard({ infringement, userToNavigateTo, onEdi
             shadow="sm"
             p="md"
             radius="md"
-            data-clickable="false">
+            data-clickable="false"
+            mod={{ deleted: !!infringement.deletedAt }}>
             {inner}
         </Card>
     );

@@ -135,7 +135,9 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
             !(await confirmModal({
                 preset: "delete",
                 title: "Delete Vote?",
-                text: "Are you sure you want to delete this vote? This action is irreversible.",
+                text: `Are you sure you want to delete this vote?${
+                    user?.isAdmin || user?.isDev ? " Only admins will be able to view or restore it." : ""
+                }`,
             }))
         )
             return;
@@ -387,8 +389,10 @@ export default function VotingInfo({ voting, user, onNavigateBack }: IProps) {
                                 variant="light"
                             />
 
-                            {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
-                            <NotVotedBadge voting={voting} user={user} variant="light" />
+                            {voting.isActive && !voting.deletedAt && (
+                                <DueDateBadge date={voting.deadline} variant="light" />
+                            )}
+                            {!voting.deletedAt && <NotVotedBadge voting={voting} user={user} variant="light" />}
                         </Group>
                     )}
 

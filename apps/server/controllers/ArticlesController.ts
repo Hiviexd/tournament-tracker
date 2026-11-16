@@ -12,6 +12,7 @@ import { WebhookBuilder } from "../services/discord/WebhookBuilder";
 import DiscordUtils from "../services/discord/DiscordUtils";
 import NotificationDispatchService from "../services/NotificationDispatchService";
 import OsuBotService from "../services/OsuBotService";
+import { WITH_DELETED, deletedVisibility, restoreDeleted, softDelete } from "../plugins/softDeletePlugin";
 
 const NEWS_PAGE_SIZE = 3;
 const NEWS_PUBLIC_MAX_LIMIT = 20;
@@ -80,7 +81,7 @@ class ArticlesController {
             query.isPublic = true;
         }
 
-        const article = await Article.findOne(query).populate({
+        const article = await Article.findOne(query).setOptions(deletedVisibility(user)).populate({
             path: "lastEditor",
             select: "username osuId groups coverUrl country",
         });
@@ -102,7 +103,9 @@ class ArticlesController {
         }
 
         //sort by title alphabetically
-        const articles = await Article.find({ type: "documentation" }).sort({ title: 1 });
+        const articles = await Article.find({ type: "documentation" })
+            .setOptions(deletedVisibility(user))
+            .sort({ title: 1 });
         res.json(articles);
     }
 
@@ -388,7 +391,7 @@ class ArticlesController {
             return res.status(403).json({ error: "News posts cannot be deleted" });
         }
 
-        await article.deleteOne();
+        await softDelete(article, res.locals!.user!._id);
 
         res.json({
             message: "Article deleted successfully",
@@ -398,6 +401,35 @@ class ArticlesController {
         await LogService.generate(
             req.session.mongoId!,
             `Deleted the ${article.type} article: [**${article.title}**](${config.baseUrl}/articles/${article.slug})`,
+            "article",
+        );
+    }
+
+    /** POST restore soft-deleted article */
+    public async restoreArticle(req: Request, res: Response) {
+        const { slug } = req.params;
+
+        const article = await Article.findOne({
+            slug: { $regex: new RegExp(`^${utils.escapeRegexPattern(slug ?? "")}$`, "i") },
+        }).setOptions(WITH_DELETED);
+        if (!article) {
+            return res.status(404).json({ error: "Article not found" });
+        }
+
+        if (!article.deletedAt) {
+            return res.status(400).json({ error: "Article is not deleted" });
+        }
+
+        await restoreDeleted(article);
+
+        res.json({
+            message: "Article restored successfully",
+        });
+
+        // Logger
+        await LogService.generate(
+            req.session.mongoId!,
+            `Restored the ${article.type} article: [**${article.title}**](${config.baseUrl}/articles/${article.slug})`,
             "article",
         );
     }

@@ -1,3 +1,5 @@
+import { useAtomValue } from "jotai";
+import { loggedInUserAtom } from "../../store/atoms";
 import { Modal, TextInput, Stack, Button, Group, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,6 +17,7 @@ interface IProps {
 }
 
 export default function TemplateEditModal({ opened, onClose, template }: IProps) {
+    const user = useAtomValue(loggedInUserAtom);
     const updateTemplateMutation = useUpdateTemplate(template?.id || "");
     const deleteTemplateMutation = useDeleteTemplate(template?.id || "");
     const autoSaveKey = `template-edit-${template?._id || "new"}-content`;
@@ -63,7 +66,9 @@ export default function TemplateEditModal({ opened, onClose, template }: IProps)
             await confirmModal({
                 preset: "delete",
                 title: `Delete template?`,
-                text: "Are you sure you want to delete this template? This action is irreversible.",
+                text: `Are you sure you want to delete this template?${
+                    user?.isAdmin || user?.isDev ? " Only admins will be able to view or restore it." : ""
+                }`,
             })
         ) {
             try {

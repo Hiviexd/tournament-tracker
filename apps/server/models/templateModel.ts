@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ITemplate } from "@tc/types/Template";
+import { softDeletePlugin } from "../plugins/softDeletePlugin";
 
 const TemplateSchema = new Schema<ITemplate>(
     {
@@ -27,6 +28,8 @@ const TemplateSchema = new Schema<ITemplate>(
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+TemplateSchema.plugin(softDeletePlugin);
 
 const Template = mongoose.model<ITemplate>("Template", TemplateSchema);
 

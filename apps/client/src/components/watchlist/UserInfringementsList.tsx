@@ -9,7 +9,7 @@ import { useAtomValue } from "jotai";
 import InfringementEditModal from "./InfringementEditModal";
 import AlertText from "../common/AlertText";
 import { useConfirmModal } from "../../hooks/useModals";
-import { useDeleteInfringement } from "../../hooks/useInfringements";
+import { useDeletedInfringements, useDeleteInfringement } from "../../hooks/useInfringements";
 import { loggedInUserAtom } from "../../store/atoms";
 
 interface IProps {
@@ -20,6 +20,9 @@ export default function UserInfringementsList({ user }: IProps) {
     const loggedInUser = useAtomValue(loggedInUserAtom);
     const confirmModal = useConfirmModal();
     const deleteInfringementMutation = useDeleteInfringement();
+    const canViewDeleted = !!(loggedInUser?.isAdmin || loggedInUser?.isDev);
+    const { data: deletedData } = useDeletedInfringements(user?.id, canViewDeleted);
+    const deletedInfringements = deletedData?.infringements ?? [];
 
     const infringements = user?.infringements ?? [];
     const activeInfringement = user?.activeInfringement;
@@ -37,7 +40,7 @@ export default function UserInfringementsList({ user }: IProps) {
             return dateB - dateA;
         });
 
-    if (!user || infringements.length === 0) {
+    if (!user || (infringements.length === 0 && deletedInfringements.length === 0)) {
         return <EmptyState icon="user-shield" title="No infringements recorded for this user." height={150} />;
     }
 
@@ -59,11 +62,12 @@ export default function UserInfringementsList({ user }: IProps) {
                 children: (
                     <Stack gap="sm">
                         <Text size="sm">
-                            This permanently removes this {infringement.typeString} from the watchlist.
+                            This removes this {infringement.typeString} from the watchlist. Admins can still view it,
+                            but it cannot be restored.
                         </Text>
                         <AlertText type="warning">
-                            Any osu! announcement stays sent, and a linked sanction vote stays marked as applied.
-                            Only proceed if you REALLY know what you're doing.
+                            Any osu! announcement stays sent, and a linked sanction vote stays marked as applied. Only
+                            proceed if you REALLY know what you're doing.
                         </AlertText>
                     </Stack>
                 ),
@@ -114,6 +118,20 @@ export default function UserInfringementsList({ user }: IProps) {
                                 onEdit={handleEditInfringement}
                                 onDelete={onDelete}
                             />
+                        ))}
+                    </Stack>
+                </>
+            )}
+
+            {deletedInfringements.length > 0 && (
+                <>
+                    <Divider />
+                    <Text size="md" fw={500} className="header-border-left">
+                        Deleted
+                    </Text>
+                    <Stack gap="sm">
+                        {deletedInfringements.map((infringement) => (
+                            <InfringementCard key={infringement.id} infringement={infringement} />
                         ))}
                     </Stack>
                 </>

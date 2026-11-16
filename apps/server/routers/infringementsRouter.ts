@@ -6,6 +6,12 @@ import auth from "../middlewares/auth";
 const infringementsRouter = Router();
 
 infringementsRouter.get("/watchlist", auth.isLoggedIn, auth.isCommittee, InfringementsController.getWatchlist);
+infringementsRouter.get(
+    "/user/:userId/deleted",
+    auth.isLoggedIn,
+    auth.isAdmin,
+    InfringementsController.getDeletedInfringements,
+);
 infringementsRouter.post("/add", auth.isLoggedIn, auth.isCommittee, InfringementsController.addInfringement);
 infringementsRouter.patch(
     "/:infringementId/edit",

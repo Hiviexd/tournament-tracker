@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import dayjs from "@tc/utils/dayjs";
 import Infringement from "../models/infringementModel";
+import { WITH_DELETED, softDelete } from "../plugins/softDeletePlugin";
 import User from "../models/userModel";
 import {
     IInfringement,
@@ -245,16 +246,27 @@ class InfringementService {
         return await Infringement.findActiveForUser(userId);
     }
 
-    public async deleteInfringement(infringementId: string | Types.ObjectId) {
-        return await Infringement.findByIdAndDelete(infringementId);
+    /** Soft-deletes one entry. Infringements cannot be restored, but admins can still read them. */
+    public async deleteInfringement(infringementId: string | Types.ObjectId, deletedBy: string | Types.ObjectId) {
+        const infringement = await Infringement.findById(infringementId);
+        if (!infringement) return null;
+
+        await softDelete(infringement, deletedBy);
+        return infringement;
+    }
+
+    public async getDeletedInfringements(userId: string) {
+        return await Infringement.find({ userId, deletedAt: { $ne: null } })
+            .setOptions(WITH_DELETED)
+            .sort({ deletedAt: -1 });
     }
 
     /**
      * Deletes one watchlist entry. A sanction vote that created it keeps its id on purpose:
      * sanctionInfringementIds is matched to targetUsers by index, so removing it would shift the other users' entries.
      */
-    public async removeInfringement(infringementId: string) {
-        const infringement = await this.deleteInfringement(infringementId);
+    public async removeInfringement(infringementId: string, deletedBy: string | Types.ObjectId) {
+        const infringement = await this.deleteInfringement(infringementId, deletedBy);
 
         if (!infringement) {
             throw { status: 404, error: "Infringement not found" };
@@ -265,10 +277,7 @@ class InfringementService {
         return { infringement, user };
     }
 
-    public async setEnchantUrl(
-        infringementIds: (string | Types.ObjectId)[],
-        enchantUrl: string,
-    ) {
+    public async setEnchantUrl(infringementIds: (string | Types.ObjectId)[], enchantUrl: string) {
         if (!infringementIds.length) return;
         if (!utils.isInfringementTicketLink(enchantUrl)) {
             throw { status: 400, error: "Invalid Enchant ticket or osu! announcement URL format" };

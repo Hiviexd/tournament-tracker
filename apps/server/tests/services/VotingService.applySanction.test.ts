@@ -84,6 +84,7 @@ function makeVoting(overrides: SanctionVotingFixture = {}): SanctionVotingDoc {
 }
 
 const currentUser = { osuId: 999 } satisfies Pick<IUser, "osuId">;
+const actorId = new Types.ObjectId();
 
 describe("VotingService.applySanction", () => {
     beforeEach(() => {
@@ -294,7 +295,7 @@ describe("VotingService.undoSanction", () => {
     });
 
     it("rejects votes that have not been applied", async () => {
-        await expect(VotingService.undoSanction(makeVoting())).rejects.toMatchObject({
+        await expect(VotingService.undoSanction(makeVoting(), actorId)).rejects.toMatchObject({
             status: 400,
             error: expect.stringContaining("has not been applied"),
         });
@@ -308,9 +309,9 @@ describe("VotingService.undoSanction", () => {
             sanctionInfringementIds: [infringementId],
         });
 
-        await VotingService.undoSanction(voting);
+        await VotingService.undoSanction(voting, actorId);
 
-        expect(mockDeleteInfringement).toHaveBeenCalledWith(infringementId);
+        expect(mockDeleteInfringement).toHaveBeenCalledWith(infringementId, actorId);
         expect(voting.sanctionInfringementIds).toBeUndefined();
         expect(voting.sanctionAppliedAt).toBeUndefined();
         expect(voting.updateOne).toHaveBeenCalledWith({
@@ -330,7 +331,7 @@ describe("VotingService.undoSanction", () => {
             sanctionInfringementIds: [new Types.ObjectId()],
         });
 
-        await VotingService.undoSanction(voting);
+        await VotingService.undoSanction(voting, actorId);
 
         expect(voting.sanctionAppliedAt).toBeUndefined();
         expect(voting.updateOne).toHaveBeenCalled();

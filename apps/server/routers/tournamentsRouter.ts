@@ -79,5 +79,6 @@ tournamentsRouter.post(
     TournamentsController.createNote,
 );
 tournamentsRouter.delete("/:tournamentId/delete", auth.isLoggedIn, auth.isAdmin, TournamentsController.delete);
+tournamentsRouter.post("/:tournamentId/restore", auth.isLoggedIn, auth.isAdmin, TournamentsController.restore);
 
 export default tournamentsRouter;

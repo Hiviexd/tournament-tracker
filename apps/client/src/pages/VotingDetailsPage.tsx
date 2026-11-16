@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { useVoting } from "../hooks/useVotings";
 import { useAtom } from "jotai";
 import { loggedInUserAtom } from "../store/atoms";
+import DeletedReadOnly from "../components/common/DeletedReadOnly";
 
 // Mantine
 import { Stack, Card, Skeleton, Group, Divider } from "@mantine/core";
@@ -108,15 +109,19 @@ export default function VotingDetailsPage() {
                     returnText="Return to votes list"
                 />
             ) : (
-                <Stack gap="lg">
-                    <VotingInfo voting={voting} user={loggedInUser} onNavigateBack={() => navigate("/votes")} />
+                <DeletedReadOnly deleted={!!voting.deletedAt}>
+                    <Stack gap="lg">
+                        <VotingInfo voting={voting} user={loggedInUser} onNavigateBack={() => navigate("/votes")} />
 
-                    {voting.isActive && <VotingForm voting={voting} user={loggedInUser!} />}
+                        {voting.isActive && !voting.deletedAt && <VotingForm voting={voting} user={loggedInUser!} />}
 
-                    {(!voting.isActive || loggedInUser?.isDev) && <VotingResults voting={voting} user={loggedInUser} />}
+                        {(!voting.isActive || loggedInUser?.isDev) && (
+                            <VotingResults voting={voting} user={loggedInUser} />
+                        )}
 
-                    <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
-                </Stack>
+                        <VotingEditModal voting={voting} opened={editModalOpened} onClose={closeEditModal} />
+                    </Stack>
+                </DeletedReadOnly>
             )}
         </>
     );

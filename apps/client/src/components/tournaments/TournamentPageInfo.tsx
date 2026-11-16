@@ -67,7 +67,7 @@ export default function TournamentPageInfo({ tournament, reports, votings }: IPr
         const confirmProps = {
             preset: "delete" as const,
             title: `Delete ${tournament.type}?`,
-            text: `Are you sure you want to delete this ${tournament.type}? This action is irreversible.`,
+            text: `Are you sure you want to delete this ${tournament.type}? Only admins will be able to view or restore it.`,
         };
         if (await confirmModal(confirmProps)) {
             await deleteTournamentMutation.mutateAsync();

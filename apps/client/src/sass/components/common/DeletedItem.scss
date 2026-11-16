@@ -1,0 +1,23 @@
+[data-deleted="true"] {
+    opacity: 0.55;
+}
+
+// Card rows use `::after` for their own effects, and `.tournament-card-content` sits at z-index 10
+.mantine-Card-root[data-deleted="true"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0.4;
+    background: repeating-linear-gradient(-45deg, transparent 0 22px, var(--mantine-color-gray-5) 22px 24px);
+}
+
+// Table and list rows cannot hold an absolute overlay
+:not(.mantine-Card-root)[data-deleted="true"] {
+    text-decoration: line-through;
+}
+
+.deleted-read-only {
+    display: contents;
+}

@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { ISoftDeletable } from "./SoftDelete";
 import { UserGroup, IUser } from "./User";
 import { IVote } from "./Vote";
 import { IAttachment } from "./Attachment";
@@ -74,7 +75,7 @@ export interface IVotingCreateResponse {
     voting: IVoting;
 }
 
-export interface IVoting {
+export interface IVoting extends ISoftDeletable {
     _id: Types.ObjectId;
     id: string;
     author: IUser;

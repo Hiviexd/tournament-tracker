@@ -282,6 +282,27 @@ export function useDeleteTournament(tournamentId: string) {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        },
+    });
+}
+
+export function useRestoreTournament(tournamentId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await utils.apiCall({
+                method: "post",
+                url: `/api/tournaments/${tournamentId}/restore`,
+            });
+            return utils.handleMutationResponse(response);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+            queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 }

@@ -161,12 +161,22 @@ class InfringementsController {
         }
     }
 
+    /** GET a user's soft-deleted infringements */
+    public async getDeletedInfringements(req: Request, res: Response) {
+        const infringements = await InfringementService.getDeletedInfringements(req.params.userId);
+
+        res.json({ infringements });
+    }
+
     /** DELETE infringement */
     public async deleteInfringement(req: Request, res: Response) {
         const { infringementId } = req.params;
 
         try {
-            const { infringement, user } = await InfringementService.removeInfringement(infringementId);
+            const { infringement, user } = await InfringementService.removeInfringement(
+                infringementId,
+                res.locals!.user!._id,
+            );
 
             res.json({ message: "Infringement deleted successfully!", user });
 

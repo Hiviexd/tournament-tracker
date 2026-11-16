@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { ITournament } from "@tc/types/Tournament";
 import startCase from "lodash/startCase.js";
 import utils from "@tc/utils/server";
+import { softDeletePlugin } from "../plugins/softDeletePlugin";
 
 const TournamentSchema = new Schema<ITournament>(
     {
@@ -99,6 +100,8 @@ TournamentSchema.virtual("isContest").get(function (this: ITournament) {
 TournamentSchema.virtual("statusString").get(function (this: ITournament) {
     return startCase(this.status);
 });
+
+TournamentSchema.plugin(softDeletePlugin);
 
 const Tournament = mongoose.model<ITournament>("Tournament", TournamentSchema);
 

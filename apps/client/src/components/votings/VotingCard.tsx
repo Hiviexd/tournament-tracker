@@ -46,6 +46,7 @@ export default function VotingCard({ voting }: IPropTypes) {
             component={Link}
             to={`/votes/${voting._id}`}
             data-active={voting.isActive}
+            mod={{ deleted: !!voting.deletedAt }}
             style={
                 voting.isActive
                     ? cssVars({
@@ -117,9 +118,11 @@ export default function VotingCard({ voting }: IPropTypes) {
 
                 <Group gap="xs">
                     {/* Not voted badge */}
-                    {user?.isCommittee && <NotVotedBadge voting={voting} user={user} variant="light" />}
+                    {user?.isCommittee && !voting.deletedAt && (
+                        <NotVotedBadge voting={voting} user={user} variant="light" />
+                    )}
                     {/* Due date badge */}
-                    {voting.isActive && <DueDateBadge date={voting.deadline} variant="light" />}
+                    {voting.isActive && !voting.deletedAt && <DueDateBadge date={voting.deadline} variant="light" />}
                 </Group>
             </Group>
         </Card>
